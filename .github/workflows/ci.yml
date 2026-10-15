@@ -1,0 +1,43 @@
+name: CI
+
+# Runs on every PR and every push to main; deploy workflows can reuse it later via workflow_call.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_call:
+
+# Read-only token: CI never needs to write to the repo.
+permissions:
+  contents: read
+
+# A newer push to the same ref cancels the run still going for the older commit.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Fails a PR that modifies, deletes or renames a migration already on the base branch.
+  # Merged migrations are shared history: fix forward with a new migration instead.
+  migrations:
+    name: migrations
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # full history, so the base branch is there to compare against
+
+      - name: Check existing migrations are untouched
+        env:
+          BASE_REF: ${{ github.base_ref }} # passed via env, never pasted into the script, to avoid injection
+        run: |
+          # Three dots: diff from where the PR split off, so migrations added to base since then don't count.
+          changed=$(git diff --diff-filter=MDR --name-only "origin/${BASE_REF}...HEAD" -- alembic/versions)
+          if [ -n "$changed" ]; then
+            echo "::error::Existing migrations were modified, deleted or renamed:"
+            echo "$changed"
+            echo "Add a new migration instead of editing one that has already merged."
+            exit 1
+          fi
+          echo "No existing migrations changed."
