@@ -24,12 +24,12 @@ function micProblem(e: unknown): string {
   return "Couldn't start recording. Try again."
 }
 
-/** Five bars that jump with your voice, so you can see it's picking you up. */
-function Level({ level }: { level: number }) {
+/** Your voice over the last half second, newest bar on the right, so you can see it's hearing you. */
+function Level({ levels }: { levels: number[] }) {
   return (
-    <span className="flex h-6 items-center gap-1" aria-hidden>
-      {[0.5, 0.8, 1, 0.8, 0.5].map((k, i) => (
-        <span key={i} className="w-1.5 rounded-full bg-light transition-[height] duration-75" style={{ height: `${20 + Math.min(80, level * k * 100)}%` }} />
+    <span className="flex h-7 items-center gap-1" aria-hidden>
+      {levels.map((level, i) => (
+        <span key={i} className="w-1.5 rounded-full bg-light transition-[height] duration-75" style={{ height: `${15 + level * 85}%` }} />
       ))}
     </span>
   )
@@ -127,7 +127,7 @@ export function Recorder() {
   return (
     <div className="rounded-xl bg-ink-2 p-4 ring-1 ring-rule">
       {review && !rec.recording ? (
-        <NewNoteCard seconds={review.seconds} status={review.status} draft={draft} onChange={setDraft}
+        <NewNoteCard key={review.id} id={review.id} seconds={review.seconds} status={review.status} draft={draft} onChange={setDraft}
           suggestions={hashtagCounts(notes).map(([t]) => t)} onDone={() => void finish(review, draft)} onDelete={() => void discard(review)} />
       ) : (
         <div className="flex items-center gap-4">
@@ -135,7 +135,7 @@ export function Recorder() {
           {rec.recording ? (
             <div className="flex flex-1 items-center gap-3" aria-live="polite">
               <span className="text-2xl tabular">{clock(rec.seconds)}</span>
-              <Level level={rec.level} />
+              <Level levels={rec.levels} />
               <span className="ml-auto text-sm text-dim">Tap to stop</span>
             </div>
           ) : flash ? (

@@ -1,11 +1,12 @@
 /** One voice note: play it, see its label and hashtags, edit them, or delete it. */
-import { CloudOff, LoaderCircle, Pause, Pencil, Play, Trash2 } from 'lucide-react'
+import { CloudOff, Pencil, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { IconButton } from '../../components/ui/Button'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { clock } from '../../lib/duration'
 import { formatDateTime } from '../../lib/time'
 import { NoteEditor } from './NoteEditor'
+import { PlayButton } from './PlayButton'
 import { usePlayer } from './usePlayer'
 import type { NoteView } from './useVoiceLibrary'
 
@@ -36,10 +37,7 @@ export function VoiceNoteRow({ note, suggestions, onEdit, onDelete, onTag }: Pro
   return (
     <li className="py-3">
       <div className="flex items-center gap-3">
-        <button type="button" onClick={player.toggle} aria-label={player.state === 'playing' ? 'Pause' : 'Play'}
-          className="flex size-11 shrink-0 items-center justify-center rounded-full bg-ink-3 text-paper hover:bg-ink-4">
-          {player.state === 'loading' ? <LoaderCircle size={18} className="animate-spin" /> : player.state === 'playing' ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-0.5" />}
-        </button>
+        <PlayButton player={player} />
         <div className="min-w-0 flex-1">
           <p className={`truncate ${note.label ? 'font-medium' : 'text-dim'}`}>{note.label || 'Untitled note'}</p>
           <p className="flex flex-wrap items-center gap-x-2 text-sm text-faint">

@@ -6,7 +6,13 @@
  * you can see it's hearing you. Stopping releases the mic, so the browser's red dot goes away.
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { MAX_RECORDING_BYTES, VOICE_BITRATE, baseType, pickMimeType } from './voiceMeta'
+import { loudness, smooth } from './loudness'
+import { MAX_RECORDING_BYTES, MIC_CONSTRAINTS, baseType, bitrateFor, pickMimeType } from './voiceMeta'
+
+/** The meter shows the last ~half second as bars scrolling left, newest on the right. */
+export const METER_BARS = 7
+const METER_STEP_MS = 70
+const QUIET: number[] = Array<number>(METER_BARS).fill(0)
 
 export interface Recording {
   audio: Blob
@@ -61,7 +67,7 @@ function makeContext(): AudioContext | null {
 export function useRecorder({ onLimit }: { onLimit: (r: Recording) => void }) {
   const [recording, setRecording] = useState(false)
   const [seconds, setSeconds] = useState(0)
-  const [level, setLevel] = useState(0)
+  const [levels, setLevels] = useState(QUIET)
   const live = useRef<Live | null>(null)
   const limitRef = useRef(onLimit)
   useEffect(() => { limitRef.current = onLimit })
@@ -72,7 +78,7 @@ export function useRecorder({ onLimit }: { onLimit: (r: Recording) => void }) {
     live.current = null
     // Update the screen first, so the tap feels instant; the recorder finishes in the background.
     setRecording(false)
-    setLevel(0)
+    setLevels(QUIET)
     cancelAnimationFrame(current.frame)
     clearInterval(current.timer)
     if (current.recorder.state !== 'inactive') current.recorder.stop()
@@ -89,7 +95,7 @@ export function useRecorder({ onLimit }: { onLimit: (r: Recording) => void }) {
     const context = makeContext()
     let stream: MediaStream
     try {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } })
+      stream = await navigator.mediaDevices.getUserMedia({ audio: MIC_CONSTRAINTS })
     } catch (e) {
       void context?.close()
       throw e
@@ -97,7 +103,7 @@ export function useRecorder({ onLimit }: { onLimit: (r: Recording) => void }) {
     const mimeType = pickMimeType((t) => MediaRecorder.isTypeSupported(t), avoidedTypes())
     let recorder: MediaRecorder
     try {
-      recorder = new MediaRecorder(stream, { mimeType, audioBitsPerSecond: VOICE_BITRATE })
+      recorder = new MediaRecorder(stream, { mimeType, audioBitsPerSecond: bitrateFor(mimeType) })
     } catch (e) {
       stream.getTracks().forEach((t) => t.stop()) // let go of the mic
       void context?.close()
@@ -122,23 +128,32 @@ export function useRecorder({ onLimit }: { onLimit: (r: Recording) => void }) {
     session.timer = window.setInterval(() => setSeconds(Math.floor((Date.now() - startedAt) / 1000)), 250)
     if (!context) return
     session.context = context // closed by stop()
+    // iOS can suspend the context when the mic switches the phone's audio mode; wake it again.
+    if (context.state !== 'running') void context.resume()
     try {
       const analyser = context.createAnalyser()
-      analyser.fftSize = 512
+      analyser.fftSize = 1024
       context.createMediaStreamSource(stream).connect(analyser)
-      const samples = new Uint8Array(analyser.fftSize)
-      const tick = () => {
-        analyser.getByteTimeDomainData(samples)
-        let sum = 0
-        for (const s of samples) sum += ((s - 128) / 128) ** 2
-        setLevel(Math.min(1, Math.sqrt(sum / samples.length) * 4))
+      const samples = new Float32Array(analyser.fftSize)
+      let current = 0
+      let pushedAt = 0
+      // Pattern: sample every animation frame, but re-render only every METER_STEP_MS, so the
+      // bars move smoothly without React redrawing 60 times a second.
+      const tick = (now: number) => {
+        analyser.getFloatTimeDomainData(samples)
+        current = smooth(current, loudness(samples))
+        if (now - pushedAt >= METER_STEP_MS) {
+          pushedAt = now
+          const level = current
+          setLevels((bars) => [...bars.slice(1), level])
+        }
         session.frame = requestAnimationFrame(tick)
       }
-      tick()
+      session.frame = requestAnimationFrame(tick)
     } catch {
       // no meter
     }
   }, [stop])
 
-  return { recording, seconds, level, start, stop }
+  return { recording, seconds, levels, start, stop }
 }

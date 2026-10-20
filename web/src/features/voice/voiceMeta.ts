@@ -14,8 +14,25 @@ export const pickMimeType = (isSupported: (type: string) => boolean, avoid: stri
 /** "audio/mp4;codecs=mp4a.40.2" -> "audio/mp4" */
 export const baseType = (type: string): string => type.split(';')[0].trim().toLowerCase()
 
-/** Asked of the browser: speech is clear at 32 kbps. It's a hint; Chrome's AAC came out near 64 kbps. */
-export const VOICE_BITRATE = 32_000
+/**
+ * Asked of the browser, per format. Opus sounds clean at 48 kbps; AAC (what iPhones record)
+ * needs more, and at 32 kbps it came out swishy. With the 4 MB cap that's ~11 minutes of Opus
+ * or ~8 of AAC per note.
+ */
+export const bitrateFor = (mimeType: string | undefined): number => (mimeType?.includes('mp4') ? 64_000 : 48_000)
+
+/**
+ * The raw microphone, like a voice memo app. The browser's call processing (noise suppression,
+ * echo cancellation, auto gain) is built for calls: auto gain turns the room hiss up whenever
+ * you pause, and noise suppression makes voices warble. Nothing plays while you record, so
+ * there's no echo to cancel.
+ */
+export const MIC_CONSTRAINTS: MediaTrackConstraints = {
+  channelCount: 1,
+  echoCancellation: false,
+  noiseSuppression: false,
+  autoGainControl: false,
+}
 
 /** The server takes up to 4 MiB per note; recording stops a little before that. */
 export const MAX_RECORDING_BYTES = 4_000_000
