@@ -7,7 +7,16 @@ import { TypeLabel } from '../../components/ui/bits'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { Modal } from '../../components/ui/Modal'
 
-export function TypeManager({ open, onClose }: { open: boolean; onClose: () => void }) {
+interface Props {
+  open: boolean
+  onClose: () => void
+  /** Lets a screen holding an unsaved copy of a joke (its draft) follow along, so its next
+   *  autosave doesn't bring a deleted type back or keep the old name of a renamed one. */
+  onRenamed?: (from: string, to: string) => void
+  onRemoved?: (name: string) => void
+}
+
+export function TypeManager({ open, onClose, onRenamed, onRemoved }: Props) {
   const { data: types = [] } = useTypes()
   const { data: bits = [] } = useBits()
   const a = useTypeActions()
@@ -17,11 +26,11 @@ export function TypeManager({ open, onClose }: { open: boolean; onClose: () => v
 
   const rename = async (t: Named) => {
     const name = await prompt({ title: 'Rename type', initial: t.name, confirmLabel: 'Rename' })
-    if (name && name !== t.name) a.rename.mutate({ id: t.id, name }, { onError: fail })
+    if (name && name !== t.name) a.rename.mutate({ id: t.id, name }, { onSuccess: () => onRenamed?.(t.name, name), onError: fail })
   }
   const remove = async (t: Named) => {
     const ok = await confirm({ title: `Delete ${t.name}?`, message: 'Jokes keep their other types. Jokes left with none show as having no type.', confirmLabel: 'Delete type', danger: true })
-    if (ok) a.remove.mutate(t.id, { onError: fail })
+    if (ok) a.remove.mutate(t.id, { onSuccess: () => onRemoved?.(t.name), onError: fail })
   }
 
   return (

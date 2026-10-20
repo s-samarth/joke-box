@@ -7,7 +7,14 @@ import { useFeedback } from '../../components/ui/feedbackContext'
 import { Modal } from '../../components/ui/Modal'
 import { topicName } from '../../lib/bitMeta'
 
-export function TopicManager({ open, onClose }: { open: boolean; onClose: () => void }) {
+interface Props {
+  open: boolean
+  onClose: () => void
+  /** Lets a screen holding an unsaved copy of a joke move it off a topic or subtopic that's gone. */
+  onRemoved?: (id: string) => void
+}
+
+export function TopicManager({ open, onClose, onRemoved }: Props) {
   const { data: topics = [] } = useTopics()
   const { data: bits = [] } = useBits()
   const a = useTopicActions()
@@ -24,7 +31,7 @@ export function TopicManager({ open, onClose }: { open: boolean; onClose: () => 
     if (name && name !== t.name) a.rename.mutate({ id: t.id, name }, { onError: fail })
   }
   const deleteTopic = async (t: Topic) => {
-    if (await confirm({ title: `Delete ${t.name}?`, message: `Its ${count(t.id)} jokes move to Thoughts.`, confirmLabel: 'Delete topic', danger: true })) a.remove.mutate(t.id, { onError: fail })
+    if (await confirm({ title: `Delete ${t.name}?`, message: `Its ${count(t.id)} jokes move to Thoughts.`, confirmLabel: 'Delete topic', danger: true })) a.remove.mutate(t.id, { onSuccess: () => onRemoved?.(t.id), onError: fail })
   }
   const addSub = async (t: Topic) => {
     const name = await prompt({ title: `New subtopic in ${topicName(t)}`, label: 'Subtopic name', confirmLabel: 'Add subtopic' })
@@ -35,7 +42,7 @@ export function TopicManager({ open, onClose }: { open: boolean; onClose: () => 
     if (name && name !== s.name) a.renameSubtopic.mutate({ id: s.id, name }, { onError: fail })
   }
   const deleteSub = async (s: Subtopic) => {
-    if (await confirm({ title: `Delete ${s.name}?`, message: 'Its jokes stay in the topic.', confirmLabel: 'Delete subtopic', danger: true })) a.removeSubtopic.mutate(s.id, { onError: fail })
+    if (await confirm({ title: `Delete ${s.name}?`, message: 'Its jokes stay in the topic.', confirmLabel: 'Delete subtopic', danger: true })) a.removeSubtopic.mutate(s.id, { onSuccess: () => onRemoved?.(s.id), onError: fail })
   }
 
   return (
