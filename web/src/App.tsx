@@ -22,6 +22,7 @@ const ShowsPage = named(() => import('./features/shows/ShowsPage'), 'ShowsPage')
 const BrainstormPage = named(() => import('./features/brainstorm/BrainstormPage'), 'BrainstormPage')
 const SessionPage = named(() => import('./features/brainstorm/SessionPage'), 'SessionPage')
 const ObservationsPage = named(() => import('./features/observations/ObservationsPage'), 'ObservationsPage')
+const VoicePage = named(() => import('./features/voice/VoicePage'), 'VoicePage')
 
 const full = (el: React.ReactNode) => <RequireAuth>{el}</RequireAuth>
 
@@ -41,6 +42,7 @@ export function App() {
           <Route path="shows" element={<ShowsPage />} />
           <Route path="observations" element={<ObservationsPage />} />
           <Route path="brainstorm" element={<BrainstormPage />} />
+          <Route path="voice" element={<VoicePage />} />
         </Route>
         {/* Full-screen modes without the app frame. */}
         <Route path="/brainstorm/:sessionId" element={full(<SessionPage />)} />

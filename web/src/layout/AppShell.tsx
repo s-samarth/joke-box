@@ -1,9 +1,9 @@
 /**
  * The frame around every signed-in screen. Desktop: a slim left rail. Phone: a bottom bar with
- * Today, Jokes, a big + for capture, Sets and Shows. On a phone, Observations and Brainstorm open from Today,
+ * Today, Jokes, a big + for capture, Sets and Shows. On a phone, Observations, Brainstorm and Voice open from Today,
  * which keeps the + in the middle of the bar.
  */
-import { Eye, Home, ListOrdered, Mic, PenLine, Plus, StickyNote } from 'lucide-react'
+import { AudioLines, Eye, Home, ListOrdered, Mic, PenLine, Plus, StickyNote } from 'lucide-react'
 import { Suspense } from 'react'
 import { NavLink, Outlet } from 'react-router'
 import { Spinner } from '../components/ui/bits'
@@ -18,6 +18,7 @@ const NAV = [
   { to: '/bits', label: 'Jokes', icon: StickyNote, end: false },
   { to: '/observations', label: 'Observations', icon: Eye, end: false, desktopOnly: true },
   { to: '/brainstorm', label: 'Brainstorm', icon: PenLine, end: false, desktopOnly: true },
+  { to: '/voice', label: 'Voice notes', icon: AudioLines, end: false, desktopOnly: true },
   { to: '/sets', label: 'Sets', icon: ListOrdered, end: false },
   { to: '/shows', label: 'Shows', icon: Mic, end: false },
 ]
