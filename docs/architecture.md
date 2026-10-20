@@ -171,6 +171,10 @@ flowchart LR
 | `api` | `ruff check`, `ruff format --check`, `mypy app`; Alembic upgrade → downgrade → upgrade on Postgres 16; `pytest` |
 | `web` | `tsc -b`, `oxlint --deny-warnings`, `vitest run`, `vite build` |
 
+[neon-preview-cleanup.yml](../.github/workflows/neon-preview-cleanup.yml) deletes a PR's Neon
+preview branch when the PR closes, and sweeps up stale ones weekly. Each preview deployment gets
+its own `preview/<git branch>` database branch, and Neon's free plan allows only 10 per project.
+
 ## Decisions and trade-offs
 
 | Decision | Trade-off |

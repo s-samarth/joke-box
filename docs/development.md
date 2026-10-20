@@ -128,6 +128,23 @@ First-time setup:
 Google only accepts the redirect URIs you registered, so sign in on production (or on a
 registered fixed preview domain).
 
+### Preview database cleanup
+
+Every preview deployment gets its own Neon branch (`preview/<git branch>`), a copy of the
+production database. Neon's free plan allows 10 branches per project, so after nine previews new
+ones fail with "Resource provisioning failed". The
+[Neon preview cleanup](../.github/workflows/neon-preview-cleanup.yml) workflow deletes a PR's
+branch when the PR closes, and sweeps stale ones every Monday. It needs two settings, made once:
+
+1. In the Neon console, go to Account settings → API keys → create a key. Then run
+   `gh secret set NEON_API_KEY` and paste the key when prompted.
+2. In the Neon console, go to the project → Settings → copy the **Project ID**. Then run
+   `gh variable set NEON_PROJECT_ID --body <project-id>`.
+
+To clear stale branches by hand, open Actions → **Neon preview cleanup** → Run workflow. A run
+with **dry_run** ticked only lists what it would delete; untick it to delete. The workflow only ever
+touches `preview/*` branches.
+
 ## Operations runbook
 
 | Task | How |
