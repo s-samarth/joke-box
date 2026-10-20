@@ -6,7 +6,7 @@
  * you can see it's hearing you. Stopping releases the mic, so the browser's red dot goes away.
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { MAX_RECORDING_BYTES, VOICE_BITRATE, pickMimeType } from './voiceMeta'
+import { MAX_RECORDING_BYTES, VOICE_BITRATE, baseType, pickMimeType } from './voiceMeta'
 
 export interface Recording {
   audio: Blob
@@ -23,6 +23,28 @@ interface Live {
   frame: number
   timer: number
   done: Promise<Recording>
+}
+
+/*
+ * Formats that produced an empty recording in this browser. Some browsers say they can record
+ * MP4 and then hand back nothing; we remember that and use the next format from then on.
+ */
+const AVOID_KEY = 'jokebox.voice.avoidTypes'
+
+function avoidedTypes(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(AVOID_KEY) ?? '[]') as string[]
+  } catch {
+    return []
+  }
+}
+
+export function avoidType(type: string): void {
+  try {
+    localStorage.setItem(AVOID_KEY, JSON.stringify([...new Set([...avoidedTypes(), baseType(type)])]))
+  } catch {
+    // storage blocked: we'll just try the same format again
+  }
 }
 
 /** The meter is a nice-to-have: without an AudioContext we still record, just without bars. */
@@ -71,7 +93,7 @@ export function useRecorder({ onLimit }: { onLimit: (r: Recording) => void }) {
       void context?.close()
       throw e
     }
-    const mimeType = pickMimeType((t) => MediaRecorder.isTypeSupported(t))
+    const mimeType = pickMimeType((t) => MediaRecorder.isTypeSupported(t), avoidedTypes())
     let recorder: MediaRecorder
     try {
       recorder = new MediaRecorder(stream, { mimeType, audioBitsPerSecond: VOICE_BITRATE })

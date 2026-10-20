@@ -26,7 +26,7 @@ export function useVoiceLibrary() {
 
   const notes: NoteView[] = [
     ...items.map((p) => ({
-      ...p.input, id: p.id, created_at: p.created_at, size_bytes: p.audio.size, problem: p.failed,
+      ...p.input, id: p.id, created_at: p.created_at, size_bytes: p.bytes.byteLength, problem: p.failed,
       state: (p.failed ? 'failed' : uploading === p.id ? 'uploading' : 'waiting') as NoteState,
     })),
     ...server.filter((n) => !pending.has(n.id)).map((n) => ({

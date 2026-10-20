@@ -8,8 +8,8 @@ import { newId } from '../../api/client'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { clock } from '../../lib/duration'
 import { NoteEditor } from './NoteEditor'
-import { addRecording } from './outbox'
-import { useRecorder, type Recording } from './useRecorder'
+import { EmptyRecordingError, addRecording } from './outbox'
+import { avoidType, useRecorder, type Recording } from './useRecorder'
 import { useVoiceLibrary } from './useVoiceLibrary'
 import { hashtagCounts } from './voiceMeta'
 
@@ -41,14 +41,21 @@ export function Recorder() {
   const keep = async ({ audio, seconds }: Recording) => {
     if (seconds < 1 && audio.size < 4000) return // a slip of the thumb, not a note
     const id = newId()
-    await addRecording(id, audio, seconds)
-    setLastId(id)
+    try {
+      await addRecording(id, audio, seconds)
+      setLastId(id)
+    } catch (e) {
+      if (!(e instanceof EmptyRecordingError)) throw e
+      // The browser claimed it could record this format but gave us nothing. Use another next time.
+      avoidType(audio.type)
+      setProblem(`That recording came out empty (${audio.type || 'unknown format'}). The next one will use a different format, so please try again.`)
+    }
   }
   const rec = useRecorder({ onLimit: (r) => { void keep(r); toast('Saved. That note reached the length limit, so recording stopped. Tap record to carry on in a new note.') } })
   const { stop } = rec
 
   // Navigating away mid-thought shouldn't lose it.
-  useEffect(() => () => { void stop().then((r) => r && addRecording(newId(), r.audio, r.seconds)) }, [stop])
+  useEffect(() => () => { void stop().then((r) => r && addRecording(newId(), r.audio, r.seconds)).catch(() => {}) }, [stop])
 
   const toggle = async () => {
     setProblem(null)

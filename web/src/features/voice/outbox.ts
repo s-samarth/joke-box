@@ -3,6 +3,9 @@
  * or not. It's saved on the phone first (so nothing is lost if the upload fails or you're on a
  * plane), then uploaded in two steps: the details, then the audio.
  *
+ * The audio is kept as raw bytes (an ArrayBuffer), not a Blob: Safari can hand back a Blob from
+ * IndexedDB that reads as empty, which uploaded as "The recording is empty".
+ *
  * Pattern: a tiny "external store". The state lives in this module, not in React; components
  * read it with useSyncExternalStore, which re-renders them whenever `emit` swaps in new state.
  */
@@ -17,7 +20,8 @@ import { cacheAudio } from './audioCache'
 export interface PendingNote {
   id: string
   input: VoiceNoteInput
-  audio: Blob
+  bytes: ArrayBuffer
+  type: string
   created_at: string
   detailsSaved: boolean
   /** Set when the server refused the upload for good (e.g. too large); no more retries. */
@@ -38,8 +42,14 @@ function emit(next: Partial<OutboxState>) {
   listeners.forEach((l) => l())
 }
 
+/** Notes saved by the first version kept a Blob; those uploads failed, so offer them for deletion. */
+function upgrade(note: PendingNote & { audio?: Blob }): PendingNote {
+  if (note.bytes) return note
+  return { ...note, bytes: new ArrayBuffer(0), type: note.audio?.type ?? '', failed: 'Recording was lost. Delete it and record again.' }
+}
+
 async function reload() {
-  const items = await values<PendingNote>(store)
+  const items = (await values<PendingNote>(store)).map(upgrade)
   emit({ items: items.sort((a, b) => b.created_at.localeCompare(a.created_at)) })
 }
 
@@ -50,13 +60,18 @@ const subscribe = (listener: () => void) => {
 
 export const useOutbox = () => useSyncExternalStore(subscribe, () => state)
 
+export class EmptyRecordingError extends Error {}
+
 export async function addRecording(id: string, audio: Blob, durationSeconds: number): Promise<void> {
+  const bytes = await audio.arrayBuffer()
+  if (!bytes.byteLength) throw new EmptyRecordingError('The recording came out empty')
+  const type = audio.type || 'audio/mp4'
   const note: PendingNote = {
-    id, audio, detailsSaved: false, created_at: new Date().toISOString(),
+    id, bytes, type, detailsSaved: false, created_at: new Date().toISOString(),
     input: { label: '', hashtags: [], duration_seconds: durationSeconds },
   }
   await set(id, note, store)
-  await cacheAudio(id, audio)
+  await cacheAudio(id, bytes, type)
   await reload()
   void flush()
 }
@@ -91,7 +106,7 @@ export async function flush(): Promise<void> {
           note.detailsSaved = true
           await set(note.id, note, store)
         }
-        await uploadVoiceAudio(note.id, note.audio)
+        await uploadVoiceAudio(note.id, new Blob([note.bytes], { type: note.type }))
         await del(note.id, store)
       } catch (e) {
         // 404: the server lost the details (deleted elsewhere?), so send them again next time.

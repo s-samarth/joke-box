@@ -1,11 +1,18 @@
 /** Small pure helpers for voice notes: recording format, search, and storage use. */
 import type { VoiceNote } from '../../api/types'
 
-/** Formats to try, best first. MP4/AAC plays everywhere (iPhone included); WebM is Chrome's fallback. */
-export const MIME_CANDIDATES = ['audio/mp4;codecs=mp4a.40.2', 'audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus']
+/**
+ * Formats to try, best first. WebM/Opus is what Chrome, Edge and Firefox have recorded reliably
+ * for years (their MP4 recording is new, and gave empty files on some Macs). Safari records MP4.
+ * Current Safari, iPhone included, plays both.
+ */
+export const MIME_CANDIDATES = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4;codecs=mp4a.40.2', 'audio/mp4', 'audio/ogg;codecs=opus']
 
-export const pickMimeType = (isSupported: (type: string) => boolean): string | undefined =>
-  MIME_CANDIDATES.find((type) => isSupported(type))
+export const pickMimeType = (isSupported: (type: string) => boolean, avoid: string[] = []): string | undefined =>
+  MIME_CANDIDATES.find((type) => isSupported(type) && !avoid.includes(baseType(type)))
+
+/** "audio/mp4;codecs=mp4a.40.2" -> "audio/mp4" */
+export const baseType = (type: string): string => type.split(';')[0].trim().toLowerCase()
 
 /** Asked of the browser: speech is clear at 32 kbps. It's a hint; Chrome's AAC came out near 64 kbps. */
 export const VOICE_BITRATE = 32_000
