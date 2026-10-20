@@ -1,0 +1,501 @@
+{
+ "topics": [
+  {
+   "id": "t1",
+   "name": "Random",
+   "subtopics": [],
+   "bitCount": 0
+  },
+  {
+   "id": "t2",
+   "name": "Dating",
+   "subtopics": [
+    "First Dates",
+    "Dating Apps",
+    "Breakups"
+   ],
+   "bitCount": 4
+  },
+  {
+   "id": "t5",
+   "name": "Technology",
+   "subtopics": [
+    "Smart Home",
+    "Social Media"
+   ],
+   "bitCount": 2
+  },
+  {
+   "id": "t6",
+   "name": "Food",
+   "subtopics": [
+    "Restaurants",
+    "Cooking"
+   ],
+   "bitCount": 1
+  },
+  {
+   "id": "t7",
+   "name": "Observational",
+   "subtopics": [],
+   "bitCount": 9
+  }
+ ],
+ "venues": [
+  {
+   "id": "v1",
+   "name": "The Comedy Store"
+  },
+  {
+   "id": "v2",
+   "name": "Garage"
+  },
+  {
+   "id": "v3",
+   "name": "Street Mic"
+  }
+ ],
+ "bits": [
+  {
+   "id": "b1",
+   "setup": "My dating life is exactly like a Windows update.",
+   "punchline": "I keep clicking 'Remind me tomorrow' hoping the bugs will just fix themselves.",
+   "type": "One-Liner",
+   "rating": 3,
+   "tags": [
+    "#dating"
+   ],
+   "topic": "Dating",
+   "subtopic": "First Dates",
+   "status": "Complete",
+   "duration": "0m 30s",
+   "comments": "",
+   "versions": [],
+   "altPunchlines": [],
+   "createdAt": "2025-03-10T10:00:00Z",
+   "updatedAt": "2025-03-10T10:00:00Z"
+  },
+  {
+   "id": "b2",
+   "setup": "The worst first date location isn't a funeral... it's an Escape Room.",
+   "punchline": "Because nothing says \"romance\" like paying $40 to realize your potential soulmate panics under mild pressure and cannot solve a 3rd-grade math problem to save our lives. I'm literally watching attraction leave my body as she tries to put a square peg in a round hole.",
+   "type": "Story",
+   "rating": 4,
+   "tags": [
+    "#bad_dates"
+   ],
+   "topic": "Dating",
+   "subtopic": "First Dates",
+   "status": "Complete",
+   "duration": "2m 00s",
+   "comments": "",
+   "versions": [],
+   "altPunchlines": [],
+   "createdAt": "2025-03-08T14:00:00Z",
+   "updatedAt": "2025-03-09T10:00:00Z"
+  },
+  {
+   "id": "b3",
+   "setup": "\"What do you do for a living?\" - \"I'm a life coach.\"",
+   "punchline": "\"Oh, a life coach? That's just a homeless person with a LinkedIn Premium account.\"",
+   "type": "Crowd Work",
+   "rating": 5,
+   "tags": [
+    "#heckler"
+   ],
+   "topic": "Observational",
+   "status": "Complete",
+   "duration": "1m 00s",
+   "comments": "Absolute killer. Never misses.",
+   "versions": [],
+   "altPunchlines": [],
+   "createdAt": "2025-03-05T20:00:00Z",
+   "updatedAt": "2025-03-06T08:00:00Z"
+  },
+  {
+   "id": "b4",
+   "setup": "You look like the type of guy who brings a guitar to a party but doesn't know how to play it.",
+   "punchline": "You just hold it by the neck and wait for girls to ask about your \"creative process.\"",
+   "type": "Roast",
+   "rating": 2,
+   "tags": [
+    "#roast"
+   ],
+   "topic": "Observational",
+   "status": "Incomplete",
+   "duration": "0m 45s",
+   "comments": "",
+   "versions": [],
+   "altPunchlines": [],
+   "createdAt": "2025-03-04T16:00:00Z",
+   "updatedAt": "2025-03-04T16:00:00Z"
+  },
+  {
+   "id": "b5",
+   "setup": "Why do we whisper in art galleries?",
+   "punchline": "Is the paint sleeping? Are we afraid we're going to wake up the abstract shapes and they'll realize they're just blobs of color?",
+   "type": "Observation",
+   "rating": 3,
+   "tags": [
+    "#art"
+   ],
+   "topic": "Observational",
+   "status": "Incomplete",
+   "duration": "1m 15s",
+   "comments": "",
+   "versions": [],
+   "altPunchlines": [],
+   "createdAt": "2025-03-02T12:00:00Z",
+   "updatedAt": "2025-03-02T12:00:00Z"
+  },
+  {
+   "id": "b6",
+   "setup": "My girlfriend treats astrology like it's the weather report...",
+   "punchline": "\"What's the forecast?\" \"Mercury is in retrograde, DO NOT sign any contracts.\" Woman, I'm just trying to buy milk.",
+   "type": "Story",
+   "rating": 4,
+   "tags": [
+    "#dating",
+    "#astrology"
+   ],
+   "topic": "Dating",
+   "subtopic": "Dating Apps",
+   "status": "Complete",
+   "duration": "2m 00s",
+   "comments": "",
+   "versions": [],
+   "altPunchlines": [],
+   "createdAt": "2025-02-28T10:00:00Z",
+   "updatedAt": "2025-03-01T10:00:00Z"
+  },
+  {
+   "id": "b7",
+   "setup": "Why do all coffee shops now require a PhD to order a latte?",
+   "punchline": "\"What size?\" \"Large.\" \"We don't have large. We have Venti, Grande, and Existential Crisis.\"",
+   "type": "One-Liner",
+   "rating": 3,
+   "tags": [
+    "#coffee"
+   ],
+   "topic": "Observational",
+   "status": "Incomplete",
+   "duration": "1m 30s",
+   "comments": "",
+   "versions": [],
+   "altPunchlines": [],
+   "createdAt": "2025-02-25T09:00:00Z",
+   "updatedAt": "2025-02-25T09:00:00Z"
+  },
+  {
+   "id": "b8",
+   "setup": "Airline food isn't bad, it's just misunderstood.",
+   "punchline": "It's high altitude cuisine. The chicken tikka at 35,000 feet? That's not food, that's survival.",
+   "type": "One-Liner",
+   "rating": 3,
+   "tags": [
+    "#travel"
+   ],
+   "topic": "Observational",
+   "status": "Incomplete",
+   "duration": "0m 45s",
+   "comments": "",
+   "versions": [],
+   "altPunchlines": [],
+   "createdAt": "2025-02-20T15:00:00Z",
+   "updatedAt": "2025-02-20T15:00:00Z"
+  },
+  {
+   "id": "b9",
+   "setup": "The distinct difference between dog owners and cat owners at the park.",
+   "punchline": "Dog owners are like proud parents at a recital. Cat owners are like witnesses at a trial.",
+   "type": "Observation",
+   "rating": 5,
+   "tags": [
+    "#pets",
+    "#observational"
+   ],
+   "topic": "Observational",
+   "status": "Complete",
+   "duration": "3m 15s",
+   "comments": "Great crowd reaction every time.",
+   "versions": [],
+   "altPunchlines": [],
+   "createdAt": "2025-02-18T11:00:00Z",
+   "updatedAt": "2025-02-19T09:00:00Z"
+  },
+  {
+   "id": "b10",
+   "setup": "So I bought a smart fridge recently. Big mistake.",
+   "punchline": "It has a camera inside. Why? So I can see my milk going bad in 4K from work? I don't need that kind of stress. The other day it emailed me. Subject line: \"We need to talk about the cheese.\"",
+   "type": "Story",
+   "rating": 4,
+   "tags": [
+    "#tech",
+    "#observational"
+   ],
+   "topic": "Technology",
+   "subtopic": "Smart Home",
+   "status": "Work in Progress",
+   "duration": "4m 00s",
+   "comments": "Need to work on the Gouda closer.",
+   "versions": [
+    {
+     "label": "Original Spark",
+     "content": "Smart fridge idea - it judges you",
+     "timestamp": "2025-03-10T16:20:00Z"
+    },
+    {
+     "label": "Version 2",
+     "content": "Added the email bit and the Gouda punchline",
+     "timestamp": "2025-03-11T10:42:00Z"
+    },
+    {
+     "label": "Current Draft",
+     "content": "Full bit with ice maker closer",
+     "timestamp": "2025-03-11T12:00:00Z"
+    }
+   ],
+   "altPunchlines": [
+    "It's like a disgruntled bartender at 2 AM.",
+    "It's aggressively hydrating me.",
+    "I think it wants to knock me out."
+   ],
+   "createdAt": "2025-03-10T16:20:00Z",
+   "updatedAt": "2025-03-11T12:00:00Z"
+  },
+  {
+   "id": "b11",
+   "setup": "Self-Checkout struggles",
+   "punchline": "\"Unexpected item in the bagging area.\" Yeah, it's my dignity. I'm putting it back.",
+   "type": "Story",
+   "rating": 4,
+   "tags": [
+    "#tech",
+    "#retail"
+   ],
+   "topic": "Technology",
+   "status": "Complete",
+   "duration": "3m 30s",
+   "comments": "",
+   "versions": [],
+   "altPunchlines": [],
+   "createdAt": "2025-02-15T10:00:00Z",
+   "updatedAt": "2025-02-16T10:00:00Z"
+  },
+  {
+   "id": "b12",
+   "setup": "The Vegan at the BBQ",
+   "punchline": "They brought a quinoa salad to a knife fight. And then they won, because nobody touched it and they had leftovers for a week.",
+   "type": "Story",
+   "rating": 5,
+   "tags": [
+    "#food",
+    "#social"
+   ],
+   "topic": "Food",
+   "status": "Complete",
+   "duration": "5m 00s",
+   "comments": "Perfect closer material.",
+   "versions": [],
+   "altPunchlines": [],
+   "createdAt": "2025-02-10T13:00:00Z",
+   "updatedAt": "2025-02-11T13:00:00Z"
+  },
+  {
+   "id": "b13",
+   "setup": "Why do toasters have settings for burnt?",
+   "punchline": "Who is eating charcoal for breakfast? Is there a market for that?",
+   "type": "Observation",
+   "rating": 3,
+   "tags": [
+    "#kitchen",
+    "#observational"
+   ],
+   "topic": "Observational",
+   "status": "Incomplete",
+   "duration": "0m 30s",
+   "comments": "",
+   "versions": [],
+   "altPunchlines": [],
+   "createdAt": "2025-03-09T08:00:00Z",
+   "updatedAt": "2025-03-09T08:00:00Z"
+  },
+  {
+   "id": "b14",
+   "setup": "The weird guy at the DMV who brought his own chair.",
+   "punchline": "He came prepared. He had snacks. A book. A neck pillow. This man was going to WAR.",
+   "type": "Story",
+   "rating": 4,
+   "tags": [
+    "#life",
+    "#observational"
+   ],
+   "topic": "Observational",
+   "status": "Incomplete",
+   "duration": "2m 30s",
+   "comments": "",
+   "versions": [],
+   "altPunchlines": [],
+   "createdAt": "2025-03-06T12:00:00Z",
+   "updatedAt": "2025-03-06T12:00:00Z"
+  },
+  {
+   "id": "b15",
+   "setup": "My therapist told me to write letters to people I hate and then burn them.",
+   "punchline": "I've done that, but now what do I do with the letters?",
+   "type": "One-Liner",
+   "rating": 4,
+   "tags": [
+    "#dark",
+    "#therapy"
+   ],
+   "topic": "Observational",
+   "status": "Complete",
+   "duration": "0m 20s",
+   "comments": "",
+   "versions": [],
+   "altPunchlines": [],
+   "createdAt": "2025-03-04T18:00:00Z",
+   "updatedAt": "2025-03-04T18:00:00Z"
+  },
+  {
+   "id": "b16",
+   "setup": "Airport security is just theater for people who are late.",
+   "punchline": "\"Sir, please remove your belt.\" I'm about to miss my flight but sure, let me do a striptease for national security.",
+   "type": "Premise",
+   "rating": 3,
+   "tags": [
+    "#travel",
+    "#observational"
+   ],
+   "topic": "Observational",
+   "status": "Incomplete",
+   "duration": "1m 00s",
+   "comments": "",
+   "versions": [],
+   "altPunchlines": [],
+   "createdAt": "2025-02-27T14:00:00Z",
+   "updatedAt": "2025-02-27T14:00:00Z"
+  },
+  {
+   "id": "b17",
+   "setup": "Dating Apps in your 30s",
+   "punchline": "It's like apartment hunting — you lower your standards every week and still end up with something that has 'character' instead of working plumbing.",
+   "type": "Story",
+   "rating": 4,
+   "tags": [
+    "#dating",
+    "#30s"
+   ],
+   "topic": "Dating",
+   "subtopic": "Dating Apps",
+   "status": "Complete",
+   "duration": "4m 15s",
+   "comments": "",
+   "versions": [],
+   "altPunchlines": [],
+   "createdAt": "2025-02-22T10:00:00Z",
+   "updatedAt": "2025-02-23T10:00:00Z"
+  }
+ ],
+ "logs": [
+  {
+   "id": "pl1",
+   "venueName": "The Comedy Store",
+   "date": "2025-03-17T20:00:00Z",
+   "duration": "10m 00s",
+   "audienceSize": 45,
+   "rating": 3,
+   "setTopics": [
+    "Dating"
+   ],
+   "bitIds": [
+    "b2",
+    "b6"
+   ],
+   "comments": "Crowd was cold at first but warmed up. The escape room bit landed well.",
+   "createdAt": "2025-03-17T22:00:00Z"
+  },
+  {
+   "id": "pl2",
+   "venueName": "Garage",
+   "date": "2025-02-28T21:00:00Z",
+   "duration": "5m 30s",
+   "audienceSize": 12,
+   "rating": 1,
+   "setTopics": [
+    "Crowdwork"
+   ],
+   "bitIds": [
+    "b3"
+   ],
+   "comments": "Rough night. Small crowd. The life coach bit saved it.",
+   "createdAt": "2025-02-28T23:00:00Z"
+  },
+  {
+   "id": "pl3",
+   "venueName": "The Comedy Store",
+   "date": "2025-02-28T20:00:00Z",
+   "duration": "7m 00s",
+   "audienceSize": 38,
+   "rating": 3,
+   "setTopics": [
+    "Crowdwork"
+   ],
+   "bitIds": [
+    "b3",
+    "b5"
+   ],
+   "comments": "Decent set. Need to tighten the transitions.",
+   "createdAt": "2025-02-28T22:00:00Z"
+  },
+  {
+   "id": "pl4",
+   "venueName": "Street Mic",
+   "date": "2025-02-26T20:30:00Z",
+   "duration": "7m 00s",
+   "audienceSize": 65,
+   "rating": 5,
+   "setTopics": [
+    "Observational"
+   ],
+   "bitIds": [
+    "b1",
+    "b3",
+    "b9",
+    "b15"
+   ],
+   "comments": "Best set in weeks. Everything landed. The therapist joke killed.",
+   "createdAt": "2025-02-26T22:00:00Z"
+  }
+ ],
+ "setlists": [
+  {
+   "id": "sl1",
+   "name": "Open Mic Night",
+   "venue": "The Comedy Store",
+   "date": "2025-10-24T20:00:00Z",
+   "targetDuration": "15m 00s",
+   "bits": [
+    {
+     "bitId": "b11",
+     "order": 1,
+     "position": "Opener",
+     "duration": "3m 30s"
+    },
+    {
+     "bitId": "b17",
+     "order": 2,
+     "duration": "4m 15s"
+    },
+    {
+     "bitId": "b12",
+     "order": 3,
+     "position": "Closer",
+     "duration": "5m 00s"
+    }
+   ],
+   "createdAt": "2025-03-10T10:00:00Z"
+  }
+ ]
+}

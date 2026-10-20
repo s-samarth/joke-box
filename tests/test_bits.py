@@ -1,0 +1,74 @@
+"""Bits: create, update, types and statuses by name, and user isolation."""
+
+import uuid
+from typing import Any
+
+from fastapi.testclient import TestClient
+
+from tests.conftest import random_topic_id
+
+
+def put_bit(client: TestClient, bit_id: str | None = None, **fields: Any) -> Any:
+    bit_id = bit_id or str(uuid.uuid4())
+    body = {"setup": "Fake setup", "topic_id": random_topic_id(client), **fields}
+    return client.put(f"/api/bits/{bit_id}", json=body)
+
+
+def test_create_and_update_bit(alice: TestClient) -> None:
+    bit_id = str(uuid.uuid4())
+    created = put_bit(alice, bit_id, punchline="Fake punch", types=["One-Liner"], status="Draft")
+    assert created.status_code == 200
+    assert created.json()["types"] == ["One-Liner"]
+    updated = put_bit(alice, bit_id, setup="Edited", tag_lines=["tag one"], clean_rating="mild")
+    body = updated.json()
+    assert (body["setup"], body["tag_lines"], body["clean_rating"]) == (
+        "Edited",
+        ["tag one"],
+        "mild",
+    )
+    assert len(alice.get("/api/bits").json()) == 1
+
+
+def test_retrying_the_same_put_does_not_duplicate(alice: TestClient) -> None:
+    bit_id = str(uuid.uuid4())
+    put_bit(alice, bit_id)
+    put_bit(alice, bit_id)
+    assert len(alice.get("/api/bits").json()) == 1
+
+
+def test_types_are_created_inline_and_pruned_when_unused(alice: TestClient) -> None:
+    bit_id = str(uuid.uuid4())
+    put_bit(alice, bit_id, types=["Story", "story", "Roast"])
+    assert sorted(t["name"] for t in alice.get("/api/types").json()) == ["Roast", "Story"]
+    put_bit(alice, bit_id, types=["Story"])
+    assert [t["name"] for t in alice.get("/api/types").json()] == ["Story"]
+    alice.delete(f"/api/bits/{bit_id}")
+    assert alice.get("/api/types").json() == []
+
+
+def test_undefined_is_not_stored_as_a_type(alice: TestClient) -> None:
+    assert put_bit(alice, types=["Undefined"]).json()["types"] == []
+
+
+def test_new_status_is_created_inline(alice: TestClient) -> None:
+    put_bit(alice, status="Needs Tag")
+    assert "Needs Tag" in [s["name"] for s in alice.get("/api/statuses").json()]
+
+
+def test_validation(alice: TestClient) -> None:
+    assert put_bit(alice, setup="   ").status_code == 422
+    assert put_bit(alice, strength=6).status_code == 422
+    assert put_bit(alice, topic_id=str(uuid.uuid4())).status_code == 422
+
+
+def test_other_users_cannot_touch_my_bits(alice: TestClient, bob: TestClient) -> None:
+    bit_id = put_bit(alice).json()["id"]
+    assert bob.get(f"/api/bits/{bit_id}").status_code == 404
+    assert put_bit(bob, bit_id, setup="stolen").status_code == 404
+    assert bob.delete(f"/api/bits/{bit_id}").status_code == 404
+    assert bob.get("/api/bits").json() == []
+    assert alice.get(f"/api/bits/{bit_id}").json()["setup"] == "Fake setup"
+
+
+def test_cannot_file_a_bit_in_someone_elses_topic(alice: TestClient, bob: TestClient) -> None:
+    assert put_bit(bob, topic_id=random_topic_id(alice)).status_code == 422
