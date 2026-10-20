@@ -10,7 +10,7 @@ from app.models.library import (
     Topic,
     bit_type_links,
 )
-from app.models.notebook import Observation, ObservationTopic
+from app.models.notebook import Observation, ObservationTopic, WritingSession
 from app.models.shows import (
     PerformanceLog,
     Setlist,
@@ -38,6 +38,7 @@ __all__ = [
     "Topic",
     "User",
     "Venue",
+    "WritingSession",
     "bit_type_links",
     "performance_log_topics",
 ]

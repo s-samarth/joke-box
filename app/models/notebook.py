@@ -1,11 +1,12 @@
-"""Observations: things you noticed, logged on their own, not yet jokes.
+"""Observations (things you noticed, not yet jokes) and free brainstorm sessions.
 
 They have their own topics, kept apart from joke topics so the joke folders stay clean.
 """
 
 import uuid
+from typing import Any
 
-from sqlalchemy import ForeignKey, Index, String, Text, Uuid, text
+from sqlalchemy import JSON, ForeignKey, Index, Integer, String, Text, Uuid, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, OwnedMixin
@@ -29,3 +30,21 @@ class Observation(OwnedMixin, Base):
     topic_id: Mapped[uuid.UUID | None] = mapped_column(
         Uuid, ForeignKey("observation_topics.id", ondelete="SET NULL"), index=True
     )
+
+
+class WritingSession(OwnedMixin, Base):
+    """A free brainstorm, not tied to one joke: typed text, handwriting, a timer and links.
+
+    Handwriting is kept as pen strokes (points), not an image, so it stays sharp at any size
+    and stays small. Links are id lists: a linked joke or observation that was later deleted
+    simply drops out when the page is shown, rather than blocking the delete.
+    """
+
+    __tablename__ = "writing_sessions"
+
+    title: Mapped[str] = mapped_column(String(200), default="")
+    content: Mapped[str] = mapped_column(Text, default="")
+    ink: Mapped[list[dict[str, Any]]] = mapped_column(JSON, default=list)
+    timer_seconds: Mapped[int] = mapped_column(Integer, default=0)
+    bit_ids: Mapped[list[str]] = mapped_column(JSON, default=list)
+    observation_ids: Mapped[list[str]] = mapped_column(JSON, default=list)

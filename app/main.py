@@ -9,7 +9,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.auth.routes import router as auth_router
 from app.config import get_settings
-from app.routers import bits, observations, shows, studio, system, topics
+from app.routers import bits, observations, sessions, shows, studio, system, topics
 
 THIRTY_DAYS = 60 * 60 * 24 * 30
 WEB_DIST = Path(__file__).resolve().parent.parent / "web" / "dist"
@@ -44,7 +44,7 @@ def create_app() -> FastAPI:
         same_site="lax",
         https_only=not settings.is_local,
     )
-    for module in (system, topics, bits, studio, shows, observations):
+    for module in (system, topics, bits, studio, shows, observations, sessions):
         app.include_router(module.router)
     app.include_router(auth_router)
     # The built React app. API routes always win; unknown page URLs get index.html.
