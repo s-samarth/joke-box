@@ -109,3 +109,25 @@ export interface Observation extends ObservationInput {
   created_at: string
   updated_at: string
 }
+
+/** One pen stroke. Points are [x, y, pressure] on a page 1000 units wide. */
+export interface Stroke {
+  color: string
+  size: number
+  points: [number, number, number][]
+}
+
+export interface WritingSessionInput {
+  title: string
+  content: string
+  ink: Stroke[]
+  timer_seconds: number
+  bit_ids: string[]
+  observation_ids: string[]
+}
+
+export interface WritingSession extends WritingSessionInput {
+  id: string
+  created_at: string
+  updated_at: string
+}

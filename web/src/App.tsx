@@ -19,6 +19,8 @@ const SetBuilder = named(() => import('./features/sets/SetBuilder'), 'SetBuilder
 const StageView = named(() => import('./features/sets/StageView'), 'StageView')
 const PrintView = named(() => import('./features/sets/PrintView'), 'PrintView')
 const ShowsPage = named(() => import('./features/shows/ShowsPage'), 'ShowsPage')
+const BrainstormPage = named(() => import('./features/brainstorm/BrainstormPage'), 'BrainstormPage')
+const SessionPage = named(() => import('./features/brainstorm/SessionPage'), 'SessionPage')
 const ObservationsPage = named(() => import('./features/observations/ObservationsPage'), 'ObservationsPage')
 
 const full = (el: React.ReactNode) => <RequireAuth>{el}</RequireAuth>
@@ -38,8 +40,10 @@ export function App() {
           <Route path="sets/:setId" element={<SetBuilder />} />
           <Route path="shows" element={<ShowsPage />} />
           <Route path="observations" element={<ObservationsPage />} />
+          <Route path="brainstorm" element={<BrainstormPage />} />
         </Route>
         {/* Full-screen modes without the app frame. */}
+        <Route path="/brainstorm/:sessionId" element={full(<SessionPage />)} />
         <Route path="/bits/:bitId/rewrite" element={full(<RewritePage />)} />
         <Route path="/sets/:setId/stage" element={full(<StageView />)} />
         <Route path="/sets/:setId/print" element={full(<PrintView />)} />

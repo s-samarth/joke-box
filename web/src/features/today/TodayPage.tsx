@@ -1,4 +1,4 @@
-/** Today: capture first, then observations, your topic folders, what's coming up, what needs work, and how the last show went. */
+/** Today: capture first, then observations, brainstorming, your topic folders, what's coming up, what needs work, and how the last show went. */
 import { Play } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
@@ -11,6 +11,7 @@ import { formatDate, todayIst } from '../../lib/time'
 import { LightBar } from '../sets/LightBar'
 import { totalSeconds } from '../sets/setlistMath'
 import { QuickCapture } from './QuickCapture'
+import { TodayBrainstorm } from './TodayBrainstorm'
 import { TodayObservations } from './TodayObservations'
 import { TopicFolders } from './TopicFolders'
 
@@ -41,6 +42,7 @@ export function TodayPage() {
       </div>
       <QuickCapture />
       <TodayObservations />
+      <TodayBrainstorm />
       <TopicFolders />
 
       <section className="mt-12">
