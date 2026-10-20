@@ -70,14 +70,15 @@ export function useRecorder({ onLimit }: { onLimit: (r: Recording) => void }) {
     const current = live.current
     if (!current) return null
     live.current = null
-    if (current.recorder.state !== 'inactive') current.recorder.stop()
-    const result = await current.done
-    cancelAnimationFrame(current.frame)
-    clearInterval(current.timer)
-    current.stream.getTracks().forEach((t) => t.stop())
-    void current.context?.close()
+    // Update the screen first, so the tap feels instant; the recorder finishes in the background.
     setRecording(false)
     setLevel(0)
+    cancelAnimationFrame(current.frame)
+    clearInterval(current.timer)
+    if (current.recorder.state !== 'inactive') current.recorder.stop()
+    const result = await current.done
+    current.stream.getTracks().forEach((t) => t.stop())
+    void current.context?.close()
     return result
   }, [])
 
