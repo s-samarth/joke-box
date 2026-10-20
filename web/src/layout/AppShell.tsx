@@ -1,6 +1,6 @@
 /**
  * The frame around every signed-in screen. Desktop: a slim left rail with every screen.
- * Phone: a bottom bar (see BottomBar) with Home, Jokes, a big + for capture, Sets and More.
+ * Phone: a bottom bar (see BottomBar) with Home, Jokes, a big + for capture, Shows and More.
  */
 import { Plus } from 'lucide-react'
 import { Suspense } from 'react'

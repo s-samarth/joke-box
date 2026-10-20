@@ -1,5 +1,5 @@
 /**
- * The phone's bottom bar: Home, Jokes, a big + for capture, Sets, and More. More opens a sheet
+ * The phone's bottom bar: Home, Jokes, a big + for capture, Shows, and More. More opens a sheet
  * with every other screen, so nothing is more than two taps away and the + stays in the middle.
  */
 import { LayoutGrid, Plus } from 'lucide-react'
