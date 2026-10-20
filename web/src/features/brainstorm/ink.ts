@@ -6,16 +6,50 @@
 import type { Stroke } from '../../api/types'
 
 export const PAGE_WIDTH = 1000
-const MIN_PAGE_HEIGHT = 1300
-const ROOM_BELOW = 500
-/** Space between the faint ruled lines, in page units. */
-export const LINE_GAP = 56
+/** A blank sheet with A4 proportions, so a whole page fits a phone screen. */
+const PAGE_HEIGHT = 1414
+/** The server refuses more (one session is saved in one request, and requests have a size cap). */
+export const MAX_PAGES = 20
 
-export const INK_COLORS = ['#ece6da', '#f0cf5a', '#ff5a47', '#74d3a8'] as const
+/** All of these show up on the dark page. */
+export const INK_COLORS = [
+  '#ece6da', '#9ca3af', '#f0cf5a', '#ff9f43', '#ff5a47', '#ff7eb6',
+  '#c084fc', '#7aa2ff', '#5fd4e8', '#74d3a8', '#b5e05a', '#c79a6b',
+] as const
 
-/** The page grows as you write lower, always leaving some blank room below. */
+export const INK_SIZES = [
+  { label: 'Fine', size: 1.2 },
+  { label: 'Medium', size: 2.4 },
+  { label: 'Bold', size: 4 },
+  { label: 'Marker', size: 7 },
+  { label: 'Thick marker', size: 12 },
+] as const
+
+/** Pages are a fixed size; a page drawn before that, which grew past it, keeps all its ink. */
 export const pageHeight = (strokes: Stroke[]) =>
-  Math.max(MIN_PAGE_HEIGHT, ...strokes.flatMap((s) => s.points.map((p) => p[1] + ROOM_BELOW)))
+  Math.max(PAGE_HEIGHT, ...strokes.flatMap((s) => s.points.map((p) => p[1])))
+
+const pageOf = (s: Stroke) => s.page ?? 0
+
+/** How many pages to show: the saved count, or more if some stroke sits beyond it. */
+export const pageCount = (strokes: Stroke[], saved = 1) =>
+  Math.max(saved, ...strokes.map((s) => pageOf(s) + 1))
+
+export const strokesOn = (strokes: Stroke[], page: number) => strokes.filter((s) => pageOf(s) === page)
+
+/** Swap one page's strokes for new ones, leaving the other pages alone. */
+export const replacePage = (strokes: Stroke[], page: number, next: Stroke[]) =>
+  [...strokes.filter((s) => pageOf(s) !== page), ...next]
+
+/** Take the newest stroke off one page. */
+export function undoOn(strokes: Stroke[], page: number): Stroke[] {
+  const i = strokes.findLastIndex((s) => pageOf(s) === page)
+  return i < 0 ? strokes : strokes.toSpliced(i, 1)
+}
+
+/** Delete a page: its strokes go and the pages after it move up one. */
+export const removePage = (strokes: Stroke[], page: number) =>
+  strokes.filter((s) => pageOf(s) !== page).map((s) => (pageOf(s) > page ? { ...s, page: pageOf(s) - 1 } : s))
 
 type Point = Stroke['points'][number]
 const mid = (a: Point, b: Point): [number, number] => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]

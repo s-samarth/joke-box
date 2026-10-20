@@ -1,5 +1,5 @@
 /**
- * A handwriting page. Apple Pencil, a mouse or a finger all draw, until the page sees a pencil:
+ * One blank handwriting page. Apple Pencil, a mouse or a finger all draw, until the page sees a pencil:
  * from then on fingers (and a resting palm) scroll instead of drawing, as in Notes.
  *
  * Pattern: Pointer Events. One set of handlers (pointerdown/move/up) covers mouse, touch and
@@ -8,19 +8,21 @@
  */
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { Stroke } from '../../api/types'
-import { drawSegment, drawStroke, eraseAt, LINE_GAP, PAGE_WIDTH, pageHeight } from './ink'
+import { drawSegment, drawStroke, eraseAt, PAGE_WIDTH, pageHeight } from './ink'
 
 export type InkTool = 'pen' | 'eraser'
 
 interface Props {
+  /** Only this page's strokes; new strokes are tagged with `page`. */
   strokes: Stroke[]
+  page: number
   onChange: (strokes: Stroke[]) => void
   tool: InkTool
   color: string
   size: number
 }
 
-export function InkCanvas({ strokes, onChange, tool, color, size }: Props) {
+export function InkCanvas({ strokes, page, onChange, tool, color, size }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [width, setWidth] = useState(0)
   const live = useRef<Stroke | null>(null)
@@ -78,7 +80,7 @@ export function InkCanvas({ strokes, onChange, tool, color, size }: Props) {
       commit(eraseAt(current.current, point[0], point[1]))
       return
     }
-    live.current = { color, size, points: [point] }
+    live.current = { color, size, page, points: [point] }
     const ctx = canvasRef.current?.getContext('2d')
     if (ctx) drawStroke(ctx, live.current, scale)
   }
@@ -117,8 +119,8 @@ export function InkCanvas({ strokes, onChange, tool, color, size }: Props) {
   }
 
   return (
-    <canvas ref={canvasRef} aria-label="Handwriting page" style={{ height, touchAction: 'none', backgroundSize: `100% ${LINE_GAP * scale}px` }}
-      className={`ruled-page block w-full rounded-xl ring-1 ring-rule ${tool === 'eraser' ? 'cursor-cell' : 'cursor-crosshair'}`}
+    <canvas ref={canvasRef} aria-label={`Handwriting page ${page + 1}`} style={{ height, touchAction: 'none' }}
+      className={`block w-full bg-ink-2 rounded-xl ring-1 ring-rule ${tool === 'eraser' ? 'cursor-cell' : 'cursor-crosshair'}`}
       onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={finish} onPointerCancel={finish} />
   )
 }

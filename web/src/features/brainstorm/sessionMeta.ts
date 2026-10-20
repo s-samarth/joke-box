@@ -11,7 +11,7 @@ export function sessionSummary(s: WritingSession): string {
   const links = s.bit_ids.length + s.observation_ids.length
   return [
     words ? `${words} words` : null,
-    s.ink.length ? 'handwriting' : null,
+    s.ink.length ? ((s.ink_pages ?? 1) > 1 ? `${s.ink_pages} handwritten pages` : 'handwriting') : null,
     links ? `${links} linked` : null,
   ].filter(Boolean).join(', ')
 }

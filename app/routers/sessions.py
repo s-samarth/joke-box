@@ -35,6 +35,7 @@ def put_session(
     session.title = data["title"]
     session.content = data["content"]
     session.ink = data["ink"]
+    session.ink_pages = data["ink_pages"]
     session.timer_seconds = data["timer_seconds"]
     session.bit_ids = data["bit_ids"]
     session.observation_ids = data["observation_ids"]

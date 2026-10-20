@@ -51,3 +51,17 @@ def test_sessions_are_private(alice: TestClient, bob: TestClient) -> None:
     put_session(bob, session_id, content="Fake takeover")
     bob.delete(f"/api/sessions/{session_id}")
     assert alice.get("/api/sessions").json()[0]["content"] == "Fake words"
+
+
+def test_pages_are_kept_and_cover_every_stroke(alice: TestClient) -> None:
+    session_id = str(uuid.uuid4())
+    saved = put_session(alice, session_id, ink=[STROKE], ink_pages=3).json()
+    assert saved["ink_pages"] == 3  # blank pages 2 and 3 survive
+    assert saved["ink"][0]["page"] == 0  # strokes saved before pages existed are on page 1
+    on_page_five = {**STROKE, "page": 4}
+    assert put_session(alice, session_id, ink=[on_page_five], ink_pages=1).json()["ink_pages"] == 5
+
+
+def test_page_count_is_capped(alice: TestClient) -> None:
+    assert put_session(alice, str(uuid.uuid4()), ink_pages=21).status_code == 422
+    assert put_session(alice, str(uuid.uuid4()), ink=[{**STROKE, "page": 20}]).status_code == 422

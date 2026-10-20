@@ -114,6 +114,8 @@ export interface Observation extends ObservationInput {
 export interface Stroke {
   color: string
   size: number
+  /** 0-based page. Strokes saved before pages existed have none and sit on the first page. */
+  page?: number
   points: [number, number, number][]
 }
 
@@ -121,6 +123,8 @@ export interface WritingSessionInput {
   title: string
   content: string
   ink: Stroke[]
+  /** How many handwriting pages, including blank ones. */
+  ink_pages: number
   timer_seconds: number
   bit_ids: string[]
   observation_ids: string[]

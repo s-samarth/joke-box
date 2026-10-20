@@ -31,12 +31,12 @@ export function useSessionAutosave(id: string, input: WritingSessionInput) {
   }, [id])
 
   // Everything except the ticking timer schedules a save; the timer is saved along with them.
-  const { title, content, ink, bit_ids, observation_ids } = input
+  const { title, content, ink, ink_pages, bit_ids, observation_ids } = input
   useEffect(() => {
     if (!dirty.current) return
     const t = setTimeout(flush, DELAY_MS)
     return () => clearTimeout(t)
-  }, [title, content, ink, bit_ids, observation_ids, flush])
+  }, [title, content, ink, ink_pages, bit_ids, observation_ids, flush])
 
   useEffect(() => flush, [flush])
 
