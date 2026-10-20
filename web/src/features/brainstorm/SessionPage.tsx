@@ -1,6 +1,6 @@
 /**
- * One brainstorm session, full screen: a timer, a title, and either a typing page or a
- * handwriting page (switch any time; both are kept), plus linked jokes and observations.
+ * One brainstorm session, full screen: a timer, a title, and either a typing page or blank
+ * handwriting pages (switch any time; both are kept), plus linked jokes and observations.
  */
 import { Keyboard, Pause, PenLine, Play, RotateCcw, X } from 'lucide-react'
 import { useState } from 'react'
@@ -13,7 +13,7 @@ import { GrowingText } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { clock } from '../../lib/duration'
 import { useTimer } from '../bits/useTimer'
-import { INK_COLORS } from './ink'
+import { INK_COLORS, INK_SIZES, pageCount, removePage, replacePage, strokesOn, undoOn } from './ink'
 import { InkCanvas, type InkTool } from './InkCanvas'
 import { InkToolbar } from './InkToolbar'
 import { SessionLinks } from './SessionLinks'
@@ -23,6 +23,19 @@ type Mode = 'type' | 'write'
 const MODE_KEY = 'jokebox.brainstorm.mode'
 const savedMode = (): Mode => { try { return localStorage.getItem(MODE_KEY) === 'write' ? 'write' : 'type' } catch { return 'type' } }
 
+/** The last pen colour and size you picked, remembered on this device. */
+const PEN_KEY = 'jokebox.brainstorm.pen'
+const DEFAULT_PEN = { color: INK_COLORS[0] as string, size: INK_SIZES[1].size as number }
+function savedPen() {
+  try {
+    const pen = JSON.parse(localStorage.getItem(PEN_KEY) ?? '{}') as Partial<typeof DEFAULT_PEN>
+    return {
+      color: INK_COLORS.find((c) => c === pen.color) ?? DEFAULT_PEN.color,
+      size: INK_SIZES.find((s) => s.size === pen.size)?.size ?? DEFAULT_PEN.size,
+    }
+  } catch { return DEFAULT_PEN }
+}
+
 const modeButton = (on: boolean) =>
   `inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'text-dim hover:text-paper'}`
 
@@ -30,22 +43,43 @@ function Workspace({ id, start }: { id: string; start?: WritingSession }) {
   const [title, setTitle] = useState(start?.title ?? '')
   const [content, setContent] = useState(start?.content ?? '')
   const [ink, setInk] = useState<Stroke[]>(start?.ink ?? [])
+  // A session cached before pages existed has no ink_pages; pageCount then counts from the ink.
+  const [pages, setPages] = useState(() => pageCount(start?.ink ?? [], start?.ink_pages))
+  const [page, setPage] = useState(0)
   const [bitIds, setBitIds] = useState(start?.bit_ids ?? [])
   const [observationIds, setObservationIds] = useState(start?.observation_ids ?? [])
   const [mode, setMode] = useState<Mode>(() => (start?.ink.length && !start.content ? 'write' : savedMode()))
   const [tool, setTool] = useState<InkTool>('pen')
-  const [color, setColor] = useState<string>(INK_COLORS[0])
+  const [pen, setPen] = useState(savedPen)
   const timer = useTimer(start?.timer_seconds ?? 0)
   const { confirm } = useFeedback()
-  const autosave = useSessionAutosave(id, { title, content, ink, timer_seconds: timer.seconds, bit_ids: bitIds, observation_ids: observationIds })
+  const autosave = useSessionAutosave(id, { title, content, ink, ink_pages: pages, timer_seconds: timer.seconds, bit_ids: bitIds, observation_ids: observationIds })
   const words = content.trim() ? content.trim().split(/\s+/).length : 0
 
   // Wrap each setter so any edit marks the session for the next autosave.
   const edit = <T,>(set: (v: T) => void) => (v: T) => { autosave.touch(); set(v) }
   const switchMode = (m: Mode) => { setMode(m); try { localStorage.setItem(MODE_KEY, m) } catch { /* private mode */ } }
   const toggleTimer = () => { if (timer.running) { timer.pause(); autosave.saveNow() } else timer.start() }
-  const clearInk = async () => {
-    if (await confirm({ title: 'Clear the handwriting?', message: 'Everything drawn on this page goes.', confirmLabel: 'Clear page', danger: true })) edit(setInk)([])
+  const pageInk = strokesOn(ink, page)
+  // Functional updates, so two strokes finished before a re-render both land.
+  const editInk = (change: (all: Stroke[]) => Stroke[]) => { autosave.touch(); setInk(change) }
+  const changePen = (next: Partial<typeof pen>) => {
+    const merged = { ...pen, ...next }
+    setPen(merged)
+    try { localStorage.setItem(PEN_KEY, JSON.stringify(merged)) } catch { /* private mode */ }
+  }
+  const addPage = () => { autosave.touch(); setPages(pages + 1); setPage(pages) }
+  const clearOrDeletePage = async () => {
+    if (!pageInk.length) {
+      if (pages === 1) return
+      editInk((all) => removePage(all, page))
+      setPages(pages - 1)
+      setPage(Math.min(page, pages - 2))
+      return
+    }
+    if (await confirm({ title: 'Clear this page?', message: 'Everything drawn on this page goes.', confirmLabel: 'Clear page', danger: true })) {
+      editInk((all) => replacePage(all, page, []))
+    }
   }
 
   return (
@@ -64,9 +98,10 @@ function Workspace({ id, start }: { id: string; start?: WritingSession }) {
           </div>
         </div>
         {mode === 'write' && (
-          <div className="no-scrollbar overflow-x-auto border-t border-rule px-3 py-1.5 sm:px-6">
-            <InkToolbar tool={tool} color={color} onTool={setTool} onColor={setColor} hasInk={ink.length > 0}
-              onUndo={() => edit(setInk)(ink.slice(0, -1))} onClear={clearInk} />
+          <div className="border-t border-rule px-3 py-1.5 sm:px-6">
+            <InkToolbar tool={tool} color={pen.color} size={pen.size} onTool={setTool} onColor={(color) => changePen({ color })} onSize={(size) => changePen({ size })}
+              hasInk={pageInk.length > 0} onUndo={() => editInk((all) => undoOn(all, page))} onClear={clearOrDeletePage}
+              page={page} pages={pages} onPage={setPage} onAddPage={addPage} />
           </div>
         )}
       </header>
@@ -83,7 +118,7 @@ function Workspace({ id, start }: { id: string; start?: WritingSession }) {
           {mode === 'type' ? (
             <GrowingText aria-label="Brainstorm" autoFocus placeholder="Write anything. Premises, angles, tags, a rant that might be a bit." className="min-h-[55dvh] text-lg leading-relaxed" value={content} onChange={(e) => edit(setContent)(e.target.value)} />
           ) : (
-            <InkCanvas strokes={ink} onChange={edit(setInk)} tool={tool} color={color} size={2.4} />
+            <InkCanvas strokes={pageInk} page={page} onChange={(next) => editInk((all) => replacePage(all, page, next))} tool={tool} color={pen.color} size={pen.size} />
           )}
         </div>
       </main>

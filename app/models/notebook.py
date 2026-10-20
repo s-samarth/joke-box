@@ -36,8 +36,10 @@ class WritingSession(OwnedMixin, Base):
     """A free brainstorm, not tied to one joke: typed text, handwriting, a timer and links.
 
     Handwriting is kept as pen strokes (points), not an image, so it stays sharp at any size
-    and stays small. Links are id lists: a linked joke or observation that was later deleted
-    simply drops out when the page is shown, rather than blocking the delete.
+    and stays small. Each stroke records which page it is on; `ink_pages` counts the pages so
+    a blank page you added is still there next time. Links are id lists: a linked joke or
+    observation that was later deleted simply drops out when the page is shown, rather than
+    blocking the delete.
     """
 
     __tablename__ = "writing_sessions"
@@ -45,6 +47,7 @@ class WritingSession(OwnedMixin, Base):
     title: Mapped[str] = mapped_column(String(200), default="")
     content: Mapped[str] = mapped_column(Text, default="")
     ink: Mapped[list[dict[str, Any]]] = mapped_column(JSON, default=list)
+    ink_pages: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
     timer_seconds: Mapped[int] = mapped_column(Integer, default=0)
     bit_ids: Mapped[list[str]] = mapped_column(JSON, default=list)
     observation_ids: Mapped[list[str]] = mapped_column(JSON, default=list)
