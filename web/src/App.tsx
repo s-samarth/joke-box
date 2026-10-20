@@ -9,7 +9,7 @@ import { AppShell } from './layout/AppShell'
 const named = <K extends string>(load: () => Promise<Record<K, React.ComponentType>>, name: K) =>
   lazy(() => load().then((m) => ({ default: m[name] })))
 
-// Screens beyond Today load on first visit, so the app opens fast on a phone.
+// Screens beyond Home load on first visit, so the app opens fast on a phone.
 const BitsLayout = named(() => import('./features/bits/BitsLayout'), 'BitsLayout')
 const NoBitSelected = named(() => import('./features/bits/BitsLayout'), 'NoBitSelected')
 const BitPage = named(() => import('./features/bits/BitPage'), 'BitPage')

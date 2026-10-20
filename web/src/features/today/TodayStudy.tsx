@@ -1,4 +1,4 @@
-/** Study, from Today: the watchlist, your analyses and your external links. On a phone this is the way in. */
+/** Study, from Home: the watchlist, your analyses and your external links. */
 import { ExternalLink, ListChecks, NotebookPen } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
