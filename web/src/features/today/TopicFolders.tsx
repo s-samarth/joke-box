@@ -3,11 +3,13 @@
  * inside it to go one level deeper. Counts are live, worked out from the jokes you have.
  */
 import { Folder } from 'lucide-react'
+import { useState } from 'react'
 import { Link } from 'react-router'
 import { useBits, useTopics } from '../../api/library'
 import type { Topic } from '../../api/types'
 import { SectionHead } from '../../components/ui/bits'
 import { topicName } from '../../lib/bitMeta'
+import { TopicManager } from '../bits/TopicManager'
 
 const MAX_SUBS = 3
 
@@ -47,6 +49,7 @@ function FolderCard({ topic, count, subCount }: { topic: Topic; count: number; s
 export function TopicFolders() {
   const { data: topics = [] } = useTopics()
   const { data: bits = [] } = useBits()
+  const [managing, setManaging] = useState(false)
   const counts = new Map<string, number>()
   for (const b of bits) {
     counts.set(b.topic_id, (counts.get(b.topic_id) ?? 0) + 1)
@@ -60,11 +63,15 @@ export function TopicFolders() {
   return (
     <section className="mt-12">
       <SectionHead title="Topics">
-        <Link to="/bits" className="text-sm text-dim hover:text-paper">All {bits.length}</Link>
+        <div className="flex items-baseline gap-4">
+          <button type="button" onClick={() => setManaging(true)} className="text-sm text-dim hover:text-paper">Edit</button>
+          <Link to="/bits" className="text-sm text-dim hover:text-paper">All {bits.length}</Link>
+        </div>
       </SectionHead>
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {ordered.map((t) => <FolderCard key={t.id} topic={t} count={count(t.id)} subCount={count} />)}
       </ul>
+      <TopicManager open={managing} onClose={() => setManaging(false)} />
     </section>
   )
 }
