@@ -1,9 +1,10 @@
 /**
- * Menus on Radix primitives. DropdownMenu opens from a button; ContextMenu opens on right-click
- * on desktop and on long-press on touch screens, which replaces the old right-click-only menus.
+ * Menus on Radix primitives. Dropdown opens from a button; WithContextMenu opens on
+ * right-click on desktop and long-press on touch.
  */
 import * as ContextMenu from '@radix-ui/react-context-menu'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+import { Check } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 export interface MenuItem {
@@ -12,24 +13,38 @@ export interface MenuItem {
   onSelect: () => void
   danger?: boolean
   disabled?: boolean
+  checked?: boolean
 }
 
-const panel = 'z-50 min-w-44 rounded-2xl bg-raised p-1.5 shadow-pop ring-1 ring-line-strong'
-const item = (danger?: boolean) =>
-  `flex h-10 cursor-pointer select-none items-center gap-2.5 rounded-xl px-3 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-40 data-[highlighted]:bg-white/5 ${danger ? 'text-danger' : 'text-text'}`
+const panel = 'z-50 max-h-[70dvh] min-w-48 overflow-y-auto rounded-xl bg-ink-3 p-1.5 shadow-lift ring-1 ring-rule-strong'
+const row = (danger?: boolean) =>
+  `flex h-10 cursor-pointer select-none items-center gap-2.5 rounded-lg px-3 text-[15px] outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-40 data-[highlighted]:bg-ink-4 ${danger ? 'text-light' : 'text-paper'}`
 
-export function Dropdown({ trigger, items }: { trigger: ReactNode; items: MenuItem[] }) {
+function Items({ items, Item }: { items: (MenuItem | 'divider')[]; Item: typeof DropdownMenu.Item }) {
+  return (
+    <>
+      {items.map((i, n) =>
+        i === 'divider' ? (
+          <div key={`d${n}`} className="my-1 h-px bg-rule" />
+        ) : (
+          <Item key={i.label} className={row(i.danger)} disabled={i.disabled} onSelect={i.onSelect}>
+            {i.icon}
+            <span className="flex-1">{i.label}</span>
+            {i.checked && <Check size={16} className="text-tape" />}
+          </Item>
+        ),
+      )}
+    </>
+  )
+}
+
+export function Dropdown({ trigger, items, align = 'end' }: { trigger: ReactNode; items: (MenuItem | 'divider')[]; align?: 'start' | 'end' }) {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>{trigger}</DropdownMenu.Trigger>
       <DropdownMenu.Portal>
-        <DropdownMenu.Content align="end" sideOffset={6} className={panel} onClick={(e) => e.stopPropagation()}>
-          {items.map((i) => (
-            <DropdownMenu.Item key={i.label} className={item(i.danger)} disabled={i.disabled} onSelect={i.onSelect}>
-              {i.icon}
-              {i.label}
-            </DropdownMenu.Item>
-          ))}
+        <DropdownMenu.Content align={align} sideOffset={6} className={panel}>
+          <Items items={items} Item={DropdownMenu.Item} />
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>
@@ -43,12 +58,7 @@ export function WithContextMenu({ children, items }: { children: ReactNode; item
       <ContextMenu.Trigger asChild>{children}</ContextMenu.Trigger>
       <ContextMenu.Portal>
         <ContextMenu.Content className={panel}>
-          {items.map((i) => (
-            <ContextMenu.Item key={i.label} className={item(i.danger)} disabled={i.disabled} onSelect={i.onSelect}>
-              {i.icon}
-              {i.label}
-            </ContextMenu.Item>
-          ))}
+          <Items items={items} Item={ContextMenu.Item as typeof DropdownMenu.Item} />
         </ContextMenu.Content>
       </ContextMenu.Portal>
     </ContextMenu.Root>

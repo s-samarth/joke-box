@@ -3,14 +3,17 @@
 A private vault for a comedian's bits, setlists and open mics. Works as a website and as an
 installable app on your phone, including offline capture.
 
-- **Library:** bits (setup, punchline, tag lines, types, topic/subtopic, status, strength,
-  duration, hashtags, clean rating, language, comments) in a folder tree, with search, type
-  filters and CSV export.
-- **Creative Studio:** timed brainstorms per bit; every save keeps a version.
-- **Setlist Builder:** drag bits into a timed set (works on touch), opener/closer, a stage view
-  with a running timer, and a print view.
-- **Performance:** log each mic (venue, IST time, duration, audience, stars, topics), filter,
-  sort, stats and CSV export.
+- **Today:** type a premise and press Enter to save it; see your next set, the bits that need
+  work and your last show.
+- **Bits:** a searchable list with topic, type, status and sort filters. Each bit has its own page
+  where you edit everything in place (setup, punchline, tag lines, strength, type, topic, status,
+  runtime, clean rating, language, hashtags, notes), start a timed **Rewrite** that keeps
+  versions, and add it to a set.
+- **Sets:** bits as masking-tape strips you drag into order (works on touch), timed against the
+  slot with an open-mic "light" at one minute left; a full-screen rehearse/stage mode and a print
+  view.
+- **Shows:** log each show in under a minute (pick the set you did to fill in time and topics),
+  then filter, sort and export.
 
 Stack: FastAPI + SQLAlchemy + Alembic (Python 3.12, `app/`), React + TypeScript + Tailwind +
 TanStack Query (`web/`). SQLite locally, Postgres (Neon) on Vercel. Sign-in is Google, limited to

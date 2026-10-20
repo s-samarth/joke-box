@@ -18,10 +18,10 @@ export function UpdatePrompt() {
   })
   if (!needRefresh) return null
   return (
-    <div className="fixed inset-x-3 bottom-24 z-[55] mx-auto flex max-w-md items-center gap-3 rounded-2xl bg-raised p-3 pl-4 shadow-pop ring-1 ring-line-strong lg:bottom-6">
+    <div className="fixed inset-x-3 bottom-24 z-[55] mx-auto flex max-w-md items-center gap-3 rounded-2xl bg-ink-3 p-3 pl-4 shadow-lift ring-1 ring-rule-strong lg:bottom-8">
       <p className="flex-1 text-sm">A new version of JokeBox is ready.</p>
-      <Button size="sm" variant="ghost" onClick={() => setNeedRefresh(false)}>Later</Button>
-      <Button size="sm" variant="primary" onClick={() => void updateServiceWorker(true)}>Refresh</Button>
+      <Button small variant="quiet" onClick={() => setNeedRefresh(false)}>Later</Button>
+      <Button small variant="tape" onClick={() => void updateServiceWorker(true)}>Update now</Button>
     </div>
   )
 }

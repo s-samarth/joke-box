@@ -12,15 +12,15 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   if (isPending) {
     return (
       <div className="flex min-h-dvh items-center justify-center">
-        <Spinner label="Loading Vault…" />
+        <Spinner label="Opening JokeBox…" />
       </div>
     )
   }
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-3 px-6 text-center">
-      <p className="font-display text-xl">Can’t reach the vault</p>
-      <p className="text-sm text-muted">Check your connection and try again.</p>
-      <button type="button" className="text-accent" onClick={() => location.reload()}>Retry</button>
+      <p className="headline text-3xl">Can’t reach JokeBox</p>
+      <p className="text-dim">Check your connection, then try again.</p>
+      <button type="button" className="text-tape" onClick={() => location.reload()}>Retry</button>
     </div>
   )
 }

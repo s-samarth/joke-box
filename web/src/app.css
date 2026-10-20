@@ -1,30 +1,32 @@
 @import "tailwindcss";
-@import "@fontsource-variable/inter";
-@import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource-variable/archivo/wdth.css";
+@import "@fontsource/permanent-marker/latin.css";
 
-/* Design tokens: "refined dark stage". Every colour in the UI comes from here. */
+/*
+ * "Taped setlist": a comic's notebook after midnight. Ink-navy night, paper-coloured text,
+ * masking tape as the only accent, and the open-mic "light" used purely for timing.
+ */
 @theme {
-  --color-ink: #0a0a0a;
-  --color-panel: #121212;
-  --color-raised: #1a1a1a;
-  --color-hover: #222222;
-  --color-line: rgb(255 255 255 / 0.08);
-  --color-line-strong: rgb(255 255 255 / 0.14);
-  --color-text: #f5f5f4;
-  --color-muted: #a3a3a3;
-  --color-faint: #737373;
-  --color-accent: #ee7c2b;
-  --color-accent-hover: #f39350;
-  --color-accent-press: #d6691c;
-  --color-accent-soft: rgb(238 124 43 / 0.12);
-  --color-ok: #34d399;
-  --color-warn: #fbbf24;
-  --color-danger: #f87171;
+  --color-ink: #151923;
+  --color-ink-2: #1b2030;
+  --color-ink-3: #242a3b;
+  --color-ink-4: #2e3549;
+  --color-rule: rgb(236 230 218 / 0.09);
+  --color-rule-strong: rgb(236 230 218 / 0.16);
+  --color-paper: #ece6da;
+  --color-dim: #a3a7b3;
+  --color-faint: #6f7689;
+  --color-tape: #f0cf5a;
+  --color-tape-deep: #d8b744;
+  --color-tape-ink: #2b2512;
+  --color-amber: #ffb547;
+  --color-light: #ff5a47;
+  --color-ok: #74d3a8;
 
-  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Bricolage Grotesque Variable", "Inter Variable", ui-sans-serif, sans-serif;
+  --font-sans: "Archivo Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-marker: "Permanent Marker", "Archivo Variable", cursive;
 
-  --shadow-pop: 0 12px 40px -12px rgb(0 0 0 / 0.7);
+  --shadow-lift: 0 18px 50px -20px rgb(0 0 0 / 0.65);
 }
 
 html {
@@ -37,18 +39,47 @@ body {
   margin: 0;
   min-height: 100dvh;
   background: var(--color-ink);
-  color: var(--color-text);
+  color: var(--color-paper);
   font-family: var(--font-sans);
+  font-stretch: 100%;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior-y: none;
 }
 
-/* Timers and durations line up when digits change. */
+/* Gig-poster headings: Archivo squeezed to 75% width, tight and tall. */
+.headline {
+  font-stretch: 75%;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  line-height: 0.95;
+}
+
 .tabular {
   font-variant-numeric: tabular-nums;
 }
 
-/* Safe areas for the installed app on notched phones. */
+/*
+ * A strip of masking tape: torn ends (zig-zag clip), a faint fibre texture, marker writing.
+ * --tilt gives each strip its own slight angle, like tape slapped down by hand.
+ */
+.tape {
+  --tilt: 0deg;
+  position: relative;
+  background:
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.05) 0 2px, transparent 2px 7px),
+    linear-gradient(180deg, #f4d769, var(--color-tape) 60%, var(--color-tape-deep));
+  color: var(--color-tape-ink);
+  font-family: var(--font-marker);
+  transform: rotate(var(--tilt));
+  clip-path: polygon(
+    0% 8%, 1.2% 0%, 98.6% 4%, 100% 0%, 99% 30%, 100% 55%, 98.8% 78%, 100% 100%,
+    1.5% 96%, 0% 100%, 1% 70%, 0% 45%, 1.4% 22%
+  );
+}
+.tape-dim {
+  filter: saturate(0.35) brightness(0.62);
+}
+
 .pt-safe {
   padding-top: env(safe-area-inset-top);
 }
@@ -57,12 +88,12 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-tape);
   outline-offset: 2px;
 }
 
 ::selection {
-  background: rgb(238 124 43 / 0.3);
+  background: rgb(240 207 90 / 0.35);
 }
 
 ::-webkit-scrollbar {
@@ -70,8 +101,22 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a2a2a;
+  background: var(--color-ink-4);
   border-radius: 8px;
+}
+
+@keyframes light-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+.light-pulse {
+  animation: light-pulse 1s steps(2) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .light-pulse {
+    animation: none;
+  }
 }
 
 @media print {
