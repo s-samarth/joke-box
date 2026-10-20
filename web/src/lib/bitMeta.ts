@@ -1,4 +1,4 @@
-/** Display rules for bits: type colours, strength words, the Inbox, and editor suggestions. */
+/** Display rules for bits: type colours, strength words, Thoughts, and editor suggestions. */
 import type { CleanRating, Topic } from '../api/types'
 
 export const UNDEFINED_TYPE = 'Undefined'
@@ -30,7 +30,8 @@ export const LANGUAGE_SUGGESTIONS = ['English', 'Hinglish', 'Hindi']
 /** Statuses that mean "still being written". */
 export const UNFINISHED = new Set(['incomplete', 'work in progress', 'draft', 'status unknown'])
 
-/** The protected default topic is stored as "Random"; the app calls it the Inbox. */
-export const topicName = (topic?: Topic): string => (!topic ? '' : topic.is_system ? 'Inbox' : topic.name)
+/** The protected default topic is stored as "Random"; the app calls it Thoughts. */
+export const THOUGHTS = 'Thoughts'
+export const topicName = (topic?: Topic): string => (!topic ? '' : topic.is_system ? THOUGHTS : topic.name)
 
 export const displayTypes = (types: string[]): string[] => (types.length ? types : [UNDEFINED_TYPE])

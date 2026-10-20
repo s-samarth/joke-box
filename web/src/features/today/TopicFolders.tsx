@@ -53,7 +53,7 @@ export function TopicFolders() {
     if (b.subtopic_id) counts.set(b.subtopic_id, (counts.get(b.subtopic_id) ?? 0) + 1)
   }
   const count = (id: string) => counts.get(id) ?? 0
-  // Inbox first (it's where new jokes land), then your topics in their saved order.
+  // Thoughts first (it's where new jokes land), then your topics in their saved order.
   const ordered = [...topics.filter((t) => t.is_system), ...topics.filter((t) => !t.is_system)]
   if (!ordered.length) return null
 

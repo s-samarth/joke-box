@@ -1,16 +1,17 @@
-/** Today: capture first, then your topic folders, what's coming up, what needs work, and how the last show went. */
+/** Today: capture first, then observations, your topic folders, what's coming up, what needs work, and how the last show went. */
 import { Play } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { useBits, useTopics } from '../../api/library'
 import { useLogs, useSetlists } from '../../api/shows'
 import { SectionHead, Stars, StrengthTicks, Tape } from '../../components/ui/bits'
-import { UNFINISHED } from '../../lib/bitMeta'
+import { THOUGHTS, UNFINISHED } from '../../lib/bitMeta'
 import { clock } from '../../lib/duration'
 import { formatDate, todayIst } from '../../lib/time'
 import { LightBar } from '../sets/LightBar'
 import { totalSeconds } from '../sets/setlistMath'
 import { QuickCapture } from './QuickCapture'
+import { TodayObservations } from './TodayObservations'
 import { TopicFolders } from './TopicFolders'
 
 const longDate = new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'long', day: 'numeric', month: 'long' })
@@ -21,8 +22,8 @@ export function TodayPage() {
   const { data: topics = [] } = useTopics()
   const { data: sets = [] } = useSetlists()
   const { data: logs = [] } = useLogs()
-  const inbox = topics.find((t) => t.is_system)
-  const inboxCount = bits.filter((b) => b.topic_id === inbox?.id).length
+  const thoughts = topics.find((t) => t.is_system)
+  const thoughtsCount = bits.filter((b) => b.topic_id === thoughts?.id).length
   const today = todayIst()
   const upcoming = sets.filter((s) => s.show_date && s.show_date >= today).sort((a, b) => a.show_date!.localeCompare(b.show_date!))
   const nextSet = upcoming[0] ?? sets[0]
@@ -39,6 +40,7 @@ export function TodayPage() {
         <h1 className="headline mt-1 text-[44px] sm:text-[56px]">Got something?</h1>
       </div>
       <QuickCapture />
+      <TodayObservations />
       <TopicFolders />
 
       <section className="mt-12">
@@ -77,7 +79,7 @@ export function TodayPage() {
 
       <section className="mt-12">
         <SectionHead title="Needs work">
-          {inboxCount > 0 && <Link to={`/bits?topic=${inbox?.id}`} className="text-sm text-dim hover:text-paper">{inboxCount} in Inbox</Link>}
+          {thoughtsCount > 0 && <Link to={`/bits?topic=${thoughts?.id}`} className="text-sm text-dim hover:text-paper">{thoughtsCount} in {THOUGHTS}</Link>}
         </SectionHead>
         {needsWork.length === 0 ? (
           <p className="text-dim">Nothing flagged. Every joke is marked done or strong.</p>

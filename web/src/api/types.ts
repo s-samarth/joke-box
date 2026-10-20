@@ -97,3 +97,15 @@ export interface PerformanceLog {
   notes: string
   created_at: string
 }
+
+export interface ObservationInput {
+  text: string
+  topic_id: string | null
+}
+
+/** Something you noticed: not a joke yet. Its topics are separate from joke topics. */
+export interface Observation extends ObservationInput {
+  id: string
+  created_at: string
+  updated_at: string
+}

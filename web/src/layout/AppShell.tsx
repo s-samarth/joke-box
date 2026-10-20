@@ -1,8 +1,9 @@
 /**
  * The frame around every signed-in screen. Desktop: a slim left rail. Phone: a bottom bar with
- * Today, Jokes, a big + for capture, Sets and Shows.
+ * Today, Jokes, a big + for capture, Sets and Shows. On a phone, Observations open from Today,
+ * which keeps the + in the middle of the bar.
  */
-import { Home, ListOrdered, Mic, Plus, StickyNote } from 'lucide-react'
+import { Eye, Home, ListOrdered, Mic, Plus, StickyNote } from 'lucide-react'
 import { Suspense } from 'react'
 import { NavLink, Outlet } from 'react-router'
 import { Spinner } from '../components/ui/bits'
@@ -15,9 +16,11 @@ import { UpdatePrompt } from './UpdatePrompt'
 const NAV = [
   { to: '/', label: 'Today', icon: Home, end: true },
   { to: '/bits', label: 'Jokes', icon: StickyNote, end: false },
+  { to: '/observations', label: 'Observations', icon: Eye, end: false, desktopOnly: true },
   { to: '/sets', label: 'Sets', icon: ListOrdered, end: false },
   { to: '/shows', label: 'Shows', icon: Mic, end: false },
 ]
+const PHONE_NAV = NAV.filter((n) => !n.desktopOnly)
 
 function Rail() {
   const { openCapture } = useCapture()
@@ -45,7 +48,7 @@ function Rail() {
 function BottomBar() {
   const { openCapture } = useCapture()
   const item = 'flex h-full flex-1 flex-col items-center justify-center gap-1 text-[11px]'
-  const [left, right] = [NAV.slice(0, 2), NAV.slice(2)]
+  const [left, right] = [PHONE_NAV.slice(0, 2), PHONE_NAV.slice(2)]
   const link = ({ to, label, icon: Icon, end }: (typeof NAV)[number]) => (
     <NavLink key={to} to={to} end={end} className={({ isActive }) => `${item} ${isActive ? 'text-paper' : 'text-faint'}`}>
       <Icon size={22} /> {label}

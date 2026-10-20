@@ -9,7 +9,7 @@ import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persi
 import { QueryClient } from '@tanstack/react-query'
 import { del, get, set } from 'idb-keyval'
 import { ApiError, api } from './client'
-import type { Bit, BitInput } from './types'
+import type { Bit, BitInput, Observation, ObservationInput } from './types'
 
 const WEEK = 1000 * 60 * 60 * 24 * 7
 
@@ -23,6 +23,8 @@ export const keys = {
   setlists: ['setlists'],
   venues: ['venues'],
   logs: ['logs'],
+  observations: ['observations'],
+  observationTopics: ['observation-topics'],
 } as const
 
 export const queryClient = new QueryClient({
@@ -81,4 +83,33 @@ queryClient.setMutationDefaults(deleteBitKey, {
       void queryClient.invalidateQueries({ queryKey: key })
     }
   },
+})
+
+/* Observations get the same offline treatment: jot one down on the bus, it syncs later. */
+export type SaveObservationVars = { id: string; input: ObservationInput }
+
+export const saveObservationKey = ['observation', 'save']
+export const deleteObservationKey = ['observation', 'delete']
+
+queryClient.setMutationDefaults(saveObservationKey, {
+  mutationFn: ({ id, input }: SaveObservationVars) => api<Observation>(`/api/observations/${id}`, 'PUT', input),
+  onMutate: async ({ id, input }: SaveObservationVars) => {
+    await queryClient.cancelQueries({ queryKey: keys.observations })
+    const now = new Date().toISOString()
+    queryClient.setQueryData<Observation[]>(keys.observations, (old = []) => {
+      const existing = old.find((o) => o.id === id)
+      const next: Observation = { ...input, id, created_at: existing?.created_at ?? now, updated_at: now }
+      return existing ? old.map((o) => (o.id === id ? next : o)) : [next, ...old]
+    })
+  },
+  onSettled: () => queryClient.invalidateQueries({ queryKey: keys.observations }),
+})
+
+queryClient.setMutationDefaults(deleteObservationKey, {
+  mutationFn: (id: string) => api<void>(`/api/observations/${id}`, 'DELETE'),
+  onMutate: async (id: string) => {
+    await queryClient.cancelQueries({ queryKey: keys.observations })
+    queryClient.setQueryData<Observation[]>(keys.observations, (old = []) => old.filter((o) => o.id !== id))
+  },
+  onSettled: () => queryClient.invalidateQueries({ queryKey: keys.observations }),
 })

@@ -16,12 +16,24 @@ interface ModalProps {
   wide?: boolean
 }
 
+/**
+ * Radix focuses the first tabbable element on open, which is the close button. A sheet with a
+ * text field should open ready to type, so focus the first field instead when there is one.
+ */
+function focusFirstField(e: Event) {
+  const field = (e.currentTarget as HTMLElement).querySelector<HTMLElement>('input:not([type=hidden]), textarea, select')
+  if (!field) return
+  e.preventDefault()
+  field.focus()
+}
+
 export function Modal({ open, onOpenChange, title, description, children, footer, wide }: ModalProps) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-[#0b0d13]/75" />
         <Dialog.Content
+          onOpenAutoFocus={focusFirstField}
           className={`fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] flex-col rounded-t-2xl bg-ink-2 shadow-lift ring-1 ring-rule-strong outline-none sm:inset-auto sm:top-1/2 sm:left-1/2 sm:max-h-[86dvh] sm:w-full sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl ${wide ? 'sm:max-w-2xl' : 'sm:max-w-md'}`}
         >
           <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-ink-4 sm:hidden" aria-hidden />

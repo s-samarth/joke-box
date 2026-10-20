@@ -21,7 +21,7 @@ def commit_or_conflict(db: Session, message: str) -> None:
 def delete_topic(db: Session, user: User, topic: Topic) -> None:
     """Move the topic's bits (and log links) to Random, clear their subtopic, then delete it."""
     if topic.is_system:
-        raise HTTPException(400, "The Random topic can't be deleted")
+        raise HTTPException(400, "Thoughts can't be deleted")
     random_topic = random_topic_for(db, user)
     db.execute(
         update(Bit)
