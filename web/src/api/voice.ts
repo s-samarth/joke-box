@@ -26,10 +26,12 @@ export function useSaveVoiceDetails() {
   })
 }
 
+export const deleteVoiceNote = (id: string) => api<void>(`/api/voice-notes/${id}`, 'DELETE')
+
 export function useDeleteVoiceNote() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) => api<void>(`/api/voice-notes/${id}`, 'DELETE'),
+    mutationFn: deleteVoiceNote,
     onMutate: (id) => qc.setQueryData<VoiceNote[]>(keys.voiceNotes, (old = []) => old.filter((n) => n.id !== id)),
     onSettled: () => qc.invalidateQueries({ queryKey: keys.voiceNotes }),
   })

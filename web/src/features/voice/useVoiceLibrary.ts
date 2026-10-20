@@ -35,14 +35,14 @@ export function useVoiceLibrary() {
     })),
   ]
 
-  const edit = (id: string, input: VoiceNoteInput) => {
-    if (pending.has(id)) void editPending(id, input)
-    else saveDetails.mutate({ id, input })
+  // Both check the outbox's live state, not this render's copy: a note may finish uploading
+  // between the render and the tap.
+  const edit = async (id: string, input: VoiceNoteInput) => {
+    if (!(await editPending(id, input))) saveDetails.mutate({ id, input })
   }
 
   const remove = async (id: string) => {
-    const waiting = pending.get(id)
-    if (waiting) await discardPending(id)
+    const waiting = await discardPending(id)
     // A note whose details already reached the server has a row there to delete too.
     if (!waiting || waiting.detailsSaved) removeOnServer.mutate(id)
     await forgetAudio(id)
