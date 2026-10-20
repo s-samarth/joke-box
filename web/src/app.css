@@ -87,9 +87,21 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-:focus-visible {
-  outline: 2px solid var(--color-tape);
-  outline-offset: 2px;
+/* In the base layer so a component can swap it for its own focus style (outline-none + a ring);
+   unlayered CSS would beat every Tailwind utility. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-tape);
+    outline-offset: 2px;
+  }
+}
+
+/* Sideways-scrolling chip rows: still scrollable by touch or trackpad, no bar under them. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 ::selection {
