@@ -9,7 +9,7 @@ import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persi
 import { QueryClient } from '@tanstack/react-query'
 import { del, get, set } from 'idb-keyval'
 import { ApiError, api } from './client'
-import type { Bit, BitInput, Observation, ObservationInput } from './types'
+import type { Bit, BitInput, Observation, ObservationInput, WritingSession, WritingSessionInput } from './types'
 
 const WEEK = 1000 * 60 * 60 * 24 * 7
 
@@ -25,6 +25,7 @@ export const keys = {
   logs: ['logs'],
   observations: ['observations'],
   observationTopics: ['observation-topics'],
+  sessions: ['sessions'],
 } as const
 
 export const queryClient = new QueryClient({
@@ -112,4 +113,33 @@ queryClient.setMutationDefaults(deleteObservationKey, {
     queryClient.setQueryData<Observation[]>(keys.observations, (old = []) => old.filter((o) => o.id !== id))
   },
   onSettled: () => queryClient.invalidateQueries({ queryKey: keys.observations }),
+})
+
+/* Brainstorm sessions autosave the same way, so a session written offline syncs later. */
+export type SaveSessionVars = { id: string; input: WritingSessionInput }
+
+export const saveSessionKey = ['session', 'save']
+export const deleteSessionKey = ['session', 'delete']
+
+queryClient.setMutationDefaults(saveSessionKey, {
+  mutationFn: ({ id, input }: SaveSessionVars) => api<WritingSession>(`/api/sessions/${id}`, 'PUT', input),
+  onMutate: async ({ id, input }: SaveSessionVars) => {
+    await queryClient.cancelQueries({ queryKey: keys.sessions })
+    const now = new Date().toISOString()
+    queryClient.setQueryData<WritingSession[]>(keys.sessions, (old = []) => {
+      const existing = old.find((s) => s.id === id)
+      const next: WritingSession = { ...input, id, created_at: existing?.created_at ?? now, updated_at: now }
+      return [next, ...old.filter((s) => s.id !== id)]
+    })
+  },
+  onSettled: () => queryClient.invalidateQueries({ queryKey: keys.sessions }),
+})
+
+queryClient.setMutationDefaults(deleteSessionKey, {
+  mutationFn: (id: string) => api<void>(`/api/sessions/${id}`, 'DELETE'),
+  onMutate: async (id: string) => {
+    await queryClient.cancelQueries({ queryKey: keys.sessions })
+    queryClient.setQueryData<WritingSession[]>(keys.sessions, (old = []) => old.filter((s) => s.id !== id))
+  },
+  onSettled: () => queryClient.invalidateQueries({ queryKey: keys.sessions }),
 })

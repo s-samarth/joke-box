@@ -138,3 +138,9 @@ body {
     color: black;
   }
 }
+
+/* The handwriting page: a dark sheet with faint ruled lines. InkCanvas sets the line spacing. */
+@utility ruled-page {
+  background-color: var(--color-ink-2);
+  background-image: linear-gradient(to bottom, transparent calc(100% - 1px), var(--color-rule) calc(100% - 1px));
+}
