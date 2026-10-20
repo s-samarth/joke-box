@@ -37,7 +37,7 @@ export function CaptureProvider({ children }: { children: ReactNode }) {
       <Modal
         open={draft !== null}
         onOpenChange={(o) => !o && setDraft(null)}
-        title="New bit"
+        title="New joke"
         footer={
           <>
             <Button variant="quiet" onClick={() => submit(true)} disabled={!draft?.setup.trim()}>Add details</Button>

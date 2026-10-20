@@ -61,7 +61,7 @@ export function TodayPage() {
             <div className="space-y-2">
               {nextSet.items.slice(0, 3).map((item, i) => (
                 <Tape key={item.bit_id} seed={i} className="px-4 py-2 text-lg leading-tight">
-                  <span className="line-clamp-1">{byId.get(item.bit_id)?.setup ?? 'Deleted bit'}</span>
+                  <span className="line-clamp-1">{byId.get(item.bit_id)?.setup ?? 'Deleted joke'}</span>
                 </Tape>
               ))}
               {nextSet.items.length > 3 && <p className="pt-1 text-sm text-faint">and {nextSet.items.length - 3} more</p>}
@@ -80,7 +80,7 @@ export function TodayPage() {
           {inboxCount > 0 && <Link to={`/bits?topic=${inbox?.id}`} className="text-sm text-dim hover:text-paper">{inboxCount} in Inbox</Link>}
         </SectionHead>
         {needsWork.length === 0 ? (
-          <p className="text-dim">Nothing flagged. Every bit is marked done or strong.</p>
+          <p className="text-dim">Nothing flagged. Every joke is marked done or strong.</p>
         ) : (
           <ul className="divide-y divide-rule border-y border-rule">
             {needsWork.slice(0, 5).map((b) => (

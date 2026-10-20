@@ -62,14 +62,14 @@ export function StageView() {
         </div>
       </header>
       <div className="relative min-h-0 flex-1">
-        <button type="button" aria-label="Previous bit" className="absolute inset-y-0 left-0 z-10 w-1/3" onClick={() => go(-1)} />
-        <button type="button" aria-label="Next bit" className="absolute inset-y-0 right-0 z-10 w-2/3" onClick={() => go(1)} />
+        <button type="button" aria-label="Previous joke" className="absolute inset-y-0 left-0 z-10 w-1/3" onClick={() => go(-1)} />
+        <button type="button" aria-label="Next joke" className="absolute inset-y-0 right-0 z-10 w-2/3" onClick={() => go(1)} />
         <ol className="h-full space-y-5 overflow-y-auto px-5 py-[30vh] sm:px-16">
           {items.length === 0 && <li className="text-xl text-dim">This set is empty.</li>}
           {items.map((it, i) => (
             <li key={it.bit_id} ref={i === index ? current : undefined} aria-current={i === index ? 'step' : undefined}>
               <Tape seed={i} dim={i !== index} className={`px-5 py-4 transition ${i === index ? 'text-3xl sm:text-5xl' : 'text-2xl sm:text-3xl'}`}>
-                {it.bit?.setup ?? 'Deleted bit'}
+                {it.bit?.setup ?? 'Deleted joke'}
               </Tape>
               {i === index && it.bit?.punchline && <p className="mt-3 px-2 text-xl leading-snug text-paper/85 sm:text-2xl">{it.bit.punchline}</p>}
               {i === index && it.bit?.tag_lines.map((t, n) => <p key={n} className="mt-1 px-2 text-lg text-dim">+ {t}</p>)}
@@ -77,7 +77,7 @@ export function StageView() {
           ))}
         </ol>
       </div>
-      <p className="px-5 py-2 text-center text-sm text-faint">Bit {items.length ? index + 1 : 0} of {items.length}. Tap right for next, left for back.</p>
+      <p className="px-5 py-2 text-center text-sm text-faint">Joke {items.length ? index + 1 : 0} of {items.length}. Tap right for next, left for back.</p>
     </div>
   )
 }

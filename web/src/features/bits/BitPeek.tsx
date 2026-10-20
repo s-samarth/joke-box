@@ -1,6 +1,6 @@
 /**
- * A bit, read in full without leaving the page you're on (used while building a set).
- * Read-only on purpose: "Edit bit" goes to the bit's own page, where every change saves.
+ * A joke, read in full without leaving the page you're on (used while building a set).
+ * Read-only on purpose: "Edit joke" goes to the joke's own page, where every change saves.
  */
 import { Check, PenLine, Plus } from 'lucide-react'
 import type { ReactNode } from 'react'
@@ -39,7 +39,7 @@ export function BitPeek({ bit, onClose, onAdd, inSet }: Props) {
   const footer = (
     <>
       <Link to={`/bits/${bit.id}`} className="mr-auto inline-flex h-10 items-center gap-2 rounded-lg px-3 text-[15px] text-dim hover:bg-ink-3 hover:text-paper">
-        <PenLine size={16} /> Edit bit
+        <PenLine size={16} /> Edit joke
       </Link>
       {onAdd && (inSet
         ? <span className="inline-flex h-10 items-center gap-2 px-3 text-[15px] text-faint"><Check size={16} /> In the set</span>
@@ -48,7 +48,7 @@ export function BitPeek({ bit, onClose, onAdd, inSet }: Props) {
   )
 
   return (
-    <Modal open onOpenChange={(o) => !o && onClose()} title="The bit" description={topicName(topic)} footer={footer} wide>
+    <Modal open onOpenChange={(o) => !o && onClose()} title="The joke" description={topicName(topic)} footer={footer} wide>
       <p className="text-[22px] leading-snug font-medium whitespace-pre-wrap">{bit.setup}</p>
       {bit.punchline && <p className="mt-3 text-[22px] leading-snug whitespace-pre-wrap text-tape">{bit.punchline}</p>}
       {bit.tag_lines.filter((t) => t.trim()).map((t, i) => (

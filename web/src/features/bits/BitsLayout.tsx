@@ -24,7 +24,7 @@ function exportCsv(bits: Bit[], topics: Topic[]) {
     b.strength, b.status ?? '', long(b.duration_seconds), b.hashtags.join(' '), b.comments, b.created_at,
     b.tag_lines.join(' | '), b.clean_rating ? CLEAN_LABELS[b.clean_rating] : '', b.language ?? '',
   ])
-  downloadCsv(`jokebox-bits-${new Date().toISOString().slice(0, 10)}.csv`, headers, rows)
+  downloadCsv(`jokebox-jokes-${new Date().toISOString().slice(0, 10)}.csv`, headers, rows)
 }
 
 function BitRow({ bit, topic, active, query }: { bit: Bit; topic?: Topic; active: boolean; query: string }) {
@@ -54,18 +54,18 @@ export function BitsLayout() {
   return (
     <div className="lg:-mx-10 lg:flex lg:h-dvh">
       <section className={`lg:flex lg:w-[26rem] lg:shrink-0 lg:flex-col lg:border-r lg:border-rule lg:px-6 ${bitId ? 'hidden lg:flex' : ''}`}>
-        <PageHead title="Bits">
+        <PageHead title="Jokes">
           <Dropdown items={[{ label: 'Export as CSV', icon: <Download size={16} />, onSelect: () => exportCsv(f.visible, topics), disabled: !f.visible.length }]}
             trigger={<IconButton label="More"><MoreHorizontal size={20} /></IconButton>} />
         </PageHead>
         <BitFilters f={f} />
-        <p className="mt-4 mb-1 text-sm text-faint">{f.active ? `${f.visible.length} of ${f.total} bits` : `${f.total} bits`}</p>
+        <p className="mt-4 mb-1 text-sm text-faint">{f.active ? `${f.visible.length} of ${f.total} jokes` : `${f.total} jokes`}</p>
         <div className="lg:-mx-6 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:px-3">
           {f.isPending ? (
             <div className="py-10"><Spinner /></div>
           ) : f.visible.length === 0 ? (
-            <EmptyState title={f.active ? 'Nothing matches' : 'No bits yet'}
-              action={!f.active && <button type="button" onClick={() => openCapture({ topicId: f.topic ?? undefined, subtopicId: f.sub })} className="text-tape underline-offset-4 hover:underline">Capture your first bit</button>}>
+            <EmptyState title={f.active ? 'Nothing matches' : 'No jokes yet'}
+              action={!f.active && <button type="button" onClick={() => openCapture({ topicId: f.topic ?? undefined, subtopicId: f.sub })} className="text-tape underline-offset-4 hover:underline">Capture your first joke</button>}>
               {f.active ? 'Try another word or clear the filters.' : 'Tap + whenever a premise hits you.'}
             </EmptyState>
           ) : (
@@ -85,7 +85,7 @@ export function BitsLayout() {
 export function NoBitSelected() {
   return (
     <div className="flex h-full items-center">
-      <EmptyState title="Pick a bit">Choose one from the list to read it, rework it or start a rewrite.</EmptyState>
+      <EmptyState title="Pick a joke">Choose one from the list to read it, rework it or start a rewrite.</EmptyState>
     </div>
   )
 }

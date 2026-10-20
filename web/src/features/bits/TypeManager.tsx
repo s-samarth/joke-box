@@ -20,14 +20,14 @@ export function TypeManager({ open, onClose }: { open: boolean; onClose: () => v
     if (name && name !== t.name) a.rename.mutate({ id: t.id, name }, { onError: fail })
   }
   const remove = async (t: Named) => {
-    const ok = await confirm({ title: `Delete ${t.name}?`, message: 'Bits keep their other types. Bits left with none show as having no type.', confirmLabel: 'Delete type', danger: true })
+    const ok = await confirm({ title: `Delete ${t.name}?`, message: 'Jokes keep their other types. Jokes left with none show as having no type.', confirmLabel: 'Delete type', danger: true })
     if (ok) a.remove.mutate(t.id, { onError: fail })
   }
 
   return (
-    <Modal open={open} onOpenChange={(o) => !o && onClose()} title="Types" description="Types are created when you tag a bit, and disappear when no bit uses them.">
+    <Modal open={open} onOpenChange={(o) => !o && onClose()} title="Types" description="Types are created when you tag a joke, and disappear when no joke uses them.">
       {types.length === 0 ? (
-        <p className="text-dim">No types yet. Pick one on any bit's page.</p>
+        <p className="text-dim">No types yet. Pick one on any joke's page.</p>
       ) : (
         <ul className="divide-y divide-rule">
           {types.map((t) => (

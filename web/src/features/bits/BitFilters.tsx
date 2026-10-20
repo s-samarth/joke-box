@@ -54,7 +54,7 @@ export function BitFilters({ f }: { f: Filters }) {
     <div className="space-y-3">
       <div className="relative">
         <Search size={18} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-faint" />
-        <Input type="search" aria-label="Search bits" placeholder="Search words, tags, notes" className="pl-10" value={f.q} onChange={(e) => f.set({ q: e.target.value })} />
+        <Input type="search" aria-label="Search jokes" placeholder="Search words, tags, notes" className="pl-10" value={f.q} onChange={(e) => f.set({ q: e.target.value })} />
       </div>
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0">
         <Dropdown align="start" items={topicItems} trigger={<span><MenuButton label={sub ? sub.name : topic ? topicName(topic) : 'Topic'} on={Boolean(topic)} /></span>} />

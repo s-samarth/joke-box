@@ -17,7 +17,7 @@ function Candidate({ bit, used, onAdd, onOpen, draggable }: { bit: Bit; used: bo
   const { attributes, listeners, setNodeRef } = useDraggable({ id: `lib:${bit.id}`, disabled: used || !draggable })
   return (
     <li ref={setNodeRef} {...(draggable ? { ...listeners, ...attributes } : {})} className={`flex items-center gap-3 py-2.5 ${used ? 'opacity-40' : draggable ? 'cursor-grab' : ''}`}>
-      <button type="button" onClick={onOpen} {...own} aria-label={`Read the whole bit: ${bit.setup}`} className="min-w-0 flex-1 rounded-md text-left hover:text-tape">
+      <button type="button" onClick={onOpen} {...own} aria-label={`Read the whole joke: ${bit.setup}`} className="min-w-0 flex-1 rounded-md text-left hover:text-tape">
         <p className="line-clamp-2 leading-snug">{bit.setup}</p>
         <p className="mt-1 flex items-center gap-3 text-[13px] text-faint"><StrengthTicks strength={bit.strength} /><span className="tabular">{clock(bit.duration_seconds)}</span></p>
       </button>
@@ -51,7 +51,7 @@ export function AddBits({ used, onAdd, onOpen, draggable = false }: Props) {
     <div className="flex h-full min-h-0 flex-col gap-3">
       <div className="relative">
         <Search size={16} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-faint" />
-        <Input type="search" aria-label="Search bits" placeholder="Search bits" className="pl-9" value={q} onChange={(e) => setQ(e.target.value)} />
+        <Input type="search" aria-label="Search jokes" placeholder="Search jokes" className="pl-9" value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
       <div className="grid grid-cols-2 gap-2">
         <Select aria-label="Topic" value={topic} onChange={(e) => setTopic(e.target.value)}>
@@ -66,7 +66,7 @@ export function AddBits({ used, onAdd, onOpen, draggable = false }: Props) {
       </div>
       <p className="text-sm text-faint">Strongest first{draggable ? '. Drag onto the set or tap +.' : '.'}</p>
       <ul className="min-h-0 flex-1 divide-y divide-rule overflow-y-auto">
-        {shown.length === 0 && <li className="py-6 text-dim">No bits match.</li>}
+        {shown.length === 0 && <li className="py-6 text-dim">No jokes match.</li>}
         {shown.map((b) => <Candidate key={b.id} bit={b} used={used.has(b.id)} onAdd={() => onAdd(b)} onOpen={() => onOpen(b)} draggable={draggable} />)}
       </ul>
     </div>

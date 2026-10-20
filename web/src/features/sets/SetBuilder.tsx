@@ -26,7 +26,7 @@ function DropArea({ empty, children }: { empty: boolean; children: ReactNode }) 
   const { setNodeRef, isOver } = useDroppable({ id: 'set' })
   return (
     <div ref={setNodeRef} className={`rounded-xl transition ${isOver ? 'bg-tape/10 ring-2 ring-tape/50' : ''} ${empty ? 'border border-dashed border-rule-strong p-8 text-center text-dim' : ''}`}>
-      {empty ? 'Nothing taped down yet. Add bits to start the set.' : children}
+      {empty ? 'Nothing taped down yet. Add jokes to start the set.' : children}
     </div>
   )
 }
@@ -109,14 +109,14 @@ function Builder({ setlist }: { setlist: Setlist }) {
               </DropArea>
             </SortableContext>
           </div>
-          <div className="mt-5 lg:hidden"><Button className="w-full" icon={<Plus size={18} />} onClick={() => setPicking(true)}>Add bits</Button></div>
+          <div className="mt-5 lg:hidden"><Button className="w-full" icon={<Plus size={18} />} onClick={() => setPicking(true)}>Add jokes</Button></div>
         </div>
         <aside className="sticky top-0 hidden h-dvh w-80 shrink-0 flex-col py-10 lg:flex">
-          <h2 className="headline mb-3 text-2xl">Your bits</h2>
+          <h2 className="headline mb-3 text-2xl">Your jokes</h2>
           <AddBits used={used} onAdd={(b) => add(b)} onOpen={setReading} draggable />
         </aside>
       </div>
-      <Modal open={picking} onOpenChange={setPicking} title="Add bits" description={`${items.length} in the set, ${clock(total)} so far`}>
+      <Modal open={picking} onOpenChange={setPicking} title="Add jokes" description={`${items.length} in the set, ${clock(total)} so far`}>
         <div className="h-[62dvh]"><AddBits used={used} onAdd={(b) => add(b)} onOpen={setReading} /></div>
       </Modal>
       {reading && <BitPeek bit={reading} onClose={() => setReading(null)} onAdd={() => add(reading)} inSet={used.has(reading.id)} />}
