@@ -15,6 +15,7 @@ import { EmptyState, Spinner } from '../../components/ui/bits'
 import { Field, GrowingText, Input } from '../../components/ui/Field'
 import { Modal } from '../../components/ui/Modal'
 import { clock, parse } from '../../lib/duration'
+import { BitPeek } from '../bits/BitPeek'
 import { AddBits } from './AddBits'
 import { LightBar } from './LightBar'
 import { move, positionLabel } from './setlistMath'
@@ -35,6 +36,7 @@ function Builder({ setlist }: { setlist: Setlist }) {
   const { data: bits = [] } = useBits()
   const { data: venues = [] } = useVenues()
   const [picking, setPicking] = useState(false)
+  const [reading, setReading] = useState<Bit | null>(null)
   const [target, setTarget] = useState(clock(draft.target_seconds))
   const byId = new Map(bits.map((b) => [b.id, b]))
   const used = new Set(draft.items.map((i) => i.bit_id))
@@ -100,7 +102,8 @@ function Builder({ setlist }: { setlist: Setlist }) {
                     <TapeRow key={item.bitId} item={item} bit={byId.get(item.bitId)} index={i} count={items.length} note={items.length > 1 ? positionLabel(i, items.length) : null}
                       onDuration={(s) => update((d) => ({ ...d, items: d.items.map((x) => (x.bit_id === item.bitId ? { ...x, duration_seconds: s } : x)) }))}
                       onMove={(to) => update((d) => ({ ...d, items: move(d.items, i, to) }))}
-                      onRemove={() => update((d) => ({ ...d, items: d.items.filter((x) => x.bit_id !== item.bitId) }))} />
+                      onRemove={() => update((d) => ({ ...d, items: d.items.filter((x) => x.bit_id !== item.bitId) }))}
+                      onOpen={() => setReading(byId.get(item.bitId) ?? null)} />
                   ))}
                 </ol>
               </DropArea>
@@ -110,12 +113,13 @@ function Builder({ setlist }: { setlist: Setlist }) {
         </div>
         <aside className="sticky top-0 hidden h-dvh w-80 shrink-0 flex-col py-10 lg:flex">
           <h2 className="headline mb-3 text-2xl">Your bits</h2>
-          <AddBits used={used} onAdd={(b) => add(b)} draggable />
+          <AddBits used={used} onAdd={(b) => add(b)} onOpen={setReading} draggable />
         </aside>
       </div>
       <Modal open={picking} onOpenChange={setPicking} title="Add bits" description={`${items.length} in the set, ${clock(total)} so far`}>
-        <div className="h-[62dvh]"><AddBits used={used} onAdd={(b) => add(b)} /></div>
+        <div className="h-[62dvh]"><AddBits used={used} onAdd={(b) => add(b)} onOpen={setReading} /></div>
       </Modal>
+      {reading && <BitPeek bit={reading} onClose={() => setReading(null)} onAdd={() => add(reading)} inSet={used.has(reading.id)} />}
     </DndContext>
   )
 }
