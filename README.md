@@ -14,6 +14,9 @@ installable app on your phone, including offline capture.
   view.
 - **Shows:** log each show in under a minute (pick the set you did to fill in time and topics),
   then filter, sort and export.
+- **Voice notes:** tap record on Today or the Voice page; stopping saves. Label and hashtag notes
+  now or later, search them, play them back. Recordings made offline wait on the phone and upload
+  when you're back online. Audio lives in a private Vercel Blob store (a local folder in dev).
 
 Stack: FastAPI + SQLAlchemy + Alembic (Python 3.12, `app/`), React + TypeScript + Tailwind +
 TanStack Query (`web/`). SQLite locally, Postgres (Neon) on Vercel. Sign-in is Google, limited to
@@ -60,10 +63,14 @@ Checks: `uv run ruff check . && uv run mypy app && uv run pytest` and
    | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | from step 2 |
    | `PUBLIC_URL` | `https://jokebox.samarthsaraswat.com` |
 
-4. **Import the repo** in Vercel with the root directory as is; it detects FastAPI from
+4. **Voice notes storage:** Storage → Create → **Blob**, set access to **Private**, and connect it
+   to the project. That adds `BLOB_STORE_ID`; the app signs in to the store with Vercel's OIDC
+   token, so there's no key to copy. Without it, voice notes answer 503 on Vercel. The free plan
+   holds 1 GB; the Voice page shows how much is used.
+5. **Import the repo** in Vercel with the root directory as is; it detects FastAPI from
    `app/main.py`. The build step (`scripts/vercel_build.py`) builds the React app and runs
    `alembic upgrade head`.
-5. **Domain:** Project → Domains → add `jokebox.samarthsaraswat.com`, then add the CNAME record
+6. **Domain:** Project → Domains → add `jokebox.samarthsaraswat.com`, then add the CNAME record
    Vercel shows at your DNS provider.
 
 Preview deployments work, but Google sign-in only accepts the redirect URIs you registered, so

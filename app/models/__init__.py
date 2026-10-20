@@ -20,6 +20,7 @@ from app.models.shows import (
 )
 from app.models.studio import Brainstorm, BrainstormVersion
 from app.models.user import User
+from app.models.voice import VoiceNote
 
 __all__ = [
     "RANDOM_TOPIC",
@@ -38,6 +39,7 @@ __all__ = [
     "Topic",
     "User",
     "Venue",
+    "VoiceNote",
     "WritingSession",
     "bit_type_links",
     "performance_log_topics",
