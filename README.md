@@ -45,7 +45,9 @@ Checks: `uv run ruff check . && uv run mypy app && uv run pytest` and
    (Web application). Authorised redirect URI:
    `https://jokebox.samarthsaraswat.com/auth/google/callback`
    (add `http://localhost:5173/auth/google/callback` for local testing).
-3. **Environment variables** (Project → Settings → Environment Variables, Production):
+3. **Environment variables** (Project → Settings → Environment Variables). Set these for
+   Production; for previews, set the same with `APP_ENV=preview`. The app refuses to start on
+   Vercel without them:
 
    | Name | Value |
    |---|---|

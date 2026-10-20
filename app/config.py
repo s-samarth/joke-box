@@ -1,5 +1,6 @@
 """Settings read from environment variables (and a local .env file)."""
 
+import os
 from functools import lru_cache
 from typing import Literal
 
@@ -43,6 +44,9 @@ class Settings(BaseSettings):
     def check_production_safety(self) -> None:
         """Refuse to start a deployed app with the default secret or the local SQLite file."""
         if self.is_local:
+            # Vercel sets VERCEL=1. Local mode there would expose the dev sign-in to the internet.
+            if os.environ.get("VERCEL"):
+                raise RuntimeError("Set APP_ENV to 'production' or 'preview' on Vercel.")
             return
         if self.session_secret == "local-dev-secret-change-me" or len(self.session_secret) < 32:
             raise RuntimeError("SESSION_SECRET must be set to a random value of 32+ characters.")

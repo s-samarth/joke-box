@@ -2,8 +2,10 @@
 
 import uuid
 
+import pytest
 from fastapi.testclient import TestClient
 
+from app.config import Settings
 from app.main import app
 from tests.conftest import random_topic_id
 
@@ -50,3 +52,11 @@ def test_logout_clears_session(alice: TestClient) -> None:
 def test_google_login_unconfigured_is_clear() -> None:
     response = TestClient(app).get("/auth/google/login", follow_redirects=False)
     assert response.status_code == 503
+
+
+def test_local_mode_refuses_to_run_on_vercel(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("VERCEL", "1")
+    with pytest.raises(RuntimeError, match="APP_ENV"):
+        Settings(app_env="local").check_production_safety()
+    with pytest.raises(RuntimeError, match="SESSION_SECRET"):
+        Settings(app_env="production", database_url="postgresql://x/y").check_production_safety()
