@@ -8,11 +8,14 @@ const notes = [
 ]
 
 describe('pickMimeType', () => {
-  it('prefers MP4 so recordings play on iPhone', () => {
-    expect(pickMimeType(() => true)).toBe('audio/mp4;codecs=mp4a.40.2')
+  it('prefers WebM/Opus where the browser records it', () => {
+    expect(pickMimeType(() => true)).toBe('audio/webm;codecs=opus')
   })
-  it('falls back to WebM where MP4 recording is missing', () => {
-    expect(pickMimeType((t) => t.startsWith('audio/webm'))).toBe('audio/webm;codecs=opus')
+  it('uses MP4 where WebM recording is missing (Safari)', () => {
+    expect(pickMimeType((t) => t.startsWith('audio/mp4'))).toBe('audio/mp4;codecs=mp4a.40.2')
+  })
+  it('skips a format that recorded nothing before', () => {
+    expect(pickMimeType(() => true, ['audio/webm'])).toBe('audio/mp4;codecs=mp4a.40.2')
   })
   it('returns undefined when nothing is supported', () => {
     expect(pickMimeType(() => false)).toBeUndefined()
