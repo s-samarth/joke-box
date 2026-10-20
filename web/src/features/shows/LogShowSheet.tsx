@@ -95,7 +95,7 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
             })}
           </div>
         </div>
-        <Field label="Notes"><Textarea placeholder="What landed, what died, what the crowd was like" value={notes} onChange={(e) => setNotes(e.target.value)} /></Field>
+        <Field label="Remarks"><Textarea placeholder="What went right, what went wrong, what the crowd was like" value={notes} onChange={(e) => setNotes(e.target.value)} /></Field>
         {error && <p className="text-sm text-light" role="alert">{error}</p>}
         <button type="submit" hidden />
       </form>

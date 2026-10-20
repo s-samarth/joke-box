@@ -1,5 +1,8 @@
-/** Shows: a few honest numbers, then every show as a timeline grouped by month. */
-import { Download, MoreHorizontal, Plus, SlidersHorizontal } from 'lucide-react'
+/**
+ * Shows: pick a period and venue, read the totals, then every show in a sortable table.
+ * One set of filters drives both, so the numbers always match the rows.
+ */
+import { Download, MoreHorizontal, Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { useTopics } from '../../api/library'
@@ -11,78 +14,72 @@ import { Dropdown } from '../../components/ui/Menu'
 import { topicName } from '../../lib/bitMeta'
 import { downloadCsv } from '../../lib/csv'
 import { long } from '../../lib/duration'
-import { formatDateTime } from '../../lib/time'
+import { formatDateTime, todayIst } from '../../lib/time'
 import { LogShowSheet } from './LogShowSheet'
-import { NO_FILTERS, PAGE_SIZE, applyFilters, sortLogs, stats, type SortKey } from './logMath'
+import { NO_FILTERS, PAGE_SIZE, applyFilters, sortLogs, type Sort, type SortKey } from './logMath'
 import { ShowDetail } from './ShowDetail'
 import { ShowFilters } from './ShowFilters'
-import { ShowTimeline } from './ShowTimeline'
-
-const SORT_LABELS: Record<SortKey, string> = { date: 'Newest', rating: 'Best rated', duration: 'Longest', audience: 'Biggest crowd' }
+import { ShowStats } from './ShowStats'
+import { ShowsTable } from './ShowsTable'
+import { ShowsToolbar } from './ShowsToolbar'
 
 export function ShowsPage() {
   const { data: logs = [] } = useLogs()
   const { data: topics = [] } = useTopics()
   const [params, setParams] = useSearchParams()
+  const [today] = useState(todayIst)
   const [filters, setFilters] = useState(NO_FILTERS)
-  const [filtering, setFiltering] = useState(false)
-  const [sort, setSort] = useState<SortKey>('date')
+  const [moreOpen, setMoreOpen] = useState(false)
+  const [sort, setSort] = useState<Sort>({ key: 'date', desc: true })
   const [limit, setLimit] = useState(PAGE_SIZE)
   const [editing, setEditing] = useState<PerformanceLog | 'new' | null>(params.get('log') ? 'new' : null)
   const [viewing, setViewing] = useState<PerformanceLog | null>(null)
 
-  const filtered = useMemo(() => sortLogs(applyFilters(logs, filters), sort, true), [logs, filters, sort])
-  const s = stats(filtered)
-  const venues = [...new Set(logs.map((l) => l.venue_name))].sort()
-  const filterCount = filters.venues.length + [filters.from, filters.to, filters.rating, filters.duration, filters.audience].filter((v) => v !== '' && v !== null).length
+  const filtered = useMemo(() => applyFilters(logs, filters, today), [logs, filters, today])
+  const rows = useMemo(() => sortLogs(filtered, sort), [filtered, sort])
+  const venues = useMemo(() => [...new Set(logs.map((l) => l.venue_name))].sort(), [logs])
   const topicNames = (ids: string[]) => ids.map((id) => topicName(topics.find((t) => t.id === id))).filter(Boolean).join(', ')
+
+  const changeFilters = (f: typeof filters) => {
+    setFilters(f)
+    setLimit(PAGE_SIZE)
+  }
+  // A new column sorts high-to-low first (newest, longest, best), except venue, which goes A to Z.
+  const sortBy = (key: SortKey) => setSort((s) => (s.key === key ? { key, desc: !s.desc } : { key, desc: key !== 'venue' }))
   const closeEditor = () => {
     setEditing(null)
     if (params.get('log')) setParams({}, { replace: true })
   }
   const exportCsv = () =>
     downloadCsv('jokebox-shows.csv', ['Date', 'Venue', 'Duration', 'Audience', 'Rating', 'Set Topics', 'Comments'],
-      filtered.map((l) => [formatDateTime(l.performed_at), l.venue_name, long(l.duration_seconds), l.audience_size, l.rating, topicNames(l.topic_ids), l.notes]))
+      rows.map((l) => [formatDateTime(l.performed_at), l.venue_name, long(l.duration_seconds), l.audience_size, l.rating, topicNames(l.topic_ids), l.notes]))
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto max-w-5xl">
       <PageHead title="Shows">
-        <Dropdown items={[{ label: 'Export as CSV', icon: <Download size={16} />, onSelect: exportCsv, disabled: !filtered.length }]} trigger={<IconButton label="More"><MoreHorizontal size={20} /></IconButton>} />
+        <Dropdown items={[{ label: 'Export as CSV', icon: <Download size={16} />, onSelect: exportCsv, disabled: !rows.length }]} trigger={<IconButton label="More"><MoreHorizontal size={20} /></IconButton>} />
         <Button variant="tape" icon={<Plus size={18} />} onClick={() => setEditing('new')}>Log a show</Button>
       </PageHead>
 
-      <dl className="grid grid-cols-2 gap-x-6 gap-y-4 border-y border-rule py-5 sm:grid-cols-4">
-        {[
-          ['Shows', String(s.totalSets)],
-          ['On stage', long(s.stageSeconds)],
-          ['Avg rating', s.rating === null ? 'None yet' : `${s.rating.toFixed(1)} of 5`],
-          ['Most played', s.topVenue ?? 'None yet'],
-        ].map(([label, value]) => (
-          <div key={label} className="min-w-0">
-            <dt className="text-sm text-dim">{label}</dt>
-            <dd className="headline mt-1 truncate text-[28px] tabular">{value}</dd>
-          </div>
-        ))}
-      </dl>
-      <p className="mt-2 text-xs text-faint">The average weights each show by its length, so a long set counts for more.</p>
+      <div className="mb-5"><ShowsToolbar value={filters} onChange={changeFilters} venues={venues} onMore={() => setMoreOpen(true)} /></div>
+      <ShowStats logs={filtered} />
 
-      <div className="mt-6 mb-2 flex items-center gap-2">
-        <Button small variant={filterCount ? 'tape' : 'plain'} icon={<SlidersHorizontal size={15} />} onClick={() => setFiltering(true)}>{filterCount ? `Filters (${filterCount})` : 'Filter'}</Button>
-        <Dropdown align="start" items={(Object.keys(SORT_LABELS) as SortKey[]).map((k) => ({ label: SORT_LABELS[k], checked: sort === k, onSelect: () => setSort(k) }))}
-          trigger={<span><Button small>{SORT_LABELS[sort]}</Button></span>} />
-        <span className="ml-auto text-sm text-faint">{filtered.length} of {logs.length}</span>
-      </div>
+      <section className="mt-10">
+        <div className="mb-2 flex items-baseline justify-between gap-3">
+          <h2 className="text-lg font-semibold">Every show</h2>
+          <span className="text-sm text-faint">{rows.length} of {logs.length}</span>
+        </div>
+        {rows.length === 0 ? (
+          <EmptyState title={logs.length ? 'No shows match' : 'No shows yet'}>{logs.length ? 'Try a longer period or clear a filter.' : 'After your next spot, log it here. It takes under a minute.'}</EmptyState>
+        ) : (
+          <>
+            <ShowsTable logs={rows.slice(0, limit)} sort={sort} onSort={sortBy} onOpen={setViewing} topicNames={topicNames} />
+            {rows.length > limit && <Button className="mt-4 w-full" onClick={() => setLimit((n) => n + PAGE_SIZE)}>Show {Math.min(PAGE_SIZE, rows.length - limit)} more</Button>}
+          </>
+        )}
+      </section>
 
-      {filtered.length === 0 ? (
-        <EmptyState title={logs.length ? 'No shows match' : 'No shows yet'}>{logs.length ? 'Loosen a filter to see more.' : 'After your next spot, log it here. It takes under a minute.'}</EmptyState>
-      ) : (
-        <>
-          <ShowTimeline logs={filtered.slice(0, limit)} grouped={sort === 'date'} onOpen={setViewing} />
-          {filtered.length > limit && <Button className="mt-4 w-full" onClick={() => setLimit((n) => n + PAGE_SIZE)}>Show {Math.min(PAGE_SIZE, filtered.length - limit)} more</Button>}
-        </>
-      )}
-
-      <ShowFilters open={filtering} onClose={() => setFiltering(false)} venues={venues} value={filters} onChange={(f) => { setFilters(f); setLimit(PAGE_SIZE) }} />
+      <ShowFilters open={moreOpen} onClose={() => setMoreOpen(false)} value={filters} onChange={changeFilters} />
       {editing && <LogShowSheet log={editing === 'new' ? undefined : editing} onClose={closeEditor} />}
       {viewing && <ShowDetail log={viewing} topics={topicNames(viewing.topic_ids)} onClose={() => setViewing(null)} onEdit={() => { setEditing(viewing); setViewing(null) }} />}
     </div>

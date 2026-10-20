@@ -34,7 +34,12 @@ export function ShowDetail({ log, topics, onClose, onEdit }: { log: PerformanceL
           </div>
         ))}
       </dl>
-      {log.notes && <p className="mt-5 leading-relaxed whitespace-pre-wrap text-paper/90">{log.notes}</p>}
+      {log.notes && (
+        <div className="mt-5">
+          <h3 className="text-sm text-dim">Remarks</h3>
+          <p className="mt-1 leading-relaxed whitespace-pre-wrap text-paper/90">{log.notes}</p>
+        </div>
+      )}
     </Modal>
   )
 }

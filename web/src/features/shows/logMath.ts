@@ -1,4 +1,4 @@
-/** Filters, sorting, paging and stats for performance logs (all in the browser, offline too). */
+/** Filters and sorting for performance logs (all in the browser, offline too). */
 import type { PerformanceLog } from '../../api/types'
 
 export interface Band {
@@ -26,7 +26,12 @@ export const AUDIENCE_BANDS: Band[] = [
   { label: '100+', min: 101, max: Infinity },
 ]
 
+export type Period = 'all' | 'month' | 'week'
+
+export const PERIODS: Record<Period, string> = { all: 'Lifetime', month: 'This month', week: 'This week' }
+
 export interface LogFilters {
+  period: Period
   venues: string[]
   from: string // YYYY-MM-DD, inclusive, IST
   to: string
@@ -35,9 +40,18 @@ export interface LogFilters {
   audience: string | null
 }
 
-export const NO_FILTERS: LogFilters = { venues: [], from: '', to: '', rating: null, duration: null, audience: null }
+export const NO_FILTERS: LogFilters = { period: 'all', venues: [], from: '', to: '', rating: null, duration: null, audience: null }
 
-export type SortKey = 'date' | 'duration' | 'audience' | 'rating'
+/** How many of the "more filters" (everything except period and venue) are set. */
+export const extraFilterCount = (f: LogFilters): number =>
+  [f.from, f.to, f.rating, f.duration, f.audience].filter((v) => v !== '' && v !== null).length
+
+export type SortKey = 'date' | 'venue' | 'duration' | 'audience' | 'rating'
+
+export interface Sort {
+  key: SortKey
+  desc: boolean
+}
 
 const inBand = (bands: Band[], label: string | null, value: number) => {
   const band = bands.find((b) => b.label === label)
@@ -47,10 +61,24 @@ const inBand = (bands: Band[], label: string | null, value: number) => {
 /** The IST calendar date of an ISO instant. */
 const istDay = (iso: string) => new Date(new Date(iso).getTime() + 5.5 * 3600_000).toISOString().slice(0, 10)
 
-export function applyFilters(logs: PerformanceLog[], f: LogFilters): PerformanceLog[] {
+/** First day of the period containing `today` (YYYY-MM-DD). Weeks start on Monday. Empty for lifetime. */
+export function periodStart(period: Period, today: string): string {
+  if (period === 'month') return `${today.slice(0, 7)}-01`
+  if (period === 'week') {
+    const d = new Date(`${today}T00:00:00Z`)
+    d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7))
+    return d.toISOString().slice(0, 10)
+  }
+  return ''
+}
+
+/** `today` is the IST date, passed in so this stays a pure function. */
+export function applyFilters(logs: PerformanceLog[], f: LogFilters, today: string): PerformanceLog[] {
+  const start = periodStart(f.period, today)
   return logs.filter((log) => {
     const day = istDay(log.performed_at)
     return (
+      (!start || day >= start) &&
       (!f.venues.length || f.venues.includes(log.venue_name)) &&
       (!f.from || day >= f.from) &&
       (!f.to || day <= f.to) &&
@@ -61,33 +89,18 @@ export function applyFilters(logs: PerformanceLog[], f: LogFilters): Performance
   })
 }
 
-export function sortLogs(logs: PerformanceLog[], key: SortKey, desc: boolean): PerformanceLog[] {
-  const value = (l: PerformanceLog) =>
-    key === 'date' ? l.performed_at : key === 'duration' ? l.duration_seconds : key === 'audience' ? l.audience_size : l.rating
+export function sortLogs(logs: PerformanceLog[], { key, desc }: Sort): PerformanceLog[] {
+  const value = (l: PerformanceLog): string | number =>
+    key === 'date' ? l.performed_at
+      : key === 'venue' ? l.venue_name.toLowerCase()
+        : key === 'duration' ? l.duration_seconds
+          : key === 'audience' ? l.audience_size
+            : l.rating
   return [...logs].sort((a, b) => {
     const [x, y] = [value(a), value(b)]
-    const cmp = x < y ? -1 : x > y ? 1 : 0
+    const cmp = x < y ? -1 : x > y ? 1 : b.performed_at.localeCompare(a.performed_at)
     return desc ? -cmp : cmp
   })
 }
 
-/** Rating weighted by stage time: a 20-minute set counts more than a 3-minute one. */
-export function weightedRating(logs: PerformanceLog[]): number | null {
-  const time = logs.reduce((s, l) => s + l.duration_seconds, 0)
-  if (!time) return logs.length ? logs.reduce((s, l) => s + l.rating, 0) / logs.length : null
-  return logs.reduce((s, l) => s + l.rating * l.duration_seconds, 0) / time
-}
-
-export function stats(logs: PerformanceLog[]) {
-  const counts = new Map<string, number>()
-  for (const l of logs) counts.set(l.venue_name, (counts.get(l.venue_name) ?? 0) + 1)
-  const top = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]
-  return {
-    totalSets: logs.length,
-    stageSeconds: logs.reduce((s, l) => s + l.duration_seconds, 0),
-    rating: weightedRating(logs),
-    topVenue: top?.[0] ?? null,
-  }
-}
-
-export const PAGE_SIZE = 10
+export const PAGE_SIZE = 25
