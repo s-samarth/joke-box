@@ -1,4 +1,4 @@
-/** Add, rename and delete topics and subtopics. Deleting a topic moves its bits to the Inbox. */
+/** Add, rename and delete topics and subtopics. Deleting a topic moves its jokes to Thoughts. */
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { useBits, useTopicActions, useTopics } from '../../api/library'
 import type { Subtopic, Topic } from '../../api/types'
@@ -24,7 +24,7 @@ export function TopicManager({ open, onClose }: { open: boolean; onClose: () => 
     if (name && name !== t.name) a.rename.mutate({ id: t.id, name }, { onError: fail })
   }
   const deleteTopic = async (t: Topic) => {
-    if (await confirm({ title: `Delete ${t.name}?`, message: `Its ${count(t.id)} jokes move to your Inbox.`, confirmLabel: 'Delete topic', danger: true })) a.remove.mutate(t.id, { onError: fail })
+    if (await confirm({ title: `Delete ${t.name}?`, message: `Its ${count(t.id)} jokes move to Thoughts.`, confirmLabel: 'Delete topic', danger: true })) a.remove.mutate(t.id, { onError: fail })
   }
   const addSub = async (t: Topic) => {
     const name = await prompt({ title: `New subtopic in ${topicName(t)}`, label: 'Subtopic name', confirmLabel: 'Add subtopic' })
@@ -39,7 +39,7 @@ export function TopicManager({ open, onClose }: { open: boolean; onClose: () => 
   }
 
   return (
-    <Modal open={open} onOpenChange={(o) => !o && onClose()} title="Topics" description="The Inbox is where new jokes land. It can't be renamed or deleted."
+    <Modal open={open} onOpenChange={(o) => !o && onClose()} title="Topics" description="Thoughts is where new jokes land. It can't be renamed or deleted."
       footer={<Button variant="tape" icon={<Plus size={18} />} onClick={addTopic}>Add topic</Button>}>
       <ul className="divide-y divide-rule">
         {topics.map((t) => (
