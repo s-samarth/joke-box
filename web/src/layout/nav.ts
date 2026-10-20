@@ -18,7 +18,7 @@ export interface NavItem {
 
 const home: NavItem = { to: '/', label: 'Home', icon: Home, end: true }
 const jokes: NavItem = { to: '/bits', label: 'Jokes', icon: StickyNote }
-const sets: NavItem = { to: '/sets', label: 'Sets', icon: ListOrdered }
+const sets: NavItem = { to: '/sets', label: 'Sets', icon: ListOrdered, hint: 'Build a setlist and run it on stage' }
 const voice: NavItem = { to: '/voice', label: 'Voice notes', icon: AudioLines, hint: 'Record an idea out loud' }
 const observations: NavItem = { to: '/observations', label: 'Observations', icon: Eye, hint: "Things you noticed, before they're jokes" }
 const brainstorm: NavItem = { to: '/brainstorm', label: 'Brainstorm', icon: PenLine, hint: 'Timed writing sessions' }
@@ -32,11 +32,11 @@ export const NAV: NavItem[] = [home, jokes, observations, brainstorm, voice, set
 
 /** Phone bottom bar: two either side of the + button, the last slot being More. */
 export const BAR_LEFT: NavItem[] = [home, jokes]
-export const BAR_RIGHT: NavItem[] = [sets]
+export const BAR_RIGHT: NavItem[] = [shows]
 
 export const MORE_GROUPS: { title: string; items: NavItem[] }[] = [
   { title: 'Write', items: [voice, observations, brainstorm] },
-  { title: 'Perform', items: [shows] },
+  { title: 'Perform', items: [sets] },
   { title: 'Study', items: [watchlist, analysis, links] },
 ]
 
