@@ -1,4 +1,4 @@
-/** Today: capture first, then what's coming up, what needs work, and how the last show went. */
+/** Today: capture first, then your topic folders, what's coming up, what needs work, and how the last show went. */
 import { Play } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
@@ -11,6 +11,7 @@ import { formatDate, todayIst } from '../../lib/time'
 import { LightBar } from '../sets/LightBar'
 import { totalSeconds } from '../sets/setlistMath'
 import { QuickCapture } from './QuickCapture'
+import { TopicFolders } from './TopicFolders'
 
 const longDate = new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'long', day: 'numeric', month: 'long' })
 
@@ -38,6 +39,7 @@ export function TodayPage() {
         <h1 className="headline mt-1 text-[44px] sm:text-[56px]">Got something?</h1>
       </div>
       <QuickCapture />
+      <TopicFolders />
 
       <section className="mt-12">
         <SectionHead title={upcoming[0] ? 'Next up' : 'Your latest set'}>
