@@ -153,6 +153,12 @@ flowchart LR
   [vercel_build.py](../scripts/vercel_build.py), which builds the React app and then migrates the
   database if `DATABASE_URL` is Postgres. `[tool.vercel.fastapi.static] cdn = true` serves
   `web/dist` from the CDN even though the app has middleware.
+- **Page addresses:** [vercel.json](../vercel.json) rewrites every path that isn't a real file and
+  doesn't start with `/api/`, `/auth/`, `/health` or `/assets/` to `/index.html` on the CDN. React
+  Router then shows the right screen. Without it, opening `/shows` directly in a fresh browser
+  reached the Python function, which has no copy of the built frontend, and answered 404.
+  Locally, `app.frontend(..., fallback="index.html")` does the same job. Missing files under
+  `/assets/` still 404, so a stale code chunk fails loudly instead of loading HTML.
 - **Database connections:** each serverless invocation opens a connection through Neon's pooler
   (`NullPool`, `pool_pre_ping`) instead of keeping its own pool.
 - **Health:** `GET /health` runs `SELECT 1` and returns `{status, env, version}`.
