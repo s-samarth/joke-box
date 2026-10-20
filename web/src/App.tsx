@@ -23,6 +23,10 @@ const BrainstormPage = named(() => import('./features/brainstorm/BrainstormPage'
 const SessionPage = named(() => import('./features/brainstorm/SessionPage'), 'SessionPage')
 const ObservationsPage = named(() => import('./features/observations/ObservationsPage'), 'ObservationsPage')
 const VoicePage = named(() => import('./features/voice/VoicePage'), 'VoicePage')
+const WatchlistPage = named(() => import('./features/study/WatchlistPage'), 'WatchlistPage')
+const AnalysisPage = named(() => import('./features/study/AnalysisPage'), 'AnalysisPage')
+const AnalysisEditor = named(() => import('./features/study/AnalysisEditor'), 'AnalysisEditor')
+const LinksPage = named(() => import('./features/study/LinksPage'), 'LinksPage')
 
 const full = (el: React.ReactNode) => <RequireAuth>{el}</RequireAuth>
 
@@ -43,6 +47,10 @@ export function App() {
           <Route path="observations" element={<ObservationsPage />} />
           <Route path="brainstorm" element={<BrainstormPage />} />
           <Route path="voice" element={<VoicePage />} />
+          <Route path="watchlist" element={<WatchlistPage />} />
+          <Route path="analysis" element={<AnalysisPage />} />
+          <Route path="analysis/:analysisId" element={<AnalysisEditor />} />
+          <Route path="links" element={<LinksPage />} />
         </Route>
         {/* Full-screen modes without the app frame. */}
         <Route path="/brainstorm/:sessionId" element={full(<SessionPage />)} />

@@ -1,9 +1,9 @@
 /**
  * The frame around every signed-in screen. Desktop: a slim left rail. Phone: a bottom bar with
- * Today, Jokes, a big + for capture, Sets and Shows. On a phone, Observations, Brainstorm and Voice open from Today,
+ * Today, Jokes, a big + for capture, Sets and Shows. On a phone, Observations, Brainstorm, Voice and the Study pages open from Today,
  * which keeps the + in the middle of the bar.
  */
-import { AudioLines, Eye, Home, ListOrdered, Mic, PenLine, Plus, StickyNote } from 'lucide-react'
+import { AudioLines, ExternalLink, Eye, Home, ListChecks, ListOrdered, Mic, NotebookPen, PenLine, Plus, StickyNote } from 'lucide-react'
 import { Suspense } from 'react'
 import { NavLink, Outlet } from 'react-router'
 import { Spinner } from '../components/ui/bits'
@@ -21,6 +21,9 @@ const NAV = [
   { to: '/voice', label: 'Voice notes', icon: AudioLines, end: false, desktopOnly: true },
   { to: '/sets', label: 'Sets', icon: ListOrdered, end: false },
   { to: '/shows', label: 'Shows', icon: Mic, end: false },
+  { to: '/watchlist', label: 'Watchlist', icon: ListChecks, end: false, desktopOnly: true },
+  { to: '/analysis', label: 'Analysis', icon: NotebookPen, end: false, desktopOnly: true },
+  { to: '/links', label: 'External links', icon: ExternalLink, end: false, desktopOnly: true },
 ]
 const PHONE_NAV = NAV.filter((n) => !n.desktopOnly)
 

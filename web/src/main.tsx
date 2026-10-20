@@ -3,6 +3,8 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
 import { persister, persistMaxAge, queryClient } from './api/queryClient'
+// Registers the watchlist and analysis save defaults before offline saves are replayed.
+import './api/study'
 import { App } from './App'
 import { FeedbackProvider } from './components/ui/feedback'
 import './app.css'

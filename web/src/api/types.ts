@@ -152,3 +152,37 @@ export interface VoiceNote extends VoiceNoteInput {
   created_at: string
   updated_at: string
 }
+
+/** A routine on the watchlist. Scores (0-10) come from the Relatable Schemer dossier. */
+export interface WatchItemInput {
+  title: string
+  comedian: string
+  category: string
+  description: string
+  url: string
+  position: number
+  schemer_index: number | null
+  logic_density: number | null
+  dark_pragmatism: number | null
+  watched: boolean
+}
+
+export interface WatchItem extends WatchItemInput {
+  id: string
+  created_at: string
+  updated_at: string
+}
+
+/** Your write-up of a set or an online bit. */
+export interface AnalysisInput {
+  title: string
+  url: string
+  body: string
+  watch_item_id: string | null
+}
+
+export interface Analysis extends AnalysisInput {
+  id: string
+  created_at: string
+  updated_at: string
+}
