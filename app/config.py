@@ -23,6 +23,8 @@ class Settings(BaseSettings):
     # Public origin, e.g. https://jokebox.samarthsaraswat.com. Used for the OAuth redirect.
     public_url: str = ""
     app_version: str = "dev"
+    # Local development keeps voice-note audio here; on Vercel it goes to a private Blob store.
+    audio_dir: str = ".voice-notes"
 
     @field_validator("database_url")
     @classmethod

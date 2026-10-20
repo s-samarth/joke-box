@@ -23,6 +23,7 @@ htmlcov/
 
 # Local data
 *.db
+.voice-notes/
 *.sqlite3
 pgdata/
 

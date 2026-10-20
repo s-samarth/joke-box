@@ -26,6 +26,7 @@ export const keys = {
   observations: ['observations'],
   observationTopics: ['observation-topics'],
   sessions: ['sessions'],
+  voiceNotes: ['voice-notes'],
 } as const
 
 export const queryClient = new QueryClient({

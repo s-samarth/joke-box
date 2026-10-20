@@ -135,3 +135,20 @@ export interface WritingSession extends WritingSessionInput {
   created_at: string
   updated_at: string
 }
+
+/** A voice note's details. The audio is uploaded separately and lives in Blob storage. */
+export interface VoiceNoteInput {
+  label: string
+  hashtags: string[]
+  duration_seconds: number
+}
+
+export interface VoiceNote extends VoiceNoteInput {
+  id: string
+  content_type: string
+  size_bytes: number
+  /** False until the recording has finished uploading. */
+  has_audio: boolean
+  created_at: string
+  updated_at: string
+}

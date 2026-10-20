@@ -1,4 +1,4 @@
-/** Today: capture first, then observations, brainstorming, your topic folders, what's coming up, what needs work, and how the last show went. */
+/** Today: capture first, then voice notes, observations, brainstorming, your topic folders, what's coming up, what needs work, and how the last show went. */
 import { Play } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
@@ -13,6 +13,7 @@ import { totalSeconds } from '../sets/setlistMath'
 import { QuickCapture } from './QuickCapture'
 import { TodayBrainstorm } from './TodayBrainstorm'
 import { TodayObservations } from './TodayObservations'
+import { TodayVoice } from './TodayVoice'
 import { TopicFolders } from './TopicFolders'
 
 const longDate = new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'long', day: 'numeric', month: 'long' })
@@ -41,6 +42,7 @@ export function TodayPage() {
         <h1 className="headline mt-1 text-[44px] sm:text-[56px]">Got something?</h1>
       </div>
       <QuickCapture />
+      <TodayVoice />
       <TodayObservations />
       <TodayBrainstorm />
       <TopicFolders />
