@@ -1,31 +1,18 @@
 /**
- * The frame around every signed-in screen. Desktop: a slim left rail. Phone: a bottom bar with
- * Today, Jokes, a big + for capture, Sets and Shows. On a phone, Observations, Brainstorm, Voice and the Study pages open from Today,
- * which keeps the + in the middle of the bar.
+ * The frame around every signed-in screen. Desktop: a slim left rail with every screen.
+ * Phone: a bottom bar (see BottomBar) with Home, Jokes, a big + for capture, Sets and More.
  */
-import { AudioLines, ExternalLink, Eye, Home, ListChecks, ListOrdered, Mic, NotebookPen, PenLine, Plus, StickyNote } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { Suspense } from 'react'
 import { NavLink, Outlet } from 'react-router'
 import { Spinner } from '../components/ui/bits'
 import { CaptureProvider } from '../features/capture/CaptureProvider'
 import { useCapture } from '../features/capture/captureContext'
 import { AccountMenu } from './AccountMenu'
+import { BottomBar } from './BottomBar'
+import { NAV } from './nav'
 import { SyncLight } from './SyncLight'
 import { UpdatePrompt } from './UpdatePrompt'
-
-const NAV = [
-  { to: '/', label: 'Today', icon: Home, end: true },
-  { to: '/bits', label: 'Jokes', icon: StickyNote, end: false },
-  { to: '/observations', label: 'Observations', icon: Eye, end: false, desktopOnly: true },
-  { to: '/brainstorm', label: 'Brainstorm', icon: PenLine, end: false, desktopOnly: true },
-  { to: '/voice', label: 'Voice notes', icon: AudioLines, end: false, desktopOnly: true },
-  { to: '/sets', label: 'Sets', icon: ListOrdered, end: false },
-  { to: '/shows', label: 'Shows', icon: Mic, end: false },
-  { to: '/watchlist', label: 'Watchlist', icon: ListChecks, end: false, desktopOnly: true },
-  { to: '/analysis', label: 'Analysis', icon: NotebookPen, end: false, desktopOnly: true },
-  { to: '/links', label: 'External links', icon: ExternalLink, end: false, desktopOnly: true },
-]
-const PHONE_NAV = NAV.filter((n) => !n.desktopOnly)
 
 function Rail() {
   const { openCapture } = useCapture()
@@ -47,30 +34,6 @@ function Rail() {
         <AccountMenu showName />
       </div>
     </aside>
-  )
-}
-
-function BottomBar() {
-  const { openCapture } = useCapture()
-  const item = 'flex h-full flex-1 flex-col items-center justify-center gap-1 text-[11px]'
-  const [left, right] = [PHONE_NAV.slice(0, 2), PHONE_NAV.slice(2)]
-  const link = ({ to, label, icon: Icon, end }: (typeof NAV)[number]) => (
-    <NavLink key={to} to={to} end={end} className={({ isActive }) => `${item} ${isActive ? 'text-paper' : 'text-faint'}`}>
-      <Icon size={22} /> {label}
-    </NavLink>
-  )
-  return (
-    <nav aria-label="Main" className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-rule bg-ink/95 backdrop-blur lg:hidden">
-      <div className="flex h-16 items-stretch">
-        {left.map(link)}
-        <div className="flex flex-1 items-center justify-center">
-          <button type="button" onClick={() => openCapture()} aria-label="New joke" className="-mt-6 flex size-14 items-center justify-center rounded-2xl bg-tape text-tape-ink shadow-lift active:bg-tape-deep">
-            <Plus size={28} strokeWidth={2.4} />
-          </button>
-        </div>
-        {right.map(link)}
-      </div>
-    </nav>
   )
 }
 
