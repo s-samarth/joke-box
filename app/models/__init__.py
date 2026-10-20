@@ -19,11 +19,13 @@ from app.models.shows import (
     performance_log_topics,
 )
 from app.models.studio import Brainstorm, BrainstormVersion
+from app.models.study import Analysis, WatchItem
 from app.models.user import User
 from app.models.voice import VoiceNote
 
 __all__ = [
     "RANDOM_TOPIC",
+    "Analysis",
     "Base",
     "Bit",
     "BitType",
@@ -40,6 +42,7 @@ __all__ = [
     "User",
     "Venue",
     "VoiceNote",
+    "WatchItem",
     "WritingSession",
     "bit_type_links",
     "performance_log_topics",
