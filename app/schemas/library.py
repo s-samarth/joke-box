@@ -1,0 +1,96 @@
+"""Request and response shapes for bits, topics, types and statuses."""
+
+import uuid
+from datetime import datetime
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+CleanRating = Literal["clean", "mild", "dirty"]
+
+
+class NameIn(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+
+    @field_validator("name")
+    @classmethod
+    def strip_name(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Name cannot be blank")
+        return value
+
+
+class SubtopicOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    name: str
+
+
+class TopicOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    name: str
+    is_system: bool
+    subtopics: list[SubtopicOut]
+
+
+class NamedOut(BaseModel):
+    """Types and statuses: just an id and a name."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    name: str
+
+
+class BitIn(BaseModel):
+    """A bit as the editor sends it. Types and status are names, created on the fly."""
+
+    setup: str = Field(min_length=1)
+    punchline: str = ""
+    topic_id: uuid.UUID
+    subtopic_id: uuid.UUID | None = None
+    types: list[str] = Field(default_factory=list)
+    status: str | None = None
+    strength: int = Field(default=3, ge=1, le=5)
+    duration_seconds: int = Field(default=0, ge=0)
+    hashtags: list[str] = Field(default_factory=list)
+    tag_lines: list[str] = Field(default_factory=list)
+    clean_rating: CleanRating | None = None
+    language: str | None = None
+    comments: str = ""
+    created_at: datetime | None = None
+
+    @field_validator("setup")
+    @classmethod
+    def setup_not_blank(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("Setup is required")
+        return value
+
+    @field_validator("types", "hashtags", "tag_lines")
+    @classmethod
+    def drop_blank_items(cls, values: list[str]) -> list[str]:
+        return [v.strip() for v in values if v.strip()]
+
+
+class BitOut(BaseModel):
+    id: uuid.UUID
+    setup: str
+    punchline: str
+    topic_id: uuid.UUID
+    subtopic_id: uuid.UUID | None
+    types: list[str]
+    status: str | None
+    strength: int
+    duration_seconds: int
+    hashtags: list[str]
+    tag_lines: list[str]
+    clean_rating: CleanRating | None
+    language: str | None
+    comments: str
+    created_at: datetime
+    updated_at: datetime
