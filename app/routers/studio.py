@@ -34,7 +34,7 @@ def save_brainstorm(
         brainstorm = Brainstorm(id=brainstorm_id, user_id=user.id, bit_id=body.bit_id)
         db.add(brainstorm)
     elif brainstorm.bit_id != body.bit_id:
-        raise HTTPException(422, "A brainstorm can't move to another bit")
+        raise HTTPException(422, "A brainstorm can't move to another joke")
     brainstorm.title = body.title
     brainstorm.content = body.content
     brainstorm.timer_seconds = body.timer_seconds

@@ -42,7 +42,7 @@ export function useCaptureBit() {
     }
     save.mutate({ id, input }, { onError: (e) => toast(`Not saved: ${e.message}`) })
     if (open) navigate(`/bits/${id}`)
-    else toast(navigator.onLine ? 'Bit saved' : 'Saved offline, will sync', { label: 'Open', onClick: () => navigate(`/bits/${id}`) })
+    else toast(navigator.onLine ? 'Joke saved' : 'Saved offline, will sync', { label: 'Open', onClick: () => navigate(`/bits/${id}`) })
     return id
   }
 }

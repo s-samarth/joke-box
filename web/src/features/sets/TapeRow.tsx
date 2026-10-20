@@ -1,7 +1,7 @@
 /**
  * One bit in a set, as a strip of masking tape with marker writing. Drag by the handle,
  * or use the arrows. The runtime is editable; opener and closer are noted on the strip.
- * Tap the strip to read the whole bit.
+ * Tap the strip to read the whole joke.
  */
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -32,11 +32,11 @@ export function TapeRow({ item, bit, index, count, note, onDuration, onMove, onR
   return (
     <li ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className={`flex items-center gap-2 ${isDragging ? 'relative z-10' : ''}`}>
       <button type="button" {...listeners} {...attributes} aria-label="Drag to reorder" className="flex h-12 w-7 shrink-0 cursor-grab touch-none items-center justify-center text-faint"><GripVertical size={18} /></button>
-      <button type="button" onClick={onOpen} disabled={!bit} aria-label={bit ? `Read the whole bit: ${bit.setup}` : 'Deleted bit'}
+      <button type="button" onClick={onOpen} disabled={!bit} aria-label={bit ? `Read the whole joke: ${bit.setup}` : 'Deleted joke'}
         className="min-w-0 flex-1 rounded-sm text-left outline-none focus-visible:ring-2 focus-visible:ring-tape">
         <Tape seed={index} className={`px-4 py-2.5 transition hover:brightness-105 ${isDragging ? 'shadow-lift' : ''}`}>
           {note && <span className="mr-2 text-sm opacity-60">{note}:</span>}
-          <span className="text-lg leading-tight">{bit?.setup ?? 'Deleted bit'}</span>
+          <span className="text-lg leading-tight">{bit?.setup ?? 'Deleted joke'}</span>
         </Tape>
       </button>
       <div className="flex shrink-0 flex-col items-end gap-0.5">

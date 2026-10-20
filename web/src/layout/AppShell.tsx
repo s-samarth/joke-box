@@ -1,6 +1,6 @@
 /**
  * The frame around every signed-in screen. Desktop: a slim left rail. Phone: a bottom bar with
- * Today, Bits, a big + for capture, Sets and Shows.
+ * Today, Jokes, a big + for capture, Sets and Shows.
  */
 import { Home, ListOrdered, Mic, Plus, StickyNote } from 'lucide-react'
 import { Suspense } from 'react'
@@ -14,7 +14,7 @@ import { UpdatePrompt } from './UpdatePrompt'
 
 const NAV = [
   { to: '/', label: 'Today', icon: Home, end: true },
-  { to: '/bits', label: 'Bits', icon: StickyNote, end: false },
+  { to: '/bits', label: 'Jokes', icon: StickyNote, end: false },
   { to: '/sets', label: 'Sets', icon: ListOrdered, end: false },
   { to: '/shows', label: 'Shows', icon: Mic, end: false },
 ]
@@ -25,7 +25,7 @@ function Rail() {
     <aside className="fixed inset-y-0 left-0 hidden w-60 flex-col border-r border-rule bg-ink px-4 py-6 lg:flex">
       <p className="headline px-2 text-[32px]">JokeBox</p>
       <button type="button" onClick={() => openCapture()} className="mt-6 flex h-11 items-center gap-2 rounded-lg bg-tape px-3 font-semibold text-tape-ink hover:bg-[#f5da77]">
-        <Plus size={20} /> New bit
+        <Plus size={20} /> New joke
       </button>
       <nav className="mt-6 space-y-1" aria-label="Main">
         {NAV.map(({ to, label, icon: Icon, end }) => (
@@ -56,7 +56,7 @@ function BottomBar() {
       <div className="flex h-16 items-stretch">
         {left.map(link)}
         <div className="flex flex-1 items-center justify-center">
-          <button type="button" onClick={() => openCapture()} aria-label="New bit" className="-mt-6 flex size-14 items-center justify-center rounded-2xl bg-tape text-tape-ink shadow-lift active:bg-tape-deep">
+          <button type="button" onClick={() => openCapture()} aria-label="New joke" className="-mt-6 flex size-14 items-center justify-center rounded-2xl bg-tape text-tape-ink shadow-lift active:bg-tape-deep">
             <Plus size={28} strokeWidth={2.4} />
           </button>
         </div>

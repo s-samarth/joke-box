@@ -30,7 +30,7 @@ export function SetsPage() {
     save.mutate({ id, input: { name: 'Untitled set', show_date: today, target_seconds: 420, venue_name: null, items: [] } }, { onSuccess: () => navigate(`/sets/${id}`) })
   }
   const onDelete = async (s: Setlist) => {
-    if (await confirm({ title: `Delete ${s.name}?`, message: 'The bits stay in your library.', confirmLabel: 'Delete set', danger: true })) remove.mutate(s.id, { onSuccess: () => toast('Set deleted') })
+    if (await confirm({ title: `Delete ${s.name}?`, message: 'The jokes stay in your library.', confirmLabel: 'Delete set', danger: true })) remove.mutate(s.id, { onSuccess: () => toast('Set deleted') })
   }
 
   return (
@@ -39,7 +39,7 @@ export function SetsPage() {
       {isPending && !sets.length ? (
         <Spinner />
       ) : sorted.length === 0 ? (
-        <EmptyState title="No sets yet">Got a spot coming up? Make a set, drop your bits in, and see if it fits the slot.</EmptyState>
+        <EmptyState title="No sets yet">Got a spot coming up? Make a set, drop your jokes in, and see if it fits the slot.</EmptyState>
       ) : (
         <ul className="space-y-3">
           {sorted.map((s) => (
@@ -48,7 +48,7 @@ export function SetsPage() {
                 <Link to={`/sets/${s.id}`} className="min-w-0 flex-1">
                   <p className="headline truncate text-[26px]">{s.name}</p>
                   <p className="mt-1 text-sm text-dim">
-                    {[s.show_date && formatDate(s.show_date), s.venue_name, `${s.items.length} bits`].filter(Boolean).join(', ')}
+                    {[s.show_date && formatDate(s.show_date), s.venue_name, `${s.items.length} jokes`].filter(Boolean).join(', ')}
                   </p>
                 </Link>
                 <Link to={`/sets/${s.id}/stage`} aria-label={`Rehearse ${s.name}`} className="inline-flex size-10 items-center justify-center rounded-lg bg-ink-3 text-paper hover:bg-ink-4"><Play size={17} /></Link>

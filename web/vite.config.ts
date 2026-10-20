@@ -16,7 +16,7 @@ export default defineConfig({
       manifest: {
         name: 'JokeBox',
         short_name: 'JokeBox',
-        description: 'A private vault for your bits, setlists and open mics.',
+        description: 'A private vault for your jokes, setlists and open mics.',
         start_url: '/',
         display: 'standalone',
         orientation: 'portrait',

@@ -24,7 +24,7 @@ export function LoginPage() {
           <Tape seed={4} className="ml-6 px-4 py-2 text-xl">Tape it to the floor</Tape>
           <Tape seed={2} className="ml-2 px-4 py-2 text-xl">Kill</Tape>
         </div>
-        <p className="mt-8 text-lg text-dim">Your bits, sets and shows in one private notebook.</p>
+        <p className="mt-8 text-lg text-dim">Your jokes, sets and shows in one private notebook.</p>
         <a href="/auth/google/login" className="mt-8 flex h-12 w-full items-center justify-center gap-3 rounded-lg bg-paper font-semibold text-ink hover:bg-white">
           <svg viewBox="0 0 24 24" className="size-5" aria-hidden><path fill="#EA4335" d="M12 10.2v3.9h5.4c-.24 1.4-1.64 4.1-5.4 4.1-3.25 0-5.9-2.69-5.9-6s2.65-6 5.9-6c1.85 0 3.09.79 3.8 1.47l2.59-2.5C16.73 3.6 14.6 2.6 12 2.6 6.82 2.6 2.6 6.82 2.6 12s4.22 9.4 9.4 9.4c5.43 0 9.02-3.81 9.02-9.19 0-.62-.07-1.09-.15-1.56H12z" /></svg>
           Sign in with Google
