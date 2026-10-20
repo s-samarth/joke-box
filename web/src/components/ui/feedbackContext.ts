@@ -14,8 +14,13 @@ export interface PromptOptions {
   confirmLabel?: string
 }
 
+export interface ToastAction {
+  label: string
+  onClick: () => void
+}
+
 export interface Feedback {
-  toast: (message: string) => void
+  toast: (message: string, action?: ToastAction) => void
   confirm: (options: ConfirmOptions) => Promise<boolean>
   prompt: (options: PromptOptions) => Promise<string | null>
 }

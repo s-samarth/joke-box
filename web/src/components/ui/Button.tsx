@@ -1,27 +1,27 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
+type Variant = 'tape' | 'plain' | 'quiet' | 'danger'
 
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-accent text-black hover:bg-accent-hover active:bg-accent-press font-semibold',
-  secondary: 'bg-raised text-text ring-1 ring-line-strong hover:bg-hover',
-  ghost: 'text-muted hover:text-text hover:bg-white/5',
-  danger: 'bg-danger/10 text-danger ring-1 ring-danger/30 hover:bg-danger/20',
+  tape: 'bg-tape text-tape-ink font-semibold hover:bg-[#f5da77] active:bg-tape-deep',
+  plain: 'bg-ink-3 text-paper hover:bg-ink-4',
+  quiet: 'text-dim hover:text-paper hover:bg-ink-3',
+  danger: 'text-light hover:bg-light/10',
 }
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant
   icon?: ReactNode
-  size?: 'sm' | 'md'
+  small?: boolean
 }
 
-/** The one button. Min height 40px (44px on touch) so it's easy to hit on a phone. */
-export function Button({ variant = 'secondary', icon, size = 'md', className = '', children, ...rest }: ButtonProps) {
-  const sizing = size === 'sm' ? 'h-9 px-3 text-sm' : 'h-11 px-4 text-sm sm:h-10'
+/** One button. 44px tall on phones so it's easy to hit after a set. */
+export function Button({ variant = 'plain', icon, small, className = '', children, ...rest }: ButtonProps) {
+  const size = small ? 'h-9 px-3 text-sm' : 'h-11 px-4 text-[15px] sm:h-10'
   return (
     <button
       type="button"
-      className={`inline-flex shrink-0 items-center justify-center gap-2 rounded-xl transition-colors disabled:pointer-events-none disabled:opacity-40 ${sizing} ${VARIANTS[variant]} ${className}`}
+      className={`inline-flex shrink-0 items-center justify-center gap-2 rounded-lg transition-colors disabled:pointer-events-none disabled:opacity-40 ${size} ${VARIANTS[variant]} ${className}`}
       {...rest}
     >
       {icon}
@@ -35,14 +35,13 @@ interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode
 }
 
-/** A square button with only an icon. `label` is read out by screen readers. */
 export function IconButton({ label, className = '', children, ...rest }: IconButtonProps) {
   return (
     <button
       type="button"
       aria-label={label}
       title={label}
-      className={`inline-flex size-10 shrink-0 items-center justify-center rounded-xl text-muted transition-colors hover:bg-white/5 hover:text-text disabled:opacity-40 ${className}`}
+      className={`inline-flex size-10 shrink-0 items-center justify-center rounded-lg text-dim transition-colors hover:bg-ink-3 hover:text-paper disabled:opacity-30 ${className}`}
       {...rest}
     >
       {children}

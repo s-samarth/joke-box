@@ -1,0 +1,45 @@
+/** Rename or delete a type across every bit. Renaming onto an existing type merges them. */
+import { Pencil, Trash2 } from 'lucide-react'
+import { useBits, useTypeActions, useTypes } from '../../api/library'
+import type { Named } from '../../api/types'
+import { IconButton } from '../../components/ui/Button'
+import { TypeLabel } from '../../components/ui/bits'
+import { useFeedback } from '../../components/ui/feedbackContext'
+import { Modal } from '../../components/ui/Modal'
+
+export function TypeManager({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { data: types = [] } = useTypes()
+  const { data: bits = [] } = useBits()
+  const a = useTypeActions()
+  const { prompt, confirm, toast } = useFeedback()
+  const fail = (e: Error) => toast(e.message)
+  const count = (name: string) => bits.filter((b) => b.types.some((t) => t.toLowerCase() === name.toLowerCase())).length
+
+  const rename = async (t: Named) => {
+    const name = await prompt({ title: 'Rename type', initial: t.name, confirmLabel: 'Rename' })
+    if (name && name !== t.name) a.rename.mutate({ id: t.id, name }, { onError: fail })
+  }
+  const remove = async (t: Named) => {
+    const ok = await confirm({ title: `Delete ${t.name}?`, message: 'Bits keep their other types. Bits left with none show as having no type.', confirmLabel: 'Delete type', danger: true })
+    if (ok) a.remove.mutate(t.id, { onError: fail })
+  }
+
+  return (
+    <Modal open={open} onOpenChange={(o) => !o && onClose()} title="Types" description="Types are created when you tag a bit, and disappear when no bit uses them.">
+      {types.length === 0 ? (
+        <p className="text-dim">No types yet. Pick one on any bit's page.</p>
+      ) : (
+        <ul className="divide-y divide-rule">
+          {types.map((t) => (
+            <li key={t.id} className="flex items-center gap-1 py-1.5">
+              <span className="flex-1"><TypeLabel name={t.name} /></span>
+              <span className="mr-2 text-sm text-faint tabular">{count(t.name)}</span>
+              <IconButton label={`Rename ${t.name}`} onClick={() => rename(t)}><Pencil size={16} /></IconButton>
+              <IconButton label={`Delete ${t.name}`} onClick={() => remove(t)} className="hover:text-light"><Trash2 size={16} /></IconButton>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Modal>
+  )
+}
