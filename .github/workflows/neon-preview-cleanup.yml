@@ -1,0 +1,72 @@
+name: Neon preview cleanup
+
+# Every Vercel preview deployment gets its own Neon database branch, named preview/<git branch>.
+# Nothing deletes those branches when a PR closes, and Neon's free plan allows 10 per project
+# (production plus 9 previews), so the tenth preview fails with "Resource provisioning failed".
+#
+# - PR closed: delete that PR's preview branch.
+# - Weekly, or run by hand: delete every preview/* branch whose git branch no longer exists.
+#   Run by hand, it only lists what it would delete unless dry_run is unticked.
+#
+# Needs the NEON_API_KEY secret and the NEON_PROJECT_ID variable (see docs/development.md).
+# It only ever touches branches named preview/*, never production.
+on:
+  pull_request:
+    types: [closed]
+  schedule:
+    - cron: "0 3 * * 1" # Mondays 03:00 UTC
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Only list the branches that would be deleted"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neon-preview-cleanup
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    env:
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      NEON_PROJECT_ID: ${{ vars.NEON_PROJECT_ID }}
+      GH_TOKEN: ${{ github.token }}
+      EVENT: ${{ github.event_name }}
+      HEAD_REF: ${{ github.head_ref }} # via env, never pasted into the script, to avoid injection
+      DRY_RUN: ${{ inputs.dry_run || 'false' }}
+    steps:
+      - name: Delete stale preview branches
+        run: |
+          set -euo pipefail
+          if [ -z "$NEON_API_KEY" ] || [ -z "$NEON_PROJECT_ID" ]; then
+            echo "::notice::NEON_API_KEY or NEON_PROJECT_ID is not set; nothing to clean up."
+            exit 0
+          fi
+          base="https://console.neon.tech/api/v2/projects/$NEON_PROJECT_ID/branches"
+          neon() { curl -sS --fail-with-body -H "Authorization: Bearer $NEON_API_KEY" -H "Accept: application/json" "$@"; }
+
+          # "name<TAB>id" for preview branches only.
+          previews=$(neon "$base" | jq -r '.branches[] | select(.name | startswith("preview/")) | "\(.name)\t\(.id)"')
+          if [ -z "$previews" ]; then echo "No preview branches."; exit 0; fi
+
+          if [ "$EVENT" = "pull_request" ]; then
+            targets=$(awk -F'\t' -v name="preview/$HEAD_REF" '$1 == name' <<<"$previews")
+          else
+            live=$(gh api --paginate "repos/$GITHUB_REPOSITORY/branches" -q '.[].name' | sed 's#^#preview/#')
+            targets=$(awk -F'\t' 'NR == FNR { live[$0] = 1; next } !($1 in live)' <(echo "$live") <(echo "$previews"))
+          fi
+          if [ -z "$targets" ]; then echo "Nothing to delete."; exit 0; fi
+
+          while IFS=$'\t' read -r name id; do
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "Would delete $name"
+            else
+              neon -X DELETE "$base/$id" > /dev/null
+              echo "Deleted $name"
+            fi
+          done <<<"$targets"
