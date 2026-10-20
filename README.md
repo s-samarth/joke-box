@@ -1,26 +1,51 @@
 # JokeBox
 
-A private vault for a comedian's bits, setlists and open mics. Works as a website and as an
-installable app on your phone, including offline capture.
+**A private notebook for a stand-up comedian.** Catch an idea in two seconds, by typing, speaking
+or handwriting. Work it into a joke, tape it into a set, run the set on stage with the clock, and log how it went
+on the way home. It works in the browser and installs on your phone as an app, including with no
+signal.
 
-- **Today:** type a premise and press Enter to save it; see your next set, the bits that need
-  work and your last show.
-- **Bits:** a searchable list with topic, type, status and sort filters. Each bit has its own page
-  where you edit everything in place (setup, punchline, tag lines, strength, type, topic, status,
-  runtime, clean rating, language, hashtags, notes), start a timed **Rewrite** that keeps
-  versions, and add it to a set.
-- **Sets:** bits as masking-tape strips you drag into order (works on touch), timed against the
-  slot with an open-mic "light" at one minute left; a full-screen rehearse/stage mode and a print
-  view.
-- **Shows:** log each show in under a minute (pick the set you did to fill in time and topics),
-  then filter, sort and export.
-- **Voice notes:** tap record on Today or the Voice page; stopping saves. Label and hashtag notes
-  now or later, search them, play them back. Recordings made offline wait on the phone and upload
-  when you're back online. Audio lives in a private Vercel Blob store (a local folder in dev).
+Live at **[jokebox.samarthsaraswat.com](https://jokebox.samarthsaraswat.com)** (invite-only Google sign-in).
 
-Stack: FastAPI + SQLAlchemy + Alembic (Python 3.12, `app/`), React + TypeScript + Tailwind +
-TanStack Query (`web/`). SQLite locally, Postgres (Neon) on Vercel. Sign-in is Google, limited to
-an allowlist.
+<img src="docs/screenshots/desktop-home.png" alt="JokeBox home screen: 'Got something?' with quick capture, voice notes and observations">
+
+<p align="center">
+  <img src="docs/screenshots/phone-home.png" width="22%" alt="Home on a phone">
+  <img src="docs/screenshots/phone-set-builder.png" width="22%" alt="Building a set on a phone">
+  <img src="docs/screenshots/phone-stage.png" width="22%" alt="Stage mode on a phone">
+  <img src="docs/screenshots/phone-more.png" width="22%" alt="The More sheet on a phone">
+</p>
+
+## What's inside
+
+| | |
+|---|---|
+| **Jokes.** Search and filter everything, then edit a joke in place: premise, punch, tag lines, strength, type, topic, runtime, clean rating, language. Changes save on their own. <br><br> <img src="docs/screenshots/desktop-joke.png" alt="A joke open beside the list"> | **Sets.** Your jokes as strips of masking tape. Drag them into order (touch too) and watch the total against the slot, with the open-mic light at one minute to go. <br><br> <img src="docs/screenshots/desktop-set-builder.png" alt="Set builder with tape strips"> |
+| **Stage.** Full screen, big marker type, and a clock that goes amber, then red. Tap right for the next joke. The screen stays awake. <br><br> <img src="docs/screenshots/desktop-stage.png" alt="Stage mode"> | **Shows.** Log a show in under a minute; picking the set you did fills in the rest. Totals follow every filter, and the table sorts and exports to CSV. <br><br> <img src="docs/screenshots/desktop-shows.png" alt="Shows with totals and a sortable table"> |
+| **Voice notes.** Tap to record, with a live level meter. Name and tag the note the moment you stop, and play it before it's even uploaded. Offline recordings wait on the phone. <br><br> <img src="docs/screenshots/desktop-voice.png" alt="Voice notes"> | **Brainstorm.** Timed writing sessions. Type, or handwrite with Apple Pencil (palm rejection included), and link the jokes and observations a session touches. <br><br> <img src="docs/screenshots/desktop-session.png" alt="A brainstorm session"> |
+| **Observations.** Things you noticed that aren't jokes yet, under their own topics. Turn one into a joke when the angle shows up. <br><br> <img src="docs/screenshots/desktop-observations.png" alt="Observations"> | **Watchlist and Analysis.** 100 routines to study, scored by the persona dossier, ticked off as you watch, with your write-ups of sets alongside. <br><br> <img src="docs/screenshots/desktop-watchlist.png" alt="Watchlist"> |
+
+Plus: **Rewrite** (rework one joke against a timer, keeping every version), **print view** for
+sets, topic folders, a "needs work" list, CSV export, and a sync light that tells you when
+everything is safely saved.
+
+## How it's built
+
+```
+React 19 + TypeScript + Tailwind v4 (PWA)  ──same origin, cookie──▶  FastAPI (Python 3.12) on Vercel
+TanStack Query cache in IndexedDB                                      ├─ SQLAlchemy 2 + Alembic ─▶ Neon Postgres
+offline saves replay on reconnect                                      ├─ Vercel Blob (voice notes, private)
+                                                                       └─ Google sign-in, allowlisted
+```
+
+- **Offline first:** every save uses a client-generated id and an idempotent `PUT`, so saves made
+  offline queue on the device and replay safely.
+- **Private by design:** Google sign-in limited to an allowlist, every query scoped to the
+  signed-in user, CSRF blocked by a required header plus SameSite cookies.
+- **One deploy:** Vercel builds the React app onto its CDN, migrates the database, and runs
+  FastAPI as a function. Merging to `main` ships.
+- **Checked on every PR:** ruff, mypy (strict), 63 pytest tests, Alembic up and down on Postgres;
+  tsc, oxlint, 43 Vitest tests and a production build.
 
 ## Run it locally
 
@@ -30,66 +55,40 @@ uv run alembic upgrade head
 uv run python -m app.seed dev@example.com   # optional: demo data
 ```
 
-Then, in two terminals:
-
 ```bash
 uv run uvicorn app.main:app --reload --port 8000
+```
+
+```bash
 npm --prefix web run dev
 ```
 
-Open http://localhost:5173 and use **Local dev sign-in** (it only exists when `APP_ENV=local`).
-No `.env` is needed; copy `.env.example` to `.env` to try Google sign-in locally.
+Open http://localhost:5173 and choose **Sign in as the local test account**. No `.env` is needed:
+locally it uses SQLite and a folder for voice notes.
 
-Checks: `uv run ruff check . && uv run mypy app && uv run pytest` and
-`npm --prefix web run typecheck && npm --prefix web run lint && npm --prefix web test`.
+## Documentation
 
-## Deploy to Vercel
+| Doc | What's in it |
+|---|---|
+| [Product overview](docs/product.md) | Who it's for, the problems it solves, principles, the feature map, the comedy vocabulary |
+| [User flows](docs/user-flows.md) | Step by step: capture, rework, build a set, perform, log, review, study, offline |
+| [Screens](docs/screens.md) and [more screens](docs/screens-perform.md) | Every screen: layout on phone and desktop, the files behind it, its data and behaviour |
+| [Design system](docs/design-system.md) | The "Taped setlist" look: colour, type, tape strips, components, and how the copy is written |
+| [System design](docs/architecture.md) | Architecture, request lifecycle, auth, data isolation, deployment, CI, trade-offs |
+| [Frontend architecture](docs/frontend.md) | Server state, optimistic updates, the offline queue, autosave, the voice pipeline, PWA |
+| [Data model](docs/data-model.md) | Every table, what deletes do, migrations, the Bit Vault importer |
+| [API reference](docs/api.md) | Every endpoint, with its body and rules |
+| [Development and operations](docs/development.md) | Setup, checks, conventions, migrations, deploying to Vercel, runbook |
 
-1. **Database:** in Vercel, Storage → create a Neon Postgres database and connect it to the
-   project. That sets `DATABASE_URL` (and gives each preview deployment its own branch database).
-2. **Google sign-in:** Google Cloud Console → APIs & Services → Credentials → Create OAuth client
-   (Web application). Authorised redirect URI:
-   `https://jokebox.samarthsaraswat.com/auth/google/callback`
-   (add `http://localhost:5173/auth/google/callback` for local testing).
-3. **Environment variables** (Project → Settings → Environment Variables). Set these for
-   Production; for previews, set the same with `APP_ENV=preview`. The app refuses to start on
-   Vercel without them:
+## Project layout
 
-   | Name | Value |
-   |---|---|
-   | `APP_ENV` | `production` |
-   | `SESSION_SECRET` | `python3 -c "import secrets; print(secrets.token_urlsafe(48))"` |
-   | `ALLOWED_EMAILS` | your Google address (comma-separate to invite others) |
-   | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | from step 2 |
-   | `PUBLIC_URL` | `https://jokebox.samarthsaraswat.com` |
-
-4. **Voice notes storage:** Storage → Create → **Blob**, set access to **Private**, and connect it
-   to the project. That adds `BLOB_STORE_ID`; the app signs in to the store with Vercel's OIDC
-   token, so there's no key to copy. Without it, voice notes answer 503 on Vercel. The free plan
-   holds 1 GB; the Voice page shows how much is used.
-5. **Import the repo** in Vercel with the root directory as is; it detects FastAPI from
-   `app/main.py`. The build step (`scripts/vercel_build.py`) builds the React app and runs
-   `alembic upgrade head`.
-6. **Domain:** Project → Domains → add `jokebox.samarthsaraswat.com`, then add the CNAME record
-   Vercel shows at your DNS provider.
-
-Preview deployments work, but Google sign-in only accepts the redirect URIs you registered, so
-sign in on production (or register a fixed preview domain).
-
-## Bring over your old Bit Vault data
-
-```bash
-uv run --with firebase-admin scripts/export_firestore.py --key ~/Downloads/service-account.json \
-  --email you@gmail.com --out ~/bitvault-export.json
-DATABASE_URL="<neon url>" uv run python -m app.seed you@gmail.com --file ~/bitvault-export.json --dry-run
+```
+app/        FastAPI: models, schemas, routers, services, auth, seed
+alembic/    migrations (append-only; CI enforces it)
+tests/      pytest
+web/        React app: api/, components/ui/, layout/, features/<area>/, lib/
+scripts/    Vercel build, Firestore export, icon generator
+docs/       documentation and screenshots
 ```
 
-Drop `--dry-run` to load it. Loading replaces everything in that account. "Tags:" typed into
-punchlines become tag lines; brainstorms of deleted bits are skipped and listed. Keep the key
-and the export out of the repo.
-
-## Install on your phone
-
-Open the site, then Share → **Add to Home Screen** (iPhone) or menu → **Install app** (Android).
-Bits you've loaded stay readable offline; new and edited bits made offline sync when you're back
-online (the dot in the header turns amber, then green).
+Screenshots show the made-up demo account. Real material never goes in the repo.
