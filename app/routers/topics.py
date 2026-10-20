@@ -38,7 +38,7 @@ def create_topic(body: NameIn, user: CurrentUser, db: DbSession) -> Topic:
 def rename_topic(topic_id: uuid.UUID, body: NameIn, user: CurrentUser, db: DbSession) -> Topic:
     topic = get_owned(db, Topic, topic_id, user)
     if topic.is_system:
-        raise HTTPException(400, "The Random topic can't be renamed")
+        raise HTTPException(400, "Thoughts can't be renamed")
     topic.name = body.name
     svc.commit_or_conflict(db, "A topic with that name already exists")
     return topic

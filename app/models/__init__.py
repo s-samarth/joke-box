@@ -10,6 +10,7 @@ from app.models.library import (
     Topic,
     bit_type_links,
 )
+from app.models.notebook import Observation, ObservationTopic
 from app.models.shows import (
     PerformanceLog,
     Setlist,
@@ -27,6 +28,8 @@ __all__ = [
     "BitType",
     "Brainstorm",
     "BrainstormVersion",
+    "Observation",
+    "ObservationTopic",
     "PerformanceLog",
     "Setlist",
     "SetlistItem",
