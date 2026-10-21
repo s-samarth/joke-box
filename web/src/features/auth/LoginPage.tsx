@@ -1,7 +1,9 @@
 /** Sign in with Google. Only invited accounts get in. */
 import { Navigate, useSearchParams } from 'react-router'
+import { ApiError } from '../../api/client'
 import { useMe } from '../../api/library'
 import { Tape } from '../../components/ui/bits'
+import { useWaiting } from '../../layout/useWaiting'
 
 const ERRORS: Record<string, string> = {
   not_invited: 'That Google account isn’t on the invite list. Sign in with an invited account, or ask to be added.',
@@ -10,8 +12,10 @@ const ERRORS: Record<string, string> = {
 
 export function LoginPage() {
   const [params] = useSearchParams()
-  const { data: me } = useMe()
-  if (me) return <Navigate to="/" replace />
+  const { data: me, error: meError } = useMe()
+  const { count: waiting } = useWaiting()
+  const signedOut = meError instanceof ApiError && meError.status === 401
+  if (me && !signedOut) return <Navigate to="/" replace />
   const error = ERRORS[params.get('error') ?? '']
   const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname)
 
@@ -30,6 +34,11 @@ export function LoginPage() {
           Sign in with Google
         </a>
         {isLocal && <a href="/auth/dev-login" className="mt-4 block text-center text-sm text-faint hover:text-dim">Sign in as the local test account</a>}
+        {waiting > 0 && (
+          <p className="mt-4 rounded-lg bg-amber/10 px-4 py-3 text-sm text-amber" role="status">
+            {waiting === 1 ? '1 change is' : `${waiting} changes are`} waiting on this phone. Sign in with the same account and they’ll sync.
+          </p>
+        )}
         {error && <p className="mt-4 rounded-lg bg-light/10 px-4 py-3 text-sm text-light" role="alert">{error}</p>}
       </div>
     </div>

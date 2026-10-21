@@ -10,7 +10,7 @@
  * read it with useSyncExternalStore, which re-renders them whenever `emit` swaps in new state.
  */
 import { onlineManager } from '@tanstack/react-query'
-import { createStore, del, get, set, values } from 'idb-keyval'
+import { clear, createStore, del, get, set, values } from 'idb-keyval'
 import { useSyncExternalStore } from 'react'
 import { ApiError } from '../../api/client'
 import { keys, queryClient } from '../../api/queryClient'
@@ -87,6 +87,14 @@ export async function editPending(id: string, input: VoiceNoteInput): Promise<bo
   await reload()
   void flush()
   return true
+}
+
+/** Drop every recording waiting to upload, and any half-recorded one (signing out). */
+export async function clearOutbox(): Promise<void> {
+  state.items.forEach((n) => discarded.add(n.id))
+  await clear(store)
+  await clearLive()
+  await reload()
 }
 
 /* Notes deleted while waiting. An upload already in flight checks this and cleans up after itself. */

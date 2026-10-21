@@ -20,6 +20,11 @@ describe('retrySync', () => {
     expect(retrySync(3, new ApiError(500, 'Oops'))).toBe(false)
   })
 
+  it('waits, a minute at a time, for you to sign in again', () => {
+    expect(retrySync(500, new ApiError(401, 'Sign in'))).toBe(true)
+    expect(QUEUED.retryDelay(3, new ApiError(401, 'Sign in'))).toBe(60_000)
+  })
+
   it("doesn't retry a refusal, which won't change", () => {
     expect(retrySync(0, new ApiError(422, 'Please check the form'))).toBe(false)
     expect(retrySync(0, new ApiError(404, 'Not found'))).toBe(false)
@@ -31,7 +36,7 @@ describe('QUEUED', () => {
   it('waits offline and sends saves one at a time', () => {
     expect(QUEUED.networkMode).toBe('online')
     expect(QUEUED.scope.id).toBe('sync')
-    expect(QUEUED.retryDelay(0)).toBe(1000)
-    expect(QUEUED.retryDelay(10)).toBe(30_000)
+    expect(QUEUED.retryDelay(0, new NetworkError())).toBe(1000)
+    expect(QUEUED.retryDelay(10, new NetworkError())).toBe(30_000)
   })
 })

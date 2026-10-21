@@ -7,8 +7,10 @@ import { Spinner } from '../../components/ui/bits'
 
 export function RequireAuth({ children }: { children: ReactNode }) {
   const { data, error, isPending } = useMe()
-  if (data) return <>{children}</>
+  // Signed out beats the cached profile: the sign-in ran out, so go and sign in again (saves
+  // waiting on the phone stay, and sync once you're back).
   if (error instanceof ApiError && error.status === 401) return <Navigate to="/login" replace />
+  if (data) return <>{children}</>
   if (isPending) {
     return (
       <div className="flex min-h-dvh items-center justify-center">
