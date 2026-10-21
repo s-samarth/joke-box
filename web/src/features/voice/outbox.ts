@@ -180,9 +180,14 @@ async function recoverInterrupted() {
   }
 }
 
-// Load what's waiting when the app starts, and retry whenever the connection comes back. That's
-// TanStack's online flag, not the phone's: it also notices a dead signal coming back to life.
-void recoverInterrupted().then(reload).then(flush)
+/**
+ * Load what's waiting and start uploading. main.tsx calls this once this tab is the open one, so
+ * a tab opening beside another can't take the other's recording while it's still going.
+ */
+export const startOutbox = () => recoverInterrupted().then(reload).then(flush)
+
+// Retry whenever the connection comes back. That's TanStack's online flag, not the phone's: it
+// also notices a dead signal coming back to life.
 onlineManager.subscribe((online) => {
   if (online) void flush()
 })
