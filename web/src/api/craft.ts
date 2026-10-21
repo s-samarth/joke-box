@@ -5,7 +5,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { api } from './client'
 import { keys, queryClient } from './queryClient'
-import type { CraftNote, CraftNoteInput } from './types'
+import type { CraftArea, CraftAreaInput, CraftNote, CraftNoteInput } from './types'
 
 export type SaveCraftVars = { id: string; input: CraftNoteInput }
 
@@ -43,6 +43,33 @@ export const useDeleteCraftNote = () => useMutation<void, Error, string>({ mutat
 
 /** The editable part of a saved note, for saving it again with one change. */
 export const craftInput = (n: CraftNote): CraftNoteInput => ({
-  title: n.title, body: n.body, kind: n.kind, area: n.area, hashtags: n.hashtags, source: n.source, url: n.url, position: n.position,
+  title: n.title, body: n.body, kind: n.kind, area_id: n.area_id, hashtags: n.hashtags, source: n.source, url: n.url, position: n.position,
   performance_log_id: n.performance_log_id, analysis_id: n.analysis_id,
 })
+
+/* Areas change online only: renaming or deleting one touches many notes, so it should land now. */
+const refreshAreas = () => {
+  void queryClient.invalidateQueries({ queryKey: keys.craftAreas })
+  void queryClient.invalidateQueries({ queryKey: keys.craftNotes })
+}
+
+export const useCraftAreas = () => useQuery({ queryKey: keys.craftAreas, queryFn: () => api<CraftArea[]>('/api/craft-areas') })
+
+export const useCreateArea = () =>
+  useMutation({ mutationFn: (input: CraftAreaInput) => api<CraftArea>('/api/craft-areas', 'POST', input), onSettled: refreshAreas })
+
+export const useUpdateArea = () =>
+  useMutation({ mutationFn: ({ id, input }: { id: string; input: CraftAreaInput }) => api<CraftArea>(`/api/craft-areas/${id}`, 'PATCH', input), onSettled: refreshAreas })
+
+export const useReorderAreas = () =>
+  useMutation({
+    mutationFn: (ids: string[]) => api<void>('/api/craft-areas/order', 'PUT', { ids }),
+    onMutate: (ids: string[]) => queryClient.setQueryData<CraftArea[]>(keys.craftAreas, (old = []) =>
+      ids.map((id) => old.find((a) => a.id === id)).filter((a): a is CraftArea => Boolean(a)).map((a, position) => ({ ...a, position }))),
+    onSettled: refreshAreas,
+  })
+
+export const useDeleteArea = () =>
+  useMutation({ mutationFn: ({ id, moveTo }: { id: string; moveTo: string }) => api<void>(`/api/craft-areas/${id}?move_to=${moveTo}`, 'DELETE'), onSettled: refreshAreas })
+
+export const areaInput = (a: CraftArea): CraftAreaInput => ({ name: a.name, description: a.description, color: a.color, screens: a.screens })

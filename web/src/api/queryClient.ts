@@ -30,6 +30,7 @@ export const keys = {
   watchlist: ['watchlist'],
   analyses: ['analyses'],
   craftNotes: ['craft-notes'],
+  craftAreas: ['craft-areas'],
 } as const
 
 export const queryClient = new QueryClient({

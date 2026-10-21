@@ -192,14 +192,29 @@ export interface Analysis extends AnalysisInput {
 }
 
 export type CraftKind = 'checklist' | 'technique' | 'reference' | 'path'
-export type CraftArea = 'writing' | 'generating' | 'rewriting' | 'sets' | 'stage' | 'formats' | 'progress'
+/** Screens that can show an area's notes in a sheet. */
+export type CraftScreen = 'rewrite' | 'sets' | 'stage'
+export type AreaColor = 'sky' | 'violet' | 'emerald' | 'orange' | 'rose' | 'pink' | 'amber' | 'teal'
+
+/** A folder of craft notes. Yours to add, rename, colour, reorder and delete. */
+export interface CraftAreaInput {
+  name: string
+  description: string
+  color: AreaColor
+  screens: CraftScreen[]
+}
+
+export interface CraftArea extends CraftAreaInput {
+  id: string
+  position: number
+}
 
 /** Something you've learned about doing stand-up: a checklist, a technique, reference or a goal. */
 export interface CraftNoteInput {
   title: string
   body: string
   kind: CraftKind
-  area: CraftArea
+  area_id: string
   hashtags: string[]
   source: string
   url: string

@@ -13,7 +13,7 @@ const bundle: ImportBundle = {
     { id: 'o2', text: 'Second fake thing', created_at: when },
   ],
   voice_notes: [{ id: 'v1', label: 'Fake note', hashtags: [], duration_seconds: 5, created_at: when, file: 'a.webm' }],
-  craft_notes: [{ id: 'c1', title: 'Fake checklist', body: '- fake', kind: 'checklist', area: 'rewriting', created_at: when }],
+  craft_notes: [{ id: 'c1', title: 'Fake checklist', body: '- fake', kind: 'checklist', area: 'Rewriting', created_at: when }],
 }
 const nothing = { ids: new Set<string>(), jokeSetups: new Set<string>(), observationTexts: new Set<string>(), craftTitles: new Set<string>() }
 

@@ -1,12 +1,12 @@
 /**
- * Craft notes for the screen you're on, in a sheet: the Rewrite checklists, the set-building
- * notes beside a set, the stage notes before you go on. Pick a note from the row at the top.
+ * Craft notes for the screen you're on, in a sheet, from the areas set to show there (each
+ * area's settings pick its screens): Rewrite checklists, set-building notes, stage notes. Pick a note from the row at the top.
  * A checklist's items tick on and off here without changing the note, so each run starts fresh.
  */
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { useCraftNotes } from '../../api/craft'
-import type { CraftArea, CraftKind } from '../../api/types'
+import { useCraftAreas, useCraftNotes } from '../../api/craft'
+import type { CraftKind, CraftScreen } from '../../api/types'
 import { Modal } from '../../components/ui/Modal'
 import { listItems } from './bodyFormat'
 import { notesFor } from './craftMeta'
@@ -17,7 +17,7 @@ interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
   title: string
-  areas: CraftArea[]
+  screen: CraftScreen
   /** Only these kinds; all kinds when left out. */
   kinds?: CraftKind[]
   /** Shown when there's nothing to show yet. */
@@ -26,14 +26,15 @@ interface Props {
 
 const chip = (on: boolean) => `h-8 shrink-0 rounded-lg px-3 text-sm transition ${on ? 'bg-paper font-medium text-ink' : 'bg-ink-3 text-dim hover:text-paper'}`
 
-export function CraftSheet({ open, onOpenChange, title, areas, kinds, empty }: Props) {
+export function CraftSheet({ open, onOpenChange, title, screen, kinds, empty }: Props) {
   const { data: all = [] } = useCraftNotes()
-  const notes = notesFor(all, areas, kinds)
+  const { data: areas = [] } = useCraftAreas()
+  const notes = notesFor(all, areas, screen, kinds)
   const [pickedId, setPickedId] = useState<string | null>(null)
   // Ticks per note, kept while the screen is open.
   const [ticks, setTicks] = useState<Record<string, number[]>>({})
   const note = notes.find((n) => n.id === pickedId) ?? notes[0]
-  const newHref = `/craft/new?area=${areas[areas.length - 1]}${kinds?.length === 1 ? `&kind=${kinds[0]}` : ''}`
+  const newHref = `/craft/new?screen=${screen}${kinds?.length === 1 ? `&kind=${kinds[0]}` : ''}`
 
   const tick = (line: number) => note && setTicks((t) => {
     const on = t[note.id] ?? []

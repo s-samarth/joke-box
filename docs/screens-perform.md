@@ -74,28 +74,47 @@ each with its premise in marker, the punch, its runtime and "by m:ss" (the runni
   **Count laughs for LPM** folds out five counters, one per laugh score from 1 (a few giggles) to 5
   (laughs and applause), with the LPM worked out as you count ([lpm.ts](../web/src/features/shows/lpm.ts),
   [LaughTally.tsx](../web/src/features/shows/LaughTally.tsx)). **What did you learn?** saves a craft
-  note under On stage, linked to the show.
+  note linked to the show, in the first area that shows on Stage.
 - **A show's detail** shows its LPM, what you learned there, and **Add a lesson**.
 - ⋯ → **Export as CSV**.
 
 <img src="screenshots/desktop-shows.png" alt="Shows">
 <img src="screenshots/phone-shows.png" width="230" alt="Shows on a phone">
 
-## Craft: `/craft` and `/craft/:noteId`
+## Craft: `/craft`, `/craft/area/:areaId` and `/craft/:noteId`
 
-[CraftPage.tsx](../web/src/features/craft/CraftPage.tsx), [CraftNotePage.tsx](../web/src/features/craft/CraftNotePage.tsx),
-[CraftNoteForm.tsx](../web/src/features/craft/CraftNoteForm.tsx), [NoteBody.tsx](../web/src/features/craft/NoteBody.tsx),
-[bodyFormat.ts](../web/src/features/craft/bodyFormat.ts), [craftMeta.ts](../web/src/features/craft/craftMeta.ts).
+[CraftPage.tsx](../web/src/features/craft/CraftPage.tsx), [AreaPage.tsx](../web/src/features/craft/AreaPage.tsx),
+[CraftNotePage.tsx](../web/src/features/craft/CraftNotePage.tsx), [CraftNoteForm.tsx](../web/src/features/craft/CraftNoteForm.tsx),
+[NoteCard.tsx](../web/src/features/craft/NoteCard.tsx), [PathLadder.tsx](../web/src/features/craft/PathLadder.tsx),
+[TechniqueShelf.tsx](../web/src/features/craft/TechniqueShelf.tsx), [AreaFolders.tsx](../web/src/features/craft/AreaFolders.tsx),
+[AreaSheet.tsx](../web/src/features/craft/AreaSheet.tsx), [ArrangeAreas.tsx](../web/src/features/craft/ArrangeAreas.tsx),
+[NoteBody.tsx](../web/src/features/craft/NoteBody.tsx), [bodyFormat.ts](../web/src/features/craft/bodyFormat.ts),
+[craftMeta.ts](../web/src/features/craft/craftMeta.ts).
 
-What you've learned about doing stand-up, kept apart from your material. The list is grouped by
-area in a fixed order (Writing, Generating, Rewriting, Building a set, On stage, Formats, Measuring
-and path), with a search box and All / Checklists / Techniques / References / Paths chips. Each row
-shows the name, its kind and the first line.
+What you've learned about doing stand-up, kept apart from your material. The page reads top to
+bottom:
+
+- **Your path** as a staircase: one step per tick box in your first open Path note (your levels),
+  done steps filled, the next outlined in tape. Below it the next step, and when it names minutes,
+  your most solid material on one topic against that target. Home shows a smaller copy.
+- **Write with a technique:** a sideways shelf of your techniques; tapping one opens a brainstorm
+  running it.
+- **Areas** as folders in their own colours, like the topic folders on Home: the count on the tab,
+  the first few notes, and how many of each kind. **New area** is the last folder; **Arrange**
+  reorders them and opens any one to edit.
+
+Areas are yours: name, a line about it, a colour, and which screens show its notes (Rewrite, the
+set builder, Stage). Deleting one asks where its notes should go. An area opens as a page of
+**note cards** in a masonry grid, each with a face for its kind: a checklist shows its first boxes,
+a technique a prompt and **Start**, a path its progress, a reference the start of the text. Each
+card's ⋯ menu moves it to another area or deletes it. Searching swaps the folders for matching
+cards from every area.
 
 A note opens formatted: headings, lists, **bold**, and tick boxes you can tick straight away (the
-tick is saved into the note). **Edit note** switches to the form: name, kind, area, the note,
+tick is saved into the note). Its area chip at the top moves it to another area. **Edit note** switches to the form: name, kind, area, the note,
 where you learned it, a link and hashtags, saved with **Save note** (offline too).
-`/craft/new?area=stage&kind=checklist` starts one with those filled in; `?show=<id>` or
+`/craft/new?area=<id>&kind=checklist` starts one with those filled in (`?screen=stage` picks the
+area that shows on Stage); `?show=<id>` or
 `?analysis=<id>` links it to where you learned it and fills in **Learned from**.
 
 ## Watchlist: `/watchlist`

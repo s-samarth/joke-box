@@ -13,6 +13,7 @@ from app.routers import (
     analyses,
     bits,
     craft,
+    craft_areas,
     observations,
     sessions,
     shows,
@@ -67,6 +68,7 @@ def create_app() -> FastAPI:
         voice,
         watchlist,
         analyses,
+        craft_areas,
         craft,
     )
     for module in routers:

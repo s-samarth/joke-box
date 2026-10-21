@@ -80,7 +80,7 @@ export function StageView() {
           ))}
         </ol>
       </div>
-      <CraftSheet open={notes} onOpenChange={setNotes} title="Before you go on" areas={['stage']} empty="No on-stage notes yet." />
+      <CraftSheet open={notes} onOpenChange={setNotes} title="Before you go on" screen="stage" empty="No notes in the areas that show on Stage." />
       <p className="px-5 py-2 text-center text-sm text-faint">Joke {items.length ? index + 1 : 0} of {items.length}. Tap right for next, left for back.</p>
     </div>
   )

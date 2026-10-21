@@ -122,7 +122,7 @@ function Builder({ setlist }: { setlist: Setlist }) {
       <Modal open={picking} onOpenChange={setPicking} title="Add jokes" description={`${items.length} in the set, ${clock(total)} so far`}>
         <div className="h-[62dvh]"><AddBits used={used} onAdd={(b) => add(b)} onOpen={setReading} /></div>
       </Modal>
-      <CraftSheet open={craft} onOpenChange={setCraft} title="Building a set" areas={['sets']} empty="No notes on building a set yet." />
+      <CraftSheet open={craft} onOpenChange={setCraft} title="Building a set" screen="sets" empty="No notes in the areas that show on the set builder." />
       {reading && <BitPeek bit={reading} onClose={() => setReading(null)} onAdd={() => add(reading)} inSet={used.has(reading.id)} />}
     </DndContext>
   )

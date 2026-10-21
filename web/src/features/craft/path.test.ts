@@ -5,7 +5,7 @@ import { lessonFrom } from './craftMeta'
 import { mostSolidTopic, nextStep, targetMinutes } from './path'
 
 const note = (patch: Partial<CraftNote>): CraftNote => ({
-  id: 'x', title: 'Fake', body: '', kind: 'path', area: 'progress', hashtags: [], source: '', url: '', position: 1,
+  id: 'x', title: 'Fake', body: '', kind: 'path', area_id: 'p', hashtags: [], source: '', url: '', position: 1,
   performance_log_id: null, analysis_id: null, created_at: '', updated_at: '', ...patch,
 })
 
@@ -33,10 +33,10 @@ describe('path', () => {
 
 describe('lessons', () => {
   it('names a lesson by its first line', () => {
-    expect(lessonFrom('Fake lesson', [])).toMatchObject({ title: 'Fake lesson', body: '', area: 'stage', kind: 'reference' })
+    expect(lessonFrom('Fake lesson', [], 's')).toMatchObject({ title: 'Fake lesson', body: '', area_id: 's', kind: 'reference' })
     const long = `${'word '.repeat(30)}end`
-    expect(lessonFrom(long, []).title.length).toBeLessThanOrEqual(81)
-    expect(lessonFrom(`Fake title\nmore fake`, []).body).toBe('Fake title\nmore fake')
+    expect(lessonFrom(long, [], 's').title.length).toBeLessThanOrEqual(81)
+    expect(lessonFrom(`Fake title\nmore fake`, [], 's').body).toBe('Fake title\nmore fake')
   })
 })
 

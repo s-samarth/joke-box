@@ -2,15 +2,15 @@
 
 import uuid
 
-from sqlalchemy import JSON, CheckConstraint, ForeignKey, Integer, String, Text, Uuid
+from sqlalchemy import JSON, CheckConstraint, ForeignKey, Index, Integer, String, Text, Uuid, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, OwnedMixin
 
 # What a note is for. The kind decides how the app shows it (a checklist ticks, a technique runs).
 CRAFT_KINDS = ("checklist", "technique", "reference", "path")
-# Where in the work it's used. Fixed, so the app can show the right notes on the right screen.
-CRAFT_AREAS = ("writing", "generating", "rewriting", "sets", "stage", "formats", "progress")
+# Screens that can show an area's notes in a sheet.
+CRAFT_SCREENS = ("rewrite", "sets", "stage")
 
 
 def one_of(column: str, values: tuple[str, ...]) -> str:
@@ -18,19 +18,34 @@ def one_of(column: str, values: tuple[str, ...]) -> str:
     return f"{column} IN ({', '.join(repr(v) for v in values)})"
 
 
+class CraftArea(OwnedMixin, Base):
+    """A folder of craft notes, yours to add, rename, colour, reorder and delete.
+
+    `screens` lists the screens that show its notes (Rewrite, the set builder, Stage).
+    """
+
+    __tablename__ = "craft_areas"
+    __table_args__ = (
+        Index("uq_craft_areas_user_name", "user_id", text("lower(name)"), unique=True),
+    )
+
+    name: Mapped[str] = mapped_column(String(80))
+    description: Mapped[str] = mapped_column(String(200), default="")
+    color: Mapped[str] = mapped_column(String(20), default="sky")
+    screens: Mapped[list[str]] = mapped_column(JSON, default=list)
+    position: Mapped[int] = mapped_column(Integer, default=0)
+
+
 class CraftNote(OwnedMixin, Base):
     """One lesson, checklist, technique or goal. The body is plain text with light formatting."""
 
     __tablename__ = "craft_notes"
-    __table_args__ = (
-        CheckConstraint(one_of("kind", CRAFT_KINDS), name="kind_values"),
-        CheckConstraint(one_of("area", CRAFT_AREAS), name="area_values"),
-    )
+    __table_args__ = (CheckConstraint(one_of("kind", CRAFT_KINDS), name="kind_values"),)
 
     title: Mapped[str] = mapped_column(String(200))
     body: Mapped[str] = mapped_column(Text, default="")
     kind: Mapped[str] = mapped_column(String(20), default="reference")
-    area: Mapped[str] = mapped_column(String(20), default="writing")
+    area_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("craft_areas.id"), index=True)
     hashtags: Mapped[list[str]] = mapped_column(JSON, default=list)
     source: Mapped[str] = mapped_column(String(200), default="")
     url: Mapped[str] = mapped_column(String(500), default="")

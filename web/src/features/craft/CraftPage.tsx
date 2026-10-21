@@ -1,75 +1,69 @@
-/** Craft: what you've learned about doing stand-up, grouped by where in the work you use it. */
-import { Plus, Search } from 'lucide-react'
+/**
+ * Craft: everything you know about doing stand-up. Top to bottom: your path as a staircase,
+ * techniques you can start writing with, then your areas as folders. Searching swaps the
+ * folders for matching note cards from every area.
+ */
+import { ArrowUpDown, Plus, Search } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { useCraftNotes } from '../../api/craft'
-import type { CraftKind } from '../../api/types'
-import { EmptyState, PageHead, SectionHead, Spinner } from '../../components/ui/bits'
+import { useCraftAreas, useCraftNotes } from '../../api/craft'
+import type { CraftArea } from '../../api/types'
+import { Button } from '../../components/ui/Button'
+import { PageHead, SectionHead, Spinner } from '../../components/ui/bits'
 import { Input } from '../../components/ui/Field'
-import { KINDS, groupByArea, kindLabel, matches } from './craftMeta'
+import { AreaFolders } from './AreaFolders'
+import { AreaSheet } from './AreaSheet'
+import { ArrangeAreas } from './ArrangeAreas'
+import { groupByArea, matches } from './craftMeta'
+import { NoteGrid } from './NoteGrid'
+import { PathLadder } from './PathLadder'
+import { TechniqueShelf } from './TechniqueShelf'
 
-const chip = (on: boolean) => `h-8 shrink-0 rounded-lg px-3 text-sm transition ${on ? 'bg-paper font-medium text-ink' : 'bg-ink-3 text-dim hover:text-paper'}`
-
-const newButton = (
-  <Link to="/craft/new" className="inline-flex h-9 items-center gap-2 rounded-lg bg-tape px-3 text-sm font-semibold text-tape-ink hover:bg-[#f5da77]">
-    <Plus size={16} /> New note
-  </Link>
-)
-
-/** The first line of the body without its formatting marks, as a preview. */
-const preview = (body: string) =>
-  body.split('\n').map((l) => l.replace(/^\s*(#+\s+|[-*]\s+|\d+[.)]\s+)?(\[[ xX]\]\s+)?/, '').replaceAll('**', '').trim()).find(Boolean) ?? ''
+type Sheet = { kind: 'new' } | { kind: 'edit'; area: CraftArea } | { kind: 'arrange' } | null
 
 export function CraftPage() {
   const { data: notes = [], isPending } = useCraftNotes()
-  const [kind, setKind] = useState<CraftKind | null>(null)
+  const { data: areas = [], isPending: areasPending } = useCraftAreas()
   const [query, setQuery] = useState('')
-  const shown = notes.filter((n) => (!kind || n.kind === kind) && matches(n, query))
-  const groups = groupByArea(shown)
+  const [sheet, setSheet] = useState<Sheet>(null)
+  const groups = groupByArea(notes, areas)
+  const counts = new Map(groups.map((g) => [g.area.id, g.notes.length]))
+  const found = query.trim() ? notes.filter((n) => matches(n, query)) : null
 
-  if (isPending) return <div className="py-16"><Spinner /></div>
+  if (isPending || areasPending) return <div className="py-16"><Spinner /></div>
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <PageHead title="Craft">{notes.length > 0 && newButton}</PageHead>
-      {notes.length === 0 ? (
-        <EmptyState title="No craft notes yet" action={newButton}>
-          Keep what you learn about doing stand-up here: checklists to tick through, writing techniques, things to look up, and where you want to get to. Your jokes stay in Jokes.
-        </EmptyState>
+    <div className="mx-auto max-w-3xl pb-16">
+      <PageHead title="Craft">
+        <Link to="/craft/new" className="inline-flex h-9 items-center gap-2 rounded-lg bg-tape px-3 text-sm font-semibold text-tape-ink hover:bg-[#f5da77]"><Plus size={16} /> New note</Link>
+      </PageHead>
+      <p className="-mt-2 mb-5 text-dim">What you know about doing stand-up. {notes.length} notes in {areas.length} areas.</p>
+      <div className="relative">
+        <Search size={18} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-faint" />
+        <Input type="search" aria-label="Search craft notes" placeholder="Search every note" className="pl-10" value={query} onChange={(e) => setQuery(e.target.value)} />
+      </div>
+
+      {found ? (
+        <section className="mt-6">
+          <p className="mb-3 text-sm text-dim">{found.length === 1 ? '1 note' : `${found.length} notes`} match “{query.trim()}”</p>
+          <NoteGrid notes={found} areas={areas} showArea />
+        </section>
       ) : (
         <>
-          <div className="space-y-3">
-            <div className="relative">
-              <Search size={18} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-faint" />
-              <Input type="search" aria-label="Search craft notes" placeholder="Search notes" className="pl-10" value={query} onChange={(e) => setQuery(e.target.value)} />
-            </div>
-            <div className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0" role="group" aria-label="Show">
-              <button type="button" className={chip(!kind)} aria-pressed={!kind} onClick={() => setKind(null)}>All</button>
-              {KINDS.map((k) => (
-                <button key={k.key} type="button" className={chip(kind === k.key)} aria-pressed={kind === k.key} title={k.hint} onClick={() => setKind(kind === k.key ? null : k.key)}>{k.label}s</button>
-              ))}
-            </div>
-          </div>
-          {groups.length === 0 && <p className="mt-6 text-dim">No notes match.</p>}
-          {groups.map(({ area, notes: inArea }) => (
-            <section key={area.key} className="mt-10">
-              <SectionHead title={area.label}><span className="text-sm text-faint">{area.hint}</span></SectionHead>
-              <ul className="divide-y divide-rule border-y border-rule">
-                {inArea.map((n) => (
-                  <li key={n.id}>
-                    <Link to={`/craft/${n.id}`} className="block py-3 hover:bg-ink-2/60">
-                      <p className="flex items-baseline justify-between gap-3">
-                        <span className="font-medium">{n.title}</span>
-                        <span className="shrink-0 text-[13px] text-faint">{kindLabel(n.kind)}</span>
-                      </p>
-                      {preview(n.body) && <p className="mt-0.5 line-clamp-1 text-sm text-dim">{preview(n.body)}</p>}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
+          <div className="mt-6"><PathLadder /></div>
+          <TechniqueShelf notes={notes} areas={areas} />
+          <section className="mt-10">
+            <SectionHead title="Areas">
+              <Button variant="quiet" small icon={<ArrowUpDown size={15} />} onClick={() => setSheet({ kind: 'arrange' })}>Arrange</Button>
+            </SectionHead>
+            <AreaFolders groups={groups} onAdd={() => setSheet({ kind: 'new' })} />
+          </section>
         </>
+      )}
+
+      {sheet?.kind === 'arrange' && <ArrangeAreas areas={areas} counts={counts} onClose={() => setSheet(null)} onEdit={(area) => setSheet({ kind: 'edit', area })} />}
+      {(sheet?.kind === 'new' || sheet?.kind === 'edit') && (
+        <AreaSheet area={sheet.kind === 'edit' ? sheet.area : undefined} areas={areas} noteCount={sheet.kind === 'edit' ? counts.get(sheet.area.id) ?? 0 : 0} onClose={() => setSheet(null)} />
       )}
     </div>
   )
