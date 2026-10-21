@@ -8,7 +8,7 @@ import { IconButton } from '../../components/ui/Button'
 import { monthWeeks, shiftMonth } from './dailyMath'
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-const monthName = (month: string) => new Date(`${month}-01T12:00:00Z`).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })
+const monthName = (month: string) => new Date(`${month}-01T12:00:00Z`).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', month: 'long', year: 'numeric' })
 
 interface Props {
   month: string

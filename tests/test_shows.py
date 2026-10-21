@@ -1,6 +1,7 @@
 """Brainstorms, setlists, venues and performance logs."""
 
 import uuid
+from datetime import UTC, datetime
 
 from fastapi.testclient import TestClient
 
@@ -73,6 +74,15 @@ def test_log_a_mic(alice: TestClient) -> None:
     assert saved["venue_name"] == "Garage"  # matched case-insensitively, not duplicated
     assert saved["topic_ids"] == [topic_id]
     assert len(alice.get("/api/venues").json()) == 1
+
+
+def test_times_come_back_as_the_same_instant_in_utc(alice: TestClient) -> None:
+    """8:30 pm IST is 15:00 UTC, and it comes back tagged UTC on every database, SQLite included."""
+    log_id = str(uuid.uuid4())
+    alice.put(f"/api/logs/{log_id}", json={"performed_at": "2026-10-01T20:30:00+05:30"})
+    [log] = alice.get("/api/logs").json()
+    assert datetime.fromisoformat(log["performed_at"]) == datetime(2026, 10, 1, 15, 0, tzinfo=UTC)
+    assert datetime.fromisoformat(log["created_at"]).tzinfo is not None
 
 
 def test_deleting_a_topic_repoints_logs_to_random(alice: TestClient) -> None:

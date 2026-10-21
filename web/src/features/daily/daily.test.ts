@@ -31,4 +31,18 @@ describe('daily joke habit', () => {
     expect([shiftMonth('2026-01', -1), shiftMonth('2026-12', 1)]).toEqual(['2025-12', '2027-01'])
     expect(daysBetween('2026-02-27', '2026-03-01')).toBe(2)
   })
+
+  it('carries on past October: every month to the end of 2028 has the right days, leap years too', () => {
+    const lengths: Record<string, number> = {}
+    for (let m = '2026-10'; m <= '2028-12'; m = shiftMonth(m, 1)) lengths[m] = monthWeeks(m).flat().filter(Boolean).length
+    expect(Object.keys(lengths)).toHaveLength(27)
+    expect([lengths['2026-11'], lengths['2026-12'], lengths['2027-01'], lengths['2027-02'], lengths['2028-02']]).toEqual([30, 31, 31, 28, 29])
+    expect(monthWeeks('2027-01')[0]).toEqual([null, null, null, null, '2027-01-01', '2027-01-02', '2027-01-03']) // a Friday
+  })
+
+  it('keeps a streak going across the end of a month and a year', () => {
+    expect(habit(['2026-10-31', '2026-11-01'], '2026-11-01')).toMatchObject({ current: 2, mood: 'done' })
+    expect(habit(['2026-12-30', '2026-12-31', '2027-01-01'], '2027-01-02')).toMatchObject({ gap: 1, current: 3, mood: 'due' })
+    expect(habit(['2026-10-21'], '2026-11-05')).toMatchObject({ gap: 15, current: 0, mood: 'gone' })
+  })
 })

@@ -2,10 +2,10 @@
 
 from datetime import datetime
 
-from sqlalchemy import DateTime, String
+from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.models.base import Base, IdMixin, TimestampMixin
+from app.models.base import Base, IdMixin, TimestampMixin, UTCDateTime
 
 
 class User(IdMixin, TimestampMixin, Base):
@@ -16,4 +16,4 @@ class User(IdMixin, TimestampMixin, Base):
     display_name: Mapped[str] = mapped_column(String(200), default="")
     avatar_url: Mapped[str] = mapped_column(String(1000), default="")
     plan: Mapped[str] = mapped_column(String(20), default="Pro")
-    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_login_at: Mapped[datetime | None] = mapped_column(UTCDateTime())
