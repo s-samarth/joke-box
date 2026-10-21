@@ -12,6 +12,8 @@ class VoiceNoteIn(BaseModel):
     label: str = Field(default="", max_length=200)
     hashtags: list[str] = Field(default_factory=list, max_length=30)
     duration_seconds: int = Field(default=0, ge=0, le=6 * 60 * 60)
+    # Kept only when the note is created: an import can keep the original date.
+    created_at: datetime | None = None
 
 
 class VoiceNoteOut(VoiceNoteIn):

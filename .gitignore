@@ -40,3 +40,10 @@ node_modules/
 
 # Vercel
 .vercel/
+
+# WhatsApp exports and import bundles: real material, never committed
+WhatsApp Chat*/
+WhatsApp Chat*.zip
+_chat.txt
+*.opus
+jokebox-whatsapp-import/

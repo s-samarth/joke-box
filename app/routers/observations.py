@@ -36,6 +36,8 @@ def put_observation(
     observation = find_owned(db, Observation, observation_id, user)
     if observation is None:
         observation = Observation(id=observation_id, user_id=user.id)
+        if body.created_at:
+            observation.created_at = body.created_at
         db.add(observation)
     observation.text = body.text
     observation.topic_id = body.topic_id

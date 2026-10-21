@@ -109,3 +109,10 @@ def test_blob_calls_see_the_requests_oidc_header(monkeypatch: pytest.MonkeyPatch
     BlobAudioStore({"x-vercel-oidc-token": "fake-token"}).put("voice/x.m4a", b"x", "audio/mp4")
     assert seen == [{"x-vercel-oidc-token": "fake-token"}]
     assert get_headers() is None  # nothing leaks past the call
+
+
+def test_an_import_keeps_the_original_date(alice: TestClient) -> None:
+    note_id = new_note(alice, created_at="2023-02-13T15:47:37Z")
+    assert alice.get("/api/voice-notes").json()[0]["created_at"].startswith("2023-02-13")
+    new_note(alice)  # recorded now, so it lists first
+    assert alice.get("/api/voice-notes").json()[1]["id"] == note_id

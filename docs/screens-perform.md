@@ -99,3 +99,20 @@ and the link's domain. The editor has a name, a link and the write-up, saved wit
 
 [LinksPage.tsx](../web/src/features/study/LinksPage.tsx). Two cards that open in a new tab:
 **The Relatable Schemer** (the persona site) and **Comedy Atlas**.
+
+## Import: `/import`
+
+[ImportPage.tsx](../web/src/features/import/ImportPage.tsx), [bundle.ts](../web/src/features/import/bundle.ts),
+[runImport.ts](../web/src/features/import/runImport.ts).
+
+Not in the navigation: open it from the avatar menu → **Import**, on a laptop (phones can't pick
+folders). Choose a prepared import folder holding `import.json` and an `audio/` folder. The page
+lists what's new (jokes, with any topics it will create, observations and voice notes) and what it
+will skip, then **Import** uploads them one by one with a progress bar and lists any failures.
+
+- Every item has a fixed id, so importing the same folder twice adds nothing. Jokes and observations
+  whose words are already in JokeBox are skipped too.
+- Original dates are kept. A joke with no topic goes to Thoughts; topics named in the folder are
+  matched by name (any case) or created.
+- The folder is made on a laptop from an export (the WhatsApp self-chat, for one). It holds real
+  material, so it stays in `~/Downloads` and `.gitignore` covers WhatsApp exports.

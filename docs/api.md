@@ -90,7 +90,7 @@ The response (`BitOut`) adds `id`, `created_at` and `updated_at`, and returns `t
 | Method | Path | Body / notes |
 |---|---|---|
 | GET | `/api/observations` | Newest first |
-| PUT | `/api/observations/{id}` | `{text, topic_id?}`. The text must not be blank |
+| PUT | `/api/observations/{id}` | `{text, topic_id?, created_at?}`. The text must not be blank. `created_at` is kept only on create (imports) |
 | DELETE | `/api/observations/{id}` | |
 | GET | `/api/observation-topics` | `[{id, name}]` |
 | POST | `/api/observation-topics` | `{name}` → 201 |
@@ -109,7 +109,7 @@ up to 5,000 points per stroke and at most 20 pages. Those caps keep one session 
 | Method | Path | Body / notes |
 |---|---|---|
 | GET | `/api/voice-notes` | Newest first; `has_audio` says whether the upload has landed |
-| PUT | `/api/voice-notes/{id}` | `{label, hashtags[], duration_seconds}` |
+| PUT | `/api/voice-notes/{id}` | `{label, hashtags[], duration_seconds, created_at?}`. `created_at` is kept only on create (imports) |
 | PUT | `/api/voice-notes/{id}/audio` | Raw bytes with `Content-Type: audio/*`. At most 4 MiB (413 over); 400 if empty; 415 if not audio |
 | GET | `/api/voice-notes/{id}/audio` | The recording. `Cache-Control: private, max-age=31536000` |
 | DELETE | `/api/voice-notes/{id}` | Deletes the row and the file |
