@@ -72,3 +72,14 @@ def test_other_users_cannot_touch_my_bits(alice: TestClient, bob: TestClient) ->
 
 def test_cannot_file_a_bit_in_someone_elses_topic(alice: TestClient, bob: TestClient) -> None:
     assert put_bit(bob, topic_id=random_topic_id(alice)).status_code == 422
+
+
+def test_a_backdated_joke_was_last_changed_when_it_was_written(alice: TestClient) -> None:
+    """Imports keep their old date as written and last changed; an edit moves only the latter."""
+    bit_id = str(uuid.uuid4())
+    old = put_bit(alice, bit_id, created_at="2024-07-19T16:30:00Z").json()
+    assert old["created_at"] == old["updated_at"]
+    assert old["updated_at"].startswith("2024-07-19")
+    edited = put_bit(alice, bit_id, setup="Fake edit").json()
+    assert edited["created_at"].startswith("2024-07-19")
+    assert edited["updated_at"] > edited["created_at"]

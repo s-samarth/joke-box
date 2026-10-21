@@ -98,8 +98,12 @@ the jokes' created dates, so there's no separate log to fall out of step.
 [TypeManager.tsx](../web/src/features/bits/TypeManager.tsx).
 
 - **List:** a search box ("Search words, tags, notes") and four menus: Topic (with subtopics), Type,
-  Status, and Sort (Newest, Strongest, Weakest, Longest). Each row shows the premise, the start of
-  the punch, strength ticks, type dots, the topic and the runtime. The ⋯ menu has **Export as CSV**.
+  Status, and Sort (Newest, Oldest, Recently edited, Strongest, Weakest, Longest). Each row shows the
+  premise, the start of the punch, strength ticks, type dots, the topic, the date it was added (or
+  last edited, under Recently edited) and the runtime. Sorted by a date, the list is grouped into
+  months under pinned headings, with the time scrubber down its side ([BitList.tsx](../web/src/features/bits/BitList.tsx)).
+  A joke brought in with an older date (an import) counts as last edited then, not on the day it
+  arrived. The ⋯ menu has **Export as CSV** (with Created At and Edited At).
 - **Layout:** like a mail app. On desktop the selected joke opens in a pane beside the list; on a
   phone it opens as its own page with a back link.
 - **The joke page:** the premise and punch (in tape yellow) are edited in place, followed by tag
@@ -154,8 +158,9 @@ tick through it; the ticks count up and don't change the note, so the next rewri
 [ObservationTopicManager.tsx](../web/src/features/observations/ObservationTopicManager.tsx).
 
 The page has a box with topic chips and **Log it**. Below it are filter tabs (All, each topic with
-its count, No topic), then the list, newest first, where each row's ⋯ menu offers Edit,
-**Turn into a joke** and Delete. A **Topics** button manages the observation topics, which are
+its count, No topic), then the list by month under pinned headings, **Newest first** or **Oldest first** (`?order=old`),
+with the time scrubber down the right edge. Each row's ⋯ menu offers Edit, **Turn into a joke** and
+Delete. A **Topics** button manages the observation topics, which are
 separate from joke topics; deleting one keeps its observations. The filter is `?topic=` in the URL.
 
 <img src="screenshots/desktop-observations.png" alt="Observations">
@@ -200,8 +205,9 @@ separate from joke topics; deleting one keeps its observations. The filter is `?
   hashtags, while the recording uploads in the background. **Done** files the note and
   **Delete** throws it away.
 - **Library:** a search box over labels and hashtags, hashtag chips with their counts, and one row
-  per note (play, label, length, date, hashtags, edit, delete). Notes still waiting in the outbox
-  are listed first.
+  per note (play, label, length, date, hashtags, edit, delete), grouped by month under pinned
+  headings, **Newest first** or **Oldest first** (`?order=old`), with the time scrubber down the
+  right edge.
 - **Storage bar:** how much of the 1 GB of free Blob storage the recordings use.
 
 How recording, the meter, the outbox and playback work is covered in
