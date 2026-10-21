@@ -5,8 +5,8 @@ import uuid
 from fastapi import APIRouter
 from sqlalchemy import select
 
-from app.auth.deps import CurrentUser, DbSession, find_owned
-from app.models import WritingSession
+from app.auth.deps import CurrentUser, DbSession, find_owned, get_owned
+from app.models import CraftNote, WritingSession
 from app.schemas.notebook import WritingSessionIn, WritingSessionOut
 
 router = APIRouter(prefix="/api", tags=["sessions"])
@@ -27,6 +27,8 @@ def put_session(
     session_id: uuid.UUID, body: WritingSessionIn, user: CurrentUser, db: DbSession
 ) -> WritingSession:
     """Create or update. The client picks the id, so autosaves and offline retries are safe."""
+    if body.technique_id is not None:
+        get_owned(db, CraftNote, body.technique_id, user)  # only your own techniques
     session = find_owned(db, WritingSession, session_id, user)
     if session is None:
         session = WritingSession(id=session_id, user_id=user.id)
@@ -39,6 +41,7 @@ def put_session(
     session.timer_seconds = data["timer_seconds"]
     session.bit_ids = data["bit_ids"]
     session.observation_ids = data["observation_ids"]
+    session.technique_id = body.technique_id
     db.commit()
     db.refresh(session)
     return session

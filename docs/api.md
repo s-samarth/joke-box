@@ -97,7 +97,7 @@ The response (`BitOut`) adds `id`, `created_at` and `updated_at`, and returns `t
 | PATCH | `/api/observation-topics/{id}` | `{name}` |
 | DELETE | `/api/observation-topics/{id}` | Its observations keep existing, with no topic |
 | GET | `/api/sessions` | Brainstorm sessions |
-| PUT | `/api/sessions/{id}` | `{title, content, ink[], ink_pages, timer_seconds, bit_ids[], observation_ids[]}` |
+| PUT | `/api/sessions/{id}` | `{title, content, ink[], ink_pages, timer_seconds, bit_ids[], observation_ids[], technique_id?}`. The technique must be your own craft note |
 | DELETE | `/api/sessions/{id}` | |
 
 `ink` holds at most 10,000 strokes, each `{color, size, page, points: [[x, y, pressure], …]}`, with

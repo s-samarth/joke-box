@@ -3,7 +3,7 @@
  * dimmed. The clock follows the open-mic light: amber with a minute to go, red when you're over.
  * Tap the right side for the next bit, the left to go back. The screen stays awake.
  */
-import { Pause, Play, RotateCcw, X } from 'lucide-react'
+import { GraduationCap, Pause, Play, RotateCcw, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { useBits } from '../../api/library'
@@ -11,6 +11,7 @@ import { useSetlists } from '../../api/shows'
 import { Tape } from '../../components/ui/bits'
 import { clock } from '../../lib/duration'
 import { useTimer } from '../bits/useTimer'
+import { CraftSheet } from '../craft/CraftSheet'
 import { lightState } from './setlistMath'
 
 function useWakeLock() {
@@ -33,6 +34,7 @@ export function StageView() {
   const { data: sets = [] } = useSetlists()
   const { data: bits = [] } = useBits()
   const [index, setIndex] = useState(0)
+  const [notes, setNotes] = useState(false)
   const timer = useTimer()
   const current = useRef<HTMLLIElement>(null)
   useWakeLock()
@@ -56,6 +58,7 @@ export function StageView() {
         <span className="text-faint tabular">/ {clock(setlist.target_seconds)}</span>
         {state === 'light' && <span className="ml-1 inline-flex items-center gap-1.5 text-sm text-amber"><span className="size-2.5 rounded-full bg-amber" />Light</span>}
         <div className="ml-auto flex gap-1">
+          <button type="button" onClick={() => setNotes(true)} aria-label="Before you go on" title="Before you go on" className="inline-flex size-11 items-center justify-center rounded-lg text-faint hover:text-paper"><GraduationCap size={20} /></button>
           <button type="button" onClick={timer.reset} aria-label="Reset clock" className="inline-flex size-11 items-center justify-center rounded-lg text-faint hover:text-paper"><RotateCcw size={20} /></button>
           <button type="button" onClick={timer.running ? timer.pause : timer.start} aria-label={timer.running ? 'Pause clock' : 'Start clock'}
             className="inline-flex size-11 items-center justify-center rounded-lg bg-tape text-tape-ink">{timer.running ? <Pause size={20} /> : <Play size={20} />}</button>
@@ -77,6 +80,7 @@ export function StageView() {
           ))}
         </ol>
       </div>
+      <CraftSheet open={notes} onOpenChange={setNotes} title="Before you go on" areas={['stage']} empty="No on-stage notes yet." />
       <p className="px-5 py-2 text-center text-sm text-faint">Joke {items.length ? index + 1 : 0} of {items.length}. Tap right for next, left for back.</p>
     </div>
   )

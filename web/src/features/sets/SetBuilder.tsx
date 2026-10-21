@@ -4,7 +4,7 @@
  */
 import { DndContext, KeyboardSensor, PointerSensor, TouchSensor, closestCenter, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { ArrowLeft, Play, Plus, Printer } from 'lucide-react'
+import { ArrowLeft, GraduationCap, Play, Plus, Printer } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router'
 import { useBits } from '../../api/library'
@@ -16,6 +16,7 @@ import { Field, GrowingText, Input } from '../../components/ui/Field'
 import { Modal } from '../../components/ui/Modal'
 import { clock, parse } from '../../lib/duration'
 import { BitPeek } from '../bits/BitPeek'
+import { CraftSheet } from '../craft/CraftSheet'
 import { AddBits } from './AddBits'
 import { LightBar } from './LightBar'
 import { move, positionLabel } from './setlistMath'
@@ -37,6 +38,7 @@ function Builder({ setlist }: { setlist: Setlist }) {
   const { data: venues = [] } = useVenues()
   const [picking, setPicking] = useState(false)
   const [reading, setReading] = useState<Bit | null>(null)
+  const [craft, setCraft] = useState(false)
   const [target, setTarget] = useState(clock(draft.target_seconds))
   const byId = new Map(bits.map((b) => [b.id, b]))
   const used = new Set(draft.items.map((i) => i.bit_id))
@@ -74,6 +76,7 @@ function Builder({ setlist }: { setlist: Setlist }) {
           <div className="flex h-12 items-center justify-between gap-2 lg:mt-6">
             <Link to="/sets" className="inline-flex items-center gap-1.5 text-dim hover:text-paper"><ArrowLeft size={18} /> Sets</Link>
             <div className="flex gap-1">
+              <button type="button" onClick={() => setCraft(true)} aria-label="Notes on building a set" title="Notes on building a set" className="inline-flex size-10 items-center justify-center rounded-lg text-dim hover:bg-ink-3 hover:text-paper"><GraduationCap size={18} /></button>
               <Link to={`/sets/${setlist.id}/print`} aria-label="Print" className="inline-flex size-10 items-center justify-center rounded-lg text-dim hover:bg-ink-3 hover:text-paper"><Printer size={18} /></Link>
               <Link to={`/sets/${setlist.id}/stage`} className="inline-flex h-10 items-center gap-2 rounded-lg bg-tape px-3 font-semibold text-tape-ink"><Play size={16} /> Rehearse</Link>
             </div>
@@ -119,6 +122,7 @@ function Builder({ setlist }: { setlist: Setlist }) {
       <Modal open={picking} onOpenChange={setPicking} title="Add jokes" description={`${items.length} in the set, ${clock(total)} so far`}>
         <div className="h-[62dvh]"><AddBits used={used} onAdd={(b) => add(b)} onOpen={setReading} /></div>
       </Modal>
+      <CraftSheet open={craft} onOpenChange={setCraft} title="Building a set" areas={['sets']} empty="No notes on building a set yet." />
       {reading && <BitPeek bit={reading} onClose={() => setReading(null)} onAdd={() => add(reading)} inSet={used.has(reading.id)} />}
     </DndContext>
   )

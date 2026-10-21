@@ -2,7 +2,7 @@
  * Rewrite: a quiet full-screen page for reworking one bit against the clock. The original stays
  * pinned at the top, the timer runs while you write, and every save keeps a version.
  */
-import { History, Pause, Play, Plus, RotateCcw, X } from 'lucide-react'
+import { History, ListChecks, Pause, Play, Plus, RotateCcw, X } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { newId } from '../../api/client'
@@ -15,6 +15,7 @@ import { GrowingText } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { Modal } from '../../components/ui/Modal'
 import { clock } from '../../lib/duration'
+import { CraftSheet } from '../craft/CraftSheet'
 import { RewriteHistory } from './RewriteHistory'
 import { useTimer } from './useTimer'
 
@@ -24,6 +25,7 @@ function Workspace({ bit, sessions, startId }: { bit: Bit; sessions: Brainstorm[
   const [title, setTitle] = useState(start?.title ?? '')
   const [content, setContent] = useState(start?.content ?? '')
   const [historyOpen, setHistoryOpen] = useState(false)
+  const [checking, setChecking] = useState(false)
   const timer = useTimer(start?.timer_seconds ?? 0)
   const actions = useBrainstormActions()
   const { toast, confirm } = useFeedback()
@@ -63,9 +65,10 @@ function Workspace({ bit, sessions, startId }: { bit: Bit; sessions: Brainstorm[
         <IconButton label="Reset timer" onClick={timer.reset}><RotateCcw size={16} /></IconButton>
         <span className="hidden text-sm text-faint tabular sm:inline">{words} words</span>
         <div className="ml-auto flex items-center gap-1">
+          <IconButton label="Checklists" onClick={() => setChecking(true)}><ListChecks size={18} /></IconButton>
           <IconButton label="New session" onClick={() => open()}><Plus size={18} /></IconButton>
           <IconButton label="History" onClick={() => setHistoryOpen(true)} className="lg:hidden"><History size={18} /></IconButton>
-          <Button variant="tape" onClick={save} disabled={actions.save.isPending}>Save version</Button>
+          <Button variant="tape" onClick={save} disabled={actions.save.isPending}>Save<span className="hidden sm:inline">&nbsp;version</span></Button>
         </div>
       </header>
       <div className="mx-auto flex max-w-6xl gap-10 px-5 sm:px-8">
@@ -81,6 +84,8 @@ function Workspace({ bit, sessions, startId }: { bit: Bit; sessions: Brainstorm[
         <aside className="hidden w-72 shrink-0 py-8 lg:block">{history}</aside>
       </div>
       <Modal open={historyOpen} onOpenChange={setHistoryOpen} title="History">{history}</Modal>
+      <CraftSheet open={checking} onOpenChange={setChecking} title="Checklists" areas={['rewriting', 'writing']} kinds={['checklist']}
+        empty="No checklists for rewriting yet." />
     </div>
   )
 }

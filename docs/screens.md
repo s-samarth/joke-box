@@ -118,9 +118,13 @@ controls with two owners of the state, so the two screens can't drift apart. Its
 [useTimer.ts](../web/src/features/bits/useTimer.ts).
 
 A full screen with no app frame. The top bar holds close, the timer (start, pause, reset), a word
-count, **+** for a new session and **Save version**. The original joke is pinned at the top, under
+count, **Checklists**, **+** for a new session and **Save version**. The original joke is pinned at the top, under
 it an optional session name and a free-writing area. On the right are **This session** (its saved
 versions) and **Earlier sessions**. `?session=<id>` reopens a past session.
+
+**Checklists** opens your craft checklists from Rewriting and Writing in a sheet
+([CraftSheet.tsx](../web/src/features/craft/CraftSheet.tsx)). Pick one from the row at the top and
+tick through it; the ticks count up and don't change the note, so the next rewrite starts fresh.
 
 <img src="screenshots/desktop-rewrite.png" alt="Rewrite">
 
@@ -145,10 +149,15 @@ separate from joke topics; deleting one keeps its observations. The filter is `?
 [SessionLinks.tsx](../web/src/features/brainstorm/SessionLinks.tsx), [useSessionAutosave.ts](../web/src/features/brainstorm/useSessionAutosave.ts).
 
 - **List:** sessions newest first, each with its date, time spent and a summary (words,
-  handwriting, links), plus **New session**.
+  handwriting, links), plus **New session**. **Start with a technique** lists your Craft techniques;
+  tapping one opens a new session running it.
 - **Session (full screen):** the timer, and a **Type / Handwrite** toggle (both are kept). Below
   them, the title, **Link jokes or observations** (shown as small cards you can open or unlink), and
   the page itself.
+- **Technique** ([TechniquePanel.tsx](../web/src/features/brainstorm/TechniquePanel.tsx)): a
+  session can run one of your Craft techniques. Its prompts (the list under a "Prompts" heading in
+  the note) show one at a time with **Next prompt** and **Any prompt**, and **How it works** folds
+  out the whole note. Without one, **Use a technique** picks one. The session keeps its technique.
 - **Handwriting:** strokes are kept as points on a page 1000 units wide with A4 proportions, so they
   stay sharp at any size and redraw to fit a phone, an iPad or a laptop. Pointer Events handle the
   pen, touch and mouse with one set of handlers. Pencil pressure sets the line width. Up to 20 pages.
