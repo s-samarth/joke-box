@@ -55,6 +55,8 @@ export interface BitInput {
 
 export interface Bit extends BitInput {
   id: string
+  /** Up by one on every save. A save says which version it was edited from (see saveBitKey). */
+  version: number
   created_at: string
   updated_at: string
 }

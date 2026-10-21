@@ -16,6 +16,8 @@ export interface Unsynced {
   key: string[]
   variables: unknown
   reason: string
+  /** 409: changed on another device meanwhile. Retrying then means "keep mine". */
+  status?: number
   at: string
 }
 
@@ -48,7 +50,8 @@ export const useUnsynced = () => useSyncExternalStore(subscribe, () => items)
 /** A queued save failed for good. A delete of something already gone isn't worth keeping. */
 export function keepUnsynced(key: readonly unknown[], variables: unknown, error: Error) {
   if (key[1] === 'delete' && error instanceof ApiError && error.status === 404) return
-  const entry: Unsynced = { id: crypto.randomUUID(), key: key.map(String), variables, reason: error.message, at: new Date().toISOString() }
+  const status = error instanceof ApiError ? error.status : undefined
+  const entry: Unsynced = { id: crypto.randomUUID(), key: key.map(String), variables, reason: error.message, status, at: new Date().toISOString() }
   void update((current) => [...current, entry])
 }
 
@@ -56,7 +59,11 @@ export const discardUnsynced = (id: string) => update((current) => current.filte
 
 export const clearUnsynced = () => update(() => [])
 
-/** Send it again through the same queued save. If it fails again, it comes back to the list. */
+/**
+ * Send it again through the same queued save. If it fails again, it comes back to the list. For a
+ * clash (409) this replaces the other device's version: the list has refetched by now, so the
+ * save goes out based on the latest version.
+ */
 export async function retryUnsynced(client: QueryClient, item: Unsynced) {
   await discardUnsynced(item.id)
   new MutationObserver<unknown, Error, unknown>(client, { mutationKey: item.key }).mutate(item.variables).catch(() => {})

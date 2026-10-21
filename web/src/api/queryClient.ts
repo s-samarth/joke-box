@@ -11,7 +11,7 @@ import { del, get, set } from 'idb-keyval'
 import { ApiError, api } from './client'
 import { QUEUED } from './sync'
 import { keepUnsynced } from './unsynced'
-import type { Bit, BitInput, Observation, ObservationInput, WritingSession, WritingSessionInput } from './types'
+import type { Observation, ObservationInput, WritingSession, WritingSessionInput } from './types'
 
 const WEEK = 1000 * 60 * 60 * 24 * 7
 
@@ -98,41 +98,6 @@ export const persistMaxAge = Infinity
  * queuedKeys.test.ts holds both in place.
  */
 export const CACHE_BUSTER = 'v1'
-
-/* ---- Offline-capable bit saves and deletes ----
- * These have defaults registered by key, so a save made offline survives a reload:
- * it is stored as a "paused mutation" and re-run with this function once back online.
- */
-export type SaveBitVars = { id: string; input: BitInput }
-
-export const saveBitKey = ['bit', 'save']
-export const deleteBitKey = ['bit', 'delete']
-
-queryClient.setMutationDefaults(saveBitKey, {
-  ...QUEUED,
-  mutationFn: ({ id, input }: SaveBitVars) => api<Bit>(`/api/bits/${id}`, 'PUT', input),
-  onMutate: async ({ id, input }: SaveBitVars) => {
-    // Optimistic update: show the change immediately, before the server answers.
-    await queryClient.cancelQueries({ queryKey: keys.bits })
-    const now = new Date().toISOString()
-    queryClient.setQueryData<Bit[]>(keys.bits, (old = []) => {
-      const existing = old.find((b) => b.id === id)
-      const next: Bit = { ...input, id, created_at: existing?.created_at ?? now, updated_at: now }
-      return existing ? old.map((b) => (b.id === id ? next : b)) : [next, ...old]
-    })
-  },
-  onSettled: () => refreshWhenSynced(keys.bits, keys.types, keys.statuses),
-})
-
-queryClient.setMutationDefaults(deleteBitKey, {
-  ...QUEUED,
-  mutationFn: (id: string) => api<void>(`/api/bits/${id}`, 'DELETE'),
-  onMutate: async (id: string) => {
-    await queryClient.cancelQueries({ queryKey: keys.bits })
-    queryClient.setQueryData<Bit[]>(keys.bits, (old = []) => old.filter((b) => b.id !== id))
-  },
-  onSettled: () => refreshWhenSynced(keys.bits, keys.types, keys.brainstorms, keys.setlists),
-})
 
 /* Observations get the same offline treatment: jot one down on the bus, it syncs later. */
 export type SaveObservationVars = { id: string; input: ObservationInput }

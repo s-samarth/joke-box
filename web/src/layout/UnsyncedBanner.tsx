@@ -1,7 +1,8 @@
 /**
  * "2 changes couldn't sync": a strip above the page whenever a waiting save failed for good. It
  * opens the list, where each one shows what you wrote, why it failed, and Retry, Copy or Discard.
- * Nothing leaves the phone until you choose.
+ * A clash with another device's edit offers Keep mine instead, and Retry all leaves clashes for
+ * you to decide one by one. Nothing leaves the phone until you choose.
  */
 import { useQueryClient } from '@tanstack/react-query'
 import { AlertTriangle, Copy, RotateCcw, Trash2 } from 'lucide-react'
@@ -26,7 +27,7 @@ function Item({ item }: { item: Unsynced }) {
       <p className="text-sm text-faint">{formatDateTime(item.at)}. {item.reason}</p>
       {text && <p className="mt-2 line-clamp-4 rounded-lg bg-ink-3 px-3 py-2 text-sm whitespace-pre-wrap">{text}</p>}
       <div className="mt-2 flex flex-wrap gap-1">
-        <Button small icon={<RotateCcw size={15} />} onClick={() => void retryUnsynced(qc, item)}>Retry</Button>
+        <Button small icon={<RotateCcw size={15} />} onClick={() => void retryUnsynced(qc, item)}>{item.status === 409 ? 'Keep mine' : 'Retry'}</Button>
         {text && <Button small variant="quiet" icon={<Copy size={15} />} onClick={copy}>Copy</Button>}
         <Button small variant="danger" icon={<Trash2 size={15} />} onClick={() => void discard()}>Discard</Button>
       </div>
@@ -49,7 +50,7 @@ export function UnsyncedBanner() {
       </button>
       <Modal open={open} onOpenChange={setOpen} title="Couldn’t sync"
         description="Kept on this phone. Retry once the problem is fixed, or copy what you wrote."
-        footer={<Button variant="tape" onClick={() => items.forEach((i) => void retryUnsynced(qc, i))}>Retry all</Button>}>
+        footer={<Button variant="tape" onClick={() => items.filter((i) => i.status !== 409).forEach((i) => void retryUnsynced(qc, i))}>Retry all</Button>}>
         <ul className="divide-y divide-rule">{items.map((i) => <Item key={i.id} item={i} />)}</ul>
       </Modal>
     </>

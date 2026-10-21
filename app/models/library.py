@@ -105,6 +105,8 @@ class Bit(OwnedMixin, Base):
     clean_rating: Mapped[str | None] = mapped_column(String(10))
     language: Mapped[str | None] = mapped_column(String(40))
     comments: Mapped[str] = mapped_column(Text, default="")
+    # Goes up by one on every save; a save edited from an older version is a conflict.
+    version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
 
     types: Mapped[list[BitType]] = relationship(secondary=bit_type_links, order_by=BitType.name)
     status: Mapped[Status | None] = relationship()

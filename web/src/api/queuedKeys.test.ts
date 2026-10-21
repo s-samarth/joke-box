@@ -3,6 +3,7 @@
  * it's sent. A release that renamed a key or changed the cache buster would strand those saves.
  */
 import { describe, expect, it } from 'vitest'
+import './bitSaves'
 import './craft'
 import { CACHE_BUSTER, persistMaxAge, queryClient } from './queryClient'
 import './showSaves'

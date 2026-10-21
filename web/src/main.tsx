@@ -4,7 +4,8 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
 import { persistOptions } from './api/persist'
 import { queryClient, resumeQueued } from './api/queryClient'
-// Registers the remaining queued saves (shows, sets, study, craft, voice) before they're replayed.
+// Registers the queued saves (jokes, shows, sets, study, craft, voice) before they're replayed.
+import './api/bitSaves'
 import './api/showSaves'
 import './api/study'
 import './api/craft'
