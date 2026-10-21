@@ -14,6 +14,7 @@ import { EmptyRecordingError, addRecording } from './outbox'
 import { useRecorder, type Recording } from './useRecorder'
 import { useVoiceLibrary } from './useVoiceLibrary'
 import { avoidType, hashtagCounts } from './voiceMeta'
+import type { WakeState } from '../../lib/useWakeLock'
 
 const canRecord = () => typeof MediaRecorder !== 'undefined' && Boolean(navigator.mediaDevices?.getUserMedia)
 const EMPTY: Draft = { label: '', hashtags: [] }
@@ -34,6 +35,16 @@ function Level({ levels }: { levels: number[] }) {
       ))}
     </span>
   )
+}
+
+/**
+ * Whether the phone agreed to keep the screen on while recording. If it said no, the screen will
+ * dim and lock as usual, and a locked phone stops the mic, so say so plainly.
+ */
+function ScreenNote({ state }: { state: WakeState }) {
+  if (state === 'held') return <span className="block text-xs text-faint">Screen stays on</span>
+  if (state !== 'refused') return null
+  return <span className="block text-xs text-amber">Screen may lock: tap it now and then</span>
 }
 
 /** The note on the card. `saved` settles to its length once it's safely on the device, or null if it wasn't kept. */
@@ -142,7 +153,7 @@ export function Recorder() {
             <div className="flex flex-1 items-center gap-3" aria-live="polite">
               <span className="text-2xl tabular">{clock(rec.seconds)}</span>
               <Level levels={rec.levels} />
-              <span className="ml-auto text-right text-sm text-dim">Tap to stop<span className="block text-xs text-faint">Screen stays on</span></span>
+              <span className="ml-auto text-right text-sm text-dim">Tap to stop<ScreenNote state={rec.screen} /></span>
             </div>
           ) : flash ? (
             <p className="flex min-w-0 items-center gap-2 text-dim"><Check size={18} className="shrink-0 text-ok" /><span className="truncate">{flash}</span></p>
