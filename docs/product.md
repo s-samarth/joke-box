@@ -20,7 +20,8 @@ What they need, in order of how often it comes up:
 2. **Work an idea into a joke:** premise, punch, tag lines, rewrites against a clock.
 3. **Build and run a set:** pick the bits, order them, fit them to the slot, rehearse, perform.
 4. **Learn from each show:** log it on the way home, see the trend over weeks.
-5. **Study the craft:** a watchlist of routines and written analyses of sets.
+5. **Study the craft:** what you've learned about doing stand-up (checklists, writing techniques,
+   reference and goals), a watchlist of routines, and written analyses of sets.
 
 **Access:** sign-in is Google, and only accounts on an allowlist get in. Each account sees only its
 own data. Today that is one comedian, but the system works for more than one.
@@ -65,6 +66,7 @@ own data. Today that is one comedian, but the system works for more than one.
 | **Stage** | Full-screen rehearse and perform mode with a clock and the open-mic light | `/sets/:id/stage` |
 | **Print** | A set on paper with each bit's running time | `/sets/:id/print` |
 | **Shows** | Log a show; totals, filters, a sortable table, CSV export | `/shows` |
+| **Craft** | What you know about doing stand-up: checklists, techniques, reference and goals, grouped by where in the work you use them | `/craft`, `/craft/:id` |
 | **Watchlist** | 100 routines from the persona dossier plus your own, scored and ticked off | `/watchlist` |
 | **Analysis** | Your write-ups of sets and online bits, optionally tied to a routine | `/analysis` |
 | **External links** | Your persona site and Comedy Atlas | `/links` |
@@ -94,6 +96,7 @@ The vocabulary is a comic's, not a database's. Keep to it in the code and in the
 | **Rewrite** | A timed session reworking one joke. Each save is a version. |
 | **Brainstorm session** | A free writing session not tied to one joke. |
 | **Observation** | Something you noticed, before it's a joke. |
+| **Craft note** | Something you've learned about doing stand-up, not material. Its **kind** says how it's used (checklist, technique, reference, path) and its **area** says where (writing, generating, rewriting, building a set, on stage, formats, measuring and path). |
 | **Routine** | An item on the watchlist: a known set by another comic. |
 | **SI / LD / DP** | The dossier's three 0–10 scores for a routine: Schemer Index, Logic Density, Dark Pragmatism. |
 

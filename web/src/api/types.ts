@@ -186,3 +186,24 @@ export interface Analysis extends AnalysisInput {
   created_at: string
   updated_at: string
 }
+
+export type CraftKind = 'checklist' | 'technique' | 'reference' | 'path'
+export type CraftArea = 'writing' | 'generating' | 'rewriting' | 'sets' | 'stage' | 'formats' | 'progress'
+
+/** Something you've learned about doing stand-up: a checklist, a technique, reference or a goal. */
+export interface CraftNoteInput {
+  title: string
+  body: string
+  kind: CraftKind
+  area: CraftArea
+  hashtags: string[]
+  source: string
+  url: string
+  position: number
+}
+
+export interface CraftNote extends CraftNoteInput {
+  id: string
+  created_at: string
+  updated_at: string
+}

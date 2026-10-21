@@ -12,6 +12,7 @@ from app.config import get_settings
 from app.routers import (
     analyses,
     bits,
+    craft,
     observations,
     sessions,
     shows,
@@ -66,6 +67,7 @@ def create_app() -> FastAPI:
         voice,
         watchlist,
         analyses,
+        craft,
     )
     for module in routers:
         app.include_router(module.router)

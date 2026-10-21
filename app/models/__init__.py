@@ -1,6 +1,7 @@
 """All tables, imported in one place so Alembic sees every model."""
 
 from app.models.base import Base
+from app.models.craft import CraftNote
 from app.models.library import (
     RANDOM_TOPIC,
     Bit,
@@ -31,6 +32,7 @@ __all__ = [
     "BitType",
     "Brainstorm",
     "BrainstormVersion",
+    "CraftNote",
     "Observation",
     "ObservationTopic",
     "PerformanceLog",

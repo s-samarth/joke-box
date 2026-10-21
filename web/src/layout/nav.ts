@@ -4,7 +4,7 @@
  * everything else sits in the More sheet, grouped by what you're doing.
  */
 import type { LucideIcon } from 'lucide-react'
-import { AudioLines, ExternalLink, Eye, Home, ListChecks, ListOrdered, Mic, NotebookPen, PenLine, StickyNote } from 'lucide-react'
+import { AudioLines, GraduationCap, ExternalLink, Eye, Home, ListChecks, ListOrdered, Mic, NotebookPen, PenLine, StickyNote } from 'lucide-react'
 
 export interface NavItem {
   to: string
@@ -23,12 +23,13 @@ const voice: NavItem = { to: '/voice', label: 'Voice notes', icon: AudioLines, h
 const observations: NavItem = { to: '/observations', label: 'Observations', icon: Eye, hint: "Things you noticed, before they're jokes" }
 const brainstorm: NavItem = { to: '/brainstorm', label: 'Brainstorm', icon: PenLine, hint: 'Timed writing sessions' }
 const shows: NavItem = { to: '/shows', label: 'Shows', icon: Mic, hint: 'Log a mic and see how sets went' }
+const craft: NavItem = { to: '/craft', label: 'Craft', icon: GraduationCap, hint: 'What you know about doing stand-up' }
 const watchlist: NavItem = { to: '/watchlist', label: 'Watchlist', icon: ListChecks, hint: 'Routines to study' }
 const analysis: NavItem = { to: '/analysis', label: 'Analysis', icon: NotebookPen, hint: 'Your write-ups of sets and bits' }
 const links: NavItem = { to: '/links', label: 'External links', icon: ExternalLink, hint: 'Your persona site and Comedy Atlas' }
 
 /** The desktop rail, top to bottom. */
-export const NAV: NavItem[] = [home, jokes, observations, brainstorm, voice, sets, shows, watchlist, analysis, links]
+export const NAV: NavItem[] = [home, jokes, observations, brainstorm, voice, sets, shows, craft, watchlist, analysis, links]
 
 /** Phone bottom bar: two either side of the + button, the last slot being More. */
 export const BAR_LEFT: NavItem[] = [home, jokes]
@@ -37,7 +38,7 @@ export const BAR_RIGHT: NavItem[] = [shows]
 export const MORE_GROUPS: { title: string; items: NavItem[] }[] = [
   { title: 'Write', items: [voice, observations, brainstorm] },
   { title: 'Perform', items: [sets] },
-  { title: 'Study', items: [watchlist, analysis, links] },
+  { title: 'Study', items: [craft, watchlist, analysis, links] },
 ]
 
 /** Is this pathname inside one of the More screens? Then the More tab shows as current. */
