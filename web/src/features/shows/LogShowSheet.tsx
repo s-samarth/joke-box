@@ -1,6 +1,6 @@
 /**
  * Log a show, ideally on the way home. Venue, how it went and how long are up top; the rest is
- * optional. Picking the sets you did (one or several) fills in the length and topics for you. You can count the
+ * optional. Picking the sets you did (none, one or several) ticks their topics for you. You can count the
  * laughs for LPM, and write down what you learned: that becomes a craft note linked to the show.
  */
 import { Star } from 'lucide-react'
@@ -20,7 +20,7 @@ import { formatDate, fromIstInput, toIstInput } from '../../lib/time'
 import { areaFor, kindFor, lessonFrom } from '../craft/craftMeta'
 import { LaughTally } from './LaughTally'
 import { NO_LAUGHS, counted } from './lpm'
-import { setSeconds, setTopics, swapTopics } from './setPick'
+import { setTopics, swapTopics } from './setPick'
 
 const UNKNOWN = 'Unidentified Venue'
 const chip = (on: boolean) => `h-9 rounded-lg px-3 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'bg-ink-3 text-dim hover:text-paper'}`
@@ -50,13 +50,12 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
   const [error, setError] = useState('')
   const recent = [...new Set([...logs.map((l) => l.venue_name), ...venues.map((v) => v.name)])].filter((v) => v !== UNKNOWN).slice(0, 6)
 
-  // Ticking a set on or off recomputes time on stage from every ticked set, and swaps that set's
-  // topics in or out (topics you tapped yourself stay).
+  // Ticking a set on or off swaps its topics in or out (topics you tapped yourself stay). Time on
+  // stage is left alone: it's never exactly the set's length, with laughs to wait for and bits skipped.
   const toggleSet = (id: string) => {
     const next = setIds.includes(id) ? setIds.filter((x) => x !== id) : [...setIds, id]
     const chosen = sets.filter((s) => next.includes(s.id))
     setSetIds(next)
-    setDuration(chosen.length ? clock(chosen.reduce((sum, s) => sum + setSeconds(s), 0)) : '')
     setTopicIds(swapTopics(topicIds, setTopics(sets.filter((s) => setIds.includes(s.id)), bits), setTopics(chosen, bits)))
     const named = chosen.find((s) => s.venue_name)?.venue_name
     if (named && !venue) setVenue(named)
@@ -97,13 +96,13 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
         </div>
         {sets.length > 0 && !log && (
           <div className="space-y-2">
-            <span className="text-sm text-dim">The sets you did (tick one or more; fills in time and topics)</span>
+            <span className="text-sm text-dim">The sets you did (optional; ticks their topics)</span>
             <div className="flex flex-wrap gap-2">
               {sets.map((s) => {
                 const on = setIds.includes(s.id)
                 return (
                   <button key={s.id} type="button" aria-pressed={on} className={chip(on)} onClick={() => toggleSet(s.id)}>
-                    {s.name} <span className="tabular opacity-60">{clock(setSeconds(s))}</span>
+                    {s.name}
                   </button>
                 )
               })}

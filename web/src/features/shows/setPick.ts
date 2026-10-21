@@ -1,8 +1,5 @@
-/** Picking the sets you did at a show fills in the time on stage and the topics. */
+/** Picking the sets you did at a show ticks their topics. */
 import type { Bit, Setlist } from '../../api/types'
-
-/** Length of a set: the sum of its bits. */
-export const setSeconds = (s: Setlist): number => s.items.reduce((sum, i) => sum + i.duration_seconds, 0)
 
 /** Topics of the bits in these sets, each once. */
 export function setTopics(chosen: Setlist[], bits: Bit[]): string[] {
