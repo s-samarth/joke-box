@@ -12,6 +12,7 @@ import { Dropdown } from '../../components/ui/Menu'
 import { CLEAN_LABELS, topicName } from '../../lib/bitMeta'
 import { downloadCsv } from '../../lib/csv'
 import { clock, long } from '../../lib/duration'
+import { formatDateTime, todayIst } from '../../lib/time'
 import { useCapture } from '../capture/captureContext'
 import { BitFilters } from './BitFilters'
 import { useBitFilters } from './useBitFilters'
@@ -21,10 +22,10 @@ function exportCsv(bits: Bit[], topics: Topic[]) {
   const headers = ['Setup', 'Punchline', 'Type', 'Topic', 'Subtopic', 'Rating', 'Status', 'Duration', 'Tags', 'Comments', 'Created At', 'Tag Lines', 'Clean', 'Language']
   const rows = bits.map((b) => [
     b.setup, b.punchline, b.types.join('; '), topicName(topicOf(b)), topicOf(b)?.subtopics.find((s) => s.id === b.subtopic_id)?.name ?? '',
-    b.strength, b.status ?? '', long(b.duration_seconds), b.hashtags.join(' '), b.comments, b.created_at,
+    b.strength, b.status ?? '', long(b.duration_seconds), b.hashtags.join(' '), b.comments, formatDateTime(b.created_at),
     b.tag_lines.join(' | '), b.clean_rating ? CLEAN_LABELS[b.clean_rating] : '', b.language ?? '',
   ])
-  downloadCsv(`jokebox-jokes-${new Date().toISOString().slice(0, 10)}.csv`, headers, rows)
+  downloadCsv(`jokebox-jokes-${todayIst()}.csv`, headers, rows)
 }
 
 function BitRow({ bit, topic, active, query }: { bit: Bit; topic?: Topic; active: boolean; query: string }) {

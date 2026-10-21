@@ -3,7 +3,7 @@
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import DateTime, ForeignKey, MetaData, Uuid
+from sqlalchemy import DateTime, Dialect, ForeignKey, MetaData, TypeDecorator, Uuid
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 # Stable constraint names so Alembic migrations work the same on SQLite and Postgres.
@@ -21,6 +21,29 @@ def utcnow() -> datetime:
     return datetime.now(UTC)
 
 
+class UTCDateTime(TypeDecorator[datetime]):
+    """A timestamp stored in UTC and always read back with its timezone.
+
+    Postgres keeps the zone itself. SQLite (local development) can't: it would store the wall time
+    of whatever zone came in and hand back a naive time, which the browser then reads as its own
+    local time. So every time is converted to UTC on the way in and tagged UTC on the way out, on
+    every database. The app shows all times in IST.
+    """
+
+    impl = DateTime(timezone=True)
+    cache_ok = True
+
+    def process_bind_param(self, value: datetime | None, dialect: Dialect) -> datetime | None:
+        if value is None:
+            return None
+        return value.astimezone(UTC) if value.tzinfo else value.replace(tzinfo=UTC)
+
+    def process_result_value(self, value: datetime | None, dialect: Dialect) -> datetime | None:
+        if value is None:
+            return None
+        return value.astimezone(UTC) if value.tzinfo else value.replace(tzinfo=UTC)
+
+
 class Base(DeclarativeBase):
     metadata = MetaData(naming_convention=NAMING)
 
@@ -32,10 +55,8 @@ class IdMixin:
 
 
 class TimestampMixin:
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=utcnow, onupdate=utcnow
-    )
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow, onupdate=utcnow)
 
 
 class OwnedMixin(IdMixin, TimestampMixin):

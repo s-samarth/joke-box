@@ -15,7 +15,7 @@ import { RATING_COLORS, ratingColor } from './vizColors'
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const DAYS = ['Mon', '', 'Wed', '', 'Fri', '', '']
 
-const dayTitle = (iso: string) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
+const dayTitle = (iso: string) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
 const showLine = (l: PerformanceLog) => `${formatTime(l.performed_at)} ${l.venue_name}: ${l.rating} stars, ${clock(l.duration_seconds)}`
 
 function Year({ data, days, today }: { data: CalendarYear; days: Map<string, PerformanceLog[]>; today: string }) {

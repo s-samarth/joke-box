@@ -3,10 +3,10 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, Uuid
+from sqlalchemy import ForeignKey, Integer, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import Base, IdMixin, OwnedMixin, utcnow
+from app.models.base import Base, IdMixin, OwnedMixin, UTCDateTime, utcnow
 
 
 class Brainstorm(OwnedMixin, Base):
@@ -33,4 +33,4 @@ class BrainstormVersion(IdMixin, Base):
     )
     title: Mapped[str] = mapped_column(String(200), default="")
     content: Mapped[str] = mapped_column(Text, default="")
-    saved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    saved_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)

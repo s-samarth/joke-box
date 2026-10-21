@@ -8,7 +8,6 @@ from sqlalchemy import (
     CheckConstraint,
     Column,
     Date,
-    DateTime,
     ForeignKey,
     Index,
     Integer,
@@ -20,7 +19,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import Base, IdMixin, OwnedMixin
+from app.models.base import Base, IdMixin, OwnedMixin, UTCDateTime
 from app.models.library import Topic
 
 
@@ -76,7 +75,7 @@ class PerformanceLog(OwnedMixin, Base):
     venue_id: Mapped[uuid.UUID | None] = mapped_column(
         Uuid, ForeignKey("venues.id", ondelete="SET NULL")
     )
-    performed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    performed_at: Mapped[datetime] = mapped_column(UTCDateTime())
     duration_seconds: Mapped[int] = mapped_column(Integer, default=0)
     audience_size: Mapped[int] = mapped_column(Integer, default=0)
     rating: Mapped[int] = mapped_column(Integer, default=3)
