@@ -17,6 +17,7 @@ import { keys, queryClient } from '../../api/queryClient'
 import type { VoiceNoteInput } from '../../api/types'
 import { deleteVoiceNote, saveVoiceDetails, uploadVoiceAudio } from '../../api/voice'
 import { cacheAudio } from './audioCache'
+import { clearLive, forgetLive, interrupted } from './inProgress'
 
 export interface PendingNote {
   id: string
@@ -63,15 +64,16 @@ export const useOutbox = () => useSyncExternalStore(subscribe, () => state)
 
 export class EmptyRecordingError extends Error {}
 
-export async function addRecording(id: string, audio: Blob, durationSeconds: number): Promise<void> {
+export async function addRecording(id: string, audio: Blob, durationSeconds: number, label = ''): Promise<void> {
   const bytes = await audio.arrayBuffer()
   if (!bytes.byteLength) throw new EmptyRecordingError('The recording came out empty')
   const type = audio.type || 'audio/mp4'
   const note: PendingNote = {
     id, bytes, type, detailsSaved: false, created_at: new Date().toISOString(),
-    input: { label: '', hashtags: [], duration_seconds: durationSeconds },
+    input: { label, hashtags: [], duration_seconds: durationSeconds },
   }
   await set(id, note, store)
+  await forgetLive(id) // it's in the outbox now, so the second-by-second copy can go
   await cacheAudio(id, bytes, type)
   await reload()
   void flush()
@@ -156,9 +158,22 @@ export async function flush(): Promise<void> {
   }
 }
 
+/** File recordings that were cut off before reaching the outbox (the app was closed or killed). */
+async function recoverInterrupted() {
+  try {
+    const waiting = new Set((await values<PendingNote>(store)).map((n) => n.id))
+    for (const r of await interrupted()) {
+      if (!waiting.has(r.id)) await addRecording(r.id, r.audio, r.seconds, 'Recovered recording').catch(() => {})
+    }
+    await clearLive()
+  } catch {
+    // storage unavailable: nothing to recover
+  }
+}
+
 // Load what's waiting when the app starts, and retry whenever the connection comes back. That's
 // TanStack's online flag, not the phone's: it also notices a dead signal coming back to life.
-void reload().then(flush)
+void recoverInterrupted().then(reload).then(flush)
 onlineManager.subscribe((online) => {
   if (online) void flush()
 })
