@@ -6,10 +6,11 @@
  * TanStack refetches them. The cache is saved to IndexedDB, so the app opens offline.
  */
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister'
-import { type QueryKey, QueryClient } from '@tanstack/react-query'
+import { MutationCache, type QueryKey, QueryClient } from '@tanstack/react-query'
 import { del, get, set } from 'idb-keyval'
 import { ApiError, api } from './client'
 import { QUEUED } from './sync'
+import { keepUnsynced } from './unsynced'
 import type { Bit, BitInput, Observation, ObservationInput, WritingSession, WritingSessionInput } from './types'
 
 const WEEK = 1000 * 60 * 60 * 24 * 7
@@ -36,6 +37,14 @@ export const keys = {
 } as const
 
 export const queryClient = new QueryClient({
+  // A queued save that fails for good (refused, or gave up) goes to the "Couldn't sync" list
+  // with what you wrote, instead of vanishing.
+  mutationCache: new MutationCache({
+    onError: (error, variables, _result, mutation) => {
+      const key = mutation.options.mutationKey
+      if (key && mutation.options.scope?.id === QUEUED.scope.id) keepUnsynced(key, variables, error)
+    },
+  }),
   defaultOptions: {
     queries: {
       gcTime: WEEK, // keep data long enough to be saved for offline use
