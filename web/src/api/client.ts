@@ -1,5 +1,5 @@
 /** A thin wrapper around fetch for our same-origin JSON API. */
-import { NetworkError, isConnectionFailure, lostConnection } from './network'
+import { NetworkError, isConnectionFailure, isForeign, lostConnection } from './network'
 
 export class ApiError extends Error {
   status: number
@@ -27,21 +27,38 @@ export async function api<T>(path: string, method: Method = 'GET', body?: unknow
     body: body === undefined ? undefined : JSON.stringify(body),
     signal: AbortSignal.timeout(TIMEOUT),
   })
+  // 511: wifi that wants you to sign in, said politely.
+  if (response.status === 511) noConnection()
   if (!response.ok) {
     throw new ApiError(response.status, await errorMessage(response))
   }
-  return response.status === 204 ? (undefined as T) : ((await response.json()) as T)
+  if (response.status === 204) return undefined as T
+  // Our API always answers in JSON. A web page instead means wifi that wants you to sign in
+  // first: that's no connection yet, so the save waits rather than failing for good.
+  if (!response.headers.get('content-type')?.includes('json')) noConnection()
+  try {
+    return (await response.json()) as T
+  } catch {
+    return noConnection() // the answer was cut off mid-way
+  }
+}
+
+function noConnection(): never {
+  lostConnection()
+  throw new NetworkError()
 }
 
 /** fetch, but a request that never reaches the server marks us offline and throws a NetworkError. */
 export async function reach(path: string, init: RequestInit): Promise<Response> {
+  let response: Response
   try {
-    return await fetch(path, init)
+    response = await fetch(path, init)
   } catch (e) {
     if (!isConnectionFailure(e)) throw e
-    lostConnection()
-    throw new NetworkError()
+    return noConnection()
   }
+  if (isForeign(response)) noConnection() // redirected to a wifi sign-in page
+  return response
 }
 
 async function errorMessage(response: Response): Promise<string> {

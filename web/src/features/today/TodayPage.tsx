@@ -12,6 +12,7 @@ import { DailyBanner } from '../daily/DailyBanner'
 import { useHabit } from '../daily/useHabit'
 import { LightBar } from '../sets/LightBar'
 import { totalSeconds } from '../sets/setlistMath'
+import { InstallHint } from './InstallHint'
 import { QuickCapture } from './QuickCapture'
 import { TodayBrainstorm } from './TodayBrainstorm'
 import { TodayCraft } from './TodayCraft'
@@ -44,6 +45,7 @@ export function TodayPage() {
     <div className="mx-auto max-w-2xl">
       {/* Waits for the jokes to load, so it never flashes "write a joke" at someone who already has. */}
       {!daily.loading && <div className="pt-6 lg:pt-10"><DailyBanner habit={daily.habit} /></div>}
+      <InstallHint />
       <div className="pt-6 pb-6 lg:pt-10">
         <p className="text-dim">{dateLabel}</p>
         <h1 className="headline mt-1 text-[44px] sm:text-[56px]">Got something?</h1>

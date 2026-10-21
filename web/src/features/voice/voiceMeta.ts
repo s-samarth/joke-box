@@ -63,3 +63,25 @@ export function megabytes(bytes: number): string {
   const mb = bytes / 1_000_000
   return mb < 10 ? `${mb.toFixed(1)} MB` : `${Math.round(mb)} MB`
 }
+
+/*
+ * Formats that produced an empty recording in this browser. Some browsers say they can record
+ * MP4 and then hand back nothing; we remember that and use the next format from then on.
+ */
+const AVOID_KEY = 'jokebox.voice.avoidTypes'
+
+export function avoidedTypes(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(AVOID_KEY) ?? '[]') as string[]
+  } catch {
+    return []
+  }
+}
+
+export function avoidType(type: string): void {
+  try {
+    localStorage.setItem(AVOID_KEY, JSON.stringify([...new Set([...avoidedTypes(), baseType(type)])]))
+  } catch {
+    // storage blocked: we'll just try the same format again
+  }
+}

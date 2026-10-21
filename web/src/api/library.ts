@@ -1,7 +1,8 @@
 /** Hooks for the library: profile, topics, types, statuses and bits. */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
-import { deleteBitKey, keys, saveBitKey, type SaveBitVars } from './queryClient'
+import { deleteBitKey, saveBitKey, type SaveBitVars } from './bitSaves'
+import { keys } from './queryClient'
 import type { Bit, Me, Named, Subtopic, Topic } from './types'
 
 export const useMe = () =>

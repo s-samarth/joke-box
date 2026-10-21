@@ -10,13 +10,14 @@
  * read it with useSyncExternalStore, which re-renders them whenever `emit` swaps in new state.
  */
 import { onlineManager } from '@tanstack/react-query'
-import { createStore, del, get, set, values } from 'idb-keyval'
+import { clear, createStore, del, get, set, values } from 'idb-keyval'
 import { useSyncExternalStore } from 'react'
 import { ApiError } from '../../api/client'
 import { keys, queryClient } from '../../api/queryClient'
 import type { VoiceNoteInput } from '../../api/types'
 import { deleteVoiceNote, saveVoiceDetails, uploadVoiceAudio } from '../../api/voice'
 import { cacheAudio } from './audioCache'
+import { clearLive, forgetLive, interrupted } from './inProgress'
 
 export interface PendingNote {
   id: string
@@ -63,15 +64,16 @@ export const useOutbox = () => useSyncExternalStore(subscribe, () => state)
 
 export class EmptyRecordingError extends Error {}
 
-export async function addRecording(id: string, audio: Blob, durationSeconds: number): Promise<void> {
+export async function addRecording(id: string, audio: Blob, durationSeconds: number, label = '', recordedAt = new Date()): Promise<void> {
   const bytes = await audio.arrayBuffer()
   if (!bytes.byteLength) throw new EmptyRecordingError('The recording came out empty')
   const type = audio.type || 'audio/mp4'
   const note: PendingNote = {
-    id, bytes, type, detailsSaved: false, created_at: new Date().toISOString(),
-    input: { label: '', hashtags: [], duration_seconds: durationSeconds },
+    id, bytes, type, detailsSaved: false, created_at: recordedAt.toISOString(),
+    input: { label, hashtags: [], duration_seconds: durationSeconds },
   }
   await set(id, note, store)
+  await forgetLive(id) // it's in the outbox now, so the second-by-second copy can go
   await cacheAudio(id, bytes, type)
   await reload()
   void flush()
@@ -85,6 +87,14 @@ export async function editPending(id: string, input: VoiceNoteInput): Promise<bo
   await reload()
   void flush()
   return true
+}
+
+/** Drop every recording waiting to upload, and any half-recorded one (signing out). */
+export async function clearOutbox(): Promise<void> {
+  state.items.forEach((n) => discarded.add(n.id))
+  await clear(store)
+  await clearLive()
+  await reload()
 }
 
 /* Notes deleted while waiting. An upload already in flight checks this and cleans up after itself. */
@@ -109,7 +119,8 @@ async function send(note: PendingNote): Promise<void> {
     return true
   }
   if (!note.detailsSaved) {
-    await saveVoiceDetails(note.id, note.input)
+    // Sent with the time it was recorded, so a note made offline isn't dated when it synced.
+    await saveVoiceDetails(note.id, { ...note.input, created_at: note.created_at })
     if (await gone()) return
     const now = await get<PendingNote>(note.id, store)
     // Only mark the details sent if they weren't edited while we were sending them.
@@ -156,9 +167,27 @@ export async function flush(): Promise<void> {
   }
 }
 
-// Load what's waiting when the app starts, and retry whenever the connection comes back. That's
-// TanStack's online flag, not the phone's: it also notices a dead signal coming back to life.
-void reload().then(flush)
+/** File recordings that were cut off before reaching the outbox (the app was closed or killed). */
+async function recoverInterrupted() {
+  try {
+    const waiting = new Set((await values<PendingNote>(store)).map((n) => n.id))
+    for (const r of await interrupted()) {
+      if (!waiting.has(r.id)) await addRecording(r.id, r.audio, r.seconds, 'Recovered recording', r.startedAt).catch(() => {})
+    }
+    await clearLive()
+  } catch {
+    // storage unavailable: nothing to recover
+  }
+}
+
+/**
+ * Load what's waiting and start uploading. main.tsx calls this once this tab is the open one, so
+ * a tab opening beside another can't take the other's recording while it's still going.
+ */
+export const startOutbox = () => recoverInterrupted().then(reload).then(flush)
+
+// Retry whenever the connection comes back. That's TanStack's online flag, not the phone's: it
+// also notices a dead signal coming back to life.
 onlineManager.subscribe((online) => {
   if (online) void flush()
 })

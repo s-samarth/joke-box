@@ -83,3 +83,52 @@ def test_a_backdated_joke_was_last_changed_when_it_was_written(alice: TestClient
     edited = put_bit(alice, bit_id, setup="Fake edit").json()
     assert edited["created_at"].startswith("2024-07-19")
     assert edited["updated_at"] > edited["created_at"]
+
+
+def test_a_joke_written_offline_keeps_the_time_it_was_written(alice: TestClient) -> None:
+    # Written at 11:50 pm IST, synced the next morning: it still counts for the day it was written.
+    saved = put_bit(alice, str(uuid.uuid4()), created_at="2026-10-21T18:20:00Z").json()
+    assert saved["created_at"].startswith("2026-10-21T18:20")
+
+
+def test_each_save_moves_the_version_on(alice: TestClient) -> None:
+    bit_id = str(uuid.uuid4())
+    topic = random_topic_id(alice)
+    assert put_bit(alice, bit_id, topic_id=topic).json()["version"] == 1
+    assert (
+        put_bit(alice, bit_id, topic_id=topic, setup="Edited", base_version=1).json()["version"]
+        == 2
+    )
+
+
+def test_an_edit_from_an_older_version_is_refused_not_overwritten(alice: TestClient) -> None:
+    # The laptop saves version 2; the phone, offline, edited version 1 and syncs afterwards.
+    bit_id = str(uuid.uuid4())
+    topic = random_topic_id(alice)
+    put_bit(alice, bit_id, topic_id=topic)
+    put_bit(alice, bit_id, topic_id=topic, setup="Laptop edit", base_version=1)
+    phone = put_bit(alice, bit_id, topic_id=topic, setup="Phone edit", base_version=1)
+    assert phone.status_code == 409
+    assert alice.get("/api/bits").json()[0]["setup"] == "Laptop edit"
+
+
+def test_resending_the_same_edit_is_not_a_conflict(alice: TestClient) -> None:
+    # A save that reached the server but whose answer was lost is sent again with the old version.
+    bit_id = str(uuid.uuid4())
+    topic = random_topic_id(alice)
+    put_bit(alice, bit_id, topic_id=topic)
+    first = put_bit(
+        alice, bit_id, topic_id=topic, setup="Same edit", types=["One-Liner"], base_version=1
+    )
+    again = put_bit(
+        alice, bit_id, topic_id=topic, setup="Same edit", types=["one-liner"], base_version=1
+    )
+    assert first.status_code == again.status_code == 200
+
+
+def test_a_save_without_a_version_is_not_checked(alice: TestClient) -> None:
+    bit_id = str(uuid.uuid4())
+    topic = random_topic_id(alice)
+    put_bit(alice, bit_id, topic_id=topic)
+    put_bit(alice, bit_id, topic_id=topic, setup="Second", base_version=1)
+    assert put_bit(alice, bit_id, topic_id=topic, setup="Keep mine").status_code == 200

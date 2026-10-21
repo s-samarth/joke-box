@@ -8,7 +8,7 @@
  * Pattern: an "object URL" (URL.createObjectURL) gives an in-memory Blob an address an <audio>
  * element can play. We make one per note and reuse it, since each one holds memory until revoked.
  */
-import { createStore, del, get, set } from 'idb-keyval'
+import { clear, createStore, del, get, set } from 'idb-keyval'
 import { downloadVoiceAudio } from '../../api/voice'
 
 const store = createStore('jokebox-voice-audio', 'audio')
@@ -20,6 +20,13 @@ interface Cached {
 }
 
 export const cacheAudio = (id: string, bytes: ArrayBuffer, type: string) => set(id, { bytes, type } satisfies Cached, store)
+
+/** Forget every recording on this device (signing out). */
+export async function forgetAllAudio(): Promise<void> {
+  urls.forEach((url) => URL.revokeObjectURL(url))
+  urls.clear()
+  await clear(store)
+}
 
 export async function forgetAudio(id: string): Promise<void> {
   const url = urls.get(id)

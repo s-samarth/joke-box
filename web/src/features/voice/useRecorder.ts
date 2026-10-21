@@ -4,10 +4,16 @@
  * MediaRecorder hands over the audio in chunks (one a second here), which lets us watch the size
  * and stop before the upload limit. An AnalyserNode reads the loudness for the level meter, so
  * you can see it's hearing you. Stopping releases the mic, so the browser's red dot goes away.
+ *
+ * Every chunk is also written to the phone as it arrives (inProgress.ts), and the screen is kept
+ * awake. If the mic is taken away anyway (the phone locked, a call came in), `onInterrupted`
+ * gets what was recorded so far, just as if you had tapped stop.
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useWakeLock } from '../../lib/useWakeLock'
+import { beginLive, saveChunk } from './inProgress'
 import { loudness, smooth } from './loudness'
-import { MAX_RECORDING_BYTES, MIC_CONSTRAINTS, baseType, bitrateFor, pickMimeType } from './voiceMeta'
+import { MAX_RECORDING_BYTES, MIC_CONSTRAINTS, avoidedTypes, bitrateFor, pickMimeType } from './voiceMeta'
 
 /** The meter shows the last ~half second as bars scrolling left, newest on the right. */
 export const METER_BARS = 7
@@ -15,6 +21,8 @@ const METER_STEP_MS = 70
 const QUIET: number[] = Array<number>(METER_BARS).fill(0)
 
 export interface Recording {
+  /** The note's id, given when recording started; its chunks on the phone are kept under it. */
+  id: string
   audio: Blob
   seconds: number
 }
@@ -31,28 +39,6 @@ interface Live {
   done: Promise<Recording>
 }
 
-/*
- * Formats that produced an empty recording in this browser. Some browsers say they can record
- * MP4 and then hand back nothing; we remember that and use the next format from then on.
- */
-const AVOID_KEY = 'jokebox.voice.avoidTypes'
-
-function avoidedTypes(): string[] {
-  try {
-    return JSON.parse(localStorage.getItem(AVOID_KEY) ?? '[]') as string[]
-  } catch {
-    return []
-  }
-}
-
-export function avoidType(type: string): void {
-  try {
-    localStorage.setItem(AVOID_KEY, JSON.stringify([...new Set([...avoidedTypes(), baseType(type)])]))
-  } catch {
-    // storage blocked: we'll just try the same format again
-  }
-}
-
 /** The meter is a nice-to-have: without an AudioContext we still record, just without bars. */
 function makeContext(): AudioContext | null {
   try {
@@ -64,13 +50,20 @@ function makeContext(): AudioContext | null {
   }
 }
 
-export function useRecorder({ onLimit }: { onLimit: (r: Recording) => void }) {
+interface Handlers {
+  onLimit: (r: Recording) => void
+  onInterrupted: (r: Recording) => void
+}
+
+export function useRecorder(handlers: Handlers) {
   const [recording, setRecording] = useState(false)
   const [seconds, setSeconds] = useState(0)
   const [levels, setLevels] = useState(QUIET)
   const live = useRef<Live | null>(null)
-  const limitRef = useRef(onLimit)
-  useEffect(() => { limitRef.current = onLimit })
+  const [liveId, setLiveId] = useState<string | null>(null)
+  const on = useRef(handlers)
+  useEffect(() => { on.current = handlers })
+  useWakeLock(recording)
 
   const stop = useCallback(async (): Promise<Recording | null> => {
     const current = live.current
@@ -88,7 +81,7 @@ export function useRecorder({ onLimit }: { onLimit: (r: Recording) => void }) {
     return result
   }, [])
 
-  const start = useCallback(async () => {
+  const start = useCallback(async (id: string) => {
     if (live.current) return
     // Made before the first await, while we're still inside the tap: browsers (Safari above all)
     // keep an AudioContext created later suspended, and the level meter would sit still.
@@ -111,18 +104,28 @@ export function useRecorder({ onLimit }: { onLimit: (r: Recording) => void }) {
     }
     const chunks: Blob[] = []
     const startedAt = Date.now()
+    const type = recorder.mimeType || mimeType || ''
     const done = new Promise<Recording>((resolve) => {
-      recorder.onstop = () => resolve({ audio: new Blob(chunks, { type: recorder.mimeType || mimeType }), seconds: Math.round((Date.now() - startedAt) / 1000) })
+      recorder.onstop = () => resolve({ id, audio: new Blob(chunks, { type }), seconds: Math.round((Date.now() - startedAt) / 1000) })
     })
     const session: Live = { recorder, stream, context: null, chunks, bytes: 0, startedAt, frame: 0, timer: 0, done }
+    void beginLive(id, type, startedAt)
     recorder.ondataavailable = (e) => {
       if (!e.data.size) return
+      void saveChunk(id, chunks.length, e.data)
       chunks.push(e.data)
       session.bytes += e.data.size
-      if (session.bytes > MAX_RECORDING_BYTES && live.current === session) void stop().then((r) => r && limitRef.current(r))
+      if (session.bytes > MAX_RECORDING_BYTES && live.current === session) void stop().then((r) => r && on.current.onLimit(r))
     }
+    // The mic was taken away: keep what we have, as if stop had been tapped.
+    const interrupted = () => {
+      if (live.current === session) void stop().then((r) => r && on.current.onInterrupted(r))
+    }
+    stream.getAudioTracks().forEach((t) => t.addEventListener('ended', interrupted))
+    recorder.onerror = interrupted
     recorder.start(1000)
     live.current = session
+    setLiveId(id)
     setSeconds(0)
     setRecording(true)
     session.timer = window.setInterval(() => setSeconds(Math.floor((Date.now() - startedAt) / 1000)), 250)
@@ -155,5 +158,28 @@ export function useRecorder({ onLimit }: { onLimit: (r: Recording) => void }) {
     }
   }, [stop])
 
-  return { recording, seconds, levels, start, stop }
+  // Leaving the screen: write out the last second now, in case the app doesn't come back. Coming
+  // back: if the phone stopped the recorder meanwhile, file what was recorded.
+  useEffect(() => {
+    const onHide = () => {
+      const r = live.current?.recorder
+      if (r?.state === 'recording') r.requestData()
+    }
+    const onVisible = () => {
+      const current = live.current
+      if (document.visibilityState === 'visible' && current && current.recorder.state === 'inactive') {
+        void stop().then((r) => r && on.current.onInterrupted(r))
+      }
+    }
+    window.addEventListener('pagehide', onHide)
+    document.addEventListener('visibilitychange', onHide)
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      window.removeEventListener('pagehide', onHide)
+      document.removeEventListener('visibilitychange', onHide)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
+  }, [stop])
+
+  return { recording, seconds, levels, start, stop, id: recording ? liveId : null }
 }

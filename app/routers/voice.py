@@ -13,6 +13,7 @@ from sqlalchemy import select
 
 from app.auth.deps import CurrentUser, DbSession, find_owned, get_owned
 from app.models import VoiceNote
+from app.models.base import written_at
 from app.schemas.voice import VoiceNoteIn, VoiceNoteOut
 from app.services.audio_store import AudioStore, get_audio_store
 
@@ -46,7 +47,7 @@ def put_note(note_id: uuid.UUID, body: VoiceNoteIn, user: CurrentUser, db: DbSes
     if note is None:
         note = VoiceNote(id=note_id, user_id=user.id)
         if body.created_at:
-            note.created_at = body.created_at
+            note.created_at = written_at(body.created_at)
         db.add(note)
     note.label = body.label.strip()
     note.hashtags = [t.strip() for t in body.hashtags if t.strip()]

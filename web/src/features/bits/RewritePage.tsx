@@ -18,7 +18,7 @@ import { clock } from '../../lib/duration'
 import { CraftSheet } from '../craft/CraftSheet'
 import { RewriteHistory } from './RewriteHistory'
 import { useTimer } from './useTimer'
-import { isOnline } from '../../api/network'
+import { announceSave } from '../../lib/announce'
 
 function Workspace({ bit, sessions, startId }: { bit: Bit; sessions: Brainstorm[]; startId: string | null }) {
   const start = sessions.find((s) => s.id === startId)
@@ -41,9 +41,9 @@ function Workspace({ bit, sessions, startId }: { bit: Bit; sessions: Brainstorm[
     setHistoryOpen(false)
   }
   const save = () => {
-    actions.save.mutateAsync({ id, input: { bit_id: bit.id, title, content, timer_seconds: timer.seconds } })
-      .then((b) => toast(`Version ${b.versions.length} saved`), (e: Error) => toast(`Not saved: ${e.message}`))
-    if (!isOnline()) toast('Saved offline, will sync')
+    const saving = actions.save.mutateAsync({ id, input: { bit_id: bit.id, title, content, timer_seconds: timer.seconds } })
+    saving.then((b) => toast(`Version ${b.versions.length} saved`), (e: Error) => toast(`Not saved: ${e.message}`))
+    announceSave(saving, toast, null) // says so if it's waiting; the version number comes when it lands
   }
   const deleteSession = async (b: Brainstorm) => {
     if (!(await confirm({ title: 'Delete this session?', message: 'All of its versions go too.', confirmLabel: 'Delete session', danger: true }))) return

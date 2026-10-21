@@ -12,6 +12,7 @@ import { AccountMenu } from './AccountMenu'
 import { BottomBar } from './BottomBar'
 import { NAV } from './nav'
 import { SyncLight } from './SyncLight'
+import { UnsyncedBanner } from './UnsyncedBanner'
 import { UpdatePrompt } from './UpdatePrompt'
 
 function Rail() {
@@ -50,6 +51,7 @@ export function AppShell() {
           </div>
         </header>
         <main className="px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-10 lg:pb-12">
+          <UnsyncedBanner />
           <Suspense fallback={<div className="py-16"><Spinner /></div>}>
             <Outlet />
           </Suspense>

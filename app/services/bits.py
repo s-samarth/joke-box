@@ -7,6 +7,7 @@ from sqlalchemy import delete, exists, func, select
 from sqlalchemy.orm import Session
 
 from app.models import Bit, BitType, Status, Subtopic, Topic, User, bit_type_links
+from app.models.base import written_at
 from app.schemas.library import BitIn, BitOut
 
 
@@ -27,6 +28,7 @@ def to_out(bit: Bit) -> BitOut:
         clean_rating=bit.clean_rating,  # type: ignore[arg-type]
         language=bit.language,
         comments=bit.comments,
+        version=bit.version,
         created_at=bit.created_at,
         updated_at=bit.updated_at,
     )
@@ -69,12 +71,13 @@ def check_placement(db: Session, user: User, data: BitIn) -> None:
 def apply(db: Session, user: User, bit: Bit, data: BitIn) -> None:
     """Copy editor fields onto the bit, creating any new type or status by name."""
     check_placement(db, user, data)
-    fields = data.model_dump(exclude={"types", "status", "created_at"})
+    fields = data.model_dump(exclude={"types", "status", "created_at", "base_version"})
     for key, value in fields.items():
         setattr(bit, key, value)
     if data.created_at and bit.created_at is None:
-        # A joke brought in with its old date (an import) was last changed then, not today.
-        bit.created_at = bit.updated_at = data.created_at
+        # A joke brought in with its old date (an import), or written offline, was last changed
+        # when it was written, not when it reached the server.
+        bit.created_at = bit.updated_at = written_at(data.created_at)
     seen: dict[str, BitType] = {}
     for name in data.types:
         if name.lower() != "undefined":
@@ -89,8 +92,38 @@ def prune_unused_types(db: Session, user: User) -> None:
     db.execute(delete(BitType).where(BitType.user_id == user.id, ~used))
 
 
+CONFLICT = "This joke was changed on another device after you edited it."
+
+
+def type_names(names: list[str]) -> set[str]:
+    """Type names as apply() stores them: case-folded, without the placeholder."""
+    return {n.lower() for n in names if n.lower() != "undefined"}
+
+
+def same_content(bit: Bit, data: BitIn) -> bool:
+    """Would this save leave the joke as it is? Then a stale version is harmless (a retry)."""
+    now = to_out(bit)
+    sent = data.model_dump(exclude={"types", "status", "created_at", "base_version"})
+    return (
+        all(getattr(now, k) == v for k, v in sent.items())
+        and type_names(now.types) == type_names(data.types)
+        and (now.status or "").lower() == (data.status or "").lower()
+    )
+
+
+def check_version(existing: Bit, data: BitIn) -> None:
+    """Refuse an edit made from an older version that would overwrite someone else's change."""
+    if data.base_version is None or data.base_version == existing.version:
+        return
+    if not same_content(existing, data):
+        raise HTTPException(409, CONFLICT)
+
+
 def save(db: Session, user: User, bit_id: uuid.UUID, data: BitIn, existing: Bit | None) -> Bit:
     """Create or update in one transaction."""
+    if existing is not None:
+        check_version(existing, data)
+        existing.version += 1
     bit = existing or Bit(id=bit_id, user_id=user.id)
     apply(db, user, bit, data)
     db.add(bit)  # after apply, so lookups inside it don't flush a half-filled bit

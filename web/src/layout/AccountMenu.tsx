@@ -5,16 +5,25 @@ import { useMe, useReseed } from '../api/library'
 import { signOut } from '../api/session'
 import { useFeedback } from '../components/ui/feedbackContext'
 import { Dropdown, type MenuItem } from '../components/ui/Menu'
+import { useWaiting } from './useWaiting'
 
 export function AccountMenu({ showName = false }: { showName?: boolean }) {
   const { data: me } = useMe()
   const reseed = useReseed()
   const { confirm, toast } = useFeedback()
   const navigate = useNavigate()
+  const { count: waiting } = useWaiting()
+  // Signing out wipes this phone, so changes that haven't synced yet would be lost: ask first.
+  const leave = async () => {
+    const changes = waiting === 1 ? '1 change hasn’t' : `${waiting} changes haven’t`
+    const message = `Signing out deletes ${waiting === 1 ? 'it' : 'them'} from this phone. Wait until you’re online and the cloud says all changes are saved.`
+    if (waiting && !(await confirm({ title: `${changes} synced yet`, message, confirmLabel: 'Sign out anyway', danger: true }))) return
+    void signOut()
+  }
 
   const items: MenuItem[] = [
     { label: 'Import', icon: <FolderInput size={16} />, onSelect: () => navigate('/import') },
-    { label: 'Sign out', icon: <LogOut size={16} />, onSelect: () => void signOut() },
+    { label: 'Sign out', icon: <LogOut size={16} />, onSelect: () => void leave() },
   ]
   if (me?.env === 'local') {
     items.unshift({

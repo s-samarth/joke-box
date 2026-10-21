@@ -24,8 +24,14 @@ visit, so the app opens fast on a phone.
 - **Sync light:** "All changes saved", "Saving…", or "Offline, N waiting to sync". It counts
   queued saves plus recordings still to upload, and reads whether the server can be reached
   (not just whether the phone has signal).
+- **Sync light** also says "Sign in to sync N waiting" when the sign-in ran out.
+- **Couldn't sync strip:** above every page while any save failed for good. **Review** opens the
+  list: what it was, when, why, the text you wrote, and **Retry** (or **Keep mine** for a clash
+  with another device's edit), **Copy** and **Discard**; **Retry all** skips clashes.
 - **Update banner:** "A new version of JokeBox is ready", with **Update now** and **Later**.
-- **Avatar menu:** Sign out, plus **Reset to demo data** when running locally.
+- **Avatar menu:** Sign out (asks first if changes haven't synced), plus **Reset to demo data**
+  when running locally.
+- **Another tab:** a tab that stepped aside shows "Open in another tab" with **Use it here**.
 
 <p>
   <img src="screenshots/phone-home.png" width="230" alt="Home on a phone">
@@ -200,8 +206,9 @@ separate from joke topics; deleting one keeps its observations. The filter is `?
 [outbox.ts](../web/src/features/voice/outbox.ts), [audioCache.ts](../web/src/features/voice/audioCache.ts),
 [useVoiceLibrary.ts](../web/src/features/voice/useVoiceLibrary.ts).
 
-- **Recorder:** a big yellow mic. While recording, it shows the elapsed time and a 7-bar level
-  meter scrolling left.
+- **Recorder:** a big yellow mic. While recording, it shows the elapsed time, a 7-bar level
+  meter scrolling left, and "Screen stays on". If the phone takes the mic, a toast says so and the
+  card opens with what was recorded.
 - **New voice note card:** appears as soon as you stop. It has play and scrub controls, a title, and
   hashtags, while the recording uploads in the background. **Done** files the note and
   **Delete** throws it away.

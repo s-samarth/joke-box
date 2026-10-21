@@ -1,6 +1,7 @@
 """Observations: logged on their own, with topics kept apart from joke topics."""
 
 import uuid
+from datetime import UTC, datetime
 
 from fastapi.testclient import TestClient
 
@@ -72,3 +73,10 @@ def test_an_import_keeps_the_original_date_but_edits_dont_move_it(alice: TestCli
     assert first["created_at"].startswith("2023-02-13")
     edited = put_obs(alice, obs_id, text="Edited", created_at="2025-01-01T00:00:00Z").json()
     assert edited["created_at"].startswith("2023-02-13")
+
+
+def test_a_phone_clock_set_ahead_cant_date_an_observation_in_the_future(alice: TestClient) -> None:
+    before = datetime.now(UTC)
+    saved = put_obs(alice, str(uuid.uuid4()), created_at="2099-01-01T00:00:00Z").json()
+    written = datetime.fromisoformat(saved["created_at"])
+    assert before <= written <= datetime.now(UTC)

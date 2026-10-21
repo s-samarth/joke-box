@@ -1,14 +1,20 @@
 /** Whether your changes are safely on the server: saved, saving, or waiting offline. */
-import { useIsMutating } from '@tanstack/react-query'
-import { Cloud, CloudOff, CloudUpload } from 'lucide-react'
-import { useOutbox } from '../features/voice/outbox'
+import { useQueryClient } from '@tanstack/react-query'
+import { Cloud, CloudOff, CloudUpload, LogIn } from 'lucide-react'
+import { useEffect } from 'react'
+import { keys } from '../api/queryClient'
 import { useOnline } from './useOnline'
+import { useWaiting } from './useWaiting'
 
 export function SyncLight({ withLabel = false }: { withLabel?: boolean }) {
   const online = useOnline()
-  // Queued saves plus recordings still to upload (those that failed for good aren't waiting).
-  const pending = useIsMutating() + useOutbox().items.filter((n) => !n.failed).length
-  const [Icon, label, tone] = !online
+  const { count: pending, needsSignIn } = useWaiting()
+  const qc = useQueryClient()
+  // A save was refused as signed out: check the profile, which sends you to sign in again.
+  useEffect(() => { if (needsSignIn) void qc.invalidateQueries({ queryKey: keys.me }) }, [needsSignIn, qc])
+  const [Icon, label, tone] = needsSignIn
+    ? [LogIn, `Sign in to sync ${pending} waiting`, 'text-amber']
+    : !online
     ? [CloudOff, pending ? `Offline, ${pending} waiting to sync` : 'Offline', 'text-amber']
     : pending
       ? [CloudUpload, 'Saving…', 'text-tape']

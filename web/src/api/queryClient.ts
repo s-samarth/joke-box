@@ -6,11 +6,12 @@
  * TanStack refetches them. The cache is saved to IndexedDB, so the app opens offline.
  */
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister'
-import { type QueryKey, QueryClient } from '@tanstack/react-query'
+import { MutationCache, type QueryKey, QueryClient } from '@tanstack/react-query'
 import { del, get, set } from 'idb-keyval'
 import { ApiError, api } from './client'
 import { QUEUED } from './sync'
-import type { Bit, BitInput, Observation, ObservationInput, WritingSession, WritingSessionInput } from './types'
+import { keepUnsynced } from './unsynced'
+import type { Observation, ObservationInput, WritingSession, WritingSessionInput } from './types'
 
 const WEEK = 1000 * 60 * 60 * 24 * 7
 
@@ -36,6 +37,14 @@ export const keys = {
 } as const
 
 export const queryClient = new QueryClient({
+  // A queued save that fails for good (refused, or gave up) goes to the "Couldn't sync" list
+  // with what you wrote, instead of vanishing.
+  mutationCache: new MutationCache({
+    onError: (error, variables, _result, mutation) => {
+      const key = mutation.options.mutationKey
+      if (key && mutation.options.scope?.id === QUEUED.scope.id) keepUnsynced(key, variables, error)
+    },
+  }),
   defaultOptions: {
     queries: {
       gcTime: WEEK, // keep data long enough to be saved for offline use
@@ -75,42 +84,20 @@ export const persister = createAsyncStoragePersister({
   throttleTime: 300, // a save is on the phone within a moment, even if the app is closed straight away
 })
 
-export const persistMaxAge = WEEK
-
-/* ---- Offline-capable bit saves and deletes ----
- * These have defaults registered by key, so a save made offline survives a reload:
- * it is stored as a "paused mutation" and re-run with this function once back online.
+/*
+ * The saved copy never expires as a whole: saves waiting in it must survive however long the app
+ * goes unopened. Old data in it is harmless (it refreshes once online) and each list is still
+ * dropped a week after it was last used (gcTime).
  */
-export type SaveBitVars = { id: string; input: BitInput }
+export const persistMaxAge = Infinity
 
-export const saveBitKey = ['bit', 'save']
-export const deleteBitKey = ['bit', 'delete']
-
-queryClient.setMutationDefaults(saveBitKey, {
-  ...QUEUED,
-  mutationFn: ({ id, input }: SaveBitVars) => api<Bit>(`/api/bits/${id}`, 'PUT', input),
-  onMutate: async ({ id, input }: SaveBitVars) => {
-    // Optimistic update: show the change immediately, before the server answers.
-    await queryClient.cancelQueries({ queryKey: keys.bits })
-    const now = new Date().toISOString()
-    queryClient.setQueryData<Bit[]>(keys.bits, (old = []) => {
-      const existing = old.find((b) => b.id === id)
-      const next: Bit = { ...input, id, created_at: existing?.created_at ?? now, updated_at: now }
-      return existing ? old.map((b) => (b.id === id ? next : b)) : [next, ...old]
-    })
-  },
-  onSettled: () => refreshWhenSynced(keys.bits, keys.types, keys.statuses),
-})
-
-queryClient.setMutationDefaults(deleteBitKey, {
-  ...QUEUED,
-  mutationFn: (id: string) => api<void>(`/api/bits/${id}`, 'DELETE'),
-  onMutate: async (id: string) => {
-    await queryClient.cancelQueries({ queryKey: keys.bits })
-    queryClient.setQueryData<Bit[]>(keys.bits, (old = []) => old.filter((b) => b.id !== id))
-  },
-  onSettled: () => refreshWhenSynced(keys.bits, keys.types, keys.brainstorms, keys.setlists),
-})
+/*
+ * Changing this throws away the whole saved copy on every phone, including saves still waiting
+ * to sync. Don't, unless the cache format truly changes; and then drain the queue first.
+ * Likewise the mutation keys below are stored with each waiting save, so never rename one.
+ * queuedKeys.test.ts holds both in place.
+ */
+export const CACHE_BUSTER = 'v1'
 
 /* Observations get the same offline treatment: jot one down on the bus, it syncs later. */
 export type SaveObservationVars = { id: string; input: ObservationInput }

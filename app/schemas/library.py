@@ -63,6 +63,8 @@ class BitIn(BaseModel):
     language: str | None = None
     comments: str = ""
     created_at: datetime | None = None
+    # The version this edit started from. Omitted (a new joke, an import), nothing is checked.
+    base_version: int | None = None
 
     @field_validator("setup")
     @classmethod
@@ -92,5 +94,6 @@ class BitOut(BaseModel):
     clean_rating: CleanRating | None
     language: str | None
     comments: str
+    version: int
     created_at: datetime
     updated_at: datetime

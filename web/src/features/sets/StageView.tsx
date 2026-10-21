@@ -10,24 +10,10 @@ import { useBits } from '../../api/library'
 import { useSetlists } from '../../api/shows'
 import { Tape } from '../../components/ui/bits'
 import { clock } from '../../lib/duration'
+import { useWakeLock } from '../../lib/useWakeLock'
 import { useTimer } from '../bits/useTimer'
 import { CraftSheet } from '../craft/CraftSheet'
 import { lightState } from './setlistMath'
-
-function useWakeLock() {
-  useEffect(() => {
-    if (!('wakeLock' in navigator)) return
-    let lock: WakeLockSentinel | undefined
-    const request = () => navigator.wakeLock.request('screen').then((l) => (lock = l)).catch(() => undefined)
-    void request()
-    const onVisible = () => document.visibilityState === 'visible' && void request()
-    document.addEventListener('visibilitychange', onVisible)
-    return () => {
-      document.removeEventListener('visibilitychange', onVisible)
-      void lock?.release()
-    }
-  }, [])
-}
 
 export function StageView() {
   const { setId } = useParams()

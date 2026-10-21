@@ -57,7 +57,7 @@ erDiagram
 | `bit_types` | `name` | Pruned whenever no joke uses it. Renaming onto an existing name merges the two |
 | `bit_type_links` | `bit_id`, `type_id` (both cascade) | Many-to-many |
 | `statuses` | `name`, `position` | Six defaults made on first sign-in; new ones are created by name when a joke uses them |
-| `bits` | `topic_id` (required), `subtopic_id` (set null), `status_id` (set null), `setup`, `punchline`, `strength` 1–5, `duration_seconds`, `hashtags` JSON, `tag_lines` JSON, `clean_rating` (clean / mild / dirty / null), `language`, `comments` | Check constraints on strength and clean rating. The API sends types and status as names |
+| `bits` | `topic_id` (required), `subtopic_id` (set null), `status_id` (set null), `setup`, `punchline`, `strength` 1–5, `duration_seconds`, `hashtags` JSON, `tag_lines` JSON, `clean_rating` (clean / mild / dirty / null), `language`, `comments`, `version` (up by one per save) | Check constraints on strength and clean rating. The API sends types and status as names. `version` catches edits made on two devices |
 
 ### Writing
 

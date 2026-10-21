@@ -9,7 +9,7 @@ import { newId } from '../../api/client'
 import { useObservationTopics, useSaveObservation } from '../../api/notebook'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { useNewObservationTopic } from './useNewObservationTopic'
-import { isOnline } from '../../api/network'
+import { announceSave } from '../../lib/announce'
 
 const chip = (on: boolean) =>
   `h-8 shrink-0 rounded-lg px-2.5 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'bg-ink-3 text-dim hover:text-paper'}`
@@ -24,9 +24,10 @@ export function ObservationBox({ initialTopicId = null }: { initialTopicId?: str
 
   const submit = () => {
     if (!text.trim()) return
-    save.mutate({ id: newId(), input: { text: text.trim(), topic_id: topicId } }, { onError: (e) => toast(`Not saved: ${e.message}`) })
+    const saving = save.mutateAsync({ id: newId(), input: { text: text.trim(), topic_id: topicId, created_at: new Date().toISOString() } })
+    saving.catch((e: Error) => toast(`Not saved: ${e.message}`))
     setText('')
-    if (!isOnline()) toast('Saved offline, will sync')
+    announceSave(saving, toast, null)
   }
   const addTopic = async () => {
     const id = await newTopic()

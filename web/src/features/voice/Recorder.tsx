@@ -9,10 +9,11 @@ import { newId } from '../../api/client'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { clock } from '../../lib/duration'
 import { NewNoteCard, type Draft } from './NewNoteCard'
+import { forgetLive } from './inProgress'
 import { EmptyRecordingError, addRecording } from './outbox'
-import { avoidType, useRecorder, type Recording } from './useRecorder'
+import { useRecorder, type Recording } from './useRecorder'
 import { useVoiceLibrary } from './useVoiceLibrary'
-import { hashtagCounts } from './voiceMeta'
+import { avoidType, hashtagCounts } from './voiceMeta'
 
 const canRecord = () => typeof MediaRecorder !== 'undefined' && Boolean(navigator.mediaDevices?.getUserMedia)
 const EMPTY: Draft = { label: '', hashtags: [] }
@@ -51,9 +52,10 @@ export function Recorder() {
   const [flash, setFlash] = useState<string | null>(null)
   const [problem, setProblem] = useState<string | null>(null)
 
-  const keep = async (id: string, { audio, seconds }: Recording): Promise<number | null> => {
+  const keep = async ({ id, audio, seconds }: Recording): Promise<number | null> => {
     if (seconds < 1 && audio.size < 4000) {
       setProblem('Too short to keep. Hold on a moment longer.')
+      void forgetLive(id)
       return null
     }
     try {
@@ -61,6 +63,7 @@ export function Recorder() {
       return seconds
     } catch (e) {
       if (!(e instanceof EmptyRecordingError)) throw e
+      void forgetLive(id)
       avoidType(audio.type) // the browser said it could record this format, then gave us nothing
       setProblem(`That recording came out empty (${audio.type || 'unknown format'}). The next one will use a different format, so please try again.`)
       return null
@@ -89,9 +92,12 @@ export function Recorder() {
 
   const rec = useRecorder({
     onLimit: (r) => {
-      const id = newId()
-      openCard(id, r.seconds, keep(id, r))
+      openCard(r.id, r.seconds, keep(r))
       toast('That note reached the length limit, so recording stopped. Tap record to carry on in a new note.')
+    },
+    onInterrupted: (r) => {
+      openCard(r.id, r.seconds, keep(r))
+      toast('Recording stopped when the phone took the mic (screen lock or a call). What was recorded is saved.')
     },
   })
 
@@ -101,20 +107,20 @@ export function Recorder() {
   useEffect(() => () => {
     const { review: open, draft: typed, finish: file, stop } = latest.current
     if (open) void file(open, typed)
-    void stop().then((r) => r && addRecording(newId(), r.audio, r.seconds)).catch(() => {})
+    void stop().then((r) => r && addRecording(r.id, r.audio, r.seconds)).catch(() => {})
   }, [])
 
   const toggle = async () => {
     setProblem(null)
     setFlash(null)
     if (rec.recording) {
-      const id = newId()
-      openCard(id, rec.seconds, rec.stop().then((r) => (r ? keep(id, r) : null)))
+      const id = rec.id
+      if (id) openCard(id, rec.seconds, rec.stop().then((r) => (r ? keep(r) : null)))
       return
     }
     if (review) void finish(review, draft) // starting the next note files this one
     if (!canRecord()) return setProblem("This browser can't record audio.")
-    try { await rec.start() } catch (e) { setProblem(micProblem(e)) }
+    try { await rec.start(newId()) } catch (e) { setProblem(micProblem(e)) }
   }
 
   const recordButton = (
@@ -136,7 +142,7 @@ export function Recorder() {
             <div className="flex flex-1 items-center gap-3" aria-live="polite">
               <span className="text-2xl tabular">{clock(rec.seconds)}</span>
               <Level levels={rec.levels} />
-              <span className="ml-auto text-sm text-dim">Tap to stop</span>
+              <span className="ml-auto text-right text-sm text-dim">Tap to stop<span className="block text-xs text-faint">Screen stays on</span></span>
             </div>
           ) : flash ? (
             <p className="flex min-w-0 items-center gap-2 text-dim"><Check size={18} className="shrink-0 text-ok" /><span className="truncate">{flash}</span></p>
