@@ -12,7 +12,11 @@ import { checkAccount } from './api/session'
 import { QUEUED } from './api/sync'
 import { App } from './App'
 import { FeedbackProvider } from './components/ui/feedback'
+import { keepStorage } from './lib/keepStorage'
 import './app.css'
+
+// Ask the phone not to clear our storage, where saves wait to sync.
+void keepStorage()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
