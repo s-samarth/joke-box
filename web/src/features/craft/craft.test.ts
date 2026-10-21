@@ -23,8 +23,12 @@ describe('note body', () => {
     expect(toggleTick('- b', 0)).toBe('- b')
   })
 
-  it('splits bold runs', () => {
+  it('splits bold runs and web addresses', () => {
     expect(inlineRuns('a **b** c')).toEqual([{ text: 'a ', bold: false }, { text: 'b', bold: true }, { text: ' c', bold: false }])
+    expect(inlineRuns('See https://example.com/fake.')).toEqual([
+      { text: 'See ', bold: false }, { text: 'https://example.com/fake', bold: false, href: 'https://example.com/fake' }, { text: '.', bold: false },
+    ])
+    expect(inlineRuns('javascript:alert(1)').every((r) => !r.href)).toBe(true)
   })
 
   it('lists top-level items and prompts', () => {

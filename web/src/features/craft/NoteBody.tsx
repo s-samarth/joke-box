@@ -1,12 +1,19 @@
 /**
  * A craft note's body, formatted. Built from parsed blocks rather than HTML, so nothing in a
- * note can inject markup. Tick boxes are buttons when `onTick` is given, otherwise just marks.
+ * note can inject markup. Web addresses become links that open in a new tab. Tick boxes are buttons when `onTick` is given, otherwise just marks.
  */
 import { Check } from 'lucide-react'
 import { inlineRuns, parseBody, type ListItem } from './bodyFormat'
 
 function Inline({ text }: { text: string }) {
-  return <>{inlineRuns(text).map((r, i) => (r.bold ? <strong key={i} className="font-semibold text-paper">{r.text}</strong> : <span key={i}>{r.text}</span>))}</>
+  return (
+    <>
+      {inlineRuns(text).map((r, i) => {
+        if (r.href) return <a key={i} href={r.href} target="_blank" rel="noopener noreferrer" className="break-all text-tape underline decoration-tape/40 underline-offset-2 hover:decoration-tape">{r.text}</a>
+        return r.bold ? <strong key={i} className="font-semibold text-paper">{r.text}</strong> : <span key={i}>{r.text}</span>
+      })}
+    </>
+  )
 }
 
 function Tick({ item, onTick }: { item: ListItem; onTick?: (line: number) => void }) {
