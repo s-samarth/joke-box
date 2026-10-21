@@ -67,6 +67,23 @@ each with its premise in marker, the punch, its runtime and "by m:ss" (the runni
 - **Totals:** Shows, On stage, Avg rating (weighted by stage time) and Median crowd. They always
   follow the filters. Under them, the LPM across the shows you counted laughs for (all points over
   all minutes), with its band: beast (12+), decent (9–12), poor (6–9), rough (under 6).
+- **Views** ([ViewTabs.tsx](../web/src/features/shows/ViewTabs.tsx), kept in the URL as `?view=`):
+  **Shows** (the table), **Timeline** and **Insights**. The toolbar and totals scope all three.
+- **Timeline** ([insights/TimelineView.tsx](../web/src/features/shows/insights/TimelineView.tsx),
+  [timelineMath.ts](../web/src/features/shows/insights/timelineMath.ts)): a mic diary (one square
+  per day, one row of weeks per year you performed in, brighter gold for better nights, a dot for
+  two shows in a day, future days outlined), shows per month stacked by rating (empty months kept so
+  gaps show), and your rating over your last 10 shows, which breaks at gaps of more than 30 days
+  instead of bridging them, against a hairline for your usual.
+- **Insights** ([insights/InsightsView.tsx](../web/src/features/shows/insights/InsightsView.tsx),
+  [insightMath.ts](../web/src/features/shows/insights/insightMath.ts)): the share of shows at 4 stars
+  or more and at 2 or less, **Strengths** and **Work on** in plain sentences, then topics, venues,
+  set length and time slot (IST start), each as bars against your usual rating (gold above, blue
+  below, weighted by stage time). A group needs 3 shows to be compared; thinner ones are listed as
+  "too few shows to tell yet", and a strength or weak spot is only named when it's at least 0.1 star
+  off your usual. The charts are hand-drawn SVG and HTML (no chart library), with colours checked
+  for colour-blind safety on the dark surface ([vizColors.ts](../web/src/features/shows/insights/vizColors.ts));
+  every mark shows a readout on hover or keyboard focus.
 - **Table:** Date, Venue, On stage, Crowd, Rating, Topics and Remarks. Click a heading to sort and
   click again to flip the order. On a phone the table scrolls sideways with the date pinned.
 - **Log a show** (a sheet, also opened by `?log=1`): venue, stars and length up top. Optional: the
