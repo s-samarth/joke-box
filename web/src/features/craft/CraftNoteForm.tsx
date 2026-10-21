@@ -1,11 +1,18 @@
-/** Write or edit one craft note: its name, kind, area, the note itself, and where it came from. */
+/**
+ * Write or edit one craft note: its name, kind, area, the note itself, and where it came from.
+ * The kind and area menus end in "New kind…" and "New area…": what you make there is picked.
+ */
 import { ExternalLink, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-import { useCraftAreas } from '../../api/craft'
-import type { CraftKind, CraftNoteInput } from '../../api/types'
+import { useCraftAreas, useCraftKinds } from '../../api/craft'
+import type { CraftNoteInput } from '../../api/types'
 import { Button } from '../../components/ui/Button'
 import { Field, Input, Select, Textarea } from '../../components/ui/Field'
-import { KINDS } from './craftMeta'
+import { AreaSheet } from './AreaSheet'
+import { BEHAVIOURS } from './craftMeta'
+import { KindSheet } from './KindSheet'
+
+const NEW = '__new'
 
 const FORMAT_HINT = 'Start a line with "# " for a heading, "- " for a list, "- [ ] " for a tick box. **Bold** works too.'
 
@@ -19,11 +26,14 @@ interface Props {
 export function CraftNoteForm({ initial, isNew, onSave, onDelete }: Props) {
   const [form, setForm] = useState(initial)
   const { data: areas = [] } = useCraftAreas()
+  const { data: kinds = [] } = useCraftKinds()
+  const [making, setMaking] = useState<'area' | 'kind' | null>(null)
+  const kind = kinds.find((k) => k.id === form.kind_id)
   const [tags, setTags] = useState(initial.hashtags.join(' '))
   const set = (patch: Partial<CraftNoteInput>) => setForm((f) => ({ ...f, ...patch }))
   const link = form.url.trim()
   const linkOk = !link || /^https?:\/\//i.test(link)
-  const ready = form.title.trim().length > 0 && linkOk && Boolean(form.area_id)
+  const ready = form.title.trim().length > 0 && linkOk && Boolean(form.area_id) && Boolean(form.kind_id)
 
   const submit = () => {
     if (!ready) return
@@ -32,19 +42,24 @@ export function CraftNoteForm({ initial, isNew, onSave, onDelete }: Props) {
   }
 
   return (
+    <>
+    {/* The sheets sit outside the form: React events bubble through portals, so a sheet's own
+        submit would otherwise submit this form too. */}
     <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); submit() }}>
       <Field label="Name">
         <Input value={form.title} maxLength={200} placeholder="e.g. Crowd work tips" onChange={(e) => set({ title: e.target.value })} autoFocus={isNew} />
       </Field>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Kind" hint={KINDS.find((k) => k.key === form.kind)?.hint}>
-          <Select value={form.kind} onChange={(e) => set({ kind: e.target.value as CraftKind })}>
-            {KINDS.map((k) => <option key={k.key} value={k.key}>{k.label}</option>)}
+        <Field label="Kind" hint={BEHAVIOURS.find((b) => b.key === kind?.behaviour)?.hint}>
+          <Select value={form.kind_id} onChange={(e) => (e.target.value === NEW ? setMaking('kind') : set({ kind_id: e.target.value }))}>
+            {kinds.map((k) => <option key={k.id} value={k.id}>{k.name}</option>)}
+            <option value={NEW}>New kind…</option>
           </Select>
         </Field>
         <Field label="Area" hint={areas.find((a) => a.id === form.area_id)?.description}>
-          <Select value={form.area_id} onChange={(e) => set({ area_id: e.target.value })}>
+          <Select value={form.area_id} onChange={(e) => (e.target.value === NEW ? setMaking('area') : set({ area_id: e.target.value }))}>
             {areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+            <option value={NEW}>New area…</option>
           </Select>
         </Field>
       </div>
@@ -70,5 +85,8 @@ export function CraftNoteForm({ initial, isNew, onSave, onDelete }: Props) {
         <Button variant="tape" type="submit" disabled={!ready}>Save note</Button>
       </div>
     </form>
+    {making === 'kind' && <KindSheet kinds={kinds} noteCount={0} onClose={() => setMaking(null)} onCreated={(k) => set({ kind_id: k.id })} />}
+    {making === 'area' && <AreaSheet areas={areas} noteCount={0} onClose={() => setMaking(null)} onCreated={(a) => set({ area_id: a.id })} />}
+    </>
   )
 }

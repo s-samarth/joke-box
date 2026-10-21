@@ -6,7 +6,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { useCraftAreas, useCraftNotes } from '../../api/craft'
-import type { CraftKind, CraftScreen } from '../../api/types'
+import type { Behaviour, CraftScreen } from '../../api/types'
 import { Modal } from '../../components/ui/Modal'
 import { listItems } from './bodyFormat'
 import { notesFor } from './craftMeta'
@@ -18,23 +18,23 @@ interface Props {
   onOpenChange: (open: boolean) => void
   title: string
   screen: CraftScreen
-  /** Only these kinds; all kinds when left out. */
-  kinds?: CraftKind[]
+  /** Only notes whose kind behaves like these; everything when left out. */
+  behaviours?: Behaviour[]
   /** Shown when there's nothing to show yet. */
   empty: string
 }
 
 const chip = (on: boolean) => `h-8 shrink-0 rounded-lg px-3 text-sm transition ${on ? 'bg-paper font-medium text-ink' : 'bg-ink-3 text-dim hover:text-paper'}`
 
-export function CraftSheet({ open, onOpenChange, title, screen, kinds, empty }: Props) {
+export function CraftSheet({ open, onOpenChange, title, screen, behaviours, empty }: Props) {
   const { data: all = [] } = useCraftNotes()
   const { data: areas = [] } = useCraftAreas()
-  const notes = notesFor(all, areas, screen, kinds)
+  const notes = notesFor(all, areas, screen, behaviours)
   const [pickedId, setPickedId] = useState<string | null>(null)
   // Ticks per note, kept while the screen is open.
   const [ticks, setTicks] = useState<Record<string, number[]>>({})
   const note = notes.find((n) => n.id === pickedId) ?? notes[0]
-  const newHref = `/craft/new?screen=${screen}${kinds?.length === 1 ? `&kind=${kinds[0]}` : ''}`
+  const newHref = `/craft/new?screen=${screen}${behaviours?.length === 1 ? `&kind=${behaviours[0]}` : ''}`
 
   const tick = (line: number) => note && setTicks((t) => {
     const on = t[note.id] ?? []
@@ -52,7 +52,7 @@ export function CraftSheet({ open, onOpenChange, title, screen, kinds, empty }: 
               {notes.map((n) => <button key={n.id} type="button" className={chip(n.id === note.id)} aria-pressed={n.id === note.id} onClick={() => setPickedId(n.id)}>{n.title}</button>)}
             </div>
           )}
-          {note.kind === 'checklist' ? (
+          {note.behaviour === 'checklist' ? (
             <TickList items={listItems(note.body)} ticked={ticks[note.id] ?? []} onTick={tick} onReset={() => setTicks((t) => ({ ...t, [note.id]: [] }))} />
           ) : (
             <NoteBody body={note.body} />

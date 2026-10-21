@@ -96,7 +96,7 @@ The vocabulary is a comic's, not a database's. Keep to it in the code and in the
 | **Rewrite** | A timed session reworking one joke. Each save is a version. |
 | **Brainstorm session** | A free writing session not tied to one joke. |
 | **Observation** | Something you noticed, before it's a joke. |
-| **Craft note** | Something you've learned about doing stand-up, not material. Its **kind** says how it's used (checklist, technique, reference, path) and its **area** is the folder it lives in. You start with seven areas and can add, rename, recolour, reorder and delete them; each area picks the screens (Rewrite, set builder, Stage) that show its notes. |
+| **Craft note** | Something you've learned about doing stand-up, not material. Its **kind** is yours to name (you start with Checklist, Technique, Reference and Path) and works like one of four things: a note to read, a checklist, a writing technique or a path. Its **area** is the folder it lives in. You start with seven areas and can add, rename, recolour, reorder and delete them; each area picks the screens (Rewrite, set builder, Stage) that show its notes. |
 | **LPM** | Laughs per minute: each laugh scored 1 (a few giggles) to 5 (laughs and applause), the points divided by the minutes on stage. |
 | **Path** | Your goals as tick boxes in a Path note (levels, a task list). Home shows the next step. |
 | **Routine** | An item on the watchlist: a known set by another comic. |

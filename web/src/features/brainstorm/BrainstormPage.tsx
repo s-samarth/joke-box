@@ -17,7 +17,7 @@ export function BrainstormPage() {
   const navigate = useNavigate()
   const { confirm, toast } = useFeedback()
   const { data: notes = [] } = useCraftNotes()
-  const techniques = notes.filter((n) => n.kind === 'technique')
+  const techniques = notes.filter((n) => n.behaviour === 'technique')
   const start = (technique?: string) => navigate(`/brainstorm/${newId()}${technique ? `?technique=${technique}` : ''}`)
 
   const onDelete = async (id: string) => {

@@ -5,7 +5,7 @@ import { lessonFrom } from './craftMeta'
 import { mostSolidTopic, nextStep, targetMinutes } from './path'
 
 const note = (patch: Partial<CraftNote>): CraftNote => ({
-  id: 'x', title: 'Fake', body: '', kind: 'path', area_id: 'p', hashtags: [], source: '', url: '', position: 1,
+  id: 'x', title: 'Fake', body: '', behaviour: 'path', kind_id: 'k', area_id: 'p', hashtags: [], source: '', url: '', position: 1,
   performance_log_id: null, analysis_id: null, created_at: '', updated_at: '', ...patch,
 })
 
@@ -13,7 +13,7 @@ describe('path', () => {
   it('finds the next unticked step in the first path note that has one', () => {
     const done = note({ id: 'a', position: 1, body: '- [x] fake one' })
     const open = note({ id: 'b', position: 2, body: '- [x] fake one\n- [ ] fake two, a solid 10 mins\n- [ ] fake three' })
-    const step = nextStep([open, done, note({ kind: 'reference', body: '- [ ] not a path' })])
+    const step = nextStep([open, done, note({ behaviour: 'reference', body: '- [ ] not a path' })])
     expect(step && [step.note.id, step.done, step.total, step.next.text]).toEqual(['b', 1, 3, 'fake two, a solid 10 mins'])
     expect(nextStep([done])).toBeNull()
   })
@@ -33,10 +33,10 @@ describe('path', () => {
 
 describe('lessons', () => {
   it('names a lesson by its first line', () => {
-    expect(lessonFrom('Fake lesson', [], 's')).toMatchObject({ title: 'Fake lesson', body: '', area_id: 's', kind: 'reference' })
+    expect(lessonFrom('Fake lesson', [], { area_id: 's', kind_id: 'k' })).toMatchObject({ title: 'Fake lesson', body: '', area_id: 's', kind_id: 'k' })
     const long = `${'word '.repeat(30)}end`
-    expect(lessonFrom(long, [], 's').title.length).toBeLessThanOrEqual(81)
-    expect(lessonFrom(`Fake title\nmore fake`, [], 's').body).toBe('Fake title\nmore fake')
+    expect(lessonFrom(long, [], { area_id: 's', kind_id: 'k' }).title.length).toBeLessThanOrEqual(81)
+    expect(lessonFrom(`Fake title\nmore fake`, [], { area_id: 's', kind_id: 'k' }).body).toBe('Fake title\nmore fake')
   })
 })
 

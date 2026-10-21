@@ -3,12 +3,12 @@
 import uuid
 
 from sqlalchemy import JSON, CheckConstraint, ForeignKey, Index, Integer, String, Text, Uuid, text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, OwnedMixin
 
-# What a note is for. The kind decides how the app shows it (a checklist ticks, a technique runs).
-CRAFT_KINDS = ("checklist", "technique", "reference", "path")
+# How a kind of note behaves: a checklist ticks, a technique runs, a path climbs, a note reads.
+BEHAVIOURS = ("checklist", "technique", "reference", "path")
 # Screens that can show an area's notes in a sheet.
 CRAFT_SCREENS = ("rewrite", "sets", "stage")
 
@@ -36,15 +36,28 @@ class CraftArea(OwnedMixin, Base):
     position: Mapped[int] = mapped_column(Integer, default=0)
 
 
+class NoteKind(OwnedMixin, Base):
+    """A kind of craft note, yours to name, add and delete. Its behaviour is how the app uses it."""
+
+    __tablename__ = "craft_kinds"
+    __table_args__ = (
+        Index("uq_craft_kinds_user_name", "user_id", text("lower(name)"), unique=True),
+        CheckConstraint(one_of("behaviour", BEHAVIOURS), name="behaviour_values"),
+    )
+
+    name: Mapped[str] = mapped_column(String(60))
+    behaviour: Mapped[str] = mapped_column(String(20), default="reference")
+    position: Mapped[int] = mapped_column(Integer, default=0)
+
+
 class CraftNote(OwnedMixin, Base):
     """One lesson, checklist, technique or goal. The body is plain text with light formatting."""
 
     __tablename__ = "craft_notes"
-    __table_args__ = (CheckConstraint(one_of("kind", CRAFT_KINDS), name="kind_values"),)
 
     title: Mapped[str] = mapped_column(String(200))
     body: Mapped[str] = mapped_column(Text, default="")
-    kind: Mapped[str] = mapped_column(String(20), default="reference")
+    kind_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("craft_kinds.id"), index=True)
     area_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("craft_areas.id"), index=True)
     hashtags: Mapped[list[str]] = mapped_column(JSON, default=list)
     source: Mapped[str] = mapped_column(String(200), default="")
@@ -57,3 +70,10 @@ class CraftNote(OwnedMixin, Base):
     analysis_id: Mapped[uuid.UUID | None] = mapped_column(
         Uuid, ForeignKey("analyses.id", ondelete="SET NULL"), index=True
     )
+
+    kind: Mapped[NoteKind] = relationship(lazy="joined")
+
+    @property
+    def behaviour(self) -> str:
+        """How the app treats this note, from its kind."""
+        return self.kind.behaviour

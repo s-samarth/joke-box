@@ -19,7 +19,7 @@ interface Props {
 export function TechniquePanel({ techniqueId, onChange }: Props) {
   const { data: notes = [] } = useCraftNotes()
   const [at, setAt] = useState(0)
-  const techniques = notes.filter((n) => n.kind === 'technique')
+  const techniques = notes.filter((n) => n.behaviour === 'technique')
   const note = notes.find((n) => n.id === techniqueId)
 
   if (!note) {

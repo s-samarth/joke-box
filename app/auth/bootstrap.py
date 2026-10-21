@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.models import RANDOM_TOPIC, Status, Topic, User
 from app.models.base import utcnow
 from app.services.craft_areas import ensure_craft_areas
+from app.services.craft_kinds import ensure_craft_kinds
 
 DEFAULT_STATUSES = [
     "Incomplete",
@@ -40,7 +41,7 @@ def upsert_user(db: Session, *, email: str, google_sub: str | None, name: str, a
 
 
 def ensure_defaults(db: Session, user: User) -> None:
-    """Every user has the protected Random topic, the default statuses and some craft areas."""
+    """Every user has the protected Random topic, default statuses, craft areas and kinds."""
     random_topic = db.scalar(
         select(Topic).where(Topic.user_id == user.id, func.lower(Topic.name) == "random")
     )
@@ -53,6 +54,7 @@ def ensure_defaults(db: Session, user: User) -> None:
         for position, name in enumerate(DEFAULT_STATUSES):
             db.add(Status(user_id=user.id, name=name, position=position))
     ensure_craft_areas(db, user)
+    ensure_craft_kinds(db, user)
     db.flush()
 
 

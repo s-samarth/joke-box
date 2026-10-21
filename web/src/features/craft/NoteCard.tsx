@@ -1,5 +1,5 @@
 /**
- * One craft note as a card whose face depends on its kind: a checklist shows its first boxes,
+ * One craft note as a card whose face depends on how its kind behaves: a checklist shows its first boxes,
  * a technique a prompt and Start, a path its progress, a reference the start of the text.
  * The ⋯ menu moves it to another area or deletes it.
  *
@@ -10,17 +10,17 @@ import { MoreHorizontal } from 'lucide-react'
 import type { CSSProperties } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { newId } from '../../api/client'
-import { craftInput, useDeleteCraftNote, useSaveCraftNote } from '../../api/craft'
+import { craftInput, useCraftKinds, useDeleteCraftNote, useSaveCraftNote } from '../../api/craft'
 import type { CraftArea, CraftNote } from '../../api/types'
 import { Dropdown, type MenuItem } from '../../components/ui/Menu'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { listItems, prompts } from './bodyFormat'
-import { AREA_COLORS, kindLabel, plainText } from './craftMeta'
+import { areaColor, kindName, plainText } from './craftMeta'
 import { KIND_ICONS } from './kindIcons'
 
 function Face({ note }: { note: CraftNote }) {
   const navigate = useNavigate()
-  if (note.kind === 'checklist') {
+  if (note.behaviour === 'checklist') {
     const items = listItems(note.body)
     return (
       <ul className="mt-2.5 space-y-1.5 text-sm text-dim">
@@ -31,7 +31,7 @@ function Face({ note }: { note: CraftNote }) {
       </ul>
     )
   }
-  if (note.kind === 'technique') {
+  if (note.behaviour === 'technique') {
     const list = prompts(note.body)
     return (
       <>
@@ -43,7 +43,7 @@ function Face({ note }: { note: CraftNote }) {
       </>
     )
   }
-  if (note.kind === 'path') {
+  if (note.behaviour === 'path') {
     const boxes = listItems(note.body).filter((i) => i.checked !== null)
     if (!boxes.length) return <p className="mt-2.5 line-clamp-3 text-sm text-dim">{plainText(note.body)}</p>
     const done = boxes.filter((i) => i.checked).length
@@ -62,7 +62,8 @@ export function NoteCard({ note, areas, showArea }: { note: CraftNote; areas: Cr
   const del = useDeleteCraftNote()
   const { confirm, toast } = useFeedback()
   const area = areas.find((a) => a.id === note.area_id)
-  const Icon = KIND_ICONS[note.kind]
+  const { data: kinds = [] } = useCraftKinds()
+  const Icon = KIND_ICONS[note.behaviour]
   const moveTo = (to: CraftArea) => {
     save.mutate({ id: note.id, input: { ...craftInput(note), area_id: to.id } }, { onError: (e) => toast(`Not moved: ${e.message}`) })
     toast(`Moved to ${to.name}`)
@@ -78,11 +79,11 @@ export function NoteCard({ note, areas, showArea }: { note: CraftNote; areas: Cr
 
   return (
     <article className="group relative mb-3 break-inside-avoid overflow-hidden rounded-xl bg-ink-2 p-4 pt-4.5 ring-1 ring-rule transition-colors hover:bg-ink-3"
-      style={{ '--area': AREA_COLORS[area?.color ?? 'sky'] } as CSSProperties}>
+      style={{ '--area': areaColor(area?.color ?? 'sky') } as CSSProperties}>
       <span aria-hidden className="absolute inset-x-0 top-0 h-[3px] bg-[var(--area)] opacity-80" />
       <div className="flex items-center gap-1.5 text-xs text-[var(--area)]">
         <Icon size={14} aria-hidden />
-        <span>{kindLabel(note.kind)}{showArea && area ? `, ${area.name}` : ''}</span>
+        <span>{kindName(kinds, note.kind_id)}{showArea && area ? `, ${area.name}` : ''}</span>
         <span className="relative z-10 -my-1.5 -mr-2 ml-auto">
           <Dropdown items={items} trigger={<button type="button" aria-label={`More for ${note.title}`} className="inline-flex size-8 items-center justify-center rounded-md text-faint hover:bg-ink-4 hover:text-paper"><MoreHorizontal size={16} /></button>} />
         </span>

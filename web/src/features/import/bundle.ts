@@ -4,7 +4,6 @@
  *
  * Every item carries a fixed id, so importing the same bundle twice adds nothing the second time.
  */
-import type { CraftKind } from '../../api/types'
 
 export interface ImportJoke {
   id: string
@@ -41,7 +40,8 @@ export interface ImportCraftNote {
   id: string
   title: string
   body: string
-  kind: CraftKind
+  /** A kind by name (or a behaviour, as older bundles have), made as a plain note kind if new. */
+  kind: string
   /** A craft area by name, made if it doesn't exist yet. */
   area: string
   hashtags?: string[]

@@ -6,7 +6,7 @@ import { useCraftAreas, useCraftNotes } from '../../api/craft'
 import { Button } from '../../components/ui/Button'
 import { EmptyState, Spinner } from '../../components/ui/bits'
 import { AreaSheet } from './AreaSheet'
-import { AREA_COLORS } from './craftMeta'
+import { areaColor } from './craftMeta'
 import { NoteGrid } from './NoteGrid'
 
 export function AreaPage() {
@@ -24,7 +24,7 @@ export function AreaPage() {
   )
 
   return (
-    <div className="mx-auto max-w-3xl pb-16" style={{ '--area': AREA_COLORS[area.color] } as CSSProperties}>
+    <div className="mx-auto max-w-3xl pb-16" style={{ '--area': areaColor(area.color) } as CSSProperties}>
       <div className="pt-6 pb-6 lg:pt-10">
         <Link to="/craft" className="inline-flex items-center gap-1.5 text-sm text-dim hover:text-paper"><ArrowLeft size={15} /> Craft</Link>
         <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">

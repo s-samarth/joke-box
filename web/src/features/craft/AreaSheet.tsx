@@ -2,18 +2,17 @@
  * Make or change an area: its name, a line about it, its colour, and which screens show its
  * notes. Deleting one moves its notes to another area you pick, so nothing is lost.
  */
-import { Check, Trash2 } from 'lucide-react'
+import { Check, Pipette, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useCreateArea, useDeleteArea, useUpdateArea } from '../../api/craft'
-import type { AreaColor, CraftArea, CraftAreaInput, CraftScreen } from '../../api/types'
+import type { CraftArea, CraftAreaInput, CraftScreen } from '../../api/types'
 import { Button } from '../../components/ui/Button'
 import { Field, Input, Select } from '../../components/ui/Field'
 import { Modal } from '../../components/ui/Modal'
 import { useFeedback } from '../../components/ui/feedbackContext'
-import { AREA_COLORS, SCREENS } from './craftMeta'
+import { AREA_COLORS, SCREENS, areaColor, nextColor } from './craftMeta'
 
 const chip = (on: boolean) => `h-9 rounded-lg px-3 text-sm transition ${on ? 'bg-paper font-medium text-ink' : 'bg-ink-3 text-dim hover:text-paper'}`
-const BLANK: CraftAreaInput = { name: '', description: '', color: 'teal', screens: [] }
 
 interface Props {
   area?: CraftArea
@@ -21,10 +20,11 @@ interface Props {
   noteCount: number
   onClose: () => void
   onDeleted?: (movedTo: string) => void
+  onCreated?: (area: CraftArea) => void
 }
 
-export function AreaSheet({ area, areas, noteCount, onClose, onDeleted }: Props) {
-  const [form, setForm] = useState<CraftAreaInput>(area ? { name: area.name, description: area.description, color: area.color, screens: area.screens } : BLANK)
+export function AreaSheet({ area, areas, noteCount, onClose, onDeleted, onCreated }: Props) {
+  const [form, setForm] = useState<CraftAreaInput>(area ? { name: area.name, description: area.description, color: area.color, screens: area.screens } : { name: '', description: '', color: nextColor(areas), screens: [] })
   const others = areas.filter((a) => a.id !== area?.id)
   const [moveTo, setMoveTo] = useState(others[0]?.id ?? '')
   const create = useCreateArea()
@@ -37,9 +37,9 @@ export function AreaSheet({ area, areas, noteCount, onClose, onDeleted }: Props)
   const save = () => {
     const input = { ...form, name: form.name.trim(), description: form.description.trim() }
     if (!input.name) return
-    const done = { onSuccess: () => { toast(area ? 'Area saved' : `${input.name} added`); onClose() }, onError: (e: Error) => toast(e.message) }
-    if (area) update.mutate({ id: area.id, input }, done)
-    else create.mutate(input, done)
+    const onError = (e: Error) => toast(e.message)
+    if (area) update.mutate({ id: area.id, input }, { onSuccess: () => { toast('Area saved'); onClose() }, onError })
+    else create.mutate(input, { onSuccess: (made) => { toast(`${made.name} added`); onCreated?.(made); onClose() }, onError })
   }
   const remove = async () => {
     if (!area) return
@@ -56,14 +56,20 @@ export function AreaSheet({ area, areas, noteCount, onClose, onDeleted }: Props)
         <Field label="Name"><Input value={form.name} maxLength={80} placeholder="e.g. Callbacks" onChange={(e) => set({ name: e.target.value })} /></Field>
         <Field label="What goes here (optional)"><Input value={form.description} maxLength={200} placeholder="One line about it" onChange={(e) => set({ description: e.target.value })} /></Field>
         <div className="space-y-2">
-          <span className="text-sm text-dim">Colour</span>
+          <span className="text-sm text-dim">Colour <span className="text-faint">(colours can repeat; there is no limit on areas)</span></span>
           <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Colour">
-            {(Object.keys(AREA_COLORS) as AreaColor[]).map((c) => (
+            {Object.keys(AREA_COLORS).map((c) => (
               <button key={c} type="button" role="radio" aria-checked={form.color === c} aria-label={c} onClick={() => set({ color: c })}
                 className="inline-flex size-10 items-center justify-center rounded-full ring-offset-2 ring-offset-ink-2 transition aria-checked:ring-2 aria-checked:ring-paper" style={{ background: AREA_COLORS[c] }}>
                 {form.color === c && <Check size={16} className="text-ink" strokeWidth={3} />}
               </button>
             ))}
+            {/* Any colour you like: the native colour picker, behind a round swatch like the rest. */}
+            <label className={`relative inline-flex size-10 cursor-pointer items-center justify-center rounded-full ring-offset-2 ring-offset-ink-2 ${form.color.startsWith('#') ? 'ring-2 ring-paper' : 'ring-1 ring-rule-strong'}`}
+              style={form.color.startsWith('#') ? { background: form.color } : undefined} title="Pick any colour">
+              <Pipette size={16} className={form.color.startsWith('#') ? 'text-ink' : 'text-dim'} aria-hidden />
+              <input type="color" aria-label="Pick any colour" className="absolute inset-0 cursor-pointer opacity-0" value={areaColor(form.color)} onChange={(e) => set({ color: e.target.value })} />
+            </label>
           </div>
         </div>
         <div className="space-y-2">
