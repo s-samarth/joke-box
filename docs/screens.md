@@ -207,8 +207,10 @@ separate from joke topics; deleting one keeps its observations. The filter is `?
 [useVoiceLibrary.ts](../web/src/features/voice/useVoiceLibrary.ts).
 
 - **Recorder:** a big yellow mic. While recording, it shows the elapsed time, a 7-bar level
-  meter scrolling left, and "Screen stays on". If the phone takes the mic, a toast says so and the
-  card opens with what was recorded.
+  meter scrolling left, and "Screen stays on" once the phone agrees to keep the screen awake. If it
+  refuses (an iPhone before iOS 18.4 from the Home Screen, a browser without the Wake Lock API), it
+  says "Screen may lock: tap it now and then" in amber instead. If the phone takes the mic, a toast
+  says so and the card opens with what was recorded.
 - **New voice note card:** appears as soon as you stop. It has play and scrub controls, a title, and
   hashtags, while the recording uploads in the background. **Done** files the note and
   **Delete** throws it away.

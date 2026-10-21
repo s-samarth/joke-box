@@ -63,7 +63,7 @@ export function useRecorder(handlers: Handlers) {
   const [liveId, setLiveId] = useState<string | null>(null)
   const on = useRef(handlers)
   useEffect(() => { on.current = handlers })
-  useWakeLock(recording)
+  const screen = useWakeLock(recording)
 
   const stop = useCallback(async (): Promise<Recording | null> => {
     const current = live.current
@@ -181,5 +181,5 @@ export function useRecorder(handlers: Handlers) {
     }
   }, [stop])
 
-  return { recording, seconds, levels, start, stop, id: recording ? liveId : null }
+  return { recording, seconds, levels, start, stop, id: recording ? liveId : null, screen }
 }

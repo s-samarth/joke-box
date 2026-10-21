@@ -161,7 +161,8 @@ flowchart LR
   Vercel's request size cap). That's about 11 minutes of Opus or 8 of AAC.
 - **While recording:** every 1 s chunk is also written to IndexedDB as it arrives
   ([inProgress.ts](../web/src/features/voice/inProgress.ts)), keyed `[note id, chunk number]`,
-  and the screen is kept awake (`useWakeLock`). If the phone takes the mic (the track ends or the
+  and the screen is kept awake (`useWakeLock`, which reports `asking`, `held` or `refused` so
+  the recorder only promises what the phone agreed to). If the phone takes the mic (the track ends or the
   recorder errors), what was recorded is filed as if stop was tapped. If the app is killed, the
   next launch puts the chunks back together as "Recovered recording", dated when it started.
 - **Uploads time out:** a minute plus time to send at 20 KB/s (at most 15 minutes), so a stalled
