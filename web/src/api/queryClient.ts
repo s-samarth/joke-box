@@ -75,7 +75,20 @@ export const persister = createAsyncStoragePersister({
   throttleTime: 300, // a save is on the phone within a moment, even if the app is closed straight away
 })
 
-export const persistMaxAge = WEEK
+/*
+ * The saved copy never expires as a whole: saves waiting in it must survive however long the app
+ * goes unopened. Old data in it is harmless (it refreshes once online) and each list is still
+ * dropped a week after it was last used (gcTime).
+ */
+export const persistMaxAge = Infinity
+
+/*
+ * Changing this throws away the whole saved copy on every phone, including saves still waiting
+ * to sync. Don't, unless the cache format truly changes; and then drain the queue first.
+ * Likewise the mutation keys below are stored with each waiting save, so never rename one.
+ * queuedKeys.test.ts holds both in place.
+ */
+export const CACHE_BUSTER = 'v1'
 
 /* ---- Offline-capable bit saves and deletes ----
  * These have defaults registered by key, so a save made offline survives a reload:
