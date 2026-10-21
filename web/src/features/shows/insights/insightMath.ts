@@ -25,6 +25,8 @@ export interface Group {
   delta: number
   /** Share of shows rated 4 or 5 stars. */
   great: number
+  /** Share of shows rated 1 or 2 stars. */
+  rough: number
 }
 
 export interface Breakdown {
@@ -71,6 +73,7 @@ export function breakdown(logs: PerformanceLog[], keysOf: (l: PerformanceLog) =>
       key, label: labelOf(key), shows: shows.length, rating, delta: rating - overall,
       seconds: shows.reduce((s, l) => s + l.duration_seconds, 0),
       great: shows.filter((l) => l.rating >= 4).length / shows.length,
+      rough: shows.filter((l) => l.rating <= 2).length / shows.length,
     }
   })
   const sorted = order
@@ -91,10 +94,3 @@ export const byLength = (logs: PerformanceLog[]): Breakdown =>
 
 export const bySlot = (logs: PerformanceLog[]): Breakdown =>
   breakdown(logs, (l) => [slotOf(l.performed_at)], (k) => SLOTS.find((s) => s.key === k)?.label ?? k, SLOTS.map((s) => s.key))
-
-/** Best and worst ranked groups, only when they really differ from your usual. */
-export function extremes(b: Breakdown, margin = 0.1): { best?: Group; worst?: Group } {
-  const best = b.ranked.reduce<Group | undefined>((m, g) => (!m || g.delta > m.delta ? g : m), undefined)
-  const worst = b.ranked.reduce<Group | undefined>((m, g) => (!m || g.delta < m.delta ? g : m), undefined)
-  return { best: best && best.delta >= margin ? best : undefined, worst: worst && worst.delta <= -margin ? worst : undefined }
-}

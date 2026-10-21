@@ -8,6 +8,8 @@ export const RATING_COLORS = ['#5c5232', '#857337', '#ad963e', '#d4b648', '#f0cf
 
 export const ABOVE = '#ad922c'
 export const BELOW = '#6a7fd4'
+/** The neutral middle (an okay, 3-star night): grey, so it reads as neither side. */
+export const OKAY = '#646b82'
 
 /** The colour for a (possibly averaged) rating from 1 to 5. */
 export const ratingColor = (rating: number): string => RATING_COLORS[Math.min(4, Math.max(0, Math.round(rating) - 1))]
