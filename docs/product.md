@@ -41,9 +41,11 @@ own data. Today that is one comedian, but the system works for more than one.
    saves. Nothing about filing is required to save a thought.
 2. **Everything saves itself.** There is no Save button on a joke, a set or a brainstorm. Changes
    save a moment after you stop, and when you leave the page.
-3. **Offline is normal.** Green rooms and metros have no signal. Reading works offline, and so does
-   saving jokes, observations, brainstorms, watchlist ticks, analyses and voice notes. All of it
-   syncs when you're back online.
+3. **Offline is normal.** Basements, green rooms and metros have no signal, or one bar, or wifi
+   that wants a sign-in. Reading works offline, and so does saving jokes, observations, shows,
+   sets, brainstorms, craft notes, watchlist ticks, analyses and voice notes. It all syncs in
+   order when you're back, keeps the time you wrote it, and nothing is dropped: a save the server
+   refuses waits in Couldn't sync with what you wrote.
 4. **Phone first, laptop comfortable.** Every screen is designed at 390 px wide, with large tap
    targets and safe-area padding. Desktop adds a side rail and two-pane layouts.
 5. **Stage-ready.** Stage mode is big, high-contrast and tap-anywhere, and it keeps the screen

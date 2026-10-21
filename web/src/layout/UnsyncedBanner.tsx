@@ -24,7 +24,7 @@ function Item({ item }: { item: Unsynced }) {
   return (
     <li className="py-4">
       <p className="font-medium">{title}</p>
-      <p className="text-sm text-faint">{formatDateTime(item.at)}. {item.reason}</p>
+      <p className="text-sm text-faint">{formatDateTime(item.at)}. {item.reason}{item.status === 409 && ' Keep mine replaces that version with yours.'}</p>
       {text && <p className="mt-2 line-clamp-4 rounded-lg bg-ink-3 px-3 py-2 text-sm whitespace-pre-wrap">{text}</p>}
       <div className="mt-2 flex flex-wrap gap-1">
         <Button small icon={<RotateCcw size={15} />} onClick={() => void retryUnsynced(qc, item)}>{item.status === 409 ? 'Keep mine' : 'Retry'}</Button>

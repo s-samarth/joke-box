@@ -36,7 +36,7 @@ export function LoginPage() {
         {isLocal && <a href="/auth/dev-login" className="mt-4 block text-center text-sm text-faint hover:text-dim">Sign in as the local test account</a>}
         {waiting > 0 && (
           <p className="mt-4 rounded-lg bg-amber/10 px-4 py-3 text-sm text-amber" role="status">
-            {waiting === 1 ? '1 change is' : `${waiting} changes are`} waiting on this phone. Sign in with the same account and they’ll sync.
+            {waiting === 1 ? '1 change is waiting on this phone. Sign in with the same account and it’ll sync.' : `${waiting} changes are waiting on this phone. Sign in with the same account and they’ll sync.`}
           </p>
         )}
         {error && <p className="mt-4 rounded-lg bg-light/10 px-4 py-3 text-sm text-light" role="alert">{error}</p>}

@@ -16,7 +16,8 @@ export function AccountMenu({ showName = false }: { showName?: boolean }) {
   // Signing out wipes this phone, so changes that haven't synced yet would be lost: ask first.
   const leave = async () => {
     const changes = waiting === 1 ? '1 change hasn’t' : `${waiting} changes haven’t`
-    if (waiting && !(await confirm({ title: `${changes} synced yet`, message: 'Signing out deletes them from this phone. Wait until you’re online and the cloud says all changes are saved.', confirmLabel: 'Sign out anyway', danger: true }))) return
+    const message = `Signing out deletes ${waiting === 1 ? 'it' : 'them'} from this phone. Wait until you’re online and the cloud says all changes are saved.`
+    if (waiting && !(await confirm({ title: `${changes} synced yet`, message, confirmLabel: 'Sign out anyway', danger: true }))) return
     void signOut()
   }
 

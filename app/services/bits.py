@@ -92,10 +92,7 @@ def prune_unused_types(db: Session, user: User) -> None:
     db.execute(delete(BitType).where(BitType.user_id == user.id, ~used))
 
 
-CONFLICT = (
-    "This joke was changed on another device since you edited it. Your version is kept on "
-    "this phone under Couldn't sync: copy it, or keep it to replace the other one."
-)
+CONFLICT = "This joke was changed on another device after you edited it."
 
 
 def type_names(names: list[str]) -> set[str]:

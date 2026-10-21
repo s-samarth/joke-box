@@ -29,11 +29,28 @@ under fixed keys (`setMutationDefaults`), each spreading the shared `QUEUED` opt
 - **One at a time, in order:** every queued save shares `scope: { id: 'sync' }`, so they reach the
   server in the order you made them. A show arrives before the lesson that points at it, and two
   quick edits to one joke can't land the wrong way round.
-- **Retries:** a save that never reached the server is retried until it does (pausing while
-  offline); a 5xx, 408 or 429 gets three more tries; any other refusal stops.
+- **Retries:** a save that never reached the server is retried (pausing while offline, which
+  costs no tries) up to 20 times while the server answers `/health`, so one stuck request can't
+  hold up the queue forever. A 5xx, 408 or 429 gets three more tries. A 401 (the sign-in ran out)
+  waits, retrying each minute, until you sign in again. Any other refusal stops.
+- **Nothing refused is lost:** a queued save that fails for good goes, with its variables, to the
+  **Couldn't sync** list ([unsynced.ts](../web/src/api/unsynced.ts), its own IndexedDB key) via
+  the `MutationCache` `onError`. A strip above every page opens it, with Retry, Copy and Discard.
+- **Written-at times:** new jokes, observations, voice notes and craft notes send `created_at`, so
+  something written offline keeps the time it was written; the server keeps it on create only and
+  caps it at now.
+- **Edits on two devices (jokes):** every joke has a `version`. A save sends the version it was
+  edited from (`base_version`, read from the cache when the save is sent, so a chain of autosaves
+  each sees the last answer). If the joke moved on elsewhere and the save would change it, the
+  server answers 409 and the edit goes to Couldn't sync, where **Keep mine** resends it on top
+  of the latest version. Resending the very same edit is never a clash.
 - **On restart, saved changes replay:** the persister keeps every queued save that hasn't
-  finished, including one that was mid-request when the app closed. `resumeQueued()` restarts them
-  all. Because the mutation function is registered by key rather than held in a closure, a save
+  finished, including one that was mid-request when the app closed. The saved copy never expires
+  (`maxAge: Infinity`; lists still drop a week after last use), and `CACHE_BUSTER` and every
+  shipped key are pinned by [queuedKeys.test.ts](../web/src/api/queuedKeys.test.ts), since
+  changing either would strand saves waiting on phones. `checkAccount()` runs first: if a different
+  account is now signed in, the last one's waiting saves are dropped rather than filed under the
+  new one. Then `resumeQueued()` restarts them all. Because the mutation function is registered by key rather than held in a closure, a save
   made before a reload can still run, and since saves are idempotent `PUT`s and deletes, sending
   one twice is harmless.
 - **Afterwards, the data refreshes, once:** `onSettled` calls `refreshWhenSynced(...)`, which
@@ -54,8 +71,27 @@ reaches the server (`TypeError` or a timeout) calls `lostConnection()`: we count
 ask `/health` every 10 seconds, on the `online` event and when the app comes back to the front,
 until it answers. The sync light and the voice outbox follow the same flag.
 
-The cache (with `gcTime` and `maxAge` of a week) is what lets the app open offline.
-`RequireAuth` uses the cached profile when the network is down.
+Wifi with a sign-in page (venues, cafés) answers with its own page until you sign in. So the
+`/health` check needs our own JSON `{"status": "ok"}`, and in `api()` a reply redirected to
+another origin, a 511, or a 200 that isn't JSON counts as no connection: the save waits.
+
+The cache is what lets the app open offline. `RequireAuth` uses the cached profile when the
+network is down, but a 401 beats it: the sign-in ran out, so it goes to sign in (the login page
+says how many changes are waiting). Signing out warns when changes haven't synced, then wipes
+them with everything else on the phone.
+
+### One tab at a time
+Two tabs would keep separate queues and overwrite each other's saved copy.
+[oneTab.ts](../web/src/lib/oneTab.ts): the open tab holds a Web Lock. A new tab that finds it
+held posts a claim on a BroadcastChannel; the open tab saves (`persistQueryClientSave`), answers,
+and reloads into "Open in another tab" with **Use it here**. Only then does the new tab restore
+the cache and start the voice outbox (`startOutbox`), so it can't take a recording still going
+in the other tab.
+
+### Honest save messages
+[announce.ts](../web/src/lib/announce.ts) waits up to 1.5 s for the server before saying "Show
+logged". On one bar the phone says online while the save is really waiting, so slower than that
+(or offline) it says "Saved offline, will sync".
 
 ## Autosave
 Joke pages, sets and brainstorm sessions keep a local draft and save after a short pause and on
@@ -123,6 +159,13 @@ flowchart LR
   and a gentle 0.85 decay.
 - **Size cap:** recording stops itself at about 4 MB, under the server's 4 MiB limit (itself under
   Vercel's request size cap). That's about 11 minutes of Opus or 8 of AAC.
+- **While recording:** every 1 s chunk is also written to IndexedDB as it arrives
+  ([inProgress.ts](../web/src/features/voice/inProgress.ts)), keyed `[note id, chunk number]`,
+  and the screen is kept awake (`useWakeLock`). If the phone takes the mic (the track ends or the
+  recorder errors), what was recorded is filed as if stop was tapped. If the app is killed, the
+  next launch puts the chunks back together as "Recovered recording", dated when it started.
+- **Uploads time out:** a minute plus time to send at 20 KB/s (at most 15 minutes), so a stalled
+  upload can't hold up the recordings behind it; a timeout counts as no connection.
 - **Outbox:** every recording is saved on the device first. The details and the audio upload as two
   calls, and retry when back online. A permanent refusal (too large, say) marks the note as failed,
   so you can delete it.

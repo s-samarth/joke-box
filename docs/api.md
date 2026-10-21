@@ -69,9 +69,15 @@ A JSON API under `/api`, served from the same origin as the app. Running locally
   "clean_rating": "clean | mild | dirty | null",
   "language": "Hinglish",
   "comments": "",
-  "created_at": "optional, kept only on create (used by the importer)"
+  "created_at": "optional, kept only on create and capped at now (imports, and jokes written offline)",
+  "base_version": "optional: the version this edit started from"
 }
 ```
+
+The answer includes `version`, which goes up by one on every save. With `base_version`, a save
+made from an older version that would change the joke answers **409** ("This joke was changed on
+another device after you edited it.") rather than overwriting; resending the same edit is fine.
+Without it, nothing is checked.
 
 The response (`BitOut`) adds `id`, `created_at` and `updated_at`, and returns `types` and
 `status` as names.

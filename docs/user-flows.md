@@ -148,7 +148,8 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 
 ## 12. Use it with no signal
 
-1. Everything you've already opened stays readable. The cache is kept on the device for a week.
+1. Everything you've already opened stays readable. Each list is kept on the device for a week
+   after you last opened it.
 2. Saves keep working: jokes, observations, shows (with their lesson), sets, rewrites, voice
    notes and craft notes. Sheets close as usual and say "Saved offline, will sync". The cloud
    icon turns amber and says "Offline, N waiting to sync", counting recordings still to upload.
@@ -156,7 +157,18 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
    the app checks every few seconds for the server to come back.
 4. Closing the app is fine. Waiting saves stay on the phone, including one that was on its way.
 5. Back online, the saves go up one at a time in the order you made them, then the lists
-   refresh and the icon returns to "All changes saved". If the server refuses one, a message
-   says which.
-6. A few things need a connection there and then, like renaming a topic or deleting a venue.
+   refresh and the icon returns to "All changes saved". Things written offline keep the time
+   you wrote them, so a joke written at 11:50 pm still counts for that day.
+6. If the server refuses a save, it isn't lost: a strip says "1 change couldn't sync" and opens
+   a list with what you wrote, and Retry, Copy and Discard. If the joke was changed on another
+   device meanwhile, your edit waits there with **Keep mine** instead of overwriting the other.
+7. Venue wifi that wants you to sign in counts as no signal until you do.
+8. If your sign-in runs out, waiting saves stay. The app asks you to sign in, says how many
+   changes are waiting, and they sync once you're back. Signing out with changes waiting asks
+   first, since it deletes them.
+9. Recording a set: the screen stays on. If the phone takes the mic or the app is closed, what
+   was recorded is kept (after a crash it comes back as "Recovered recording").
+10. A few things need a connection there and then, like renaming a topic or deleting a venue.
    Offline they say "You're offline" straight away.
+11. On a phone in a browser tab, Home suggests adding JokeBox to the Home Screen: Safari can clear
+   a tab's storage after a week unused, but not an installed app's.
