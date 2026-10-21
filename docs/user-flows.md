@@ -114,6 +114,8 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 2. Open a routine to watch it (its link, or a YouTube search). Tick the circle once you've watched it.
 3. Tap the notebook icon to start an **analysis**: the name and link are filled in from the routine.
 4. Analyses are listed on **Analysis**, where you can search them.
+5. Learned something about doing stand-up? On **Craft**, tap **New note**, pick its kind and area,
+   and write it down. Notes are grouped by where in the work you'll use them.
 
 ## 11. Install it on your phone
 

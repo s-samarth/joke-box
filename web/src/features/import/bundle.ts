@@ -1,9 +1,10 @@
 /**
  * An import bundle: a folder holding `import.json` and an `audio/` folder, made on a laptop from
- * an export such as a WhatsApp chat. Pure helpers: read the JSON, then work out what's new.
+ * an export such as a WhatsApp chat, or from notes on doing stand-up. Pure helpers: read the JSON, then work out what's new.
  *
  * Every item carries a fixed id, so importing the same bundle twice adds nothing the second time.
  */
+import type { CraftArea, CraftKind } from '../../api/types'
 
 export interface ImportJoke {
   id: string
@@ -36,11 +37,25 @@ export interface ImportVoiceNote {
   file: string
 }
 
+export interface ImportCraftNote {
+  id: string
+  title: string
+  body: string
+  kind: CraftKind
+  area: CraftArea
+  hashtags?: string[]
+  source?: string
+  url?: string
+  created_at: string
+}
+
 export interface ImportBundle {
   source: string
   jokes: ImportJoke[]
   observations: ImportObservation[]
   voice_notes: ImportVoiceNote[]
+  /** Optional: older bundles don't have it. */
+  craft_notes: ImportCraftNote[]
 }
 
 /** What's already in JokeBox, to skip items imported before (or typed in by hand). */
@@ -48,12 +63,14 @@ export interface Existing {
   ids: Set<string>
   jokeSetups: Set<string>
   observationTexts: Set<string>
+  craftTitles: Set<string>
 }
 
 export interface ImportPlan {
   jokes: ImportJoke[]
   observations: ImportObservation[]
   voiceNotes: ImportVoiceNote[]
+  craftNotes: ImportCraftNote[]
   skipped: number
 }
 
@@ -75,18 +92,21 @@ export function parseBundle(json: string): ImportBundle {
   if (!b || typeof b !== 'object' || !isList(b.jokes) || !isList(b.observations) || !isList(b.voice_notes)) {
     throw new Error('import.json needs jokes, observations and voice_notes lists.')
   }
-  return { source: String(b.source ?? 'import'), jokes: b.jokes, observations: b.observations, voice_notes: b.voice_notes }
+  const craft = isList(b.craft_notes) ? b.craft_notes : []
+  return { source: String(b.source ?? 'import'), jokes: b.jokes, observations: b.observations, voice_notes: b.voice_notes, craft_notes: craft }
 }
 
 /** Everything in the bundle that JokeBox doesn't have yet. */
 export function planImport(bundle: ImportBundle, existing: Existing): ImportPlan {
-  const total = bundle.jokes.length + bundle.observations.length + bundle.voice_notes.length
+  const total = bundle.jokes.length + bundle.observations.length + bundle.voice_notes.length + bundle.craft_notes.length
   const jokes = bundle.jokes.filter((j) => !existing.ids.has(j.id) && !existing.jokeSetups.has(normalise(j.setup)))
   const observations = bundle.observations.filter(
     (o) => !existing.ids.has(o.id) && !existing.observationTexts.has(normalise(o.text)),
   )
   const voiceNotes = bundle.voice_notes.filter((n) => !existing.ids.has(n.id))
-  return { jokes, observations, voiceNotes, skipped: total - jokes.length - observations.length - voiceNotes.length }
+  const craftNotes = bundle.craft_notes.filter((n) => !existing.ids.has(n.id) && !existing.craftTitles.has(normalise(n.title)))
+  const kept = jokes.length + observations.length + voiceNotes.length + craftNotes.length
+  return { jokes, observations, voiceNotes, craftNotes, skipped: total - kept }
 }
 
 /** Topic names the plan uses, without repeats (case-insensitive), in first-seen order. */

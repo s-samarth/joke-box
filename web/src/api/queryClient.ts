@@ -29,6 +29,7 @@ export const keys = {
   voiceNotes: ['voice-notes'],
   watchlist: ['watchlist'],
   analyses: ['analyses'],
+  craftNotes: ['craft-notes'],
 } as const
 
 export const queryClient = new QueryClient({

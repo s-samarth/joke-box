@@ -81,6 +81,7 @@ erDiagram
 | Table | Columns | Rules |
 |---|---|---|
 | `watch_items` | `title`, `comedian`, `category`, `description`, `url`, `position`, `schemer_index`, `logic_density`, `dark_pragmatism` (0–10, nullable), `watched` | The dossier is imported once and matched on title and comedian, so a re-import adds only new routines |
+| `craft_notes` | `title`, `body`, `kind` (checklist / technique / reference / path), `area` (writing / generating / rewriting / sets / stage / formats / progress), `hashtags` JSON, `source`, `url`, `position` | Check constraints on kind and area. The areas are fixed so screens can show the right notes. The body is plain text with light formatting (`#` headings, `-` lists, `- [ ]` tick boxes, `**bold**`) |
 | `analyses` | `title`, `url`, `body`, `watch_item_id` (set null) | Deleting the routine keeps the analysis |
 
 ## What happens on delete

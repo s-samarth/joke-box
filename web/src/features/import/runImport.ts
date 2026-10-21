@@ -22,6 +22,8 @@ interface Context {
   observationTopics: Named[]
   /** Audio files by name, from the bundle's audio/ folder. */
   audio: Map<string, File>
+  /** Craft notes are numbered on from here, so they sort after the ones you have. */
+  craftPosition: number
   onProgress: (p: Progress) => void
 }
 
@@ -40,7 +42,7 @@ async function ensureTopics(names: string[], known: Map<string, string>, path: s
 }
 
 export async function runImport(plan: ImportPlan, ctx: Context): Promise<Progress> {
-  const progress: Progress = { done: 0, total: plan.jokes.length + plan.observations.length + plan.voiceNotes.length, failures: [] }
+  const progress: Progress = { done: 0, total: plan.jokes.length + plan.observations.length + plan.voiceNotes.length + plan.craftNotes.length, failures: [] }
   const step = async (what: string, work: () => Promise<unknown>) => {
     try {
       await work()
@@ -84,6 +86,12 @@ export async function runImport(plan: ImportPlan, ctx: Context): Promise<Progres
       // A folder picker types .webm as video; the server takes audio only.
       await uploadVoiceAudio(n.id, new Blob([file], { type: audioType(n.file) }))
     })
+  }
+  for (const [i, n] of plan.craftNotes.entries()) {
+    const { title, body, kind, area, hashtags = [], source = '', url = '', created_at } = n
+    await step(`Craft note "${title}"`, () =>
+      api(`/api/craft-notes/${n.id}`, 'PUT', { title, body, kind, area, hashtags, source, url, created_at, position: ctx.craftPosition + i + 1 }),
+    )
   }
   return progress
 }

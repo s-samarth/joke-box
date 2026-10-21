@@ -13,33 +13,38 @@ const bundle: ImportBundle = {
     { id: 'o2', text: 'Second fake thing', created_at: when },
   ],
   voice_notes: [{ id: 'v1', label: 'Fake note', hashtags: [], duration_seconds: 5, created_at: when, file: 'a.webm' }],
+  craft_notes: [{ id: 'c1', title: 'Fake checklist', body: '- fake', kind: 'checklist', area: 'rewriting', created_at: when }],
 }
-const nothing = { ids: new Set<string>(), jokeSetups: new Set<string>(), observationTexts: new Set<string>() }
+const nothing = { ids: new Set<string>(), jokeSetups: new Set<string>(), observationTexts: new Set<string>(), craftTitles: new Set<string>() }
 
 describe('parseBundle', () => {
   it('reads a bundle and rejects anything else', () => {
     expect(parseBundle(JSON.stringify(bundle)).jokes).toHaveLength(2)
     expect(() => parseBundle('not json')).toThrow('not valid JSON')
     expect(() => parseBundle('{"jokes": []}')).toThrow('needs jokes')
+    // Bundles from before craft notes still read, with none.
+    expect(parseBundle('{"jokes": [], "observations": [], "voice_notes": []}').craft_notes).toEqual([])
   })
 })
 
 describe('planImport', () => {
   it('imports everything into an empty JokeBox', () => {
     const plan = planImport(bundle, nothing)
-    expect([plan.jokes.length, plan.observations.length, plan.voiceNotes.length, plan.skipped]).toEqual([2, 2, 1, 0])
+    expect([plan.jokes.length, plan.observations.length, plan.voiceNotes.length, plan.craftNotes.length, plan.skipped]).toEqual([2, 2, 1, 1, 0])
   })
 
-  it('skips items imported before, by id, and jokes or observations already typed in', () => {
+  it('skips items imported before, by id, and jokes, observations or craft notes already typed in', () => {
     const plan = planImport(bundle, {
       ids: new Set(['v1', 'o2']),
       jokeSetups: new Set([normalise('  fake PREMISE about queues. ')]),
       observationTexts: new Set(),
+      craftTitles: new Set([normalise('Fake Checklist')]),
     })
     expect(plan.jokes.map((j) => j.id)).toEqual(['j2'])
     expect(plan.observations.map((o) => o.id)).toEqual(['o1'])
     expect(plan.voiceNotes).toEqual([])
-    expect(plan.skipped).toBe(3)
+    expect(plan.craftNotes).toEqual([])
+    expect(plan.skipped).toBe(4)
   })
 })
 

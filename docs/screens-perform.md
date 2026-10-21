@@ -71,6 +71,22 @@ each with its premise in marker, the punch, its runtime and "by m:ss" (the runni
 <img src="screenshots/desktop-shows.png" alt="Shows">
 <img src="screenshots/phone-shows.png" width="230" alt="Shows on a phone">
 
+## Craft: `/craft` and `/craft/:noteId`
+
+[CraftPage.tsx](../web/src/features/craft/CraftPage.tsx), [CraftNotePage.tsx](../web/src/features/craft/CraftNotePage.tsx),
+[CraftNoteForm.tsx](../web/src/features/craft/CraftNoteForm.tsx), [NoteBody.tsx](../web/src/features/craft/NoteBody.tsx),
+[bodyFormat.ts](../web/src/features/craft/bodyFormat.ts), [craftMeta.ts](../web/src/features/craft/craftMeta.ts).
+
+What you've learned about doing stand-up, kept apart from your material. The list is grouped by
+area in a fixed order (Writing, Generating, Rewriting, Building a set, On stage, Formats, Measuring
+and path), with a search box and All / Checklists / Techniques / References / Paths chips. Each row
+shows the name, its kind and the first line.
+
+A note opens formatted: headings, lists, **bold**, and tick boxes you can tick straight away (the
+tick is saved into the note). **Edit note** switches to the form: name, kind, area, the note,
+where you learned it, a link and hashtags, saved with **Save note** (offline too).
+`/craft/new?area=stage&kind=checklist` starts one with those filled in.
+
 ## Watchlist: `/watchlist`
 
 [WatchlistPage.tsx](../web/src/features/study/WatchlistPage.tsx), [WatchRow.tsx](../web/src/features/study/WatchRow.tsx),
@@ -107,7 +123,7 @@ and the link's domain. The editor has a name, a link and the write-up, saved wit
 
 Not in the navigation: open it from the avatar menu → **Import**, on a laptop (phones can't pick
 folders). Choose a prepared import folder holding `import.json` and an `audio/` folder. The page
-lists what's new (jokes, with any topics it will create, observations and voice notes) and what it
+lists what's new (jokes, with any topics it will create, observations, voice notes and craft notes) and what it
 will skip, then **Import** uploads them one by one with a progress bar and lists any failures.
 
 - Every item has a fixed id, so importing the same folder twice adds nothing. Jokes and observations
@@ -115,5 +131,7 @@ will skip, then **Import** uploads them one by one with a progress bar and lists
 - Original dates are kept. A joke with no topic goes to Thoughts; topics named in the folder are
   matched by name (any case) or created. Jokes can carry types (the WhatsApp import uses
   "To review" to flag everything that still needs a look).
+- `craft_notes` is optional in `import.json`; craft notes whose name is already in JokeBox are
+  skipped, and new ones sort after the ones you have.
 - The folder is made on a laptop from an export (the WhatsApp self-chat, for one). It holds real
   material, so it stays in `~/Downloads` and `.gitignore` covers WhatsApp exports.

@@ -15,7 +15,7 @@ New rows get their UUID in the browser (`crypto.randomUUID()`) and are saved wit
 therefore never makes a duplicate. That's what makes the offline queue safe.
 
 ## Optimistic updates and the offline queue
-Saving and deleting jokes, observations, brainstorm sessions, watchlist routines and analyses are
+Saving and deleting jokes, observations, brainstorm sessions, watchlist routines, analyses and craft notes are
 registered as **mutation defaults** under fixed keys (`setMutationDefaults`).
 
 - **Saving updates the screen at once:** `onMutate` writes the change into the cached list before

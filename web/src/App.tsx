@@ -26,6 +26,8 @@ const VoicePage = named(() => import('./features/voice/VoicePage'), 'VoicePage')
 const WatchlistPage = named(() => import('./features/study/WatchlistPage'), 'WatchlistPage')
 const AnalysisPage = named(() => import('./features/study/AnalysisPage'), 'AnalysisPage')
 const AnalysisEditor = named(() => import('./features/study/AnalysisEditor'), 'AnalysisEditor')
+const CraftPage = named(() => import('./features/craft/CraftPage'), 'CraftPage')
+const CraftNotePage = named(() => import('./features/craft/CraftNotePage'), 'CraftNotePage')
 const LinksPage = named(() => import('./features/study/LinksPage'), 'LinksPage')
 const ImportPage = named(() => import('./features/import/ImportPage'), 'ImportPage')
 
@@ -51,6 +53,8 @@ export function App() {
           <Route path="watchlist" element={<WatchlistPage />} />
           <Route path="analysis" element={<AnalysisPage />} />
           <Route path="analysis/:analysisId" element={<AnalysisEditor />} />
+          <Route path="craft" element={<CraftPage />} />
+          <Route path="craft/:noteId" element={<CraftNotePage />} />
           <Route path="links" element={<LinksPage />} />
           <Route path="import" element={<ImportPage />} />
         </Route>

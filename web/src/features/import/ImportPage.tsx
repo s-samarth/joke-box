@@ -1,5 +1,6 @@
 /**
- * Import: pick a prepared folder (import.json + audio/) and add what's in it to JokeBox.
+ * Import: pick a prepared folder (import.json + audio/) and add what's in it to JokeBox:
+ * jokes, observations, voice notes and craft notes.
  * Not in the navigation; it's reached from the avatar menu, since it's used once in a while.
  *
  * Pattern: a folder picker. `<input type="file" webkitdirectory>` hands back every file inside the
@@ -10,6 +11,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { FolderOpen } from 'lucide-react'
 import { useState, type ChangeEvent } from 'react'
 import { Link } from 'react-router'
+import { useCraftNotes } from '../../api/craft'
 import { useBits, useTopics } from '../../api/library'
 import { useObservations, useObservationTopics } from '../../api/notebook'
 import { useVoiceNotes } from '../../api/voice'
@@ -26,6 +28,7 @@ export function ImportPage() {
   const { data: bits = [] } = useBits()
   const { data: observations = [] } = useObservations()
   const { data: notes = [] } = useVoiceNotes()
+  const { data: craft = [] } = useCraftNotes()
   const { data: topics = [] } = useTopics()
   const { data: observationTopics = [] } = useObservationTopics()
   const [plan, setPlan] = useState<ImportPlan | null>(null)
@@ -45,9 +48,10 @@ export function ImportPage() {
       const bundle = parseBundle(await json.text())
       setAudio(new Map(files.filter((f) => f.webkitRelativePath.includes('/audio/')).map((f) => [f.name, f])))
       setPlan(planImport(bundle, {
-        ids: new Set([...bits, ...observations, ...notes].map((x) => x.id)),
+        ids: new Set([...bits, ...observations, ...notes, ...craft].map((x) => x.id)),
         jokeSetups: new Set(bits.map((b) => normalise(b.setup))),
         observationTexts: new Set(observations.map((o) => normalise(o.text))),
+        craftTitles: new Set(craft.map((n) => normalise(n.title))),
       }))
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
@@ -57,7 +61,7 @@ export function ImportPage() {
   async function start() {
     if (!plan) return
     setProgress({ done: 0, total: 0, failures: [] })
-    const result = await runImport(plan, { topics, observationTopics, audio, onProgress: setProgress })
+    const result = await runImport(plan, { topics, observationTopics, audio, craftPosition: Math.max(0, ...craft.map((n) => n.position)), onProgress: setProgress })
     setProgress(result)
     setFinished(true)
     void qc.invalidateQueries()
@@ -70,7 +74,7 @@ export function ImportPage() {
     <div className="mx-auto max-w-2xl">
       <PageHead title="Import" />
       <p className="-mt-2 mb-6 text-dim">
-        Add jokes, observations and voice notes from a prepared import folder. Use a laptop: phones can't pick folders.
+        Add jokes, observations, voice notes and craft notes from a prepared import folder. Use a laptop: phones can't pick folders.
         Items already in JokeBox are skipped, so importing the same folder twice is safe.
       </p>
 
@@ -87,10 +91,11 @@ export function ImportPage() {
             <li><b className="tabular">{plan.jokes.length}</b> jokes{newTopics.length > 0 && <span className="text-dim"> (new topics: {newTopics.join(', ')})</span>}</li>
             <li><b className="tabular">{plan.observations.length}</b> observations</li>
             <li><b className="tabular">{plan.voiceNotes.length}</b> voice notes</li>
+            {plan.craftNotes.length > 0 && <li><b className="tabular">{plan.craftNotes.length}</b> craft notes</li>}
             {plan.skipped > 0 && <li className="text-dim">{plan.skipped} already in JokeBox, skipped</li>}
           </ul>
           {!progress && (
-            <Button variant="tape" className="mt-4" disabled={!plan.jokes.length && !plan.observations.length && !plan.voiceNotes.length} onClick={() => void start()}>
+            <Button variant="tape" className="mt-4" disabled={!plan.jokes.length && !plan.observations.length && !plan.voiceNotes.length && !plan.craftNotes.length} onClick={() => void start()}>
               Import
             </Button>
           )}
@@ -108,7 +113,7 @@ export function ImportPage() {
           </p>
           {finished && (
             <p className="mt-4 flex gap-4 text-tape">
-              <Link to="/bits">Jokes</Link><Link to="/observations">Observations</Link><Link to="/voice">Voice notes</Link>
+              <Link to="/bits">Jokes</Link><Link to="/observations">Observations</Link><Link to="/voice">Voice notes</Link><Link to="/craft">Craft</Link>
             </p>
           )}
           {progress.failures.length > 0 && (
