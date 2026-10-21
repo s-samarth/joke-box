@@ -8,14 +8,20 @@ import { useBits } from '../../api/library'
 import type { Bit } from '../../api/types'
 import { UNDEFINED_TYPE } from '../../lib/bitMeta'
 
-export type SortKey = 'new' | 'strong' | 'weak' | 'long'
+export type SortKey = 'new' | 'old' | 'edited' | 'strong' | 'weak' | 'long'
 
 export const SORTS: Record<SortKey, string> = {
   new: 'Newest',
+  old: 'Oldest',
+  edited: 'Recently edited',
   strong: 'Strongest',
   weak: 'Weakest',
   long: 'Longest',
 }
+
+/** The date a sort runs on, when it runs on one: these sorts get month headings and the time scrubber. */
+export const sortDate = (sort: SortKey): ((b: Bit) => string) | null =>
+  sort === 'edited' ? (b) => b.updated_at : sort === 'new' || sort === 'old' ? (b) => b.created_at : null
 
 export function matchesSearch(bit: Bit, q: string): boolean {
   if (!q) return true
@@ -31,6 +37,8 @@ export function matchesType(bit: Bit, type: string | null): boolean {
 
 const SORTERS: Record<SortKey, (a: Bit, b: Bit) => number> = {
   new: (a, b) => b.created_at.localeCompare(a.created_at),
+  old: (a, b) => a.created_at.localeCompare(b.created_at),
+  edited: (a, b) => b.updated_at.localeCompare(a.updated_at),
   strong: (a, b) => b.strength - a.strength || b.created_at.localeCompare(a.created_at),
   weak: (a, b) => a.strength - b.strength || b.created_at.localeCompare(a.created_at),
   long: (a, b) => b.duration_seconds - a.duration_seconds,

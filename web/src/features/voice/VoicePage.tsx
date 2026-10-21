@@ -1,8 +1,16 @@
-/** Voice notes: record, then find and replay your raw thoughts by label or hashtag. */
+/**
+ * Voice notes: record, then find and replay your raw thoughts by label or hashtag, by month,
+ * newest or oldest first, with a time scrubber to jump back in time.
+ */
 import { Search } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router'
+import { MonthSection, OrderToggle } from '../../components/time/MonthSection'
+import { PAGE_RAIL, RAIL_ROOM } from '../../components/time/place'
+import { TimeRail } from '../../components/time/TimeRail'
 import { EmptyState, PageHead, Spinner } from '../../components/ui/bits'
 import { Input } from '../../components/ui/Field'
+import { byDate, groupByMonth, type Order } from '../../lib/months'
 import { Recorder } from './Recorder'
 import { useVoiceLibrary } from './useVoiceLibrary'
 import { VoiceNoteRow } from './VoiceNoteRow'
@@ -29,6 +37,9 @@ export function VoicePage() {
   const [query, setQuery] = useState('')
   const tags = hashtagCounts(notes)
   const shown = filterNotes(notes, query)
+  const [params, setParams] = useSearchParams()
+  const order: Order = params.get('order') === 'old' ? 'old' : 'new'
+  const groups = useMemo(() => groupByMonth([...shown].sort(byDate((n) => n.created_at, order)), (n) => n.created_at), [shown, order])
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -61,12 +72,24 @@ export function VoicePage() {
       ) : shown.length === 0 ? (
         <p className="mt-6 text-dim">No notes match “{query}”.</p>
       ) : (
-        <ul className="mt-4 divide-y divide-rule border-y border-rule">
-          {shown.map((n) => (
-            <VoiceNoteRow key={n.id} note={n} suggestions={tags.map(([t]) => t)} onTag={setQuery} onDelete={() => void remove(n.id)}
-              onEdit={(patch) => edit(n.id, { label: n.label, hashtags: n.hashtags, duration_seconds: n.duration_seconds, ...patch })} />
-          ))}
-        </ul>
+        <>
+          <div className="mt-4 mb-1 flex justify-end">
+            <OrderToggle order={order} onChange={(o) => setParams(o === 'old' ? { order: 'old' } : {}, { replace: true })} />
+          </div>
+          <div className={RAIL_ROOM}>
+            {groups.map((g) => (
+              <MonthSection key={g.key} scope="voice" monthKey={g.key} label={g.label} count={g.items.length}>
+                <ul className="divide-y divide-rule border-y border-rule">
+                  {g.items.map((n) => (
+                    <VoiceNoteRow key={n.id} note={n} suggestions={tags.map(([t]) => t)} onTag={setQuery} onDelete={() => void remove(n.id)}
+                      onEdit={(patch) => edit(n.id, { label: n.label, hashtags: n.hashtags, duration_seconds: n.duration_seconds, ...patch })} />
+                  ))}
+                </ul>
+              </MonthSection>
+            ))}
+          </div>
+          <TimeRail scope="voice" months={groups} className={PAGE_RAIL} />
+        </>
       )}
       <StorageBar used={usedBytes} />
     </div>

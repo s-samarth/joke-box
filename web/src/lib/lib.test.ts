@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { toCsv } from './csv'
 import { clock, long, parse } from './duration'
+import { byDate, groupByMonth, monthOf } from './months'
 import { fromIstInput, toIstInput } from './time'
 
 describe('duration', () => {
@@ -33,5 +34,26 @@ describe('IST conversion', () => {
 describe('csv', () => {
   it('quotes commas, quotes and newlines', () => {
     expect(toCsv(['a', 'b'], [['x, y', 'say "hi"\nok']])).toBe('a,b\n"x, y","say ""hi""\nok"')
+  })
+})
+
+describe('months', () => {
+  const items = [
+    { at: '2025-03-31T19:00:00Z' }, // 1 April in IST
+    { at: '2026-10-21T10:00:00Z' },
+    { at: '2025-03-02T10:00:00Z' },
+    { at: '2026-10-01T10:00:00Z' },
+  ]
+  const at = (i: { at: string }) => i.at
+
+  it('groups newest first into IST months, with readable labels', () => {
+    const groups = groupByMonth([...items].sort(byDate(at, 'new')), at)
+    expect(groups.map((g) => [g.label, g.items.length])).toEqual([['October 2026', 2], ['April 2025', 1], ['March 2025', 1]])
+  })
+
+  it('flips to oldest first', () => {
+    expect(groupByMonth([...items].sort(byDate(at, 'old')), at).map((g) => g.key)).toEqual(['2025-03', '2025-04', '2026-10'])
+    expect(monthOf('2026-12-31T19:00:00Z')).toBe('2027-01')
+    expect(groupByMonth([], at)).toEqual([])
   })
 })

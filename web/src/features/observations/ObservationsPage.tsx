@@ -7,7 +7,9 @@ import { useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { useObservations, useObservationTopics } from '../../api/notebook'
 import { Button } from '../../components/ui/Button'
+import { OrderToggle } from '../../components/time/MonthSection'
 import { EmptyState, PageHead, Spinner } from '../../components/ui/bits'
+import type { Order } from '../../lib/months'
 import { ObservationBox } from './ObservationBox'
 import { ObservationList } from './ObservationList'
 import { ObservationTopicManager } from './ObservationTopicManager'
@@ -22,10 +24,13 @@ export function ObservationsPage() {
   const [params, setParams] = useSearchParams()
   const [managing, setManaging] = useState(false)
   const filter = params.get('topic')
+  const order: Order = params.get('order') === 'old' ? 'old' : 'new'
   const all = observations ?? []
   const shown = filter === null ? all : all.filter((o) => (filter === NONE ? o.topic_id === null : o.topic_id === filter))
   const count = (id: string | null) => all.filter((o) => o.topic_id === id).length
-  const setFilter = (value: string | null) => setParams(value ? { topic: value } : {}, { replace: true })
+  // Each control changes only its own part of the URL (?topic=, ?order=), keeping the other.
+  const setParam = (name: string, value: string | null) => setParams((p) => { if (value) p.set(name, value); else p.delete(name); return p }, { replace: true })
+  const setFilter = (value: string | null) => setParam('topic', value)
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -55,7 +60,10 @@ export function ObservationsPage() {
           {all.length ? 'Log one above and it lands here.' : 'The next weird thing you see, log it above before it fades.'}
         </EmptyState>
       ) : (
-        <ObservationList observations={shown} />
+        <>
+          <div className="mb-1 flex justify-end"><OrderToggle order={order} onChange={(o) => setParam('order', o === 'old' ? 'old' : null)} /></div>
+          <ObservationList observations={shown} order={order} />
+        </>
       )}
       {managing && <ObservationTopicManager onClose={() => setManaging(false)} />}
     </div>

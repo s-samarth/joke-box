@@ -55,6 +55,20 @@ dependency, at the cost of more code per new chart type.
   colour-blind safety against the dark surface: a one-hue gold ramp for ratings, and gold against
   blue at equal lightness for better or worse than your usual.
 
+## Month headings and the time scrubber
+Observations, Voice notes and Jokes (sorted by a date) group their lists by IST month with
+[months.ts](../web/src/lib/months.ts) and render each month as a
+[MonthSection](../web/src/components/time/MonthSection.tsx): a section with an id and a heading
+that sticks under the phone's top bar. [TimeRail](../web/src/components/time/TimeRail.tsx) is the
+scrubber beside them, built as an ARIA slider:
+- **Jumping:** pressing or dragging picks the month at that height (months share the rail equally)
+  and scrolls only the box the list lives in (the page on phones, the list column for jokes on
+  desktop), never both, so the page doesn't shift.
+- **Following:** a scroll listener on `window` in the capture phase hears scrolling in any box, and
+  marks the last month whose heading has passed the top as current.
+- **Keyboard:** arrow keys step a month, Home and End jump to either end.
+On phones the lists keep a little room on the right so the scrubber never covers a row's buttons.
+
 ## Navigation config
 [nav.ts](../web/src/layout/nav.ts) is the single list of screens. The desktop rail renders `NAV`;
 the phone bar renders `BAR_LEFT`, the + button, `BAR_RIGHT` and More (`MORE_GROUPS`).

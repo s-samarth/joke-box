@@ -73,7 +73,8 @@ def apply(db: Session, user: User, bit: Bit, data: BitIn) -> None:
     for key, value in fields.items():
         setattr(bit, key, value)
     if data.created_at and bit.created_at is None:
-        bit.created_at = data.created_at
+        # A joke brought in with its old date (an import) was last changed then, not today.
+        bit.created_at = bit.updated_at = data.created_at
     seen: dict[str, BitType] = {}
     for name in data.types:
         if name.lower() != "undefined":
