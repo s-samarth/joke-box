@@ -84,7 +84,7 @@ function Workspace({ bit, sessions, startId }: { bit: Bit; sessions: Brainstorm[
         <aside className="hidden w-72 shrink-0 py-8 lg:block">{history}</aside>
       </div>
       <Modal open={historyOpen} onOpenChange={setHistoryOpen} title="History">{history}</Modal>
-      <CraftSheet open={checking} onOpenChange={setChecking} title="Checklists" screen="rewrite" kinds={['checklist']}
+      <CraftSheet open={checking} onOpenChange={setChecking} title="Checklists" screen="rewrite" behaviours={['checklist']}
         empty="No checklists in the areas that show on Rewrite." />
     </div>
   )

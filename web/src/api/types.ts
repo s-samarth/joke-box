@@ -191,10 +191,23 @@ export interface Analysis extends AnalysisInput {
   updated_at: string
 }
 
-export type CraftKind = 'checklist' | 'technique' | 'reference' | 'path'
+/** How a kind of note behaves: a checklist ticks, a technique runs, a path climbs, a reference reads. */
+export type Behaviour = 'checklist' | 'technique' | 'reference' | 'path'
+
+/** A kind of craft note. Yours to name, add and delete; its behaviour is how the app uses it. */
+export interface NoteKindInput {
+  name: string
+  behaviour: Behaviour
+}
+
+export interface NoteKind extends NoteKindInput {
+  id: string
+  position: number
+}
 /** Screens that can show an area's notes in a sheet. */
 export type CraftScreen = 'rewrite' | 'sets' | 'stage'
-export type AreaColor = 'sky' | 'violet' | 'emerald' | 'orange' | 'rose' | 'pink' | 'amber' | 'teal'
+/** A preset colour name, or any "#rrggbb". */
+export type AreaColor = string
 
 /** A folder of craft notes. Yours to add, rename, colour, reorder and delete. */
 export interface CraftAreaInput {
@@ -213,7 +226,7 @@ export interface CraftArea extends CraftAreaInput {
 export interface CraftNoteInput {
   title: string
   body: string
-  kind: CraftKind
+  kind_id: string
   area_id: string
   hashtags: string[]
   source: string
@@ -226,6 +239,8 @@ export interface CraftNoteInput {
 
 export interface CraftNote extends CraftNoteInput {
   id: string
+  /** From the note's kind: how screens show it. */
+  behaviour: Behaviour
   created_at: string
   updated_at: string
 }

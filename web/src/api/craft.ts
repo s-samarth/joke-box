@@ -5,7 +5,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { api } from './client'
 import { keys, queryClient } from './queryClient'
-import type { CraftArea, CraftAreaInput, CraftNote, CraftNoteInput } from './types'
+import type { CraftArea, CraftAreaInput, CraftNote, CraftNoteInput, NoteKind, NoteKindInput } from './types'
 
 export type SaveCraftVars = { id: string; input: CraftNoteInput }
 
@@ -21,7 +21,10 @@ queryClient.setMutationDefaults(saveKey, {
     const now = new Date().toISOString()
     queryClient.setQueryData<CraftNote[]>(keys.craftNotes, (old = []) => {
       const existing = old.find((n) => n.id === id)
-      const next: CraftNote = { ...input, id, created_at: existing?.created_at ?? now, updated_at: now }
+      // The behaviour comes from the kind, so look it up for the optimistic copy.
+      const kind = queryClient.getQueryData<NoteKind[]>(keys.craftKinds)?.find((k) => k.id === input.kind_id)
+      const behaviour = kind?.behaviour ?? existing?.behaviour ?? 'reference'
+      const next: CraftNote = { ...input, id, behaviour, created_at: existing?.created_at ?? now, updated_at: now }
       return (existing ? old.map((n) => (n.id === id ? next : n)) : [...old, next]).sort(byPosition)
     })
   },
@@ -43,7 +46,7 @@ export const useDeleteCraftNote = () => useMutation<void, Error, string>({ mutat
 
 /** The editable part of a saved note, for saving it again with one change. */
 export const craftInput = (n: CraftNote): CraftNoteInput => ({
-  title: n.title, body: n.body, kind: n.kind, area_id: n.area_id, hashtags: n.hashtags, source: n.source, url: n.url, position: n.position,
+  title: n.title, body: n.body, kind_id: n.kind_id, area_id: n.area_id, hashtags: n.hashtags, source: n.source, url: n.url, position: n.position,
   performance_log_id: n.performance_log_id, analysis_id: n.analysis_id,
 })
 
@@ -73,3 +76,20 @@ export const useDeleteArea = () =>
   useMutation({ mutationFn: ({ id, moveTo }: { id: string; moveTo: string }) => api<void>(`/api/craft-areas/${id}?move_to=${moveTo}`, 'DELETE'), onSettled: refreshAreas })
 
 export const areaInput = (a: CraftArea): CraftAreaInput => ({ name: a.name, description: a.description, color: a.color, screens: a.screens })
+
+/* Kinds change online only too: deleting one moves its notes. */
+const refreshKinds = () => {
+  void queryClient.invalidateQueries({ queryKey: keys.craftKinds })
+  void queryClient.invalidateQueries({ queryKey: keys.craftNotes })
+}
+
+export const useCraftKinds = () => useQuery({ queryKey: keys.craftKinds, queryFn: () => api<NoteKind[]>('/api/craft-kinds') })
+
+export const useCreateKind = () =>
+  useMutation({ mutationFn: (input: NoteKindInput) => api<NoteKind>('/api/craft-kinds', 'POST', input), onSettled: refreshKinds })
+
+export const useUpdateKind = () =>
+  useMutation({ mutationFn: ({ id, input }: { id: string; input: NoteKindInput }) => api<NoteKind>(`/api/craft-kinds/${id}`, 'PATCH', input), onSettled: refreshKinds })
+
+export const useDeleteKind = () =>
+  useMutation({ mutationFn: ({ id, moveTo }: { id: string; moveTo: string }) => api<void>(`/api/craft-kinds/${id}?move_to=${moveTo}`, 'DELETE'), onSettled: refreshKinds })

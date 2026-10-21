@@ -8,40 +8,41 @@ import { ArrowLeft, ChevronDown, ExternalLink, Pencil } from 'lucide-react'
 import { useState, type CSSProperties } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { newId } from '../../api/client'
-import { craftInput, useCraftAreas, useCraftNotes, useDeleteCraftNote, useSaveCraftNote } from '../../api/craft'
+import { craftInput, useCraftAreas, useCraftKinds, useCraftNotes, useDeleteCraftNote, useSaveCraftNote } from '../../api/craft'
 import { useLogs } from '../../api/shows'
 import { useAnalyses } from '../../api/study'
-import type { CraftArea, CraftKind, CraftNote, CraftNoteInput, CraftScreen } from '../../api/types'
+import type { Behaviour, CraftArea, CraftNote, CraftNoteInput, CraftScreen, NoteKind } from '../../api/types'
 import { Button } from '../../components/ui/Button'
 import { Spinner } from '../../components/ui/bits'
 import { Dropdown } from '../../components/ui/Menu'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { formatDate } from '../../lib/time'
 import { toggleTick } from './bodyFormat'
-import { AREA_COLORS, KINDS, SCREENS, areaFor, blankNote, kindLabel } from './craftMeta'
+import { BEHAVIOURS, SCREENS, areaColor, areaFor, blankNote, kindFor, kindName } from './craftMeta'
 import { CraftNoteForm } from './CraftNoteForm'
 import { NoteBody } from './NoteBody'
 
 interface ReadingProps {
   note: CraftNote
   areas: CraftArea[]
+  kinds: NoteKind[]
   onEdit: () => void
   onTick: (line: number) => void
   onMove: (area: CraftArea) => void
 }
 
-function Reading({ note, areas, onEdit, onTick, onMove }: ReadingProps) {
+function Reading({ note, areas, kinds, onEdit, onTick, onMove }: ReadingProps) {
   const area = areas.find((a) => a.id === note.area_id)
   const moves = areas.filter((a) => a.id !== note.area_id).map((a) => ({ label: a.name, onSelect: () => onMove(a) }))
   return (
-    <article style={{ '--area': AREA_COLORS[area?.color ?? 'sky'] } as CSSProperties}>
+    <article style={{ '--area': areaColor(area?.color ?? 'sky') } as CSSProperties}>
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <Dropdown align="start" items={moves} trigger={
           <button type="button" className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[color-mix(in_srgb,var(--area)_18%,transparent)] px-3 text-[var(--area)] hover:bg-[color-mix(in_srgb,var(--area)_28%,transparent)]" aria-label={`Area: ${area?.name ?? 'none'}. Move to another area`}>
             <span className="size-2 rounded-full bg-[var(--area)]" aria-hidden />{area?.name ?? 'No area'}<ChevronDown size={14} />
           </button>
         } />
-        <span className="text-faint">{kindLabel(note.kind)}</span>
+        <span className="text-faint">{kindName(kinds, note.kind_id)}</span>
       </div>
       <h1 className="headline mt-3 text-[40px] leading-none sm:text-[52px]">{note.title}</h1>
       <div className="mt-6"><NoteBody body={note.body} onTick={onTick} /></div>
@@ -58,7 +59,7 @@ function Reading({ note, areas, onEdit, onTick, onMove }: ReadingProps) {
   )
 }
 
-const isKind = (v: string | null): v is CraftKind => KINDS.some((k) => k.key === v)
+const isBehaviour = (v: string | null): v is Behaviour => BEHAVIOURS.some((b) => b.key === v)
 const isScreen = (v: string | null): v is CraftScreen => SCREENS.some((s) => s.key === v)
 
 export function CraftNotePage() {
@@ -68,13 +69,14 @@ export function CraftNotePage() {
   const [editing, setEditing] = useState(false)
   const { data: notes = [], isPending } = useCraftNotes()
   const { data: areas = [], isPending: areasPending } = useCraftAreas()
+  const { data: kinds = [], isPending: kindsPending } = useCraftKinds()
   const { data: logs = [] } = useLogs()
   const { data: analyses = [] } = useAnalyses()
   const save = useSaveCraftNote()
   const del = useDeleteCraftNote()
   const navigate = useNavigate()
   const { confirm, toast } = useFeedback()
-  if (isPending || areasPending) return <div className="py-16"><Spinner /></div>
+  if (isPending || areasPending || kindsPending) return <div className="py-16"><Spinner /></div>
 
   const isNew = noteId === 'new'
   const note = notes.find((n) => n.id === noteId)
@@ -87,7 +89,8 @@ export function CraftNotePage() {
     ? { performance_log_id: show.id, source: `Show at ${show.venue_name}, ${formatDate(show.performed_at)}` }
     : analysis ? { analysis_id: analysis.id, source: `Analysis: ${analysis.title}`, url: analysis.url } : {}
   const areaId = askedArea ?? areaFor(areas, isScreen(screen) ? screen : undefined)
-  const initial: CraftNoteInput = note ? craftInput(note) : blankNote(notes, areaId, { ...(isKind(kind) && { kind }), ...learnedAt })
+  const filing = { area_id: areaId, kind_id: kindFor(kinds, isBehaviour(kind) ? kind : 'reference') }
+  const initial: CraftNoteInput = note ? craftInput(note) : blankNote(notes, filing, learnedAt)
   const id = note?.id ?? freshId
   const back = note ? `/craft/area/${note.area_id}` : askedArea ? `/craft/area/${askedArea}` : '/craft'
   const backLabel = areas.find((a) => a.id === (note?.area_id ?? askedArea))?.name ?? 'Craft'
@@ -116,7 +119,7 @@ export function CraftNotePage() {
       ) : isNew || editing || !note ? (
         <CraftNoteForm key={`${id}${show?.id ?? ''}${analysis?.id ?? ''}`} initial={initial} isNew={isNew} onSave={submit} onDelete={isNew ? undefined : remove} />
       ) : (
-        <Reading note={note} areas={areas} onEdit={() => { setEditing(true); window.scrollTo(0, 0) }}
+        <Reading note={note} areas={areas} kinds={kinds} onEdit={() => { setEditing(true); window.scrollTo(0, 0) }}
           onTick={(line) => store({ ...craftInput(note), body: toggleTick(note.body, line) })}
           onMove={(a) => { store({ ...craftInput(note), area_id: a.id }); toast(`Moved to ${a.name}`) }} />
       )}

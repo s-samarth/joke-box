@@ -6,7 +6,7 @@
 import { Star } from 'lucide-react'
 import { useState } from 'react'
 import { newId } from '../../api/client'
-import { useCraftAreas, useCraftNotes, useSaveCraftNote } from '../../api/craft'
+import { useCraftAreas, useCraftKinds, useCraftNotes, useSaveCraftNote } from '../../api/craft'
 import { useBits, useTopics } from '../../api/library'
 import { useLogActions, useLogs, useSetlists, useVenues } from '../../api/shows'
 import type { PerformanceLog } from '../../api/types'
@@ -17,7 +17,7 @@ import { Modal } from '../../components/ui/Modal'
 import { topicName } from '../../lib/bitMeta'
 import { clock, parse } from '../../lib/duration'
 import { formatDate, fromIstInput, toIstInput } from '../../lib/time'
-import { areaFor, lessonFrom } from '../craft/craftMeta'
+import { areaFor, kindFor, lessonFrom } from '../craft/craftMeta'
 import { LaughTally } from './LaughTally'
 import { NO_LAUGHS, counted } from './lpm'
 
@@ -33,6 +33,7 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
   const { save } = useLogActions()
   const { data: craft = [] } = useCraftNotes()
   const { data: areas = [] } = useCraftAreas()
+  const { data: kinds = [] } = useCraftKinds()
   const saveLesson = useSaveCraftNote()
   const { toast } = useFeedback()
   const [venue, setVenue] = useState(log?.venue_name ?? '')
@@ -62,7 +63,7 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
     const venueName = venue.trim() || UNKNOWN
     const performedAt = fromIstInput(when)
     // The lesson points at the show, so it's saved once the show exists.
-    const keepLesson = () => lesson.trim() && saveLesson.mutate({ id: newId(), input: lessonFrom(lesson, craft, areaFor(areas, 'stage'), { performance_log_id: id, source: `Show at ${venueName}, ${formatDate(performedAt)}` }) })
+    const keepLesson = () => lesson.trim() && saveLesson.mutate({ id: newId(), input: lessonFrom(lesson, craft, { area_id: areaFor(areas, 'stage'), kind_id: kindFor(kinds) }, { performance_log_id: id, source: `Show at ${venueName}, ${formatDate(performedAt)}` }) })
     save.mutate(
       { id, input: { venue_name: venueName, performed_at: performedAt, duration_seconds: seconds, audience_size: Number(crowd) || 0, rating, topic_ids: topicIds, notes: notes.trim(), laughs: counted(laughs) ? laughs : null } },
       { onSuccess: () => { keepLesson(); toast(log ? 'Show updated' : 'Show logged'); onClose() }, onError: (e) => setError(e.message) },

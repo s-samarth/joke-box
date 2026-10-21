@@ -4,7 +4,7 @@ import { useReorderAreas } from '../../api/craft'
 import type { CraftArea } from '../../api/types'
 import { IconButton } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
-import { AREA_COLORS } from './craftMeta'
+import { areaColor } from './craftMeta'
 
 interface Props {
   areas: CraftArea[]
@@ -26,7 +26,7 @@ export function ArrangeAreas({ areas, counts, onEdit, onClose }: Props) {
       <ul className="divide-y divide-rule border-y border-rule">
         {areas.map((a, i) => (
           <li key={a.id} className="flex items-center gap-2 py-1.5">
-            <span className="size-3 shrink-0 rounded-full" style={{ background: AREA_COLORS[a.color] }} aria-hidden />
+            <span className="size-3 shrink-0 rounded-full" style={{ background: areaColor(a.color) }} aria-hidden />
             <span className="min-w-0 flex-1 truncate">{a.name}</span>
             <span className="text-sm text-faint tabular">{counts.get(a.id) ?? 0}</span>
             <IconButton label={`Move ${a.name} up`} disabled={i === 0} onClick={() => move(i, i - 1)}><ArrowUp size={16} /></IconButton>

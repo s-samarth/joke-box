@@ -2,10 +2,10 @@
 import { useState, type CSSProperties } from 'react'
 import { Link } from 'react-router'
 import { newId } from '../../api/client'
-import { useCraftAreas, useCraftNotes, useSaveCraftNote } from '../../api/craft'
+import { useCraftAreas, useCraftKinds, useCraftNotes, useSaveCraftNote } from '../../api/craft'
 import { SectionHead } from '../../components/ui/bits'
 import { useFeedback } from '../../components/ui/feedbackContext'
-import { AREA_COLORS, lessonFrom } from '../craft/craftMeta'
+import { areaColor, kindFor, lessonFrom } from '../craft/craftMeta'
 import { PathLadder } from '../craft/PathLadder'
 
 const chip = (on: boolean) => `inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-2.5 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'bg-ink-3 text-dim hover:text-paper'}`
@@ -14,13 +14,14 @@ function LessonBox() {
   const [text, setText] = useState('')
   const { data: notes = [] } = useCraftNotes()
   const { data: areas = [] } = useCraftAreas()
+  const { data: kinds = [] } = useCraftKinds()
   const [picked, setPicked] = useState<string | null>(null)
   const area = areas.find((a) => a.id === picked)?.id ?? areas[0]?.id ?? ''
   const save = useSaveCraftNote()
   const { toast } = useFeedback()
   const submit = () => {
     if (!text.trim() || !area) return
-    save.mutate({ id: newId(), input: lessonFrom(text, notes, area) }, { onError: (e) => toast(`Not saved: ${e.message}`) })
+    save.mutate({ id: newId(), input: lessonFrom(text, notes, { area_id: area, kind_id: kindFor(kinds) }) }, { onError: (e) => toast(`Not saved: ${e.message}`) })
     setText('')
     toast(navigator.onLine ? 'Lesson saved to Craft' : 'Saved offline, will sync')
   }
@@ -35,7 +36,7 @@ function LessonBox() {
       <div className="flex items-center gap-2 px-3 pb-3">
         <div className="no-scrollbar flex min-w-0 flex-1 gap-1.5 overflow-x-auto" role="group" aria-label="Area">
           {areas.map((a) => (
-            <button key={a.id} type="button" aria-pressed={area === a.id} onClick={() => setPicked(a.id)} className={chip(area === a.id)} style={{ '--area': AREA_COLORS[a.color] } as CSSProperties}>
+            <button key={a.id} type="button" aria-pressed={area === a.id} onClick={() => setPicked(a.id)} className={chip(area === a.id)} style={{ '--area': areaColor(a.color) } as CSSProperties}>
               <span className="size-2 rounded-full bg-[var(--area)]" aria-hidden />{a.name}
             </button>
           ))}

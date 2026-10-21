@@ -13,7 +13,7 @@ export interface NextStep {
 }
 
 export function nextStep(notes: CraftNote[]): NextStep | null {
-  const paths = notes.filter((n) => n.kind === 'path').sort((a, b) => a.position - b.position)
+  const paths = notes.filter((n) => n.behaviour === 'path').sort((a, b) => a.position - b.position)
   for (const note of paths) {
     const boxes = listItems(note.body).filter((i) => i.checked !== null)
     const next = boxes.find((i) => !i.checked)

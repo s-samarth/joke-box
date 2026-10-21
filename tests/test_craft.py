@@ -1,4 +1,4 @@
-"""Craft notes and areas: saving, ordering, kinds, editable areas, links, and privacy.
+"""Craft notes, areas and kinds: saving, ordering, editing areas and kinds, links, privacy.
 
 The notes here are made up; real craft notes never go into tests.
 """
@@ -7,22 +7,30 @@ import uuid
 
 from fastapi.testclient import TestClient
 
-BASE = {"title": "Fake checklist", "body": "- Fake item one\n- Fake item two", "kind": "checklist"}
+BASE = {"title": "Fake checklist", "body": "- Fake item one\n- Fake item two"}
 
 
 def areas(client: TestClient) -> list[dict[str, object]]:
     return list(client.get("/api/craft-areas").json())
 
 
-def note_in(client: TestClient, index: int = 0) -> dict[str, object]:
-    """The fake note, filed in one of the client's own areas."""
-    return BASE | {"area_id": areas(client)[index]["id"]}
+def kinds(client: TestClient) -> list[dict[str, object]]:
+    return list(client.get("/api/craft-kinds").json())
+
+
+def kind_id(client: TestClient, behaviour: str) -> object:
+    return next(k["id"] for k in kinds(client) if k["behaviour"] == behaviour)
+
+
+def note_in(client: TestClient, index: int = 0, behaviour: str = "checklist") -> dict[str, object]:
+    """The fake note, filed in one of the client's own areas under one of their kinds."""
+    return BASE | {"area_id": areas(client)[index]["id"], "kind_id": kind_id(client, behaviour)}
 
 
 def test_save_and_edit_a_note(alice: TestClient) -> None:
     note_id, rewriting = str(uuid.uuid4()), areas(alice)[2]["id"]
     saved = alice.put(f"/api/craft-notes/{note_id}", json=note_in(alice, 2)).json()
-    assert saved["kind"] == "checklist" and saved["area_id"] == rewriting
+    assert saved["behaviour"] == "checklist" and saved["area_id"] == rewriting
     edited = alice.put(f"/api/craft-notes/{note_id}", json=note_in(alice) | {"body": "Fake"}).json()
     assert edited["body"] == "Fake" and edited["area_id"] != rewriting
     assert alice.delete(f"/api/craft-notes/{note_id}").status_code == 204
@@ -50,14 +58,14 @@ def test_created_at_is_kept_on_create_only(alice: TestClient) -> None:
 
 def test_kinds_areas_titles_and_links_are_checked(alice: TestClient) -> None:
     bad = [
-        note_in(alice) | {"kind": "poem"},
         note_in(alice) | {"title": "  "},
         note_in(alice) | {"url": "javascript:alert(1)"},
     ]
     for body in bad:
         assert alice.put(f"/api/craft-notes/{uuid.uuid4()}", json=body).status_code == 422
-    missing_area = note_in(alice) | {"area_id": str(uuid.uuid4())}
-    assert alice.put(f"/api/craft-notes/{uuid.uuid4()}", json=missing_area).status_code == 404
+    for missing in ("area_id", "kind_id"):
+        body = note_in(alice) | {missing: str(uuid.uuid4())}
+        assert alice.put(f"/api/craft-notes/{uuid.uuid4()}", json=body).status_code == 404
     tags = alice.put(
         f"/api/craft-notes/{uuid.uuid4()}", json=note_in(alice) | {"hashtags": [" #a ", ""]}
     )
@@ -77,7 +85,7 @@ def test_other_users_cannot_see_or_change(alice: TestClient, bob: TestClient) ->
 
 def test_a_brainstorm_session_can_run_a_technique(alice: TestClient, bob: TestClient) -> None:
     note_id, session_id = str(uuid.uuid4()), str(uuid.uuid4())
-    alice.put(f"/api/craft-notes/{note_id}", json=note_in(alice) | {"kind": "technique"})
+    alice.put(f"/api/craft-notes/{note_id}", json=note_in(alice, behaviour="technique"))
     body = {"title": "Fake session", "technique_id": note_id}
     assert alice.put(f"/api/sessions/{session_id}", json=body).json()["technique_id"] == note_id
     # Bob can't run Alice's technique.
@@ -131,7 +139,7 @@ def test_everyone_starts_with_areas_they_can_change(alice: TestClient) -> None:
 def test_reorder_and_delete_an_area_keeps_its_notes(alice: TestClient) -> None:
     first, second = areas(alice)[:2]
     note_id = str(uuid.uuid4())
-    alice.put(f"/api/craft-notes/{note_id}", json=BASE | {"area_id": first["id"]})
+    alice.put(f"/api/craft-notes/{note_id}", json=note_in(alice) | {"area_id": first["id"]})
     alice.put("/api/craft-areas/order", json={"ids": [second["id"], first["id"]]})
     assert areas(alice)[0]["id"] == second["id"]
     alice.delete(f"/api/craft-areas/{first['id']}", params={"move_to": second["id"]})
@@ -152,3 +160,42 @@ def test_areas_are_private(alice: TestClient, bob: TestClient) -> None:
     theirs = areas(bob)[0]["id"]
     bob_area = alice.delete(f"/api/craft-areas/{mine['id']}", params={"move_to": theirs})
     assert bob_area.status_code == 404
+
+
+def test_kinds_are_yours_to_change(alice: TestClient, bob: TestClient) -> None:
+    assert [k["behaviour"] for k in kinds(alice)] == ["checklist", "technique", "reference", "path"]
+    made = alice.post("/api/craft-kinds", json={"name": "Fake exercise", "behaviour": "technique"})
+    exercise = made.json()
+    assert exercise["position"] == 4
+    assert alice.post("/api/craft-kinds", json={"name": "fake EXERCISE"}).status_code == 409
+    assert (
+        alice.post("/api/craft-kinds", json={"name": "x", "behaviour": "poem"}).status_code == 422
+    )
+    note_id = str(uuid.uuid4())
+    body = note_in(alice) | {"kind_id": exercise["id"]}
+    assert alice.put(f"/api/craft-notes/{note_id}", json=body).json()["behaviour"] == "technique"
+    # Changing the kind's behaviour changes how its notes behave.
+    alice.patch(f"/api/craft-kinds/{exercise['id']}", json={"name": "Fake", "behaviour": "path"})
+    assert alice.get("/api/craft-notes").json()[0]["behaviour"] == "path"
+    assert bob.delete(f"/api/craft-kinds/{exercise['id']}").status_code == 404
+    reference = kind_id(alice, "reference")
+    alice.delete(f"/api/craft-kinds/{exercise['id']}", params={"move_to": str(reference)})
+    assert alice.get("/api/craft-notes").json()[0]["kind_id"] == reference
+
+
+def test_the_last_kind_cannot_go(alice: TestClient) -> None:
+    for kind in kinds(alice)[1:]:
+        assert alice.delete(f"/api/craft-kinds/{kind['id']}").status_code == 204
+    assert alice.delete(f"/api/craft-kinds/{kinds(alice)[0]['id']}").status_code == 400
+
+
+def test_area_colours_are_presets_or_hex(alice: TestClient) -> None:
+    ok = alice.post("/api/craft-areas", json={"name": "Fake hex", "color": "#4fa3e0"})
+    assert ok.json()["color"] == "#4fa3e0"
+    assert (
+        alice.post("/api/craft-areas", json={"name": "Fake lime", "color": "lime"}).status_code
+        == 201
+    )
+    assert (
+        alice.post("/api/craft-areas", json={"name": "Fake bad", "color": "#12"}).status_code == 422
+    )

@@ -3,10 +3,10 @@
  * techniques you can start writing with, then your areas as folders. Searching swaps the
  * folders for matching note cards from every area.
  */
-import { ArrowUpDown, Plus, Search } from 'lucide-react'
+import { ArrowUpDown, Plus, Search, Shapes } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { useCraftAreas, useCraftNotes } from '../../api/craft'
+import { useCraftAreas, useCraftKinds, useCraftNotes } from '../../api/craft'
 import type { CraftArea } from '../../api/types'
 import { Button } from '../../components/ui/Button'
 import { PageHead, SectionHead, Spinner } from '../../components/ui/bits'
@@ -15,19 +15,22 @@ import { AreaFolders } from './AreaFolders'
 import { AreaSheet } from './AreaSheet'
 import { ArrangeAreas } from './ArrangeAreas'
 import { groupByArea, matches } from './craftMeta'
+import { ManageKinds } from './ManageKinds'
 import { NoteGrid } from './NoteGrid'
 import { PathLadder } from './PathLadder'
 import { TechniqueShelf } from './TechniqueShelf'
 
-type Sheet = { kind: 'new' } | { kind: 'edit'; area: CraftArea } | { kind: 'arrange' } | null
+type Sheet = { kind: 'new' } | { kind: 'edit'; area: CraftArea } | { kind: 'arrange' } | { kind: 'kinds' } | null
 
 export function CraftPage() {
   const { data: notes = [], isPending } = useCraftNotes()
   const { data: areas = [], isPending: areasPending } = useCraftAreas()
+  const { data: kinds = [] } = useCraftKinds()
   const [query, setQuery] = useState('')
   const [sheet, setSheet] = useState<Sheet>(null)
   const groups = groupByArea(notes, areas)
   const counts = new Map(groups.map((g) => [g.area.id, g.notes.length]))
+  const kindCounts = new Map(kinds.map((k) => [k.id, notes.filter((n) => n.kind_id === k.id).length]))
   const found = query.trim() ? notes.filter((n) => matches(n, query)) : null
 
   if (isPending || areasPending) return <div className="py-16"><Spinner /></div>
@@ -54,13 +57,17 @@ export function CraftPage() {
           <TechniqueShelf notes={notes} areas={areas} />
           <section className="mt-10">
             <SectionHead title="Areas">
-              <Button variant="quiet" small icon={<ArrowUpDown size={15} />} onClick={() => setSheet({ kind: 'arrange' })}>Arrange</Button>
+              <div className="flex gap-1">
+                <Button variant="quiet" small icon={<Shapes size={15} />} onClick={() => setSheet({ kind: 'kinds' })}>Kinds</Button>
+                <Button variant="quiet" small icon={<ArrowUpDown size={15} />} onClick={() => setSheet({ kind: 'arrange' })}>Arrange</Button>
+              </div>
             </SectionHead>
-            <AreaFolders groups={groups} onAdd={() => setSheet({ kind: 'new' })} />
+            <AreaFolders groups={groups} kinds={kinds} onAdd={() => setSheet({ kind: 'new' })} />
           </section>
         </>
       )}
 
+      {sheet?.kind === 'kinds' && <ManageKinds kinds={kinds} counts={kindCounts} onClose={() => setSheet(null)} />}
       {sheet?.kind === 'arrange' && <ArrangeAreas areas={areas} counts={counts} onClose={() => setSheet(null)} onEdit={(area) => setSheet({ kind: 'edit', area })} />}
       {(sheet?.kind === 'new' || sheet?.kind === 'edit') && (
         <AreaSheet area={sheet.kind === 'edit' ? sheet.area : undefined} areas={areas} noteCount={sheet.kind === 'edit' ? counts.get(sheet.area.id) ?? 0 : 0} onClose={() => setSheet(null)} />

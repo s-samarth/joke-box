@@ -31,6 +31,7 @@ export const keys = {
   analyses: ['analyses'],
   craftNotes: ['craft-notes'],
   craftAreas: ['craft-areas'],
+  craftKinds: ['craft-kinds'],
 } as const
 
 export const queryClient = new QueryClient({
