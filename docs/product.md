@@ -66,7 +66,7 @@ own data. Today that is one comedian, but the system works for more than one.
 | **Stage** | Full-screen rehearse and perform mode with a clock and the open-mic light | `/sets/:id/stage` |
 | **Print** | A set on paper with each bit's running time | `/sets/:id/print` |
 | **Shows** | Log a show; totals, filters, a sortable table, CSV export | `/shows` |
-| **Craft** | What you know about doing stand-up: checklists, techniques, reference and goals, grouped by where in the work you use them | `/craft`, `/craft/:id` |
+| **Craft** | What you know about doing stand-up: your path as a staircase, techniques to write with, and your own areas as folders of note cards | `/craft`, `/craft/area/:id`, `/craft/:id` |
 | **Watchlist** | 100 routines from the persona dossier plus your own, scored and ticked off | `/watchlist` |
 | **Analysis** | Your write-ups of sets and online bits, optionally tied to a routine | `/analysis` |
 | **External links** | Your persona site and Comedy Atlas | `/links` |
@@ -96,7 +96,7 @@ The vocabulary is a comic's, not a database's. Keep to it in the code and in the
 | **Rewrite** | A timed session reworking one joke. Each save is a version. |
 | **Brainstorm session** | A free writing session not tied to one joke. |
 | **Observation** | Something you noticed, before it's a joke. |
-| **Craft note** | Something you've learned about doing stand-up, not material. Its **kind** says how it's used (checklist, technique, reference, path) and its **area** says where (writing, generating, rewriting, building a set, on stage, formats, measuring and path). |
+| **Craft note** | Something you've learned about doing stand-up, not material. Its **kind** says how it's used (checklist, technique, reference, path) and its **area** is the folder it lives in. You start with seven areas and can add, rename, recolour, reorder and delete them; each area picks the screens (Rewrite, set builder, Stage) that show its notes. |
 | **LPM** | Laughs per minute: each laugh scored 1 (a few giggles) to 5 (laughs and applause), the points divided by the minutes on stage. |
 | **Path** | Your goals as tick boxes in a Path note (levels, a task list). Home shows the next step. |
 | **Routine** | An item on the watchlist: a known set by another comic. |

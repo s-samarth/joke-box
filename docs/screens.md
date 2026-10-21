@@ -61,7 +61,7 @@ The page is one column, at most 672 px wide. It shows today's date in IST and th
 | Voice notes | `TodayVoice.tsx` | The same recorder as the Voice screen, plus "All N" |
 | Observations | `TodayObservations.tsx` | The observation box and the last few logged |
 | Brainstorm | `TodayBrainstorm.tsx` | Start a session, or pick up the last one |
-| Craft | `TodayCraft.tsx`, `PathCard.tsx` | **Path:** the first Path note with tick boxes still open, how many are done, and the next step. When the step names minutes, it shows your most solid material on one topic (Strong and Killer jokes, by runtime) against that target. Below it, a box to save a lesson to an area |
+| Craft | `TodayCraft.tsx`, `craft/PathLadder.tsx` | **Path:** a small copy of the Craft staircase: the first Path note with tick boxes still open, how many are done, and the next step. When the step names minutes, it shows your most solid material on one topic (Strong and Killer jokes, by runtime) against that target. Below it, a box to save a lesson to one of your areas (chips in their colours) |
 | Study | `TodayStudy.tsx` | Craft notes, watchlist progress, analyses, external links |
 | Topics | `TopicFolders.tsx` | Topics as folders with live counts; tap through to a subtopic |
 | Next up | (inline) | The soonest upcoming set (or the latest), its first three strips, the light bar and **Rehearse** |
@@ -123,7 +123,7 @@ count, **Checklists**, **+** for a new session and **Save version**. The origina
 it an optional session name and a free-writing area. On the right are **This session** (its saved
 versions) and **Earlier sessions**. `?session=<id>` reopens a past session.
 
-**Checklists** opens your craft checklists from Rewriting and Writing in a sheet
+**Checklists** opens the craft checklists from the areas set to show on Rewrite, in a sheet
 ([CraftSheet.tsx](../web/src/features/craft/CraftSheet.tsx)). Pick one from the row at the top and
 tick through it; the ticks count up and don't change the note, so the next rewrite starts fresh.
 

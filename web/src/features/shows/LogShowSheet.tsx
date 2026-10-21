@@ -6,7 +6,7 @@
 import { Star } from 'lucide-react'
 import { useState } from 'react'
 import { newId } from '../../api/client'
-import { useCraftNotes, useSaveCraftNote } from '../../api/craft'
+import { useCraftAreas, useCraftNotes, useSaveCraftNote } from '../../api/craft'
 import { useBits, useTopics } from '../../api/library'
 import { useLogActions, useLogs, useSetlists, useVenues } from '../../api/shows'
 import type { PerformanceLog } from '../../api/types'
@@ -17,7 +17,7 @@ import { Modal } from '../../components/ui/Modal'
 import { topicName } from '../../lib/bitMeta'
 import { clock, parse } from '../../lib/duration'
 import { formatDate, fromIstInput, toIstInput } from '../../lib/time'
-import { lessonFrom } from '../craft/craftMeta'
+import { areaFor, lessonFrom } from '../craft/craftMeta'
 import { LaughTally } from './LaughTally'
 import { NO_LAUGHS, counted } from './lpm'
 
@@ -32,6 +32,7 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
   const { data: bits = [] } = useBits()
   const { save } = useLogActions()
   const { data: craft = [] } = useCraftNotes()
+  const { data: areas = [] } = useCraftAreas()
   const saveLesson = useSaveCraftNote()
   const { toast } = useFeedback()
   const [venue, setVenue] = useState(log?.venue_name ?? '')
@@ -61,7 +62,7 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
     const venueName = venue.trim() || UNKNOWN
     const performedAt = fromIstInput(when)
     // The lesson points at the show, so it's saved once the show exists.
-    const keepLesson = () => lesson.trim() && saveLesson.mutate({ id: newId(), input: lessonFrom(lesson, craft, { performance_log_id: id, source: `Show at ${venueName}, ${formatDate(performedAt)}` }) })
+    const keepLesson = () => lesson.trim() && saveLesson.mutate({ id: newId(), input: lessonFrom(lesson, craft, areaFor(areas, 'stage'), { performance_log_id: id, source: `Show at ${venueName}, ${formatDate(performedAt)}` }) })
     save.mutate(
       { id, input: { venue_name: venueName, performed_at: performedAt, duration_seconds: seconds, audience_size: Number(crowd) || 0, rating, topic_ids: topicIds, notes: notes.trim(), laughs: counted(laughs) ? laughs : null } },
       { onSuccess: () => { keepLesson(); toast(log ? 'Show updated' : 'Show logged'); onClose() }, onError: (e) => setError(e.message) },
@@ -111,7 +112,7 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
         </div>
         <LaughTally laughs={laughs} seconds={parse(duration)} onChange={setLaughs} />
         <Field label="Remarks"><Textarea placeholder="What went right, what went wrong, what the crowd was like" value={notes} onChange={(e) => setNotes(e.target.value)} /></Field>
-        <Field label="What did you learn?" hint="Saved to Craft, under On stage, linked to this show">
+        <Field label="What did you learn?" hint="Saved to Craft, linked to this show, in the area that shows on Stage">
           <Textarea placeholder="e.g. Slow down before the punch" className="min-h-16" value={lesson} onChange={(e) => setLesson(e.target.value)} />
         </Field>
         {error && <p className="text-sm text-light" role="alert">{error}</p>}

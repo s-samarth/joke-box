@@ -1,10 +1,11 @@
 /** Write or edit one craft note: its name, kind, area, the note itself, and where it came from. */
 import { ExternalLink, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-import type { CraftArea, CraftKind, CraftNoteInput } from '../../api/types'
+import { useCraftAreas } from '../../api/craft'
+import type { CraftKind, CraftNoteInput } from '../../api/types'
 import { Button } from '../../components/ui/Button'
 import { Field, Input, Select, Textarea } from '../../components/ui/Field'
-import { AREAS, KINDS } from './craftMeta'
+import { KINDS } from './craftMeta'
 
 const FORMAT_HINT = 'Start a line with "# " for a heading, "- " for a list, "- [ ] " for a tick box. **Bold** works too.'
 
@@ -17,11 +18,12 @@ interface Props {
 
 export function CraftNoteForm({ initial, isNew, onSave, onDelete }: Props) {
   const [form, setForm] = useState(initial)
+  const { data: areas = [] } = useCraftAreas()
   const [tags, setTags] = useState(initial.hashtags.join(' '))
   const set = (patch: Partial<CraftNoteInput>) => setForm((f) => ({ ...f, ...patch }))
   const link = form.url.trim()
   const linkOk = !link || /^https?:\/\//i.test(link)
-  const ready = form.title.trim().length > 0 && linkOk
+  const ready = form.title.trim().length > 0 && linkOk && Boolean(form.area_id)
 
   const submit = () => {
     if (!ready) return
@@ -40,9 +42,9 @@ export function CraftNoteForm({ initial, isNew, onSave, onDelete }: Props) {
             {KINDS.map((k) => <option key={k.key} value={k.key}>{k.label}</option>)}
           </Select>
         </Field>
-        <Field label="Area" hint={AREAS.find((a) => a.key === form.area)?.hint}>
-          <Select value={form.area} onChange={(e) => set({ area: e.target.value as CraftArea })}>
-            {AREAS.map((a) => <option key={a.key} value={a.key}>{a.label}</option>)}
+        <Field label="Area" hint={areas.find((a) => a.id === form.area_id)?.description}>
+          <Select value={form.area_id} onChange={(e) => set({ area_id: e.target.value })}>
+            {areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
           </Select>
         </Field>
       </div>

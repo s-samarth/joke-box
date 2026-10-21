@@ -140,8 +140,13 @@ Every `bit_id` and `topic_id` must belong to you (otherwise 404).
 | PUT | `/api/watchlist/{id}` | `{title, comedian, category, description, url, position, schemer_index, logic_density, dark_pragmatism, watched}`. Scores are 0–10 or null |
 | DELETE | `/api/watchlist/{id}` | |
 | POST | `/api/watchlist/import-dossier` | Adds the dossier's routines you don't already have (matched on title and comedian). Returns the full list |
+| GET | `/api/craft-areas` | In your order. Makes the starting areas if you have none |
+| POST | `/api/craft-areas` | `{name, description, color, screens[]}`. Goes last. 409 if the name is taken |
+| PATCH | `/api/craft-areas/{id}` | Same body; rename, recolour, change screens |
+| PUT | `/api/craft-areas/order` | `{ids[]}` in the order you want |
+| DELETE | `/api/craft-areas/{id}?move_to=<id>` | Its notes move to `move_to` (or your first other area). 400 for your last area |
 | GET | `/api/craft-notes` | In order of `position` |
-| PUT | `/api/craft-notes/{id}` | `{title, body, kind, area, hashtags, source, url, position, performance_log_id?, analysis_id?, created_at?}`. The show and analysis must be yours. `created_at` is kept only when the note is created |
+| PUT | `/api/craft-notes/{id}` | `{title, body, kind, area_id, hashtags, source, url, position, performance_log_id?, analysis_id?, created_at?}`. The area, show and analysis must be yours. `created_at` is kept only when the note is created |
 | DELETE | `/api/craft-notes/{id}` | |
 | GET | `/api/analyses` | |
 | PUT | `/api/analyses/{id}` | `{title, url, body, watch_item_id?}`. The URL must be http(s) or empty |

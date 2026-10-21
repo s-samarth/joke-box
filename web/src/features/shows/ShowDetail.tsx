@@ -54,7 +54,7 @@ export function ShowDetail({ log, topics, onClose, onEdit }: { log: PerformanceL
           {lessons.map((n) => (
             <li key={n.id}><Link to={`/craft/${n.id}`} className="inline-flex items-center gap-2 hover:text-tape"><GraduationCap size={15} className="text-tape" />{n.title}</Link></li>
           ))}
-          <li><Link to={`/craft/new?show=${log.id}&area=stage`} className="inline-flex items-center gap-2 text-sm text-dim hover:text-paper"><Plus size={15} />Add a lesson</Link></li>
+          <li><Link to={`/craft/new?show=${log.id}&screen=stage`} className="inline-flex items-center gap-2 text-sm text-dim hover:text-paper"><Plus size={15} />Add a lesson</Link></li>
         </ul>
       </div>
     </Modal>

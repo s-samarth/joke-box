@@ -1,36 +1,55 @@
 /**
  * One craft note. It opens formatted, with tick boxes you can tick, and switches to a form to
- * edit. /craft/new opens the form straight away; ?area= and ?kind= fill those in, and ?show= or
- * ?analysis= links the new note to the show or analysis it was learned from.
+ * edit. /craft/new opens the form straight away: ?area=<id> and ?kind= fill those in, ?screen=
+ * picks the area that shows on that screen, and ?show= or ?analysis= link the new note to the
+ * show or analysis it was learned from.
  */
-import { ArrowLeft, ExternalLink, Pencil } from 'lucide-react'
-import { useState } from 'react'
+import { ArrowLeft, ChevronDown, ExternalLink, Pencil } from 'lucide-react'
+import { useState, type CSSProperties } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { newId } from '../../api/client'
-import { craftInput, useCraftNotes, useDeleteCraftNote, useSaveCraftNote } from '../../api/craft'
+import { craftInput, useCraftAreas, useCraftNotes, useDeleteCraftNote, useSaveCraftNote } from '../../api/craft'
 import { useLogs } from '../../api/shows'
 import { useAnalyses } from '../../api/study'
-import type { CraftArea, CraftKind, CraftNote, CraftNoteInput } from '../../api/types'
+import type { CraftArea, CraftKind, CraftNote, CraftNoteInput, CraftScreen } from '../../api/types'
 import { Button } from '../../components/ui/Button'
 import { Spinner } from '../../components/ui/bits'
+import { Dropdown } from '../../components/ui/Menu'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { formatDate } from '../../lib/time'
-import { AREAS, KINDS, areaLabel, blankNote, kindLabel } from './craftMeta'
+import { toggleTick } from './bodyFormat'
+import { AREA_COLORS, KINDS, SCREENS, areaFor, blankNote, kindLabel } from './craftMeta'
 import { CraftNoteForm } from './CraftNoteForm'
 import { NoteBody } from './NoteBody'
-import { toggleTick } from './bodyFormat'
 
-function Reading({ note, onEdit, onTick }: { note: CraftNote; onEdit: () => void; onTick: (line: number) => void }) {
+interface ReadingProps {
+  note: CraftNote
+  areas: CraftArea[]
+  onEdit: () => void
+  onTick: (line: number) => void
+  onMove: (area: CraftArea) => void
+}
+
+function Reading({ note, areas, onEdit, onTick, onMove }: ReadingProps) {
+  const area = areas.find((a) => a.id === note.area_id)
+  const moves = areas.filter((a) => a.id !== note.area_id).map((a) => ({ label: a.name, onSelect: () => onMove(a) }))
   return (
-    <article>
-      <p className="text-sm text-faint">{kindLabel(note.kind)}, {areaLabel(note.area)}</p>
-      <h1 className="headline mt-1 text-[40px] leading-none sm:text-[52px]">{note.title}</h1>
+    <article style={{ '--area': AREA_COLORS[area?.color ?? 'sky'] } as CSSProperties}>
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <Dropdown align="start" items={moves} trigger={
+          <button type="button" className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[color-mix(in_srgb,var(--area)_18%,transparent)] px-3 text-[var(--area)] hover:bg-[color-mix(in_srgb,var(--area)_28%,transparent)]" aria-label={`Area: ${area?.name ?? 'none'}. Move to another area`}>
+            <span className="size-2 rounded-full bg-[var(--area)]" aria-hidden />{area?.name ?? 'No area'}<ChevronDown size={14} />
+          </button>
+        } />
+        <span className="text-faint">{kindLabel(note.kind)}</span>
+      </div>
+      <h1 className="headline mt-3 text-[40px] leading-none sm:text-[52px]">{note.title}</h1>
       <div className="mt-6"><NoteBody body={note.body} onTick={onTick} /></div>
       <footer className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-4 text-sm text-faint">
         <span>
-          {note.source && <>From {note.source}. </>}Written {formatDate(note.created_at)}
+          {note.source && <>From {note.source}. </>}Written {formatDate(note.created_at)}.
           {note.analysis_id && <> <Link to={`/analysis/${note.analysis_id}`} className="text-dim hover:text-paper">Open the analysis</Link></>}
-          {note.url && <> · <a href={note.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-dim hover:text-paper">Link <ExternalLink size={13} /></a></>}
+          {note.url && <> <a href={note.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-dim hover:text-paper">Link <ExternalLink size={13} /></a></>}
           {note.hashtags.length > 0 && <span className="mt-1 block text-dim">{note.hashtags.join(' ')}</span>}
         </span>
         <Button small icon={<Pencil size={15} />} onClick={onEdit}>Edit note</Button>
@@ -39,8 +58,8 @@ function Reading({ note, onEdit, onTick }: { note: CraftNote; onEdit: () => void
   )
 }
 
-const isArea = (v: string | null): v is CraftArea => AREAS.some((a) => a.key === v)
 const isKind = (v: string | null): v is CraftKind => KINDS.some((k) => k.key === v)
+const isScreen = (v: string | null): v is CraftScreen => SCREENS.some((s) => s.key === v)
 
 export function CraftNotePage() {
   const { noteId = 'new' } = useParams()
@@ -48,25 +67,30 @@ export function CraftNotePage() {
   const [freshId] = useState(newId)
   const [editing, setEditing] = useState(false)
   const { data: notes = [], isPending } = useCraftNotes()
+  const { data: areas = [], isPending: areasPending } = useCraftAreas()
   const { data: logs = [] } = useLogs()
   const { data: analyses = [] } = useAnalyses()
   const save = useSaveCraftNote()
   const del = useDeleteCraftNote()
   const navigate = useNavigate()
   const { confirm, toast } = useFeedback()
-  if (isPending) return <div className="py-16"><Spinner /></div>
+  if (isPending || areasPending) return <div className="py-16"><Spinner /></div>
 
   const isNew = noteId === 'new'
   const note = notes.find((n) => n.id === noteId)
-  const area = params.get('area')
   const kind = params.get('kind')
+  const screen = params.get('screen')
+  const askedArea = areas.find((a) => a.id === params.get('area'))?.id
   const show = logs.find((l) => l.id === params.get('show'))
   const analysis = analyses.find((a) => a.id === params.get('analysis'))
   const learnedAt: Partial<CraftNoteInput> = show
     ? { performance_log_id: show.id, source: `Show at ${show.venue_name}, ${formatDate(show.performed_at)}` }
     : analysis ? { analysis_id: analysis.id, source: `Analysis: ${analysis.title}`, url: analysis.url } : {}
-  const initial: CraftNoteInput = note ? craftInput(note) : blankNote(notes, { ...(isArea(area) && { area }), ...(isKind(kind) && { kind }), ...learnedAt })
+  const areaId = askedArea ?? areaFor(areas, isScreen(screen) ? screen : undefined)
+  const initial: CraftNoteInput = note ? craftInput(note) : blankNote(notes, areaId, { ...(isKind(kind) && { kind }), ...learnedAt })
   const id = note?.id ?? freshId
+  const back = note ? `/craft/area/${note.area_id}` : askedArea ? `/craft/area/${askedArea}` : '/craft'
+  const backLabel = areas.find((a) => a.id === (note?.area_id ?? askedArea))?.name ?? 'Craft'
 
   const store = (input: CraftNoteInput) => save.mutate({ id, input }, { onError: (e) => toast(`Not saved: ${e.message}`) })
   const submit = (input: CraftNoteInput) => {
@@ -78,13 +102,13 @@ export function CraftNotePage() {
   const remove = async () => {
     if (!(await confirm({ title: 'Delete this note?', message: 'It is deleted for good.', confirmLabel: 'Delete', danger: true }))) return
     del.mutate(id)
-    navigate('/craft')
+    navigate(back)
   }
 
   return (
     <div className="mx-auto max-w-2xl pb-16">
       <div className="pt-6 pb-5 lg:pt-10">
-        <Link to="/craft" className="inline-flex items-center gap-1.5 text-sm text-dim hover:text-paper"><ArrowLeft size={15} /> All craft notes</Link>
+        <Link to={back} className="inline-flex items-center gap-1.5 text-sm text-dim hover:text-paper"><ArrowLeft size={15} /> {backLabel}</Link>
         {(isNew || editing) && <h1 className="headline mt-2 text-[44px] sm:text-[56px]">{isNew ? 'New note' : 'Edit note'}</h1>}
       </div>
       {!isNew && !note ? (
@@ -92,7 +116,9 @@ export function CraftNotePage() {
       ) : isNew || editing || !note ? (
         <CraftNoteForm key={`${id}${show?.id ?? ''}${analysis?.id ?? ''}`} initial={initial} isNew={isNew} onSave={submit} onDelete={isNew ? undefined : remove} />
       ) : (
-        <Reading note={note} onEdit={() => { setEditing(true); window.scrollTo(0, 0) }} onTick={(line) => store({ ...craftInput(note), body: toggleTick(note.body, line) })} />
+        <Reading note={note} areas={areas} onEdit={() => { setEditing(true); window.scrollTo(0, 0) }}
+          onTick={(line) => store({ ...craftInput(note), body: toggleTick(note.body, line) })}
+          onMove={(a) => { store({ ...craftInput(note), area_id: a.id }); toast(`Moved to ${a.name}`) }} />
       )}
     </div>
   )

@@ -6,7 +6,7 @@
  * failing doesn't stop the rest; failures are collected and shown at the end.
  */
 import { api } from '../../api/client'
-import type { Named, Topic } from '../../api/types'
+import type { CraftArea, Named, Topic } from '../../api/types'
 import { uploadVoiceAudio } from '../../api/voice'
 import { blankBit } from '../capture/newBit'
 import { topicNames, type ImportPlan } from './bundle'
@@ -87,10 +87,15 @@ export async function runImport(plan: ImportPlan, ctx: Context): Promise<Progres
       await uploadVoiceAudio(n.id, new Blob([file], { type: audioType(n.file) }))
     })
   }
+  const areas = plan.craftNotes.length ? byName(await api<CraftArea[]>('/api/craft-areas')) : new Map<string, string>()
+  for (const name of topicNames(plan.craftNotes.map((n) => ({ topic: n.area })))) {
+    if (!areas.has(name.toLowerCase())) areas.set(name.toLowerCase(), (await api<CraftArea>('/api/craft-areas', 'POST', { name, description: '', color: 'teal', screens: [] })).id)
+  }
   for (const [i, n] of plan.craftNotes.entries()) {
     const { title, body, kind, area, hashtags = [], source = '', url = '', created_at } = n
+    const area_id = areas.get(area.trim().toLowerCase()) ?? [...areas.values()][0]
     await step(`Craft note "${title}"`, () =>
-      api(`/api/craft-notes/${n.id}`, 'PUT', { title, body, kind, area, hashtags, source, url, created_at, position: ctx.craftPosition + i + 1 }),
+      api(`/api/craft-notes/${n.id}`, 'PUT', { title, body, kind, area_id, hashtags, source, url, created_at, position: ctx.craftPosition + i + 1 }),
     )
   }
   return progress
