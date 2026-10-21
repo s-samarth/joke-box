@@ -25,7 +25,8 @@ Live at **[jokebox.samarthsaraswat.com](https://jokebox.samarthsaraswat.com)** (
 | **Voice notes.** Tap to record, with a live level meter. Name and tag the note the moment you stop, and play it before it's even uploaded. Offline recordings wait on the phone. <br><br> <img src="docs/screenshots/desktop-voice.png" alt="Voice notes"> | **Brainstorm.** Timed writing sessions. Type, or handwrite with Apple Pencil (palm rejection included), and link the jokes and observations a session touches. <br><br> <img src="docs/screenshots/desktop-session.png" alt="A brainstorm session"> |
 | **Observations.** Things you noticed that aren't jokes yet, under their own topics. Turn one into a joke when the angle shows up. <br><br> <img src="docs/screenshots/desktop-observations.png" alt="Observations"> | **Watchlist and Analysis.** 100 routines to study, scored by the persona dossier, ticked off as you watch, with your write-ups of sets alongside. <br><br> <img src="docs/screenshots/desktop-watchlist.png" alt="Watchlist"> |
 
-Plus: **Rewrite** (rework one joke against a timer, keeping every version), **print view** for
+Plus: **Daily joke** (one new joke a day, a calendar of ticks, and a nudge on Home that goes from
+yellow to red to spooky the longer you skip), **Rewrite** (rework one joke against a timer, keeping every version), **print view** for
 sets, topic folders, a "needs work" list, CSV export, and a sync light that tells you when
 everything is safely saved.
 

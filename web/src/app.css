@@ -125,8 +125,34 @@ body {
 .light-pulse {
   animation: light-pulse 1s steps(2) infinite;
 }
+/* The daily joke nudge once you've gone quiet for over a week: a drifting ghost, a flickering line. */
+@keyframes ghost-float {
+  50% {
+    transform: translateY(-6px) rotate(-4deg);
+  }
+}
+.ghost-float {
+  animation: ghost-float 4s ease-in-out infinite;
+}
+@keyframes spooky-flicker {
+  0%, 90%, 92%, 95%, 100% {
+    opacity: 1;
+  }
+  91% {
+    opacity: 0.35;
+  }
+  94% {
+    opacity: 0.6;
+  }
+}
+.spooky-flicker {
+  animation: spooky-flicker 7s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .light-pulse {
+  .light-pulse,
+  .ghost-float,
+  .spooky-flicker {
     animation: none;
   }
 }
