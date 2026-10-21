@@ -39,6 +39,15 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
    topic stays picked for the next one.
 2. Tap **Log it**.
 
+## 2a. Write a joke every day
+
+1. Home opens with the daily joke nudge. Yellow means today is still open; red means it's been three
+   days or more; dark and spooky means over a week.
+2. Tap **Write it** (or open **Daily joke**). Type a premise, and the punch if you have it, and press
+   Enter. It saves to Thoughts.
+3. The nudge turns into a small green line with your streak, and today gets a tick on the calendar.
+4. On **Daily joke**, tap any day to see what you wrote, or page back through earlier months.
+
 ## 3. Work an observation into a joke
 
 1. On **Observations**, open the ⋯ menu on an observation and choose **Turn into a joke**.

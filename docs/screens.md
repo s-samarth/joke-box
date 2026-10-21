@@ -52,11 +52,12 @@ offline, it uses the cached profile, so the app still opens.
 
 [TodayPage.tsx](../web/src/features/today/TodayPage.tsx) and its siblings in `features/today/`.
 
-The page is one column, at most 672 px wide. It shows today's date in IST and the headline
-**"Got something?"**, followed by these sections from top to bottom:
+The page is one column, at most 672 px wide. It opens with the daily joke nudge, then today's date
+in IST and the headline **"Got something?"**, followed by these sections from top to bottom:
 
 | Section | File | Notes |
 |---|---|---|
+| Daily joke nudge | `daily/DailyBanner.tsx` | Days since your last new joke: today written, a small green line with your streak; 1 or 2 days, yellow **Write a joke today**; 3 to 7, red **N days without a joke**; over a week, a dark, spooky card (a drifting ghost, a cobweb, a flickering line; still under reduced motion). Waits for the jokes to load so it never flashes the wrong state. Links to Daily joke |
 | Quick capture | `QuickCapture.tsx` | Premise and punch in one box. Enter saves to Thoughts; Shift+Enter adds a new line |
 | Voice notes | `TodayVoice.tsx` | The same recorder as the Voice screen, plus "All N" |
 | Observations | `TodayObservations.tsx` | The observation box and the last few logged |
@@ -69,6 +70,23 @@ The page is one column, at most 672 px wide. It shows today's date in IST and th
 | Last show | (inline) | Venue, date, time on stage, crowd and stars, plus **Log a show** |
 
 <img src="screenshots/desktop-home.png" alt="Home on desktop">
+
+## Daily joke: `/daily`
+
+[DailyPage.tsx](../web/src/features/daily/DailyPage.tsx), [dailyMath.ts](../web/src/features/daily/dailyMath.ts),
+[MonthCalendar.tsx](../web/src/features/daily/MonthCalendar.tsx).
+
+The habit of writing at least one new joke a day. A day counts when any joke was added to JokeBox
+that day (IST), however it got there, imports included with their original dates; it's read from
+the jokes' created dates, so there's no separate log to fall out of step.
+
+- **The nudge** (the same one as Home); its button focuses the box below.
+- **Today's joke:** the quick capture box. Saving puts the joke in Thoughts and ticks today at once.
+- **Streaks:** current (ending today, or yesterday while today is still open), longest, and days
+  this month.
+- **Calendar:** a month at a time, Monday first. Days with a new joke get a green tick and a count
+  when there were several; today is outlined in yellow; days to come are dimmed. Arrows move
+  between months. Tap a day to list its jokes, each linking to the joke.
 
 ## Jokes: `/bits` and `/bits/:bitId`
 

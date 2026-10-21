@@ -55,7 +55,8 @@ own data. Today that is one comedian, but the system works for more than one.
 
 | Area | What it does | Screen |
 |---|---|---|
-| **Home** | Quick capture, record a voice note, log an observation, start a brainstorm, study shortcuts, topic folders, next set, "Needs work", last show | `/` |
+| **Home** | The daily joke nudge, quick capture, record a voice note, log an observation, start a brainstorm, study shortcuts, topic folders, next set, "Needs work", last show | `/` |
+| **Daily joke** | One new joke a day: today's box, streaks, a calendar of ticks; the nudge on Home goes from green to yellow, red and spooky | `/daily` |
 | **Jokes** | Searchable list with topic, type, status and sort filters; each joke edited in place; CSV export | `/bits`, `/bits/:id` |
 | **New joke** | The + button anywhere: a full sheet with every field, prefilled from where you are | sheet |
 | **Rewrite** | Full-screen timed rewrite of one joke; every save keeps a version | `/bits/:id/rewrite` |
