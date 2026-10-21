@@ -27,6 +27,7 @@ const WatchlistPage = named(() => import('./features/study/WatchlistPage'), 'Wat
 const AnalysisPage = named(() => import('./features/study/AnalysisPage'), 'AnalysisPage')
 const AnalysisEditor = named(() => import('./features/study/AnalysisEditor'), 'AnalysisEditor')
 const LinksPage = named(() => import('./features/study/LinksPage'), 'LinksPage')
+const ImportPage = named(() => import('./features/import/ImportPage'), 'ImportPage')
 
 const full = (el: React.ReactNode) => <RequireAuth>{el}</RequireAuth>
 
@@ -51,6 +52,7 @@ export function App() {
           <Route path="analysis" element={<AnalysisPage />} />
           <Route path="analysis/:analysisId" element={<AnalysisEditor />} />
           <Route path="links" element={<LinksPage />} />
+          <Route path="import" element={<ImportPage />} />
         </Route>
         {/* Full-screen modes without the app frame. */}
         <Route path="/brainstorm/:sessionId" element={full(<SessionPage />)} />

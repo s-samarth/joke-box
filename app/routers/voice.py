@@ -45,6 +45,8 @@ def put_note(note_id: uuid.UUID, body: VoiceNoteIn, user: CurrentUser, db: DbSes
     note = find_owned(db, VoiceNote, note_id, user)
     if note is None:
         note = VoiceNote(id=note_id, user_id=user.id)
+        if body.created_at:
+            note.created_at = body.created_at
         db.add(note)
     note.label = body.label.strip()
     note.hashtags = [t.strip() for t in body.hashtags if t.strip()]

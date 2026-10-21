@@ -64,3 +64,11 @@ def test_other_users_cannot_see_or_touch_mine(alice: TestClient, bob: TestClient
     assert bob.delete(f"/api/observation-topics/{topic_id}").status_code == 404
     bob.delete(f"/api/observations/{obs_id}")
     assert len(alice.get("/api/observations").json()) == 1
+
+
+def test_an_import_keeps_the_original_date_but_edits_dont_move_it(alice: TestClient) -> None:
+    obs_id = str(uuid.uuid4())
+    first = put_obs(alice, obs_id, created_at="2023-02-13T15:47:37Z").json()
+    assert first["created_at"].startswith("2023-02-13")
+    edited = put_obs(alice, obs_id, text="Edited", created_at="2025-01-01T00:00:00Z").json()
+    assert edited["created_at"].startswith("2023-02-13")

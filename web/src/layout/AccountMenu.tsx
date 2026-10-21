@@ -1,5 +1,6 @@
-/** Your avatar: sign out, and (on your laptop only) reset to demo data. */
-import { LogOut, RefreshCcw } from 'lucide-react'
+/** Your avatar: import, sign out, and (on your laptop only) reset to demo data. */
+import { FolderInput, LogOut, RefreshCcw } from 'lucide-react'
+import { useNavigate } from 'react-router'
 import { useMe, useReseed } from '../api/library'
 import { signOut } from '../api/session'
 import { useFeedback } from '../components/ui/feedbackContext'
@@ -9,8 +10,12 @@ export function AccountMenu({ showName = false }: { showName?: boolean }) {
   const { data: me } = useMe()
   const reseed = useReseed()
   const { confirm, toast } = useFeedback()
+  const navigate = useNavigate()
 
-  const items: MenuItem[] = [{ label: 'Sign out', icon: <LogOut size={16} />, onSelect: () => void signOut() }]
+  const items: MenuItem[] = [
+    { label: 'Import', icon: <FolderInput size={16} />, onSelect: () => navigate('/import') },
+    { label: 'Sign out', icon: <LogOut size={16} />, onSelect: () => void signOut() },
+  ]
   if (me?.env === 'local') {
     items.unshift({
       label: 'Reset to demo data',

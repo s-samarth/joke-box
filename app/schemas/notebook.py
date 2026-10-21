@@ -10,6 +10,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 class ObservationIn(BaseModel):
     text: str
     topic_id: uuid.UUID | None = None
+    # Kept only when the observation is created: an import can keep the original date.
+    created_at: datetime | None = None
 
     @field_validator("text")
     @classmethod
