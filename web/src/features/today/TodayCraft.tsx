@@ -7,6 +7,7 @@ import { SectionHead } from '../../components/ui/bits'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { areaColor, kindFor, lessonFrom } from '../craft/craftMeta'
 import { PathLadder } from '../craft/PathLadder'
+import { isOnline } from '../../api/network'
 
 const chip = (on: boolean) => `inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-2.5 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'bg-ink-3 text-dim hover:text-paper'}`
 
@@ -23,7 +24,7 @@ function LessonBox() {
     if (!text.trim() || !area) return
     save.mutate({ id: newId(), input: lessonFrom(text, notes, { area_id: area, kind_id: kindFor(kinds) }) }, { onError: (e) => toast(`Not saved: ${e.message}`) })
     setText('')
-    toast(navigator.onLine ? 'Lesson saved to Craft' : 'Saved offline, will sync')
+    toast(isOnline() ? 'Lesson saved to Craft' : 'Saved offline, will sync')
   }
 
   return (

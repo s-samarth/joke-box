@@ -9,6 +9,7 @@ import { newId } from '../../api/client'
 import { useObservationTopics, useSaveObservation } from '../../api/notebook'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { useNewObservationTopic } from './useNewObservationTopic'
+import { isOnline } from '../../api/network'
 
 const chip = (on: boolean) =>
   `h-8 shrink-0 rounded-lg px-2.5 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'bg-ink-3 text-dim hover:text-paper'}`
@@ -25,7 +26,7 @@ export function ObservationBox({ initialTopicId = null }: { initialTopicId?: str
     if (!text.trim()) return
     save.mutate({ id: newId(), input: { text: text.trim(), topic_id: topicId } }, { onError: (e) => toast(`Not saved: ${e.message}`) })
     setText('')
-    if (!navigator.onLine) toast('Saved offline, will sync')
+    if (!isOnline()) toast('Saved offline, will sync')
   }
   const addTopic = async () => {
     const id = await newTopic()

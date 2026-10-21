@@ -21,6 +21,7 @@ import { toggleTick } from './bodyFormat'
 import { BEHAVIOURS, SCREENS, areaColor, areaFor, blankNote, kindFor, kindName } from './craftMeta'
 import { CraftNoteForm } from './CraftNoteForm'
 import { NoteBody } from './NoteBody'
+import { isOnline } from '../../api/network'
 
 interface ReadingProps {
   note: CraftNote
@@ -98,7 +99,7 @@ export function CraftNotePage() {
   const store = (input: CraftNoteInput) => save.mutate({ id, input }, { onError: (e) => toast(`Not saved: ${e.message}`) })
   const submit = (input: CraftNoteInput) => {
     store(input)
-    toast(navigator.onLine ? 'Note saved' : 'Saved offline, will sync')
+    toast(isOnline() ? 'Note saved' : 'Saved offline, will sync')
     if (isNew) navigate(`/craft/${id}`, { replace: true })
     setEditing(false)
   }

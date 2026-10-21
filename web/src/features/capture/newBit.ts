@@ -4,6 +4,7 @@ import { newId } from '../../api/client'
 import { useSaveBit, useTopics } from '../../api/library'
 import type { BitInput } from '../../api/types'
 import { useFeedback } from '../../components/ui/feedbackContext'
+import { isOnline } from '../../api/network'
 
 /** Everything a new joke starts with. Filed under Thoughts unless you pick a topic. */
 export const blankBit = (topicId = ''): BitInput => ({
@@ -52,7 +53,7 @@ export function useCaptureBit() {
     // while this promise settles whenever the save does (even after an offline wait).
     save.mutateAsync({ id, input }).then(() => onSaved?.(id), (e: Error) => toast(`Not saved: ${e.message}`))
     if (open) navigate(`/bits/${id}`)
-    else toast(navigator.onLine ? 'Joke saved' : 'Saved offline, will sync', { label: 'Open', onClick: () => navigate(`/bits/${id}`) })
+    else toast(isOnline() ? 'Joke saved' : 'Saved offline, will sync', { label: 'Open', onClick: () => navigate(`/bits/${id}`) })
     return id
   }
 }

@@ -149,5 +149,14 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 ## 12. Use it with no signal
 
 1. Everything you've already opened stays readable. The cache is kept on the device for a week.
-2. Saves keep working. The cloud icon turns amber and says "Offline, N waiting to sync".
-3. Back online, the queued saves replay in order and the icon returns to "All changes saved".
+2. Saves keep working: jokes, observations, shows (with their lesson), sets, rewrites, voice
+   notes and craft notes. Sheets close as usual and say "Saved offline, will sync". The cloud
+   icon turns amber and says "Offline, N waiting to sync", counting recordings still to upload.
+3. A weak signal counts too: a save that can't reach the server waits like an offline one, and
+   the app checks every few seconds for the server to come back.
+4. Closing the app is fine. Waiting saves stay on the phone, including one that was on its way.
+5. Back online, the saves go up one at a time in the order you made them, then the lists
+   refresh and the icon returns to "All changes saved". If the server refuses one, a message
+   says which.
+6. A few things need a connection there and then, like renaming a topic or deleting a venue.
+   Offline they say "You're offline" straight away.

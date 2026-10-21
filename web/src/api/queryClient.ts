@@ -6,9 +6,10 @@
  * TanStack refetches them. The cache is saved to IndexedDB, so the app opens offline.
  */
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister'
-import { QueryClient } from '@tanstack/react-query'
+import { type QueryKey, QueryClient } from '@tanstack/react-query'
 import { del, get, set } from 'idb-keyval'
 import { ApiError, api } from './client'
+import { QUEUED } from './sync'
 import type { Bit, BitInput, Observation, ObservationInput, WritingSession, WritingSessionInput } from './types'
 
 const WEEK = 1000 * 60 * 60 * 24 * 7
@@ -41,12 +42,37 @@ export const queryClient = new QueryClient({
       staleTime: 30_000,
       retry: (count, error) => !(error instanceof ApiError && error.status < 500) && count < 2,
     },
+    // Anything not queued (renaming a topic, deleting a venue...) needs the server there and then:
+    // offline it fails at once with "You're offline" rather than spinning. Queued saves override this.
+    mutations: { networkMode: 'always', retry: false },
   },
 })
+
+/* Lists to refetch once the queue is empty. Refetching while saves are still waiting would show
+ * the server's older copy for a moment, so the change you just made would seem to vanish. */
+const toRefresh = new Map<string, QueryKey>()
+const queued = () => queryClient.isMutating({ predicate: (m) => m.options.scope?.id === QUEUED.scope.id })
+
+/** Called as each queued save settles; the last one (it still counts itself) refetches. */
+export async function refreshWhenSynced(...lists: QueryKey[]) {
+  lists.forEach((k) => toRefresh.set(JSON.stringify(k), k))
+  if (queued() > 1) return
+  const all = [...toRefresh.values()]
+  toRefresh.clear()
+  await Promise.all(all.map((queryKey) => queryClient.invalidateQueries({ queryKey })))
+}
+
+/**
+ * Restart every save restored from the phone, including any that were mid-flight when the app
+ * closed: those may or may not have reached the server, and sending a save twice is harmless.
+ */
+export const resumeQueued = () =>
+  Promise.all(queryClient.getMutationCache().getAll().filter((m) => m.state.status === 'pending').map((m) => m.continue().catch(() => {})))
 
 export const persister = createAsyncStoragePersister({
   storage: { getItem: get, setItem: set, removeItem: del },
   key: 'jokebox-cache',
+  throttleTime: 300, // a save is on the phone within a moment, even if the app is closed straight away
 })
 
 export const persistMaxAge = WEEK
@@ -61,6 +87,7 @@ export const saveBitKey = ['bit', 'save']
 export const deleteBitKey = ['bit', 'delete']
 
 queryClient.setMutationDefaults(saveBitKey, {
+  ...QUEUED,
   mutationFn: ({ id, input }: SaveBitVars) => api<Bit>(`/api/bits/${id}`, 'PUT', input),
   onMutate: async ({ id, input }: SaveBitVars) => {
     // Optimistic update: show the change immediately, before the server answers.
@@ -72,24 +99,17 @@ queryClient.setMutationDefaults(saveBitKey, {
       return existing ? old.map((b) => (b.id === id ? next : b)) : [next, ...old]
     })
   },
-  onSettled: () => {
-    void queryClient.invalidateQueries({ queryKey: keys.bits })
-    void queryClient.invalidateQueries({ queryKey: keys.types })
-    void queryClient.invalidateQueries({ queryKey: keys.statuses })
-  },
+  onSettled: () => refreshWhenSynced(keys.bits, keys.types, keys.statuses),
 })
 
 queryClient.setMutationDefaults(deleteBitKey, {
+  ...QUEUED,
   mutationFn: (id: string) => api<void>(`/api/bits/${id}`, 'DELETE'),
   onMutate: async (id: string) => {
     await queryClient.cancelQueries({ queryKey: keys.bits })
     queryClient.setQueryData<Bit[]>(keys.bits, (old = []) => old.filter((b) => b.id !== id))
   },
-  onSettled: () => {
-    for (const key of [keys.bits, keys.types, keys.brainstorms, keys.setlists]) {
-      void queryClient.invalidateQueries({ queryKey: key })
-    }
-  },
+  onSettled: () => refreshWhenSynced(keys.bits, keys.types, keys.brainstorms, keys.setlists),
 })
 
 /* Observations get the same offline treatment: jot one down on the bus, it syncs later. */
@@ -99,6 +119,7 @@ export const saveObservationKey = ['observation', 'save']
 export const deleteObservationKey = ['observation', 'delete']
 
 queryClient.setMutationDefaults(saveObservationKey, {
+  ...QUEUED,
   mutationFn: ({ id, input }: SaveObservationVars) => api<Observation>(`/api/observations/${id}`, 'PUT', input),
   onMutate: async ({ id, input }: SaveObservationVars) => {
     await queryClient.cancelQueries({ queryKey: keys.observations })
@@ -109,16 +130,17 @@ queryClient.setMutationDefaults(saveObservationKey, {
       return existing ? old.map((o) => (o.id === id ? next : o)) : [next, ...old]
     })
   },
-  onSettled: () => queryClient.invalidateQueries({ queryKey: keys.observations }),
+  onSettled: () => refreshWhenSynced(keys.observations),
 })
 
 queryClient.setMutationDefaults(deleteObservationKey, {
+  ...QUEUED,
   mutationFn: (id: string) => api<void>(`/api/observations/${id}`, 'DELETE'),
   onMutate: async (id: string) => {
     await queryClient.cancelQueries({ queryKey: keys.observations })
     queryClient.setQueryData<Observation[]>(keys.observations, (old = []) => old.filter((o) => o.id !== id))
   },
-  onSettled: () => queryClient.invalidateQueries({ queryKey: keys.observations }),
+  onSettled: () => refreshWhenSynced(keys.observations),
 })
 
 /* Brainstorm sessions autosave the same way, so a session written offline syncs later. */
@@ -128,6 +150,7 @@ export const saveSessionKey = ['session', 'save']
 export const deleteSessionKey = ['session', 'delete']
 
 queryClient.setMutationDefaults(saveSessionKey, {
+  ...QUEUED,
   mutationFn: ({ id, input }: SaveSessionVars) => api<WritingSession>(`/api/sessions/${id}`, 'PUT', input),
   onMutate: async ({ id, input }: SaveSessionVars) => {
     await queryClient.cancelQueries({ queryKey: keys.sessions })
@@ -138,14 +161,15 @@ queryClient.setMutationDefaults(saveSessionKey, {
       return [next, ...old.filter((s) => s.id !== id)]
     })
   },
-  onSettled: () => queryClient.invalidateQueries({ queryKey: keys.sessions }),
+  onSettled: () => refreshWhenSynced(keys.sessions),
 })
 
 queryClient.setMutationDefaults(deleteSessionKey, {
+  ...QUEUED,
   mutationFn: (id: string) => api<void>(`/api/sessions/${id}`, 'DELETE'),
   onMutate: async (id: string) => {
     await queryClient.cancelQueries({ queryKey: keys.sessions })
     queryClient.setQueryData<WritingSession[]>(keys.sessions, (old = []) => old.filter((s) => s.id !== id))
   },
-  onSettled: () => queryClient.invalidateQueries({ queryKey: keys.sessions }),
+  onSettled: () => refreshWhenSynced(keys.sessions),
 })

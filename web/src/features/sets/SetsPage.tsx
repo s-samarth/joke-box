@@ -27,15 +27,20 @@ export function SetsPage() {
 
   const create = () => {
     const id = newId()
-    save.mutate({ id, input: { name: 'Untitled set', show_date: today, target_seconds: 420, venue_name: null, items: [] } }, { onSuccess: () => navigate(`/sets/${id}`) })
+    // Shown at once and saved in the background (offline too), like a new joke.
+    save.mutateAsync({ id, input: { name: 'Untitled set', show_date: today, target_seconds: 420, venue_name: null, items: [] } }).catch((e: Error) => toast(`Set not saved: ${e.message}`))
+    navigate(`/sets/${id}`)
   }
   const onDelete = async (s: Setlist) => {
-    if (await confirm({ title: `Delete ${s.name}?`, message: 'The jokes stay in your library.', confirmLabel: 'Delete set', danger: true })) remove.mutate(s.id, { onSuccess: () => toast('Set deleted') })
+    if (await confirm({ title: `Delete ${s.name}?`, message: 'The jokes stay in your library.', confirmLabel: 'Delete set', danger: true })) {
+      remove.mutateAsync(s.id).catch((e: Error) => toast(`Set not deleted: ${e.message}`))
+      toast('Set deleted')
+    }
   }
 
   return (
     <div className="mx-auto max-w-2xl">
-      <PageHead title="Sets"><Button variant="tape" icon={<Plus size={18} />} onClick={create} disabled={save.isPending}>New set</Button></PageHead>
+      <PageHead title="Sets"><Button variant="tape" icon={<Plus size={18} />} onClick={create}>New set</Button></PageHead>
       {isPending && !sets.length ? (
         <Spinner />
       ) : sorted.length === 0 ? (

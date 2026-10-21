@@ -7,6 +7,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { audioUrl } from './audioCache'
+import { isOnline } from '../../api/network'
 
 let playing: HTMLAudioElement | null = null
 
@@ -43,7 +44,7 @@ export function usePlayer(id: string, knownSeconds: number) {
       await el.play()
     } catch {
       setState('idle')
-      setProblem(navigator.onLine ? "Couldn't play this note." : 'Not on this phone yet. Play it once online and it stays available offline.')
+      setProblem(isOnline() ? "Couldn't play this note." : 'Not on this phone yet. Play it once online and it stays available offline.')
     }
   }
 

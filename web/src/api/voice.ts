@@ -4,9 +4,10 @@
  * Audio isn't JSON, so uploads and downloads use fetch directly instead of the `api` helper.
  * Recording and the offline queue live in features/voice; this file only talks to the API.
  */
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ApiError, api } from './client'
-import { keys } from './queryClient'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { ApiError, api, reach } from './client'
+import { keys, queryClient, refreshWhenSynced } from './queryClient'
+import { QUEUED } from './sync'
 import type { VoiceNote, VoiceNoteInput } from './types'
 
 export const useVoiceNotes = () =>
@@ -15,27 +16,33 @@ export const useVoiceNotes = () =>
 export const saveVoiceDetails = (id: string, input: VoiceNoteInput) =>
   api<VoiceNote>(`/api/voice-notes/${id}`, 'PUT', input)
 
-/** Change the label or hashtags of a note that's already on the server. */
-export function useSaveVoiceDetails() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ id, input }: { id: string; input: VoiceNoteInput }) => saveVoiceDetails(id, input),
-    onMutate: ({ id, input }) =>
-      qc.setQueryData<VoiceNote[]>(keys.voiceNotes, (old = []) => old.map((n) => (n.id === id ? { ...n, ...input } : n))),
-    onSettled: () => qc.invalidateQueries({ queryKey: keys.voiceNotes }),
-  })
-}
-
 export const deleteVoiceNote = (id: string) => api<void>(`/api/voice-notes/${id}`, 'DELETE')
 
-export function useDeleteVoiceNote() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: deleteVoiceNote,
-    onMutate: (id) => qc.setQueryData<VoiceNote[]>(keys.voiceNotes, (old = []) => old.filter((n) => n.id !== id)),
-    onSettled: () => qc.invalidateQueries({ queryKey: keys.voiceNotes }),
-  })
-}
+/* Renaming or deleting a note that's already on the server is queued like a joke's save, so it
+ * works offline too. (A new recording goes through the outbox in features/voice instead.) */
+type SaveDetailsVars = { id: string; input: VoiceNoteInput }
+const saveDetailsKey = ['voice', 'save']
+const deleteKey = ['voice', 'delete']
+
+queryClient.setMutationDefaults(saveDetailsKey, {
+  ...QUEUED,
+  mutationFn: ({ id, input }: SaveDetailsVars) => saveVoiceDetails(id, input),
+  onMutate: ({ id, input }: SaveDetailsVars) =>
+    queryClient.setQueryData<VoiceNote[]>(keys.voiceNotes, (old = []) => old.map((n) => (n.id === id ? { ...n, ...input } : n))),
+  onSettled: () => refreshWhenSynced(keys.voiceNotes),
+})
+
+queryClient.setMutationDefaults(deleteKey, {
+  ...QUEUED,
+  mutationFn: deleteVoiceNote,
+  onMutate: (id: string) => queryClient.setQueryData<VoiceNote[]>(keys.voiceNotes, (old = []) => old.filter((n) => n.id !== id)),
+  onSettled: () => refreshWhenSynced(keys.voiceNotes),
+})
+
+/** Change the label or hashtags of a note that's already on the server. */
+export const useSaveVoiceDetails = () => useMutation<VoiceNote, Error, SaveDetailsVars>({ mutationKey: saveDetailsKey })
+
+export const useDeleteVoiceNote = () => useMutation<void, Error, string>({ mutationKey: deleteKey })
 
 async function failure(response: Response): Promise<ApiError> {
   let message = `Upload failed (${response.status})`
@@ -50,7 +57,7 @@ async function failure(response: Response): Promise<ApiError> {
 
 /** Send the recording itself as the request body. */
 export async function uploadVoiceAudio(id: string, audio: Blob): Promise<VoiceNote> {
-  const response = await fetch(`/api/voice-notes/${id}/audio`, {
+  const response = await reach(`/api/voice-notes/${id}/audio`, {
     method: 'PUT',
     credentials: 'same-origin',
     headers: { 'X-Requested-With': 'jokebox', 'Content-Type': audio.type || 'audio/mp4' },
@@ -61,7 +68,7 @@ export async function uploadVoiceAudio(id: string, audio: Blob): Promise<VoiceNo
 }
 
 export async function downloadVoiceAudio(id: string): Promise<Blob> {
-  const response = await fetch(`/api/voice-notes/${id}/audio`, { credentials: 'same-origin' })
+  const response = await reach(`/api/voice-notes/${id}/audio`, { credentials: 'same-origin' })
   if (!response.ok) throw await failure(response)
   return response.blob()
 }
