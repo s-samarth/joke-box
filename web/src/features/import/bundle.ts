@@ -11,6 +11,8 @@ export interface ImportJoke {
   punchline?: string
   /** A joke topic by name. Missing or null files it under Thoughts. */
   topic?: string | null
+  /** Joke types by name, made if new (e.g. "To review" to flag imported jokes). */
+  types?: string[]
   hashtags?: string[]
   language?: string | null
   created_at: string
