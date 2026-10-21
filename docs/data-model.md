@@ -63,7 +63,7 @@ erDiagram
 | `brainstorm_versions` | `brainstorm_id` (cascade), `title`, `content`, `saved_at` | One row appended per save |
 | `observation_topics` | `name` | Separate from joke topics |
 | `observations` | `text`, `topic_id` (set null) | Deleting the topic keeps the observation |
-| `writing_sessions` | `title`, `content`, `ink` JSON (strokes: colour, size, page, `[x, y, pressure]` points), `ink_pages` (1–20), `timer_seconds`, `bit_ids` JSON, `observation_ids` JSON | A free **Brainstorm** session. Links are id lists; deleted targets just drop out of view |
+| `writing_sessions` | `title`, `content`, `ink` JSON (strokes: colour, size, page, `[x, y, pressure]` points), `ink_pages` (1–20), `timer_seconds`, `bit_ids` JSON, `observation_ids` JSON, `technique_id → craft_notes` (set null) | A free **Brainstorm** session. Links are id lists; deleted targets just drop out of view. Deleting the technique keeps the session |
 | `voice_notes` | `label`, `hashtags` JSON, `duration_seconds`, `content_type`, `size_bytes`, `audio_path` | `audio_path` stays empty until the upload lands. The audio itself lives in Blob storage |
 
 ### Performing

@@ -56,3 +56,15 @@ def test_other_users_cannot_see_or_change(alice: TestClient, bob: TestClient) ->
     assert bob.put(f"/api/craft-notes/{note_id}", json=NOTE).status_code == 404
     bob.delete(f"/api/craft-notes/{note_id}")
     assert len(alice.get("/api/craft-notes").json()) == 1
+
+
+def test_a_brainstorm_session_can_run_a_technique(alice: TestClient, bob: TestClient) -> None:
+    note_id, session_id = str(uuid.uuid4()), str(uuid.uuid4())
+    alice.put(f"/api/craft-notes/{note_id}", json=NOTE | {"kind": "technique"})
+    body = {"title": "Fake session", "technique_id": note_id}
+    assert alice.put(f"/api/sessions/{session_id}", json=body).json()["technique_id"] == note_id
+    # Bob can't run Alice's technique.
+    assert bob.put(f"/api/sessions/{uuid.uuid4()}", json=body).status_code == 404
+    # Deleting the note keeps the session, just unlinked.
+    alice.delete(f"/api/craft-notes/{note_id}")
+    assert alice.get("/api/sessions").json()[0]["technique_id"] is None

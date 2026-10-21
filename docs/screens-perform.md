@@ -22,6 +22,8 @@ Sets, stage, print, shows and the study screens. The frame, capture and writing 
   joke to read it in full (`BitPeek`).
 - **Drag and drop** uses dnd-kit, with pointer, touch and keyboard sensors, so it works on phones.
 - **Saving:** the set autosaves shortly after each change.
+- **Notes on building a set** (the cap icon) opens your Craft notes from Building a set in a sheet:
+  checklists tick through, everything else reads as written.
 
 <img src="screenshots/desktop-set-builder.png" alt="Set builder">
 <p>
@@ -36,7 +38,9 @@ Sets, stage, print, shows and the study screens. The frame, capture and writing 
 A full screen with no frame. It shows the clock against the slot, reset, and play/pause. The
 current joke is bright tape with its punch under it; the others are dimmed tape. Tap the right half
 of the screen for the next joke and the left half for the previous one. The clock turns amber in
-the last minute and red when you're over. The screen wake lock keeps the phone awake.
+the last minute and red when you're over. The screen wake lock keeps the phone awake. The cap icon
+opens **Before you go on**: your On stage notes, like crowd work and hecklers, with checklists to
+tick through.
 
 <img src="screenshots/desktop-stage.png" alt="Stage mode">
 

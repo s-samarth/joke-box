@@ -40,6 +40,11 @@ export function matches(note: CraftNote, query: string): boolean {
   return words.every((w) => text.includes(w))
 }
 
+/** Notes in these areas and kinds, in area order, then each note's own order. */
+export const notesFor = (notes: CraftNote[], areas: CraftArea[], kinds?: CraftKind[]): CraftNote[] =>
+  notes.filter((n) => areas.includes(n.area) && (!kinds || kinds.includes(n.kind)))
+    .sort((a, b) => areas.indexOf(a.area) - areas.indexOf(b.area) || a.position - b.position)
+
 /** A blank note that sorts after everything you already have. */
 export function blankNote(notes: CraftNote[], patch: Partial<CraftNoteInput> = {}): CraftNoteInput {
   const position = notes.reduce((max, n) => Math.max(max, n.position), 0) + 1

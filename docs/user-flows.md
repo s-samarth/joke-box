@@ -55,10 +55,12 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 4. For a deeper pass, scroll to Rewrites and choose **Start a rewrite**. The full-screen **Rewrite** page pins the
    original at the top and runs a timer. Write freely and tap **Save version** to keep a snapshot.
    Earlier versions and earlier sessions sit on the right.
+5. Tap the **Checklists** icon to tick through your review questions as you go.
 
 ## 5. Brainstorm against the clock
 
-1. On **Brainstorm**, tap **New session**.
+1. On **Brainstorm**, tap **New session**, or a technique under **Start with a technique** to
+   write against its prompts (tap **Next prompt** when one runs dry).
 2. Start the timer. Give the session a title, then either type or switch to **Handwrite**. Both are
    kept, and you can switch at any time.
 3. When handwriting, draw with Apple Pencil, a finger or a mouse. Once the page has seen a Pencil,
@@ -87,6 +89,7 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
    dimmed. The screen stays awake.
 3. Tap ▶ to start the clock. Tap the right half of the screen for the next joke and the left half to
    go back. The clock turns amber with a minute to go and red when you're over.
+   Before you start, the cap icon shows **Before you go on**: crowd work, hecklers and delivery notes.
 4. For paper, use the printer icon: **Print** lays out numbered bits, each with its runtime and
    where you should be by then.
 

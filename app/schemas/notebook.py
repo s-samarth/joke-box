@@ -54,6 +54,7 @@ class WritingSessionIn(BaseModel):
     timer_seconds: int = Field(default=0, ge=0)
     bit_ids: list[uuid.UUID] = Field(default_factory=list, max_length=200)
     observation_ids: list[uuid.UUID] = Field(default_factory=list, max_length=200)
+    technique_id: uuid.UUID | None = None
 
     @model_validator(mode="after")
     def pages_cover_ink(self) -> Self:

@@ -51,3 +51,7 @@ class WritingSession(OwnedMixin, Base):
     timer_seconds: Mapped[int] = mapped_column(Integer, default=0)
     bit_ids: Mapped[list[str]] = mapped_column(JSON, default=list)
     observation_ids: Mapped[list[str]] = mapped_column(JSON, default=list)
+    # The craft technique the session runs, if any (Ranting HWSS, joke webs...).
+    technique_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("craft_notes.id", ondelete="SET NULL")
+    )

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { groupByArea, matches, blankNote } from './craftMeta'
+import { blankNote, groupByArea, matches, notesFor } from './craftMeta'
 import { inlineRuns, listItems, parseBody, prompts, toggleTick } from './bodyFormat'
 import type { CraftNote } from '../../api/types'
 
@@ -43,6 +43,12 @@ describe('craft meta', () => {
   it('groups by area in the fixed order', () => {
     const groups = groupByArea([note({ id: 'a', area: 'stage' }), note({ id: 'b', area: 'writing' })])
     expect(groups.map((g) => g.area.key)).toEqual(['writing', 'stage'])
+  })
+
+  it('picks the notes for a screen, in the order of the areas asked for', () => {
+    const all = [note({ id: 'w', area: 'writing', kind: 'checklist', position: 1 }), note({ id: 'r', area: 'rewriting', kind: 'checklist', position: 9 }), note({ id: 't', area: 'rewriting', kind: 'reference' })]
+    expect(notesFor(all, ['rewriting', 'writing'], ['checklist']).map((n) => n.id)).toEqual(['r', 'w'])
+    expect(notesFor(all, ['rewriting']).map((n) => n.id)).toEqual(['t', 'r'])
   })
 
   it('searches every word and sorts new notes last', () => {

@@ -1,10 +1,11 @@
 /**
  * One brainstorm session, full screen: a timer, a title, and either a typing page or blank
  * handwriting pages (switch any time; both are kept), plus linked jokes and observations.
+ * A session can run a craft technique (/brainstorm/<id>?technique=<noteId> starts one with it).
  */
 import { Keyboard, Pause, PenLine, Play, RotateCcw, X } from 'lucide-react'
 import { useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link, useParams, useSearchParams } from 'react-router'
 import { useSessions } from '../../api/sessions'
 import type { Stroke, WritingSession } from '../../api/types'
 import { IconButton } from '../../components/ui/Button'
@@ -17,6 +18,7 @@ import { INK_COLORS, INK_SIZES, pageCount, removePage, replacePage, strokesOn, u
 import { InkCanvas, type InkTool } from './InkCanvas'
 import { InkToolbar } from './InkToolbar'
 import { SessionLinks } from './SessionLinks'
+import { TechniquePanel } from './TechniquePanel'
 import { useSessionAutosave } from './useSessionAutosave'
 
 type Mode = 'type' | 'write'
@@ -39,7 +41,7 @@ function savedPen() {
 const modeButton = (on: boolean) =>
   `inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'text-dim hover:text-paper'}`
 
-function Workspace({ id, start }: { id: string; start?: WritingSession }) {
+function Workspace({ id, start, technique }: { id: string; start?: WritingSession; technique: string | null }) {
   const [title, setTitle] = useState(start?.title ?? '')
   const [content, setContent] = useState(start?.content ?? '')
   const [ink, setInk] = useState<Stroke[]>(start?.ink ?? [])
@@ -48,12 +50,13 @@ function Workspace({ id, start }: { id: string; start?: WritingSession }) {
   const [page, setPage] = useState(0)
   const [bitIds, setBitIds] = useState(start?.bit_ids ?? [])
   const [observationIds, setObservationIds] = useState(start?.observation_ids ?? [])
+  const [techniqueId, setTechniqueId] = useState(start ? start.technique_id : technique)
   const [mode, setMode] = useState<Mode>(() => (start?.ink.length && !start.content ? 'write' : savedMode()))
   const [tool, setTool] = useState<InkTool>('pen')
   const [pen, setPen] = useState(savedPen)
   const timer = useTimer(start?.timer_seconds ?? 0)
   const { confirm } = useFeedback()
-  const autosave = useSessionAutosave(id, { title, content, ink, ink_pages: pages, timer_seconds: timer.seconds, bit_ids: bitIds, observation_ids: observationIds })
+  const autosave = useSessionAutosave(id, { title, content, ink, ink_pages: pages, timer_seconds: timer.seconds, bit_ids: bitIds, observation_ids: observationIds, technique_id: techniqueId ?? null })
   const words = content.trim() ? content.trim().split(/\s+/).length : 0
 
   // Wrap each setter so any edit marks the session for the next autosave.
@@ -112,6 +115,9 @@ function Workspace({ id, start }: { id: string; start?: WritingSession }) {
           <span className="shrink-0 text-sm text-faint tabular" aria-live="polite">{autosave.saving ? 'Saving…' : mode === 'type' ? `${words} words` : ''}</span>
         </div>
         <div className="mt-4">
+          <TechniquePanel techniqueId={techniqueId ?? null} onChange={edit(setTechniqueId)} />
+        </div>
+        <div className="mt-4">
           <SessionLinks bitIds={bitIds} observationIds={observationIds} onChange={(b, o) => { autosave.touch(); setBitIds(b); setObservationIds(o) }} />
         </div>
         <div className="mt-6">
@@ -128,8 +134,9 @@ function Workspace({ id, start }: { id: string; start?: WritingSession }) {
 
 export function SessionPage() {
   const { sessionId = '' } = useParams()
+  const [params] = useSearchParams()
   const { data: sessions, isPending } = useSessions()
   if (isPending && !sessions) return <div className="p-8"><Spinner /></div>
   // key: opening a different session starts a fresh workspace instead of reusing the old state.
-  return <Workspace key={sessionId} id={sessionId} start={sessions?.find((s) => s.id === sessionId)} />
+  return <Workspace key={sessionId} id={sessionId} start={sessions?.find((s) => s.id === sessionId)} technique={params.get('technique')} />
 }

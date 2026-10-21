@@ -1,7 +1,8 @@
-/** All your free brainstorm sessions, newest first, and a button to start a new one. */
-import { Plus, Trash2 } from 'lucide-react'
+/** All your free brainstorm sessions, newest first, and buttons to start one, plain or with a technique. */
+import { GraduationCap, Plus, Trash2 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router'
 import { newId } from '../../api/client'
+import { useCraftNotes } from '../../api/craft'
 import { useDeleteSession, useSessions } from '../../api/sessions'
 import { Button, IconButton } from '../../components/ui/Button'
 import { EmptyState, PageHead, Spinner } from '../../components/ui/bits'
@@ -15,7 +16,9 @@ export function BrainstormPage() {
   const remove = useDeleteSession()
   const navigate = useNavigate()
   const { confirm, toast } = useFeedback()
-  const start = () => navigate(`/brainstorm/${newId()}`)
+  const { data: notes = [] } = useCraftNotes()
+  const techniques = notes.filter((n) => n.kind === 'technique')
+  const start = (technique?: string) => navigate(`/brainstorm/${newId()}${technique ? `?technique=${technique}` : ''}`)
 
   const onDelete = async (id: string) => {
     if (!(await confirm({ title: 'Delete this session?', confirmLabel: 'Delete session', danger: true }))) return
@@ -25,14 +28,26 @@ export function BrainstormPage() {
   return (
     <div className="mx-auto max-w-2xl">
       <PageHead title="Brainstorm">
-        <Button variant="tape" small icon={<Plus size={16} />} onClick={start}>New session</Button>
+        <Button variant="tape" small icon={<Plus size={16} />} onClick={() => start()}>New session</Button>
       </PageHead>
       <p className="-mt-2 mb-6 text-dim">Daily writing, not tied to one joke. Type or handwrite against the timer, and link the jokes and observations it touches.</p>
+      {techniques.length > 0 && (
+        <section className="mb-8" aria-label="Start with a technique">
+          <p className="mb-2 text-sm text-dim">Start with a technique</p>
+          <div className="flex flex-wrap gap-2">
+            {techniques.map((t) => (
+              <button key={t.id} type="button" onClick={() => start(t.id)} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-ink-3 px-3 text-sm hover:bg-ink-4">
+                <GraduationCap size={15} className="text-tape" /> {t.title}
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
 
       {isPending && !sessions ? (
         <div className="py-10"><Spinner /></div>
       ) : !sessions?.length ? (
-        <EmptyState title="No sessions yet" action={<Button variant="tape" onClick={start}>Start writing</Button>}>
+        <EmptyState title="No sessions yet" action={<Button variant="tape" onClick={() => start()}>Start writing</Button>}>
           Start the timer and write whatever comes. Sessions save as you go.
         </EmptyState>
       ) : (

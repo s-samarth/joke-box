@@ -128,6 +128,8 @@ export interface WritingSessionInput {
   timer_seconds: number
   bit_ids: string[]
   observation_ids: string[]
+  /** The craft technique this session runs, if any. */
+  technique_id: string | null
 }
 
 export interface WritingSession extends WritingSessionInput {
