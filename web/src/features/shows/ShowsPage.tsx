@@ -3,7 +3,7 @@
  * timeline, or broken down into strengths and weak spots. One set of filters drives all of it, so
  * the numbers always match the rows.
  */
-import { Download, MoreHorizontal, Plus } from 'lucide-react'
+import { Download, MapPin, MoreHorizontal, Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { useTopics } from '../../api/library'
@@ -25,6 +25,7 @@ import { ShowFilters } from './ShowFilters'
 import { ShowStats } from './ShowStats'
 import { ShowsTable } from './ShowsTable'
 import { ShowsToolbar } from './ShowsToolbar'
+import { VenuesSheet } from './VenuesSheet'
 import { ViewTabs, type View } from './ViewTabs'
 
 export function ShowsPage() {
@@ -38,6 +39,7 @@ export function ShowsPage() {
   const [limit, setLimit] = useState(PAGE_SIZE)
   const [editing, setEditing] = useState<PerformanceLog | 'new' | null>(params.get('log') ? 'new' : null)
   const [viewing, setViewing] = useState<PerformanceLog | null>(null)
+  const [venuesOpen, setVenuesOpen] = useState(false)
   const view: View = params.get('view') === 'timeline' || params.get('view') === 'insights' ? (params.get('view') as View) : 'list'
 
   const filtered = useMemo(() => applyFilters(logs, filters, today), [logs, filters, today])
@@ -63,7 +65,7 @@ export function ShowsPage() {
   return (
     <div className="mx-auto max-w-5xl">
       <PageHead title="Shows">
-        <Dropdown items={[{ label: 'Export as CSV', icon: <Download size={16} />, onSelect: exportCsv, disabled: !rows.length }]} trigger={<IconButton label="More"><MoreHorizontal size={20} /></IconButton>} />
+        <Dropdown items={[{ label: 'Venues', icon: <MapPin size={16} />, onSelect: () => setVenuesOpen(true) }, { label: 'Export as CSV', icon: <Download size={16} />, onSelect: exportCsv, disabled: !rows.length }]} trigger={<IconButton label="More"><MoreHorizontal size={20} /></IconButton>} />
         <Button variant="tape" icon={<Plus size={18} />} onClick={() => setEditing('new')}>Log a show</Button>
       </PageHead>
 
@@ -88,6 +90,7 @@ export function ShowsPage() {
         )}
       </section>}
 
+      {venuesOpen && <VenuesSheet onClose={() => setVenuesOpen(false)} />}
       <ShowFilters open={moreOpen} onClose={() => setMoreOpen(false)} value={filters} onChange={changeFilters} />
       {editing && <LogShowSheet log={editing === 'new' ? undefined : editing} onClose={closeEditor} />}
       {viewing && <ShowDetail log={viewing} topics={topicNames(viewing.topic_ids)} onClose={() => setViewing(null)} onEdit={() => { setEditing(viewing); setViewing(null) }} />}

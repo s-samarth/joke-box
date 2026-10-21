@@ -21,6 +21,7 @@ from app.routers import (
     studio,
     system,
     topics,
+    venues,
     voice,
     watchlist,
 )
@@ -64,6 +65,7 @@ def create_app() -> FastAPI:
         bits,
         studio,
         shows,
+        venues,
         observations,
         sessions,
         voice,

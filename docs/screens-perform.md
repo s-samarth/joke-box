@@ -104,6 +104,9 @@ each with its premise in marker, the punch, its runtime and "by m:ss" (the runni
   [LaughTally.tsx](../web/src/features/shows/LaughTally.tsx)). **What did you learn?** saves a craft
   note linked to the show, in the first area that shows on Stage.
 - **A show's detail** shows its LPM, what you learned there, and **Add a lesson**.
+- ⋯ → **Venues** ([VenuesSheet.tsx](../web/src/features/shows/VenuesSheet.tsx)): every venue with how
+  many shows and sets use it. Delete an unused one straight away; for one in use, pick the venue its
+  shows and sets move to first, which is also how to merge duplicates.
 - ⋯ → **Export as CSV**.
 
 <img src="screenshots/desktop-shows.png" alt="Shows">

@@ -7,10 +7,11 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class VenueOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
     id: uuid.UUID
     name: str
+    # How many shows and sets use the venue, so the app can say what deleting it would move.
+    shows: int = 0
+    sets: int = 0
 
 
 class SetlistItemIn(BaseModel):
