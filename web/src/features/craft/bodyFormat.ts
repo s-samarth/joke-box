@@ -60,10 +60,26 @@ export function toggleTick(body: string, line: number): string {
   return lines.join('\n')
 }
 
-/** Text split into plain and **bold** runs. */
-export function inlineRuns(text: string): { text: string; bold: boolean }[] {
-  return text.split(/(\*\*[^*]+\*\*)/).filter(Boolean).map((part) =>
-    part.startsWith('**') && part.endsWith('**') && part.length > 4 ? { text: part.slice(2, -2), bold: true } : { text: part, bold: false })
+export interface Run {
+  text: string
+  bold: boolean
+  /** Set when the run is a web address, so it can be shown as a link. */
+  href?: string
+}
+
+const URL = /(https?:\/\/[^\s<>"]+[^\s<>".,;:!?)])/
+
+/** Text split into plain, **bold** and web-address runs. */
+export function inlineRuns(text: string): Run[] {
+  const runs: Run[] = []
+  for (const part of text.split(/(\*\*[^*]+\*\*)/).filter(Boolean)) {
+    const bold = part.startsWith('**') && part.endsWith('**') && part.length > 4
+    const inner = bold ? part.slice(2, -2) : part
+    for (const piece of inner.split(URL).filter(Boolean)) {
+      runs.push(URL.test(piece) && /^https?:\/\//.test(piece) ? { text: piece, bold, href: piece } : { text: piece, bold })
+    }
+  }
+  return runs
 }
 
 /** Every top-level list item in the note, for ticking through a checklist. */
