@@ -1,4 +1,4 @@
-"""Venues, setlists and performance logs."""
+"""Setlists and performance logs (venues have their own router; `venue_named` lives here)."""
 
 import uuid
 
@@ -8,8 +8,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.auth.deps import CurrentUser, DbSession, find_owned, get_owned
 from app.models import Bit, PerformanceLog, Setlist, SetlistItem, Topic, User, Venue
-from app.schemas.library import NameIn
-from app.schemas.shows import LogIn, LogOut, SetlistIn, SetlistItemOut, SetlistOut, VenueOut
+from app.schemas.shows import LogIn, LogOut, SetlistIn, SetlistItemOut, SetlistOut
 
 router = APIRouter(prefix="/api", tags=["shows"])
 
@@ -31,18 +30,6 @@ def check_all_owned(db: Session, model: type[Bit] | type[Topic], ids: set[uuid.U
     found = db.scalar(select(func.count()).where(model.id.in_(ids), model.user_id == user.id))
     if found != len(ids):
         raise HTTPException(422, f"Unknown {model.__name__.lower()} in request")
-
-
-@router.get("/venues", response_model=list[VenueOut])
-def list_venues(user: CurrentUser, db: DbSession) -> list[Venue]:
-    return list(db.scalars(select(Venue).where(Venue.user_id == user.id).order_by(Venue.name)))
-
-
-@router.post("/venues", response_model=VenueOut, status_code=201)
-def create_venue(body: NameIn, user: CurrentUser, db: DbSession) -> Venue:
-    venue = venue_named(db, user, body.name)
-    db.commit()
-    return venue
 
 
 def setlist_out(s: Setlist) -> SetlistOut:

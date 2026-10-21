@@ -28,6 +28,12 @@ export interface Named {
   name: string
 }
 
+/** A venue, with how many shows and sets use it. */
+export interface Venue extends Named {
+  shows: number
+  sets: number
+}
+
 /** What the editor sends. Types and status are names; the server creates new ones. */
 export interface BitInput {
   setup: string

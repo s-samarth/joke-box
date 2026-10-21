@@ -120,8 +120,9 @@ On a deployment without a Blob store, these answer **503**.
 
 | Method | Path | Body / notes |
 |---|---|---|
-| GET | `/api/venues` | |
+| GET | `/api/venues` | Each with `shows` and `sets`: how many use it |
 | POST | `/api/venues` | `{name}`. Returns the existing venue if the name is already used |
+| DELETE | `/api/venues/{id}?move_to=` | 409 if shows or sets use it and `move_to` is missing; with `move_to` (another of your venues), they move there first, then the venue is deleted |
 | GET | `/api/setlists` | Most recently edited first, with `items` and `venue_name` |
 | PUT | `/api/setlists/{id}` | `{name, show_date?, target_seconds, venue_name?, items: [{bit_id, duration_seconds}]}`. The items are replaced as a whole, in the order sent |
 | DELETE | `/api/setlists/{id}` | |

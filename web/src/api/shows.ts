@@ -2,7 +2,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
 import { keys } from './queryClient'
-import type { Brainstorm, Named, PerformanceLog, Setlist } from './types'
+import type { Brainstorm, Named, PerformanceLog, Setlist, Venue } from './types'
 
 export const useBrainstorms = () =>
   useQuery({ queryKey: keys.brainstorms, queryFn: () => api<Brainstorm[]>('/api/brainstorms') })
@@ -11,7 +11,20 @@ export const useSetlists = () =>
   useQuery({ queryKey: keys.setlists, queryFn: () => api<Setlist[]>('/api/setlists') })
 
 export const useVenues = () =>
-  useQuery({ queryKey: keys.venues, queryFn: () => api<Named[]>('/api/venues') })
+  useQuery({ queryKey: keys.venues, queryFn: () => api<Venue[]>('/api/venues') })
+
+/**
+ * Delete a venue, first moving its shows and sets to `moveTo` if it has any. Online only, like
+ * deleting a Craft area: the server does the move, then every list that shows venues refreshes.
+ */
+export function useDeleteVenue() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, moveTo }: { id: string; moveTo?: string }) =>
+      api<void>(`/api/venues/${id}${moveTo ? `?move_to=${moveTo}` : ''}`, 'DELETE'),
+    onSettled: () => Promise.all([keys.venues, keys.logs, keys.setlists].map((queryKey) => qc.invalidateQueries({ queryKey }))),
+  })
+}
 
 export const useLogs = () =>
   useQuery({ queryKey: keys.logs, queryFn: () => api<PerformanceLog[]>('/api/logs') })
