@@ -2,7 +2,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
 import { keys } from './queryClient'
-import type { Brainstorm, Named, PerformanceLog, Setlist, Venue } from './types'
+import {
+  type SaveBrainstormVars, type SaveLogVars, type SaveSetlistVars, deleteBrainstormKey, deleteBrainstormVersionKey,
+  deleteLogKey, deleteSetlistKey, saveBrainstormKey, saveLogKey, saveSetlistKey,
+} from './showSaves'
+import type { Brainstorm, PerformanceLog, Setlist, Venue } from './types'
 
 export const useBrainstorms = () =>
   useQuery({ queryKey: keys.brainstorms, queryFn: () => api<Brainstorm[]>('/api/brainstorms') })
@@ -36,22 +40,11 @@ export interface BrainstormInput {
   timer_seconds: number
 }
 
+/** Saves and deletes below are queued (see showSaves.ts): offline they wait and sync later. */
 export function useBrainstormActions() {
-  const qc = useQueryClient()
-  const onSuccess = () => qc.invalidateQueries({ queryKey: keys.brainstorms })
-  const save = useMutation({
-    mutationFn: ({ id, input }: { id: string; input: BrainstormInput }) =>
-      api<Brainstorm>(`/api/brainstorms/${id}`, 'PUT', input),
-    onSuccess,
-  })
-  const remove = useMutation({
-    mutationFn: (id: string) => api<void>(`/api/brainstorms/${id}`, 'DELETE'),
-    onSuccess,
-  })
-  const removeVersion = useMutation({
-    mutationFn: (id: string) => api<void>(`/api/brainstorm-versions/${id}`, 'DELETE'),
-    onSuccess,
-  })
+  const save = useMutation<Brainstorm, Error, SaveBrainstormVars>({ mutationKey: saveBrainstormKey })
+  const remove = useMutation<void, Error, string>({ mutationKey: deleteBrainstormKey })
+  const removeVersion = useMutation<void, Error, string>({ mutationKey: deleteBrainstormVersionKey })
   return { save, remove, removeVersion }
 }
 
@@ -64,20 +57,8 @@ export interface SetlistInput {
 }
 
 export function useSetlistActions() {
-  const qc = useQueryClient()
-  const onSuccess = () => {
-    void qc.invalidateQueries({ queryKey: keys.setlists })
-    void qc.invalidateQueries({ queryKey: keys.venues })
-  }
-  const save = useMutation({
-    mutationFn: ({ id, input }: { id: string; input: SetlistInput }) =>
-      api<Setlist>(`/api/setlists/${id}`, 'PUT', input),
-    onSuccess,
-  })
-  const remove = useMutation({
-    mutationFn: (id: string) => api<void>(`/api/setlists/${id}`, 'DELETE'),
-    onSuccess,
-  })
+  const save = useMutation<Setlist, Error, SaveSetlistVars>({ mutationKey: saveSetlistKey })
+  const remove = useMutation<void, Error, string>({ mutationKey: deleteSetlistKey })
   return { save, remove }
 }
 
@@ -93,23 +74,7 @@ export interface LogInput {
 }
 
 export function useLogActions() {
-  const qc = useQueryClient()
-  const onSuccess = () => {
-    void qc.invalidateQueries({ queryKey: keys.logs })
-    void qc.invalidateQueries({ queryKey: keys.venues })
-  }
-  const save = useMutation({
-    mutationFn: ({ id, input }: { id: string; input: LogInput }) =>
-      api<PerformanceLog>(`/api/logs/${id}`, 'PUT', input),
-    onSuccess,
-  })
-  const remove = useMutation({
-    mutationFn: (id: string) => api<void>(`/api/logs/${id}`, 'DELETE'),
-    onSuccess,
-  })
-  const addVenue = useMutation({
-    mutationFn: (name: string) => api<Named>('/api/venues', 'POST', { name }),
-    onSuccess,
-  })
-  return { save, remove, addVenue }
+  const save = useMutation<PerformanceLog, Error, SaveLogVars>({ mutationKey: saveLogKey })
+  const remove = useMutation<void, Error, string>({ mutationKey: deleteLogKey })
+  return { save, remove }
 }

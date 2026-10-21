@@ -4,7 +4,8 @@
  */
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { api } from './client'
-import { keys, queryClient } from './queryClient'
+import { keys, queryClient, refreshWhenSynced } from './queryClient'
+import { QUEUED } from './sync'
 import type { CraftArea, CraftAreaInput, CraftNote, CraftNoteInput, NoteKind, NoteKindInput } from './types'
 
 export type SaveCraftVars = { id: string; input: CraftNoteInput }
@@ -15,6 +16,7 @@ const deleteKey = ['craft', 'delete']
 const byPosition = (a: CraftNote, b: CraftNote) => a.position - b.position || a.created_at.localeCompare(b.created_at)
 
 queryClient.setMutationDefaults(saveKey, {
+  ...QUEUED,
   mutationFn: ({ id, input }: SaveCraftVars) => api<CraftNote>(`/api/craft-notes/${id}`, 'PUT', input),
   onMutate: async ({ id, input }: SaveCraftVars) => {
     await queryClient.cancelQueries({ queryKey: keys.craftNotes })
@@ -28,16 +30,17 @@ queryClient.setMutationDefaults(saveKey, {
       return (existing ? old.map((n) => (n.id === id ? next : n)) : [...old, next]).sort(byPosition)
     })
   },
-  onSettled: () => queryClient.invalidateQueries({ queryKey: keys.craftNotes }),
+  onSettled: () => refreshWhenSynced(keys.craftNotes),
 })
 
 queryClient.setMutationDefaults(deleteKey, {
+  ...QUEUED,
   mutationFn: (id: string) => api<void>(`/api/craft-notes/${id}`, 'DELETE'),
   onMutate: async (id: string) => {
     await queryClient.cancelQueries({ queryKey: keys.craftNotes })
     queryClient.setQueryData<CraftNote[]>(keys.craftNotes, (old = []) => old.filter((n) => n.id !== id))
   },
-  onSettled: () => queryClient.invalidateQueries({ queryKey: keys.craftNotes }),
+  onSettled: () => refreshWhenSynced(keys.craftNotes),
 })
 
 export const useCraftNotes = () => useQuery({ queryKey: keys.craftNotes, queryFn: () => api<CraftNote[]>('/api/craft-notes') })

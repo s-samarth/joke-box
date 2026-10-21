@@ -21,8 +21,9 @@ visit, so the app opens fast on a phone.
   Brainstorm), **Perform** (Sets) and **Study** (Watchlist, Analysis, External links). While
   you're on one of those screens, the More tab shows as the current one.
 - One list in `nav.ts` feeds both the rail and the bar, so they can't drift apart.
-- **Sync light:** "All changes saved", "Saving…", or "Offline, N waiting to sync". It reads
-  TanStack Query's count of in-flight saves and whether the browser is online.
+- **Sync light:** "All changes saved", "Saving…", or "Offline, N waiting to sync". It counts
+  queued saves plus recordings still to upload, and reads whether the server can be reached
+  (not just whether the phone has signal).
 - **Update banner:** "A new version of JokeBox is ready", with **Update now** and **Later**.
 - **Avatar menu:** Sign out, plus **Reset to demo data** when running locally.
 

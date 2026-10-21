@@ -14,6 +14,7 @@ import { Button } from '../../components/ui/Button'
 import { Spinner } from '../../components/ui/bits'
 import { Field, Input, Textarea } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
+import { isOnline } from '../../api/network'
 
 function Form({ id, initial, isNew }: { id: string; initial: AnalysisInput; isNew: boolean }) {
   const [form, setForm] = useState(initial)
@@ -31,7 +32,7 @@ function Form({ id, initial, isNew }: { id: string; initial: AnalysisInput; isNe
   const submit = () => {
     if (!ready) return
     save.mutate({ id, input: { ...form, title: form.title.trim(), url: link } }, { onError: (e) => toast(`Not saved: ${e.message}`) })
-    toast(navigator.onLine ? 'Analysis saved' : 'Saved offline, will sync')
+    toast(isOnline() ? 'Analysis saved' : 'Saved offline, will sync')
     navigate('/analysis')
   }
   const remove = async () => {

@@ -6,6 +6,7 @@
 import { Star } from 'lucide-react'
 import { useState } from 'react'
 import { newId } from '../../api/client'
+import { isOnline } from '../../api/network'
 import { useCraftAreas, useCraftKinds, useCraftNotes, useSaveCraftNote } from '../../api/craft'
 import { useBits, useTopics } from '../../api/library'
 import { useLogActions, useLogs, useSetlists, useVenues } from '../../api/shows'
@@ -48,6 +49,8 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
   const [lesson, setLesson] = useState('')
   const [setIds, setSetIds] = useState<string[]>([])
   const [error, setError] = useState('')
+  // One id for this sheet, made once: tapping Log show twice saves the same show twice, not two shows.
+  const [id] = useState(() => log?.id ?? newId())
   const recent = [...new Set([...logs.map((l) => l.venue_name), ...venues.map((v) => v.name)])].filter((v) => v !== UNKNOWN).slice(0, 6)
 
   // Ticking a set on or off swaps its topics in or out (topics you tapped yourself stay). Time on
@@ -64,20 +67,21 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
     const seconds = parse(duration)
     if (!rating) return setError('Give it a rating from one to five stars.')
     if (seconds === null) return setError('Time on stage should look like 6:30.')
-    const id = log?.id ?? newId()
     const venueName = venue.trim() || UNKNOWN
     const performedAt = fromIstInput(when)
-    // The lesson points at the show, so it's saved once the show exists.
-    const keepLesson = () => lesson.trim() && saveLesson.mutate({ id: newId(), input: lessonFrom(lesson, craft, { area_id: areaFor(areas, 'stage'), kind_id: kindFor(kinds) }, { performance_log_id: id, source: `Show at ${venueName}, ${formatDate(performedAt)}` }) })
-    save.mutate(
+    // Both saves are queued and close the sheet at once, signal or not. The queue sends them in
+    // order, so the show reaches the server before the lesson that points at it.
+    save.mutateAsync(
       { id, input: { venue_name: venueName, performed_at: performedAt, duration_seconds: seconds, audience_size: Number(crowd) || 0, rating, topic_ids: topicIds, notes: notes.trim(), laughs: counted(laughs) ? laughs : null } },
-      { onSuccess: () => { keepLesson(); toast(log ? 'Show updated' : 'Show logged'); onClose() }, onError: (e) => setError(e.message) },
-    )
+    ).catch((e: Error) => toast(`Show not saved: ${e.message}`))
+    if (lesson.trim()) saveLesson.mutate({ id: newId(), input: lessonFrom(lesson, craft, { area_id: areaFor(areas, 'stage'), kind_id: kindFor(kinds) }, { performance_log_id: id, source: `Show at ${venueName}, ${formatDate(performedAt)}` }) })
+    toast(!isOnline() ? 'Saved offline, will sync' : log ? 'Show updated' : 'Show logged')
+    onClose()
   }
 
   return (
     <Modal open wide onOpenChange={(o) => !o && onClose()} title={log ? 'Edit show' : 'Log a show'}
-      footer={<><Button variant="quiet" onClick={onClose}>Cancel</Button><Button variant="tape" onClick={submit} disabled={save.isPending}>{log ? 'Save changes' : 'Log show'}</Button></>}>
+      footer={<><Button variant="quiet" onClick={onClose}>Cancel</Button><Button variant="tape" onClick={submit} disabled={save.isPending && !save.isPaused}>{log ? 'Save changes' : 'Log show'}</Button></>}>
       <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); submit() }}>
         <div className="space-y-2">
           <Field label="Where"><Input list="jb-venue-list" placeholder="Venue name" value={venue} onChange={(e) => setVenue(e.target.value)} /></Field>

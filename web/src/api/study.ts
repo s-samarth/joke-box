@@ -5,7 +5,8 @@
  */
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { api } from './client'
-import { keys, queryClient } from './queryClient'
+import { keys, queryClient, refreshWhenSynced } from './queryClient'
+import { QUEUED } from './sync'
 import type { Analysis, AnalysisInput, WatchItem, WatchItemInput } from './types'
 
 export type SaveWatchVars = { id: string; input: WatchItemInput }
@@ -19,6 +20,7 @@ const deleteAnalysisKey = ['analysis', 'delete']
 const byPosition = (a: WatchItem, b: WatchItem) => a.position - b.position || a.created_at.localeCompare(b.created_at)
 
 queryClient.setMutationDefaults(saveWatchKey, {
+  ...QUEUED,
   mutationFn: ({ id, input }: SaveWatchVars) => api<WatchItem>(`/api/watchlist/${id}`, 'PUT', input),
   onMutate: async ({ id, input }: SaveWatchVars) => {
     // Optimistic: the tick shows at once, before the server answers.
@@ -30,22 +32,21 @@ queryClient.setMutationDefaults(saveWatchKey, {
       return (existing ? old.map((i) => (i.id === id ? next : i)) : [...old, next]).sort(byPosition)
     })
   },
-  onSettled: () => queryClient.invalidateQueries({ queryKey: keys.watchlist }),
+  onSettled: () => refreshWhenSynced(keys.watchlist),
 })
 
 queryClient.setMutationDefaults(deleteWatchKey, {
+  ...QUEUED,
   mutationFn: (id: string) => api<void>(`/api/watchlist/${id}`, 'DELETE'),
   onMutate: async (id: string) => {
     await queryClient.cancelQueries({ queryKey: keys.watchlist })
     queryClient.setQueryData<WatchItem[]>(keys.watchlist, (old = []) => old.filter((i) => i.id !== id))
   },
-  onSettled: () => {
-    void queryClient.invalidateQueries({ queryKey: keys.watchlist })
-    void queryClient.invalidateQueries({ queryKey: keys.analyses }) // its analyses lose their link
-  },
+  onSettled: () => refreshWhenSynced(keys.watchlist, keys.analyses), // its analyses lose their link
 })
 
 queryClient.setMutationDefaults(saveAnalysisKey, {
+  ...QUEUED,
   mutationFn: ({ id, input }: SaveAnalysisVars) => api<Analysis>(`/api/analyses/${id}`, 'PUT', input),
   onMutate: async ({ id, input }: SaveAnalysisVars) => {
     await queryClient.cancelQueries({ queryKey: keys.analyses })
@@ -56,16 +57,17 @@ queryClient.setMutationDefaults(saveAnalysisKey, {
       return [next, ...old.filter((a) => a.id !== id)]
     })
   },
-  onSettled: () => queryClient.invalidateQueries({ queryKey: keys.analyses }),
+  onSettled: () => refreshWhenSynced(keys.analyses),
 })
 
 queryClient.setMutationDefaults(deleteAnalysisKey, {
+  ...QUEUED,
   mutationFn: (id: string) => api<void>(`/api/analyses/${id}`, 'DELETE'),
   onMutate: async (id: string) => {
     await queryClient.cancelQueries({ queryKey: keys.analyses })
     queryClient.setQueryData<Analysis[]>(keys.analyses, (old = []) => old.filter((a) => a.id !== id))
   },
-  onSettled: () => queryClient.invalidateQueries({ queryKey: keys.analyses }),
+  onSettled: () => refreshWhenSynced(keys.analyses),
 })
 
 export const useWatchlist = () => useQuery({ queryKey: keys.watchlist, queryFn: () => api<WatchItem[]>('/api/watchlist') })

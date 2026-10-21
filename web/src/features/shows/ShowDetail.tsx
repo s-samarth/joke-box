@@ -20,7 +20,8 @@ export function ShowDetail({ log, topics, onClose, onEdit }: { log: PerformanceL
   const score = lpm(log.laughs, log.duration_seconds)
   const onDelete = async () => {
     if (!(await confirm({ title: 'Delete this show?', message: `${log.venue_name}, ${formatDateTime(log.performed_at)}`, confirmLabel: 'Delete show', danger: true }))) return
-    remove.mutate(log.id, { onSuccess: () => toast('Show deleted') })
+    remove.mutateAsync(log.id).catch((e: Error) => toast(`Show not deleted: ${e.message}`))
+    toast('Show deleted')
     onClose()
   }
   const rows: [string, React.ReactNode][] = [

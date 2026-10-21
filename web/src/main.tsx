@@ -2,10 +2,13 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
-import { persister, persistMaxAge, queryClient } from './api/queryClient'
-// Registers the watchlist, analysis and craft note save defaults before offline saves are replayed.
+import { persister, persistMaxAge, queryClient, resumeQueued } from './api/queryClient'
+// Registers the remaining queued saves (shows, sets, study, craft, voice) before they're replayed.
+import './api/showSaves'
 import './api/study'
 import './api/craft'
+import './api/voice'
+import { QUEUED } from './api/sync'
 import { App } from './App'
 import { FeedbackProvider } from './components/ui/feedback'
 import './app.css'
@@ -14,9 +17,14 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <PersistQueryClientProvider
       client={queryClient}
-      persistOptions={{ persister, maxAge: persistMaxAge, buster: 'v1' }}
-      // After the saved cache loads, replay any saves that were made offline.
-      onSuccess={() => queryClient.resumePausedMutations().then(() => queryClient.invalidateQueries())}
+      persistOptions={{
+        persister, maxAge: persistMaxAge, buster: 'v1',
+        // Keep every queued save that hasn't finished, not only the paused ones: a save on its way
+        // when the app is closed may never have arrived, so it's sent again next time.
+        dehydrateOptions: { shouldDehydrateMutation: (m) => m.state.status === 'pending' && m.options.scope?.id === QUEUED.scope.id },
+      }}
+      // After the saved cache loads, replay the saves waiting on the phone, then refresh.
+      onSuccess={() => resumeQueued().then(() => queryClient.invalidateQueries())}
     >
       <BrowserRouter>
         <FeedbackProvider>

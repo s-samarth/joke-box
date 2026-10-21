@@ -9,6 +9,7 @@
  * Pattern: a tiny "external store". The state lives in this module, not in React; components
  * read it with useSyncExternalStore, which re-renders them whenever `emit` swaps in new state.
  */
+import { onlineManager } from '@tanstack/react-query'
 import { createStore, del, get, set, values } from 'idb-keyval'
 import { useSyncExternalStore } from 'react'
 import { ApiError } from '../../api/client'
@@ -125,7 +126,7 @@ let running = false
 
 /** Upload everything waiting, oldest first. Safe to call often: it runs one pass at a time. */
 export async function flush(): Promise<void> {
-  if (running || !navigator.onLine) return
+  if (running || !onlineManager.isOnline()) return
   running = true
   try {
     for (const note of [...state.items].reverse()) {
@@ -155,6 +156,9 @@ export async function flush(): Promise<void> {
   }
 }
 
-// Load what's waiting when the app starts, and retry whenever the connection comes back.
+// Load what's waiting when the app starts, and retry whenever the connection comes back. That's
+// TanStack's online flag, not the phone's: it also notices a dead signal coming back to life.
 void reload().then(flush)
-if (typeof window !== 'undefined') window.addEventListener('online', () => void flush())
+onlineManager.subscribe((online) => {
+  if (online) void flush()
+})

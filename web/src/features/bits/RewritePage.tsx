@@ -18,6 +18,7 @@ import { clock } from '../../lib/duration'
 import { CraftSheet } from '../craft/CraftSheet'
 import { RewriteHistory } from './RewriteHistory'
 import { useTimer } from './useTimer'
+import { isOnline } from '../../api/network'
 
 function Workspace({ bit, sessions, startId }: { bit: Bit; sessions: Brainstorm[]; startId: string | null }) {
   const start = sessions.find((s) => s.id === startId)
@@ -39,11 +40,11 @@ function Workspace({ bit, sessions, startId }: { bit: Bit; sessions: Brainstorm[
     timer.load(b?.timer_seconds ?? 0)
     setHistoryOpen(false)
   }
-  const save = () =>
-    actions.save.mutate(
-      { id, input: { bit_id: bit.id, title, content, timer_seconds: timer.seconds } },
-      { onSuccess: (b) => toast(`Version ${b.versions.length} saved`), onError: (e) => toast(`Not saved: ${e.message}`) },
-    )
+  const save = () => {
+    actions.save.mutateAsync({ id, input: { bit_id: bit.id, title, content, timer_seconds: timer.seconds } })
+      .then((b) => toast(`Version ${b.versions.length} saved`), (e: Error) => toast(`Not saved: ${e.message}`))
+    if (!isOnline()) toast('Saved offline, will sync')
+  }
   const deleteSession = async (b: Brainstorm) => {
     if (!(await confirm({ title: 'Delete this session?', message: 'All of its versions go too.', confirmLabel: 'Delete session', danger: true }))) return
     actions.remove.mutate(b.id)
@@ -68,7 +69,7 @@ function Workspace({ bit, sessions, startId }: { bit: Bit; sessions: Brainstorm[
           <IconButton label="Checklists" onClick={() => setChecking(true)}><ListChecks size={18} /></IconButton>
           <IconButton label="New session" onClick={() => open()}><Plus size={18} /></IconButton>
           <IconButton label="History" onClick={() => setHistoryOpen(true)} className="lg:hidden"><History size={18} /></IconButton>
-          <Button variant="tape" onClick={save} disabled={actions.save.isPending}>Save<span className="hidden sm:inline">&nbsp;version</span></Button>
+          <Button variant="tape" onClick={save} disabled={actions.save.isPending && !actions.save.isPaused}>Save<span className="hidden sm:inline">&nbsp;version</span></Button>
         </div>
       </header>
       <div className="mx-auto flex max-w-6xl gap-10 px-5 sm:px-8">

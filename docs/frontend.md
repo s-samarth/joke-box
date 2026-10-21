@@ -15,18 +15,44 @@ New rows get their UUID in the browser (`crypto.randomUUID()`) and are saved wit
 therefore never makes a duplicate. That's what makes the offline queue safe.
 
 ## Optimistic updates and the offline queue
-Saving and deleting jokes, observations, brainstorm sessions, watchlist routines, analyses and craft notes are
-registered as **mutation defaults** under fixed keys (`setMutationDefaults`).
+Saving and deleting jokes, observations, brainstorm sessions, shows, sets, rewrites, voice note
+details, watchlist routines, analyses and craft notes are registered as **mutation defaults**
+under fixed keys (`setMutationDefaults`), each spreading the shared `QUEUED` options from
+[sync.ts](../web/src/api/sync.ts).
 
 - **Saving updates the screen at once:** `onMutate` writes the change into the cached list before
-  the server answers.
-- **Offline, the save pauses:** TanStack Query marks it paused, and the persister writes it to
-  IndexedDB with the rest of the cache.
-- **On restart, saved changes replay:** `PersistQueryClientProvider.onSuccess` runs
-  `resumePausedMutations()`. Because the mutation function is registered by key rather than held in
-  a closure, a save made before a reload can still run.
-- **Afterwards, the data refreshes:** `onSettled` invalidates the related keys, so the server's
-  version wins.
+  the server answers. Sheets close straight away, signal or not; a save the server later refuses
+  shows a "Not saved" toast (screens use `mutateAsync().catch`, which still fires after the
+  sheet has closed).
+- **Offline, the save pauses:** `networkMode: 'online'` makes TanStack Query hold it, and the
+  persister writes it to IndexedDB with the rest of the cache (`throttleTime` 300 ms).
+- **One at a time, in order:** every queued save shares `scope: { id: 'sync' }`, so they reach the
+  server in the order you made them. A show arrives before the lesson that points at it, and two
+  quick edits to one joke can't land the wrong way round.
+- **Retries:** a save that never reached the server is retried until it does (pausing while
+  offline); a 5xx, 408 or 429 gets three more tries; any other refusal stops.
+- **On restart, saved changes replay:** the persister keeps every queued save that hasn't
+  finished, including one that was mid-request when the app closed. `resumeQueued()` restarts them
+  all. Because the mutation function is registered by key rather than held in a closure, a save
+  made before a reload can still run, and since saves are idempotent `PUT`s and deletes, sending
+  one twice is harmless.
+- **Afterwards, the data refreshes, once:** `onSettled` calls `refreshWhenSynced(...)`, which
+  collects the keys and invalidates them only when the last queued save settles. Refetching
+  earlier would show the server's older copy and make a waiting change seem to vanish. On
+  reconnect TanStack also resumes saves before it refetches queries.
+
+Anything not queued (renaming a topic, deleting a venue, the dossier import) uses the default
+`networkMode: 'always'` with no retries: offline it fails at once with "You're offline" instead
+of spinning.
+
+### Knowing when we're offline
+[network.ts](../web/src/api/network.ts) drives TanStack's `onlineManager`. It starts from
+`navigator.onLine`, so flight mode counts as offline from the first moment. The phone's flag
+isn't enough on its own, though: one bar in a basement, or wifi with no internet, says online
+while every request fails. So `api()` gives each request 20 seconds, and a request that never
+reaches the server (`TypeError` or a timeout) calls `lostConnection()`: we count as offline and
+ask `/health` every 10 seconds, on the `online` event and when the app comes back to the front,
+until it answers. The sync light and the voice outbox follow the same flag.
 
 The cache (with `gcTime` and `maxAge` of a week) is what lets the app open offline.
 `RequireAuth` uses the cached profile when the network is down.
