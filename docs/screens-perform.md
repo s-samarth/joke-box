@@ -113,6 +113,7 @@ will skip, then **Import** uploads them one by one with a progress bar and lists
 - Every item has a fixed id, so importing the same folder twice adds nothing. Jokes and observations
   whose words are already in JokeBox are skipped too.
 - Original dates are kept. A joke with no topic goes to Thoughts; topics named in the folder are
-  matched by name (any case) or created.
+  matched by name (any case) or created. Jokes can carry types (the WhatsApp import uses
+  "To review" to flag everything that still needs a look).
 - The folder is made on a laptop from an export (the WhatsApp self-chat, for one). It holds real
   material, so it stays in `~/Downloads` and `.gitignore` covers WhatsApp exports.
