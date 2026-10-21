@@ -14,7 +14,7 @@ import { Button } from '../../components/ui/Button'
 import { Spinner } from '../../components/ui/bits'
 import { Field, Input, Textarea } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
-import { isOnline } from '../../api/network'
+import { announceSave } from '../../lib/announce'
 
 function Form({ id, initial, isNew }: { id: string; initial: AnalysisInput; isNew: boolean }) {
   const [form, setForm] = useState(initial)
@@ -31,8 +31,9 @@ function Form({ id, initial, isNew }: { id: string; initial: AnalysisInput; isNe
 
   const submit = () => {
     if (!ready) return
-    save.mutate({ id, input: { ...form, title: form.title.trim(), url: link } }, { onError: (e) => toast(`Not saved: ${e.message}`) })
-    toast(isOnline() ? 'Analysis saved' : 'Saved offline, will sync')
+    const saving = save.mutateAsync({ id, input: { ...form, title: form.title.trim(), url: link } })
+    saving.catch((e: Error) => toast(`Not saved: ${e.message}`))
+    announceSave(saving, toast, 'Analysis saved')
     navigate('/analysis')
   }
   const remove = async () => {

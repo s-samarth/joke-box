@@ -21,7 +21,7 @@ import { toggleTick } from './bodyFormat'
 import { BEHAVIOURS, SCREENS, areaColor, areaFor, blankNote, kindFor, kindName } from './craftMeta'
 import { CraftNoteForm } from './CraftNoteForm'
 import { NoteBody } from './NoteBody'
-import { isOnline } from '../../api/network'
+import { announceSave } from '../../lib/announce'
 
 interface ReadingProps {
   note: CraftNote
@@ -96,10 +96,13 @@ export function CraftNotePage() {
   const back = note ? `/craft/area/${note.area_id}` : askedArea ? `/craft/area/${askedArea}` : '/craft'
   const backLabel = areas.find((a) => a.id === (note?.area_id ?? askedArea))?.name ?? 'Craft'
 
-  const store = (input: CraftNoteInput) => save.mutate({ id, input: isNew ? { ...input, created_at: new Date().toISOString() } : input }, { onError: (e) => toast(`Not saved: ${e.message}`) })
+  const store = (input: CraftNoteInput) => {
+    const saving = save.mutateAsync({ id, input: isNew ? { ...input, created_at: new Date().toISOString() } : input })
+    saving.catch((e: Error) => toast(`Not saved: ${e.message}`))
+    return saving
+  }
   const submit = (input: CraftNoteInput) => {
-    store(input)
-    toast(isOnline() ? 'Note saved' : 'Saved offline, will sync')
+    announceSave(store(input), toast, 'Note saved')
     if (isNew) navigate(`/craft/${id}`, { replace: true })
     setEditing(false)
   }
@@ -122,7 +125,7 @@ export function CraftNotePage() {
       ) : (
         <Reading note={note} areas={areas} kinds={kinds} onEdit={() => { setEditing(true); window.scrollTo(0, 0) }}
           onTick={(line) => store({ ...craftInput(note), body: toggleTick(note.body, line) })}
-          onMove={(a) => { store({ ...craftInput(note), area_id: a.id }); toast(`Moved to ${a.name}`) }} />
+          onMove={(a) => { void store({ ...craftInput(note), area_id: a.id }); toast(`Moved to ${a.name}`) }} />
       )}
     </div>
   )

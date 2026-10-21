@@ -6,7 +6,7 @@
 import { Star } from 'lucide-react'
 import { useState } from 'react'
 import { newId } from '../../api/client'
-import { isOnline } from '../../api/network'
+import { announceSave } from '../../lib/announce'
 import { useCraftAreas, useCraftKinds, useCraftNotes, useSaveCraftNote } from '../../api/craft'
 import { useBits, useTopics } from '../../api/library'
 import { useLogActions, useLogs, useSetlists, useVenues } from '../../api/shows'
@@ -71,11 +71,12 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
     const performedAt = fromIstInput(when)
     // Both saves are queued and close the sheet at once, signal or not. The queue sends them in
     // order, so the show reaches the server before the lesson that points at it.
-    save.mutateAsync(
+    const saving = save.mutateAsync(
       { id, input: { venue_name: venueName, performed_at: performedAt, duration_seconds: seconds, audience_size: Number(crowd) || 0, rating, topic_ids: topicIds, notes: notes.trim(), laughs: counted(laughs) ? laughs : null } },
-    ).catch((e: Error) => toast(`Show not saved: ${e.message}`))
+    )
+    saving.catch((e: Error) => toast(`Show not saved: ${e.message}`))
     if (lesson.trim()) saveLesson.mutate({ id: newId(), input: lessonFrom(lesson, craft, { area_id: areaFor(areas, 'stage'), kind_id: kindFor(kinds) }, { performance_log_id: id, source: `Show at ${venueName}, ${formatDate(performedAt)}`, created_at: new Date().toISOString() }) })
-    toast(!isOnline() ? 'Saved offline, will sync' : log ? 'Show updated' : 'Show logged')
+    announceSave(saving, toast, log ? 'Show updated' : 'Show logged')
     onClose()
   }
 
