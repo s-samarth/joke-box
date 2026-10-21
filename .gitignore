@@ -33,6 +33,10 @@ pgdata/
 # Node (if any frontend tooling is added)
 node_modules/
 
+# Claude Code and browser-test scratch (local only)
+.claude/
+.playwright-mcp/
+
 # Editors and OS
 .vscode/
 .idea/
