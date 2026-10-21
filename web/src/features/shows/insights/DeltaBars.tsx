@@ -56,7 +56,7 @@ export function DeltaBars({ data, empty }: { data: Breakdown; empty: string }) {
       </div>
       {data.few.length > 0 && (
         <p className="mt-3 text-sm text-dim">
-          Too few shows to tell yet: {data.few.map((g) => `${g.label} (${g.shows})`).join(', ')}.
+          Fewer than {MIN_SHOWS} shows, so not compared yet: {data.few.map((g) => `${g.label} (${g.shows})`).join(', ')}.
         </p>
       )}
       <TipBox tip={tip} />

@@ -9,30 +9,32 @@ const log = (over: Partial<PerformanceLog>): PerformanceLog => ({
 })
 const topic = (id: string, name: string) => ({ id, name, is_system: false, subtopics: [] }) as Topic
 
+const times = (n: number, over: Partial<PerformanceLog>) => Array.from({ length: n }, () => log(over))
+
 describe('strengths and weak spots', () => {
   const logs = [
-    ...[4, 4, 4].map((rating) => log({ rating, topic_ids: ['t1'], venue_name: 'Attic' })),
-    ...[2, 2, 3].map((rating) => log({ rating, topic_ids: ['t2', 'gone'] })),
+    ...times(6, { rating: 4, topic_ids: ['t1'], venue_name: 'Attic' }),
+    ...times(6, { rating: 2, topic_ids: ['t2', 'gone'] }),
     log({ rating: 5, topic_ids: ['t1', 't2'] }),
   ]
 
   it('rates each topic against your overall rating, best first, and sets aside thin ones', () => {
     const b = byTopic(logs, [topic('t1', 'Travel'), topic('t2', 'Work'), topic('t3', 'Unused')])
-    expect(b.ranked.map((g) => [g.label, g.shows])).toEqual([['Travel', 4], ['Work', 4]])
+    expect(b.ranked.map((g) => [g.label, g.shows])).toEqual([['Travel', 7], ['Work', 7]])
     expect(b.ranked[0].delta).toBeGreaterThan(0)
     expect(b.ranked[1].delta).toBeLessThan(0)
     expect(b.ranked[0].great).toBe(1)
     expect(b.few).toEqual([])
   })
 
-  it('keeps venues with too few shows apart', () => {
-    const b = byVenue([...logs, log({ venue_name: 'Once' })])
-    expect(b.ranked.map((g) => g.label)).toEqual(['Attic', 'Garage'])
-    expect(b.few.map((g) => g.label)).toEqual(['Once'])
+  it('never compares a group with fewer than seven shows', () => {
+    const b = byVenue([...logs, log({ venue_name: 'Attic' }), ...times(6, { venue_name: 'Six' })])
+    expect(b.ranked.map((g) => [g.label, g.shows])).toEqual([['Attic', 7], ['Garage', 7]])
+    expect(b.few.map((g) => [g.label, g.shows])).toEqual([['Six', 6]])
   })
 
   it('keeps set lengths and time slots in their natural order', () => {
-    const mixed = [...[100, 200, 250].map((s) => log({ duration_seconds: s })), ...[700, 800, 850].map((s) => log({ duration_seconds: s, rating: 4 }))]
+    const mixed = [...times(7, { duration_seconds: 200 }), ...times(7, { duration_seconds: 800, rating: 4 })]
     expect(byLength(mixed).ranked.map((g) => g.label)).toEqual(['< 5 min', '10–15 min'])
     expect(slotOf('2026-10-01T17:30:00Z')).toBe('late') // 11 pm IST
     expect(slotOf('2026-10-01T19:00:00Z')).toBe('late') // 12:30 am IST
@@ -41,8 +43,9 @@ describe('strengths and weak spots', () => {
   })
 
   it('only calls something a strength when it clearly beats your usual', () => {
-    expect(extremes(byVenue(logs)).best?.label).toBe('Attic')
-    expect(extremes(byVenue([log({}), log({}), log({})]))).toEqual({ best: undefined, worst: undefined })
+    expect(extremes(byVenue(logs)).best).toBeUndefined() // Attic has only 6 shows
+    expect(extremes(byVenue([...logs, log({ rating: 4, venue_name: 'Attic' })])).best?.label).toBe('Attic')
+    expect(extremes(byVenue(times(7, {})))).toEqual({ best: undefined, worst: undefined })
   })
 
   it('copes with no shows at all', () => {
