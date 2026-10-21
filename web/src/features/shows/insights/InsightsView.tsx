@@ -7,7 +7,7 @@ import type { PerformanceLog, Topic } from '../../../api/types'
 import { EmptyState } from '../../../components/ui/bits'
 import { weightedRating } from '../logStats'
 import { DeltaBars } from './DeltaBars'
-import { byLength, bySlot, byTopic, byVenue, extremes, MIN_SHOWS, type Group } from './insightMath'
+import { byLength, bySlot, byTopic, byVenue, extremes, MIN_SHOWS, slotPhrase, type Group } from './insightMath'
 import { ChartCard } from './TipBox'
 import { ABOVE, BELOW, signed } from './vizColors'
 
@@ -21,7 +21,7 @@ function Summary({ title, color, lines }: { title: string; color: string; lines:
       {lines.length ? (
         <ul className="mt-2 space-y-2 text-[15px]">{lines.map((l) => <li key={l}>{l}</li>)}</ul>
       ) : (
-        <p className="mt-2 text-sm text-dim">Nothing stands out yet. Patterns show up once a topic, venue or slot has {MIN_SHOWS} or more shows.</p>
+        <p className="mt-2 text-sm text-dim">Nothing stands out yet. A topic, venue, set length or time slot is only compared once it has {MIN_SHOWS} or more shows.</p>
       )}
     </div>
   )
@@ -36,13 +36,13 @@ export function InsightsView({ logs, topics }: { logs: PerformanceLog[]; topics:
     t.best && `${t.best.label} is your strongest topic: ${fact(t.best)}.`,
     v.best && `${v.best.label} is your best room: ${fact(v.best)}.`,
     len.best && `Sets of ${len.best.label} go best: ${fact(len.best)}.`,
-    s.best && `The ${s.best.label} slot goes best: ${fact(s.best)}.`,
+    s.best && `Shows starting ${slotPhrase(s.best.key)} go best: ${fact(s.best)}.`,
   ].filter((x): x is string => Boolean(x))
   const work = [
     t.worst && `${t.worst.label} lands below your usual: ${fact(t.worst)}.`,
     v.worst && `${v.worst.label} has been a tough room: ${fact(v.worst)}.`,
     len.worst && `Sets of ${len.worst.label} go worst: ${fact(len.worst)}.`,
-    s.worst && `The ${s.worst.label} slot goes worst: ${fact(s.worst)}.`,
+    s.worst && `Shows starting ${slotPhrase(s.worst.key)} go worst: ${fact(s.worst)}.`,
   ].filter((x): x is string => Boolean(x))
   const great = logs.filter((l) => l.rating >= 4).length
   const rough = logs.filter((l) => l.rating <= 2).length

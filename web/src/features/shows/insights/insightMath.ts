@@ -9,8 +9,11 @@ import { toIstInput } from '../../../lib/time'
 import { DURATION_BANDS } from '../logMath'
 import { weightedRating } from '../logStats'
 
-/** Below this many shows a group's rating is mostly luck, so it isn't ranked. */
-export const MIN_SHOWS = 3
+/**
+ * Below this many shows a group's rating is mostly luck, so it is never called better or worse.
+ * A hard rule for topics, venues, set lengths and time slots alike.
+ */
+export const MIN_SHOWS = 7
 
 export interface Group {
   key: string
@@ -31,13 +34,16 @@ export interface Breakdown {
 
 /** Time slots by IST start time. After midnight counts as the late slot. */
 export const SLOTS = [
-  { key: 'day', label: 'Before 6 pm' },
-  { key: '18', label: '6 to 8 pm' },
-  { key: '20', label: '8 to 9 pm' },
-  { key: '21', label: '9 to 10 pm' },
-  { key: '22', label: '10 to 11 pm' },
-  { key: 'late', label: '11 pm or later' },
+  { key: 'day', label: 'Before 6 pm', starting: 'before 6 pm' },
+  { key: '18', label: '6 to 8 pm', starting: 'between 6 and 8 pm' },
+  { key: '20', label: '8 to 9 pm', starting: 'between 8 and 9 pm' },
+  { key: '21', label: '9 to 10 pm', starting: 'between 9 and 10 pm' },
+  { key: '22', label: '10 to 11 pm', starting: 'between 10 and 11 pm' },
+  { key: 'late', label: '11 pm or later', starting: 'at 11 pm or later' },
 ]
+
+/** "before 6 pm", "between 8 and 9 pm": a slot as it reads after "Shows starting". */
+export const slotPhrase = (key: string): string => SLOTS.find((s) => s.key === key)?.starting ?? key
 
 export function slotOf(iso: string): string {
   const hour = Number(toIstInput(iso).slice(11, 13))

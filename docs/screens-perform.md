@@ -79,8 +79,8 @@ each with its premise in marker, the punch, its runtime and "by m:ss" (the runni
   [insightMath.ts](../web/src/features/shows/insights/insightMath.ts)): the share of shows at 4 stars
   or more and at 2 or less, **Strengths** and **Work on** in plain sentences, then topics, venues,
   set length and time slot (IST start), each as bars against your usual rating (gold above, blue
-  below, weighted by stage time). A group needs 3 shows to be compared; thinner ones are listed as
-  "too few shows to tell yet", and a strength or weak spot is only named when it's at least 0.1 star
+  below, weighted by stage time). A group needs 7 shows to be compared (a hard rule, for topics,
+  venues, set lengths and slots alike); thinner ones are listed as "not compared yet", and a strength or weak spot is only named when it's at least 0.1 star
   off your usual. The charts are hand-drawn SVG and HTML (no chart library), with colours checked
   for colour-blind safety on the dark surface ([vizColors.ts](../web/src/features/shows/insights/vizColors.ts));
   every mark shows a readout on hover or keyboard focus.
