@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { PerformanceLog, Topic } from '../../../api/types'
-import { byLength, bySlot, byTopic, byVenue, extremes, slotOf } from './insightMath'
+import { recentForm, topicGrid } from './formMath'
+import { byLength, bySlot, byTopic, byVenue, slotOf } from './insightMath'
 import { calendarYears, months, showsByDay, trend } from './timelineMath'
 
 const log = (over: Partial<PerformanceLog>): PerformanceLog => ({
@@ -24,6 +25,7 @@ describe('strengths and weak spots', () => {
     expect(b.ranked[0].delta).toBeGreaterThan(0)
     expect(b.ranked[1].delta).toBeLessThan(0)
     expect(b.ranked[0].great).toBe(1)
+    expect(b.ranked[1].rough).toBeCloseTo(6 / 7)
     expect(b.few).toEqual([])
   })
 
@@ -42,10 +44,24 @@ describe('strengths and weak spots', () => {
     expect(bySlot([log({ performed_at: '2026-10-01T17:30:00Z' }), ...mixed]).few.map((g) => g.label)).toEqual(['11 pm or later'])
   })
 
-  it('only calls something a strength when it clearly beats your usual', () => {
-    expect(extremes(byVenue(logs)).best).toBeUndefined() // Attic has only 6 shows
-    expect(extremes(byVenue([...logs, log({ rating: 4, venue_name: 'Attic' })])).best?.label).toBe('Attic')
-    expect(extremes(byVenue(times(7, {})))).toEqual({ best: undefined, worst: undefined })
+  it('compares your last shows with the same number just before', () => {
+    const dated = (rating: number, day: number) => log({ rating, duration_seconds: 600, performed_at: `2026-10-${String(day).padStart(2, '0')}T15:00:00Z` })
+    const form = recentForm([...[2, 2, 3, 3].map((r, i) => dated(r, i + 1)), ...[4, 4, 3, 5].map((r, i) => dated(r, i + 10))], 4)
+    expect(form?.now.rating).toBe(4)
+    expect(form?.now.great).toBe(0.75)
+    expect(form?.before?.rough).toBe(0.5)
+    expect(recentForm([dated(3, 1), dated(4, 2)], 10)?.before).toBeNull() // not enough to compare
+    expect(recentForm([])).toBeNull()
+  })
+
+  it('lays each topic out month by month, in the order you first did it', () => {
+    const grid = topicGrid([
+      ...times(7, { topic_ids: ['late'], performed_at: '2026-10-05T15:00:00Z' }),
+      ...times(7, { topic_ids: ['early'], performed_at: '2026-08-05T15:00:00Z' }),
+      log({ topic_ids: ['thin'] }),
+    ], [topic('late', 'Late'), topic('early', 'Early'), topic('thin', 'Thin')], ['2026-08', '2026-09', '2026-10'])
+    expect(grid.rows.map((r) => [r.label, r.months.map((m) => m.length)])).toEqual([['Early', [7, 0, 0]], ['Late', [0, 0, 7]]])
+    expect(grid.thin.map((r) => r.label)).toEqual(['Thin'])
   })
 
   it('copes with no shows at all', () => {

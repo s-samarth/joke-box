@@ -76,14 +76,24 @@ each with its premise in marker, the punch, its runtime and "by m:ss" (the runni
   gaps show), and your rating over your last 10 shows, which breaks at gaps of more than 30 days
   instead of bridging them, against a hairline for your usual.
 - **Insights** ([insights/InsightsView.tsx](../web/src/features/shows/insights/InsightsView.tsx),
-  [insightMath.ts](../web/src/features/shows/insights/insightMath.ts)): the share of shows at 4 stars
-  or more and at 2 or less, **Strengths** and **Work on** in plain sentences, then topics, venues,
-  set length and time slot (IST start), each as bars against your usual rating (gold above, blue
-  below, weighted by stage time). A group needs 7 shows to be compared (a hard rule, for topics,
-  venues, set lengths and slots alike); thinner ones are listed as "not compared yet", and a strength or weak spot is only named when it's at least 0.1 star
-  off your usual. The charts are hand-drawn SVG and HTML (no chart library), with colours checked
-  for colour-blind safety on the dark surface ([vizColors.ts](../web/src/features/shows/insights/vizColors.ts));
-  every mark shows a readout on hover or keyboard focus.
+  [insightMath.ts](../web/src/features/shows/insights/insightMath.ts),
+  [formMath.ts](../web/src/features/shows/insights/formMath.ts)), all worked out from your shows on
+  every load:
+  - **Recent form:** average rating, share at 4 stars or more, share at 2 or less, and average set
+    length for your last 10 shows, each with a green or red arrow for how it moved against the 10
+    before (set length stays grey: neither way is better).
+  - **Topics over time:** a row per topic and a square per month, coloured by how it went that
+    month, in the order you first did them: when a bit started, how often it ran, whether it got
+    better and when you dropped it. Squares grow to fill the card; on a phone it scrolls sideways
+    with the names pinned, opening on the latest months.
+  - **Topics, venues, set length and time slot** (IST start): one bar each, split into rough
+    (2 stars or less, blue), okay (3, grey) and great (4 or more, gold), best first, with the rating
+    against your usual (weighted by stage time) and the show count beside it.
+  - **7 shows minimum**, a hard rule for every grouping: anything with fewer is listed as "not
+    compared yet" and never charted as better or worse.
+  - The charts are hand-drawn SVG and HTML (no chart library), with colours checked for colour-blind
+    safety on the dark surface ([vizColors.ts](../web/src/features/shows/insights/vizColors.ts));
+    every mark shows a readout on hover or keyboard focus.
 - **Table:** Date, Venue, On stage, Crowd, Rating, Topics and Remarks. Click a heading to sort and
   click again to flip the order. On a phone the table scrolls sideways with the date pinned.
 - **Log a show** (a sheet, also opened by `?log=1`): venue, stars and length up top. Optional: the
