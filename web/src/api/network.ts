@@ -22,13 +22,23 @@ export const isConnectionFailure = (e: unknown): boolean => e instanceof TypeErr
 const PROBE_EVERY = 10_000
 let probeTimer: ReturnType<typeof setInterval> | undefined
 
+/**
+ * Wifi with a sign-in page (venues, cafés) answers every request with its own page until you sign
+ * in, so a plain "did something answer" isn't enough: it has to be our server saying ok.
+ */
 async function serverAnswers(): Promise<boolean> {
   try {
-    return (await fetch('/health', { cache: 'no-store', signal: AbortSignal.timeout(8_000) })).ok
+    const response = await fetch('/health', { cache: 'no-store', signal: AbortSignal.timeout(8_000) })
+    if (!response.ok || isForeign(response)) return false
+    return ((await response.json()) as { status?: string }).status === 'ok'
   } catch {
     return false
   }
 }
+
+/** A reply that came from somewhere else: a wifi sign-in page we were redirected to. */
+export const isForeign = (response: Response): boolean =>
+  response.redirected && new URL(response.url).origin !== location.origin
 
 function stopProbing() {
   clearInterval(probeTimer)

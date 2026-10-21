@@ -6,8 +6,12 @@ import { QUEUED, retrySync } from './sync'
 describe('retrySync', () => {
   it('keeps trying a save that never reached the server', () => {
     expect(retrySync(0, new NetworkError())).toBe(true)
-    expect(retrySync(50, new NetworkError())).toBe(true)
+    expect(retrySync(19, new NetworkError())).toBe(true)
     expect(retrySync(3, new TypeError('Load failed'))).toBe(true)
+  })
+
+  it('gives up on a save that keeps failing while the server is up, so it stops blocking the queue', () => {
+    expect(retrySync(20, new NetworkError())).toBe(false)
   })
 
   it('gives a server hiccup a few more tries, then stops', () => {
