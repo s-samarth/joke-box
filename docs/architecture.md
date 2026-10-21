@@ -131,6 +131,11 @@ All reads go through queries filtered by `user_id`; writes check ownership of ev
 (for example, `check_all_owned` for the jokes in a set, and `check_placement` for a joke's topic
 and subtopic). The tests cover cross-user access per resource.
 
+Every response also carries browser hardening headers from [vercel.json](../vercel.json): no framing
+by other sites (`X-Frame-Options: DENY` and `frame-ancestors 'none'`, against clickjacking),
+`nosniff`, a `strict-origin-when-cross-origin` referrer policy, and a permissions policy that allows
+only the microphone (for voice notes). Vercel adds HSTS.
+
 ## Frontend, voice notes and PWA
 
 Server state, the offline queue, autosave, the voice notes pipeline and the service worker are

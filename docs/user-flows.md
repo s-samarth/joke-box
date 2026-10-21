@@ -111,6 +111,12 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 3. **More filters** adds a date range, stars, set length and crowd size bands.
 4. Sort the table by any column, and tap a row to read, edit or delete the show.
 5. Use ⋯ → **Export as CSV** for a spreadsheet. Jokes have the same export.
+6. Switch to **Timeline** for the mic diary (every day you went up), shows per month by rating and
+   your rating over your last 10 shows.
+7. Switch to **Insights** for recent form (your last 10 shows against the 10 before), each topic
+   month by month, and the mix of rough, okay and great nights by topic, venue, set length and time
+   slot. Anything with fewer than 7 shows isn't compared yet. The period and venue filters scope
+   both views.
 
 ## 10. Study other comics
 

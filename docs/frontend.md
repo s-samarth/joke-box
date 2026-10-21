@@ -39,7 +39,21 @@ values, so a delayed save writes what's on screen now.
 ## URL as state
 The filters for Jokes (`?topic&sub&type&status&q&sort`) and Observations (`?topic`) live in the
 query string, so back, refresh and shared links keep your place. `/shows?log=1` opens the Log a
-show sheet, which is how Home links to it. Filtering, sorting and totals run in the browser, over the cached lists.
+show sheet, which is how Home links to it, and `/shows?view=timeline|insights` picks the Shows view. Filtering, sorting and totals run in the browser, over the cached lists.
+
+## Charts
+The Timeline and Insights charts ([features/shows/insights](../web/src/features/shows/insights)) are
+hand-written SVG and HTML, not a chart library: a handful of chart types didn't justify the
+dependency, at the cost of more code per new chart type.
+- **Pure maths, separate from drawing:** `insightMath.ts`, `timelineMath.ts` and `formMath.ts` turn
+  shows into numbers and have unit tests; the components only lay them out.
+- **Measured width:** `useWidth` (a `ResizeObserver`) gives SVG charts their pixel width, so lines
+  stay crisp and labels thin out instead of colliding on a phone.
+- **Readouts:** `useTip` gives every mark the same readout on hover and on keyboard focus;
+  values that matter are also written beside the marks, so the readout only adds detail.
+- **Colours** ([vizColors.ts](../web/src/features/shows/insights/vizColors.ts)) were checked for
+  colour-blind safety against the dark surface: a one-hue gold ramp for ratings, and gold against
+  blue at equal lightness for better or worse than your usual.
 
 ## Navigation config
 [nav.ts](../web/src/layout/nav.ts) is the single list of screens. The desktop rail renders `NAV`;

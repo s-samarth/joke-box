@@ -75,8 +75,6 @@ export const useReorderAreas = () =>
 export const useDeleteArea = () =>
   useMutation({ mutationFn: ({ id, moveTo }: { id: string; moveTo: string }) => api<void>(`/api/craft-areas/${id}?move_to=${moveTo}`, 'DELETE'), onSettled: refreshAreas })
 
-export const areaInput = (a: CraftArea): CraftAreaInput => ({ name: a.name, description: a.description, color: a.color, screens: a.screens })
-
 /* Kinds change online only too: deleting one moves its notes. */
 const refreshKinds = () => {
   void queryClient.invalidateQueries({ queryKey: keys.craftKinds })
