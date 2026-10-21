@@ -32,7 +32,7 @@ own data. Today that is one comedian, but the system works for more than one.
 |---|---|
 | Ideas spread across Notes, WhatsApp-to-self, voice memos and paper | One app: jokes, observations, voice notes and brainstorms, all searchable |
 | Setlists on paper; timing guessed | Sets are timed against the slot, with the open-mic "light" built in |
-| No record of how bits did on stage | Shows are logged in under a minute; totals follow any filter |
+| No record of how bits did on stage | Shows are logged in under a minute; totals follow any filter; Timeline and Insights show trends and what's working |
 | The old Bit Vault (Firebase) broke on phones, served stale builds, and lost data on rename | Built again with ids, transactions, a proper offline queue and an update prompt |
 
 ## Product principles
@@ -65,7 +65,7 @@ own data. Today that is one comedian, but the system works for more than one.
 | **Sets** | Bits as masking-tape strips: drag to order, time against the slot, opener and closer marked | `/sets`, `/sets/:id` |
 | **Stage** | Full-screen rehearse and perform mode with a clock and the open-mic light | `/sets/:id/stage` |
 | **Print** | A set on paper with each bit's running time | `/sets/:id/print` |
-| **Shows** | Log a show; totals, filters, a sortable table, CSV export | `/shows` |
+| **Shows** | Log a show; totals, filters, a sortable table, CSV export; Timeline and Insights views | `/shows` |
 | **Craft** | What you know about doing stand-up: your path as a staircase, techniques to write with, and your own areas as folders of note cards | `/craft`, `/craft/area/:id`, `/craft/:id` |
 | **Watchlist** | 100 routines from the persona dossier plus your own, scored and ticked off | `/watchlist` |
 | **Analysis** | Your write-ups of sets and online bits, optionally tied to a routine | `/analysis` |
