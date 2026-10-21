@@ -55,9 +55,18 @@ async function failure(response: Response): Promise<ApiError> {
   return new ApiError(response.status, message)
 }
 
+/**
+ * How long an upload may take before it counts as stuck: a minute, plus time to send it at a slow
+ * 20 KB a second (one bar in a basement). Without a limit a stalled upload would hang, holding up
+ * every recording behind it until the app restarted; timed out, it waits and retries like any
+ * failed save.
+ */
+export const uploadLimit = (bytes: number): number => Math.min(60_000 + (bytes / 20_000) * 1000, 15 * 60_000)
+
 /** Send the recording itself as the request body. */
 export async function uploadVoiceAudio(id: string, audio: Blob): Promise<VoiceNote> {
   const response = await reach(`/api/voice-notes/${id}/audio`, {
+    signal: AbortSignal.timeout(uploadLimit(audio.size)),
     method: 'PUT',
     credentials: 'same-origin',
     headers: { 'X-Requested-With': 'jokebox', 'Content-Type': audio.type || 'audio/mp4' },
@@ -68,7 +77,7 @@ export async function uploadVoiceAudio(id: string, audio: Blob): Promise<VoiceNo
 }
 
 export async function downloadVoiceAudio(id: string): Promise<Blob> {
-  const response = await reach(`/api/voice-notes/${id}/audio`, { credentials: 'same-origin' })
+  const response = await reach(`/api/voice-notes/${id}/audio`, { credentials: 'same-origin', signal: AbortSignal.timeout(2 * 60_000) })
   if (!response.ok) throw await failure(response)
   return response.blob()
 }

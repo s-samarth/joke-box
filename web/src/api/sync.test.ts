@@ -40,3 +40,12 @@ describe('QUEUED', () => {
     expect(QUEUED.retryDelay(10, new NetworkError())).toBe(30_000)
   })
 })
+
+describe('uploadLimit', () => {
+  it('gives a recording time to crawl up on one bar, but not forever', async () => {
+    const { uploadLimit } = await import('./voice')
+    expect(uploadLimit(0)).toBe(60_000)
+    expect(uploadLimit(2_000_000)).toBe(160_000) // a 2 MB note: a minute plus 100 s
+    expect(uploadLimit(500_000_000)).toBe(15 * 60_000)
+  })
+})
