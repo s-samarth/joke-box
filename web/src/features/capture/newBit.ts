@@ -48,6 +48,7 @@ export function useCaptureBit() {
       setup: c.setup.trim(),
       punchline: (c.punchline ?? '').trim(),
       topic_id: topicId,
+      created_at: c.created_at ?? new Date().toISOString(), // kept even if it only syncs tomorrow
     }
     // mutateAsync, not mutate's callbacks: those are skipped once the calling sheet has closed,
     // while this promise settles whenever the save does (even after an offline wait).

@@ -7,6 +7,7 @@ from sqlalchemy import select, update
 
 from app.auth.deps import CurrentUser, DbSession, find_owned, get_owned
 from app.models import Observation, ObservationTopic
+from app.models.base import written_at
 from app.schemas.library import NamedOut, NameIn
 from app.schemas.notebook import ObservationIn, ObservationOut
 from app.services.topics import commit_or_conflict
@@ -37,7 +38,7 @@ def put_observation(
     if observation is None:
         observation = Observation(id=observation_id, user_id=user.id)
         if body.created_at:
-            observation.created_at = body.created_at
+            observation.created_at = written_at(body.created_at)
         db.add(observation)
     observation.text = body.text
     observation.topic_id = body.topic_id

@@ -96,7 +96,7 @@ export function CraftNotePage() {
   const back = note ? `/craft/area/${note.area_id}` : askedArea ? `/craft/area/${askedArea}` : '/craft'
   const backLabel = areas.find((a) => a.id === (note?.area_id ?? askedArea))?.name ?? 'Craft'
 
-  const store = (input: CraftNoteInput) => save.mutate({ id, input }, { onError: (e) => toast(`Not saved: ${e.message}`) })
+  const store = (input: CraftNoteInput) => save.mutate({ id, input: isNew ? { ...input, created_at: new Date().toISOString() } : input }, { onError: (e) => toast(`Not saved: ${e.message}`) })
   const submit = (input: CraftNoteInput) => {
     store(input)
     toast(isOnline() ? 'Note saved' : 'Saved offline, will sync')

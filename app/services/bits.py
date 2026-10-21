@@ -7,6 +7,7 @@ from sqlalchemy import delete, exists, func, select
 from sqlalchemy.orm import Session
 
 from app.models import Bit, BitType, Status, Subtopic, Topic, User, bit_type_links
+from app.models.base import written_at
 from app.schemas.library import BitIn, BitOut
 
 
@@ -73,8 +74,9 @@ def apply(db: Session, user: User, bit: Bit, data: BitIn) -> None:
     for key, value in fields.items():
         setattr(bit, key, value)
     if data.created_at and bit.created_at is None:
-        # A joke brought in with its old date (an import) was last changed then, not today.
-        bit.created_at = bit.updated_at = data.created_at
+        # A joke brought in with its old date (an import), or written offline, was last changed
+        # when it was written, not when it reached the server.
+        bit.created_at = bit.updated_at = written_at(data.created_at)
     seen: dict[str, BitType] = {}
     for name in data.types:
         if name.lower() != "undefined":

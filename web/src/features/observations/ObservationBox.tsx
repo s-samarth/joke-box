@@ -24,7 +24,7 @@ export function ObservationBox({ initialTopicId = null }: { initialTopicId?: str
 
   const submit = () => {
     if (!text.trim()) return
-    save.mutate({ id: newId(), input: { text: text.trim(), topic_id: topicId } }, { onError: (e) => toast(`Not saved: ${e.message}`) })
+    save.mutate({ id: newId(), input: { text: text.trim(), topic_id: topicId, created_at: new Date().toISOString() } }, { onError: (e) => toast(`Not saved: ${e.message}`) })
     setText('')
     if (!isOnline()) toast('Saved offline, will sync')
   }

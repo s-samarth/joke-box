@@ -22,7 +22,7 @@ function LessonBox() {
   const { toast } = useFeedback()
   const submit = () => {
     if (!text.trim() || !area) return
-    save.mutate({ id: newId(), input: lessonFrom(text, notes, { area_id: area, kind_id: kindFor(kinds) }) }, { onError: (e) => toast(`Not saved: ${e.message}`) })
+    save.mutate({ id: newId(), input: { ...lessonFrom(text, notes, { area_id: area, kind_id: kindFor(kinds) }), created_at: new Date().toISOString() } }, { onError: (e) => toast(`Not saved: ${e.message}`) })
     setText('')
     toast(isOnline() ? 'Lesson saved to Craft' : 'Saved offline, will sync')
   }

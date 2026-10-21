@@ -21,6 +21,16 @@ def utcnow() -> datetime:
     return datetime.now(UTC)
 
 
+def written_at(value: datetime) -> datetime:
+    """When the client says a new row was written: offline, that's before it reached us.
+
+    A phone with its clock set ahead can't date something in the future, so the time is capped
+    at now. A time without a zone is taken as UTC, like every time we store.
+    """
+    value = value.astimezone(UTC) if value.tzinfo else value.replace(tzinfo=UTC)
+    return min(value, utcnow())
+
+
 class UTCDateTime(TypeDecorator[datetime]):
     """A timestamp stored in UTC and always read back with its timezone.
 

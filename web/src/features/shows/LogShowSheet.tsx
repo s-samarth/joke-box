@@ -74,7 +74,7 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
     save.mutateAsync(
       { id, input: { venue_name: venueName, performed_at: performedAt, duration_seconds: seconds, audience_size: Number(crowd) || 0, rating, topic_ids: topicIds, notes: notes.trim(), laughs: counted(laughs) ? laughs : null } },
     ).catch((e: Error) => toast(`Show not saved: ${e.message}`))
-    if (lesson.trim()) saveLesson.mutate({ id: newId(), input: lessonFrom(lesson, craft, { area_id: areaFor(areas, 'stage'), kind_id: kindFor(kinds) }, { performance_log_id: id, source: `Show at ${venueName}, ${formatDate(performedAt)}` }) })
+    if (lesson.trim()) saveLesson.mutate({ id: newId(), input: lessonFrom(lesson, craft, { area_id: areaFor(areas, 'stage'), kind_id: kindFor(kinds) }, { performance_log_id: id, source: `Show at ${venueName}, ${formatDate(performedAt)}`, created_at: new Date().toISOString() }) })
     toast(!isOnline() ? 'Saved offline, will sync' : log ? 'Show updated' : 'Show logged')
     onClose()
   }

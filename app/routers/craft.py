@@ -7,6 +7,7 @@ from sqlalchemy import select
 
 from app.auth.deps import CurrentUser, DbSession, find_owned, get_owned
 from app.models import Analysis, CraftArea, CraftNote, NoteKind, PerformanceLog
+from app.models.base import written_at
 from app.schemas.craft import CraftNoteIn, CraftNoteOut
 
 router = APIRouter(prefix="/api/craft-notes", tags=["craft"])
@@ -33,7 +34,7 @@ def put_craft_note(
     if note is None:
         note = CraftNote(id=note_id, user_id=user.id)
         if body.created_at:
-            note.created_at = body.created_at
+            note.created_at = written_at(body.created_at)
         db.add(note)
     for field, value in body.model_dump(exclude={"created_at"}).items():
         setattr(note, field, value)

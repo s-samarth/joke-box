@@ -49,6 +49,8 @@ export interface BitInput {
   clean_rating: CleanRating | null
   language: string | null
   comments: string
+  /** Sent when creating, so something written offline keeps the time it was written. */
+  created_at?: string
 }
 
 export interface Bit extends BitInput {
@@ -109,6 +111,8 @@ export interface PerformanceLog {
 export interface ObservationInput {
   text: string
   topic_id: string | null
+  /** Sent when creating, so something written offline keeps the time it was written. */
+  created_at?: string
 }
 
 /** Something you noticed: not a joke yet. Its topics are separate from joke topics. */
@@ -151,6 +155,8 @@ export interface VoiceNoteInput {
   label: string
   hashtags: string[]
   duration_seconds: number
+  /** Sent when creating, so something written offline keeps the time it was written. */
+  created_at?: string
 }
 
 export interface VoiceNote extends VoiceNoteInput {
@@ -241,6 +247,8 @@ export interface CraftNoteInput {
   /** The show or analysis the lesson came from, if any. */
   performance_log_id: string | null
   analysis_id: string | null
+  /** Sent when creating, so something written offline keeps the time it was written. */
+  created_at?: string
 }
 
 export interface CraftNote extends CraftNoteInput {

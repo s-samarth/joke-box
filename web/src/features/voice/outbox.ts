@@ -64,12 +64,12 @@ export const useOutbox = () => useSyncExternalStore(subscribe, () => state)
 
 export class EmptyRecordingError extends Error {}
 
-export async function addRecording(id: string, audio: Blob, durationSeconds: number, label = ''): Promise<void> {
+export async function addRecording(id: string, audio: Blob, durationSeconds: number, label = '', recordedAt = new Date()): Promise<void> {
   const bytes = await audio.arrayBuffer()
   if (!bytes.byteLength) throw new EmptyRecordingError('The recording came out empty')
   const type = audio.type || 'audio/mp4'
   const note: PendingNote = {
-    id, bytes, type, detailsSaved: false, created_at: new Date().toISOString(),
+    id, bytes, type, detailsSaved: false, created_at: recordedAt.toISOString(),
     input: { label, hashtags: [], duration_seconds: durationSeconds },
   }
   await set(id, note, store)
@@ -111,7 +111,8 @@ async function send(note: PendingNote): Promise<void> {
     return true
   }
   if (!note.detailsSaved) {
-    await saveVoiceDetails(note.id, note.input)
+    // Sent with the time it was recorded, so a note made offline isn't dated when it synced.
+    await saveVoiceDetails(note.id, { ...note.input, created_at: note.created_at })
     if (await gone()) return
     const now = await get<PendingNote>(note.id, store)
     // Only mark the details sent if they weren't edited while we were sending them.
@@ -163,7 +164,7 @@ async function recoverInterrupted() {
   try {
     const waiting = new Set((await values<PendingNote>(store)).map((n) => n.id))
     for (const r of await interrupted()) {
-      if (!waiting.has(r.id)) await addRecording(r.id, r.audio, r.seconds, 'Recovered recording').catch(() => {})
+      if (!waiting.has(r.id)) await addRecording(r.id, r.audio, r.seconds, 'Recovered recording', r.startedAt).catch(() => {})
     }
     await clearLive()
   } catch {

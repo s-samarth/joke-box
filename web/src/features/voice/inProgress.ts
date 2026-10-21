@@ -19,6 +19,7 @@ export interface Interrupted {
   id: string
   audio: Blob
   seconds: number
+  startedAt: Date
 }
 
 export const beginLive = (id: string, type: string, startedAt: number) =>
@@ -54,6 +55,6 @@ export async function interrupted(): Promise<Interrupted[]> {
     if (!details || !chunks.length) return []
     chunks.sort((a, b) => a[0] - b[0])
     const last = Math.max(...chunks.map(([, c]) => c.at))
-    return [{ id, audio: new Blob(chunks.map(([, c]) => c.bytes), { type: details.type }), seconds: Math.max(1, Math.round((last - details.startedAt) / 1000)) }]
+    return [{ id, audio: new Blob(chunks.map(([, c]) => c.bytes), { type: details.type }), seconds: Math.max(1, Math.round((last - details.startedAt) / 1000)), startedAt: new Date(details.startedAt) }]
   })
 }
