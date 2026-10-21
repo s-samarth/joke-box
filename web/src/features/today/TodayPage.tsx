@@ -1,4 +1,4 @@
-/** Today: capture first, then voice notes, observations, brainstorming, craft (your path and a lesson box), study (watchlist, analysis, links), your topic folders, what's coming up, what needs work, and how the last show went. */
+/** Today: the daily joke nudge, then capture, then voice notes, observations, brainstorming, craft (your path and a lesson box), study (watchlist, analysis, links), your topic folders, what's coming up, what needs work, and how the last show went. */
 import { Play } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
@@ -8,6 +8,8 @@ import { SectionHead, Stars, StrengthTicks, Tape } from '../../components/ui/bit
 import { THOUGHTS, UNFINISHED } from '../../lib/bitMeta'
 import { clock } from '../../lib/duration'
 import { formatDate, todayIst } from '../../lib/time'
+import { DailyBanner } from '../daily/DailyBanner'
+import { useHabit } from '../daily/useHabit'
 import { LightBar } from '../sets/LightBar'
 import { totalSeconds } from '../sets/setlistMath'
 import { QuickCapture } from './QuickCapture'
@@ -36,9 +38,12 @@ export function TodayPage() {
     .filter((b) => b.strength <= 2 || UNFINISHED.has((b.status ?? '').toLowerCase()))
     .sort((a, b) => a.strength - b.strength || b.updated_at.localeCompare(a.updated_at))
   const lastShow = logs[0]
+  const daily = useHabit()
 
   return (
     <div className="mx-auto max-w-2xl">
+      {/* Waits for the jokes to load, so it never flashes "write a joke" at someone who already has. */}
+      {!daily.loading && <div className="pt-6 lg:pt-10"><DailyBanner habit={daily.habit} /></div>}
       <div className="pt-6 pb-6 lg:pt-10">
         <p className="text-dim">{dateLabel}</p>
         <h1 className="headline mt-1 text-[44px] sm:text-[56px]">Got something?</h1>

@@ -29,6 +29,7 @@ const AnalysisEditor = named(() => import('./features/study/AnalysisEditor'), 'A
 const CraftPage = named(() => import('./features/craft/CraftPage'), 'CraftPage')
 const AreaPage = named(() => import('./features/craft/AreaPage'), 'AreaPage')
 const CraftNotePage = named(() => import('./features/craft/CraftNotePage'), 'CraftNotePage')
+const DailyPage = named(() => import('./features/daily/DailyPage'), 'DailyPage')
 const LinksPage = named(() => import('./features/study/LinksPage'), 'LinksPage')
 const ImportPage = named(() => import('./features/import/ImportPage'), 'ImportPage')
 
@@ -48,6 +49,7 @@ export function App() {
           <Route path="sets" element={<SetsPage />} />
           <Route path="sets/:setId" element={<SetBuilder />} />
           <Route path="shows" element={<ShowsPage />} />
+          <Route path="daily" element={<DailyPage />} />
           <Route path="observations" element={<ObservationsPage />} />
           <Route path="brainstorm" element={<BrainstormPage />} />
           <Route path="voice" element={<VoicePage />} />

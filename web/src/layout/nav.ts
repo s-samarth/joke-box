@@ -4,7 +4,7 @@
  * everything else sits in the More sheet, grouped by what you're doing.
  */
 import type { LucideIcon } from 'lucide-react'
-import { AudioLines, GraduationCap, ExternalLink, Eye, Home, ListChecks, ListOrdered, Mic, NotebookPen, PenLine, StickyNote } from 'lucide-react'
+import { AudioLines, CalendarCheck, GraduationCap, ExternalLink, Eye, Home, ListChecks, ListOrdered, Mic, NotebookPen, PenLine, StickyNote } from 'lucide-react'
 
 export interface NavItem {
   to: string
@@ -18,6 +18,7 @@ export interface NavItem {
 
 const home: NavItem = { to: '/', label: 'Home', icon: Home, end: true }
 const jokes: NavItem = { to: '/bits', label: 'Jokes', icon: StickyNote }
+const daily: NavItem = { to: '/daily', label: 'Daily joke', icon: CalendarCheck, hint: 'One new joke a day, ticked off' }
 const sets: NavItem = { to: '/sets', label: 'Sets', icon: ListOrdered, hint: 'Build a setlist and run it on stage' }
 const voice: NavItem = { to: '/voice', label: 'Voice notes', icon: AudioLines, hint: 'Record an idea out loud' }
 const observations: NavItem = { to: '/observations', label: 'Observations', icon: Eye, hint: "Things you noticed, before they're jokes" }
@@ -29,14 +30,14 @@ const analysis: NavItem = { to: '/analysis', label: 'Analysis', icon: NotebookPe
 const links: NavItem = { to: '/links', label: 'External links', icon: ExternalLink, hint: 'Your persona site and Comedy Atlas' }
 
 /** The desktop rail, top to bottom. */
-export const NAV: NavItem[] = [home, jokes, observations, brainstorm, voice, sets, shows, craft, watchlist, analysis, links]
+export const NAV: NavItem[] = [home, jokes, daily, observations, brainstorm, voice, sets, shows, craft, watchlist, analysis, links]
 
 /** Phone bottom bar: two either side of the + button, the last slot being More. */
 export const BAR_LEFT: NavItem[] = [home, jokes]
 export const BAR_RIGHT: NavItem[] = [shows]
 
 export const MORE_GROUPS: { title: string; items: NavItem[] }[] = [
-  { title: 'Write', items: [voice, observations, brainstorm] },
+  { title: 'Write', items: [daily, voice, observations, brainstorm] },
   { title: 'Perform', items: [sets] },
   { title: 'Study', items: [craft, watchlist, analysis, links] },
 ]
