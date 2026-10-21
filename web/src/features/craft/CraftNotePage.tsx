@@ -1,12 +1,15 @@
 /**
  * One craft note. It opens formatted, with tick boxes you can tick, and switches to a form to
- * edit. /craft/new opens the form straight away; ?area= and ?kind= fill those in.
+ * edit. /craft/new opens the form straight away; ?area= and ?kind= fill those in, and ?show= or
+ * ?analysis= links the new note to the show or analysis it was learned from.
  */
 import { ArrowLeft, ExternalLink, Pencil } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { newId } from '../../api/client'
 import { craftInput, useCraftNotes, useDeleteCraftNote, useSaveCraftNote } from '../../api/craft'
+import { useLogs } from '../../api/shows'
+import { useAnalyses } from '../../api/study'
 import type { CraftArea, CraftKind, CraftNote, CraftNoteInput } from '../../api/types'
 import { Button } from '../../components/ui/Button'
 import { Spinner } from '../../components/ui/bits'
@@ -26,6 +29,7 @@ function Reading({ note, onEdit, onTick }: { note: CraftNote; onEdit: () => void
       <footer className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-4 text-sm text-faint">
         <span>
           {note.source && <>From {note.source}. </>}Written {formatDate(note.created_at)}
+          {note.analysis_id && <> <Link to={`/analysis/${note.analysis_id}`} className="text-dim hover:text-paper">Open the analysis</Link></>}
           {note.url && <> · <a href={note.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-dim hover:text-paper">Link <ExternalLink size={13} /></a></>}
           {note.hashtags.length > 0 && <span className="mt-1 block text-dim">{note.hashtags.join(' ')}</span>}
         </span>
@@ -44,6 +48,8 @@ export function CraftNotePage() {
   const [freshId] = useState(newId)
   const [editing, setEditing] = useState(false)
   const { data: notes = [], isPending } = useCraftNotes()
+  const { data: logs = [] } = useLogs()
+  const { data: analyses = [] } = useAnalyses()
   const save = useSaveCraftNote()
   const del = useDeleteCraftNote()
   const navigate = useNavigate()
@@ -54,7 +60,12 @@ export function CraftNotePage() {
   const note = notes.find((n) => n.id === noteId)
   const area = params.get('area')
   const kind = params.get('kind')
-  const initial: CraftNoteInput = note ? craftInput(note) : blankNote(notes, { ...(isArea(area) && { area }), ...(isKind(kind) && { kind }) })
+  const show = logs.find((l) => l.id === params.get('show'))
+  const analysis = analyses.find((a) => a.id === params.get('analysis'))
+  const learnedAt: Partial<CraftNoteInput> = show
+    ? { performance_log_id: show.id, source: `Show at ${show.venue_name}, ${formatDate(show.performed_at)}` }
+    : analysis ? { analysis_id: analysis.id, source: `Analysis: ${analysis.title}`, url: analysis.url } : {}
+  const initial: CraftNoteInput = note ? craftInput(note) : blankNote(notes, { ...(isArea(area) && { area }), ...(isKind(kind) && { kind }), ...learnedAt })
   const id = note?.id ?? freshId
 
   const store = (input: CraftNoteInput) => save.mutate({ id, input }, { onError: (e) => toast(`Not saved: ${e.message}`) })
@@ -79,7 +90,7 @@ export function CraftNotePage() {
       {!isNew && !note ? (
         <p className="text-dim">This note isn't here. It may have been deleted.</p>
       ) : isNew || editing || !note ? (
-        <CraftNoteForm key={id} initial={initial} isNew={isNew} onSave={submit} onDelete={isNew ? undefined : remove} />
+        <CraftNoteForm key={`${id}${show?.id ?? ''}${analysis?.id ?? ''}`} initial={initial} isNew={isNew} onSave={submit} onDelete={isNew ? undefined : remove} />
       ) : (
         <Reading note={note} onEdit={() => { setEditing(true); window.scrollTo(0, 0) }} onTick={(line) => store({ ...craftInput(note), body: toggleTick(note.body, line) })} />
       )}

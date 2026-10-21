@@ -76,6 +76,7 @@ export interface LogInput {
   rating: number
   topic_ids: string[]
   notes: string
+  laughs: number[] | null
 }
 
 export function useLogActions() {

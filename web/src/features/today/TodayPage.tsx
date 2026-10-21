@@ -1,4 +1,4 @@
-/** Today: capture first, then voice notes, observations, brainstorming, study (watchlist, analysis, links), your topic folders, what's coming up, what needs work, and how the last show went. */
+/** Today: capture first, then voice notes, observations, brainstorming, craft (your path and a lesson box), study (watchlist, analysis, links), your topic folders, what's coming up, what needs work, and how the last show went. */
 import { Play } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
@@ -12,6 +12,7 @@ import { LightBar } from '../sets/LightBar'
 import { totalSeconds } from '../sets/setlistMath'
 import { QuickCapture } from './QuickCapture'
 import { TodayBrainstorm } from './TodayBrainstorm'
+import { TodayCraft } from './TodayCraft'
 import { TodayObservations } from './TodayObservations'
 import { TodayStudy } from './TodayStudy'
 import { TodayVoice } from './TodayVoice'
@@ -46,6 +47,7 @@ export function TodayPage() {
       <TodayVoice />
       <TodayObservations />
       <TodayBrainstorm />
+      <TodayCraft />
       <TodayStudy />
       <TopicFolders />
 

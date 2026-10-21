@@ -61,7 +61,8 @@ The page is one column, at most 672 px wide. It shows today's date in IST and th
 | Voice notes | `TodayVoice.tsx` | The same recorder as the Voice screen, plus "All N" |
 | Observations | `TodayObservations.tsx` | The observation box and the last few logged |
 | Brainstorm | `TodayBrainstorm.tsx` | Start a session, or pick up the last one |
-| Study | `TodayStudy.tsx` | Watchlist progress, analyses, external links |
+| Craft | `TodayCraft.tsx`, `PathCard.tsx` | **Path:** the first Path note with tick boxes still open, how many are done, and the next step. When the step names minutes, it shows your most solid material on one topic (Strong and Killer jokes, by runtime) against that target. Below it, a box to save a lesson to an area |
+| Study | `TodayStudy.tsx` | Craft notes, watchlist progress, analyses, external links |
 | Topics | `TopicFolders.tsx` | Topics as folders with live counts; tap through to a subtopic |
 | Next up | (inline) | The soonest upcoming set (or the latest), its first three strips, the light bar and **Rehearse** |
 | Needs work | (inline) | Up to five jokes with strength ≤ 2 or an unfinished status, weakest first |

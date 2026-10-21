@@ -73,7 +73,7 @@ erDiagram
 | `venues` | `name` | Created by name when a set or show uses one; "Unidentified Venue" is the default |
 | `setlists` | `name`, `show_date`, `target_seconds` (default 900), `venue_id` (set null) | Saved whole: `PUT` replaces the items in one transaction |
 | `setlist_items` | `setlist_id` (cascade), `bit_id` (cascade), `position`, `duration_seconds` | Opener and closer are the first and last positions, not stored |
-| `performance_logs` | `venue_id` (set null), `performed_at` (timestamptz), `duration_seconds`, `audience_size`, `rating` 1–5, `notes` | |
+| `performance_logs` | `venue_id` (set null), `performed_at` (timestamptz), `duration_seconds`, `audience_size`, `rating` 1–5, `notes`, `laughs` JSON (five counts, for laughs scored 1–5 points; null if not counted) | LPM is worked out in the browser from `laughs` and the time on stage |
 | `performance_log_topics` | `log_id`, `topic_id` (both cascade) | "Topics you did". Deleting a topic re-points its links to Thoughts |
 
 ### Study
@@ -81,7 +81,7 @@ erDiagram
 | Table | Columns | Rules |
 |---|---|---|
 | `watch_items` | `title`, `comedian`, `category`, `description`, `url`, `position`, `schemer_index`, `logic_density`, `dark_pragmatism` (0–10, nullable), `watched` | The dossier is imported once and matched on title and comedian, so a re-import adds only new routines |
-| `craft_notes` | `title`, `body`, `kind` (checklist / technique / reference / path), `area` (writing / generating / rewriting / sets / stage / formats / progress), `hashtags` JSON, `source`, `url`, `position` | Check constraints on kind and area. The areas are fixed so screens can show the right notes. The body is plain text with light formatting (`#` headings, `-` lists, `- [ ]` tick boxes, `**bold**`) |
+| `craft_notes` | `title`, `body`, `kind` (checklist / technique / reference / path), `area` (writing / generating / rewriting / sets / stage / formats / progress), `hashtags` JSON, `source`, `url`, `position`, `performance_log_id → performance_logs` (set null), `analysis_id → analyses` (set null) | Check constraints on kind and area. The two links say which show or analysis a lesson came from; deleting either keeps the note. The areas are fixed so screens can show the right notes. The body is plain text with light formatting (`#` headings, `-` lists, `- [ ]` tick boxes, `**bold**`) |
 | `analyses` | `title`, `url`, `body`, `watch_item_id` (set null) | Deleting the routine keeps the analysis |
 
 ## What happens on delete

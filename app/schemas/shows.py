@@ -3,7 +3,7 @@
 import uuid
 from datetime import date, datetime
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class VenueOut(BaseModel):
@@ -53,6 +53,15 @@ class LogIn(BaseModel):
     rating: int = Field(default=3, ge=1, le=5)
     topic_ids: list[uuid.UUID] = Field(default_factory=list)
     notes: str = ""
+    laughs: list[int] | None = None
+
+    @field_validator("laughs")
+    @classmethod
+    def five_counts(cls, value: list[int] | None) -> list[int] | None:
+        """One count per laugh score, 1 to 5 points, none negative."""
+        if value is not None and (len(value) != 5 or any(n < 0 for n in value)):
+            raise ValueError("Laughs are five counts, one per score from 1 to 5")
+        return value
 
 
 class LogOut(BaseModel):
@@ -64,6 +73,7 @@ class LogOut(BaseModel):
     rating: int
     topic_ids: list[uuid.UUID]
     notes: str
+    laughs: list[int] | None
     created_at: datetime
 
 

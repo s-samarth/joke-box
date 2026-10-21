@@ -65,11 +65,17 @@ each with its premise in marker, the punch, its runtime and "by m:ss" (the runni
 - **Toolbar:** Lifetime / This month / This week, a venue picker and **More filters** (date range,
   stars, set length band, crowd band).
 - **Totals:** Shows, On stage, Avg rating (weighted by stage time) and Median crowd. They always
-  follow the filters.
+  follow the filters. Under them, the LPM across the shows you counted laughs for (all points over
+  all minutes), with its band: beast (12+), decent (9–12), poor (6–9), rough (under 6).
 - **Table:** Date, Venue, On stage, Crowd, Rating, Topics and Remarks. Click a heading to sort and
   click again to flip the order. On a phone the table scrolls sideways with the date pinned.
 - **Log a show** (a sheet, also opened by `?log=1`): venue, stars and length up top. Optional: the
   set you did (which fills in the length and topics), date and time, crowd and remarks.
+  **Count laughs for LPM** folds out five counters, one per laugh score from 1 (a few giggles) to 5
+  (laughs and applause), with the LPM worked out as you count ([lpm.ts](../web/src/features/shows/lpm.ts),
+  [LaughTally.tsx](../web/src/features/shows/LaughTally.tsx)). **What did you learn?** saves a craft
+  note under On stage, linked to the show.
+- **A show's detail** shows its LPM, what you learned there, and **Add a lesson**.
 - ⋯ → **Export as CSV**.
 
 <img src="screenshots/desktop-shows.png" alt="Shows">
@@ -89,7 +95,8 @@ shows the name, its kind and the first line.
 A note opens formatted: headings, lists, **bold**, and tick boxes you can tick straight away (the
 tick is saved into the note). **Edit note** switches to the form: name, kind, area, the note,
 where you learned it, a link and hashtags, saved with **Save note** (offline too).
-`/craft/new?area=stage&kind=checklist` starts one with those filled in.
+`/craft/new?area=stage&kind=checklist` starts one with those filled in; `?show=<id>` or
+`?analysis=<id>` links it to where you learned it and fills in **Learned from**.
 
 ## Watchlist: `/watchlist`
 
@@ -111,7 +118,8 @@ analyse and delete. **Add routine** adds your own. The dossier loads once with
 The list is searchable, with the most recently edited first; each row shows the title, a preview
 and the link's domain. The editor has a name, a link and the write-up, saved with **Save analysis**
 (offline too; it syncs later).
-`/analysis/new?watch=<id>` starts one prefilled from a watchlist routine.
+`/analysis/new?watch=<id>` starts one prefilled from a watchlist routine. A saved analysis lists its
+**Takeaways** (craft notes learned from it) with **Save a takeaway**.
 
 <img src="screenshots/desktop-analysis.png" alt="Analysis">
 

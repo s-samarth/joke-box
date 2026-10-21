@@ -68,3 +68,28 @@ def test_a_brainstorm_session_can_run_a_technique(alice: TestClient, bob: TestCl
     # Deleting the note keeps the session, just unlinked.
     alice.delete(f"/api/craft-notes/{note_id}")
     assert alice.get("/api/sessions").json()[0]["technique_id"] is None
+
+
+def test_lessons_point_at_their_show_or_analysis(alice: TestClient, bob: TestClient) -> None:
+    log_id, analysis_id, note_id = str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4())
+    alice.put(f"/api/logs/{log_id}", json={"performed_at": "2026-10-20T21:00:00+05:30"})
+    alice.put(f"/api/analyses/{analysis_id}", json={"title": "Fake set"})
+    body = NOTE | {"performance_log_id": log_id, "analysis_id": analysis_id}
+    saved = alice.put(f"/api/craft-notes/{note_id}", json=body).json()
+    assert saved["performance_log_id"] == log_id and saved["analysis_id"] == analysis_id
+    assert bob.put(f"/api/craft-notes/{uuid.uuid4()}", json=body).status_code == 404
+    # Deleting the show or the analysis keeps the lesson.
+    alice.delete(f"/api/logs/{log_id}")
+    alice.delete(f"/api/analyses/{analysis_id}")
+    kept = alice.get("/api/craft-notes").json()[0]
+    assert kept["performance_log_id"] is None and kept["analysis_id"] is None
+
+
+def test_a_show_keeps_its_laugh_tally(alice: TestClient) -> None:
+    log_id = str(uuid.uuid4())
+    show = {"performed_at": "2026-10-20T21:00:00+05:30", "duration_seconds": 300}
+    saved = alice.put(f"/api/logs/{log_id}", json=show | {"laughs": [2, 0, 3, 1, 1]}).json()
+    assert saved["laughs"] == [2, 0, 3, 1, 1]
+    assert alice.put(f"/api/logs/{log_id}", json=show).json()["laughs"] is None
+    for bad in ([1, 2], [0, 0, 0, 0, -1]):
+        assert alice.put(f"/api/logs/{log_id}", json=show | {"laughs": bad}).status_code == 422

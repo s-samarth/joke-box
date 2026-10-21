@@ -126,7 +126,7 @@ On a deployment without a Blob store, these answer **503**.
 | PUT | `/api/setlists/{id}` | `{name, show_date?, target_seconds, venue_name?, items: [{bit_id, duration_seconds}]}`. The items are replaced as a whole, in the order sent |
 | DELETE | `/api/setlists/{id}` | |
 | GET | `/api/logs` | Every show, most recent first, with `venue_name` and `topic_ids` |
-| PUT | `/api/logs/{id}` | `{venue_name, performed_at, duration_seconds, audience_size, rating 1–5, topic_ids[], notes}` |
+| PUT | `/api/logs/{id}` | `{venue_name, performed_at, duration_seconds, audience_size, rating 1–5, topic_ids[], notes, laughs?}`. `laughs` is five counts of 0 or more, or null |
 | DELETE | `/api/logs/{id}` | |
 
 The venue is given by name and created if it's new; it defaults to "Unidentified Venue".
@@ -141,7 +141,7 @@ Every `bit_id` and `topic_id` must belong to you (otherwise 404).
 | DELETE | `/api/watchlist/{id}` | |
 | POST | `/api/watchlist/import-dossier` | Adds the dossier's routines you don't already have (matched on title and comedian). Returns the full list |
 | GET | `/api/craft-notes` | In order of `position` |
-| PUT | `/api/craft-notes/{id}` | `{title, body, kind, area, hashtags, source, url, position, created_at?}`. `created_at` is kept only when the note is created |
+| PUT | `/api/craft-notes/{id}` | `{title, body, kind, area, hashtags, source, url, position, performance_log_id?, analysis_id?, created_at?}`. The show and analysis must be yours. `created_at` is kept only when the note is created |
 | DELETE | `/api/craft-notes/{id}` | |
 | GET | `/api/analyses` | |
 | PUT | `/api/analyses/{id}` | `{title, url, body, watch_item_id?}`. The URL must be http(s) or empty |

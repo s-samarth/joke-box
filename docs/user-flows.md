@@ -99,7 +99,9 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 2. Choose the venue (or type a new one), how it went (1–5 stars) and how long you were on.
 3. Optionally pick **the set you did**. That fills in the length and the topics for you. Then add the
    crowd size and remarks.
-4. Save. The totals on **Shows** update straight away.
+4. If you recorded the set, tap **Count laughs for LPM** and count each laugh by its score. Under
+   **What did you learn?**, write down the lesson: it goes to Craft, linked to this show.
+5. Save. The totals on **Shows** update straight away.
 
 ## 9. Review how it's going
 
