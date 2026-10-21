@@ -97,6 +97,8 @@ The vocabulary is a comic's, not a database's. Keep to it in the code and in the
 | **Brainstorm session** | A free writing session not tied to one joke. |
 | **Observation** | Something you noticed, before it's a joke. |
 | **Craft note** | Something you've learned about doing stand-up, not material. Its **kind** says how it's used (checklist, technique, reference, path) and its **area** says where (writing, generating, rewriting, building a set, on stage, formats, measuring and path). |
+| **LPM** | Laughs per minute: each laugh scored 1 (a few giggles) to 5 (laughs and applause), the points divided by the minutes on stage. |
+| **Path** | Your goals as tick boxes in a Path note (levels, a task list). Home shows the next step. |
 | **Routine** | An item on the watchlist: a known set by another comic. |
 | **SI / LD / DP** | The dossier's three 0–10 scores for a routine: Schemer Index, Logic Density, Dark Pragmatism. |
 

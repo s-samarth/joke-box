@@ -95,6 +95,8 @@ export interface PerformanceLog {
   rating: number
   topic_ids: string[]
   notes: string
+  /** Laugh tally for LPM: how many laughs scored 1 to 5 points. Null if not counted. */
+  laughs: number[] | null
   created_at: string
 }
 
@@ -202,6 +204,9 @@ export interface CraftNoteInput {
   source: string
   url: string
   position: number
+  /** The show or analysis the lesson came from, if any. */
+  performance_log_id: string | null
+  analysis_id: string | null
 }
 
 export interface CraftNote extends CraftNoteInput {

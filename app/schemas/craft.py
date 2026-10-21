@@ -21,6 +21,8 @@ class CraftNoteIn(BaseModel):
     source: str = Field(default="", max_length=200)
     url: str = Field(default="", max_length=500)
     position: int = Field(default=0, ge=0)
+    performance_log_id: uuid.UUID | None = None
+    analysis_id: uuid.UUID | None = None
     # Honoured only when the note is created, so an import can keep the date it was written.
     created_at: datetime | None = None
 

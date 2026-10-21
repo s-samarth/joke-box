@@ -44,4 +44,5 @@ export const useDeleteCraftNote = () => useMutation<void, Error, string>({ mutat
 /** The editable part of a saved note, for saving it again with one change. */
 export const craftInput = (n: CraftNote): CraftNoteInput => ({
   title: n.title, body: n.body, kind: n.kind, area: n.area, hashtags: n.hashtags, source: n.source, url: n.url, position: n.position,
+  performance_log_id: n.performance_log_id, analysis_id: n.analysis_id,
 })

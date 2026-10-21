@@ -36,7 +36,7 @@ describe('note body', () => {
 })
 
 const note = (patch: Partial<CraftNote>): CraftNote => ({
-  id: 'x', title: 'Fake', body: '', kind: 'reference', area: 'writing', hashtags: [], source: '', url: '', position: 1, created_at: '', updated_at: '', ...patch,
+  id: 'x', title: 'Fake', body: '', kind: 'reference', area: 'writing', hashtags: [], source: '', url: '', position: 1, performance_log_id: null, analysis_id: null, created_at: '', updated_at: '', ...patch,
 })
 
 describe('craft meta', () => {

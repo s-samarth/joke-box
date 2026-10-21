@@ -107,6 +107,7 @@ def log_out(log: PerformanceLog) -> LogOut:
         rating=log.rating,
         topic_ids=[t.id for t in log.topics],
         notes=log.notes,
+        laughs=log.laughs,
         created_at=log.created_at,
     )
 
@@ -136,6 +137,7 @@ def save_log(log_id: uuid.UUID, body: LogIn, user: CurrentUser, db: DbSession) -
     log.audience_size = body.audience_size
     log.rating = body.rating
     log.notes = body.notes
+    log.laughs = body.laughs
     log.topics = topics
     db.add(log)
     db.commit()

@@ -1,6 +1,8 @@
 """Craft notes: what you've learned about doing stand-up, kept apart from your material."""
 
-from sqlalchemy import JSON, CheckConstraint, Integer, String, Text
+import uuid
+
+from sqlalchemy import JSON, CheckConstraint, ForeignKey, Integer, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, OwnedMixin
@@ -33,3 +35,10 @@ class CraftNote(OwnedMixin, Base):
     source: Mapped[str] = mapped_column(String(200), default="")
     url: Mapped[str] = mapped_column(String(500), default="")
     position: Mapped[int] = mapped_column(Integer, default=0)
+    # Where the lesson came from, if it was learned at a show or from an analysis.
+    performance_log_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("performance_logs.id", ondelete="SET NULL"), index=True
+    )
+    analysis_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("analyses.id", ondelete="SET NULL"), index=True
+    )

@@ -4,6 +4,7 @@ import uuid
 from datetime import date, datetime
 
 from sqlalchemy import (
+    JSON,
     CheckConstraint,
     Column,
     Date,
@@ -80,5 +81,7 @@ class PerformanceLog(OwnedMixin, Base):
     audience_size: Mapped[int] = mapped_column(Integer, default=0)
     rating: Mapped[int] = mapped_column(Integer, default=3)
     notes: Mapped[str] = mapped_column(Text, default="")
+    # Laugh tally for LPM: how many laughs scored 1, 2, 3, 4 and 5 points. None if not counted.
+    laughs: Mapped[list[int] | None] = mapped_column(JSON)
     venue: Mapped[Venue | None] = relationship()
     topics: Mapped[list[Topic]] = relationship(secondary=performance_log_topics)

@@ -2,9 +2,11 @@
 import type { PerformanceLog } from '../../api/types'
 import { long } from '../../lib/duration'
 import { totals } from './logStats'
+import { averageLpm, formatLpm } from './lpm'
 
 export function ShowStats({ logs }: { logs: PerformanceLog[] }) {
   const t = totals(logs)
+  const laughs = averageLpm(logs)
   return (
     <>
       <dl className="grid grid-cols-2 gap-x-6 gap-y-4 border-y border-rule py-5 sm:grid-cols-4">
@@ -20,7 +22,8 @@ export function ShowStats({ logs }: { logs: PerformanceLog[] }) {
           </div>
         ))}
       </dl>
-      <p className="mt-2 text-xs text-faint">The average rating weights each show by its length, so a long set counts for more.</p>
+      {laughs && <p className="mt-3 text-[15px] tabular">{formatLpm(laughs.lpm)} <span className="text-dim">over the {laughs.shows === 1 ? 'show' : `${laughs.shows} shows`} you counted laughs for</span></p>}
+      <p className="mt-2 text-xs text-faint">The average rating and LPM weight each show by its length, so a long set counts for more.</p>
     </>
   )
 }

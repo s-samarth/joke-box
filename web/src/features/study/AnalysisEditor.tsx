@@ -1,11 +1,13 @@
 /**
  * Write or edit one analysis: the set or bit's name, a link, and your analysis. Opened from a
  * watchlist routine (/analysis/new?watch=…), the name and link are filled in for you.
+ * A saved analysis lists its takeaways: craft notes learned from it.
  */
-import { ArrowLeft, ExternalLink, Trash2 } from 'lucide-react'
+import { ArrowLeft, ExternalLink, GraduationCap, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { newId } from '../../api/client'
+import { useCraftNotes } from '../../api/craft'
 import { useAnalyses, useDeleteAnalysis, useSaveAnalysis, useWatchlist } from '../../api/study'
 import type { AnalysisInput } from '../../api/types'
 import { Button } from '../../components/ui/Button'
@@ -64,6 +66,24 @@ function Form({ id, initial, isNew }: { id: string; initial: AnalysisInput; isNe
   )
 }
 
+/** Craft notes learned from this analysis, and a way to add one. */
+function Takeaways({ analysisId }: { analysisId: string }) {
+  const { data: notes = [] } = useCraftNotes()
+  const mine = notes.filter((n) => n.analysis_id === analysisId)
+  return (
+    <section className="mt-10 border-t border-rule pt-5">
+      <h2 className="headline text-2xl">Takeaways</h2>
+      <p className="mt-1 text-sm text-dim">What you'd take from it, kept in Craft.</p>
+      <ul className="mt-3 space-y-1.5">
+        {mine.map((n) => (
+          <li key={n.id}><Link to={`/craft/${n.id}`} className="inline-flex items-center gap-2 hover:text-tape"><GraduationCap size={15} className="text-tape" />{n.title}</Link></li>
+        ))}
+      </ul>
+      <Link to={`/craft/new?analysis=${analysisId}`} className="mt-3 inline-flex h-9 items-center gap-2 rounded-lg bg-ink-3 px-3 text-sm hover:bg-ink-4"><Plus size={15} />Save a takeaway</Link>
+    </section>
+  )
+}
+
 export function AnalysisEditor() {
   const { analysisId = 'new' } = useParams()
   const [params] = useSearchParams()
@@ -88,7 +108,10 @@ export function AnalysisEditor() {
       {!isNew && !existing ? (
         <p className="text-dim">This analysis isn't here. It may have been deleted.</p>
       ) : (
-        <Form key={analysisId} id={existing?.id ?? freshId} initial={initial} isNew={isNew} />
+        <>
+          <Form key={analysisId} id={existing?.id ?? freshId} initial={initial} isNew={isNew} />
+          {existing && <Takeaways analysisId={existing.id} />}
+        </>
       )}
     </div>
   )

@@ -5,7 +5,7 @@ import { medianAudience, totals, weightedRating } from './logStats'
 
 const log = (over: Partial<PerformanceLog>): PerformanceLog => ({
   id: crypto.randomUUID(), venue_name: 'Garage', performed_at: '2026-10-01T15:00:00Z', duration_seconds: 300,
-  audience_size: 10, rating: 3, topic_ids: [], notes: '', created_at: '2026-10-01T15:00:00Z', ...over,
+  audience_size: 10, rating: 3, topic_ids: [], notes: '', laughs: null, created_at: '2026-10-01T15:00:00Z', ...over,
 })
 
 const TODAY = '2026-10-20' // a Tuesday

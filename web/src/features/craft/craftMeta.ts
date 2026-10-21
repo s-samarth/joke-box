@@ -48,5 +48,15 @@ export const notesFor = (notes: CraftNote[], areas: CraftArea[], kinds?: CraftKi
 /** A blank note that sorts after everything you already have. */
 export function blankNote(notes: CraftNote[], patch: Partial<CraftNoteInput> = {}): CraftNoteInput {
   const position = notes.reduce((max, n) => Math.max(max, n.position), 0) + 1
-  return { title: '', body: '', kind: 'reference', area: 'writing', hashtags: [], source: '', url: '', position, ...patch }
+  return { title: '', body: '', kind: 'reference', area: 'writing', hashtags: [], source: '', url: '', position, performance_log_id: null, analysis_id: null, ...patch }
+}
+
+const TITLE_MAX = 80
+
+/** A lesson typed in one go: the first line (cut at a word) names it, the whole text is the note. */
+export function lessonFrom(text: string, notes: CraftNote[], patch: Partial<CraftNoteInput> = {}): CraftNoteInput {
+  const clean = text.trim()
+  const first = clean.split('\n')[0].trim()
+  const title = first.length <= TITLE_MAX ? first : `${first.slice(0, first.lastIndexOf(' ', TITLE_MAX) > 0 ? first.lastIndexOf(' ', TITLE_MAX) : TITLE_MAX)}…`
+  return blankNote(notes, { title, body: clean === title ? '' : clean, area: 'stage', ...patch })
 }

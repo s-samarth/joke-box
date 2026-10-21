@@ -1,0 +1,57 @@
+/** Craft, from Home: where you are on your path, and a box for something you just learned. */
+import { useState } from 'react'
+import { Link } from 'react-router'
+import { newId } from '../../api/client'
+import { useCraftNotes, useSaveCraftNote } from '../../api/craft'
+import type { CraftArea } from '../../api/types'
+import { SectionHead } from '../../components/ui/bits'
+import { useFeedback } from '../../components/ui/feedbackContext'
+import { AREAS, lessonFrom } from '../craft/craftMeta'
+import { PathCard } from './PathCard'
+
+const chip = (on: boolean) => `h-8 shrink-0 rounded-lg px-2.5 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'bg-ink-3 text-dim hover:text-paper'}`
+
+function LessonBox() {
+  const [text, setText] = useState('')
+  const [area, setArea] = useState<CraftArea>('writing')
+  const { data: notes = [] } = useCraftNotes()
+  const save = useSaveCraftNote()
+  const { toast } = useFeedback()
+  const submit = () => {
+    if (!text.trim()) return
+    save.mutate({ id: newId(), input: lessonFrom(text, notes, { area }) }, { onError: (e) => toast(`Not saved: ${e.message}`) })
+    setText('')
+    toast(navigator.onLine ? 'Lesson saved to Craft' : 'Saved offline, will sync')
+  }
+
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); submit() }} className="rounded-xl bg-ink-2 ring-1 ring-rule transition focus-within:ring-2 focus-within:ring-paper/40">
+      <label htmlFor="lesson-text" className="sr-only">Lesson</label>
+      <textarea id="lesson-text" rows={2} value={text} onChange={(e) => setText(e.target.value)}
+        onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() } }}
+        placeholder="Learned something about doing stand-up?"
+        className="block w-full resize-none bg-transparent px-4 pt-3.5 pb-2 text-lg leading-snug text-paper outline-none placeholder:text-faint" />
+      <div className="flex items-center gap-2 px-3 pb-3">
+        <div className="no-scrollbar flex min-w-0 flex-1 gap-1.5 overflow-x-auto" role="group" aria-label="Area">
+          {AREAS.map((a) => <button key={a.key} type="button" aria-pressed={area === a.key} onClick={() => setArea(a.key)} className={chip(area === a.key)}>{a.label}</button>)}
+        </div>
+        <button type="submit" disabled={!text.trim()} className="h-9 shrink-0 rounded-lg bg-paper px-3 text-[15px] font-medium text-ink transition disabled:bg-ink-4 disabled:text-faint">Save lesson</button>
+      </div>
+    </form>
+  )
+}
+
+export function TodayCraft() {
+  const { data: notes = [] } = useCraftNotes()
+  return (
+    <section className="mt-12">
+      <SectionHead title="Craft">
+        <Link to="/craft" className="text-sm text-dim hover:text-paper">{notes.length ? `All ${notes.length}` : 'Open'}</Link>
+      </SectionHead>
+      <div className="space-y-3">
+        <PathCard />
+        <LessonBox />
+      </div>
+    </section>
+  )
+}
