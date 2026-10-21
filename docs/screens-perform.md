@@ -70,7 +70,8 @@ each with its premise in marker, the punch, its runtime and "by m:ss" (the runni
 - **Table:** Date, Venue, On stage, Crowd, Rating, Topics and Remarks. Click a heading to sort and
   click again to flip the order. On a phone the table scrolls sideways with the date pinned.
 - **Log a show** (a sheet, also opened by `?log=1`): venue, stars and length up top. Optional: the
-  set you did (which fills in the length and topics), date and time, crowd and remarks.
+  sets you did (tick one or more: their lengths add up and their topics are ticked,
+  [setPick.ts](../web/src/features/shows/setPick.ts)), date and time, crowd and remarks.
   **Count laughs for LPM** folds out five counters, one per laugh score from 1 (a few giggles) to 5
   (laughs and applause), with the LPM worked out as you count ([lpm.ts](../web/src/features/shows/lpm.ts),
   [LaughTally.tsx](../web/src/features/shows/LaughTally.tsx)). **What did you learn?** saves a craft

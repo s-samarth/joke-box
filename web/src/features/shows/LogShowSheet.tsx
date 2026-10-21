@@ -1,6 +1,6 @@
 /**
  * Log a show, ideally on the way home. Venue, how it went and how long are up top; the rest is
- * optional. Picking the set you did fills in the length and topics for you. You can count the
+ * optional. Picking the sets you did (one or several) fills in the length and topics for you. You can count the
  * laughs for LPM, and write down what you learned: that becomes a craft note linked to the show.
  */
 import { Star } from 'lucide-react'
@@ -11,7 +11,7 @@ import { useBits, useTopics } from '../../api/library'
 import { useLogActions, useLogs, useSetlists, useVenues } from '../../api/shows'
 import type { PerformanceLog } from '../../api/types'
 import { Button } from '../../components/ui/Button'
-import { Field, Input, Select, Textarea } from '../../components/ui/Field'
+import { Field, Input, Textarea } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { Modal } from '../../components/ui/Modal'
 import { topicName } from '../../lib/bitMeta'
@@ -20,6 +20,7 @@ import { formatDate, fromIstInput, toIstInput } from '../../lib/time'
 import { areaFor, kindFor, lessonFrom } from '../craft/craftMeta'
 import { LaughTally } from './LaughTally'
 import { NO_LAUGHS, counted } from './lpm'
+import { setSeconds, setTopics, swapTopics } from './setPick'
 
 const UNKNOWN = 'Unidentified Venue'
 const chip = (on: boolean) => `h-9 rounded-lg px-3 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'bg-ink-3 text-dim hover:text-paper'}`
@@ -45,15 +46,20 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
   const [notes, setNotes] = useState(log?.notes ?? '')
   const [laughs, setLaughs] = useState(log?.laughs ?? NO_LAUGHS)
   const [lesson, setLesson] = useState('')
+  const [setIds, setSetIds] = useState<string[]>([])
   const [error, setError] = useState('')
   const recent = [...new Set([...logs.map((l) => l.venue_name), ...venues.map((v) => v.name)])].filter((v) => v !== UNKNOWN).slice(0, 6)
 
-  const fromSet = (id: string) => {
-    const s = sets.find((x) => x.id === id)
-    if (!s) return
-    setDuration(clock(s.items.reduce((sum, i) => sum + i.duration_seconds, 0)))
-    setTopicIds([...new Set(s.items.map((i) => bits.find((b) => b.id === i.bit_id)?.topic_id).filter((t): t is string => Boolean(t)))])
-    if (s.venue_name && !venue) setVenue(s.venue_name)
+  // Ticking a set on or off recomputes time on stage from every ticked set, and swaps that set's
+  // topics in or out (topics you tapped yourself stay).
+  const toggleSet = (id: string) => {
+    const next = setIds.includes(id) ? setIds.filter((x) => x !== id) : [...setIds, id]
+    const chosen = sets.filter((s) => next.includes(s.id))
+    setSetIds(next)
+    setDuration(chosen.length ? clock(chosen.reduce((sum, s) => sum + setSeconds(s), 0)) : '')
+    setTopicIds(swapTopics(topicIds, setTopics(sets.filter((s) => setIds.includes(s.id)), bits), setTopics(chosen, bits)))
+    const named = chosen.find((s) => s.venue_name)?.venue_name
+    if (named && !venue) setVenue(named)
   }
   const submit = () => {
     const seconds = parse(duration)
@@ -90,12 +96,19 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
           </div>
         </div>
         {sets.length > 0 && !log && (
-          <Field label="The set you did (fills in time and topics)">
-            <Select defaultValue="" onChange={(e) => fromSet(e.target.value)}>
-              <option value="">Choose a set</option>
-              {sets.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </Select>
-          </Field>
+          <div className="space-y-2">
+            <span className="text-sm text-dim">The sets you did (tick one or more; fills in time and topics)</span>
+            <div className="flex flex-wrap gap-2">
+              {sets.map((s) => {
+                const on = setIds.includes(s.id)
+                return (
+                  <button key={s.id} type="button" aria-pressed={on} className={chip(on)} onClick={() => toggleSet(s.id)}>
+                    {s.name} <span className="tabular opacity-60">{clock(setSeconds(s))}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
         )}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <Field label="Time on stage"><Input inputMode="numeric" className="tabular" placeholder="6:30" value={duration} onChange={(e) => setDuration(e.target.value)} /></Field>
