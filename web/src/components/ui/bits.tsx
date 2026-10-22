@@ -4,12 +4,12 @@ import type { CSSProperties, ReactNode } from 'react'
 import { strengthLabel, typeDot } from '../../lib/bitMeta'
 
 /** Strength as five ticks, like marks scratched into a notebook margin. */
-export function StrengthTicks({ strength, size = 'sm' }: { strength: number; size?: 'sm' | 'lg' }) {
+export function StrengthTicks({ strength, size = 'sm', fill = 'bg-tape' }: { strength: number; size?: 'sm' | 'lg'; fill?: string }) {
   const tick = size === 'lg' ? 'h-4 w-1.5' : 'h-3 w-1'
   return (
     <span className="inline-flex items-end gap-[3px]" role="img" aria-label={`Strength: ${strengthLabel(strength)}`} title={strengthLabel(strength)}>
       {[1, 2, 3, 4, 5].map((n) => (
-        <span key={n} className={`${tick} rounded-[1px] ${n <= strength ? 'bg-tape' : 'bg-ink-4'}`} />
+        <span key={n} className={`${tick} rounded-[1px] ${n <= strength ? fill : 'bg-ink-4'}`} />
       ))}
     </span>
   )
@@ -36,10 +36,10 @@ export function Stars({ rating, size = 14 }: { rating: number; size?: number }) 
 }
 
 /** A strip of masking tape with marker writing. `seed` keeps each strip's tilt stable. */
-export function Tape({ children, seed = 0, dim, className = '' }: { children: ReactNode; seed?: number; dim?: boolean; className?: string }) {
+export function Tape({ children, seed = 0, dim, optional, className = '' }: { children: ReactNode; seed?: number; dim?: boolean; optional?: boolean; className?: string }) {
   const tilt = (((seed * 37) % 7) - 3) * 0.25
   return (
-    <div className={`tape ${dim ? 'tape-dim' : ''} ${className}`} style={{ '--tilt': `${tilt}deg` } as CSSProperties}>
+    <div className={`tape ${optional ? 'tape-optional' : ''} ${dim ? 'tape-dim' : ''} ${className}`} style={{ '--tilt': `${tilt}deg` } as CSSProperties}>
       {children}
     </div>
   )

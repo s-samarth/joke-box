@@ -26,8 +26,8 @@ export function BitExtras({ bit }: { bit: Bit }) {
   const addTo = (setId: string | null) => {
     const target = sets.find((s) => s.id === setId)
     const id = target?.id ?? newId()
-    const base = target ? setlistInput(target) : { name: 'Untitled set', show_date: null, target_seconds: 420, venue_name: null, items: [] }
-    save.mutateAsync({ id, input: { ...base, items: [...base.items, { bit_id: bit.id, duration_seconds: bit.duration_seconds }] } })
+    const base = target ? setlistInput(target) : { name: 'Untitled set', show_date: null, target_seconds: 420, venue_name: null, rating: null, tag_ids: [], items: [] }
+    save.mutateAsync({ id, input: { ...base, items: [...base.items, { bit_id: bit.id, duration_seconds: bit.duration_seconds, optional: false }] } })
       .catch((e: Error) => toast(`Not added: ${e.message}`))
     toast(`Added to ${base.name}`, { label: 'Open set', onClick: () => navigate(`/sets/${id}`) })
   }

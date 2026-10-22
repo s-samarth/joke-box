@@ -89,7 +89,11 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
    on its strip.
 5. Watch the light bar. It stays tape-yellow while there's room, turns amber inside the last
    minute and red when you're over. The first strip is marked **Opener** and the last **Closer**.
-6. There's no Save button: the set saves as you go.
+6. Mark a joke **optional** (the dashed circle on its strip) if you'll cut it when time is short. It
+   turns to faded paper tape and leaves the total; the time it would add shows as "+N optional".
+7. Rate the set with stars and tag it (In progress, Weak, Opener set, your own...). On **Sets**,
+   the tag chips show only the sets with that tag.
+8. There's no Save button: the set saves as you go.
 
 ## 7. Rehearse and perform
 

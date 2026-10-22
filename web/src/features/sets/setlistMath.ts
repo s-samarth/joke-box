@@ -3,10 +3,21 @@
 export interface DraftItem {
   bitId: string
   duration: number
+  /** One to cut if time is short: not counted towards the slot. */
+  optional?: boolean
 }
 
+/** The set's running time: the jokes you'll do for sure. */
 export const totalSeconds = (items: DraftItem[]): number =>
-  items.reduce((sum, item) => sum + item.duration, 0)
+  items.reduce((sum, item) => sum + (item.optional ? 0 : item.duration), 0)
+
+/** Time in the optional jokes, shown beside the total. */
+export const optionalSeconds = (items: DraftItem[]): number =>
+  items.reduce((sum, item) => sum + (item.optional ? item.duration : 0), 0)
+
+/** A saved set's items in the shape the timing works on. */
+export const draftItems = (items: { bit_id: string; duration_seconds: number; optional?: boolean }[]): DraftItem[] =>
+  items.map((i) => ({ bitId: i.bit_id, duration: i.duration_seconds, optional: i.optional ?? false }))
 
 export function positionLabel(index: number, count: number): 'Opener' | 'Closer' | null {
   if (index === 0) return 'Opener'

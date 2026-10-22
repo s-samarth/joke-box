@@ -83,6 +83,8 @@ export interface SetlistItem {
   bit_id: string
   position: number
   duration_seconds: number
+  /** One to cut if time is short: it doesn't count towards the slot. */
+  optional: boolean
 }
 
 export interface Setlist {
@@ -91,6 +93,9 @@ export interface Setlist {
   show_date: string | null
   target_seconds: number
   venue_name: string | null
+  /** 1-5 stars, or null until rated. */
+  rating: number | null
+  tag_ids: string[]
   items: SetlistItem[]
   created_at: string
   updated_at: string

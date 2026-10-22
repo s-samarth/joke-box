@@ -57,7 +57,8 @@ export function StageView() {
           {items.length === 0 && <li className="text-xl text-dim">This set is empty.</li>}
           {items.map((it, i) => (
             <li key={it.bit_id} ref={i === index ? current : undefined} aria-current={i === index ? 'step' : undefined}>
-              <Tape seed={i} dim={i !== index} className={`px-5 py-4 transition ${i === index ? 'text-3xl sm:text-5xl' : 'text-2xl sm:text-3xl'}`}>
+              <Tape seed={i} dim={i !== index} optional={it.optional} className={`px-5 py-4 transition ${i === index ? 'text-3xl sm:text-5xl' : 'text-2xl sm:text-3xl'}`}>
+                {it.optional && <span className="mr-2 text-[0.6em] opacity-60">Optional:</span>}
                 {it.bit?.setup ?? 'Deleted joke'}
               </Tape>
               {i === index && it.bit?.punchline && <p className="mt-3 px-2 text-xl leading-snug text-paper/85 sm:text-2xl">{it.bit.punchline}</p>}

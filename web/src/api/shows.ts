@@ -53,7 +53,9 @@ export interface SetlistInput {
   show_date: string | null
   target_seconds: number
   venue_name: string | null
-  items: { bit_id: string; duration_seconds: number }[]
+  rating: number | null
+  tag_ids: string[]
+  items: { bit_id: string; duration_seconds: number; optional: boolean }[]
 }
 
 export function useSetlistActions() {

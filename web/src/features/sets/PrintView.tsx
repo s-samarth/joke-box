@@ -12,7 +12,8 @@ export function PrintView() {
   const { data: bits = [] } = useBits()
   const setlist = sets.find((s) => s.id === setId)
   if (!setlist) return <div className="p-8 text-dim">Set not found.</div>
-  const ends = setlist.items.map((_, i) => setlist.items.slice(0, i + 1).reduce((sum, it) => sum + it.duration_seconds, 0))
+  // When each joke ends if you do the sure ones; an optional joke is marked instead.
+  const ends = setlist.items.map((_, i) => setlist.items.slice(0, i + 1).reduce((sum, it) => sum + (it.optional ? 0 : it.duration_seconds), 0))
   const details = [setlist.show_date && formatDate(setlist.show_date), setlist.venue_name, `${clock(setlist.target_seconds)} slot`].filter(Boolean)
 
   return (
@@ -34,7 +35,7 @@ export function PrintView() {
                   <p className="font-marker text-2xl leading-snug">{bit?.setup ?? 'Deleted joke'}</p>
                   {bit?.punchline && <p className="mt-1 text-lg leading-snug">{bit.punchline}</p>}
                 </div>
-                <span className="text-right text-lg tabular">{clock(item.duration_seconds)}<span className="block text-sm text-black/50">by {clock(ends[i])}</span></span>
+                <span className="text-right text-lg tabular">{clock(item.duration_seconds)}<span className="block text-sm text-black/50">{item.optional ? 'optional' : `by ${clock(ends[i])}`}</span></span>
               </li>
             )
           })}
