@@ -1,10 +1,12 @@
-/** Your avatar: import, sign out, and (on your laptop only) reset to demo data. */
-import { FolderInput, LogOut, RefreshCcw } from 'lucide-react'
+/** Your avatar: import, several tabs, sign out, and (on your laptop only) reset to demo data. */
+import { AppWindow, FolderInput, LogOut, RefreshCcw } from 'lucide-react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useMe, useReseed } from '../api/library'
 import { signOut } from '../api/session'
 import { useFeedback } from '../components/ui/feedbackContext'
 import { Dropdown, type MenuItem } from '../components/ui/Menu'
+import { manyTabs, setManyTabs } from '../lib/oneTab'
 import { useWaiting } from './useWaiting'
 
 export function AccountMenu({ showName = false }: { showName?: boolean }) {
@@ -20,9 +22,22 @@ export function AccountMenu({ showName = false }: { showName?: boolean }) {
     if (waiting && !(await confirm({ title: `${changes} synced yet`, message, confirmLabel: 'Sign out anyway', danger: true }))) return
     void signOut()
   }
+  const [many, setMany] = useState(manyTabs)
+  const toggleTabs = async () => {
+    if (many) {
+      setManyTabs(false)
+      setMany(false)
+      return toast('Back to one tab: JokeBox stepped aside in your other tabs')
+    }
+    const message = 'For when you won’t edit the same thing in two tabs. Each tab keeps its own unsynced changes, so offline, close a tab only once it has synced (it asks first). Just this browser.'
+    if (!(await confirm({ title: 'Allow several tabs?', message, confirmLabel: 'Allow' }))) return
+    setManyTabs(true)
+    setMany(true)
+  }
 
   const items: MenuItem[] = [
     { label: 'Import', icon: <FolderInput size={16} />, onSelect: () => navigate('/import') },
+    { label: 'Several tabs', icon: <AppWindow size={16} />, checked: many, onSelect: () => void toggleTabs() },
     { label: 'Sign out', icon: <LogOut size={16} />, onSelect: () => void leave() },
   ]
   if (me?.env === 'local') {

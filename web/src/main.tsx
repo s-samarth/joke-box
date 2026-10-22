@@ -24,12 +24,13 @@ const root = createRoot(document.getElementById('root')!)
 
 async function boot() {
   if (isAside()) return root.render(<AsideScreen />)
-  // One tab at a time: another open tab saves everything and steps aside before this one loads.
-  await claim()
+  // One tab at a time: another open tab saves everything and steps aside before this one loads
+  // (unless several tabs are allowed).
+  const alone = await claim()
   stepAsideWhenClaimed(() => persistQueryClientSave({ queryClient, ...persistOptions }))
   // Ask the phone not to clear our storage, where saves wait to sync.
   void keepStorage()
-  void startOutbox()
+  void startOutbox(alone)
   root.render(
     <StrictMode>
       <PersistQueryClientProvider
