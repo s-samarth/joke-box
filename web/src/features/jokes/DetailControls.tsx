@@ -1,10 +1,10 @@
-/** The small editors on a bit's page: strength, types, clean rating and hashtags. */
+/** The small editors on a joke's page: strength, types, clean rating and hashtags. */
 import { Plus, X } from 'lucide-react'
 import { useId, useState } from 'react'
 import { useTypes } from '../../api/library'
 import type { CleanRating } from '../../api/types'
 import { useTypeColor } from '../../api/typeColors'
-import { CLEAN_LABELS, DEFAULT_TYPES, STRENGTH_LABELS } from '../../lib/bitMeta'
+import { CLEAN_LABELS, DEFAULT_TYPES, STRENGTH_LABELS } from '../../lib/jokeMeta'
 import { NewTypeDialog } from './NewTypeDialog'
 
 const choice = (on: boolean) =>

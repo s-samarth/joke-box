@@ -58,8 +58,12 @@ def test_import_handles_orphans_and_tags(db: Session) -> None:
     loader = Loader(db, user)
     loader.run(data)
     db.commit()
-    assert loader.report == {"topics": 2, "bits": 2, "logs": 1, "setlists": 1}
+    assert loader.report == {"topics": 2, "jokes": 2, "logs": 1, "setlists": 1}
     assert len(loader.skipped) == 2
-    bit = loader.bits["b1"]
-    assert (bit.punchline, bit.tag_lines, bit.duration_seconds) == ("Fake punch.", ["fake tag"], 8)
-    assert sorted(t.name for t in bit.types) == ["English", "One-liner"]
+    joke = loader.jokes["b1"]
+    assert (joke.punchline, joke.tag_lines, joke.duration_seconds) == (
+        "Fake punch.",
+        ["fake tag"],
+        8,
+    )
+    assert sorted(t.name for t in joke.types) == ["English", "One-liner"]

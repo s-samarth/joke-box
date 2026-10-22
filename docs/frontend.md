@@ -6,7 +6,7 @@ The overall system is in [architecture.md](architecture.md).
 ## Server state vs UI state
 Data from the API lives in TanStack Query ([queryClient.ts](../web/src/api/queryClient.ts)), never
 in `useState`. Each resource has a hooks file (`api/library.ts`, `api/shows.ts`, ...) exposing
-`useBits()`, `useSaveSetlist()` and so on. `useState` is only for UI: whether a sheet is open, or
+`useJokes()`, `useSaveSetlist()` and so on. `useState` is only for UI: whether a sheet is open, or
 a draft being typed.
 
 ## Client-generated ids and upserts
@@ -102,7 +102,7 @@ logged". On one bar the phone says online while the save is really waiting, so s
 
 ## Autosave
 Joke pages, sets and brainstorm sessions keep a local draft and save after a short pause and on
-unmount (`useAutosaveBit`, `useAutosaveSet`, `useSessionAutosave`). A ref holds the newest
+unmount (`useAutosaveJoke`, `useAutosaveSet`, `useSessionAutosave`). A ref holds the newest
 values, so a delayed save writes what's on screen now.
 
 ## URL as state

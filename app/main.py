@@ -11,10 +11,10 @@ from app.auth.routes import router as auth_router
 from app.config import get_settings
 from app.routers import (
     analyses,
-    bits,
     craft,
     craft_areas,
     craft_kinds,
+    jokes,
     observations,
     sessions,
     set_tags,
@@ -64,7 +64,7 @@ def create_app() -> FastAPI:
     routers = (
         system,
         topics,
-        bits,
+        jokes,
         studio,
         shows,
         venues,
@@ -81,6 +81,7 @@ def create_app() -> FastAPI:
     )
     for module in routers:
         app.include_router(module.router)
+    app.include_router(jokes.legacy_router)
     app.include_router(auth_router)
     # The built React app. API routes always win; unknown page URLs get index.html.
     app.frontend("/", directory=WEB_DIST, fallback="index.html", check_dir=False)

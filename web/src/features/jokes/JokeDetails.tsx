@@ -1,11 +1,11 @@
-/** Everything about a bit beyond the words, as rows you edit in place. */
+/** Everything about a joke beyond the words, as rows you edit in place. */
 import { useMemo, useState, type ReactNode } from 'react'
-import { useBits, useStatuses, useTopicActions, useTopics } from '../../api/library'
-import type { BitInput } from '../../api/types'
+import { useJokes, useStatuses, useTopicActions, useTopics } from '../../api/library'
+import type { JokeInput } from '../../api/types'
 import { Select } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { useCapture } from '../capture/captureContext'
-import { LANGUAGES, topicName } from '../../lib/bitMeta'
+import { LANGUAGES, topicName } from '../../lib/jokeMeta'
 import { followersOf } from '../../lib/chains'
 import { FollowedBy, FollowsField } from './ChainFields'
 import { CleanPicker, HashtagField, StrengthPicker, TypeToggles } from './DetailControls'
@@ -28,11 +28,11 @@ function Row({ label, edit, children }: { label: string; edit?: { label: string;
   )
 }
 
-/** `bitId` is the joke being edited; none while writing a new one. */
-export function BitDetails({ bitId, draft, update }: { bitId?: string; draft: BitInput; update: (p: Partial<BitInput>) => void }) {
+/** `jokeId` is the joke being edited; none while writing a new one. */
+export function JokeDetails({ jokeId, draft, update }: { jokeId?: string; draft: JokeInput; update: (p: Partial<JokeInput>) => void }) {
   const { data: topics = [] } = useTopics()
   const { data: statuses = [] } = useStatuses()
-  const { data: bits = [] } = useBits()
+  const { data: jokes = [] } = useJokes()
   const actions = useTopicActions()
   const { prompt, toast } = useFeedback()
   const [managing, setManaging] = useState<'topics' | 'types' | null>(null)
@@ -41,9 +41,9 @@ export function BitDetails({ bitId, draft, update }: { bitId?: string; draft: Bi
   if (draft.status && !statusNames.includes(draft.status)) statusNames.push(draft.status)
   // Older jokes may have no language or another one; show it rather than pretend it's Hinglish.
   const languages = draft.language && !LANGUAGES.includes(draft.language) ? [...LANGUAGES, draft.language] : LANGUAGES
-  const next = bitId ? followersOf(bitId, bits) : []
+  const next = jokeId ? followersOf(jokeId, jokes) : []
   const { openCapture } = useCapture()
-  const hashtags = useMemo(() => [...new Set(bits.flatMap((b) => b.hashtags))].sort(), [bits])
+  const hashtags = useMemo(() => [...new Set(jokes.flatMap((b) => b.hashtags))].sort(), [jokes])
 
   // Keep this joke's draft in step with the managers (the server already moved saved jokes).
   const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase()
@@ -88,11 +88,11 @@ export function BitDetails({ bitId, draft, update }: { bitId?: string; draft: Bi
           </Select>
         </div>
       </Row>
-      <Row label="Follows"><FollowsField bitId={bitId} value={draft.follows_id ?? null} onChange={(follows_id) => update({ follows_id })} /></Row>
-      {bitId && (
+      <Row label="Follows"><FollowsField jokeId={jokeId} value={draft.follows_id ?? null} onChange={(follows_id) => update({ follows_id })} /></Row>
+      {jokeId && (
         <Row label="Followed by">
           {/* The next joke starts filed where this one is, already following it. */}
-          <FollowedBy next={next} onWriteNext={() => openCapture({ topicId: draft.topic_id, subtopicId: draft.subtopic_id, followsId: bitId })} />
+          <FollowedBy next={next} onWriteNext={() => openCapture({ topicId: draft.topic_id, subtopicId: draft.subtopic_id, followsId: jokeId })} />
         </Row>
       )}
       <Row label="Status">

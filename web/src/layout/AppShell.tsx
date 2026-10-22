@@ -5,7 +5,7 @@
 import { Plus } from 'lucide-react'
 import { Suspense } from 'react'
 import { NavLink, Outlet } from 'react-router'
-import { Spinner } from '../components/ui/bits'
+import { Spinner } from '../components/ui/pieces'
 import { CaptureProvider } from '../features/capture/CaptureProvider'
 import { useCapture } from '../features/capture/captureContext'
 import { AccountMenu } from './AccountMenu'

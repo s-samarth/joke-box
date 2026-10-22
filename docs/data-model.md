@@ -26,16 +26,16 @@ The models are defined in [app/models/](../app/models/), and the schema changes 
 ```mermaid
 erDiagram
   users ||--o{ topics : owns
-  users ||--o{ bits : owns
+  users ||--o{ jokes : owns
   topics ||--o{ subtopics : has
-  topics ||--o{ bits : files
-  subtopics |o--o{ bits : "files (optional)"
-  statuses |o--o{ bits : "status (optional)"
-  bits }o--o{ bit_types : bit_type_links
-  bits ||--o{ brainstorms : rewrites
+  topics ||--o{ jokes : files
+  subtopics |o--o{ jokes : "files (optional)"
+  statuses |o--o{ jokes : "status (optional)"
+  jokes }o--o{ joke_types : joke_type_links
+  jokes ||--o{ brainstorms : rewrites
   brainstorms ||--o{ brainstorm_versions : snapshots
   setlists ||--o{ setlist_items : contains
-  bits ||--o{ setlist_items : "appears in"
+  jokes ||--o{ setlist_items : "appears in"
   venues |o--o{ setlists : at
   venues |o--o{ performance_logs : at
   performance_logs }o--o{ topics : performance_log_topics
@@ -54,20 +54,20 @@ erDiagram
 | `users` | `google_sub` (unique), `email` (unique, lowercase), `display_name`, `avatar_url`, `plan` (default "Pro"), `last_login_at` | Created on first sign-in |
 | `topics` | `name`, `position`, `is_system` | One `is_system` topic per user, named `Random` and shown as **Thoughts**. It can't be deleted; deleting another topic moves its jokes there. `position` is the order you drag them into (new ones go last) |
 | `subtopics` | `topic_id → topics` (cascade), `name`, `position` | Unique per topic, in the order you drag them into. Deleting one clears it from its jokes |
-| `bit_types` | `name` | Pruned whenever no joke uses it. Renaming onto an existing name merges the two |
-| `bit_type_links` | `bit_id`, `type_id` (both cascade) | Many-to-many |
+| `joke_types` | `name` | Pruned whenever no joke uses it. Renaming onto an existing name merges the two |
+| `joke_type_links` | `joke_id`, `type_id` (both cascade) | Many-to-many |
 | `statuses` | `name`, `position` | Six defaults made on first sign-in; new ones are created by name when a joke uses them |
-| `bits` | `topic_id` (required), `subtopic_id` (set null), `status_id` (set null), `setup`, `punchline`, `strength` 1–5, `duration_seconds`, `hashtags` JSON, `tag_lines` JSON, `clean_rating` (clean / mild / dirty / null), `language`, `comments`, `version` (up by one per save) | Check constraints on strength and clean rating. The API sends types and status as names. `version` catches edits made on two devices |
+| `jokes` | `topic_id` (required), `subtopic_id` (set null), `status_id` (set null), `setup`, `punchline`, `strength` 1–5, `duration_seconds`, `hashtags` JSON, `tag_lines` JSON, `clean_rating` (clean / mild / dirty / null), `language`, `comments`, `version` (up by one per save) | Check constraints on strength and clean rating. The API sends types and status as names. `version` catches edits made on two devices |
 
 ### Writing
 
 | Table | Columns | Rules |
 |---|---|---|
-| `brainstorms` | `bit_id → bits` (cascade), `title`, `content`, `timer_seconds` | A **Rewrite** session on one joke |
+| `brainstorms` | `joke_id → jokes` (cascade), `title`, `content`, `timer_seconds` | A **Rewrite** session on one joke |
 | `brainstorm_versions` | `brainstorm_id` (cascade), `title`, `content`, `saved_at` | One row appended per save |
 | `observation_topics` | `name`, `position` | Separate from joke topics, in the order you drag them into |
 | `observations` | `text`, `topic_id` (set null) | Deleting the topic keeps the observation |
-| `writing_sessions` | `title`, `content`, `ink` JSON (strokes: colour, size, page, `[x, y, pressure]` points), `ink_pages` (1–20), `timer_seconds`, `bit_ids` JSON, `observation_ids` JSON, `technique_id → craft_notes` (set null) | A free **Brainstorm** session. Links are id lists; deleted targets just drop out of view. Deleting the technique keeps the session |
+| `writing_sessions` | `title`, `content`, `ink` JSON (strokes: colour, size, page, `[x, y, pressure]` points), `ink_pages` (1–20), `timer_seconds`, `joke_ids` JSON, `observation_ids` JSON, `technique_id → craft_notes` (set null) | A free **Brainstorm** session. Links are id lists; deleted targets just drop out of view. Deleting the technique keeps the session |
 | `voice_notes` | `label`, `hashtags` JSON, `duration_seconds`, `content_type`, `size_bytes`, `audio_path` | `audio_path` stays empty until the upload lands. The audio itself lives in Blob storage |
 
 ### Performing
@@ -78,7 +78,7 @@ erDiagram
 | `setlists` | `name`, `show_date`, `target_seconds` (default 900), `venue_id` (set null), `rating` (1–5 or null) | Saved whole: `PUT` replaces the items and tags in one transaction |
 | `set_tags` | `name` (unique per user, any case), `position` | Your labels for sets (In progress, Weak, Opener set...). Everyone got eight to start, once; deleting them all sticks |
 | `setlist_tag_links` | `setlist_id`, `tag_id` (both cascade) | Many-to-many. Deleting a tag takes it off its sets |
-| `setlist_items` | `setlist_id` (cascade), `bit_id` (cascade), `position`, `duration_seconds`, `optional` | Opener and closer are the first and last positions, not stored. An optional joke is one to cut if time is short; it doesn't count towards the slot |
+| `setlist_items` | `setlist_id` (cascade), `joke_id` (cascade), `position`, `duration_seconds`, `optional` | Opener and closer are the first and last positions, not stored. An optional joke is one to cut if time is short; it doesn't count towards the slot |
 | `performance_logs` | `venue_id` (set null), `performed_at` (timestamptz), `duration_seconds`, `audience_size`, `rating` 1–5, `notes`, `laughs` JSON (five counts, for laughs scored 1–5 points; null if not counted) | LPM is worked out in the browser from `laughs` and the time on stage |
 | `performance_log_topics` | `log_id`, `topic_id` (both cascade) | "Topics you did". Deleting a topic re-points its links to Thoughts |
 
@@ -136,6 +136,7 @@ migration needs a working `downgrade()`.
 [app/seed/loader.py](../app/seed/loader.py) reads the old Firestore export shape (the demo data
 uses the same shape):
 
+- The export keeps Bit Vault's own names (`bits`, `bitId`), so they stay as they are here.
 - Type strings or arrays become type links.
 - `"Xm YYs"` becomes seconds.
 - `tags` become hashtags.

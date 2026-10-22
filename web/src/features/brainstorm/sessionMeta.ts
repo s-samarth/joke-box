@@ -8,7 +8,7 @@ export function sessionName(s: WritingSession): string {
 
 export function sessionSummary(s: WritingSession): string {
   const words = s.content.trim() ? s.content.trim().split(/\s+/).length : 0
-  const links = s.bit_ids.length + s.observation_ids.length
+  const links = s.joke_ids.length + s.observation_ids.length
   return [
     words ? `${words} words` : null,
     s.ink.length ? ((s.ink_pages ?? 1) > 1 ? `${s.ink_pages} handwritten pages` : 'handwriting') : null,

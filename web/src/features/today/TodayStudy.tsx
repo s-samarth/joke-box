@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { useCraftNotes } from '../../api/craft'
 import { useAnalyses, useWatchlist } from '../../api/study'
-import { SectionHead } from '../../components/ui/bits'
+import { SectionHead } from '../../components/ui/pieces'
 
 function Tile({ to, icon, title, detail }: { to: string; icon: ReactNode; title: string; detail: string }) {
   return (

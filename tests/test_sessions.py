@@ -13,13 +13,13 @@ def put_session(client: TestClient, session_id: str, **fields: object):  # type:
 
 
 def test_create_with_ink_links_and_timer(alice: TestClient) -> None:
-    session_id, bit_id = str(uuid.uuid4()), str(uuid.uuid4())
-    response = put_session(alice, session_id, ink=[STROKE], timer_seconds=95, bit_ids=[bit_id])
+    session_id, joke_id = str(uuid.uuid4()), str(uuid.uuid4())
+    response = put_session(alice, session_id, ink=[STROKE], timer_seconds=95, joke_ids=[joke_id])
     assert response.status_code == 200
     saved = alice.get("/api/sessions").json()[0]
     assert saved["ink"][0]["points"][1] == [30, 40, 0.7]
     assert saved["timer_seconds"] == 95
-    assert saved["bit_ids"] == [bit_id]
+    assert saved["joke_ids"] == [joke_id]
 
 
 def test_update_replaces_fields(alice: TestClient) -> None:

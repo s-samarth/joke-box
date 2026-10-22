@@ -31,7 +31,7 @@ export function Textarea({ className = '', ...rest }: TextareaHTMLAttributes<HTM
 }
 
 /**
- * A textarea with no box that grows with its text: used for editing a bit in place,
+ * A textarea with no box that grows with its text: used for editing a joke in place,
  * so the page reads like the joke itself rather than a form.
  */
 export function GrowingText({ className = '', value, ...rest }: TextareaHTMLAttributes<HTMLTextAreaElement> & { value: string }) {

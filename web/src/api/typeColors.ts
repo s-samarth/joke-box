@@ -5,7 +5,7 @@ import { DEFAULT_TYPE_COLORS, NO_COLOR } from '../lib/typeColors'
 import { api } from './client'
 import { useTypes } from './library'
 import { keys } from './queryClient'
-import type { BitTypeInfo } from './types'
+import type { JokeTypeInfo } from './types'
 
 type Chosen = Record<string, string>
 
@@ -36,7 +36,7 @@ export function useSetTypeColor() {
     mutationFn: ({ name, color }: { name: string; color: string }) => api<void>('/api/types/color', 'PUT', { name, color }),
     onMutate: ({ name, color }) => {
       const key = name.toLowerCase()
-      qc.setQueryData<BitTypeInfo[]>(keys.types, (old) => old?.map((t) => (t.name.toLowerCase() === key ? { ...t, color } : t)))
+      qc.setQueryData<JokeTypeInfo[]>(keys.types, (old) => old?.map((t) => (t.name.toLowerCase() === key ? { ...t, color } : t)))
       qc.setQueryData<Chosen>(keys.typeColors, (old = {}) => ({ ...old, [key]: color }))
     },
     onSettled: () => qc.invalidateQueries({ queryKey: keys.types }),

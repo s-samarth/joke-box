@@ -5,7 +5,7 @@
  */
 import { ArrowDown, ArrowUp } from 'lucide-react'
 import type { PerformanceLog } from '../../api/types'
-import { Stars } from '../../components/ui/bits'
+import { Stars } from '../../components/ui/pieces'
 import { clock } from '../../lib/duration'
 import { formatDate } from '../../lib/time'
 import type { Sort, SortKey } from './logMath'

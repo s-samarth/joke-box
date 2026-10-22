@@ -5,43 +5,43 @@
  */
 import { Timer } from 'lucide-react'
 import { Link } from 'react-router'
-import type { Bit, Topic } from '../../api/types'
+import type { Joke, Topic } from '../../api/types'
 import { MonthSection } from '../../components/time/MonthSection'
 import { TimeRail } from '../../components/time/TimeRail'
-import { StrengthTicks, TypeLabel } from '../../components/ui/bits'
-import { topicName } from '../../lib/bitMeta'
+import { StrengthTicks, TypeLabel } from '../../components/ui/pieces'
+import { topicName } from '../../lib/jokeMeta'
 import { clock } from '../../lib/duration'
 import { groupByMonth } from '../../lib/months'
 import { formatDate } from '../../lib/time'
-import { sortDate, type SortKey } from './useBitFilters'
+import { sortDate, type SortKey } from './useJokeFilters'
 
 /** Phones: down the screen edge like the other lists. Desktop: down the right of the list column. */
 const RAIL = 'fixed right-0.5 top-[calc(4.5rem+env(safe-area-inset-top))] bottom-[calc(6rem+env(safe-area-inset-bottom))] lg:absolute lg:right-0 lg:top-0 lg:bottom-0'
 
-function BitRow({ bit, topic, active, query, edited }: { bit: Bit; topic?: Topic; active: boolean; query: string; edited: boolean }) {
+function JokeRow({ joke, topic, active, query, edited }: { joke: Joke; topic?: Topic; active: boolean; query: string; edited: boolean }) {
   return (
     <li>
-      <Link to={`/bits/${bit.id}${query ? `?${query}` : ''}`} aria-current={active ? 'page' : undefined}
+      <Link to={`/jokes/${joke.id}${query ? `?${query}` : ''}`} aria-current={active ? 'page' : undefined}
         className={`block border-l-2 py-3.5 pr-2 pl-3 transition-colors ${active ? 'border-tape bg-ink-2' : 'border-transparent hover:bg-ink-2/60'}`}>
-        <p className="line-clamp-2 leading-snug">{bit.setup}</p>
-        {bit.punchline && <p className="mt-1 line-clamp-1 text-[15px] text-dim">{bit.punchline}</p>}
+        <p className="line-clamp-2 leading-snug">{joke.setup}</p>
+        {joke.punchline && <p className="mt-1 line-clamp-1 text-[15px] text-dim">{joke.punchline}</p>}
         <div className="mt-2 flex items-center gap-x-3 gap-y-1 text-[13px] text-faint">
-          <StrengthTicks strength={bit.strength} />
-          {bit.types.slice(0, 2).map((t) => <span key={t} className="shrink-0 whitespace-nowrap"><TypeLabel name={t} /></span>)}
+          <StrengthTicks strength={joke.strength} />
+          {joke.types.slice(0, 2).map((t) => <span key={t} className="shrink-0 whitespace-nowrap"><TypeLabel name={t} /></span>)}
           <span className="truncate">{topicName(topic)}</span>
-          <span className="ml-auto shrink-0 tabular">{edited ? `Edited ${formatDate(bit.updated_at)}` : formatDate(bit.created_at)}</span>
-          {bit.duration_seconds > 0 && <span className="flex shrink-0 items-center gap-1 tabular"><Timer size={12} aria-label="Runs" />{clock(bit.duration_seconds)}</span>}
+          <span className="ml-auto shrink-0 tabular">{edited ? `Edited ${formatDate(joke.updated_at)}` : formatDate(joke.created_at)}</span>
+          {joke.duration_seconds > 0 && <span className="flex shrink-0 items-center gap-1 tabular"><Timer size={12} aria-label="Runs" />{clock(joke.duration_seconds)}</span>}
         </div>
       </Link>
     </li>
   )
 }
 
-export function BitList({ bits, topics, sort, activeId, query }: { bits: Bit[]; topics: Topic[]; sort: SortKey; activeId?: string; query: string }) {
+export function JokeList({ jokes, topics, sort, activeId, query }: { jokes: Joke[]; topics: Topic[]; sort: SortKey; activeId?: string; query: string }) {
   const dateOf = sortDate(sort)
-  const row = (b: Bit) => <BitRow key={b.id} bit={b} topic={topics.find((t) => t.id === b.topic_id)} active={b.id === activeId} query={query} edited={sort === 'edited'} />
-  if (!dateOf) return <ul className="divide-y divide-rule pb-6">{bits.map(row)}</ul>
-  const groups = groupByMonth(bits, dateOf)
+  const row = (b: Joke) => <JokeRow key={b.id} joke={b} topic={topics.find((t) => t.id === b.topic_id)} active={b.id === activeId} query={query} edited={sort === 'edited'} />
+  if (!dateOf) return <ul className="divide-y divide-rule pb-6">{jokes.map(row)}</ul>
+  const groups = groupByMonth(jokes, dateOf)
   return (
     <>
       <div className="pr-5 pb-6 lg:pr-6">

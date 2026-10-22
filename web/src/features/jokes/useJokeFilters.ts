@@ -1,12 +1,12 @@
 /**
- * Bits list state lives in the URL (?topic=&sub=&type=&status=&q=&sort=), so back, refresh and
+ * Jokes list state lives in the URL (?topic=&sub=&type=&status=&q=&sort=), so back, refresh and
  * links keep your place. Filtering runs in the browser, so it works offline.
  */
 import { useMemo } from 'react'
 import { useSearchParams } from 'react-router'
-import { useBits } from '../../api/library'
-import type { Bit } from '../../api/types'
-import { UNDEFINED_TYPE } from '../../lib/bitMeta'
+import { useJokes } from '../../api/library'
+import type { Joke } from '../../api/types'
+import { UNDEFINED_TYPE } from '../../lib/jokeMeta'
 
 export type SortKey = 'new' | 'old' | 'edited' | 'strong' | 'weak' | 'long'
 
@@ -20,22 +20,22 @@ export const SORTS: Record<SortKey, string> = {
 }
 
 /** The date a sort runs on, when it runs on one: these sorts get month headings and the time scrubber. */
-export const sortDate = (sort: SortKey): ((b: Bit) => string) | null =>
+export const sortDate = (sort: SortKey): ((b: Joke) => string) | null =>
   sort === 'edited' ? (b) => b.updated_at : sort === 'new' || sort === 'old' ? (b) => b.created_at : null
 
-export function matchesSearch(bit: Bit, q: string): boolean {
+export function matchesSearch(joke: Joke, q: string): boolean {
   if (!q) return true
   const needle = q.toLowerCase()
-  return [bit.setup, bit.punchline, bit.comments, ...bit.hashtags, ...bit.tag_lines].some((t) => t.toLowerCase().includes(needle))
+  return [joke.setup, joke.punchline, joke.comments, ...joke.hashtags, ...joke.tag_lines].some((t) => t.toLowerCase().includes(needle))
 }
 
-export function matchesType(bit: Bit, type: string | null): boolean {
+export function matchesType(joke: Joke, type: string | null): boolean {
   if (!type) return true
-  if (type === UNDEFINED_TYPE) return bit.types.length === 0
-  return bit.types.some((t) => t.toLowerCase() === type.toLowerCase())
+  if (type === UNDEFINED_TYPE) return joke.types.length === 0
+  return joke.types.some((t) => t.toLowerCase() === type.toLowerCase())
 }
 
-const SORTERS: Record<SortKey, (a: Bit, b: Bit) => number> = {
+const SORTERS: Record<SortKey, (a: Joke, b: Joke) => number> = {
   new: (a, b) => b.created_at.localeCompare(a.created_at),
   old: (a, b) => a.created_at.localeCompare(b.created_at),
   edited: (a, b) => b.updated_at.localeCompare(a.updated_at),
@@ -44,9 +44,9 @@ const SORTERS: Record<SortKey, (a: Bit, b: Bit) => number> = {
   long: (a, b) => b.duration_seconds - a.duration_seconds,
 }
 
-export function useBitFilters() {
+export function useJokeFilters() {
   const [params, setParams] = useSearchParams()
-  const { data: bits = [], isPending } = useBits()
+  const { data: jokes = [], isPending } = useJokes()
   const f = {
     topic: params.get('topic'),
     sub: params.get('sub'),
@@ -67,7 +67,7 @@ export function useBitFilters() {
 
   const visible = useMemo(
     () =>
-      bits
+      jokes
         .filter(
           (b) =>
             (!f.topic || b.topic_id === f.topic) &&
@@ -77,9 +77,9 @@ export function useBitFilters() {
             matchesSearch(b, f.q),
         )
         .sort(SORTERS[f.sort] ?? SORTERS.new),
-    [bits, f.topic, f.sub, f.type, f.status, f.q, f.sort],
+    [jokes, f.topic, f.sub, f.type, f.status, f.q, f.sort],
   )
 
   const active = Boolean(f.topic || f.type || f.status || f.q)
-  return { ...f, set, visible, total: bits.length, isPending, active, query: params.toString() }
+  return { ...f, set, visible, total: jokes.length, isPending, active, query: params.toString() }
 }

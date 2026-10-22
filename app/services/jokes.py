@@ -1,4 +1,4 @@
-"""Saving bits: resolve type and status names, and keep the type list tidy."""
+"""Saving jokes: resolve type and status names, and keep the type list tidy."""
 
 import uuid
 
@@ -6,42 +6,44 @@ from fastapi import HTTPException
 from sqlalchemy import delete, exists, func, select
 from sqlalchemy.orm import Session
 
-from app.models import Bit, BitType, Status, Subtopic, Topic, User, bit_type_links
+from app.models import Joke, JokeType, Status, Subtopic, Topic, User, joke_type_links
 from app.models.base import written_at
-from app.schemas.library import BitIn, BitOut
+from app.schemas.library import JokeIn, JokeOut
 from app.services import chains, type_colors
 
 
-def to_out(bit: Bit) -> BitOut:
-    """Flatten a bit for the API: type and status become plain names."""
-    return BitOut(
-        id=bit.id,
-        setup=bit.setup,
-        punchline=bit.punchline,
-        topic_id=bit.topic_id,
-        subtopic_id=bit.subtopic_id,
-        types=[t.name for t in bit.types],
-        status=bit.status.name if bit.status else None,
-        strength=bit.strength,
-        duration_seconds=bit.duration_seconds,
-        hashtags=list(bit.hashtags or []),
-        tag_lines=list(bit.tag_lines or []),
-        clean_rating=bit.clean_rating,  # type: ignore[arg-type]
-        language=bit.language,
-        comments=bit.comments,
-        follows_id=bit.follows_id,
-        version=bit.version,
-        created_at=bit.created_at,
-        updated_at=bit.updated_at,
+def to_out(joke: Joke) -> JokeOut:
+    """Flatten a joke for the API: type and status become plain names."""
+    return JokeOut(
+        id=joke.id,
+        setup=joke.setup,
+        punchline=joke.punchline,
+        topic_id=joke.topic_id,
+        subtopic_id=joke.subtopic_id,
+        types=[t.name for t in joke.types],
+        status=joke.status.name if joke.status else None,
+        strength=joke.strength,
+        duration_seconds=joke.duration_seconds,
+        hashtags=list(joke.hashtags or []),
+        tag_lines=list(joke.tag_lines or []),
+        clean_rating=joke.clean_rating,  # type: ignore[arg-type]
+        language=joke.language,
+        comments=joke.comments,
+        follows_id=joke.follows_id,
+        version=joke.version,
+        created_at=joke.created_at,
+        updated_at=joke.updated_at,
     )
 
 
-def get_or_create_type(db: Session, user: User, name: str) -> BitType:
+def get_or_create_type(db: Session, user: User, name: str) -> JokeType:
     found = db.scalar(
-        select(BitType).where(BitType.user_id == user.id, func.lower(BitType.name) == name.lower())
+        select(JokeType).where(
+            JokeType.user_id == user.id, func.lower(JokeType.name) == name.lower()
+        )
     )
     if found is None:
-        found = BitType(user_id=user.id, name=name)
+        found = JokeType(user_id=user.id, name=name)
         db.add(found)
         db.flush()
         type_colors.ensure_color(db, user, name)
@@ -60,7 +62,7 @@ def get_or_create_status(db: Session, user: User, name: str) -> Status:
     return found
 
 
-def check_placement(db: Session, user: User, data: BitIn) -> None:
+def check_placement(db: Session, user: User, data: JokeIn) -> None:
     """The topic and subtopic must be the user's own, and the subtopic must sit in the topic."""
     topic = db.scalar(select(Topic).where(Topic.id == data.topic_id, Topic.user_id == user.id))
     if topic is None:
@@ -71,7 +73,7 @@ def check_placement(db: Session, user: User, data: BitIn) -> None:
             raise HTTPException(422, "Subtopic does not belong to that topic")
 
 
-def plain_fields(data: BitIn) -> dict[str, object]:
+def plain_fields(data: JokeIn) -> dict[str, object]:
     """The fields copied as they are. An app too old to know about chains leaves follows_id out,
     and then the link is kept rather than cleared."""
     skip = {"types", "status", "created_at", "base_version"}
@@ -80,30 +82,30 @@ def plain_fields(data: BitIn) -> dict[str, object]:
     return data.model_dump(exclude=skip)
 
 
-def apply(db: Session, user: User, bit: Bit, data: BitIn) -> None:
-    """Copy editor fields onto the bit, creating any new type or status by name."""
+def apply(db: Session, user: User, joke: Joke, data: JokeIn) -> None:
+    """Copy editor fields onto the joke, creating any new type or status by name."""
     check_placement(db, user, data)
     fields = plain_fields(data)
     if "follows_id" in fields:
-        chains.check_follows(db, user, bit.id, data.follows_id)
+        chains.check_follows(db, user, joke.id, data.follows_id)
     for key, value in fields.items():
-        setattr(bit, key, value)
-    if data.created_at and bit.created_at is None:
+        setattr(joke, key, value)
+    if data.created_at and joke.created_at is None:
         # A joke brought in with its old date (an import), or written offline, was last changed
         # when it was written, not when it reached the server.
-        bit.created_at = bit.updated_at = written_at(data.created_at)
-    seen: dict[str, BitType] = {}
+        joke.created_at = joke.updated_at = written_at(data.created_at)
+    seen: dict[str, JokeType] = {}
     for name in data.types:
         if name.lower() != "undefined":
             seen.setdefault(name.lower(), get_or_create_type(db, user, name))
-    bit.types = list(seen.values())
-    bit.status = get_or_create_status(db, user, data.status) if data.status else None
+    joke.types = list(seen.values())
+    joke.status = get_or_create_status(db, user, data.status) if data.status else None
 
 
 def prune_unused_types(db: Session, user: User) -> None:
-    """A type exists only while some bit uses it, as in the original app."""
-    used = exists().where(bit_type_links.c.type_id == BitType.id)
-    db.execute(delete(BitType).where(BitType.user_id == user.id, ~used))
+    """A type exists only while some joke uses it, as in the original app."""
+    used = exists().where(joke_type_links.c.type_id == JokeType.id)
+    db.execute(delete(JokeType).where(JokeType.user_id == user.id, ~used))
 
 
 CONFLICT = "This joke was changed on another device after you edited it."
@@ -114,9 +116,9 @@ def type_names(names: list[str]) -> set[str]:
     return {n.lower() for n in names if n.lower() != "undefined"}
 
 
-def same_content(bit: Bit, data: BitIn) -> bool:
+def same_content(joke: Joke, data: JokeIn) -> bool:
     """Would this save leave the joke as it is? Then a stale version is harmless (a retry)."""
-    now = to_out(bit)
+    now = to_out(joke)
     return (
         all(getattr(now, k) == v for k, v in plain_fields(data).items())
         and type_names(now.types) == type_names(data.types)
@@ -124,7 +126,7 @@ def same_content(bit: Bit, data: BitIn) -> bool:
     )
 
 
-def check_version(existing: Bit, data: BitIn) -> None:
+def check_version(existing: Joke, data: JokeIn) -> None:
     """Refuse an edit made from an older version that would overwrite someone else's change."""
     if data.base_version is None or data.base_version == existing.version:
         return
@@ -132,16 +134,16 @@ def check_version(existing: Bit, data: BitIn) -> None:
         raise HTTPException(409, CONFLICT)
 
 
-def save(db: Session, user: User, bit_id: uuid.UUID, data: BitIn, existing: Bit | None) -> Bit:
+def save(db: Session, user: User, joke_id: uuid.UUID, data: JokeIn, existing: Joke | None) -> Joke:
     """Create or update in one transaction."""
     if existing is not None:
         check_version(existing, data)
         existing.version += 1
-    bit = existing or Bit(id=bit_id, user_id=user.id)
-    apply(db, user, bit, data)
-    db.add(bit)  # after apply, so lookups inside it don't flush a half-filled bit
+    joke = existing or Joke(id=joke_id, user_id=user.id)
+    apply(db, user, joke, data)
+    db.add(joke)  # after apply, so lookups inside it don't flush a half-filled joke
     db.flush()
     prune_unused_types(db, user)
     db.commit()
-    db.refresh(bit)
-    return bit
+    db.refresh(joke)
+    return joke

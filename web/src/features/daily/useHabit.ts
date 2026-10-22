@@ -1,14 +1,14 @@
 /** The daily joke habit, worked out from the cached jokes list, so it updates the moment you save one. */
 import { useMemo } from 'react'
-import { useBits } from '../../api/library'
+import { useJokes } from '../../api/library'
 import { useToday } from '../../lib/useToday'
 import { habit, jokesByDay } from './dailyMath'
 
 export function useHabit() {
-  const { data: bits, isPending } = useBits()
+  const { data: jokes, isPending } = useJokes()
   const today = useToday()
   return useMemo(() => {
-    const days = jokesByDay(bits ?? [])
+    const days = jokesByDay(jokes ?? [])
     return { days, today, habit: habit(days.keys(), today), loading: isPending }
-  }, [bits, today, isPending])
+  }, [jokes, today, isPending])
 }

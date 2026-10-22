@@ -17,7 +17,7 @@ export interface NavItem {
 }
 
 const home: NavItem = { to: '/', label: 'Home', icon: Home, end: true }
-const jokes: NavItem = { to: '/bits', label: 'Jokes', icon: StickyNote }
+const jokes: NavItem = { to: '/jokes', label: 'Jokes', icon: StickyNote }
 const daily: NavItem = { to: '/daily', label: 'Daily joke', icon: CalendarCheck, hint: 'One new joke a day, ticked off' }
 const sets: NavItem = { to: '/sets', label: 'Sets', icon: ListOrdered, hint: 'Build a setlist and run it on stage' }
 const voice: NavItem = { to: '/voice', label: 'Voice notes', icon: AudioLines, hint: 'Record an idea out loud' }
@@ -26,7 +26,7 @@ const brainstorm: NavItem = { to: '/brainstorm', label: 'Brainstorm', icon: PenL
 const shows: NavItem = { to: '/shows', label: 'Shows', icon: Mic, hint: 'Log a mic and see how sets went' }
 const craft: NavItem = { to: '/craft', label: 'Craft', icon: GraduationCap, hint: 'What you know about doing stand-up' }
 const watchlist: NavItem = { to: '/watchlist', label: 'Watchlist', icon: ListChecks, hint: 'Routines to study' }
-const analysis: NavItem = { to: '/analysis', label: 'Analysis', icon: NotebookPen, hint: 'Your write-ups of sets and bits' }
+const analysis: NavItem = { to: '/analysis', label: 'Analysis', icon: NotebookPen, hint: 'Your write-ups of sets and jokes' }
 const links: NavItem = { to: '/links', label: 'External links', icon: ExternalLink, hint: 'Your persona site and Comedy Atlas' }
 const trash: NavItem = { to: '/trash', label: 'Trash', icon: Trash2, hint: 'What you deleted, kept for 30 days' }
 

@@ -1,4 +1,4 @@
-/** Display rules for bits: strength words, Thoughts, and editor suggestions. Type colours: typeColors.ts. */
+/** Display rules for jokes: strength words, Thoughts, and editor suggestions. Type colours: typeColors.ts. */
 import type { CleanRating, Topic } from '../api/types'
 
 export const UNDEFINED_TYPE = 'Undefined'

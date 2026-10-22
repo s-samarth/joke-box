@@ -71,14 +71,14 @@ class Setlist(OwnedMixin, Base):
 
 
 class SetlistItem(IdMixin, Base):
-    """One bit in a set. Opener and closer are simply the first and last positions."""
+    """One joke in a set. Opener and closer are simply the first and last positions."""
 
     __tablename__ = "setlist_items"
 
     setlist_id: Mapped[uuid.UUID] = mapped_column(
         Uuid, ForeignKey("setlists.id", ondelete="CASCADE"), index=True
     )
-    bit_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("bits.id", ondelete="CASCADE"))
+    joke_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("jokes.id", ondelete="CASCADE"))
     position: Mapped[int] = mapped_column(Integer)
     duration_seconds: Mapped[int] = mapped_column(Integer, default=0)
     # Optional: a joke to cut if time is short. It doesn't count towards the slot.

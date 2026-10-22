@@ -1,25 +1,25 @@
-/** Pick bits for a set: search, filter by topic and type, tap + (or drag on desktop). Tap a bit to read it. */
+/** Pick jokes for a set: search, filter by topic and type, tap + (or drag on desktop). Tap a joke to read it. */
 import { useDraggable } from '@dnd-kit/core'
 import { Check, Plus, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { useBits, useTopics } from '../../api/library'
-import type { Bit } from '../../api/types'
-import { StrengthTicks } from '../../components/ui/bits'
+import { useJokes, useTopics } from '../../api/library'
+import type { Joke } from '../../api/types'
+import { StrengthTicks } from '../../components/ui/pieces'
 import { Input, Select } from '../../components/ui/Field'
-import { UNDEFINED_TYPE, topicName } from '../../lib/bitMeta'
+import { UNDEFINED_TYPE, topicName } from '../../lib/jokeMeta'
 import { clock } from '../../lib/duration'
-import { matchesSearch, matchesType } from '../bits/useBitFilters'
+import { matchesSearch, matchesType } from '../jokes/useJokeFilters'
 
 // Keys pressed on a button inside a draggable row shouldn't start a keyboard drag of the row.
 const own = { onKeyDown: (e: React.KeyboardEvent) => e.stopPropagation() }
 
-function Candidate({ bit, used, onAdd, onOpen, draggable }: { bit: Bit; used: boolean; onAdd: () => void; onOpen: () => void; draggable: boolean }) {
-  const { attributes, listeners, setNodeRef } = useDraggable({ id: `lib:${bit.id}`, disabled: used || !draggable })
+function Candidate({ joke, used, onAdd, onOpen, draggable }: { joke: Joke; used: boolean; onAdd: () => void; onOpen: () => void; draggable: boolean }) {
+  const { attributes, listeners, setNodeRef } = useDraggable({ id: `lib:${joke.id}`, disabled: used || !draggable })
   return (
     <li ref={setNodeRef} {...(draggable ? { ...listeners, ...attributes } : {})} className={`flex items-center gap-3 py-2.5 ${used ? 'opacity-40' : draggable ? 'cursor-grab' : ''}`}>
-      <button type="button" onClick={onOpen} {...own} aria-label={`Read the whole joke: ${bit.setup}`} className="min-w-0 flex-1 rounded-md text-left hover:text-tape">
-        <p className="line-clamp-2 leading-snug">{bit.setup}</p>
-        <p className="mt-1 flex items-center gap-3 text-[13px] text-faint"><StrengthTicks strength={bit.strength} /><span className="tabular">{clock(bit.duration_seconds)}</span></p>
+      <button type="button" onClick={onOpen} {...own} aria-label={`Read the whole joke: ${joke.setup}`} className="min-w-0 flex-1 rounded-md text-left hover:text-tape">
+        <p className="line-clamp-2 leading-snug">{joke.setup}</p>
+        <p className="mt-1 flex items-center gap-3 text-[13px] text-faint"><StrengthTicks strength={joke.strength} /><span className="tabular">{clock(joke.duration_seconds)}</span></p>
       </button>
       <button type="button" onClick={onAdd} {...own} disabled={used} aria-label={used ? 'Already in the set' : 'Add to set'} onPointerDown={(e) => e.stopPropagation()}
         className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg bg-ink-3 text-tape hover:bg-ink-4 disabled:bg-transparent disabled:text-faint">
@@ -31,19 +31,19 @@ function Candidate({ bit, used, onAdd, onOpen, draggable }: { bit: Bit; used: bo
 
 interface Props {
   used: Set<string>
-  onAdd: (b: Bit) => void
-  onOpen: (b: Bit) => void
+  onAdd: (b: Joke) => void
+  onOpen: (b: Joke) => void
   draggable?: boolean
 }
 
-export function AddBits({ used, onAdd, onOpen, draggable = false }: Props) {
-  const { data: bits = [] } = useBits()
+export function AddJokes({ used, onAdd, onOpen, draggable = false }: Props) {
+  const { data: jokes = [] } = useJokes()
   const { data: topics = [] } = useTopics()
   const [q, setQ] = useState('')
   const [topic, setTopic] = useState('')
   const [type, setType] = useState('')
-  const types = useMemo(() => [...new Set(bits.flatMap((b) => b.types))].sort(), [bits])
-  const shown = bits
+  const types = useMemo(() => [...new Set(jokes.flatMap((b) => b.types))].sort(), [jokes])
+  const shown = jokes
     .filter((b) => (!topic || b.topic_id === topic) && matchesType(b, type || null) && matchesSearch(b, q))
     .sort((a, b) => b.strength - a.strength)
 
@@ -67,7 +67,7 @@ export function AddBits({ used, onAdd, onOpen, draggable = false }: Props) {
       <p className="text-sm text-faint">Strongest first{draggable ? '. Drag onto the set or tap +.' : '.'}</p>
       <ul className="min-h-0 flex-1 divide-y divide-rule overflow-y-auto">
         {shown.length === 0 && <li className="py-6 text-dim">No jokes match.</li>}
-        {shown.map((b) => <Candidate key={b.id} bit={b} used={used.has(b.id)} onAdd={() => onAdd(b)} onOpen={() => onOpen(b)} draggable={draggable} />)}
+        {shown.map((b) => <Candidate key={b.id} joke={b} used={used.has(b.id)} onAdd={() => onAdd(b)} onOpen={() => onOpen(b)} draggable={draggable} />)}
       </ul>
     </div>
   )

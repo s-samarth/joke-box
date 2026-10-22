@@ -1,4 +1,4 @@
-"""Creative Studio: timed brainstorm sessions on a bit, with saved versions."""
+"""Creative Studio: timed brainstorm sessions on a joke, with saved versions."""
 
 import uuid
 from datetime import datetime
@@ -13,8 +13,8 @@ from app.models.trash import Trashable
 class Brainstorm(Trashable, OwnedMixin, Base):
     __tablename__ = "brainstorms"
 
-    bit_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, ForeignKey("bits.id", ondelete="CASCADE"), index=True
+    joke_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("jokes.id", ondelete="CASCADE"), index=True
     )
     title: Mapped[str] = mapped_column(String(200), default="")
     content: Mapped[str] = mapped_column(Text, default="")

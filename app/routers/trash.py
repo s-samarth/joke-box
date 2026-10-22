@@ -8,9 +8,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.auth.deps import CurrentUser, DbSession
 from app.models import (
     Analysis,
-    Bit,
     Brainstorm,
     CraftNote,
+    Joke,
     Observation,
     PerformanceLog,
     User,
@@ -36,16 +36,16 @@ def first_line(text: str, fallback: str) -> str:
 def describe(db: DbSession, user: User, row: Trashable) -> tuple[str, str] | None:
     """A row's title and detail line, or None if it shouldn't be listed on its own."""
     match row:
-        case Bit():
+        case Joke():
             rewrites = len(svc.rewrites_of(db, row, row.deleted_at))
             detail = f"With {rewrites} rewrite{'s' * (rewrites != 1)}" if rewrites else ""
             return first_line(row.setup, "Untitled joke"), detail
         case Brainstorm():
-            bit = svc.find_any(db, Bit, row.bit_id, user)
-            if bit is None or bit.deleted_at is not None:
+            joke = svc.find_any(db, Joke, row.joke_id, user)
+            if joke is None or joke.deleted_at is not None:
                 return None  # it's in the Trash with its joke, and comes back with it
-            joke = first_line(bit.setup, "")
-            return first_line(row.title or row.content, "Untitled rewrite"), joke
+            setup = first_line(joke.setup, "")
+            return first_line(row.title or row.content, "Untitled rewrite"), setup
         case Observation():
             return first_line(row.text, "Empty observation"), ""
         case WritingSession():

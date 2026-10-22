@@ -8,7 +8,7 @@
 import { api } from '../../api/client'
 import type { CraftArea, Named, NoteKind, Topic } from '../../api/types'
 import { uploadVoiceAudio } from '../../api/voice'
-import { blankBit } from '../capture/newBit'
+import { blankJoke } from '../capture/newJoke'
 import { topicNames, type ImportPlan } from './bundle'
 
 export interface Progress {
@@ -60,13 +60,13 @@ export async function runImport(plan: ImportPlan, ctx: Context): Promise<Progres
   for (const j of plan.jokes) {
     const topicId = (j.topic && jokeTopics.get(j.topic.trim().toLowerCase())) || thoughts
     await step(`Joke "${j.setup.slice(0, 40)}"`, () =>
-      api(`/api/bits/${j.id}`, 'PUT', {
-        ...blankBit(topicId),
+      api(`/api/jokes/${j.id}`, 'PUT', {
+        ...blankJoke(topicId),
         setup: j.setup,
         punchline: j.punchline ?? '',
         types: j.types ?? [],
         hashtags: j.hashtags ?? [],
-        language: j.language ?? blankBit().language,
+        language: j.language ?? blankJoke().language,
         created_at: j.created_at,
       }),
     )

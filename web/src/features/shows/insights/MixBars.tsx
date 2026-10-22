@@ -1,7 +1,7 @@
 /**
  * How each group's nights went: one bar per group split into rough (2 stars or less, blue), okay
  * (3 stars, grey) and great (4 or more, gold), best groups first. The number beside it is the
- * group's rating against your usual, then how many shows. A bit that's half great and half rough
+ * group's rating against your usual, then how many shows. A joke that's half great and half rough
  * looks very different here from one that's always okay, which an average alone would hide.
  */
 import { long } from '../../../lib/duration'

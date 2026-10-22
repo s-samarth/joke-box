@@ -1,7 +1,7 @@
-/** A set on paper: big, numbered, with each bit's runtime and where you should be by then. */
+/** A set on paper: big, numbered, with each joke's runtime and where you should be by then. */
 import { ArrowLeft, Printer } from 'lucide-react'
 import { Link, useParams } from 'react-router'
-import { useBits } from '../../api/library'
+import { useJokes } from '../../api/library'
 import { useSetlists } from '../../api/shows'
 import { clock } from '../../lib/duration'
 import { formatDate } from '../../lib/time'
@@ -9,7 +9,7 @@ import { formatDate } from '../../lib/time'
 export function PrintView() {
   const { setId } = useParams()
   const { data: sets = [] } = useSetlists()
-  const { data: bits = [] } = useBits()
+  const { data: jokes = [] } = useJokes()
   const setlist = sets.find((s) => s.id === setId)
   if (!setlist) return <div className="p-8 text-dim">Set not found.</div>
   // When each joke ends if you do the sure ones; an optional joke is marked instead.
@@ -27,13 +27,13 @@ export function PrintView() {
         <p className="mt-2 border-b-2 border-black pb-4 text-lg">{details.join(', ')}</p>
         <ol className="mt-6 space-y-5">
           {setlist.items.map((item, i) => {
-            const bit = bits.find((b) => b.id === item.bit_id)
+            const joke = jokes.find((b) => b.id === item.joke_id)
             return (
-              <li key={item.bit_id} className="grid grid-cols-[2rem_1fr_auto] gap-4 break-inside-avoid">
+              <li key={item.joke_id} className="grid grid-cols-[2rem_1fr_auto] gap-4 break-inside-avoid">
                 <span className="text-2xl font-bold tabular">{i + 1}</span>
                 <div>
-                  <p className="font-marker text-2xl leading-snug">{bit?.setup ?? 'Deleted joke'}</p>
-                  {bit?.punchline && <p className="mt-1 text-lg leading-snug">{bit.punchline}</p>}
+                  <p className="font-marker text-2xl leading-snug">{joke?.setup ?? 'Deleted joke'}</p>
+                  {joke?.punchline && <p className="mt-1 text-lg leading-snug">{joke.punchline}</p>}
                 </div>
                 <span className="text-right text-lg tabular">{clock(item.duration_seconds)}<span className="block text-sm text-black/50">{item.optional ? 'optional' : `by ${clock(ends[i])}`}</span></span>
               </li>

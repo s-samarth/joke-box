@@ -8,14 +8,14 @@ import { useState } from 'react'
 import { newId } from '../../api/client'
 import { announceSave } from '../../lib/announce'
 import { useCraftAreas, useCraftKinds, useCraftNotes, useSaveCraftNote } from '../../api/craft'
-import { useBits, useTopics } from '../../api/library'
+import { useJokes, useTopics } from '../../api/library'
 import { useLogActions, useLogs, useSetlists, useVenues } from '../../api/shows'
 import type { PerformanceLog } from '../../api/types'
 import { Button } from '../../components/ui/Button'
 import { Field, Input, Textarea } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { Modal } from '../../components/ui/Modal'
-import { topicName } from '../../lib/bitMeta'
+import { topicName } from '../../lib/jokeMeta'
 import { clock, parse } from '../../lib/duration'
 import { formatDate, fromIstInput, toIstInput } from '../../lib/time'
 import { areaFor, kindFor, lessonFrom } from '../craft/craftMeta'
@@ -31,7 +31,7 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
   const { data: logs = [] } = useLogs()
   const { data: topics = [] } = useTopics()
   const { data: sets = [] } = useSetlists()
-  const { data: bits = [] } = useBits()
+  const { data: jokes = [] } = useJokes()
   const { save } = useLogActions()
   const { data: craft = [] } = useCraftNotes()
   const { data: areas = [] } = useCraftAreas()
@@ -54,12 +54,12 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
   const recent = [...new Set([...logs.map((l) => l.venue_name), ...venues.map((v) => v.name)])].filter((v) => v !== UNKNOWN).slice(0, 6)
 
   // Ticking a set on or off swaps its topics in or out (topics you tapped yourself stay). Time on
-  // stage is left alone: it's never exactly the set's length, with laughs to wait for and bits skipped.
+  // stage is left alone: it's never exactly the set's length, with laughs to wait for and jokes skipped.
   const toggleSet = (id: string) => {
     const next = setIds.includes(id) ? setIds.filter((x) => x !== id) : [...setIds, id]
     const chosen = sets.filter((s) => next.includes(s.id))
     setSetIds(next)
-    setTopicIds(swapTopics(topicIds, setTopics(sets.filter((s) => setIds.includes(s.id)), bits), setTopics(chosen, bits)))
+    setTopicIds(swapTopics(topicIds, setTopics(sets.filter((s) => setIds.includes(s.id)), jokes), setTopics(chosen, jokes)))
     const named = chosen.find((s) => s.venue_name)?.venue_name
     if (named && !venue) setVenue(named)
   }

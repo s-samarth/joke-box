@@ -1,7 +1,7 @@
 /**
  * Topics over time: a row per topic, a square per month, coloured by how that topic went that
  * month (brighter gold for better). Empty squares are months you didn't do it, so you can see when
- * a bit started, how often it ran, whether it got better, and when you dropped it. Topics are in
+ * a joke started, how often it ran, whether it got better, and when you dropped it. Topics are in
  * the order you first did them. Wider than a phone, so it scrolls sideways inside its card, with
  * the topic names pinned (their shadow paints over squares sliding underneath).
  */

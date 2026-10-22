@@ -1,12 +1,12 @@
-/** A bit's rewrites (Studio sessions) and the sets it's in, with a quick "add to set". */
+/** A joke's rewrites (Studio sessions) and the sets it's in, with a quick "add to set". */
 import { PenLine, Plus } from 'lucide-react'
 import { Link, useNavigate } from 'react-router'
 import { newId } from '../../api/client'
-import { useBits } from '../../api/library'
+import { useJokes } from '../../api/library'
 import { useBrainstorms, useSetlistActions, useSetlists } from '../../api/shows'
-import type { Bit } from '../../api/types'
+import type { Joke } from '../../api/types'
 import { Button } from '../../components/ui/Button'
-import { SectionHead } from '../../components/ui/bits'
+import { SectionHead } from '../../components/ui/pieces'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { Dropdown } from '../../components/ui/Menu'
 import { formatDate } from '../../lib/time'
@@ -15,22 +15,22 @@ import { setlistInput } from '../sets/setlistInput'
 
 const words = (text: string) => (text.trim() ? text.trim().split(/\s+/).length : 0)
 
-export function BitExtras({ bit }: { bit: Bit }) {
+export function JokeExtras({ joke }: { joke: Joke }) {
   const { data: brainstorms = [] } = useBrainstorms()
   const { data: sets = [] } = useSetlists()
-  const { data: bits = [] } = useBits()
+  const { data: jokes = [] } = useJokes()
   const { save } = useSetlistActions()
   const { toast } = useFeedback()
   const navigate = useNavigate()
-  const rewrites = brainstorms.filter((b) => b.bit_id === bit.id)
-  const inSets = sets.filter((s) => s.items.some((i) => i.bit_id === bit.id))
+  const rewrites = brainstorms.filter((b) => b.joke_id === joke.id)
+  const inSets = sets.filter((s) => s.items.some((i) => i.joke_id === joke.id))
   const otherSets = sets.filter((s) => !inSets.includes(s))
 
   const addTo = (setId: string | null) => {
     const target = sets.find((s) => s.id === setId)
     const id = target?.id ?? newId()
     const base = target ? setlistInput(target) : { name: 'Untitled set', show_date: null, target_seconds: 420, venue_name: null, rating: null, tag_ids: [], items: [] }
-    const added = chainItems(bit, new Map(bits.map((b) => [b.id, b])), new Set(base.items.map((i) => i.bit_id)))
+    const added = chainItems(joke, new Map(jokes.map((b) => [b.id, b])), new Set(base.items.map((i) => i.joke_id)))
     save.mutateAsync({ id, input: { ...base, items: [...base.items, ...added] } })
       .catch((e: Error) => toast(`Not added: ${e.message}`))
     const note = chainNote(added.length)
@@ -47,7 +47,7 @@ export function BitExtras({ bit }: { bit: Bit }) {
           <ul className="mb-3 divide-y divide-rule border-y border-rule">
             {rewrites.map((r) => (
               <li key={r.id}>
-                <Link to={`/bits/${bit.id}/rewrite?session=${r.id}`} className="flex items-baseline justify-between gap-3 py-3 hover:bg-ink-2/60">
+                <Link to={`/jokes/${joke.id}/rewrite?session=${r.id}`} className="flex items-baseline justify-between gap-3 py-3 hover:bg-ink-2/60">
                   <span className="truncate">{r.title || 'Untitled session'}</span>
                   <span className="shrink-0 text-sm text-faint">{words(r.content)} words, {formatDate(r.updated_at)}</span>
                 </Link>
@@ -55,7 +55,7 @@ export function BitExtras({ bit }: { bit: Bit }) {
             ))}
           </ul>
         )}
-        <Link to={`/bits/${bit.id}/rewrite`} className="inline-flex h-10 items-center gap-2 rounded-lg bg-ink-3 px-3 text-[15px] hover:bg-ink-4">
+        <Link to={`/jokes/${joke.id}/rewrite`} className="inline-flex h-10 items-center gap-2 rounded-lg bg-ink-3 px-3 text-[15px] hover:bg-ink-4">
           <PenLine size={16} /> Start a rewrite
         </Link>
       </section>

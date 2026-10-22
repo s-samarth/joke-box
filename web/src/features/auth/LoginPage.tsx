@@ -2,7 +2,7 @@
 import { Navigate, useSearchParams } from 'react-router'
 import { ApiError } from '../../api/client'
 import { useMe } from '../../api/library'
-import { Tape } from '../../components/ui/bits'
+import { Tape } from '../../components/ui/pieces'
 import { useWaiting } from '../../layout/useWaiting'
 
 const ERRORS: Record<string, string> = {

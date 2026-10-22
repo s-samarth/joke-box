@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Bit } from '../../api/types'
+import type { Joke } from '../../api/types'
 import { daysBetween, habit, jokesByDay, monthWeeks, moodFor, shiftMonth } from './dailyMath'
 
 const TODAY = '2026-10-21'
@@ -17,8 +17,8 @@ describe('daily joke habit', () => {
   })
 
   it('reads days in IST and ignores duplicates', () => {
-    const bit = (created_at: string) => ({ id: created_at, created_at }) as Bit
-    const days = jokesByDay([bit('2026-10-20T19:00:00Z'), bit('2026-10-21T05:00:00Z')])
+    const joke = (created_at: string) => ({ id: created_at, created_at }) as Joke
+    const days = jokesByDay([joke('2026-10-20T19:00:00Z'), joke('2026-10-21T05:00:00Z')])
     expect([...days.keys()]).toEqual(['2026-10-21']) // 19:00 UTC on the 20th is past midnight IST
     expect(days.get('2026-10-21')).toHaveLength(2)
     expect(habit(['2026-10-21', '2026-10-21'], TODAY).current).toBe(1)

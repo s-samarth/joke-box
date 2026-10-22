@@ -6,9 +6,9 @@ Sets, stage, print, shows and the study screens. The frame, capture and writing 
 ## Sets: `/sets` and `/sets/:setId`
 
 [SetsPage.tsx](../web/src/features/sets/SetsPage.tsx), [SetBuilder.tsx](../web/src/features/sets/SetBuilder.tsx),
-[TapeRow.tsx](../web/src/features/sets/TapeRow.tsx), [SetMeta.tsx](../web/src/features/sets/SetMeta.tsx), [SetTagsSheet.tsx](../web/src/features/sets/SetTagsSheet.tsx), [AddBits.tsx](../web/src/features/sets/AddBits.tsx),
+[TapeRow.tsx](../web/src/features/sets/TapeRow.tsx), [SetMeta.tsx](../web/src/features/sets/SetMeta.tsx), [SetTagsSheet.tsx](../web/src/features/sets/SetTagsSheet.tsx), [AddJokes.tsx](../web/src/features/sets/AddJokes.tsx),
 [LightBar.tsx](../web/src/features/sets/LightBar.tsx), [setlistMath.ts](../web/src/features/sets/setlistMath.ts),
-[useAutosaveSet.ts](../web/src/features/sets/useAutosaveSet.ts), [BitPeek.tsx](../web/src/features/bits/BitPeek.tsx).
+[useAutosaveSet.ts](../web/src/features/sets/useAutosaveSet.ts), [JokePeek.tsx](../web/src/features/jokes/JokePeek.tsx).
 
 - **List:** sets with the soonest show first. Each card shows the date, venue, joke count, its
   stars and tags, and the light bar, with Rehearse and a ⋯ menu (Open set, Print, Delete set).
@@ -25,7 +25,7 @@ Sets, stage, print, shows and the study screens. The frame, capture and writing 
   optional jokes the same way.
 - **Your jokes:** a column on desktop and a sheet behind **Add jokes** on a phone. It has search,
   topic and type filters, and lists the strongest first; jokes already in the set are dimmed. Tap a
-  joke to read it in full (`BitPeek`).
+  joke to read it in full (`JokePeek`).
 - **Drag and drop** uses dnd-kit, with pointer, touch and keyboard sensors, so it works on phones.
 - **Saving:** the set autosaves shortly after each change.
 - **Notes on building a set** (the cap icon) opens your Craft notes from Building a set in a sheet:
@@ -89,7 +89,7 @@ each with its premise in marker, the punch, its runtime and "by m:ss" (the runni
     length for your last 10 shows, each with a green or red arrow for how it moved against the 10
     before (set length stays grey: neither way is better).
   - **Topics over time:** a row per topic and a square per month, coloured by how it went that
-    month, in the order you first did them: when a bit started, how often it ran, whether it got
+    month, in the order you first did them: when a joke started, how often it ran, whether it got
     better and when you dropped it. Squares grow to fill the card; on a phone it scrolls sideways
     with the names pinned, opening on the latest months.
   - **Topics, venues, set length and time slot** (IST start): one bar each, split into rough

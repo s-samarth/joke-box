@@ -3,7 +3,7 @@
  * however it got there: quick capture, the new joke sheet, or an import that kept its old date.
  * No extra table: it's read straight from the jokes' created dates, so it can never drift.
  */
-import type { Bit } from '../../api/types'
+import type { Joke } from '../../api/types'
 import { toIstInput } from '../../lib/time'
 
 /** How the habit is going, from the day of your last joke. */
@@ -25,9 +25,9 @@ export const daysBetween = (a: string, b: string): number => Math.round((toTime(
 export const shiftDay = (date: string, days: number): string => new Date(toTime(date) + days * DAY).toISOString().slice(0, 10)
 
 /** Jokes by the IST day they were added, oldest first within a day. */
-export function jokesByDay(bits: Bit[]): Map<string, Bit[]> {
-  const days = new Map<string, Bit[]>()
-  for (const b of [...bits].sort((x, y) => x.created_at.localeCompare(y.created_at))) {
+export function jokesByDay(jokes: Joke[]): Map<string, Joke[]> {
+  const days = new Map<string, Joke[]>()
+  for (const b of [...jokes].sort((x, y) => x.created_at.localeCompare(y.created_at))) {
     const day = toIstInput(b.created_at).slice(0, 10)
     days.set(day, [...(days.get(day) ?? []), b])
   }

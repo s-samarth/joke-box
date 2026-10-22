@@ -5,30 +5,30 @@
 import { Link2, Plus, Search, X } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { useBits } from '../../api/library'
-import type { Bit } from '../../api/types'
+import { useJokes } from '../../api/library'
+import type { Joke } from '../../api/types'
 import { Input } from '../../components/ui/Field'
 import { Modal } from '../../components/ui/Modal'
 import { laterThan } from '../../lib/chains'
-import { matchesSearch } from './useBitFilters'
+import { matchesSearch } from './useJokeFilters'
 
 const chip = 'inline-flex h-10 items-center gap-2 rounded-lg bg-ink-3 px-3 text-[15px] hover:bg-ink-4'
 
 interface Props {
   /** The joke being edited; none while writing a new one. */
-  bitId?: string
+  jokeId?: string
   value: string | null
   onChange: (id: string | null) => void
 }
 
-export function FollowsField({ bitId, value, onChange }: Props) {
-  const { data: bits = [] } = useBits()
+export function FollowsField({ jokeId, value, onChange }: Props) {
+  const { data: jokes = [] } = useJokes()
   const [picking, setPicking] = useState(false)
   const [q, setQ] = useState('')
-  const before = bits.find((b) => b.id === value)
+  const before = jokes.find((b) => b.id === value)
   // A joke can't follow itself or anything that already comes after it.
-  const later = bitId ? laterThan(bitId, bits) : new Set<string>()
-  const shown = bits.filter((b) => !later.has(b.id) && matchesSearch(b, q))
+  const later = jokeId ? laterThan(jokeId, jokes) : new Set<string>()
+  const shown = jokes.filter((b) => !later.has(b.id) && matchesSearch(b, q))
   const pick = (id: string) => {
     onChange(id)
     setPicking(false)
@@ -40,7 +40,7 @@ export function FollowsField({ bitId, value, onChange }: Props) {
       {value ? (
         <div className="space-y-2">
           {before
-            ? <Link to={`/bits/${before.id}`} className="line-clamp-2 rounded-lg bg-ink-3 px-3 py-2.5 leading-snug hover:bg-ink-4">{before.setup}</Link>
+            ? <Link to={`/jokes/${before.id}`} className="line-clamp-2 rounded-lg bg-ink-3 px-3 py-2.5 leading-snug hover:bg-ink-4">{before.setup}</Link>
             : <p className="text-dim">A joke in the Trash</p>}
           <div className="flex gap-5 text-sm">
             <button type="button" onClick={() => setPicking(true)} className="text-tape hover:underline">Change</button>
@@ -72,13 +72,13 @@ export function FollowsField({ bitId, value, onChange }: Props) {
 }
 
 /** The jokes that follow this one, as links, and a button to write another. */
-export function FollowedBy({ next, onWriteNext }: { next: Bit[]; onWriteNext: () => void }) {
+export function FollowedBy({ next, onWriteNext }: { next: Joke[]; onWriteNext: () => void }) {
   return (
     <div className="space-y-2">
       {next.length > 0 && (
         <ul className="space-y-2">
           {next.map((b) => (
-            <li key={b.id}><Link to={`/bits/${b.id}`} className="line-clamp-2 rounded-lg bg-ink-3 px-3 py-2.5 leading-snug hover:bg-ink-4">{b.setup}</Link></li>
+            <li key={b.id}><Link to={`/jokes/${b.id}`} className="line-clamp-2 rounded-lg bg-ink-3 px-3 py-2.5 leading-snug hover:bg-ink-4">{b.setup}</Link></li>
           ))}
         </ul>
       )}

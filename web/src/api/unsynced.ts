@@ -10,6 +10,7 @@ import { MutationObserver, type QueryClient } from '@tanstack/react-query'
 import { get, set } from 'idb-keyval'
 import { useSyncExternalStore } from 'react'
 import { ApiError } from './client'
+import { renamedKey } from './legacy'
 
 export interface Unsynced {
   id: string
@@ -66,11 +67,11 @@ export const clearUnsynced = () => update(() => [])
  */
 export async function retryUnsynced(client: QueryClient, item: Unsynced) {
   await discardUnsynced(item.id)
-  new MutationObserver<unknown, Error, unknown>(client, { mutationKey: item.key }).mutate(item.variables).catch(() => {})
+  new MutationObserver<unknown, Error, unknown>(client, { mutationKey: renamedKey(item.key) }).mutate(item.variables).catch(() => {})
 }
 
 const KINDS: Record<string, string> = {
-  bit: 'Joke', observation: 'Observation', session: 'Brainstorm session', watch: 'Watchlist routine',
+  joke: 'Joke', observation: 'Observation', session: 'Brainstorm session', watch: 'Watchlist routine',
   analysis: 'Analysis', craft: 'Craft note', log: 'Show', setlist: 'Set', brainstorm: 'Rewrite',
   'brainstorm-version': 'Rewrite version', voice: 'Voice note',
 }
@@ -81,7 +82,8 @@ const TRASH: Record<string, string> = { restore: 'Put back from the Trash', eras
 const WORDS = ['setup', 'punchline', 'text', 'title', 'name', 'label', 'venue_name', 'notes', 'body', 'content']
 
 /** What the item was, in words: "Joke", "Delete show", and the text you'd want to copy. */
-export function summary(key: string[], variables: unknown): { title: string; text: string } {
+export function summary(saved: string[], variables: unknown): { title: string; text: string } {
+  const key = renamedKey(saved) as string[]
   if (key[0] === 'trash') return { title: TRASH[key[1]] ?? 'Trash', text: '' }
   const kind = KINDS[key[0]] ?? 'Change'
   if (key[1] === 'delete') return { title: `Delete ${kind.toLowerCase()}`, text: '' }

@@ -9,11 +9,11 @@ import { Link, useParams, useSearchParams } from 'react-router'
 import { useSessions } from '../../api/sessions'
 import type { Stroke, WritingSession } from '../../api/types'
 import { IconButton } from '../../components/ui/Button'
-import { Spinner } from '../../components/ui/bits'
+import { Spinner } from '../../components/ui/pieces'
 import { GrowingText } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { clock } from '../../lib/duration'
-import { useTimer } from '../bits/useTimer'
+import { useTimer } from '../jokes/useTimer'
 import { INK_COLORS, INK_SIZES, pageCount, removePage, replacePage, strokesOn, undoOn } from './ink'
 import { InkCanvas, type InkTool } from './InkCanvas'
 import { InkToolbar } from './InkToolbar'
@@ -48,7 +48,7 @@ function Workspace({ id, start, technique }: { id: string; start?: WritingSessio
   // A session cached before pages existed has no ink_pages; pageCount then counts from the ink.
   const [pages, setPages] = useState(() => pageCount(start?.ink ?? [], start?.ink_pages))
   const [page, setPage] = useState(0)
-  const [bitIds, setBitIds] = useState(start?.bit_ids ?? [])
+  const [jokeIds, setJokeIds] = useState(start?.joke_ids ?? [])
   const [observationIds, setObservationIds] = useState(start?.observation_ids ?? [])
   const [techniqueId, setTechniqueId] = useState(start ? start.technique_id : technique)
   const [mode, setMode] = useState<Mode>(() => (start?.ink.length && !start.content ? 'write' : savedMode()))
@@ -56,7 +56,7 @@ function Workspace({ id, start, technique }: { id: string; start?: WritingSessio
   const [pen, setPen] = useState(savedPen)
   const timer = useTimer(start?.timer_seconds ?? 0)
   const { confirm } = useFeedback()
-  const autosave = useSessionAutosave(id, { title, content, ink, ink_pages: pages, timer_seconds: timer.seconds, bit_ids: bitIds, observation_ids: observationIds, technique_id: techniqueId ?? null })
+  const autosave = useSessionAutosave(id, { title, content, ink, ink_pages: pages, timer_seconds: timer.seconds, joke_ids: jokeIds, observation_ids: observationIds, technique_id: techniqueId ?? null })
   const words = content.trim() ? content.trim().split(/\s+/).length : 0
 
   // Wrap each setter so any edit marks the session for the next autosave.
@@ -118,11 +118,11 @@ function Workspace({ id, start, technique }: { id: string; start?: WritingSessio
           <TechniquePanel techniqueId={techniqueId ?? null} onChange={edit(setTechniqueId)} />
         </div>
         <div className="mt-4">
-          <SessionLinks bitIds={bitIds} observationIds={observationIds} onChange={(b, o) => { autosave.touch(); setBitIds(b); setObservationIds(o) }} />
+          <SessionLinks jokeIds={jokeIds} observationIds={observationIds} onChange={(b, o) => { autosave.touch(); setJokeIds(b); setObservationIds(o) }} />
         </div>
         <div className="mt-6">
           {mode === 'type' ? (
-            <GrowingText aria-label="Brainstorm" autoFocus placeholder="Write anything. Premises, angles, tags, a rant that might be a bit." className="min-h-[55dvh] text-lg leading-relaxed" value={content} onChange={(e) => edit(setContent)(e.target.value)} />
+            <GrowingText aria-label="Brainstorm" autoFocus placeholder="Write anything. Premises, angles, tags, a rant that might be a joke." className="min-h-[55dvh] text-lg leading-relaxed" value={content} onChange={(e) => edit(setContent)(e.target.value)} />
           ) : (
             <InkCanvas strokes={pageInk} page={page} onChange={(next) => editInk((all) => replacePage(all, page, next))} tool={tool} color={pen.color} size={pen.size} />
           )}

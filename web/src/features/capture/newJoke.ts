@@ -1,8 +1,8 @@
 /** Saving a freshly captured joke: sensible defaults so capture needs only the words. */
 import { useNavigate } from 'react-router'
 import { newId } from '../../api/client'
-import { useSaveBit, useTopics } from '../../api/library'
-import type { BitInput } from '../../api/types'
+import { useSaveJoke, useTopics } from '../../api/library'
+import type { JokeInput } from '../../api/types'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { announceSave } from '../../lib/announce'
 import { DEFAULT_RUNTIME } from '../../lib/duration'
@@ -11,7 +11,7 @@ import { DEFAULT_RUNTIME } from '../../lib/duration'
  * Everything a new joke starts with: Thoughts (unless you pick a topic), Incomplete, 15 seconds,
  * clean and in Hinglish.
  */
-export const blankBit = (topicId = ''): BitInput => ({
+export const blankJoke = (topicId = ''): JokeInput => ({
   setup: '',
   punchline: '',
   topic_id: topicId,
@@ -35,20 +35,20 @@ interface Options {
   onSaved?: (id: string) => void
 }
 
-export function useCaptureBit() {
-  const save = useSaveBit()
+export function useCaptureJoke() {
+  const save = useSaveJoke()
   const { data: topics = [] } = useTopics()
   const { toast } = useFeedback()
   const navigate = useNavigate()
   const thoughtsId = topics.find((t) => t.is_system)?.id
 
   /** Saves (works offline) and returns the new joke's id. */
-  return (c: Partial<BitInput> & { setup: string }, { open = false, onSaved }: Options = {}): string | null => {
+  return (c: Partial<JokeInput> & { setup: string }, { open = false, onSaved }: Options = {}): string | null => {
     const topicId = c.topic_id || thoughtsId
     if (!c.setup.trim() || !topicId) return null
     const id = newId()
-    const input: BitInput = {
-      ...blankBit(topicId),
+    const input: JokeInput = {
+      ...blankJoke(topicId),
       ...c,
       setup: c.setup.trim(),
       punchline: (c.punchline ?? '').trim(),
@@ -59,8 +59,8 @@ export function useCaptureBit() {
     // while this promise settles whenever the save does (even after an offline wait).
     const saving = save.mutateAsync({ id, input })
     saving.then(() => onSaved?.(id), (e: Error) => toast(`Not saved: ${e.message}`))
-    if (open) navigate(`/bits/${id}`)
-    else announceSave(saving, toast, 'Joke saved', { label: 'Open', onClick: () => navigate(`/bits/${id}`) })
+    if (open) navigate(`/jokes/${id}`)
+    else announceSave(saving, toast, 'Joke saved', { label: 'Open', onClick: () => navigate(`/jokes/${id}`) })
     return id
   }
 }

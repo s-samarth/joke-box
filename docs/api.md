@@ -20,6 +20,13 @@ A JSON API under `/api`, served from the same origin as the app. Running locally
 - **Errors:** `{"detail": "message"}`. 409 means a name clash (for example a topic name already in
   use) and 422 means a validation error.
 
+## Old names
+
+Jokes were called bits until October 2026. Saves can wait on a phone for months, so requests
+still accept the old `bit_id` and `bit_ids` for good. Until 2026-11-30, for app versions still open
+from before the rename, `/api/bits` answers like `/api/jokes` and responses repeat `joke_id` and
+`joke_ids` as `bit_id` and `bit_ids`. See `app/schemas/legacy.py`.
+
 ## System and auth
 
 | Method | Path | Does |
@@ -51,12 +58,12 @@ A JSON API under `/api`, served from the same origin as the app. Running locally
 | DELETE | `/api/types/{id}` | Removed from every joke |
 | GET | `/api/statuses` | In order of `position` |
 | POST | `/api/statuses` | `{name}`. Returns the existing status if the name is already used |
-| GET | `/api/bits` | Every joke, newest first |
-| GET | `/api/bits/{id}` | One joke |
-| PUT | `/api/bits/{id}` | See below. Creates any new type or status by name, and prunes types no joke uses |
-| DELETE | `/api/bits/{id}` | Cascades to its rewrites and set entries |
+| GET | `/api/jokes` | Every joke, newest first |
+| GET | `/api/jokes/{id}` | One joke |
+| PUT | `/api/jokes/{id}` | See below. Creates any new type or status by name, and prunes types no joke uses |
+| DELETE | `/api/jokes/{id}` | Cascades to its rewrites and set entries |
 
-**Joke body (`BitIn`)**
+**Joke body (`JokeIn`)**
 
 ```json
 {
@@ -89,7 +96,7 @@ trees. Following itself or a joke that comes after it, or someone else's joke, a
 Left out of the body (an older app), the link is kept as it is. A link to a joke in the Trash
 stays; erasing that joke for good clears it.
 
-The response (`BitOut`) adds `id`, `created_at` and `updated_at`, and returns `types` and
+The response (`JokeOut`) adds `id`, `created_at` and `updated_at`, and returns `types` and
 `status` as names.
 
 ## Rewrites (Studio)
@@ -97,7 +104,7 @@ The response (`BitOut`) adds `id`, `created_at` and `updated_at`, and returns `t
 | Method | Path | Body / notes |
 |---|---|---|
 | GET | `/api/brainstorms` | Every rewrite session, with its `versions` |
-| PUT | `/api/brainstorms/{id}` | `{bit_id, title, content, timer_seconds}`. Each save appends a version |
+| PUT | `/api/brainstorms/{id}` | `{joke_id, title, content, timer_seconds}`. Each save appends a version |
 | DELETE | `/api/brainstorms/{id}` | |
 | DELETE | `/api/brainstorm-versions/{id}` | Removes one saved version |
 
@@ -114,7 +121,7 @@ The response (`BitOut`) adds `id`, `created_at` and `updated_at`, and returns `t
 | PATCH | `/api/observation-topics/{id}` | `{name}` |
 | DELETE | `/api/observation-topics/{id}` | Its observations keep existing, with no topic |
 | GET | `/api/sessions` | Brainstorm sessions |
-| PUT | `/api/sessions/{id}` | `{title, content, ink[], ink_pages, timer_seconds, bit_ids[], observation_ids[], technique_id?}`. The technique must be your own craft note |
+| PUT | `/api/sessions/{id}` | `{title, content, ink[], ink_pages, timer_seconds, joke_ids[], observation_ids[], technique_id?}`. The technique must be your own craft note |
 | DELETE | `/api/sessions/{id}` | |
 
 `ink` holds at most 10,000 strokes, each `{color, size, page, points: [[x, y, pressure], …]}`, with
@@ -141,7 +148,7 @@ On a deployment without a Blob store, these answer **503**.
 | POST | `/api/venues` | `{name}`. Returns the existing venue if the name is already used |
 | DELETE | `/api/venues/{id}?move_to=` | 409 if shows or sets use it and `move_to` is missing; with `move_to` (another of your venues), they move there first, then the venue is deleted |
 | GET | `/api/setlists` | Most recently edited first, with `items` and `venue_name` |
-| PUT | `/api/setlists/{id}` | `{name, show_date?, target_seconds, venue_name?, rating?, tag_ids[], items: [{bit_id, duration_seconds, optional}]}`. `rating` is 1–5 or null. The items and tags are replaced as a whole, items in the order sent. Jokes in the Trash keep their places |
+| PUT | `/api/setlists/{id}` | `{name, show_date?, target_seconds, venue_name?, rating?, tag_ids[], items: [{joke_id, duration_seconds, optional}]}`. `rating` is 1–5 or null. The items and tags are replaced as a whole, items in the order sent. Jokes in the Trash keep their places |
 | DELETE | `/api/setlists/{id}` | |
 | GET | `/api/set-tags` | Your set tags, in order |
 | POST | `/api/set-tags` | `{name}`. Goes last. 409 if the name is taken |
@@ -152,7 +159,7 @@ On a deployment without a Blob store, these answer **503**.
 | DELETE | `/api/logs/{id}` | |
 
 The venue is given by name and created if it's new; it defaults to "Unidentified Venue".
-Every `bit_id` and `topic_id` must belong to you (otherwise 404).
+Every `joke_id` and `topic_id` must belong to you (otherwise 404).
 
 ## Study
 

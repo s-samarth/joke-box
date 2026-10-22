@@ -1,7 +1,7 @@
 /** Today's observation log: a box for what you noticed, and the last few you logged. */
 import { Link } from 'react-router'
 import { useObservations } from '../../api/notebook'
-import { SectionHead } from '../../components/ui/bits'
+import { SectionHead } from '../../components/ui/pieces'
 import { ObservationBox } from '../observations/ObservationBox'
 import { ObservationList } from '../observations/ObservationList'
 

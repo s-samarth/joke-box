@@ -1,24 +1,24 @@
 /**
- * Rehearse or perform: the set taped down in big marker, the current bit bright and the rest
+ * Rehearse or perform: the set taped down in big marker, the current joke bright and the rest
  * dimmed. The clock follows the open-mic light: amber with a minute to go, red when you're over.
- * Tap the right side for the next bit, the left to go back. The screen stays awake.
+ * Tap the right side for the next joke, the left to go back. The screen stays awake.
  */
 import { GraduationCap, Pause, Play, RotateCcw, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router'
-import { useBits } from '../../api/library'
+import { useJokes } from '../../api/library'
 import { useSetlists } from '../../api/shows'
-import { Tape } from '../../components/ui/bits'
+import { Tape } from '../../components/ui/pieces'
 import { clock } from '../../lib/duration'
 import { useWakeLock } from '../../lib/useWakeLock'
-import { useTimer } from '../bits/useTimer'
+import { useTimer } from '../jokes/useTimer'
 import { CraftSheet } from '../craft/CraftSheet'
 import { lightState } from './setlistMath'
 
 export function StageView() {
   const { setId } = useParams()
   const { data: sets = [] } = useSetlists()
-  const { data: bits = [] } = useBits()
+  const { data: jokes = [] } = useJokes()
   const [index, setIndex] = useState(0)
   const [notes, setNotes] = useState(false)
   const timer = useTimer()
@@ -31,7 +31,7 @@ export function StageView() {
 
   const setlist = sets.find((s) => s.id === setId)
   if (!setlist) return <div className="p-8 text-dim">Set not found. <Link to="/sets" className="text-tape">Back to sets</Link></div>
-  const items = setlist.items.map((i) => ({ ...i, bit: bits.find((b) => b.id === i.bit_id) }))
+  const items = setlist.items.map((i) => ({ ...i, joke: jokes.find((b) => b.id === i.joke_id) }))
   const state = lightState(timer.seconds, setlist.target_seconds)
   const go = (d: number) => setIndex((i) => Math.min(Math.max(i + d, 0), items.length - 1))
   const clockTone = state === 'over' ? 'text-light light-pulse' : state === 'light' ? 'text-amber' : 'text-paper'
@@ -56,13 +56,13 @@ export function StageView() {
         <ol className="h-full space-y-5 overflow-y-auto px-5 py-[30vh] sm:px-16">
           {items.length === 0 && <li className="text-xl text-dim">This set is empty.</li>}
           {items.map((it, i) => (
-            <li key={it.bit_id} ref={i === index ? current : undefined} aria-current={i === index ? 'step' : undefined}>
+            <li key={it.joke_id} ref={i === index ? current : undefined} aria-current={i === index ? 'step' : undefined}>
               <Tape seed={i} dim={i !== index} optional={it.optional} className={`px-5 py-4 transition ${i === index ? 'text-3xl sm:text-5xl' : 'text-2xl sm:text-3xl'}`}>
                 {it.optional && <span className="mr-2 text-[0.6em] opacity-60">Optional:</span>}
-                {it.bit?.setup ?? 'Deleted joke'}
+                {it.joke?.setup ?? 'Deleted joke'}
               </Tape>
-              {i === index && it.bit?.punchline && <p className="mt-3 px-2 text-xl leading-snug text-paper/85 sm:text-2xl">{it.bit.punchline}</p>}
-              {i === index && it.bit?.tag_lines.map((t, n) => <p key={n} className="mt-1 px-2 text-lg text-dim">+ {t}</p>)}
+              {i === index && it.joke?.punchline && <p className="mt-3 px-2 text-xl leading-snug text-paper/85 sm:text-2xl">{it.joke.punchline}</p>}
+              {i === index && it.joke?.tag_lines.map((t, n) => <p key={n} className="mt-1 px-2 text-lg text-dim">+ {t}</p>)}
             </li>
           ))}
         </ol>

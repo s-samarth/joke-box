@@ -12,7 +12,7 @@ import type { WritingSessionInput } from '../../api/types'
 const DELAY_MS = 1200
 
 const isEmpty = (s: WritingSessionInput) =>
-  !s.title.trim() && !s.content.trim() && !s.ink.length && !s.bit_ids.length && !s.observation_ids.length
+  !s.title.trim() && !s.content.trim() && !s.ink.length && !s.joke_ids.length && !s.observation_ids.length
 
 export function useSessionAutosave(id: string, input: WritingSessionInput) {
   const save = useSaveSession()
@@ -31,12 +31,12 @@ export function useSessionAutosave(id: string, input: WritingSessionInput) {
   }, [id])
 
   // Everything except the ticking timer schedules a save; the timer is saved along with them.
-  const { title, content, ink, ink_pages, bit_ids, observation_ids, technique_id } = input
+  const { title, content, ink, ink_pages, joke_ids, observation_ids, technique_id } = input
   useEffect(() => {
     if (!dirty.current) return
     const t = setTimeout(flush, DELAY_MS)
     return () => clearTimeout(t)
-  }, [title, content, ink, ink_pages, bit_ids, observation_ids, technique_id, flush])
+  }, [title, content, ink, ink_pages, joke_ids, observation_ids, technique_id, flush])
 
   useEffect(() => flush, [flush])
 

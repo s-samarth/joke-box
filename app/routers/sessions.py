@@ -40,7 +40,7 @@ def put_session(
     session.ink = data["ink"]
     session.ink_pages = data["ink_pages"]
     session.timer_seconds = data["timer_seconds"]
-    session.bit_ids = data["bit_ids"]
+    session.joke_ids = data["joke_ids"]
     session.observation_ids = data["observation_ids"]
     session.technique_id = body.technique_id
     db.commit()

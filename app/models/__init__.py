@@ -4,13 +4,13 @@ from app.models.base import Base
 from app.models.craft import CraftArea, CraftNote, NoteKind
 from app.models.library import (
     RANDOM_TOPIC,
-    Bit,
-    BitType,
+    Joke,
+    JokeType,
     Status,
     Subtopic,
     Topic,
     TypeColor,
-    bit_type_links,
+    joke_type_links,
 )
 from app.models.notebook import Observation, ObservationTopic, WritingSession
 from app.models.shows import (
@@ -31,8 +31,8 @@ __all__ = [
     "RANDOM_TOPIC",
     "Analysis",
     "Base",
-    "Bit",
-    "BitType",
+    "Joke",
+    "JokeType",
     "Brainstorm",
     "BrainstormVersion",
     "CraftArea",
@@ -53,7 +53,7 @@ __all__ = [
     "VoiceNote",
     "WatchItem",
     "WritingSession",
-    "bit_type_links",
+    "joke_type_links",
     "performance_log_topics",
     "setlist_tag_links",
 ]

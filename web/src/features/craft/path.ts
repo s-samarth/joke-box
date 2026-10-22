@@ -2,7 +2,7 @@
  * Where you are on your path: the first Path note with tick boxes still to tick, its next step,
  * and, when that step names minutes, how much solid material you have on one topic so far.
  */
-import type { Bit, CraftNote } from '../../api/types'
+import type { Joke, CraftNote } from '../../api/types'
 import { listItems, type ListItem } from './bodyFormat'
 
 export interface NextStep {
@@ -33,9 +33,9 @@ export function targetMinutes(text: string): number | null {
 export const SOLID = 4
 
 /** The topic with the most solid material, by total runtime. */
-export function mostSolidTopic(bits: Bit[]): { topicId: string; seconds: number } | null {
+export function mostSolidTopic(jokes: Joke[]): { topicId: string; seconds: number } | null {
   const byTopic = new Map<string, number>()
-  for (const b of bits) if (b.strength >= SOLID) byTopic.set(b.topic_id, (byTopic.get(b.topic_id) ?? 0) + b.duration_seconds)
+  for (const b of jokes) if (b.strength >= SOLID) byTopic.set(b.topic_id, (byTopic.get(b.topic_id) ?? 0) + b.duration_seconds)
   const best = [...byTopic.entries()].sort((a, b) => b[1] - a[1])[0]
   return best && best[1] > 0 ? { topicId: best[0], seconds: best[1] } : null
 }

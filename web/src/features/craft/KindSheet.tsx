@@ -49,7 +49,7 @@ export function KindSheet({ kind, kinds, noteCount, onClose, onCreated }: Props)
     <Modal open onOpenChange={(o) => !o && onClose()} title={kind ? 'Edit kind' : 'New kind'}
       footer={<><Button variant="quiet" onClick={onClose}>Cancel</Button><Button variant="tape" onClick={save} disabled={!form.name.trim() || create.isPending || update.isPending}>{kind ? 'Save kind' : 'Add kind'}</Button></>}>
       <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); save() }}>
-        <Field label="Name"><Input value={form.name} maxLength={60} placeholder="e.g. Exercise, Quote, Bit breakdown" onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
+        <Field label="Name"><Input value={form.name} maxLength={60} placeholder="e.g. Exercise, Quote, Joke breakdown" onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
         <fieldset className="space-y-2">
           <legend className="mb-2 text-sm text-dim">Works like</legend>
           {BEHAVIOURS.map((b) => {

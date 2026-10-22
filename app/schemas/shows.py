@@ -3,7 +3,9 @@
 import uuid
 from datetime import date, datetime
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
+
+from app.schemas.legacy import JOKE_ID
 
 
 class VenueOut(BaseModel):
@@ -15,7 +17,7 @@ class VenueOut(BaseModel):
 
 
 class SetlistItemIn(BaseModel):
-    bit_id: uuid.UUID
+    joke_id: uuid.UUID = Field(validation_alias=JOKE_ID)
     duration_seconds: int = Field(default=0, ge=0)
     optional: bool = False
 
@@ -33,10 +35,16 @@ class SetlistIn(BaseModel):
 class SetlistItemOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    bit_id: uuid.UUID
+    joke_id: uuid.UUID
     position: int
     duration_seconds: int
     optional: bool
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def bit_id(self) -> uuid.UUID:
+        """The old name, for app versions from before the rename (see app/schemas/legacy.py)."""
+        return self.joke_id
 
 
 class SetlistOut(BaseModel):
@@ -85,7 +93,7 @@ class LogOut(BaseModel):
 
 
 class BrainstormIn(BaseModel):
-    bit_id: uuid.UUID
+    joke_id: uuid.UUID = Field(validation_alias=JOKE_ID)
     title: str = Field(default="", max_length=200)
     content: str = ""
     timer_seconds: int = Field(default=0, ge=0)
@@ -104,12 +112,19 @@ class BrainstormOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
-    bit_id: uuid.UUID
+    joke_id: uuid.UUID
     title: str
     content: str
     timer_seconds: int
     versions: list[BrainstormVersionOut]
     created_at: datetime
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def bit_id(self) -> uuid.UUID:
+        """The old name, for app versions from before the rename (see app/schemas/legacy.py)."""
+        return self.joke_id
+
     updated_at: datetime
 
 

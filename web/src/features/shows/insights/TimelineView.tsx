@@ -4,7 +4,7 @@
  */
 import { useMemo } from 'react'
 import type { PerformanceLog } from '../../../api/types'
-import { EmptyState } from '../../../components/ui/bits'
+import { EmptyState } from '../../../components/ui/pieces'
 import { weightedRating } from '../logStats'
 import { MicCalendar } from './MicCalendar'
 import { MonthColumns } from './MonthColumns'

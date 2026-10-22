@@ -1,5 +1,5 @@
 /**
- * Write or edit one analysis: the set or bit's name, a link, and your analysis. Opened from a
+ * Write or edit one analysis: the set or joke's name, a link, and your analysis. Opened from a
  * watchlist routine (/analysis/new?watch=…), the name and link are filled in for you.
  * A saved analysis lists its takeaways: craft notes learned from it.
  */
@@ -11,7 +11,7 @@ import { useCraftNotes } from '../../api/craft'
 import { useAnalyses, useDeleteAnalysis, useSaveAnalysis, useWatchlist } from '../../api/study'
 import type { AnalysisInput } from '../../api/types'
 import { Button } from '../../components/ui/Button'
-import { Spinner } from '../../components/ui/bits'
+import { Spinner } from '../../components/ui/pieces'
 import { Field, Input, Textarea } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { announceSave } from '../../lib/announce'
@@ -44,7 +44,7 @@ function Form({ id, initial, isNew }: { id: string; initial: AnalysisInput; isNe
 
   return (
     <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); submit() }}>
-      <Field label="Name of the set or bit">
+      <Field label="Name of the set or joke">
         <Input value={form.title} maxLength={200} placeholder="e.g. Bill Burr: Sinking Cruise Ships" onChange={(e) => set({ title: e.target.value })} autoFocus={isNew && !form.title} />
       </Field>
       <Field label="Link" hint={linkOk ? undefined : 'Links start with http:// or https://'}>

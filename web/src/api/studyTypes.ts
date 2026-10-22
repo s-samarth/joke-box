@@ -20,7 +20,7 @@ export interface WatchItem extends WatchItemInput {
   updated_at: string
 }
 
-/** Your write-up of a set or an online bit. */
+/** Your write-up of a set or an online joke. */
 export interface AnalysisInput {
   title: string
   url: string

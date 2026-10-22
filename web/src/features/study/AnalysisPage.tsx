@@ -1,9 +1,9 @@
-/** Analysis: every set and online bit you've written up, newest edits first. */
+/** Analysis: every set and online joke you've written up, newest edits first. */
 import { Plus, Search } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { useAnalyses } from '../../api/study'
-import { EmptyState, PageHead, Spinner } from '../../components/ui/bits'
+import { EmptyState, PageHead, Spinner } from '../../components/ui/pieces'
 import { Input } from '../../components/ui/Field'
 import { formatDate } from '../../lib/time'
 
@@ -35,7 +35,7 @@ export function AnalysisPage() {
       <PageHead title="Analysis">{analyses.length > 0 && newButton}</PageHead>
       {analyses.length === 0 ? (
         <EmptyState title="No analyses yet" action={newButton}>
-          Watched a set or a bit online? Write down how it works: the premise, the turns, the tags, what you'd take from it. Start one from any routine on your watchlist too.
+          Watched a set or a joke online? Write down how it works: the premise, the turns, the tags, what you'd take from it. Start one from any routine on your watchlist too.
         </EmptyState>
       ) : (
         <>

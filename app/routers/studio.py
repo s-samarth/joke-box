@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.auth.deps import CurrentUser, DbSession, find_owned, get_owned
-from app.models import Bit, Brainstorm, BrainstormVersion
+from app.models import Brainstorm, BrainstormVersion, Joke
 from app.schemas.shows import BrainstormIn, BrainstormOut
 from app.services.trash import move_to_trash
 
@@ -29,12 +29,12 @@ def list_brainstorms(user: CurrentUser, db: DbSession) -> list[Brainstorm]:
 def save_brainstorm(
     brainstorm_id: uuid.UUID, body: BrainstormIn, user: CurrentUser, db: DbSession
 ) -> Brainstorm:
-    get_owned(db, Bit, body.bit_id, user)
+    get_owned(db, Joke, body.joke_id, user)
     brainstorm = find_owned(db, Brainstorm, brainstorm_id, user)
     if brainstorm is None:
-        brainstorm = Brainstorm(id=brainstorm_id, user_id=user.id, bit_id=body.bit_id)
+        brainstorm = Brainstorm(id=brainstorm_id, user_id=user.id, joke_id=body.joke_id)
         db.add(brainstorm)
-    elif brainstorm.bit_id != body.bit_id:
+    elif brainstorm.joke_id != body.joke_id:
         raise HTTPException(422, "A brainstorm can't move to another joke")
     brainstorm.title = body.title
     brainstorm.content = body.content

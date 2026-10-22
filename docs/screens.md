@@ -96,20 +96,20 @@ the jokes' created dates, so there's no separate log to fall out of step.
   when there were several; today is outlined in yellow; days to come are dimmed. Arrows move
   between months. Tap a day to list its jokes, each linking to the joke.
 
-## Jokes: `/bits` and `/bits/:bitId`
+## Jokes: `/jokes` and `/jokes/:jokeId`
 
-[BitsLayout.tsx](../web/src/features/bits/BitsLayout.tsx), [BitFilters.tsx](../web/src/features/bits/BitFilters.tsx),
-[useBitFilters.ts](../web/src/features/bits/useBitFilters.ts), [BitPage.tsx](../web/src/features/bits/BitPage.tsx),
-[BitDetails.tsx](../web/src/features/bits/BitDetails.tsx), [DetailControls.tsx](../web/src/features/bits/DetailControls.tsx),
-[TagLines.tsx](../web/src/features/bits/TagLines.tsx), [BitExtras.tsx](../web/src/features/bits/BitExtras.tsx),
-[useAutosaveBit.ts](../web/src/features/bits/useAutosaveBit.ts), [TopicManager.tsx](../web/src/features/bits/TopicManager.tsx),
-[TypeManager.tsx](../web/src/features/bits/TypeManager.tsx).
+[JokesLayout.tsx](../web/src/features/jokes/JokesLayout.tsx), [JokeFilters.tsx](../web/src/features/jokes/JokeFilters.tsx),
+[useJokeFilters.ts](../web/src/features/jokes/useJokeFilters.ts), [JokePage.tsx](../web/src/features/jokes/JokePage.tsx),
+[JokeDetails.tsx](../web/src/features/jokes/JokeDetails.tsx), [DetailControls.tsx](../web/src/features/jokes/DetailControls.tsx),
+[TagLines.tsx](../web/src/features/jokes/TagLines.tsx), [JokeExtras.tsx](../web/src/features/jokes/JokeExtras.tsx),
+[useAutosaveJoke.ts](../web/src/features/jokes/useAutosaveJoke.ts), [TopicManager.tsx](../web/src/features/jokes/TopicManager.tsx),
+[TypeManager.tsx](../web/src/features/jokes/TypeManager.tsx).
 
 - **List:** a search box ("Search words, tags, notes") and four menus: Topic (with subtopics), Type,
   Status, and Sort (Newest, Oldest, Recently edited, Strongest, Weakest, Longest). Each row shows the
   premise, the start of the punch, strength ticks, type dots, the topic, the date it was added (or
   last edited, under Recently edited) and the runtime. Sorted by a date, the list is grouped into
-  months under pinned headings, with the time scrubber down its side ([BitList.tsx](../web/src/features/bits/BitList.tsx)).
+  months under pinned headings, with the time scrubber down its side ([JokeList.tsx](../web/src/features/jokes/JokeList.tsx)).
   A joke brought in with an older date (an import) counts as last edited then, not on the day it
   arrived. The ⋯ menu has **Export as CSV** (with Created At and Edited At).
 - **Layout:** like a mail app. On desktop the selected joke opens in a pane beside the list; on a
@@ -122,7 +122,7 @@ the jokes' created dates, so there's no separate log to fall out of step.
   **Delete joke**, which asks for confirmation first.
 - **State:** the filters live in the URL (`?topic=&sub=&type=&status=&q=&sort=`). Filtering runs in
   the browser, so it works offline. Edits go into a local draft and save about a moment after you
-  stop typing, through the offline-safe bit save.
+  stop typing, through the offline-safe joke save.
 - **Topic and type managers** are sheets for renaming and deleting across every joke. Deleting a
   topic moves its jokes to Thoughts. Renaming a type onto an existing one merges the two.
 
@@ -135,19 +135,19 @@ the jokes' created dates, so there's no separate log to fall out of step.
 ## New joke sheet
 
 [CaptureProvider.tsx](../web/src/features/capture/CaptureProvider.tsx), [NewJokeForm.tsx](../web/src/features/capture/NewJokeForm.tsx),
-[newBit.ts](../web/src/features/capture/newBit.ts).
+[newJoke.ts](../web/src/features/capture/newJoke.ts).
 
 The sheet is opened by **+**, by **New joke**, or by "Turn into a joke" on an observation. It
-renders the same `BitDetails` controls as the joke page, but owns its own draft: one set of
+renders the same `JokeDetails` controls as the joke page, but owns its own draft: one set of
 controls with two owners of the state, so the two screens can't drift apart. Its buttons are
 **Save and open** and **Save joke**. A new joke starts as Incomplete, 15 seconds, Clean and in
 Hinglish. It's a bottom sheet on phones and a centred panel on desktop
 (see `Modal`).
 
-## Rewrite: `/bits/:bitId/rewrite`
+## Rewrite: `/jokes/:jokeId/rewrite`
 
-[RewritePage.tsx](../web/src/features/bits/RewritePage.tsx), [RewriteHistory.tsx](../web/src/features/bits/RewriteHistory.tsx),
-[useTimer.ts](../web/src/features/bits/useTimer.ts).
+[RewritePage.tsx](../web/src/features/jokes/RewritePage.tsx), [RewriteHistory.tsx](../web/src/features/jokes/RewriteHistory.tsx),
+[useTimer.ts](../web/src/features/jokes/useTimer.ts).
 
 A full screen with no app frame. The top bar holds close, the timer (start, pause, reset), a word
 count, **Checklists**, **+** for a new session and **Save version**. The original joke is pinned at the top, under

@@ -7,7 +7,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.auth.deps import CurrentUser, DbSession, find_owned, get_owned
-from app.models import Bit, PerformanceLog, Setlist, SetlistItem, SetTag, Topic, User, Venue
+from app.models import Joke, PerformanceLog, Setlist, SetlistItem, SetTag, Topic, User, Venue
 from app.schemas.shows import (
     LogIn,
     LogOut,
@@ -16,7 +16,7 @@ from app.schemas.shows import (
     SetlistItemOut,
     SetlistOut,
 )
-from app.services.trash import move_to_trash, trashed_bit_ids
+from app.services.trash import move_to_trash, trashed_joke_ids
 
 router = APIRouter(prefix="/api", tags=["shows"])
 
@@ -35,7 +35,7 @@ def venue_named(db: Session, user: User, name: str) -> Venue:
 
 
 def check_all_owned(
-    db: Session, model: type[Bit] | type[Topic], ids: set[uuid.UUID], user: User
+    db: Session, model: type[Joke] | type[Topic], ids: set[uuid.UUID], user: User
 ) -> None:
     found = db.scalar(select(func.count()).where(model.id.in_(ids), model.user_id == user.id))
     if found != len(ids):
@@ -52,7 +52,7 @@ def setlist_out(s: Setlist, hidden: set[uuid.UUID]) -> SetlistOut:
         venue_name=s.venue.name if s.venue else None,
         rating=s.rating,
         tag_ids=[t.id for t in s.tags],
-        items=[SetlistItemOut.model_validate(i) for i in s.items if i.bit_id not in hidden],
+        items=[SetlistItemOut.model_validate(i) for i in s.items if i.joke_id not in hidden],
         created_at=s.created_at,
         updated_at=s.updated_at,
     )
@@ -68,7 +68,7 @@ def list_setlists(user: CurrentUser, db: DbSession) -> list[SetlistOut]:
         )
         .order_by(Setlist.updated_at.desc())
     )
-    hidden = trashed_bit_ids(db, user)
+    hidden = trashed_joke_ids(db, user)
     return [setlist_out(s, hidden) for s in db.scalars(query)]
 
 
@@ -77,11 +77,11 @@ def save_setlist(
     setlist_id: uuid.UUID, body: SetlistIn, user: CurrentUser, db: DbSession
 ) -> SetlistOut:
     """Create or replace a setlist and its items in one transaction."""
-    hidden = trashed_bit_ids(db, user)
+    hidden = trashed_joke_ids(db, user)
     # A set saved offline may still list a joke deleted since on another device: it keeps its
     # place, hidden like any joke in the Trash.
-    sent = [i for i in body.items if i.bit_id not in hidden]
-    check_all_owned(db, Bit, {i.bit_id for i in sent}, user)
+    sent = [i for i in body.items if i.joke_id not in hidden]
+    check_all_owned(db, Joke, {i.joke_id for i in sent}, user)
     venue = venue_named(db, user, body.venue_name) if body.venue_name else None
     setlist = find_owned(db, Setlist, setlist_id, user) or Setlist(id=setlist_id, user_id=user.id)
     setlist.name = body.name
@@ -97,7 +97,7 @@ def save_setlist(
     items = [SetlistItemIn.model_validate(i, from_attributes=True) for i in sent]
     # Jokes in the Trash aren't sent by the app, so keep their places for when they come back.
     for away in sorted(setlist.items, key=lambda i: i.position):
-        if away.bit_id in hidden:
+        if away.joke_id in hidden:
             kept = SetlistItemIn.model_validate(away, from_attributes=True)
             items.insert(min(away.position, len(items)), kept)
     setlist.items = [SetlistItem(position=n, **item.model_dump()) for n, item in enumerate(items)]

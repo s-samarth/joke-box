@@ -2,7 +2,7 @@
 import { Star } from 'lucide-react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTypeColor } from '../../api/typeColors'
-import { strengthLabel } from '../../lib/bitMeta'
+import { strengthLabel } from '../../lib/jokeMeta'
 
 /** Strength as five ticks, like marks scratched into a notebook margin. */
 export function StrengthTicks({ strength, size = 'sm', fill = 'bg-tape' }: { strength: number; size?: 'sm' | 'lg'; fill?: string }) {
