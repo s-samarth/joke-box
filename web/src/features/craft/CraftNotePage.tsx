@@ -107,7 +107,7 @@ export function CraftNotePage() {
     setEditing(false)
   }
   const remove = async () => {
-    if (!(await confirm({ title: 'Delete this note?', message: 'It is deleted for good.', confirmLabel: 'Delete', danger: true }))) return
+    if (!(await confirm({ title: 'Delete this note?', message: 'It goes to the Trash for 30 days.', confirmLabel: 'Delete', danger: true }))) return
     del.mutate(id)
     navigate(back)
   }

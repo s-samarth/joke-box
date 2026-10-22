@@ -6,6 +6,7 @@ import type { VoiceNoteInput } from '../../api/types'
 import { useDeleteVoiceNote, useSaveVoiceDetails, useVoiceNotes } from '../../api/voice'
 import { forgetAudio } from './audioCache'
 import { discardPending, editPending, useOutbox } from './outbox'
+import { useErase } from '../../api/trash'
 
 export type NoteState = 'saved' | 'uploading' | 'waiting' | 'failed'
 
@@ -15,6 +16,8 @@ export interface NoteView extends VoiceNoteInput {
   size_bytes: number
   state: NoteState
   problem?: string
+  /** Its recording is only on this phone so far. */
+  local?: boolean
 }
 
 export function useVoiceLibrary() {
@@ -22,11 +25,12 @@ export function useVoiceLibrary() {
   const { items, uploading } = useOutbox()
   const saveDetails = useSaveVoiceDetails()
   const removeOnServer = useDeleteVoiceNote()
+  const erase = useErase()
   const pending = new Map(items.map((p) => [p.id, p]))
 
   const notes: NoteView[] = [
     ...items.map((p) => ({
-      ...p.input, id: p.id, created_at: p.created_at, size_bytes: p.bytes.byteLength, problem: p.failed,
+      ...p.input, id: p.id, created_at: p.created_at, size_bytes: p.bytes.byteLength, problem: p.failed, local: true,
       state: (p.failed ? 'failed' : uploading === p.id ? 'uploading' : 'waiting') as NoteState,
     })),
     ...server.filter((n) => !pending.has(n.id)).map((n) => ({
@@ -43,8 +47,11 @@ export function useVoiceLibrary() {
 
   const remove = async (id: string) => {
     const waiting = await discardPending(id)
-    // A note whose details already reached the server has a row there to delete too.
+    // A note whose details already reached the server has a row there to delete too. One still
+    // waiting to upload has its recording only on this phone, which goes now, so it skips the
+    // Trash: putting it back would return a note with no sound.
     if (!waiting || waiting.detailsSaved) removeOnServer.mutate(id)
+    if (waiting?.detailsSaved) erase.mutate({ kind: 'voice-notes', id })
     await forgetAudio(id)
   }
 

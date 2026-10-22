@@ -69,7 +69,7 @@ export function NoteCard({ note, areas, showArea }: { note: CraftNote; areas: Cr
     toast(`Moved to ${to.name}`)
   }
   const remove = async () => {
-    if (await confirm({ title: `Delete ${note.title}?`, message: 'The note is deleted for good.', confirmLabel: 'Delete note', danger: true })) del.mutate(note.id)
+    if (await confirm({ title: `Delete ${note.title}?`, message: 'It goes to the Trash for 30 days.', confirmLabel: 'Delete note', danger: true })) del.mutate(note.id)
   }
   const items: (MenuItem | 'divider')[] = [
     ...areas.filter((a) => a.id !== note.area_id).map((a) => ({ label: `Move to ${a.name}`, onSelect: () => moveTo(a) })),

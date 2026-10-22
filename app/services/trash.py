@@ -11,6 +11,7 @@ from datetime import timedelta
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.exc import StaleDataError
 
 from app.models import (
     Analysis,
@@ -130,11 +131,14 @@ def delete_forever(
 def empty(db: Session, user: User, store: AudioStore, older_than: timedelta | None = None) -> None:
     """Erase everything in the Trash, or only what has waited longer than `older_than`."""
     cutoff = utcnow() - older_than if older_than else None
-    for model in KINDS.values():
-        for row in trashed(db, model, user):
-            if cutoff is None or row.deleted_at <= cutoff:  # type: ignore[operator]
-                erase(db, user, row, store)
-    db.commit()
+    try:
+        for model in KINDS.values():
+            for row in trashed(db, model, user):
+                if cutoff is None or row.deleted_at <= cutoff:  # type: ignore[operator]
+                    erase(db, user, row, store)
+        db.commit()
+    except StaleDataError:
+        db.rollback()  # another request (a second tab) erased them first
 
 
 def purge_expired(db: Session, user: User, store: AudioStore) -> None:

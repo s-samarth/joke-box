@@ -31,7 +31,8 @@ export function VoiceNoteRow({ note, suggestions, onEdit, onDelete, onTag }: Pro
   const { confirm } = useFeedback()
   const status = note.problem ?? STATUS[note.state]
   const remove = async () => {
-    if (await confirm({ title: 'Delete this voice note?', message: 'The recording is deleted for good.', confirmLabel: 'Delete', danger: true })) onDelete()
+    const message = !note.local ? 'It goes to the Trash for 30 days.' : 'It hasn’t uploaded yet, so the recording is deleted for good, not kept in the Trash.'
+    if (await confirm({ title: 'Delete this voice note?', message, confirmLabel: 'Delete', danger: true })) onDelete()
   }
 
   return (

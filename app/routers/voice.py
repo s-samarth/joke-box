@@ -67,7 +67,9 @@ def put_audio(
     data: Annotated[bytes, Depends(audio_body)],
     content_type: Annotated[str, Header()] = "",
 ) -> VoiceNote:
-    note = get_owned(db, VoiceNote, note_id, user)
+    # A recording still uploading from one phone lands even if the note was deleted on another,
+    # so putting it back from the Trash brings back its sound.
+    note = get_owned(db, VoiceNote, note_id, user, in_trash=True)
     kind = content_type.split(";")[0].strip().lower()
     if not kind.startswith("audio/"):
         raise HTTPException(415, "Only audio can be uploaded")

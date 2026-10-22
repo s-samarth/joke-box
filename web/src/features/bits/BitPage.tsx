@@ -17,7 +17,7 @@ import { TagLines } from './TagLines'
 import { useAutosaveBit } from './useAutosaveBit'
 
 function Editor({ bit }: { bit: Bit }) {
-  const { draft, update } = useAutosaveBit(bit)
+  const { draft, update, flush } = useAutosaveBit(bit)
   const remove = useDeleteBit()
   const { confirm, toast } = useFeedback()
   const navigate = useNavigate()
@@ -25,8 +25,9 @@ function Editor({ bit }: { bit: Bit }) {
   const back = `/bits${params.toString() ? `?${params}` : ''}`
 
   const onDelete = async () => {
-    const ok = await confirm({ title: 'Delete this joke?', message: 'Its rewrites and its places in sets go too.', confirmLabel: 'Delete joke', danger: true })
+    const ok = await confirm({ title: 'Delete this joke?', message: 'It goes to the Trash for 30 days, with its rewrites. Put it back and it returns to its sets.', confirmLabel: 'Delete joke', danger: true })
     if (!ok) return
+    flush() // an edit still waiting saves first, so it's in the Trash too (and not sent after)
     remove.mutate(bit.id, { onError: (e) => toast(`Not deleted: ${e.message}`) })
     navigate(back)
     toast('Joke deleted')

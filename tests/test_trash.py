@@ -62,7 +62,7 @@ def test_editing_something_in_the_trash_is_refused(alice: TestClient) -> None:
     bit_id = joke(alice)
     alice.delete(f"/api/bits/{bit_id}")
     response = put_bit(alice, bit_id, setup="Edited on another device")
-    assert response.status_code == 409
+    assert response.status_code == 410
     assert "Trash" in response.json()["detail"]
 
 
@@ -108,3 +108,15 @@ def test_other_users_cannot_touch_my_trash(alice: TestClient, bob: TestClient) -
     bob.delete(f"/api/trash/jokes/{bit_id}")
     bob.delete("/api/trash")
     assert len(trash(alice)) == 1
+
+
+def test_a_set_saved_offline_with_a_trashed_joke_still_saves(alice: TestClient) -> None:
+    keep, gone = joke(alice), joke(alice)
+    set_id = str(uuid.uuid4())
+    body = {"name": "Fake set", "items": [{"bit_id": gone}, {"bit_id": keep}]}
+    alice.put(f"/api/setlists/{set_id}", json=body)
+    alice.delete(f"/api/bits/{gone}")  # on another device
+    assert alice.put(f"/api/setlists/{set_id}", json=body).status_code == 200  # the stale save
+    alice.post(f"/api/trash/jokes/{gone}/restore")
+    [back] = alice.get("/api/setlists").json()
+    assert [i["bit_id"] for i in back["items"]] == [gone, keep]

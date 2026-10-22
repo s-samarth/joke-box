@@ -14,7 +14,7 @@ from app.models.trash import INCLUDE_TRASHED, Trashable
 
 DbSession = Annotated[Session, Depends(get_db)]
 
-IN_TRASH = "This was moved to the Trash. Put it back from the Trash to change it."
+IN_TRASH = "This was moved to the Trash. Put it back from the Trash, then try again."
 
 
 def current_user(request: Request, db: DbSession) -> User:
@@ -47,11 +47,12 @@ def get_owned[T: OwnedMixin](
 def find_owned[T: OwnedMixin](
     db: Session, model: type[T], row_id: uuid.UUID, user: User
 ) -> T | None:
-    """Like get_owned for upserts: None if new, 404 if the id belongs to another user, 409 if
-    it's in the Trash (a save made on another device after it was deleted)."""
+    """Like get_owned for upserts: None if new, 404 if the id belongs to another user, 410 if
+    it's in the Trash (a save made on another device after it was deleted). 410, not 409, so
+    the app offers Retry (after putting it back) rather than Keep mine."""
     row = db.get(model, row_id, execution_options={INCLUDE_TRASHED: True})
     if row is not None and row.user_id != user.id:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"{model.__name__} not found")
     if isinstance(row, Trashable) and row.deleted_at is not None:
-        raise HTTPException(status.HTTP_409_CONFLICT, IN_TRASH)
+        raise HTTPException(status.HTTP_410_GONE, IN_TRASH)
     return row

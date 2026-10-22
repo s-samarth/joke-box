@@ -92,16 +92,25 @@ erDiagram
 
 ## What happens on delete
 
+Jokes, rewrites, observations, brainstorms, voice notes, shows, analyses, watchlist routines and
+craft notes go to the **Trash** ([models/trash.py](../app/models/trash.py)): `deleted_at` is set
+and the row stays. A filter on every ORM query hides trashed rows, so lists, counts and lookups
+never see them; the Trash asks for them explicitly. Bulk updates (moving jokes off a deleted topic,
+shows off a deleted venue) still reach them, so they stay restorable. Put back clears
+`deleted_at`. After 30 days, or on Delete now / Empty Trash, the row is erased and the effects below
+happen. Saving something that's in the Trash answers 410.
+
 | You delete | Effect |
 |---|---|
-| A joke | Its rewrites and versions go; it's removed from every set (cascade). Brainstorm links to it drop out of view |
+| A joke | To the Trash with its live rewrites (same `deleted_at`, so they come back together). Its set places stay but are hidden; saving a set keeps them where they were. Links to it from shows' lessons and brainstorms stay. Erased: its rewrites, versions and set places go (cascade) |
+| A rewrite, observation, brainstorm, show, analysis, routine or craft note | To the Trash. Links to it (a lesson's show or analysis, an analysis's routine, a brainstorm's technique) stay while it's there and clear when it's erased |
 | A topic | Its jokes move to Thoughts with no subtopic; its show links move to Thoughts; its subtopics go |
 | A subtopic | Its jokes keep their topic and lose the subtopic |
 | A type | Removed from every joke; a joke left with none shows as "Undefined" |
 | An observation topic | Its observations stay, with no topic |
 | A set | Its items go; the jokes stay |
 | A watchlist routine | Analyses of it stay, unlinked |
-| A voice note | The row and its audio file go. Deleting twice is fine (a replayed delete) |
+| A voice note | To the Trash; the audio file stays until it's erased. One whose recording hasn't uploaded yet is erased at once (the sound was only on the phone). Deleting twice is fine (a replayed delete) |
 
 All of these run in one transaction ([services/topics.py](../app/services/topics.py)).
 

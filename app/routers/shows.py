@@ -64,7 +64,11 @@ def save_setlist(
     setlist_id: uuid.UUID, body: SetlistIn, user: CurrentUser, db: DbSession
 ) -> SetlistOut:
     """Create or replace a setlist and its items in one transaction."""
-    check_all_owned(db, Bit, {i.bit_id for i in body.items}, user)
+    hidden = trashed_bit_ids(db, user)
+    # A set saved offline may still list a joke deleted since on another device: it keeps its
+    # place, hidden like any joke in the Trash.
+    sent = [i for i in body.items if i.bit_id not in hidden]
+    check_all_owned(db, Bit, {i.bit_id for i in sent}, user)
     venue = venue_named(db, user, body.venue_name) if body.venue_name else None
     setlist = find_owned(db, Setlist, setlist_id, user) or Setlist(id=setlist_id, user_id=user.id)
     setlist.name = body.name
@@ -72,8 +76,7 @@ def save_setlist(
     setlist.target_seconds = body.target_seconds
     setlist.venue = venue
     db.add(setlist)
-    hidden = trashed_bit_ids(db, user)
-    items = [(i.bit_id, i.duration_seconds) for i in body.items]
+    items = [(i.bit_id, i.duration_seconds) for i in sent]
     # Jokes in the Trash aren't sent by the app, so keep their places for when they come back.
     for away in sorted(setlist.items, key=lambda i: i.position):
         if away.bit_id in hidden:

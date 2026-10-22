@@ -18,7 +18,8 @@ visit, so the app opens fast on a phone.
 - **Phone:** a slim header (wordmark, sync icon, avatar) and a bottom bar laid out as
   **Home · Jokes · + · Shows · More**. The **+** opens the New joke sheet. **More** opens a
   bottom sheet that groups every other screen: **Write** (Voice notes, Observations,
-  Brainstorm), **Perform** (Sets) and **Study** (Watchlist, Analysis, External links). While
+  Brainstorm), **Perform** (Sets), **Study** (Watchlist, Analysis, External links) and **Deleted**
+  (Trash). While
   you're on one of those screens, the More tab shows as the current one.
 - One list in `nav.ts` feeds both the rail and the bar, so they can't drift apart.
 - **Sync light:** "All changes saved", "Saving…", or "Offline, N waiting to sync". It counts

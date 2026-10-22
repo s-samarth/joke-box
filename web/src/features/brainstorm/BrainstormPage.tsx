@@ -21,7 +21,7 @@ export function BrainstormPage() {
   const start = (technique?: string) => navigate(`/brainstorm/${newId()}${technique ? `?technique=${technique}` : ''}`)
 
   const onDelete = async (id: string) => {
-    if (!(await confirm({ title: 'Delete this session?', confirmLabel: 'Delete session', danger: true }))) return
+    if (!(await confirm({ title: 'Delete this session?', message: 'It goes to the Trash for 30 days.', confirmLabel: 'Delete session', danger: true }))) return
     remove.mutate(id, { onError: (e) => toast(`Not deleted: ${e.message}`) })
   }
 

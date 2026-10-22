@@ -13,7 +13,8 @@ A JSON API under `/api`, served from the same origin as the app. Running locally
 - **Upserts:** most resources are created and updated with `PUT /api/<resource>/<id>`, where the
   client picks the UUID. Repeating the same request is safe.
 - **Deletes** answer **204**, including when the row is already gone (so a replayed offline delete
-  succeeds).
+  succeeds). Most deletes move the row to the Trash (see below); sets and organisers are erased.
+- **In the Trash:** a save to a row in the Trash answers **410**. Put it back, then retry.
 - **Lists** return the whole collection. Filtering, searching, sorting and totals happen in the
   browser, so they work offline.
 - **Errors:** `{"detail": "message"}`. 409 means a name clash (for example a topic name already in
@@ -162,3 +163,16 @@ Every `bit_id` and `topic_id` must belong to you (otherwise 404).
 | GET | `/api/analyses` | |
 | PUT | `/api/analyses/{id}` | `{title, url, body, watch_item_id?}`. The URL must be http(s) or empty |
 | DELETE | `/api/analyses/{id}` | |
+
+## Trash
+
+Jokes, rewrites, observations, brainstorms, voice notes, shows, analyses, watchlist routines and
+craft notes wait here 30 days after they're deleted. `{kind}` is one of `jokes`, `rewrites`,
+`observations`, `brainstorms`, `voice-notes`, `shows`, `analyses`, `watchlist`, `craft-notes`.
+
+| Method | Path | Body / notes |
+|---|---|---|
+| GET | `/api/trash` | `[{kind, id, title, detail, when, deleted_at, erase_at}]`, by kind, newest first. Erases anything older than 30 days first. A joke's rewrites aren't listed on their own; `detail` says how many go with it |
+| POST | `/api/trash/{kind}/{id}/restore` | Puts it back (a joke with its rewrites, and into its sets). 404 once erased. 204 if it's not in the Trash |
+| DELETE | `/api/trash/{kind}/{id}` | Erases it now (and a voice note's audio). Only acts on things in the Trash |
+| DELETE | `/api/trash` | Empties the Trash |
