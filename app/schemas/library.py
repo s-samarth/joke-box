@@ -9,6 +9,12 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 CleanRating = Literal["clean", "mild", "dirty"]
 
 
+class OrderIn(BaseModel):
+    """Ids in the order you arranged them."""
+
+    ids: list[uuid.UUID] = Field(max_length=500)
+
+
 class NameIn(BaseModel):
     name: str = Field(min_length=1, max_length=120)
 

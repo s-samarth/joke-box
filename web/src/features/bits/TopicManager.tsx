@@ -1,10 +1,15 @@
-/** Add, rename and delete topics and subtopics. Deleting a topic moves its jokes to Thoughts. */
+/**
+ * Add, arrange, rename and delete topics and subtopics. Deleting a topic moves its jokes to
+ * Thoughts, which always stays first.
+ */
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { useBits, useTopicActions, useTopics } from '../../api/library'
+import { useReorderSubtopics, useReorderTopics } from '../../api/ordering'
 import type { Subtopic, Topic } from '../../api/types'
 import { Button, IconButton } from '../../components/ui/Button'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { Modal } from '../../components/ui/Modal'
+import { SortableList } from '../../components/ui/SortableList'
 import { topicName } from '../../lib/bitMeta'
 
 interface Props {
@@ -18,6 +23,8 @@ export function TopicManager({ open, onClose, onRemoved }: Props) {
   const { data: topics = [] } = useTopics()
   const { data: bits = [] } = useBits()
   const a = useTopicActions()
+  const reorder = useReorderTopics()
+  const reorderSubs = useReorderSubtopics()
   const { prompt, confirm, toast } = useFeedback()
   const fail = (e: Error) => toast(e.message)
   const count = (id: string) => bits.filter((b) => b.topic_id === id || b.subtopic_id === id).length
@@ -45,30 +52,41 @@ export function TopicManager({ open, onClose, onRemoved }: Props) {
     if (await confirm({ title: `Delete ${s.name}?`, message: 'Its jokes stay in the topic.', confirmLabel: 'Delete subtopic', danger: true })) a.removeSubtopic.mutate(s.id, { onSuccess: () => onRemoved?.(s.id), onError: fail })
   }
 
+  const topicRow = (t: Topic) => (
+    <div className="flex items-center gap-1">
+      <span className="min-w-0 flex-1 truncate font-medium">{topicName(t)}</span>
+      <span className="mr-2 text-sm text-faint tabular">{count(t.id)}</span>
+      <IconButton label={`Add subtopic to ${topicName(t)}`} onClick={() => addSub(t)}><Plus size={17} /></IconButton>
+      {!t.is_system && <IconButton label={`Rename ${t.name}`} onClick={() => renameTopic(t)}><Pencil size={16} /></IconButton>}
+      {!t.is_system && <IconButton label={`Delete ${t.name}`} onClick={() => deleteTopic(t)} className="hover:text-light"><Trash2 size={16} /></IconButton>}
+    </div>
+  )
+  // Each topic's subtopics are their own list: they move with the topic and reorder within it.
+  const subtopics = (t: Topic) => t.subtopics.length > 0 && (
+    <SortableList items={t.subtopics} label={(s) => s.name} onReorder={(ids) => reorderSubs.mutate({ topicId: t.id, ids }, { onError: fail })}>
+      {(s) => (
+        <div className="flex items-center gap-1 text-dim">
+          <span className="min-w-0 flex-1 truncate">{s.name}</span>
+          <span className="mr-2 text-sm text-faint tabular">{count(s.id)}</span>
+          <IconButton label={`Rename ${s.name}`} onClick={() => renameSub(s)}><Pencil size={15} /></IconButton>
+          <IconButton label={`Delete ${s.name}`} onClick={() => deleteSub(s)} className="hover:text-light"><Trash2 size={15} /></IconButton>
+        </div>
+      )}
+    </SortableList>
+  )
+  const [pinned, movable] = [topics.filter((t) => t.is_system), topics.filter((t) => !t.is_system)]
+
   return (
-    <Modal open={open} onOpenChange={(o) => !o && onClose()} title="Topics" description="Thoughts is where new jokes land. It can't be renamed or deleted."
+    <Modal open={open} onOpenChange={(o) => !o && onClose()} title="Topics" description="Drag the grips to change the order. Thoughts is where new jokes land, so it stays first and can't be renamed or deleted."
       footer={<Button variant="tape" icon={<Plus size={18} />} onClick={addTopic}>Add topic</Button>}>
-      <ul className="divide-y divide-rule">
-        {topics.map((t) => (
-          <li key={t.id} className="py-2">
-            <div className="flex items-center gap-1">
-              <span className="flex-1 font-medium">{topicName(t)}</span>
-              <span className="mr-2 text-sm text-faint tabular">{count(t.id)}</span>
-              <IconButton label={`Add subtopic to ${topicName(t)}`} onClick={() => addSub(t)}><Plus size={17} /></IconButton>
-              {!t.is_system && <IconButton label={`Rename ${t.name}`} onClick={() => renameTopic(t)}><Pencil size={16} /></IconButton>}
-              {!t.is_system && <IconButton label={`Delete ${t.name}`} onClick={() => deleteTopic(t)} className="hover:text-light"><Trash2 size={16} /></IconButton>}
-            </div>
-            {t.subtopics.map((s) => (
-              <div key={s.id} className="flex items-center gap-1 pl-5 text-dim">
-                <span className="flex-1">{s.name}</span>
-                <span className="mr-2 text-sm text-faint tabular">{count(s.id)}</span>
-                <IconButton label={`Rename ${s.name}`} onClick={() => renameSub(s)}><Pencil size={15} /></IconButton>
-                <IconButton label={`Delete ${s.name}`} onClick={() => deleteSub(s)} className="hover:text-light"><Trash2 size={15} /></IconButton>
-              </div>
-            ))}
-          </li>
+      <div className="divide-y divide-rule">
+        {pinned.map((t) => (
+          <div key={t.id} className="py-1 pl-8">{topicRow(t)}{subtopics(t)}</div>
         ))}
-      </ul>
+        <SortableList items={movable} label={topicName} onReorder={(ids) => reorder.mutate(ids, { onError: fail })} className="divide-y divide-rule" rowClassName="py-1">
+          {(t) => <>{topicRow(t)}{subtopics(t)}</>}
+        </SortableList>
+      </div>
     </Modal>
   )
 }

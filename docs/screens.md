@@ -169,7 +169,7 @@ The page has a box with topic chips and **Log it**. Below it are filter tabs (Al
 its count, No topic), then the list by month under pinned headings, **Newest first** or **Oldest first** (`?order=old`),
 with the time scrubber down the right edge. Each row's ⋯ menu offers Edit, **Turn into a joke** and
 Delete. A **Topics** button manages the observation topics, which are
-separate from joke topics; deleting one keeps its observations. The filter is `?topic=` in the URL.
+separate from joke topics: drag the grips to reorder them; deleting one keeps its observations. The filter is `?topic=` in the URL.
 
 <img src="screenshots/desktop-observations.png" alt="Observations">
 
