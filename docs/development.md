@@ -172,5 +172,14 @@ key and the export **out of the repo**.
 
 - **Icons:** `uv run python scripts/make_icons.py` writes the PWA icons and splash screens into
   `web/public/`.
-- **README screenshots** (`docs/screenshots/`): run the app against a scratch database with the demo
-  data, sign in with the local test account, and capture at 1440×900 (desktop) and 390×844 (phone).
+- **README screenshots** (`docs/screenshots/`), all made-up material:
+  1. Point `DATABASE_URL` at a scratch SQLite file, then `uv run alembic upgrade head` and
+     `uv run python -m app.seed dev@example.com` for the demo data.
+  2. Make three short audio files, `note0.m4a` to `note2.m4a`, in a folder (any sound will do,
+     e.g. `ffmpeg -f lavfi -i "anoisesrc=d=20:c=pink:a=0.5" -c:a aac note0.m4a`).
+  3. `PYTHONPATH=. uv run python scripts/screenshot_demo.py <that folder>` adds shows over six
+     months, rated and tagged sets, observations, voice notes, craft notes, a brainstorm, a
+     rewrite, the watchlist, an analysis and a few things in the Trash.
+  4. Run the app on that database, sign in with the local test account and capture at 2x:
+     1440×900 (desktop) and 390×844 (phone). Save them as WebP (`cwebp -q 82`) to keep the repo
+     small.

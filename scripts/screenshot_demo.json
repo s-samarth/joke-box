@@ -1,0 +1,78 @@
+{
+ "daily": [
+  ["My phone's screen-time report is the only thing in my life that checks on me weekly.", "Technology"],
+  ["I bought a standing desk. Now I sit at a taller desk.", "Observational"],
+  ["Every recipe blog is a memoir with a lasagna hidden at the bottom.", "Food"],
+  ["My smart watch congratulated me for standing up. Low bar, but I'll take it.", "Technology"],
+  ["Dating apps ask for my height but never my credit score. Wrong priorities.", "Dating"],
+  ["The gym is just a waiting room for the one machine everyone wants.", "Observational"],
+  ["I meal-prepped for the week. It lasted until Tuesday's lunch.", "Food"],
+  ["My landlord calls it 'cosy'. The fire inspector calls it 'a cupboard'.", "Observational"],
+  ["Autocorrect has seen me at my lowest and still capitalises Monday.", "Technology"],
+  ["A first date at a quiz night is just two people losing in public together.", "Dating"]
+ ],
+ "venues": ["The Comedy Store", "Basement Mic", "Rooftop Open Mic", "Laugh Lab"],
+ "show_notes": ["Opener landed, middle sagged.", "Hot room, everything worked.", "Tried the fridge bit cold.", "Light came early, cut the closer.", "Quiet Tuesday crowd.", ""],
+ "sets": [
+  [
+   "Thursday club spot",
+   3,
+   ["Complete", "One-liners"],
+   [0, 5, 7, 12],
+   420
+  ],
+  [
+   "Rooftop tryout",
+   null,
+   ["Weak", "Incomplete"],
+   [3, 9, 14],
+   300
+  ]
+ ],
+ "observation_topics": ["Commute", "Family", "Office"],
+ "observations": [
+  ["Everyone on the train pretends the seat next to them is reserved for an invisible friend.", "Commute"],
+  ["Cab drivers ask 'which route?' as if I have a favourite.", "Commute"],
+  ["My mum forwards every message with 'see this', never 'see this, it's fake'.", "Family"],
+  ["Family group chats are 90% good-morning images.", "Family"],
+  ["Meetings that could have been an email become emails that should have been a meeting.", "Office"],
+  ["The office fridge has a sign, a rota and still a mystery yoghurt.", "Office"],
+  ["Why do printers sense fear?", null],
+  ["Lift small talk peaks at 'which floor?'.", "Office"]
+ ],
+ "voice_notes": [
+  [
+   "Fridge bit, tag ideas",
+   ["#tags"]
+  ],
+  [
+   "Train seat rant",
+   ["#commute"]
+  ],
+  [
+   "Closer for the rooftop set",
+   ["#closer"]
+  ]
+ ],
+ "craft": [
+  ["My path to a tight 10", "Path", "Measuring and path", "- [x] Get up at two mics a week\n- [x] A tight 5 mins that works in a bad room\n- [ ] A solid 10 mins on one topic\n- [ ] Host a show\n- [ ] A 20-minute feature spot"],
+  ["Before I go up", "Checklist", "On stage", "- [x] Set list on my hand\n- [x] Phone recording\n- [ ] Water\n- [ ] Know my light"],
+  ["Joke webs", "Technique", "Generating", "Write the topic in the middle and branch out everything it touches.\n\n- What else does this word mean?\n- What's the opposite?\n- Who would hate this most?"],
+  ["Rant: hard, weird, scary, stupid", "Technique", "Generating", "Pick a topic and rant about why it's **hard**, **weird**, **scary** or **stupid**. Don't try to be funny; be honest and logical."],
+  ["Rule of three", "Reference", "Writing", "Two items set the pattern; the third breaks it."],
+  ["Openers", "Reference", "Building a set", "Point out what everyone can see. Be about the room first."]
+ ],
+ "session": {
+  "title": "Smart homes",
+  "content": "Smart fridge orders milk when I run out. Who asked it to judge my milk habits?\n\nThe lights won't turn on until I say please. My house has better manners than my flatmate.\n\nWhat if the doorbell starts screening my friends?"
+ },
+ "rewrite": {
+  "title": "Smart fridge, sharper",
+  "versions": ["So I bought a smart fridge. It knows when I'm out of milk.", "So I bought a smart fridge. It knows when I'm out of milk, and it tells my mum.", "So I bought a smart fridge. Now my milk has a better support system than I do."]
+ },
+ "analysis": "# What I noticed\n- States the opinion in the first line\n- Every tag stays in the same attitude\n- The callback at the end pays off the opener\n\n# Steal for my set\nOpen with the take, not the story.",
+ "trash": {
+  "joke": "Parking meters that only take coins from 1998.",
+  "observation": "Self-checkout machines that need a staff member to approve every carrot."
+ }
+}

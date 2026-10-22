@@ -31,10 +31,10 @@ Sets, stage, print, shows and the study screens. The frame, capture and writing 
 - **Notes on building a set** (the cap icon) opens your Craft notes from Building a set in a sheet:
   checklists tick through, everything else reads as written.
 
-<img src="screenshots/desktop-set-builder.png" alt="Set builder">
+<img src="screenshots/desktop-set-builder.webp" alt="Set builder">
 <p>
-  <img src="screenshots/phone-set-builder.png" width="230" alt="Set builder on a phone">
-  <img src="screenshots/phone-stage.png" width="230" alt="Stage mode on a phone">
+  <img src="screenshots/phone-set-builder.webp" width="230" alt="Set builder on a phone">
+  <img src="screenshots/phone-stage.webp" width="230" alt="Stage mode on a phone">
 </p>
 
 ## Stage: `/sets/:setId/stage`
@@ -48,7 +48,7 @@ the last minute and red when you're over. The screen wake lock keeps the phone a
 opens **Before you go on**: your On stage notes, like crowd work and hecklers, with checklists to
 tick through.
 
-<img src="screenshots/desktop-stage.png" alt="Stage mode">
+<img src="screenshots/desktop-stage.webp" alt="Stage mode">
 
 ## Print: `/sets/:setId/print`
 
@@ -58,7 +58,7 @@ A white page. It shows the set name, then date, venue and slot. Below that, the 
 each with its premise in marker, the punch, its runtime and "by m:ss" (the running total). A
 **Print** button opens the browser's print dialog.
 
-<img src="screenshots/desktop-print.png" alt="Print view">
+<img src="screenshots/desktop-print.webp" alt="Print view">
 
 ## Shows: `/shows`
 
@@ -115,8 +115,8 @@ each with its premise in marker, the punch, its runtime and "by m:ss" (the runni
   shows and sets move to first, which is also how to merge duplicates.
 - ⋯ → **Export as CSV**.
 
-<img src="screenshots/desktop-shows.png" alt="Shows">
-<img src="screenshots/phone-shows.png" width="230" alt="Shows on a phone">
+<img src="screenshots/desktop-shows.webp" alt="Shows">
+<img src="screenshots/phone-shows.webp" width="230" alt="Shows on a phone">
 
 ## Craft: `/craft`, `/craft/area/:areaId` and `/craft/:noteId`
 
@@ -169,7 +169,7 @@ row has a watched circle, its number, title, comedian, description and score chi
 analyse and delete. **Add routine** adds your own. The dossier loads once with
 `POST /api/watchlist/import-dossier`, which skips routines you already have.
 
-<img src="screenshots/desktop-watchlist.png" alt="Watchlist">
+<img src="screenshots/desktop-watchlist.webp" alt="Watchlist">
 
 ## Analysis: `/analysis` and `/analysis/:analysisId`
 
@@ -181,7 +181,7 @@ and the link's domain. The editor has a name, a link and the write-up, saved wit
 `/analysis/new?watch=<id>` starts one prefilled from a watchlist routine. A saved analysis lists its
 **Takeaways** (craft notes learned from it) with **Save a takeaway**.
 
-<img src="screenshots/desktop-analysis.png" alt="Analysis">
+<img src="screenshots/desktop-analysis.webp" alt="Analysis">
 
 ## External links: `/links`
 
