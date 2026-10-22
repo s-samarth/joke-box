@@ -21,6 +21,7 @@ from app.routers import (
     studio,
     system,
     topics,
+    trash,
     venues,
     voice,
     watchlist,
@@ -74,6 +75,7 @@ def create_app() -> FastAPI:
         craft_areas,
         craft_kinds,
         craft,
+        trash,
     )
     for module in routers:
         app.include_router(module.router)

@@ -11,6 +11,7 @@ from app.models.base import written_at
 from app.schemas.library import NamedOut, NameIn
 from app.schemas.notebook import ObservationIn, ObservationOut
 from app.services.topics import commit_or_conflict
+from app.services.trash import move_to_trash
 
 router = APIRouter(prefix="/api", tags=["observations"])
 
@@ -49,11 +50,7 @@ def put_observation(
 
 @router.delete("/observations/{observation_id}", status_code=204)
 def delete_observation(observation_id: uuid.UUID, user: CurrentUser, db: DbSession) -> None:
-    observation = find_owned(db, Observation, observation_id, user)
-    if observation is None:
-        return  # already gone: a replayed offline delete is fine
-    db.delete(observation)
-    db.commit()
+    move_to_trash(db, user, Observation, observation_id)
 
 
 @router.get("/observation-topics", response_model=list[NamedOut])

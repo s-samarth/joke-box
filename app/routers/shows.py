@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.auth.deps import CurrentUser, DbSession, find_owned, get_owned
 from app.models import Bit, PerformanceLog, Setlist, SetlistItem, Topic, User, Venue
 from app.schemas.shows import LogIn, LogOut, SetlistIn, SetlistItemOut, SetlistOut
+from app.services.trash import move_to_trash, trashed_bit_ids
 
 router = APIRouter(prefix="/api", tags=["shows"])
 
@@ -32,14 +33,15 @@ def check_all_owned(db: Session, model: type[Bit] | type[Topic], ids: set[uuid.U
         raise HTTPException(422, f"Unknown {model.__name__.lower()} in request")
 
 
-def setlist_out(s: Setlist) -> SetlistOut:
+def setlist_out(s: Setlist, hidden: set[uuid.UUID]) -> SetlistOut:
+    """A set as the app sees it: jokes in the Trash are left out until they come back."""
     return SetlistOut(
         id=s.id,
         name=s.name,
         show_date=s.show_date,
         target_seconds=s.target_seconds,
         venue_name=s.venue.name if s.venue else None,
-        items=[SetlistItemOut.model_validate(i) for i in s.items],
+        items=[SetlistItemOut.model_validate(i) for i in s.items if i.bit_id not in hidden],
         created_at=s.created_at,
         updated_at=s.updated_at,
     )
@@ -53,7 +55,8 @@ def list_setlists(user: CurrentUser, db: DbSession) -> list[SetlistOut]:
         .options(selectinload(Setlist.items), selectinload(Setlist.venue))
         .order_by(Setlist.updated_at.desc())
     )
-    return [setlist_out(s) for s in db.scalars(query)]
+    hidden = trashed_bit_ids(db, user)
+    return [setlist_out(s, hidden) for s in db.scalars(query)]
 
 
 @router.put("/setlists/{setlist_id}", response_model=SetlistOut)
@@ -61,7 +64,11 @@ def save_setlist(
     setlist_id: uuid.UUID, body: SetlistIn, user: CurrentUser, db: DbSession
 ) -> SetlistOut:
     """Create or replace a setlist and its items in one transaction."""
-    check_all_owned(db, Bit, {i.bit_id for i in body.items}, user)
+    hidden = trashed_bit_ids(db, user)
+    # A set saved offline may still list a joke deleted since on another device: it keeps its
+    # place, hidden like any joke in the Trash.
+    sent = [i for i in body.items if i.bit_id not in hidden]
+    check_all_owned(db, Bit, {i.bit_id for i in sent}, user)
     venue = venue_named(db, user, body.venue_name) if body.venue_name else None
     setlist = find_owned(db, Setlist, setlist_id, user) or Setlist(id=setlist_id, user_id=user.id)
     setlist.name = body.name
@@ -69,13 +76,18 @@ def save_setlist(
     setlist.target_seconds = body.target_seconds
     setlist.venue = venue
     db.add(setlist)
+    items = [(i.bit_id, i.duration_seconds) for i in sent]
+    # Jokes in the Trash aren't sent by the app, so keep their places for when they come back.
+    for away in sorted(setlist.items, key=lambda i: i.position):
+        if away.bit_id in hidden:
+            items.insert(min(away.position, len(items)), (away.bit_id, away.duration_seconds))
     setlist.items = [
-        SetlistItem(bit_id=i.bit_id, position=n, duration_seconds=i.duration_seconds)
-        for n, i in enumerate(body.items)
+        SetlistItem(bit_id=bit_id, position=n, duration_seconds=seconds)
+        for n, (bit_id, seconds) in enumerate(items)
     ]
     db.commit()
     db.refresh(setlist)
-    return setlist_out(setlist)
+    return setlist_out(setlist, hidden)
 
 
 @router.delete("/setlists/{setlist_id}", status_code=204)
@@ -134,5 +146,4 @@ def save_log(log_id: uuid.UUID, body: LogIn, user: CurrentUser, db: DbSession) -
 
 @router.delete("/logs/{log_id}", status_code=204)
 def delete_log(log_id: uuid.UUID, user: CurrentUser, db: DbSession) -> None:
-    db.delete(get_owned(db, PerformanceLog, log_id, user))
-    db.commit()
+    move_to_trash(db, user, PerformanceLog, log_id)

@@ -16,6 +16,7 @@ from app.models import VoiceNote
 from app.models.base import written_at
 from app.schemas.voice import VoiceNoteIn, VoiceNoteOut
 from app.services.audio_store import AudioStore, get_audio_store
+from app.services.trash import move_to_trash
 
 router = APIRouter(prefix="/api/voice-notes", tags=["voice"])
 
@@ -66,7 +67,9 @@ def put_audio(
     data: Annotated[bytes, Depends(audio_body)],
     content_type: Annotated[str, Header()] = "",
 ) -> VoiceNote:
-    note = get_owned(db, VoiceNote, note_id, user)
+    # A recording still uploading from one phone lands even if the note was deleted on another,
+    # so putting it back from the Trash brings back its sound.
+    note = get_owned(db, VoiceNote, note_id, user, in_trash=True)
     kind = content_type.split(";")[0].strip().lower()
     if not kind.startswith("audio/"):
         raise HTTPException(415, "Only audio can be uploaded")
@@ -93,11 +96,6 @@ def get_audio(note_id: uuid.UUID, user: CurrentUser, db: DbSession, store: Store
 
 
 @router.delete("/{note_id}", status_code=204)
-def delete_note(note_id: uuid.UUID, user: CurrentUser, db: DbSession, store: Store) -> None:
-    note = find_owned(db, VoiceNote, note_id, user)
-    if note is None:
-        return  # already gone: a replayed delete is fine
-    if note.audio_path:
-        store.delete(note.audio_path)
-    db.delete(note)
-    db.commit()
+def delete_note(note_id: uuid.UUID, user: CurrentUser, db: DbSession) -> None:
+    """To the Trash. The recording is kept until the Trash erases it."""
+    move_to_trash(db, user, VoiceNote, note_id)

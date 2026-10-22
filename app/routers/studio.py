@@ -9,6 +9,7 @@ from sqlalchemy.orm import selectinload
 from app.auth.deps import CurrentUser, DbSession, find_owned, get_owned
 from app.models import Bit, Brainstorm, BrainstormVersion
 from app.schemas.shows import BrainstormIn, BrainstormOut
+from app.services.trash import move_to_trash
 
 router = APIRouter(prefix="/api", tags=["studio"])
 
@@ -46,8 +47,7 @@ def save_brainstorm(
 
 @router.delete("/brainstorms/{brainstorm_id}", status_code=204)
 def delete_brainstorm(brainstorm_id: uuid.UUID, user: CurrentUser, db: DbSession) -> None:
-    db.delete(get_owned(db, Brainstorm, brainstorm_id, user))
-    db.commit()
+    move_to_trash(db, user, Brainstorm, brainstorm_id)
 
 
 @router.delete("/brainstorm-versions/{version_id}", status_code=204)

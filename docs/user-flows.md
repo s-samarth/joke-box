@@ -172,3 +172,15 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
    Offline they say "You're offline" straight away.
 11. On a phone in a browser tab, Home suggests adding JokeBox to the Home Screen: Safari can clear
    a tab's storage after a week unused, but not an installed app's.
+
+## 13. Get back something you deleted
+
+1. Deleting a joke, observation, brainstorm, rewrite, voice note, show, analysis, routine or
+   craft note moves it to the **Trash** (in the rail, or More on a phone). Sets are deleted
+   for good.
+2. The Trash lists everything by kind, with a chip for each kind, and how many days each has
+   left. After 30 days it's deleted for good.
+3. **Put back** returns it where it was: a joke comes back with its rewrites and into its sets.
+4. **Delete now** (the ✕) or **Empty Trash** deletes for good, after asking.
+5. Offline, Put back and Delete now wait and sync like any save. Editing something on another
+   device after it was deleted waits in "Couldn't sync" until you put it back and retry.

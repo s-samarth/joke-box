@@ -30,7 +30,7 @@ export function ObservationList({ observations, order }: { observations: Observa
   const topicName = (id: string | null) => topics.find((t) => t.id === id)?.name
 
   const onDelete = async (o: Observation) => {
-    if (!(await confirm({ title: 'Delete this observation?', confirmLabel: 'Delete', danger: true }))) return
+    if (!(await confirm({ title: 'Delete this observation?', message: 'It goes to the Trash for 30 days.', confirmLabel: 'Delete', danger: true }))) return
     remove.mutate(o.id, { onError: (e) => toast(`Not deleted: ${e.message}`) })
   }
 

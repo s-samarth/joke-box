@@ -9,9 +9,10 @@ from sqlalchemy import JSON, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, OwnedMixin
+from app.models.trash import Trashable
 
 
-class VoiceNote(OwnedMixin, Base):
+class VoiceNote(Trashable, OwnedMixin, Base):
     __tablename__ = "voice_notes"
 
     label: Mapped[str] = mapped_column(String(200), default="")

@@ -46,7 +46,7 @@ function Workspace({ bit, sessions, startId }: { bit: Bit; sessions: Brainstorm[
     announceSave(saving, toast, null) // says so if it's waiting; the version number comes when it lands
   }
   const deleteSession = async (b: Brainstorm) => {
-    if (!(await confirm({ title: 'Delete this session?', message: 'All of its versions go too.', confirmLabel: 'Delete session', danger: true }))) return
+    if (!(await confirm({ title: 'Delete this session?', message: 'It goes to the Trash for 30 days, with all its versions.', confirmLabel: 'Delete session', danger: true }))) return
     actions.remove.mutate(b.id)
     if (b.id === id) open()
   }

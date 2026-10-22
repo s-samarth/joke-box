@@ -10,6 +10,7 @@ from app.auth.deps import CurrentUser, DbSession, find_owned, get_owned
 from app.models import Bit
 from app.schemas.library import BitIn, BitOut
 from app.services import bits as svc
+from app.services import trash
 
 router = APIRouter(prefix="/api/bits", tags=["bits"])
 
@@ -40,11 +41,5 @@ def put_bit(bit_id: uuid.UUID, body: BitIn, user: CurrentUser, db: DbSession) ->
 
 @router.delete("/{bit_id}", status_code=204)
 def delete_bit(bit_id: uuid.UUID, user: CurrentUser, db: DbSession) -> None:
-    """Deleting a bit also removes its brainstorms and setlist entries (database cascade)."""
-    bit = find_owned(db, Bit, bit_id, user)
-    if bit is None:
-        return  # already gone: a replayed offline delete is fine
-    db.delete(bit)
-    db.flush()
-    svc.prune_unused_types(db, user)
-    db.commit()
+    """To the Trash, with its rewrites. Its places in sets wait for it there."""
+    trash.move_to_trash(db, user, Bit, bit_id)

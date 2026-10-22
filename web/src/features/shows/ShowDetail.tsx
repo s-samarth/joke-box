@@ -19,7 +19,7 @@ export function ShowDetail({ log, topics, onClose, onEdit }: { log: PerformanceL
   const lessons = craft.filter((n) => n.performance_log_id === log.id)
   const score = lpm(log.laughs, log.duration_seconds)
   const onDelete = async () => {
-    if (!(await confirm({ title: 'Delete this show?', message: `${log.venue_name}, ${formatDateTime(log.performed_at)}`, confirmLabel: 'Delete show', danger: true }))) return
+    if (!(await confirm({ title: 'Delete this show?', message: `${log.venue_name}, ${formatDateTime(log.performed_at)}. It goes to the Trash for 30 days.`, confirmLabel: 'Delete show', danger: true }))) return
     remove.mutateAsync(log.id).catch((e: Error) => toast(`Show not deleted: ${e.message}`))
     toast('Show deleted')
     onClose()

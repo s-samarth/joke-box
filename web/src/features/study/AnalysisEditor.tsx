@@ -37,7 +37,7 @@ function Form({ id, initial, isNew }: { id: string; initial: AnalysisInput; isNe
     navigate('/analysis')
   }
   const remove = async () => {
-    if (!(await confirm({ title: 'Delete this analysis?', message: 'Your write-up is deleted for good.', confirmLabel: 'Delete', danger: true }))) return
+    if (!(await confirm({ title: 'Delete this analysis?', message: 'It goes to the Trash for 30 days.', confirmLabel: 'Delete', danger: true }))) return
     del.mutate(id)
     navigate('/analysis')
   }

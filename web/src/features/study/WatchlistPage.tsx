@@ -28,7 +28,7 @@ export function WatchlistPage() {
 
   const toggle = (item: WatchItem) => save.mutate({ id: item.id, input: { ...toInput(item), watched: !item.watched } }, { onError: (e) => toast(`Not saved: ${e.message}`) })
   const remove = async (item: WatchItem) => {
-    if (await confirm({ title: `Remove ${item.title}?`, message: 'It comes off your watchlist. Analyses you wrote about it stay.', confirmLabel: 'Remove', danger: true })) del.mutate(item.id)
+    if (await confirm({ title: `Remove ${item.title}?`, message: 'It goes to the Trash for 30 days. Analyses you wrote about it stay.', confirmLabel: 'Remove', danger: true })) del.mutate(item.id)
   }
   const loadDossier = () => load.mutate(undefined, { onSuccess: (all) => toast(`${all.length} routines on your watchlist`), onError: (e) => toast(e.message) })
 

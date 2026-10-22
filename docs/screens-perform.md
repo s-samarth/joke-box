@@ -201,3 +201,12 @@ will skip, then **Import** uploads them one by one with a progress bar and lists
   skipped, and new ones sort after the ones you have.
 - The folder is made on a laptop from an export (the WhatsApp self-chat, for one). It holds real
   material, so it stays in `~/Downloads` and `.gitignore` covers WhatsApp exports.
+
+## Trash: `/trash`
+
+Like a Mac's Trash. A line says things wait 30 days. Chips filter by kind (All, Jokes, Rewrites,
+Observations, Brainstorms, Voice notes, Shows, Analyses, Watchlist, Craft notes), each with its
+count; All shows a heading per kind. Each row: the title (a show adds its date), a detail line
+(a joke's rewrites, a rewrite's joke, a routine's comic, a voice note's tags), "Deleted 22 Oct
+2026, 27 days left", **Put back** and a ✕ to delete now. **Empty Trash** sits top right while
+anything's there. Empty: "Trash is empty".

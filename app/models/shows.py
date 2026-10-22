@@ -21,6 +21,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, IdMixin, OwnedMixin, UTCDateTime
 from app.models.library import Topic
+from app.models.trash import Trashable
 
 
 class Venue(OwnedMixin, Base):
@@ -66,7 +67,7 @@ performance_log_topics = Table(
 )
 
 
-class PerformanceLog(OwnedMixin, Base):
+class PerformanceLog(Trashable, OwnedMixin, Base):
     """One open mic or show, logged afterwards."""
 
     __tablename__ = "performance_logs"

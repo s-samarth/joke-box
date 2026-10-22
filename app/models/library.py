@@ -20,6 +20,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, OwnedMixin
+from app.models.trash import Trashable
 
 RANDOM_TOPIC = "Random"
 
@@ -76,7 +77,7 @@ class Status(OwnedMixin, Base):
     position: Mapped[int] = mapped_column(Integer, default=0)
 
 
-class Bit(OwnedMixin, Base):
+class Bit(Trashable, OwnedMixin, Base):
     """The atomic unit of material: a setup, a punchline and its metadata."""
 
     __tablename__ = "bits"

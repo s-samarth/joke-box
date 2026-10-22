@@ -50,6 +50,8 @@ def test_write_and_edit_an_analysis(alice: TestClient) -> None:
     assert edited["body"] == "Fake rewrite"
     # Deleting the routine keeps the analysis, just unlinked.
     alice.delete(f"/api/watchlist/{item_id}")
+    assert alice.get("/api/analyses").json()[0]["watch_item_id"] == item_id  # back on restore
+    alice.delete(f"/api/trash/watchlist/{item_id}")
     assert alice.get("/api/analyses").json()[0]["watch_item_id"] is None
     assert alice.delete(f"/api/analyses/{analysis_id}").status_code == 204
     assert alice.get("/api/analyses").json() == []

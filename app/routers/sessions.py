@@ -8,6 +8,7 @@ from sqlalchemy import select
 from app.auth.deps import CurrentUser, DbSession, find_owned, get_owned
 from app.models import CraftNote, WritingSession
 from app.schemas.notebook import WritingSessionIn, WritingSessionOut
+from app.services.trash import move_to_trash
 
 router = APIRouter(prefix="/api", tags=["sessions"])
 
@@ -28,7 +29,7 @@ def put_session(
 ) -> WritingSession:
     """Create or update. The client picks the id, so autosaves and offline retries are safe."""
     if body.technique_id is not None:
-        get_owned(db, CraftNote, body.technique_id, user)  # only your own techniques
+        get_owned(db, CraftNote, body.technique_id, user, in_trash=True)  # only your own techniques
     session = find_owned(db, WritingSession, session_id, user)
     if session is None:
         session = WritingSession(id=session_id, user_id=user.id)
@@ -49,8 +50,4 @@ def put_session(
 
 @router.delete("/sessions/{session_id}", status_code=204)
 def delete_session(session_id: uuid.UUID, user: CurrentUser, db: DbSession) -> None:
-    session = find_owned(db, WritingSession, session_id, user)
-    if session is None:
-        return  # already gone: a replayed offline delete is fine
-    db.delete(session)
-    db.commit()
+    move_to_trash(db, user, WritingSession, session_id)

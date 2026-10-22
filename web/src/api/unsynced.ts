@@ -75,11 +75,14 @@ const KINDS: Record<string, string> = {
   'brainstorm-version': 'Rewrite version', voice: 'Voice note',
 }
 
+const TRASH: Record<string, string> = { restore: 'Put back from the Trash', erase: 'Delete from the Trash', empty: 'Empty the Trash' }
+
 /** The fields worth showing (and copying) from a save, in reading order. */
 const WORDS = ['setup', 'punchline', 'text', 'title', 'name', 'label', 'venue_name', 'notes', 'body', 'content']
 
 /** What the item was, in words: "Joke", "Delete show", and the text you'd want to copy. */
 export function summary(key: string[], variables: unknown): { title: string; text: string } {
+  if (key[0] === 'trash') return { title: TRASH[key[1]] ?? 'Trash', text: '' }
   const kind = KINDS[key[0]] ?? 'Change'
   if (key[1] === 'delete') return { title: `Delete ${kind.toLowerCase()}`, text: '' }
   const input = (variables as { input?: Record<string, unknown> } | null)?.input ?? {}
