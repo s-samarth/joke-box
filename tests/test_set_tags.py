@@ -42,9 +42,12 @@ def test_tag_a_set_and_manage_tags(alice: TestClient, bob: TestClient) -> None:
     # Deleting a tag takes it off the set; the set stays.
     assert alice.delete(f"/api/set-tags/{weak}").status_code == 204
     assert alice.get("/api/setlists").json()[0]["tag_ids"] == [mine.json()["id"]]
+    # A save still listing the deleted tag (it waited offline) saves without it.
+    stale = save_set(alice, set_id, tag_ids=[weak, mine.json()["id"]])
+    assert stale["tag_ids"] == [mine.json()["id"]]
     # Bob can't use, rename or delete Alice's tags.
     bob_set = f"/api/setlists/{uuid.uuid4()}"
-    assert bob.put(bob_set, json={"tag_ids": [mine.json()["id"]]}).status_code == 422
+    assert bob.put(bob_set, json={"tag_ids": [mine.json()["id"]]}).json()["tag_ids"] == []
     assert bob.patch(f"/api/set-tags/{mine.json()['id']}", json={"name": "x"}).status_code == 404
     assert bob.delete(f"/api/set-tags/{mine.json()['id']}").status_code == 404
 

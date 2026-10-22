@@ -34,10 +34,9 @@ def venue_named(db: Session, user: User, name: str) -> Venue:
     return venue
 
 
-Owned = type[Bit] | type[Topic] | type[SetTag]
-
-
-def check_all_owned(db: Session, model: Owned, ids: set[uuid.UUID], user: User) -> None:
+def check_all_owned(
+    db: Session, model: type[Bit] | type[Topic], ids: set[uuid.UUID], user: User
+) -> None:
     found = db.scalar(select(func.count()).where(model.id.in_(ids), model.user_id == user.id))
     if found != len(ids):
         raise HTTPException(422, f"Unknown {model.__name__.lower()} in request")
@@ -83,7 +82,6 @@ def save_setlist(
     # place, hidden like any joke in the Trash.
     sent = [i for i in body.items if i.bit_id not in hidden]
     check_all_owned(db, Bit, {i.bit_id for i in sent}, user)
-    check_all_owned(db, SetTag, set(body.tag_ids), user)
     venue = venue_named(db, user, body.venue_name) if body.venue_name else None
     setlist = find_owned(db, Setlist, setlist_id, user) or Setlist(id=setlist_id, user_id=user.id)
     setlist.name = body.name
@@ -91,7 +89,10 @@ def save_setlist(
     setlist.target_seconds = body.target_seconds
     setlist.venue = venue
     setlist.rating = body.rating
-    setlist.tags = list(db.scalars(select(SetTag).where(SetTag.id.in_(body.tag_ids))))
+    # Only your tags that still exist: one deleted while a save waited (offline, or with the set
+    # open) just drops off, rather than failing the save.
+    mine = select(SetTag).where(SetTag.id.in_(body.tag_ids), SetTag.user_id == user.id)
+    setlist.tags = list(db.scalars(mine))
     db.add(setlist)
     items = [SetlistItemIn.model_validate(i, from_attributes=True) for i in sent]
     # Jokes in the Trash aren't sent by the app, so keep their places for when they come back.
