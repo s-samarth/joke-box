@@ -73,13 +73,14 @@ def test_audio_needs_the_note_first(alice: TestClient, store: LocalAudioStore) -
     assert alice.put(url, content=FAKE_AUDIO, headers=AUDIO).status_code == 404
 
 
-def test_delete_removes_the_file(alice: TestClient, store: LocalAudioStore) -> None:
+def test_the_file_waits_in_the_trash(alice: TestClient, store: LocalAudioStore) -> None:
     note_id = new_note(alice)
     alice.put(f"/api/voice-notes/{note_id}/audio", content=FAKE_AUDIO, headers=AUDIO)
-    assert list(store.root.rglob("*.m4a"))
     assert alice.delete(f"/api/voice-notes/{note_id}").status_code == 204
-    assert not list(store.root.rglob("*.m4a"))
     assert alice.get("/api/voice-notes").json() == []
+    assert list(store.root.rglob("*.m4a"))  # kept until the Trash erases it
+    assert alice.delete(f"/api/trash/voice-notes/{note_id}").status_code == 204
+    assert not list(store.root.rglob("*.m4a"))
     assert alice.delete(f"/api/voice-notes/{note_id}").status_code == 204
 
 

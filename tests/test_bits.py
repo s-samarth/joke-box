@@ -43,6 +43,8 @@ def test_types_are_created_inline_and_pruned_when_unused(alice: TestClient) -> N
     put_bit(alice, bit_id, types=["Story"])
     assert [t["name"] for t in alice.get("/api/types").json()] == ["Story"]
     alice.delete(f"/api/bits/{bit_id}")
+    assert [t["name"] for t in alice.get("/api/types").json()] == ["Story"]  # kept while in Trash
+    alice.delete("/api/trash")
     assert alice.get("/api/types").json() == []
 
 

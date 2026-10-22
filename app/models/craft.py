@@ -6,6 +6,7 @@ from sqlalchemy import JSON, CheckConstraint, ForeignKey, Index, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, OwnedMixin
+from app.models.trash import Trashable
 
 # How a kind of note behaves: a checklist ticks, a technique runs, a path climbs, a note reads.
 BEHAVIOURS = ("checklist", "technique", "reference", "path")
@@ -50,7 +51,7 @@ class NoteKind(OwnedMixin, Base):
     position: Mapped[int] = mapped_column(Integer, default=0)
 
 
-class CraftNote(OwnedMixin, Base):
+class CraftNote(Trashable, OwnedMixin, Base):
     """One lesson, checklist, technique or goal. The body is plain text with light formatting."""
 
     __tablename__ = "craft_notes"

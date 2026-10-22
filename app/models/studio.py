@@ -7,9 +7,10 @@ from sqlalchemy import ForeignKey, Integer, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, IdMixin, OwnedMixin, UTCDateTime, utcnow
+from app.models.trash import Trashable
 
 
-class Brainstorm(OwnedMixin, Base):
+class Brainstorm(Trashable, OwnedMixin, Base):
     __tablename__ = "brainstorms"
 
     bit_id: Mapped[uuid.UUID] = mapped_column(

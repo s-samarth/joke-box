@@ -90,8 +90,10 @@ def test_a_brainstorm_session_can_run_a_technique(alice: TestClient, bob: TestCl
     assert alice.put(f"/api/sessions/{session_id}", json=body).json()["technique_id"] == note_id
     # Bob can't run Alice's technique.
     assert bob.put(f"/api/sessions/{uuid.uuid4()}", json=body).status_code == 404
-    # Deleting the note keeps the session, just unlinked.
+    # The note in the Trash keeps the link, for when it's put back; erasing it unlinks.
     alice.delete(f"/api/craft-notes/{note_id}")
+    assert alice.get("/api/sessions").json()[0]["technique_id"] == note_id
+    alice.delete("/api/trash")
     assert alice.get("/api/sessions").json()[0]["technique_id"] is None
 
 
@@ -103,9 +105,12 @@ def test_lessons_point_at_their_show_or_analysis(alice: TestClient, bob: TestCli
     saved = alice.put(f"/api/craft-notes/{note_id}", json=body).json()
     assert saved["performance_log_id"] == log_id and saved["analysis_id"] == analysis_id
     assert bob.put(f"/api/craft-notes/{uuid.uuid4()}", json=body).status_code == 404
-    # Deleting the show or the analysis keeps the lesson.
+    # Deleting the show or the analysis keeps the lesson, still linked while they're in the
+    # Trash (and editing it still saves); erasing them unlinks it.
     alice.delete(f"/api/logs/{log_id}")
     alice.delete(f"/api/analyses/{analysis_id}")
+    assert alice.put(f"/api/craft-notes/{note_id}", json=body).status_code == 200
+    alice.delete("/api/trash")
     kept = alice.get("/api/craft-notes").json()[0]
     assert kept["performance_log_id"] is None and kept["analysis_id"] is None
 

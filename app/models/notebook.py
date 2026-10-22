@@ -10,6 +10,7 @@ from sqlalchemy import JSON, ForeignKey, Index, Integer, String, Text, Uuid, tex
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, OwnedMixin
+from app.models.trash import Trashable
 
 
 class ObservationTopic(OwnedMixin, Base):
@@ -21,7 +22,7 @@ class ObservationTopic(OwnedMixin, Base):
     name: Mapped[str] = mapped_column(String(120))
 
 
-class Observation(OwnedMixin, Base):
+class Observation(Trashable, OwnedMixin, Base):
     """One thing you noticed. Its topic is optional; deleting the topic keeps the observation."""
 
     __tablename__ = "observations"
@@ -32,7 +33,7 @@ class Observation(OwnedMixin, Base):
     )
 
 
-class WritingSession(OwnedMixin, Base):
+class WritingSession(Trashable, OwnedMixin, Base):
     """A free brainstorm, not tied to one joke: typed text, handwriting, a timer and links.
 
     Handwriting is kept as pen strokes (points), not an image, so it stays sharp at any size

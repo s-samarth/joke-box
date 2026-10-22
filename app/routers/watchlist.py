@@ -14,6 +14,7 @@ from sqlalchemy import select
 from app.auth.deps import CurrentUser, DbSession, find_owned
 from app.models import WatchItem
 from app.schemas.study import WatchItemIn, WatchItemOut
+from app.services.trash import move_to_trash
 
 router = APIRouter(prefix="/api/watchlist", tags=["watchlist"])
 DOSSIER = Path(__file__).resolve().parent.parent / "seed" / "watchlist_dossier.json"
@@ -45,11 +46,7 @@ def put_item(item_id: uuid.UUID, body: WatchItemIn, user: CurrentUser, db: DbSes
 
 @router.delete("/{item_id}", status_code=204)
 def delete_item(item_id: uuid.UUID, user: CurrentUser, db: DbSession) -> None:
-    item = find_owned(db, WatchItem, item_id, user)
-    if item is None:
-        return  # already gone: a replayed offline delete is fine
-    db.delete(item)
-    db.commit()
+    move_to_trash(db, user, WatchItem, item_id)
 
 
 @router.post("/import-dossier", response_model=list[WatchItemOut])

@@ -6,9 +6,10 @@ from sqlalchemy import Boolean, ForeignKey, Integer, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, OwnedMixin
+from app.models.trash import Trashable
 
 
-class WatchItem(OwnedMixin, Base):
+class WatchItem(Trashable, OwnedMixin, Base):
     """One routine to watch. The three scores come from the Relatable Schemer dossier (0-10)."""
 
     __tablename__ = "watch_items"
@@ -25,7 +26,7 @@ class WatchItem(OwnedMixin, Base):
     watched: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
-class Analysis(OwnedMixin, Base):
+class Analysis(Trashable, OwnedMixin, Base):
     """Your write-up of a set or an online bit. Optionally tied to a watchlist routine."""
 
     __tablename__ = "analyses"

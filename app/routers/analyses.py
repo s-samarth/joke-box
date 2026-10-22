@@ -8,6 +8,7 @@ from sqlalchemy import select
 from app.auth.deps import CurrentUser, DbSession, find_owned, get_owned
 from app.models import Analysis, WatchItem
 from app.schemas.study import AnalysisIn, AnalysisOut
+from app.services.trash import move_to_trash
 
 router = APIRouter(prefix="/api/analyses", tags=["analyses"])
 
@@ -24,7 +25,7 @@ def put_analysis(
 ) -> Analysis:
     """Create or update. The client picks the id, so a save made offline replays safely."""
     if body.watch_item_id is not None:
-        get_owned(db, WatchItem, body.watch_item_id, user)  # only your own routines
+        get_owned(db, WatchItem, body.watch_item_id, user, in_trash=True)  # only your own routines
     analysis = find_owned(db, Analysis, analysis_id, user)
     if analysis is None:
         analysis = Analysis(id=analysis_id, user_id=user.id)
@@ -38,8 +39,4 @@ def put_analysis(
 
 @router.delete("/{analysis_id}", status_code=204)
 def delete_analysis(analysis_id: uuid.UUID, user: CurrentUser, db: DbSession) -> None:
-    analysis = find_owned(db, Analysis, analysis_id, user)
-    if analysis is None:
-        return
-    db.delete(analysis)
-    db.commit()
+    move_to_trash(db, user, Analysis, analysis_id)
