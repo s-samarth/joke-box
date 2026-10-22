@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { lightState, move, positionLabel, progress, totalSeconds } from './setlistMath'
+import { draftItems, lightState, move, optionalSeconds, positionLabel, progress, totalSeconds } from './setlistMath'
 
 describe('setlist math', () => {
   it('sums durations', () => {
@@ -26,4 +26,14 @@ describe('setlist math', () => {
   it('moves an item', () => {
     expect(move(['a', 'b', 'c'], 0, 2)).toEqual(['b', 'c', 'a'])
   })
+})
+
+describe('optional jokes', () => {
+  const items = [{ bitId: 'a', duration: 60 }, { bitId: 'b', duration: 30, optional: true }, { bitId: 'c', duration: 45 }]
+  it("don't count towards the slot", () => expect(totalSeconds(items)).toBe(105))
+  it('show their own time', () => expect(optionalSeconds(items)).toBe(30))
+  it('read from a saved set, old ones too', () =>
+    expect(draftItems([{ bit_id: 'a', duration_seconds: 5 }, { bit_id: 'b', duration_seconds: 7, optional: true }])).toEqual([
+      { bitId: 'a', duration: 5, optional: false }, { bitId: 'b', duration: 7, optional: true },
+    ]))
 })

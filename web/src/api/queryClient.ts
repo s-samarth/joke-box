@@ -35,6 +35,7 @@ export const keys = {
   craftAreas: ['craft-areas'],
   craftKinds: ['craft-kinds'],
   trash: ['trash'],
+  setTags: ['set-tags'],
 } as const
 
 export const queryClient = new QueryClient({

@@ -22,6 +22,8 @@
   --color-amber: #ffb547;
   --color-light: #ff5a47;
   --color-ok: #74d3a8;
+  /* Strength beside a joke in a set: periwinkle, the cool opposite of tape-yellow on the ink. */
+  --color-sky: #9db4ff;
 
   --font-sans: "Archivo Variable", ui-sans-serif, system-ui, sans-serif;
   --font-marker: "Permanent Marker", "Archivo Variable", cursive;
@@ -78,6 +80,13 @@ body {
 }
 .tape-dim {
   filter: saturate(0.35) brightness(0.62);
+}
+/* An optional joke: a different roll, faded paper tape. Still readable, clearly not the main set. */
+.tape-optional {
+  background:
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.06) 0 2px, transparent 2px 7px),
+    linear-gradient(180deg, #ddd6c8, #cbc3b2 60%, #b7ae9b);
+  color: #3b3528;
 }
 
 .pt-safe {

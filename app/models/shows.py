@@ -5,6 +5,7 @@ from datetime import date, datetime
 
 from sqlalchemy import (
     JSON,
+    Boolean,
     CheckConstraint,
     Column,
     Date,
@@ -15,6 +16,7 @@ from sqlalchemy import (
     Table,
     Text,
     Uuid,
+    false,
     text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -31,12 +33,33 @@ class Venue(OwnedMixin, Base):
     name: Mapped[str] = mapped_column(String(160))
 
 
+class SetTag(OwnedMixin, Base):
+    """A label you give sets (In progress, Weak, Opener set...). Yours to add, rename and delete."""
+
+    __tablename__ = "set_tags"
+    __table_args__ = (Index("uq_set_tags_user_name", "user_id", text("lower(name)"), unique=True),)
+
+    name: Mapped[str] = mapped_column(String(120))
+    position: Mapped[int] = mapped_column(Integer, default=0)
+
+
+setlist_tag_links = Table(
+    "setlist_tag_links",
+    Base.metadata,
+    Column("setlist_id", Uuid, ForeignKey("setlists.id", ondelete="CASCADE"), primary_key=True),
+    Column("tag_id", Uuid, ForeignKey("set_tags.id", ondelete="CASCADE"), primary_key=True),
+)
+
+
 class Setlist(OwnedMixin, Base):
     __tablename__ = "setlists"
+    __table_args__ = (CheckConstraint("rating BETWEEN 1 AND 5", name="rating_range"),)
 
     name: Mapped[str] = mapped_column(String(200), default="Untitled Setlist")
     show_date: Mapped[date | None] = mapped_column(Date)
     target_seconds: Mapped[int] = mapped_column(Integer, default=900)
+    # How the set feels to you, 1-5 stars; None until you rate it.
+    rating: Mapped[int | None] = mapped_column(Integer)
     venue_id: Mapped[uuid.UUID | None] = mapped_column(
         Uuid, ForeignKey("venues.id", ondelete="SET NULL")
     )
@@ -44,6 +67,7 @@ class Setlist(OwnedMixin, Base):
     items: Mapped[list["SetlistItem"]] = relationship(
         cascade="all, delete-orphan", order_by="SetlistItem.position"
     )
+    tags: Mapped[list[SetTag]] = relationship(secondary=setlist_tag_links, order_by=SetTag.position)
 
 
 class SetlistItem(IdMixin, Base):
@@ -57,6 +81,8 @@ class SetlistItem(IdMixin, Base):
     bit_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("bits.id", ondelete="CASCADE"))
     position: Mapped[int] = mapped_column(Integer)
     duration_seconds: Mapped[int] = mapped_column(Integer, default=0)
+    # Optional: a joke to cut if time is short. It doesn't count towards the slot.
+    optional: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
 
 
 performance_log_topics = Table(

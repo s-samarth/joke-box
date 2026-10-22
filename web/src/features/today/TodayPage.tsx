@@ -11,7 +11,7 @@ import { formatDate, todayIst } from '../../lib/time'
 import { DailyBanner } from '../daily/DailyBanner'
 import { useHabit } from '../daily/useHabit'
 import { LightBar } from '../sets/LightBar'
-import { totalSeconds } from '../sets/setlistMath'
+import { draftItems, optionalSeconds, totalSeconds } from '../sets/setlistMath'
 import { InstallHint } from './InstallHint'
 import { QuickCapture } from './QuickCapture'
 import { TodayBrainstorm } from './TodayBrainstorm'
@@ -77,14 +77,14 @@ export function TodayPage() {
             </div>
             <div className="space-y-2">
               {nextSet.items.slice(0, 3).map((item, i) => (
-                <Tape key={item.bit_id} seed={i} className="px-4 py-2 text-lg leading-tight">
+                <Tape key={item.bit_id} seed={i} optional={item.optional} className="px-4 py-2 text-lg leading-tight">
                   <span className="line-clamp-1">{byId.get(item.bit_id)?.setup ?? 'Deleted joke'}</span>
                 </Tape>
               ))}
               {nextSet.items.length > 3 && <p className="pt-1 text-sm text-faint">and {nextSet.items.length - 3} more</p>}
             </div>
             <div className="mt-4">
-              <LightBar total={totalSeconds(nextSet.items.map((i) => ({ bitId: i.bit_id, duration: i.duration_seconds })))} target={nextSet.target_seconds} />
+              <LightBar total={totalSeconds(draftItems(nextSet.items))} optional={optionalSeconds(draftItems(nextSet.items))} target={nextSet.target_seconds} />
             </div>
           </div>
         ) : (

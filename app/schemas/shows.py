@@ -17,6 +17,7 @@ class VenueOut(BaseModel):
 class SetlistItemIn(BaseModel):
     bit_id: uuid.UUID
     duration_seconds: int = Field(default=0, ge=0)
+    optional: bool = False
 
 
 class SetlistIn(BaseModel):
@@ -24,6 +25,8 @@ class SetlistIn(BaseModel):
     show_date: date | None = None
     target_seconds: int = Field(default=900, ge=0)
     venue_name: str | None = None
+    rating: int | None = Field(default=None, ge=1, le=5)
+    tag_ids: list[uuid.UUID] = Field(default_factory=list)
     items: list[SetlistItemIn] = Field(default_factory=list)
 
 
@@ -33,6 +36,7 @@ class SetlistItemOut(BaseModel):
     bit_id: uuid.UUID
     position: int
     duration_seconds: int
+    optional: bool
 
 
 class SetlistOut(BaseModel):
@@ -41,6 +45,8 @@ class SetlistOut(BaseModel):
     show_date: date | None
     target_seconds: int
     venue_name: str | None
+    rating: int | None
+    tag_ids: list[uuid.UUID]
     items: list[SetlistItemOut]
     created_at: datetime
     updated_at: datetime

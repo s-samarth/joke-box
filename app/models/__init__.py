@@ -16,8 +16,10 @@ from app.models.shows import (
     PerformanceLog,
     Setlist,
     SetlistItem,
+    SetTag,
     Venue,
     performance_log_topics,
+    setlist_tag_links,
 )
 from app.models.studio import Brainstorm, BrainstormVersion
 from app.models.study import Analysis, WatchItem
@@ -40,6 +42,7 @@ __all__ = [
     "PerformanceLog",
     "Setlist",
     "SetlistItem",
+    "SetTag",
     "Status",
     "Subtopic",
     "Topic",
@@ -50,4 +53,5 @@ __all__ = [
     "WritingSession",
     "bit_type_links",
     "performance_log_topics",
+    "setlist_tag_links",
 ]

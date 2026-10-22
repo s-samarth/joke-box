@@ -7,8 +7,15 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.auth.deps import CurrentUser, DbSession, find_owned, get_owned
-from app.models import Bit, PerformanceLog, Setlist, SetlistItem, Topic, User, Venue
-from app.schemas.shows import LogIn, LogOut, SetlistIn, SetlistItemOut, SetlistOut
+from app.models import Bit, PerformanceLog, Setlist, SetlistItem, SetTag, Topic, User, Venue
+from app.schemas.shows import (
+    LogIn,
+    LogOut,
+    SetlistIn,
+    SetlistItemIn,
+    SetlistItemOut,
+    SetlistOut,
+)
 from app.services.trash import move_to_trash, trashed_bit_ids
 
 router = APIRouter(prefix="/api", tags=["shows"])
@@ -27,7 +34,9 @@ def venue_named(db: Session, user: User, name: str) -> Venue:
     return venue
 
 
-def check_all_owned(db: Session, model: type[Bit] | type[Topic], ids: set[uuid.UUID], user: User):  # type: ignore[no-untyped-def]
+def check_all_owned(
+    db: Session, model: type[Bit] | type[Topic], ids: set[uuid.UUID], user: User
+) -> None:
     found = db.scalar(select(func.count()).where(model.id.in_(ids), model.user_id == user.id))
     if found != len(ids):
         raise HTTPException(422, f"Unknown {model.__name__.lower()} in request")
@@ -41,6 +50,8 @@ def setlist_out(s: Setlist, hidden: set[uuid.UUID]) -> SetlistOut:
         show_date=s.show_date,
         target_seconds=s.target_seconds,
         venue_name=s.venue.name if s.venue else None,
+        rating=s.rating,
+        tag_ids=[t.id for t in s.tags],
         items=[SetlistItemOut.model_validate(i) for i in s.items if i.bit_id not in hidden],
         created_at=s.created_at,
         updated_at=s.updated_at,
@@ -52,7 +63,9 @@ def list_setlists(user: CurrentUser, db: DbSession) -> list[SetlistOut]:
     query = (
         select(Setlist)
         .where(Setlist.user_id == user.id)
-        .options(selectinload(Setlist.items), selectinload(Setlist.venue))
+        .options(
+            selectinload(Setlist.items), selectinload(Setlist.venue), selectinload(Setlist.tags)
+        )
         .order_by(Setlist.updated_at.desc())
     )
     hidden = trashed_bit_ids(db, user)
@@ -75,16 +88,19 @@ def save_setlist(
     setlist.show_date = body.show_date
     setlist.target_seconds = body.target_seconds
     setlist.venue = venue
+    setlist.rating = body.rating
+    # Only your tags that still exist: one deleted while a save waited (offline, or with the set
+    # open) just drops off, rather than failing the save.
+    mine = select(SetTag).where(SetTag.id.in_(body.tag_ids), SetTag.user_id == user.id)
+    setlist.tags = list(db.scalars(mine))
     db.add(setlist)
-    items = [(i.bit_id, i.duration_seconds) for i in sent]
+    items = [SetlistItemIn.model_validate(i, from_attributes=True) for i in sent]
     # Jokes in the Trash aren't sent by the app, so keep their places for when they come back.
     for away in sorted(setlist.items, key=lambda i: i.position):
         if away.bit_id in hidden:
-            items.insert(min(away.position, len(items)), (away.bit_id, away.duration_seconds))
-    setlist.items = [
-        SetlistItem(bit_id=bit_id, position=n, duration_seconds=seconds)
-        for n, (bit_id, seconds) in enumerate(items)
-    ]
+            kept = SetlistItemIn.model_validate(away, from_attributes=True)
+            items.insert(min(away.position, len(items)), kept)
+    setlist.items = [SetlistItem(position=n, **item.model_dump()) for n, item in enumerate(items)]
     db.commit()
     db.refresh(setlist)
     return setlist_out(setlist, hidden)

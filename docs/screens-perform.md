@@ -6,17 +6,23 @@ Sets, stage, print, shows and the study screens. The frame, capture and writing 
 ## Sets: `/sets` and `/sets/:setId`
 
 [SetsPage.tsx](../web/src/features/sets/SetsPage.tsx), [SetBuilder.tsx](../web/src/features/sets/SetBuilder.tsx),
-[TapeRow.tsx](../web/src/features/sets/TapeRow.tsx), [AddBits.tsx](../web/src/features/sets/AddBits.tsx),
+[TapeRow.tsx](../web/src/features/sets/TapeRow.tsx), [SetMeta.tsx](../web/src/features/sets/SetMeta.tsx), [SetTagsSheet.tsx](../web/src/features/sets/SetTagsSheet.tsx), [AddBits.tsx](../web/src/features/sets/AddBits.tsx),
 [LightBar.tsx](../web/src/features/sets/LightBar.tsx), [setlistMath.ts](../web/src/features/sets/setlistMath.ts),
 [useAutosaveSet.ts](../web/src/features/sets/useAutosaveSet.ts), [BitPeek.tsx](../web/src/features/bits/BitPeek.tsx).
 
-- **List:** sets with the soonest show first. Each card shows the date, venue, joke count and light
-  bar, with Rehearse and a ⋯ menu (Open set, Print, Delete set). **New set** creates one and
-  opens it.
-- **Builder:** the set name, then Show date, Slot length and Venue. Below them, the total against the
-  slot with "N left", and the light bar. Then one **tape strip** per joke: a drag handle, the premise
-  in marker, an editable runtime, up and down arrows, and remove. The opener and closer are labelled
-  on their strips.
+- **List:** sets with the soonest show first. Each card shows the date, venue, joke count, its
+  stars and tags, and the light bar, with Rehearse and a ⋯ menu (Open set, Print, Delete set).
+  Chips above the list (All, then each tag in use) show only the sets with that tag. **New set**
+  creates one and opens it.
+- **Builder:** the set name, then Show date, Slot length and Venue. Then **Rating** (five stars; tap
+  the same star again to clear it) and **Tags** (tap a tag on or off; **Edit tags** opens a sheet to
+  add, rename and delete them, with how many sets use each). Below them, the total against the slot
+  with "N left", and the light bar. Then one **tape strip** per joke: a drag handle, the premise in
+  marker, the joke's strength as periwinkle ticks, an **optional** toggle (the dashed circle), an
+  editable runtime, up and down arrows, and remove. The opener and closer are labelled on their
+  strips. An optional joke (one to cut if time is short) is on faded paper tape, labelled Optional;
+  it doesn't count towards the slot, and the total says "+N optional". Stage, Print and Home show
+  optional jokes the same way.
 - **Your jokes:** a column on desktop and a sheet behind **Add jokes** on a phone. It has search,
   topic and type filters, and lists the strongest first; jokes already in the set are dimmed. Tap a
   joke to read it in full (`BitPeek`).

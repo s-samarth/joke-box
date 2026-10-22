@@ -19,7 +19,8 @@ import { BitPeek } from '../bits/BitPeek'
 import { CraftSheet } from '../craft/CraftSheet'
 import { AddBits } from './AddBits'
 import { LightBar } from './LightBar'
-import { move, positionLabel } from './setlistMath'
+import { SetMeta } from './SetMeta'
+import { draftItems, move, optionalSeconds, positionLabel, totalSeconds } from './setlistMath'
 import { TapeRow } from './TapeRow'
 import { useAutosaveSet } from './useAutosaveSet'
 
@@ -42,8 +43,8 @@ function Builder({ setlist }: { setlist: Setlist }) {
   const [target, setTarget] = useState(clock(draft.target_seconds))
   const byId = new Map(bits.map((b) => [b.id, b]))
   const used = new Set(draft.items.map((i) => i.bit_id))
-  const items = draft.items.map((i) => ({ bitId: i.bit_id, duration: i.duration_seconds }))
-  const total = items.reduce((s, i) => s + i.duration, 0)
+  const items = draftItems(draft.items)
+  const total = totalSeconds(items)
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 120, tolerance: 6 } }),
@@ -53,7 +54,7 @@ function Builder({ setlist }: { setlist: Setlist }) {
   const add = (bit: Bit, at?: number) =>
     !used.has(bit.id) && update((d) => {
       const list = [...d.items]
-      list.splice(at ?? list.length, 0, { bit_id: bit.id, duration_seconds: bit.duration_seconds })
+      list.splice(at ?? list.length, 0, { bit_id: bit.id, duration_seconds: bit.duration_seconds, optional: false })
       return { ...d, items: list }
     })
   const onDragEnd = ({ active, over }: DragEndEvent) => {
@@ -96,7 +97,8 @@ function Builder({ setlist }: { setlist: Setlist }) {
               </Field>
             </div>
           </div>
-          <div className="mt-8"><LightBar total={total} target={draft.target_seconds} big /></div>
+          <SetMeta draft={draft} update={update} />
+          <div className="mt-8"><LightBar total={total} optional={optionalSeconds(items)} target={draft.target_seconds} big /></div>
           <div className="mt-8">
             <SortableContext items={items.map((i) => i.bitId)} strategy={verticalListSortingStrategy}>
               <DropArea empty={items.length === 0}>
@@ -104,6 +106,7 @@ function Builder({ setlist }: { setlist: Setlist }) {
                   {items.map((item, i) => (
                     <TapeRow key={item.bitId} item={item} bit={byId.get(item.bitId)} index={i} count={items.length} note={items.length > 1 ? positionLabel(i, items.length) : null}
                       onDuration={(s) => update((d) => ({ ...d, items: d.items.map((x) => (x.bit_id === item.bitId ? { ...x, duration_seconds: s } : x)) }))}
+                      onOptional={() => update((d) => ({ ...d, items: d.items.map((x) => (x.bit_id === item.bitId ? { ...x, optional: !x.optional } : x)) }))}
                       onMove={(to) => update((d) => ({ ...d, items: move(d.items, i, to) }))}
                       onRemove={() => update((d) => ({ ...d, items: d.items.filter((x) => x.bit_id !== item.bitId) }))}
                       onOpen={() => setReading(byId.get(item.bitId) ?? null)} />

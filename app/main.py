@@ -17,6 +17,7 @@ from app.routers import (
     craft_kinds,
     observations,
     sessions,
+    set_tags,
     shows,
     studio,
     system,
@@ -76,6 +77,7 @@ def create_app() -> FastAPI:
         craft_kinds,
         craft,
         trash,
+        set_tags,
     )
     for module in routers:
         app.include_router(module.router)
