@@ -168,7 +168,6 @@ Every `joke_id` and `topic_id` must belong to you (otherwise 404).
 | GET | `/api/watchlist` | In order of `position` |
 | PUT | `/api/watchlist/{id}` | `{title, comedian, category, description, url, position, schemer_index, logic_density, dark_pragmatism, watched}`. Scores are 0–10 or null |
 | DELETE | `/api/watchlist/{id}` | |
-| POST | `/api/watchlist/import-dossier` | Adds the dossier's routines you don't already have (matched on title and comedian). Returns the full list |
 | GET | `/api/craft-areas` | In your order. Makes the starting areas if you have none |
 | POST | `/api/craft-areas` | `{name, description, color, screens[]}`; `color` is a preset name or `#rrggbb`. Goes last. 409 if the name is taken |
 | PATCH | `/api/craft-areas/{id}` | Same body; rename, recolour, change screens |

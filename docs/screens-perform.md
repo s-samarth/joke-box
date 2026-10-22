@@ -165,11 +165,10 @@ area that shows on Stage); `?show=<id>` or
 [WatchlistPage.tsx](../web/src/features/study/WatchlistPage.tsx), [WatchRow.tsx](../web/src/features/study/WatchRow.tsx),
 [AddRoutineSheet.tsx](../web/src/features/study/AddRoutineSheet.tsx), [watchMeta.ts](../web/src/features/study/watchMeta.ts).
 
-The header shows progress ("N of 100 watched"), an explainer for SI, LD and DP, a search box, and
+The header shows progress ("N of M watched"), an explainer for SI, LD and DP, a search box, and
 All / To watch / Watched. Routines are grouped by category, each group with its own count. Each
 row has a watched circle, its number, title, comedian, description and score chips, plus open,
-analyse and delete. **Add routine** adds your own. The dossier loads once with
-`POST /api/watchlist/import-dossier`, which skips routines you already have.
+analyse and delete. **Add routine** adds one; with nothing added yet, the empty list offers the same button.
 
 <img src="screenshots/desktop-watchlist.webp" alt="Watchlist">
 
@@ -184,11 +183,6 @@ and the link's domain. The editor has a name, a link and the write-up, saved wit
 **Takeaways** (craft notes learned from it) with **Save a takeaway**.
 
 <img src="screenshots/desktop-analysis.webp" alt="Analysis">
-
-## External links: `/links`
-
-[LinksPage.tsx](../web/src/features/study/LinksPage.tsx). Two cards that open in a new tab:
-**The Relatable Schemer** (the persona site) and **Comedy Atlas**.
 
 ## Import: `/import`
 

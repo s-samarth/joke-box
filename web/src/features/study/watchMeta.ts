@@ -1,7 +1,7 @@
-/** Pure helpers for the watchlist: the dossier's scores, grouping, filtering, and watch links. */
+/** Pure helpers for the watchlist: the three scores, grouping, filtering, and watch links. */
 import type { WatchItem, WatchItemInput } from '../../api/types'
 
-/** The three dossier scores, each 0-10. */
+/** The three scores, each 0-10. */
 export const SCORES = [
   { key: 'schemer_index', short: 'SI', name: 'Schemer Index', hint: "How well the routine embodies the forensic, loophole-finding 'System Hacker' mindset." },
   { key: 'logic_density', short: 'LD', name: 'Logic Density', hint: 'How tightly the comedy is built on reasoning chains rather than physical humour.' },

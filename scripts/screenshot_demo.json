@@ -74,5 +74,20 @@
  "trash": {
   "joke": "Parking meters that only take coins from 1998.",
   "observation": "Self-checkout machines that need a staff member to approve every carrot."
+ },
+ "watchlist": {
+  "fields": ["title", "comedian", "category", "description", "schemer_index", "logic_density", "dark_pragmatism"],
+  "rows": [
+   ["Airport Queues", "Fake Comic One", "The Logicians", "Proves the fast lane is always the slow one.", 9, 10, 6],
+   ["The Warranty Card", "Fake Comic One", "The Logicians", "Reads the fine print until it confesses.", 8, 9, 7],
+   ["Toll Booths", "Fake Comic Two", "The Logicians", "Charges the road for using his car.", 7, 9, 5],
+   ["Group Projects", "Fake Comic Two", "The Logicians", "Works out who did nothing, with a chart.", 8, 8, 4],
+   ["The Wrong Wedding", "Fake Comic Three", "The Storytellers", "Ten minutes at a stranger's wedding.", 6, 7, 5],
+   ["Driving Test", "Fake Comic Three", "The Storytellers", "Fails the test three ways at once.", 5, 6, 3],
+   ["Night Bus", "Fake Comic Four", "The Storytellers", "One bus, one driver, every bad decision.", 6, 6, 6],
+   ["Uncle on Video Call", "Fake Comic Four", "The Act-out Comics", "Becomes the uncle who holds the phone to his ear.", 7, 6, 4],
+   ["The Gym Trainer", "Fake Comic Five", "The Act-out Comics", "Plays the trainer who counts to ten in eleven.", 6, 5, 3],
+   ["Customer Care", "Fake Comic Five", "The Act-out Comics", "Both sides of a call that never ends.", 7, 7, 5]
+  ]
  }
 }

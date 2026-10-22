@@ -133,8 +133,8 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 
 ## 10. Study other comics
 
-1. On **Watchlist**, the dossier's 100 routines are grouped by category, each with its SI, LD
-   and DP scores. Add your own with **Add routine**.
+1. On **Watchlist**, add routines with **Add routine**. They're grouped by category, each with
+   its SI, LD and DP scores.
 2. Open a routine to watch it (its link, or a YouTube search). Tick the circle once you've watched it.
 3. Tap the notebook icon to start an **analysis**: the name and link are filled in from the routine.
 4. Analyses are listed on **Analysis**, where you can search them.

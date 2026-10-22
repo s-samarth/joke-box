@@ -1,12 +1,10 @@
 """The watchlist: routines to study, ticked off when watched.
 
 Saves are upserts keyed by an id the browser makes, like jokes, so ticks made offline replay
-safely. The 100-routine dossier can be loaded in one go; loading it twice adds nothing new.
+safely.
 """
 
-import json
 import uuid
-from pathlib import Path
 
 from fastapi import APIRouter
 from sqlalchemy import select
@@ -17,7 +15,6 @@ from app.schemas.study import WatchItemIn, WatchItemOut
 from app.services.trash import move_to_trash
 
 router = APIRouter(prefix="/api/watchlist", tags=["watchlist"])
-DOSSIER = Path(__file__).resolve().parent.parent / "seed" / "watchlist_dossier.json"
 
 
 def _ordered(user: CurrentUser, db: DbSession) -> list[WatchItem]:
@@ -47,16 +44,3 @@ def put_item(item_id: uuid.UUID, body: WatchItemIn, user: CurrentUser, db: DbSes
 @router.delete("/{item_id}", status_code=204)
 def delete_item(item_id: uuid.UUID, user: CurrentUser, db: DbSession) -> None:
     move_to_trash(db, user, WatchItem, item_id)
-
-
-@router.post("/import-dossier", response_model=list[WatchItemOut])
-def import_dossier(user: CurrentUser, db: DbSession) -> list[WatchItem]:
-    """Add the dossier's routines you don't already have (matched on title and comedian)."""
-    data = json.loads(DOSSIER.read_text())
-    have = {(i.title.lower(), i.comedian.lower()) for i in _ordered(user, db)}
-    for row in data["rows"]:
-        fields = dict(zip(data["fields"], row, strict=True))
-        if (fields["title"].lower(), fields["comedian"].lower()) not in have:
-            db.add(WatchItem(user_id=user.id, **WatchItemIn(**fields).model_dump()))
-    db.commit()
-    return _ordered(user, db)

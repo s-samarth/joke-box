@@ -10,7 +10,7 @@ from app.models.trash import Trashable
 
 
 class WatchItem(Trashable, OwnedMixin, Base):
-    """One routine to watch. The three scores come from the Relatable Schemer dossier (0-10)."""
+    """One routine to watch. Its three optional scores are 0-10."""
 
     __tablename__ = "watch_items"
 
