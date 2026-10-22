@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
 import { deleteBitKey, saveBitKey, type SaveBitVars } from './bitSaves'
 import { keys } from './queryClient'
-import type { Bit, Me, Named, Subtopic, Topic } from './types'
+import type { Bit, BitTypeInfo, Me, Named, Subtopic, Topic } from './types'
 
 export const useMe = () =>
   useQuery({ queryKey: keys.me, queryFn: () => api<Me>('/api/me'), staleTime: 5 * 60_000 })
@@ -12,7 +12,7 @@ export const useTopics = () =>
   useQuery({ queryKey: keys.topics, queryFn: () => api<Topic[]>('/api/topics') })
 
 export const useTypes = () =>
-  useQuery({ queryKey: keys.types, queryFn: () => api<Named[]>('/api/types') })
+  useQuery({ queryKey: keys.types, queryFn: () => api<BitTypeInfo[]>('/api/types') })
 
 export const useStatuses = () =>
   useQuery({ queryKey: keys.statuses, queryFn: () => api<Named[]>('/api/statuses') })

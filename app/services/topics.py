@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.auth.bootstrap import random_topic_for
 from app.models import Bit, BitType, Subtopic, Topic, User, bit_type_links, performance_log_topics
+from app.services import type_colors
 
 
 def commit_or_conflict(db: Session, message: str) -> None:
@@ -53,6 +54,7 @@ def delete_subtopic(db: Session, user: User, sub: Subtopic) -> None:
 
 def rename_type(db: Session, user: User, bit_type: BitType, new_name: str) -> None:
     """Rename a type; if the new name already exists, merge the two."""
+    type_colors.rename(db, user, bit_type.name, new_name)
     target = db.scalar(
         select(BitType).where(
             BitType.user_id == user.id,

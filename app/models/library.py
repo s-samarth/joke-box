@@ -72,6 +72,18 @@ class BitType(OwnedMixin, Base):
     name: Mapped[str] = mapped_column(String(80))
 
 
+class TypeColor(OwnedMixin, Base):
+    """The colour of a type's dot, kept by name so it outlives the type being pruned."""
+
+    __tablename__ = "type_colors"
+    __table_args__ = (
+        Index("uq_type_colors_user_name", "user_id", text("lower(name)"), unique=True),
+    )
+
+    name: Mapped[str] = mapped_column(String(80))
+    color: Mapped[str] = mapped_column(String(7))
+
+
 class Status(OwnedMixin, Base):
     __tablename__ = "statuses"
     __table_args__ = (Index("uq_statuses_user_name", "user_id", text("lower(name)"), unique=True),)

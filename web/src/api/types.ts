@@ -28,6 +28,11 @@ export interface Named {
   name: string
 }
 
+/** A joke type and the colour of its dot. */
+export interface BitTypeInfo extends Named {
+  color: string
+}
+
 /** A venue, with how many shows and sets use it. */
 export interface Venue extends Named {
   shows: number

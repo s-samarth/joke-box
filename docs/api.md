@@ -45,7 +45,8 @@ A JSON API under `/api`, served from the same origin as the app. Running locally
 | PUT | `/api/topics/{id}/subtopics/order` | `{ids}` → 204. Same rules as topics |
 | PATCH | `/api/subtopics/{id}` | `{name}` |
 | DELETE | `/api/subtopics/{id}` | Its jokes lose the subtopic |
-| GET | `/api/types` | `[{id, name}]` |
+| GET | `/api/types` | `[{id, name, color}]`, colour as `#rrggbb` |
+| PUT | `/api/types/color` | `{name, color}`. Works before the type exists, so a new type is coloured before its joke saves |
 | PATCH | `/api/types/{id}` | `{name}`. Renaming onto an existing type merges the two |
 | DELETE | `/api/types/{id}` | Removed from every joke |
 | GET | `/api/statuses` | In order of `position` |

@@ -52,6 +52,21 @@ class NamedOut(BaseModel):
     name: str
 
 
+class TypeOut(NamedOut):
+    color: str
+
+
+class TypeColorIn(NameIn):
+    """A type's colour. The type need not exist yet: a new one is coloured before it is saved."""
+
+    color: str = Field(pattern=r"^#[0-9a-fA-F]{6}$")
+
+    @field_validator("color")
+    @classmethod
+    def lower_color(cls, value: str) -> str:
+        return value.lower()
+
+
 class BitIn(BaseModel):
     """A bit as the editor sends it. Types and status are names, created on the fly."""
 

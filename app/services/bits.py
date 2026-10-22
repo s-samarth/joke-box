@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.models import Bit, BitType, Status, Subtopic, Topic, User, bit_type_links
 from app.models.base import written_at
 from app.schemas.library import BitIn, BitOut
+from app.services import type_colors
 
 
 def to_out(bit: Bit) -> BitOut:
@@ -42,6 +43,7 @@ def get_or_create_type(db: Session, user: User, name: str) -> BitType:
         found = BitType(user_id=user.id, name=name)
         db.add(found)
         db.flush()
+        type_colors.ensure_color(db, user, name)
     return found
 
 

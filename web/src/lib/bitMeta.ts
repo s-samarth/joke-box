@@ -1,22 +1,10 @@
-/** Display rules for bits: type colours, strength words, Thoughts, and editor suggestions. */
+/** Display rules for bits: strength words, Thoughts, and editor suggestions. Type colours: typeColors.ts. */
 import type { CleanRating, Topic } from '../api/types'
 
 export const UNDEFINED_TYPE = 'Undefined'
 
 /** The seven common joke forms, offered in the editor even before you've used them. */
 export const DEFAULT_TYPES = ['One-Liner', 'Story', 'Crowd Work', 'Roast', 'Observation', 'Premise', 'Act Out']
-
-const TYPE_DOTS: Record<string, string> = {
-  'one-liner': 'bg-sky-300',
-  story: 'bg-violet-300',
-  'crowd work': 'bg-amber-300',
-  roast: 'bg-rose-400',
-  observation: 'bg-emerald-300',
-  premise: 'bg-pink-300',
-  'act out': 'bg-orange-300',
-}
-
-export const typeDot = (name: string): string => TYPE_DOTS[name.toLowerCase()] ?? 'bg-faint'
 
 export const STRENGTH_LABELS = ['Weak', 'Needs work', 'Decent', 'Strong', 'Killer']
 

@@ -19,6 +19,7 @@ export const keys = {
   me: ['me'],
   topics: ['topics'],
   types: ['types'],
+  typeColors: ['type-colors'],
   statuses: ['statuses'],
   bits: ['bits'],
   brainstorms: ['brainstorms'],

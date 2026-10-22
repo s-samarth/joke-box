@@ -26,8 +26,10 @@ block, so every token is also a utility class (`bg-ink-2`, `text-tape`, `ring-ru
 | `ok` | `#74d3a8` | Success |
 
 Joke types get a small coloured dot, never a filled chip: One-Liner sky, Story violet,
-Crowd Work amber, Roast rose, Observation emerald, Premise pink, Act Out orange, anything else
-`faint` ([bitMeta.ts](../web/src/lib/bitMeta.ts)).
+Crowd Work amber, Roast rose, Observation emerald, Premise pink, Act Out orange. Every other type
+is given the next colour none of your types has, and you can pick any type's colour (40 swatches
+plus a custom picker) when you create it or in Edit types
+([typeColors.ts](../web/src/lib/typeColors.ts)). A type with no colour, like Undefined, is `faint`.
 
 **Rule:** yellow means "this is yours, or this is the action". Don't use tape colour for
 decoration.
