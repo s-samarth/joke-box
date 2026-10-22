@@ -116,8 +116,9 @@ the jokes' created dates, so there's no separate log to fall out of step.
   phone it opens as its own page with a back link.
 - **The joke page:** the premise and punch (in tape yellow) are edited in place, followed by tag
   lines. Below them, a row of details: Strength, Type (with Edit types), Filed under (topic and
-  subtopic, with Edit topics), Status, Runs for, Clean rating, Language and Hashtags, followed by a
-  Notes box. Then
+  subtopic, with Edit topics), Status, Runs for (type it, or step it with − and +: 15 seconds at a
+  time under 2 minutes, 30 up to 5, then a minute), Clean rating, Language (Hinglish, Hindi or
+  English) and Hashtags, followed by a Notes box. Then
   **Rewrites** (earlier sessions and **Start a rewrite**), **In sets** (with Add to a set), and
   **Delete joke**, which asks for confirmation first.
 - **State:** the filters live in the URL (`?topic=&sub=&type=&status=&q=&sort=`). Filtering runs in
@@ -140,7 +141,8 @@ the jokes' created dates, so there's no separate log to fall out of step.
 The sheet is opened by **+**, by **New joke**, or by "Turn into a joke" on an observation. It
 renders the same `BitDetails` controls as the joke page, but owns its own draft: one set of
 controls with two owners of the state, so the two screens can't drift apart. Its buttons are
-**Save and open** and **Save joke**. It's a bottom sheet on phones and a centred panel on desktop
+**Save and open** and **Save joke**. A new joke starts as Incomplete, 15 seconds, Clean and in
+Hinglish. It's a bottom sheet on phones and a centred panel on desktop
 (see `Modal`).
 
 ## Rewrite: `/bits/:bitId/rewrite`

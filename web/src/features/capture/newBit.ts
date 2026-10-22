@@ -6,20 +6,23 @@ import type { BitInput } from '../../api/types'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { announceSave } from '../../lib/announce'
 
-/** Everything a new joke starts with. Filed under Thoughts unless you pick a topic. */
+/**
+ * Everything a new joke starts with: Thoughts (unless you pick a topic), Incomplete, 15 seconds,
+ * clean and in Hinglish.
+ */
 export const blankBit = (topicId = ''): BitInput => ({
   setup: '',
   punchline: '',
   topic_id: topicId,
   subtopic_id: null,
   types: [],
-  status: 'Draft',
+  status: 'Incomplete',
   strength: 3,
-  duration_seconds: 0,
+  duration_seconds: 15,
   hashtags: [],
   tag_lines: [],
-  clean_rating: null,
-  language: null,
+  clean_rating: 'clean',
+  language: 'Hinglish',
   comments: '',
 })
 

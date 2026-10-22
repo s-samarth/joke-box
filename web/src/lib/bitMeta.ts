@@ -25,7 +25,8 @@ export const strengthLabel = (strength: number): string =>
 
 export const CLEAN_LABELS: Record<CleanRating, string> = { clean: 'Clean', mild: 'Mild', dirty: 'Dirty' }
 
-export const LANGUAGE_SUGGESTIONS = ['English', 'Hinglish', 'Hindi']
+/** The languages a joke can be in. New jokes start in Hinglish. */
+export const LANGUAGES = ['Hinglish', 'Hindi', 'English']
 
 /** Statuses that mean "still being written". */
 export const UNFINISHED = new Set(['incomplete', 'work in progress', 'draft', 'status unknown'])
