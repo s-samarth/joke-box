@@ -1,8 +1,8 @@
 import { createContext, useContext } from 'react'
 
 export interface CaptureApi {
-  /** Open the new joke sheet, optionally filed under a topic or started from some text. */
-  openCapture: (prefill?: { topicId?: string; subtopicId?: string | null; setup?: string }) => void
+  /** Open the new joke sheet, optionally filed under a topic, started from some text, or following a joke. */
+  openCapture: (prefill?: { topicId?: string; subtopicId?: string | null; setup?: string; followsId?: string }) => void
 }
 
 export const CaptureContext = createContext<CaptureApi | null>(null)
