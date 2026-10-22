@@ -35,9 +35,9 @@ visit, so the app opens fast on a phone.
 - **Another tab:** a tab that stepped aside shows "Open in another tab" with **Use it here** and **Keep both open** (allows several tabs; switch it off under **Several tabs** in the account menu).
 
 <p>
-  <img src="screenshots/phone-home.png" width="230" alt="Home on a phone">
-  <img src="screenshots/phone-more.png" width="230" alt="The More sheet on a phone">
-  <img src="screenshots/phone-new-joke.png" width="230" alt="The New joke sheet on a phone">
+  <img src="screenshots/phone-home.webp" width="230" alt="Home on a phone">
+  <img src="screenshots/phone-more.webp" width="230" alt="The More sheet on a phone">
+  <img src="screenshots/phone-new-joke.webp" width="230" alt="The New joke sheet on a phone">
 </p>
 
 ## Sign in: `/login`
@@ -54,7 +54,7 @@ and the route behind it (`/auth/dev-login`) answers 404 unless `APP_ENV=local`.
 redirects to `/login` on a 401, and offers Retry when the server can't be reached. When
 offline, it uses the cached profile, so the app still opens.
 
-<img src="screenshots/phone-login.png" width="230" alt="Sign in">
+<img src="screenshots/phone-login.webp" width="230" alt="Sign in">
 
 ## Home: `/`
 
@@ -77,7 +77,7 @@ in IST and the headline **"Got something?"**, followed by these sections from to
 | Needs work | (inline) | Up to five jokes with strength ≤ 2 or an unfinished status, weakest first |
 | Last show | (inline) | Venue, date, time on stage, crowd and stars, plus **Log a show** |
 
-<img src="screenshots/desktop-home.png" alt="Home on desktop">
+<img src="screenshots/desktop-home.webp" alt="Home on desktop">
 
 ## Daily joke: `/daily`
 
@@ -126,10 +126,10 @@ the jokes' created dates, so there's no separate log to fall out of step.
 - **Topic and type managers** are sheets for renaming and deleting across every joke. Deleting a
   topic moves its jokes to Thoughts. Renaming a type onto an existing one merges the two.
 
-<img src="screenshots/desktop-joke.png" alt="A joke open beside the list">
+<img src="screenshots/desktop-joke.webp" alt="A joke open beside the list">
 <p>
-  <img src="screenshots/phone-jokes.png" width="230" alt="Jokes list on a phone">
-  <img src="screenshots/phone-joke.png" width="230" alt="A joke on a phone">
+  <img src="screenshots/phone-jokes.webp" width="230" alt="Jokes list on a phone">
+  <img src="screenshots/phone-joke.webp" width="230" alt="A joke on a phone">
 </p>
 
 ## New joke sheet
@@ -157,7 +157,7 @@ versions) and **Earlier sessions**. `?session=<id>` reopens a past session.
 ([CraftSheet.tsx](../web/src/features/craft/CraftSheet.tsx)). Pick one from the row at the top and
 tick through it; the ticks count up and don't change the note, so the next rewrite starts fresh.
 
-<img src="screenshots/desktop-rewrite.png" alt="Rewrite">
+<img src="screenshots/desktop-rewrite.webp" alt="Rewrite">
 
 ## Observations: `/observations`
 
@@ -171,7 +171,7 @@ with the time scrubber down the right edge. Each row's ⋯ menu offers Edit, **T
 Delete. A **Topics** button manages the observation topics, which are
 separate from joke topics: drag the grips to reorder them; deleting one keeps its observations. The filter is `?topic=` in the URL.
 
-<img src="screenshots/desktop-observations.png" alt="Observations">
+<img src="screenshots/desktop-observations.webp" alt="Observations">
 
 ## Brainstorm: `/brainstorm` and `/brainstorm/:sessionId`
 
@@ -196,7 +196,7 @@ separate from joke topics: drag the grips to reorder them; deleting one keeps it
 - **Saving:** the session autosaves a moment after you stop, and again when you leave. Nothing is
   saved until the session has some content.
 
-<img src="screenshots/desktop-session.png" alt="A brainstorm session">
+<img src="screenshots/desktop-session.webp" alt="A brainstorm session">
 
 ## Voice notes: `/voice`
 
@@ -224,7 +224,7 @@ separate from joke topics: drag the grips to reorder them; deleting one keeps it
 How recording, the meter, the outbox and playback work is covered in
 [frontend.md](frontend.md#voice-notes-pipeline).
 
-<img src="screenshots/desktop-voice.png" alt="Voice notes">
+<img src="screenshots/desktop-voice.webp" alt="Voice notes">
 
 ## Perform and study screens
 
