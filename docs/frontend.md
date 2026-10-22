@@ -88,6 +88,13 @@ and reloads into "Open in another tab" with **Use it here**. Only then does the 
 the cache and start the voice outbox (`startOutbox`), so it can't take a recording still going
 in the other tab.
 
+**Several tabs** (account menu, or **Keep both open** on that screen) turns this off for one
+browser (`localStorage`). Each tab then holds the lock shared, only so a new tab knows it isn't
+alone: it skips recovering cut-off recordings, which may still be recording elsewhere. Uploads
+from the voice outbox take a `jokebox-outbox` lock, so two tabs never send the same note at once.
+Tabs still overwrite each other's saved copy, so a tab with unsynced saves asks before closing
+(`useCloseWarning`). Switching it off claims the lock again and the other tabs step aside.
+
 ### Honest save messages
 [announce.ts](../web/src/lib/announce.ts) waits up to 1.5 s for the server before saying "Show
 logged". On one bar the phone says online while the save is really waiting, so slower than that

@@ -18,6 +18,7 @@ import type { VoiceNoteInput } from '../../api/types'
 import { deleteVoiceNote, saveVoiceDetails, uploadVoiceAudio } from '../../api/voice'
 import { cacheAudio } from './audioCache'
 import { clearLive, forgetLive, interrupted } from './inProgress'
+import { oneTabAtATime } from '../../lib/oneTab'
 
 export interface PendingNote {
   id: string
@@ -140,25 +141,29 @@ export async function flush(): Promise<void> {
   if (running || !onlineManager.isOnline()) return
   running = true
   try {
-    for (const note of [...state.items].reverse()) {
-      if (note.failed || discarded.has(note.id)) continue
-      emit({ uploading: note.id })
-      try {
-        await send(note)
-      } catch (e) {
-        if (discarded.has(note.id)) continue
-        const now = (await get<PendingNote>(note.id, store)) ?? note
-        // 404: the server lost the details (deleted elsewhere?), so send them again next time.
-        if (e instanceof ApiError && e.status === 404) {
-          await set(note.id, { ...now, detailsSaved: false }, store)
-          break
+    // Another tab may be uploading the same notes: wait for it, then start from what's left.
+    await oneTabAtATime('jokebox-outbox', async () => {
+      await reload()
+      for (const note of [...state.items].reverse()) {
+        if (note.failed || discarded.has(note.id)) continue
+        emit({ uploading: note.id })
+        try {
+          await send(note)
+        } catch (e) {
+          if (discarded.has(note.id)) continue
+          const now = (await get<PendingNote>(note.id, store)) ?? note
+          // 404: the server lost the details (deleted elsewhere?), so send them again next time.
+          if (e instanceof ApiError && e.status === 404) {
+            await set(note.id, { ...now, detailsSaved: false }, store)
+            break
+          }
+          // Other 4xx (too large, not audio) won't get better by retrying; the rest waits for next time.
+          const permanent = e instanceof ApiError && e.status >= 400 && e.status < 500 && ![401, 408, 429].includes(e.status)
+          if (!permanent) break
+          await set(note.id, { ...now, failed: e.message }, store)
         }
-        // Other 4xx (too large, not audio) won't get better by retrying; the rest waits for next time.
-        const permanent = e instanceof ApiError && e.status >= 400 && e.status < 500 && ![401, 408, 429].includes(e.status)
-        if (!permanent) break
-        await set(note.id, { ...now, failed: e.message }, store)
       }
-    }
+    })
   } finally {
     running = false
     emit({ uploading: null })
@@ -181,10 +186,10 @@ async function recoverInterrupted() {
 }
 
 /**
- * Load what's waiting and start uploading. main.tsx calls this once this tab is the open one, so
- * a tab opening beside another can't take the other's recording while it's still going.
+ * Load what's waiting and start uploading. main.tsx calls this once this tab is the open one, and
+ * only recovers cut-off recordings when no other tab is open: one may still be recording there.
  */
-export const startOutbox = () => recoverInterrupted().then(reload).then(flush)
+export const startOutbox = (recover: boolean) => (recover ? recoverInterrupted() : Promise.resolve()).then(reload).then(flush)
 
 // Retry whenever the connection comes back. That's TanStack's online flag, not the phone's: it
 // also notices a dead signal coming back to life.

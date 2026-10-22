@@ -14,6 +14,7 @@ import { NAV } from './nav'
 import { SyncLight } from './SyncLight'
 import { UnsyncedBanner } from './UnsyncedBanner'
 import { UpdatePrompt } from './UpdatePrompt'
+import { useCloseWarning } from './useCloseWarning'
 
 function Rail() {
   const { openCapture } = useCapture()
@@ -39,6 +40,7 @@ function Rail() {
 }
 
 export function AppShell() {
+  useCloseWarning()
   return (
     <CaptureProvider>
       <div className="min-h-dvh lg:pl-60">

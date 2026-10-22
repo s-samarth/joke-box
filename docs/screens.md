@@ -32,7 +32,7 @@ visit, so the app opens fast on a phone.
 - **Update banner:** "A new version of JokeBox is ready", with **Update now** and **Later**.
 - **Avatar menu:** Sign out (asks first if changes haven't synced), plus **Reset to demo data**
   when running locally.
-- **Another tab:** a tab that stepped aside shows "Open in another tab" with **Use it here**.
+- **Another tab:** a tab that stepped aside shows "Open in another tab" with **Use it here** and **Keep both open** (allows several tabs; switch it off under **Several tabs** in the account menu).
 
 <p>
   <img src="screenshots/phone-home.png" width="230" alt="Home on a phone">
