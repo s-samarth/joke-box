@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { areaColor, areaFor, blankNote, groupByArea, kindFor, matches, nextColor, notesFor, plainText } from './craftMeta'
-import { inlineRuns, listItems, parseBody, prompts, toggleTick } from './bodyFormat'
+import { groupItems, inlineRuns, listItems, parseBody, prompts, toggleTick } from './bodyFormat'
 import type { CraftArea, CraftNote, NoteKind } from '../../api/types'
 
 const BODY = ['# Fake heading', 'A fake line', 'goes on.', '', '- one', '  - one inside', '- [x] two', '1. first', '2. second'].join('\n')
@@ -29,6 +29,25 @@ describe('note body', () => {
       { text: 'See ', bold: false }, { text: 'https://example.com/fake', bold: false, href: 'https://example.com/fake' }, { text: '.', bold: false },
     ])
     expect(inlineRuns('javascript:alert(1)').every((r) => !r.href)).toBe(true)
+  })
+
+  it('reads tables, callouts, dividers and flows', () => {
+    const body = ['| Fake | Col |', '|---|:--:|', '| a | **b** |', '| c |', '', '> Fake tip', '> goes on', '---', 'Setup → Premise -> Punch', '', 'A long fake sentence that is not a step at all → B'].join('\n')
+    expect(parseBody(body)).toEqual([
+      { type: 'table', head: ['Fake', 'Col'], rows: [['a', '**b**'], ['c']] },
+      { type: 'quote', text: 'Fake tip\ngoes on' },
+      { type: 'rule' },
+      { type: 'flow', steps: ['Setup', 'Premise', 'Punch'] },
+      { type: 'para', text: 'A long fake sentence that is not a step at all → B' },
+    ])
+    expect(parseBody('| a | b |\n| c | d |')).toEqual([{ type: 'table', head: [], rows: [['a', 'b'], ['c', 'd']] }])
+    expect(parseBody('Fake line\nA → B').map((b) => b.type)).toEqual(['para'])
+  })
+
+  it('groups indented items under the item above', () => {
+    const list = parseBody('- one\n  - inside\n  - [x] done\n- two')[0]
+    const groups = list.type === 'list' ? groupItems(list.items) : []
+    expect(groups.map((g) => [g.item.text, g.children.map((c) => c.text)])).toEqual([['one', ['inside', 'done']], ['two', []]])
   })
 
   it('lists top-level items and prompts', () => {
@@ -77,6 +96,7 @@ describe('craft meta', () => {
 
   it('strips formatting for previews', () => {
     expect(plainText('# Head\n- **Bold** item\n- [x] done')).toBe('Head Bold item done')
+    expect(plainText('| A | B |\n|---|---|\n| c | d |\n> tip\n---')).toBe('A · B c · d tip')
   })
 
   it('searches every word and sorts new notes last', () => {
