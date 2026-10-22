@@ -4,6 +4,7 @@ import { useBits, useStatuses, useTopicActions, useTopics } from '../../api/libr
 import type { BitInput } from '../../api/types'
 import { Select } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
+import { useCapture } from '../capture/captureContext'
 import { LANGUAGES, topicName } from '../../lib/bitMeta'
 import { followersOf } from '../../lib/chains'
 import { FollowedBy, FollowsField } from './ChainFields'
@@ -41,6 +42,7 @@ export function BitDetails({ bitId, draft, update }: { bitId?: string; draft: Bi
   // Older jokes may have no language or another one; show it rather than pretend it's Hinglish.
   const languages = draft.language && !LANGUAGES.includes(draft.language) ? [...LANGUAGES, draft.language] : LANGUAGES
   const next = bitId ? followersOf(bitId, bits) : []
+  const { openCapture } = useCapture()
   const hashtags = useMemo(() => [...new Set(bits.flatMap((b) => b.hashtags))].sort(), [bits])
 
   // Keep this joke's draft in step with the managers (the server already moved saved jokes).
@@ -87,7 +89,12 @@ export function BitDetails({ bitId, draft, update }: { bitId?: string; draft: Bi
         </div>
       </Row>
       <Row label="Follows"><FollowsField bitId={bitId} value={draft.follows_id ?? null} onChange={(follows_id) => update({ follows_id })} /></Row>
-      {next.length > 0 && <Row label="Followed by"><FollowedBy next={next} /></Row>}
+      {bitId && (
+        <Row label="Followed by">
+          {/* The next joke starts filed where this one is, already following it. */}
+          <FollowedBy next={next} onWriteNext={() => openCapture({ topicId: draft.topic_id, subtopicId: draft.subtopic_id, followsId: bitId })} />
+        </Row>
+      )}
       <Row label="Status">
         <Select aria-label="Status" value={draft.status ?? ''} onChange={(e) => pickStatus(e.target.value)} className="sm:max-w-xs">
           <option value="">No status</option>

@@ -2,7 +2,7 @@
  * "Follows": the joke this one continues from, picked from your jokes. Many jokes can follow the
  * same one, so "Followed by" can list several, and a chain branches into a tree.
  */
-import { Link2, Search, X } from 'lucide-react'
+import { Link2, Plus, Search, X } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { useBits } from '../../api/library'
@@ -71,13 +71,18 @@ export function FollowsField({ bitId, value, onChange }: Props) {
   )
 }
 
-/** The jokes that follow this one, as links. */
-export function FollowedBy({ next }: { next: Bit[] }) {
+/** The jokes that follow this one, as links, and a button to write another. */
+export function FollowedBy({ next, onWriteNext }: { next: Bit[]; onWriteNext: () => void }) {
   return (
-    <ul className="space-y-2">
-      {next.map((b) => (
-        <li key={b.id}><Link to={`/bits/${b.id}`} className="line-clamp-2 rounded-lg bg-ink-3 px-3 py-2.5 leading-snug hover:bg-ink-4">{b.setup}</Link></li>
-      ))}
-    </ul>
+    <div className="space-y-2">
+      {next.length > 0 && (
+        <ul className="space-y-2">
+          {next.map((b) => (
+            <li key={b.id}><Link to={`/bits/${b.id}`} className="line-clamp-2 rounded-lg bg-ink-3 px-3 py-2.5 leading-snug hover:bg-ink-4">{b.setup}</Link></li>
+          ))}
+        </ul>
+      )}
+      <button type="button" onClick={onWriteNext} className={`${chip} text-dim hover:text-paper`}><Plus size={16} /> Write the next joke</button>
+    </div>
   )
 }

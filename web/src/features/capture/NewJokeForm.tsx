@@ -26,12 +26,14 @@ export interface Prefill {
   topicId?: string
   subtopicId?: string | null
   setup?: string
+  /** Written as the next joke after this one. */
+  followsId?: string
 }
 
 export function NewJokeForm({ prefill, onClose }: { prefill: Prefill; onClose: () => void }) {
   const { data: topics = [] } = useTopics()
   const thoughtsId = topics.find((t) => t.is_system)?.id ?? ''
-  const [draft, setDraft] = useState<BitInput>(() => ({ ...blankBit(prefill.topicId), subtopic_id: prefill.subtopicId ?? null, setup: prefill.setup ?? '' }))
+  const [draft, setDraft] = useState<BitInput>(() => ({ ...blankBit(prefill.topicId), subtopic_id: prefill.subtopicId ?? null, setup: prefill.setup ?? '', follows_id: prefill.followsId ?? null }))
   const [brainstorm, setBrainstorm] = useState('')
   const capture = useCaptureBit()
   const qc = useQueryClient()
