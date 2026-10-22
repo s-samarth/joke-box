@@ -32,13 +32,3 @@ export function parse(text: string): number | null {
   return null
 }
 
-/**
- * One click of the runtime stepper: 15 seconds under 2 minutes, 30 up to 5 minutes, then a
- * minute. Lands on the step's grid, so 0:20 goes up to 0:30, not 0:35.
- */
-export function nudge(seconds: number, up: boolean): number {
-  const at = up ? seconds : seconds - 1
-  const step = at < 120 ? 15 : at < 300 ? 30 : 60
-  const next = up ? Math.floor(seconds / step) * step + step : Math.ceil(seconds / step) * step - step
-  return Math.max(0, next)
-}

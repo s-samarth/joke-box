@@ -116,9 +116,8 @@ the jokes' created dates, so there's no separate log to fall out of step.
   phone it opens as its own page with a back link.
 - **The joke page:** the premise and punch (in tape yellow) are edited in place, followed by tag
   lines. Below them, a row of details: Strength, Type (with Edit types), Filed under (topic and
-  subtopic, with Edit topics), Status, Runs for (type it, or step it with − and +: 15 seconds at a
-  time under 2 minutes, 30 up to 5, then a minute), Clean rating, Language (Hinglish, Hindi or
-  English) and Hashtags, followed by a Notes box. Then
+  subtopic, with Edit topics), Status, Runs for (type it, or step it a second at a time with −
+  and +), Clean rating, Language (Hinglish, Hindi or English) and Hashtags, followed by a Notes box. Then
   **Rewrites** (earlier sessions and **Start a rewrite**), **In sets** (with Add to a set), and
   **Delete joke**, which asks for confirmation first.
 - **State:** the filters live in the URL (`?topic=&sub=&type=&status=&q=&sort=`). Filtering runs in

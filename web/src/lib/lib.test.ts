@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { toCsv } from './csv'
-import { clock, long, nudge, parse } from './duration'
+import { clock, long, parse } from './duration'
 import { byDate, groupByMonth, monthOf } from './months'
 import { fromIstInput, toIstInput } from './time'
 
@@ -21,22 +21,6 @@ describe('duration', () => {
     expect(parse('90')).toBe(90)
     expect(parse('')).toBe(0)
     expect(parse('soon')).toBeNull()
-  })
-})
-
-describe('runtime stepper', () => {
-  it('steps 15s under 2m, 30s up to 5m, then a minute, on the grid', () => {
-    expect(nudge(15, true)).toBe(30)
-    expect(nudge(20, true)).toBe(30)
-    expect(nudge(20, false)).toBe(15)
-    expect(nudge(120, true)).toBe(150)
-    expect(nudge(120, false)).toBe(105)
-    expect(nudge(300, false)).toBe(270)
-    expect(nudge(300, true)).toBe(360)
-  })
-  it('never goes below zero', () => {
-    expect(nudge(0, false)).toBe(0)
-    expect(nudge(10, false)).toBe(0)
   })
 })
 
