@@ -7,6 +7,7 @@ from app.models import RANDOM_TOPIC, Status, Topic, User
 from app.models.base import utcnow
 from app.services.craft_areas import ensure_craft_areas
 from app.services.craft_kinds import ensure_craft_kinds
+from app.services.set_tags import add_default_set_tags
 
 DEFAULT_STATUSES = [
     "Incomplete",
@@ -26,6 +27,7 @@ def upsert_user(db: Session, *, email: str, google_sub: str | None, name: str, a
         user = db.scalar(select(User).where(User.google_sub == google_sub))
     if user is None:
         user = db.scalar(select(User).where(User.email == email))
+    new = user is None
     if user is None:
         user = User(email=email)
         db.add(user)
@@ -36,6 +38,8 @@ def upsert_user(db: Session, *, email: str, google_sub: str | None, name: str, a
     user.last_login_at = utcnow()
     db.flush()
     ensure_defaults(db, user)
+    if new:
+        add_default_set_tags(db, user)
     db.commit()
     return user
 
