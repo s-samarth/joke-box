@@ -3,7 +3,7 @@ import type { WatchItem } from '../../api/types'
 import { OWN_CATEGORY, filterItems, groupByCategory, nextPosition, watchUrl } from './watchMeta'
 
 const item = (over: Partial<WatchItem>): WatchItem => ({
-  id: Math.random().toString(), title: 'Fake Bit', comedian: 'Fake Comic', category: 'Fake Logicians', description: '',
+  id: Math.random().toString(), title: 'Fake Joke', comedian: 'Fake Comic', category: 'Fake Logicians', description: '',
   url: '', position: 1, schemer_index: null, logic_density: null, dark_pragmatism: null, watched: false,
   created_at: '2026-10-21T00:00:00Z', updated_at: '2026-10-21T00:00:00Z', ...over,
 })
@@ -43,8 +43,8 @@ describe('watchUrl', () => {
     expect(watchUrl({ url: 'https://example.com/x', title: 'A', comedian: 'B' })).toBe('https://example.com/x')
   })
   it('otherwise searches YouTube for the comic and routine', () => {
-    expect(watchUrl({ url: '', title: 'Fake & Bit', comedian: 'Fake Comic' })).toBe(
-      'https://www.youtube.com/results?search_query=Fake%20Comic%20Fake%20%26%20Bit%20stand%20up',
+    expect(watchUrl({ url: '', title: 'Fake & Joke', comedian: 'Fake Comic' })).toBe(
+      'https://www.youtube.com/results?search_query=Fake%20Comic%20Fake%20%26%20Joke%20stand%20up',
     )
   })
 })

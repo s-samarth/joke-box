@@ -29,7 +29,7 @@ export interface Named {
 }
 
 /** A joke type and the colour of its dot. */
-export interface BitTypeInfo extends Named {
+export interface JokeTypeInfo extends Named {
   color: string
 }
 
@@ -40,7 +40,7 @@ export interface Venue extends Named {
 }
 
 /** What the editor sends. Types and status are names; the server creates new ones. */
-export interface BitInput {
+export interface JokeInput {
   setup: string
   punchline: string
   topic_id: string
@@ -60,9 +60,9 @@ export interface BitInput {
   created_at?: string
 }
 
-export interface Bit extends BitInput {
+export interface Joke extends JokeInput {
   id: string
-  /** Up by one on every save. A save says which version it was edited from (see saveBitKey). */
+  /** Up by one on every save. A save says which version it was edited from (see saveJokeKey). */
   version: number
   created_at: string
   updated_at: string
@@ -77,7 +77,7 @@ export interface BrainstormVersion {
 
 export interface Brainstorm {
   id: string
-  bit_id: string
+  joke_id: string
   title: string
   content: string
   timer_seconds: number
@@ -87,7 +87,7 @@ export interface Brainstorm {
 }
 
 export interface SetlistItem {
-  bit_id: string
+  joke_id: string
   position: number
   duration_seconds: number
   /** One to cut if time is short: it doesn't count towards the slot. */
@@ -152,7 +152,7 @@ export interface WritingSessionInput {
   /** How many handwriting pages, including blank ones. */
   ink_pages: number
   timer_seconds: number
-  bit_ids: string[]
+  joke_ids: string[]
   observation_ids: string[]
   /** The craft technique this session runs, if any. */
   technique_id: string | null

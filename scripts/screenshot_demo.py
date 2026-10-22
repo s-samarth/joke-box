@@ -39,20 +39,22 @@ def ago(days: float, hour: int = 14) -> str:
     return (NOW - timedelta(days=days)).replace(hour=hour, minute=30).isoformat()
 
 
-def jokes(topics: dict[str, Any]) -> list[Any]:
+def seed_jokes(topics: dict[str, Any]) -> list[Any]:
     """Varied strengths on the demo jokes, and a joke on most of the last two weeks."""
-    bits: list[Any] = ok(c.get("/api/bits"))
+    jokes: list[Any] = ok(c.get("/api/jokes"))
     fields = ["setup", "punchline", "topic_id", "subtopic_id", "types", "status", "comments",
               "duration_seconds", "hashtags", "tag_lines", "clean_rating", "language"]  # fmt: skip
-    for b, strength in zip(bits, [5, 4, 4, 3, 2, 5, 3, 4, 1, 3, 4, 2, 5, 3, 4, 3, 2], strict=False):
+    for b, strength in zip(
+        jokes, [5, 4, 4, 3, 2, 5, 3, 4, 1, 3, 4, 2, 5, 3, 4, 3, 2], strict=False
+    ):
         body = {k: b[k] for k in fields} | {"strength": strength, "base_version": b["version"]}
-        ok(c.put(f"/api/bits/{b['id']}", json=body))
+        ok(c.put(f"/api/jokes/{b['id']}", json=body))
     for days, (setup, topic) in zip([0, 1, 2, 3, 5, 6, 7, 9, 10, 12], DATA["daily"], strict=True):
         body = {"setup": setup, "topic_id": topics[topic]["id"], "types": ["One-liner"],
                 "status": "Draft", "strength": random.choice([2, 3, 4]),
                 "created_at": ago(days)}  # fmt: skip
-        ok(c.put(f"/api/bits/{new_id()}", json=body))
-    return bits
+        ok(c.put(f"/api/jokes/{new_id()}", json=body))
+    return jokes
 
 
 def shows(topic_ids: list[str]) -> None:
@@ -70,18 +72,20 @@ def shows(topic_ids: list[str]) -> None:
         }))  # fmt: skip
 
 
-def sets(bits: list[Any]) -> None:
+def sets(jokes: list[Any]) -> None:
     """The demo set rated and tagged with an optional joke, and two more to filter."""
     tags = {t["name"]: t["id"] for t in ok(c.get("/api/set-tags"))}
     [first] = ok(c.get("/api/setlists"))
-    items = [{"bit_id": i["bit_id"], "duration_seconds": i["duration_seconds"], "optional": n == 2}
-             for n, i in enumerate(first["items"])]  # fmt: skip
+    items = [
+        {"joke_id": i["joke_id"], "duration_seconds": i["duration_seconds"], "optional": n == 2}
+        for n, i in enumerate(first["items"])
+    ]
     keep = ["name", "show_date", "target_seconds", "venue_name"]
     tag_ids = [tags["In progress"], tags["Opener set"]]
     body = {k: first[k] for k in keep} | {"rating": 4, "tag_ids": tag_ids, "items": items}
     ok(c.put(f"/api/setlists/{first['id']}", json=body))
     for name, rating, names, picks, target in DATA["sets"]:
-        items = [{"bit_id": bits[p]["id"], "duration_seconds": 75} for p in picks]
+        items = [{"joke_id": jokes[p]["id"], "duration_seconds": 75} for p in picks]
         ok(c.put(f"/api/setlists/{new_id()}", json={
             "name": name, "target_seconds": target, "venue_name": "Rooftop Open Mic",
             "rating": rating, "tag_ids": [tags[t] for t in names], "items": items,
@@ -131,9 +135,9 @@ def stroke(points: list[tuple[float, float]]) -> dict[str, Any]:
     return {"color": "#f2d16b", "size": 4, "points": [[x, y, 0.6] for x, y in points]}
 
 
-def writing(bits: list[Any], observation_ids: list[str], technique: str) -> None:
+def writing(jokes: list[Any], observation_ids: list[str], technique: str) -> None:
     """A brainstorm with typing and handwriting, and a rewrite with saved versions."""
-    fridge = next(b for b in bits if b["setup"].startswith("So I bought a smart fridge"))
+    fridge = next(b for b in jokes if b["setup"].startswith("So I bought a smart fridge"))
     circle = [(620 + 90 * math.cos(t / 20 * math.tau), 210 + 45 * math.sin(t / 20 * math.tau))
               for t in range(21)]  # fmt: skip
     arrow = [(520.0, 330.0), (680.0, 270.0)]
@@ -142,11 +146,11 @@ def writing(bits: list[Any], observation_ids: list[str], technique: str) -> None
     ink = [circle, arrow, head, underline]
     ok(c.put(f"/api/sessions/{new_id()}", json=DATA["session"] | {
         "timer_seconds": 600, "technique_id": technique, "ink": [stroke(s) for s in ink],
-        "bit_ids": [fridge["id"]], "observation_ids": [observation_ids[6]],
+        "joke_ids": [fridge["id"]], "observation_ids": [observation_ids[6]],
     }))  # fmt: skip
     rewrite = new_id()
     for text in DATA["rewrite"]["versions"]:
-        body = {"bit_id": fridge["id"], "title": DATA["rewrite"]["title"], "content": text}
+        body = {"joke_id": fridge["id"], "title": DATA["rewrite"]["title"], "content": text}
         ok(c.put(f"/api/brainstorms/{rewrite}", json=body | {"timer_seconds": 300}))
 
 
@@ -165,24 +169,24 @@ def study() -> None:
 def trash(topics: dict[str, Any], observation_ids: list[str]) -> None:
     joke, note = new_id(), new_id()
     topic = topics["Observational"]["id"]
-    ok(c.put(f"/api/bits/{joke}", json={"setup": DATA["trash"]["joke"], "topic_id": topic}))
+    ok(c.put(f"/api/jokes/{joke}", json={"setup": DATA["trash"]["joke"], "topic_id": topic}))
     ok(c.put(f"/api/observations/{note}", json={"text": DATA["trash"]["observation"]}))
-    for url in (f"/api/bits/{joke}", f"/api/observations/{note}",
+    for url in (f"/api/jokes/{joke}", f"/api/observations/{note}",
                 f"/api/observations/{observation_ids[3]}"):  # fmt: skip
         ok(c.delete(url))
 
 
 def main() -> None:
     topics = {t["name"]: t for t in ok(c.get("/api/topics"))}
-    bits = jokes(topics)
+    jokes = seed_jokes(topics)
     shows([t["id"] for t in topics.values() if not t["is_system"]])
-    sets(bits)
+    sets(jokes)
     observation_ids = observations()
     voice_notes(Path(sys.argv[1]))
-    writing(bits, observation_ids, craft()[0])
+    writing(jokes, observation_ids, craft()[0])
     study()
     trash(topics, observation_ids)
-    print(f"Done: {len(ok(c.get('/api/bits')))} jokes, {len(ok(c.get('/api/logs')))} shows")
+    print(f"Done: {len(ok(c.get('/api/jokes')))} jokes, {len(ok(c.get('/api/logs')))} shows")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 /**
- * One bit in a set, as a strip of masking tape with marker writing. Drag by the handle,
+ * One joke in a set, as a strip of masking tape with marker writing. Drag by the handle,
  * or use the arrows. The runtime is editable; opener and closer are noted on the strip, and
  * the joke's strength sits beside it. An optional joke (one to cut if time is short) is on
  * faded tape. Tap the strip to read the whole joke.
@@ -8,14 +8,14 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { ArrowDown, ArrowUp, CircleDashed, GripVertical, X } from 'lucide-react'
 import { useState } from 'react'
-import type { Bit } from '../../api/types'
-import { StrengthTicks, Tape } from '../../components/ui/bits'
+import type { Joke } from '../../api/types'
+import { StrengthTicks, Tape } from '../../components/ui/pieces'
 import { clock, parse } from '../../lib/duration'
 import type { DraftItem } from './setlistMath'
 
 interface Props {
   item: DraftItem
-  bit?: Bit
+  joke?: Joke
   index: number
   count: number
   note: 'Opener' | 'Closer' | null
@@ -26,22 +26,22 @@ interface Props {
   onOpen: () => void
 }
 
-export function TapeRow({ item, bit, index, count, note, onDuration, onOptional, onMove, onRemove, onOpen }: Props) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.bitId })
+export function TapeRow({ item, joke, index, count, note, onDuration, onOptional, onMove, onRemove, onOpen }: Props) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.jokeId })
   const [text, setText] = useState(clock(item.duration))
   const tool = 'inline-flex size-8 items-center justify-center rounded-md text-faint hover:text-paper disabled:opacity-25'
 
   return (
     <li ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className={`flex items-center gap-2 ${isDragging ? 'relative z-10' : ''}`}>
       <button type="button" {...listeners} {...attributes} aria-label="Drag to reorder" className="flex h-12 w-7 shrink-0 cursor-grab touch-none items-center justify-center text-faint"><GripVertical size={18} /></button>
-      <button type="button" onClick={onOpen} disabled={!bit} aria-label={bit ? `Read the whole joke: ${bit.setup}` : 'Deleted joke'}
+      <button type="button" onClick={onOpen} disabled={!joke} aria-label={joke ? `Read the whole joke: ${joke.setup}` : 'Deleted joke'}
         className="min-w-0 flex-1 rounded-sm text-left outline-none focus-visible:ring-2 focus-visible:ring-tape">
         <Tape seed={index} optional={item.optional} className={`px-4 py-2.5 transition hover:brightness-105 ${isDragging ? 'shadow-lift' : ''}`}>
           {(note || item.optional) && <span className="mr-2 text-sm opacity-60">{[note, item.optional && 'Optional'].filter(Boolean).join(', ')}:</span>}
-          <span className="text-lg leading-tight">{bit?.setup ?? 'Deleted joke'}</span>
+          <span className="text-lg leading-tight">{joke?.setup ?? 'Deleted joke'}</span>
         </Tape>
       </button>
-      {bit && <StrengthTicks strength={bit.strength} fill="bg-sky" />}
+      {joke && <StrengthTicks strength={joke.strength} fill="bg-sky" />}
       <div className="flex shrink-0 flex-col items-end gap-0.5">
         <div className="flex items-center gap-0.5">
           <button type="button" aria-pressed={!!item.optional} onClick={onOptional} aria-label="Optional: cut it if time is short" title="Optional: cut it if time is short"

@@ -1,24 +1,24 @@
 /**
  * Building a set: the set itself as tape strips you reorder, the slot length as the light bar,
- * and your bits beside it (desktop) or in a sheet (phone). Saves itself as you go.
+ * and your jokes beside it (desktop) or in a sheet (phone). Saves itself as you go.
  */
 import { DndContext, KeyboardSensor, PointerSensor, TouchSensor, closestCenter, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { ArrowLeft, GraduationCap, Play, Plus, Printer } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router'
-import { useBits } from '../../api/library'
+import { useJokes } from '../../api/library'
 import { useSetlists, useVenues } from '../../api/shows'
-import type { Bit, Setlist } from '../../api/types'
+import type { Joke, Setlist } from '../../api/types'
 import { Button } from '../../components/ui/Button'
-import { EmptyState, Spinner } from '../../components/ui/bits'
+import { EmptyState, Spinner } from '../../components/ui/pieces'
 import { Field, GrowingText, Input } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { Modal } from '../../components/ui/Modal'
 import { clock, parse } from '../../lib/duration'
-import { BitPeek } from '../bits/BitPeek'
+import { JokePeek } from '../jokes/JokePeek'
 import { CraftSheet } from '../craft/CraftSheet'
-import { AddBits } from './AddBits'
+import { AddJokes } from './AddJokes'
 import { LightBar } from './LightBar'
 import { SetMeta } from './SetMeta'
 import { chainItems, chainNote, draftItems, move, optionalSeconds, positionLabel, totalSeconds } from './setlistMath'
@@ -36,15 +36,15 @@ function DropArea({ empty, children }: { empty: boolean; children: ReactNode }) 
 
 function Builder({ setlist }: { setlist: Setlist }) {
   const { draft, update } = useAutosaveSet(setlist)
-  const { data: bits = [] } = useBits()
+  const { data: jokes = [] } = useJokes()
   const { data: venues = [] } = useVenues()
   const [picking, setPicking] = useState(false)
-  const [reading, setReading] = useState<Bit | null>(null)
+  const [reading, setReading] = useState<Joke | null>(null)
   const [craft, setCraft] = useState(false)
   const [target, setTarget] = useState(clock(draft.target_seconds))
   const { toast } = useFeedback()
-  const byId = new Map(bits.map((b) => [b.id, b]))
-  const used = new Set(draft.items.map((i) => i.bit_id))
+  const byId = new Map(jokes.map((b) => [b.id, b]))
+  const used = new Set(draft.items.map((i) => i.joke_id))
   const items = draftItems(draft.items)
   const total = totalSeconds(items)
   const sensors = useSensors(
@@ -54,9 +54,9 @@ function Builder({ setlist }: { setlist: Setlist }) {
   )
 
   // A joke that follows others brings the ones before it that aren't in the set yet.
-  const add = (bit: Bit, at?: number) => {
-    if (used.has(bit.id)) return
-    const added = chainItems(bit, byId, used)
+  const add = (joke: Joke, at?: number) => {
+    if (used.has(joke.id)) return
+    const added = chainItems(joke, byId, used)
     update((d) => {
       const list = [...d.items]
       list.splice(at ?? list.length, 0, ...added)
@@ -68,13 +68,13 @@ function Builder({ setlist }: { setlist: Setlist }) {
   const onDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over) return
     const id = String(active.id)
-    const to = draft.items.findIndex((i) => i.bit_id === over.id)
+    const to = draft.items.findIndex((i) => i.joke_id === over.id)
     if (id.startsWith('lib:')) {
-      const bit = byId.get(id.slice(4))
-      if (bit) add(bit, to >= 0 ? to : undefined)
+      const joke = byId.get(id.slice(4))
+      if (joke) add(joke, to >= 0 ? to : undefined)
       return
     }
-    const from = draft.items.findIndex((i) => i.bit_id === id)
+    const from = draft.items.findIndex((i) => i.joke_id === id)
     if (from >= 0 && to >= 0 && from !== to) update((d) => ({ ...d, items: move(d.items, from, to) }))
   }
 
@@ -108,16 +108,16 @@ function Builder({ setlist }: { setlist: Setlist }) {
           <SetMeta draft={draft} update={update} />
           <div className="mt-8"><LightBar total={total} optional={optionalSeconds(items)} target={draft.target_seconds} big /></div>
           <div className="mt-8">
-            <SortableContext items={items.map((i) => i.bitId)} strategy={verticalListSortingStrategy}>
+            <SortableContext items={items.map((i) => i.jokeId)} strategy={verticalListSortingStrategy}>
               <DropArea empty={items.length === 0}>
                 <ol className="space-y-3">
                   {items.map((item, i) => (
-                    <TapeRow key={item.bitId} item={item} bit={byId.get(item.bitId)} index={i} count={items.length} note={items.length > 1 ? positionLabel(i, items.length) : null}
-                      onDuration={(s) => update((d) => ({ ...d, items: d.items.map((x) => (x.bit_id === item.bitId ? { ...x, duration_seconds: s } : x)) }))}
-                      onOptional={() => update((d) => ({ ...d, items: d.items.map((x) => (x.bit_id === item.bitId ? { ...x, optional: !x.optional } : x)) }))}
+                    <TapeRow key={item.jokeId} item={item} joke={byId.get(item.jokeId)} index={i} count={items.length} note={items.length > 1 ? positionLabel(i, items.length) : null}
+                      onDuration={(s) => update((d) => ({ ...d, items: d.items.map((x) => (x.joke_id === item.jokeId ? { ...x, duration_seconds: s } : x)) }))}
+                      onOptional={() => update((d) => ({ ...d, items: d.items.map((x) => (x.joke_id === item.jokeId ? { ...x, optional: !x.optional } : x)) }))}
                       onMove={(to) => update((d) => ({ ...d, items: move(d.items, i, to) }))}
-                      onRemove={() => update((d) => ({ ...d, items: d.items.filter((x) => x.bit_id !== item.bitId) }))}
-                      onOpen={() => setReading(byId.get(item.bitId) ?? null)} />
+                      onRemove={() => update((d) => ({ ...d, items: d.items.filter((x) => x.joke_id !== item.jokeId) }))}
+                      onOpen={() => setReading(byId.get(item.jokeId) ?? null)} />
                   ))}
                 </ol>
               </DropArea>
@@ -127,14 +127,14 @@ function Builder({ setlist }: { setlist: Setlist }) {
         </div>
         <aside className="sticky top-0 hidden h-dvh w-80 shrink-0 flex-col py-10 lg:flex">
           <h2 className="headline mb-3 text-2xl">Your jokes</h2>
-          <AddBits used={used} onAdd={(b) => add(b)} onOpen={setReading} draggable />
+          <AddJokes used={used} onAdd={(b) => add(b)} onOpen={setReading} draggable />
         </aside>
       </div>
       <Modal open={picking} onOpenChange={setPicking} title="Add jokes" description={`${items.length} in the set, ${clock(total)} so far`}>
-        <div className="h-[62dvh]"><AddBits used={used} onAdd={(b) => add(b)} onOpen={setReading} /></div>
+        <div className="h-[62dvh]"><AddJokes used={used} onAdd={(b) => add(b)} onOpen={setReading} /></div>
       </Modal>
       <CraftSheet open={craft} onOpenChange={setCraft} title="Building a set" screen="sets" empty="No notes in the areas that show on the set builder." />
-      {reading && <BitPeek bit={reading} onClose={() => setReading(null)} onAdd={() => add(reading)} inSet={used.has(reading.id)} />}
+      {reading && <JokePeek joke={reading} onClose={() => setReading(null)} onAdd={() => add(reading)} inSet={used.has(reading.id)} />}
     </DndContext>
   )
 }

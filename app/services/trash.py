@@ -15,9 +15,9 @@ from sqlalchemy.orm.exc import StaleDataError
 
 from app.models import (
     Analysis,
-    Bit,
     Brainstorm,
     CraftNote,
+    Joke,
     Observation,
     PerformanceLog,
     User,
@@ -28,13 +28,13 @@ from app.models import (
 from app.models.base import utcnow
 from app.models.trash import INCLUDE_TRASHED, Trashable
 from app.services.audio_store import AudioStore
-from app.services.bits import prune_unused_types
+from app.services.jokes import prune_unused_types
 
 KEEP_FOR = timedelta(days=30)
 
 # The URL name of each kind, in the order the Trash shows them.
 KINDS: dict[str, type[Trashable]] = {
-    "jokes": Bit,
+    "jokes": Joke,
     "rewrites": Brainstorm,
     "observations": Observation,
     "brainstorms": WritingSession,
@@ -62,15 +62,15 @@ def trashed[T: Trashable](db: Session, model: type[T], user: User) -> list[T]:
     return list(db.scalars(query.execution_options(**{INCLUDE_TRASHED: True})))
 
 
-def trashed_bit_ids(db: Session, user: User) -> set[uuid.UUID]:
+def trashed_joke_ids(db: Session, user: User) -> set[uuid.UUID]:
     """Jokes in the Trash: sets keep their places but don't show them."""
-    query = select(Bit.id).where(Bit.user_id == user.id, Bit.deleted_at.is_not(None))
+    query = select(Joke.id).where(Joke.user_id == user.id, Joke.deleted_at.is_not(None))
     return set(db.scalars(query.execution_options(**{INCLUDE_TRASHED: True})))
 
 
-def rewrites_of(db: Session, bit: Bit, deleted_at: object) -> list[Brainstorm]:
+def rewrites_of(db: Session, joke: Joke, deleted_at: object) -> list[Brainstorm]:
     """The joke's rewrites whose deleted_at matches: None for live ones, or the joke's time."""
-    query = select(Brainstorm).where(Brainstorm.bit_id == bit.id)
+    query = select(Brainstorm).where(Brainstorm.joke_id == joke.id)
     query = query.where(
         Brainstorm.deleted_at.is_(None)
         if deleted_at is None
@@ -87,7 +87,7 @@ def move_to_trash(db: Session, user: User, model: type[Trashable], row_id: uuid.
     if row is None or row.deleted_at is not None:
         return
     row.deleted_at = utcnow()
-    if isinstance(row, Bit):
+    if isinstance(row, Joke):
         for rewrite in rewrites_of(db, row, None):
             rewrite.deleted_at = row.deleted_at
     db.commit()
@@ -100,9 +100,9 @@ def restore(db: Session, user: User, model: type[Trashable], row_id: uuid.UUID) 
         raise HTTPException(404, "It's no longer in the Trash")
     if row.deleted_at is None:
         return
-    if isinstance(row, Brainstorm) and find_any(db, Bit, row.bit_id, user).deleted_at:  # type: ignore[union-attr]
+    if isinstance(row, Brainstorm) and find_any(db, Joke, row.joke_id, user).deleted_at:  # type: ignore[union-attr]
         raise HTTPException(409, "Its joke is in the Trash. Put the joke back first.")
-    if isinstance(row, Bit):
+    if isinstance(row, Joke):
         for rewrite in rewrites_of(db, row, row.deleted_at):
             rewrite.deleted_at = None
     row.deleted_at = None
@@ -115,7 +115,7 @@ def erase(db: Session, user: User, row: Trashable, store: AudioStore) -> None:
         store.delete(row.audio_path)
     db.delete(row)
     db.flush()
-    if isinstance(row, Bit):
+    if isinstance(row, Joke):
         prune_unused_types(db, user)
 
 

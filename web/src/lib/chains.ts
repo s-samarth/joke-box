@@ -8,11 +8,11 @@ interface Linked {
   follows_id?: string | null
 }
 
-/** The jokes leading up to `bit`, first one first, ending with `bit`. Stops at a joke you can't see (in the Trash). */
-export function chainTo<T extends Linked>(bit: T, byId: Map<string, T>): T[] {
-  const chain = [bit]
-  const seen = new Set([bit.id])
-  for (let at = bit.follows_id; at && !seen.has(at); ) {
+/** The jokes leading up to `joke`, first one first, ending with `joke`. Stops at a joke you can't see (in the Trash). */
+export function chainTo<T extends Linked>(joke: T, byId: Map<string, T>): T[] {
+  const chain = [joke]
+  const seen = new Set([joke.id])
+  for (let at = joke.follows_id; at && !seen.has(at); ) {
     const prev = byId.get(at)
     if (!prev) break
     chain.unshift(prev)
@@ -23,14 +23,14 @@ export function chainTo<T extends Linked>(bit: T, byId: Map<string, T>): T[] {
 }
 
 /** The jokes that follow `id` directly. */
-export const followersOf = <T extends Linked>(id: string, bits: T[]): T[] => bits.filter((b) => b.follows_id === id)
+export const followersOf = <T extends Linked>(id: string, jokes: T[]): T[] => jokes.filter((b) => b.follows_id === id)
 
 /** `id` and every joke after it, down every branch: none of these can come before it. */
-export function laterThan(id: string, bits: Linked[]): Set<string> {
+export function laterThan(id: string, jokes: Linked[]): Set<string> {
   const out = new Set([id])
   for (let grew = true; grew; ) {
     grew = false
-    for (const b of bits) {
+    for (const b of jokes) {
       if (b.follows_id && out.has(b.follows_id) && !out.has(b.id)) {
         out.add(b.id)
         grew = true

@@ -7,7 +7,7 @@ import { Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { TRASH_KINDS, useEmptyTrash, useErase, useRestore, useTrash, type TrashItem, type TrashKind } from '../../api/trash'
 import { Button } from '../../components/ui/Button'
-import { EmptyState, PageHead, SectionHead, Spinner } from '../../components/ui/bits'
+import { EmptyState, PageHead, SectionHead, Spinner } from '../../components/ui/pieces'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { TrashRow } from './TrashRow'
 

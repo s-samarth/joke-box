@@ -1,4 +1,4 @@
-"""Request and response shapes for bits, topics, types and statuses."""
+"""Request and response shapes for jokes, topics, types and statuses."""
 
 import uuid
 from datetime import datetime
@@ -67,8 +67,8 @@ class TypeColorIn(NameIn):
         return value.lower()
 
 
-class BitIn(BaseModel):
-    """A bit as the editor sends it. Types and status are names, created on the fly."""
+class JokeIn(BaseModel):
+    """A joke as the editor sends it. Types and status are names, created on the fly."""
 
     setup: str = Field(min_length=1)
     punchline: str = ""
@@ -102,7 +102,7 @@ class BitIn(BaseModel):
         return [v.strip() for v in values if v.strip()]
 
 
-class BitOut(BaseModel):
+class JokeOut(BaseModel):
     id: uuid.UUID
     setup: str
     punchline: str

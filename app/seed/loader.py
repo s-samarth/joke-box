@@ -6,9 +6,9 @@ from sqlalchemy.orm import Session
 
 from app.auth.bootstrap import ensure_defaults, random_topic_for
 from app.models import (
-    Bit,
     Brainstorm,
     BrainstormVersion,
+    Joke,
     PerformanceLog,
     Setlist,
     SetlistItem,
@@ -17,9 +17,9 @@ from app.models import (
     User,
     Venue,
 )
-from app.schemas.library import BitIn
+from app.schemas.library import JokeIn
 from app.seed.convert import Json, seconds, split_tags, when, wipe
-from app.services import bits as bit_svc
+from app.services import jokes as joke_svc
 
 
 class Loader:
@@ -28,7 +28,7 @@ class Loader:
     def __init__(self, db: Session, user: User) -> None:
         self.db, self.user = db, user
         self.topics: dict[str, Topic] = {}
-        self.bits: dict[str, Bit] = {}
+        self.jokes: dict[str, Joke] = {}
         self.venues: dict[str, Venue] = {}
         self.report: dict[str, int] = {}
         self.skipped: list[str] = []
@@ -62,7 +62,7 @@ class Loader:
             self.db.add(self.venues[name.lower()])
         return self.venues[name.lower()]
 
-    def load_bit(self, b: Json) -> None:
+    def load_joke(self, b: Json) -> None:
         topic = self.topic(b.get("topic"))
         sub = self.subtopic(topic, b.get("subtopic"))
         self.db.flush()
@@ -72,7 +72,7 @@ class Loader:
         if b.get("versions"):
             history = "\n".join(f"- {v.get('label')}: {v.get('content')}" for v in b["versions"])
             comments = f"{comments}\n\nEarlier versions:\n{history}".strip()
-        data = BitIn(
+        data = JokeIn(
             setup=b.get("setup") or "(no setup)",
             punchline=punchline,
             topic_id=topic.id,
@@ -86,17 +86,17 @@ class Loader:
             comments=comments,
             created_at=when(b.get("createdAt")),
         )
-        bit = Bit(user_id=self.user.id, created_at=data.created_at)
-        bit_svc.apply(self.db, self.user, bit, data)
-        self.db.add(bit)
+        joke = Joke(user_id=self.user.id, created_at=data.created_at)
+        joke_svc.apply(self.db, self.user, joke, data)
+        self.db.add(joke)
         self.db.flush()
-        self.bits[b["id"]] = bit
-        self.count("bits")
+        self.jokes[b["id"]] = joke
+        self.count("jokes")
 
     def load_brainstorm(self, raw: Json) -> None:
-        bit = self.bits.get(raw.get("bitId", ""))
-        if bit is None:
-            self.skipped.append(f"brainstorm '{raw.get('title')}' (its bit no longer exists)")
+        joke = self.jokes.get(raw.get("bitId", ""))
+        if joke is None:
+            self.skipped.append(f"brainstorm '{raw.get('title')}' (its joke no longer exists)")
             return
         versions = [
             BrainstormVersion(
@@ -109,7 +109,7 @@ class Loader:
         self.db.add(
             Brainstorm(
                 user_id=self.user.id,
-                bit_id=bit.id,
+                joke_id=joke.id,
                 title=raw.get("title", ""),
                 content=raw.get("content", ""),
                 timer_seconds=int(raw.get("timerSeconds") or 0),
@@ -136,10 +136,10 @@ class Loader:
 
     def load_setlist(self, raw: Json) -> None:
         items = sorted(raw.get("bits") or [], key=lambda i: i.get("order", 0))
-        kept = [i for i in items if i.get("bitId") in self.bits]
+        kept = [i for i in items if i.get("bitId") in self.jokes]
         if len(kept) < len(items):
             self.skipped.append(
-                f"{len(items) - len(kept)} deleted bit(s) in setlist '{raw.get('name')}'"
+                f"{len(items) - len(kept)} deleted joke(s) in setlist '{raw.get('name')}'"
             )
         self.db.add(
             Setlist(
@@ -150,7 +150,7 @@ class Loader:
                 venue=self.venue(raw.get("venue")),
                 items=[
                     SetlistItem(
-                        bit_id=self.bits[i["bitId"]].id,
+                        joke_id=self.jokes[i["bitId"]].id,
                         position=n,
                         duration_seconds=seconds(i.get("duration")),
                     )
@@ -171,7 +171,7 @@ class Loader:
         for v in data.get("venues", []):
             self.venue(v["name"])
         for b in data.get("bits", []):
-            self.load_bit(b)
+            self.load_joke(b)
         for raw in data.get("brainstorms", []):
             self.load_brainstorm(raw)
         for raw in data.get("logs", []):
@@ -179,4 +179,4 @@ class Loader:
         for raw in data.get("setlists", []):
             self.load_setlist(raw)
         self.db.flush()
-        bit_svc.prune_unused_types(self.db, self.user)
+        joke_svc.prune_unused_types(self.db, self.user)

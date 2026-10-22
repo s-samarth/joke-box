@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.auth.deps import CurrentUser, DbSession, get_owned
-from app.models import BitType, Status, Subtopic, Topic
+from app.models import JokeType, Status, Subtopic, Topic
 from app.schemas.library import (
     NamedOut,
     NameIn,
@@ -19,7 +19,7 @@ from app.schemas.library import (
 )
 from app.services import topics as svc
 from app.services import type_colors
-from app.services.bits import get_or_create_status
+from app.services.jokes import get_or_create_status
 from app.services.ordering import next_position, set_order
 
 router = APIRouter(prefix="/api", tags=["library"])
@@ -100,7 +100,7 @@ def delete_subtopic(sub_id: uuid.UUID, user: CurrentUser, db: DbSession) -> None
 
 @router.get("/types", response_model=list[TypeOut])
 def list_types(user: CurrentUser, db: DbSession) -> list[TypeOut]:
-    types = db.scalars(select(BitType).where(BitType.user_id == user.id).order_by(BitType.name))
+    types = db.scalars(select(JokeType).where(JokeType.user_id == user.id).order_by(JokeType.name))
     colors = type_colors.colors_by_name(db, user)
     return [
         TypeOut(
@@ -120,13 +120,13 @@ def set_type_color(body: TypeColorIn, user: CurrentUser, db: DbSession) -> None:
 
 @router.patch("/types/{type_id}", status_code=204)
 def rename_type(type_id: uuid.UUID, body: NameIn, user: CurrentUser, db: DbSession) -> None:
-    svc.rename_type(db, user, get_owned(db, BitType, type_id, user), body.name)
+    svc.rename_type(db, user, get_owned(db, JokeType, type_id, user), body.name)
 
 
 @router.delete("/types/{type_id}", status_code=204)
 def delete_type(type_id: uuid.UUID, user: CurrentUser, db: DbSession) -> None:
-    """Bits keep their other types; a bit left with none shows as Undefined."""
-    db.delete(get_owned(db, BitType, type_id, user))
+    """Jokes keep their other types; a joke left with none shows as Undefined."""
+    db.delete(get_owned(db, JokeType, type_id, user))
     db.commit()
 
 

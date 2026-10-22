@@ -18,7 +18,7 @@ def test_health() -> None:
 
 def test_signed_out_requests_are_rejected() -> None:
     client = TestClient(app)
-    assert client.get("/api/bits").status_code == 401
+    assert client.get("/api/jokes").status_code == 401
     assert client.get("/api/me").status_code == 401
 
 
@@ -40,7 +40,7 @@ def test_second_login_does_not_duplicate_defaults(alice: TestClient) -> None:
 
 def test_changes_without_csrf_header_are_refused(alice: TestClient) -> None:
     body = {"setup": "x", "topic_id": random_topic_id(alice)}
-    response = alice.put(f"/api/bits/{uuid.uuid4()}", json=body, headers={"X-Requested-With": ""})
+    response = alice.put(f"/api/jokes/{uuid.uuid4()}", json=body, headers={"X-Requested-With": ""})
     assert response.status_code == 403
 
 

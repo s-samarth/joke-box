@@ -55,11 +55,11 @@ def test_tag_a_set_and_manage_tags(alice: TestClient, bob: TestClient) -> None:
 def test_optional_jokes_are_kept_even_while_in_the_trash(alice: TestClient) -> None:
     sure, maybe = joke(alice), joke(alice)
     set_id = str(uuid.uuid4())
-    items = [{"bit_id": sure}, {"bit_id": maybe, "optional": True}]
+    items = [{"joke_id": sure}, {"joke_id": maybe, "optional": True}]
     saved = save_set(alice, set_id, items=items)
     assert [i["optional"] for i in saved["items"]] == [False, True]
-    alice.delete(f"/api/bits/{maybe}")
-    save_set(alice, set_id, items=[{"bit_id": sure}])  # the app's save, without the trashed one
+    alice.delete(f"/api/jokes/{maybe}")
+    save_set(alice, set_id, items=[{"joke_id": sure}])  # the app's save, without the trashed one
     alice.post(f"/api/trash/jokes/{maybe}/restore")
     back = alice.get("/api/setlists").json()[0]["items"]
-    assert [(i["bit_id"], i["optional"]) for i in back] == [(sure, False), (maybe, True)]
+    assert [(i["joke_id"], i["optional"]) for i in back] == [(sure, False), (maybe, True)]

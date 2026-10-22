@@ -9,5 +9,5 @@ export const setlistInput = (s: Setlist): SetlistInput => ({
   venue_name: s.venue_name,
   rating: s.rating ?? null,
   tag_ids: s.tag_ids ?? [],
-  items: s.items.map((i) => ({ bit_id: i.bit_id, duration_seconds: i.duration_seconds, optional: i.optional ?? false })),
+  items: s.items.map((i) => ({ joke_id: i.joke_id, duration_seconds: i.duration_seconds, optional: i.optional ?? false })),
 })

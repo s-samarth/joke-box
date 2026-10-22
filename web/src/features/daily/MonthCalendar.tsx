@@ -3,7 +3,7 @@
  * several). Today is outlined in yellow; days to come are dimmed. Tap a day to see its jokes.
  */
 import { Check, ChevronLeft, ChevronRight } from 'lucide-react'
-import type { Bit } from '../../api/types'
+import type { Joke } from '../../api/types'
 import { IconButton } from '../../components/ui/Button'
 import { monthWeeks, shiftMonth } from './dailyMath'
 
@@ -13,7 +13,7 @@ const monthName = (month: string) => new Date(`${month}-01T12:00:00Z`).toLocaleD
 interface Props {
   month: string
   onMonth: (m: string) => void
-  days: Map<string, Bit[]>
+  days: Map<string, Joke[]>
   today: string
   selected: string | null
   onSelect: (day: string) => void

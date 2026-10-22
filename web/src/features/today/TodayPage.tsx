@@ -2,10 +2,10 @@
 import { Play } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { useBits, useTopics } from '../../api/library'
+import { useJokes, useTopics } from '../../api/library'
 import { useLogs, useSetlists } from '../../api/shows'
-import { SectionHead, Stars, StrengthTicks, Tape } from '../../components/ui/bits'
-import { THOUGHTS, UNFINISHED } from '../../lib/bitMeta'
+import { SectionHead, Stars, StrengthTicks, Tape } from '../../components/ui/pieces'
+import { THOUGHTS, UNFINISHED } from '../../lib/jokeMeta'
 import { clock } from '../../lib/duration'
 import { formatDate, todayIst } from '../../lib/time'
 import { DailyBanner } from '../daily/DailyBanner'
@@ -25,17 +25,17 @@ const longDate = new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', we
 
 export function TodayPage() {
   const [dateLabel] = useState(() => longDate.format(new Date()))
-  const { data: bits = [] } = useBits()
+  const { data: jokes = [] } = useJokes()
   const { data: topics = [] } = useTopics()
   const { data: sets = [] } = useSetlists()
   const { data: logs = [] } = useLogs()
   const thoughts = topics.find((t) => t.is_system)
-  const thoughtsCount = bits.filter((b) => b.topic_id === thoughts?.id).length
+  const thoughtsCount = jokes.filter((b) => b.topic_id === thoughts?.id).length
   const today = todayIst()
   const upcoming = sets.filter((s) => s.show_date && s.show_date >= today).sort((a, b) => a.show_date!.localeCompare(b.show_date!))
   const nextSet = upcoming[0] ?? sets[0]
-  const byId = new Map(bits.map((b) => [b.id, b]))
-  const needsWork = bits
+  const byId = new Map(jokes.map((b) => [b.id, b]))
+  const needsWork = jokes
     .filter((b) => b.strength <= 2 || UNFINISHED.has((b.status ?? '').toLowerCase()))
     .sort((a, b) => a.strength - b.strength || b.updated_at.localeCompare(a.updated_at))
   const lastShow = logs[0]
@@ -77,8 +77,8 @@ export function TodayPage() {
             </div>
             <div className="space-y-2">
               {nextSet.items.slice(0, 3).map((item, i) => (
-                <Tape key={item.bit_id} seed={i} optional={item.optional} className="px-4 py-2 text-lg leading-tight">
-                  <span className="line-clamp-1">{byId.get(item.bit_id)?.setup ?? 'Deleted joke'}</span>
+                <Tape key={item.joke_id} seed={i} optional={item.optional} className="px-4 py-2 text-lg leading-tight">
+                  <span className="line-clamp-1">{byId.get(item.joke_id)?.setup ?? 'Deleted joke'}</span>
                 </Tape>
               ))}
               {nextSet.items.length > 3 && <p className="pt-1 text-sm text-faint">and {nextSet.items.length - 3} more</p>}
@@ -94,7 +94,7 @@ export function TodayPage() {
 
       <section className="mt-12">
         <SectionHead title="Needs work">
-          {thoughtsCount > 0 && <Link to={`/bits?topic=${thoughts?.id}`} className="text-sm text-dim hover:text-paper">{thoughtsCount} in {THOUGHTS}</Link>}
+          {thoughtsCount > 0 && <Link to={`/jokes?topic=${thoughts?.id}`} className="text-sm text-dim hover:text-paper">{thoughtsCount} in {THOUGHTS}</Link>}
         </SectionHead>
         {needsWork.length === 0 ? (
           <p className="text-dim">Nothing flagged. Every joke is marked done or strong.</p>
@@ -102,7 +102,7 @@ export function TodayPage() {
           <ul className="divide-y divide-rule border-y border-rule">
             {needsWork.slice(0, 5).map((b) => (
               <li key={b.id}>
-                <Link to={`/bits/${b.id}`} className="flex items-center gap-4 py-3.5 hover:bg-ink-2/60">
+                <Link to={`/jokes/${b.id}`} className="flex items-center gap-4 py-3.5 hover:bg-ink-2/60">
                   <span className="min-w-0 flex-1 truncate">{b.setup}</span>
                   <span className="shrink-0 text-sm text-faint">{b.status}</span>
                   <StrengthTicks strength={b.strength} />

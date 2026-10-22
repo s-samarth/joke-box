@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Bit, CraftNote, PerformanceLog } from '../../api/types'
+import type { Joke, CraftNote, PerformanceLog } from '../../api/types'
 import { averageLpm, formatLpm, lpm } from '../shows/lpm'
 import { lessonFrom } from './craftMeta'
 import { mostSolidTopic, nextStep, targetMinutes } from './path'
@@ -25,9 +25,9 @@ describe('path', () => {
   })
 
   it('sums solid material by topic', () => {
-    const bit = (topic_id: string, strength: number, duration_seconds: number) => ({ topic_id, strength, duration_seconds }) as Bit
-    expect(mostSolidTopic([bit('a', 4, 60), bit('b', 5, 100), bit('a', 5, 60), bit('b', 2, 500)])).toEqual({ topicId: 'a', seconds: 120 })
-    expect(mostSolidTopic([bit('a', 3, 60)])).toBeNull()
+    const joke = (topic_id: string, strength: number, duration_seconds: number) => ({ topic_id, strength, duration_seconds }) as Joke
+    expect(mostSolidTopic([joke('a', 4, 60), joke('b', 5, 100), joke('a', 5, 60), joke('b', 2, 500)])).toEqual({ topicId: 'a', seconds: 120 })
+    expect(mostSolidTopic([joke('a', 3, 60)])).toBeNull()
   })
 })
 

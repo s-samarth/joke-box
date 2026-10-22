@@ -1,6 +1,6 @@
 /** A note's label and hashtags. The label saves when you leave the field or press Enter. */
 import { useState } from 'react'
-import { HashtagField } from '../bits/DetailControls'
+import { HashtagField } from '../jokes/DetailControls'
 import type { NoteView } from './useVoiceLibrary'
 
 interface Props {

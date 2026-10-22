@@ -5,11 +5,11 @@
 import { Folder } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { useBits, useTopics } from '../../api/library'
+import { useJokes, useTopics } from '../../api/library'
 import type { Topic } from '../../api/types'
-import { SectionHead } from '../../components/ui/bits'
-import { topicName } from '../../lib/bitMeta'
-import { TopicManager } from '../bits/TopicManager'
+import { SectionHead } from '../../components/ui/pieces'
+import { topicName } from '../../lib/jokeMeta'
+import { TopicManager } from '../jokes/TopicManager'
 
 const MAX_SUBS = 3
 
@@ -23,7 +23,7 @@ function FolderCard({ topic, count, subCount }: { topic: Topic; count: number; s
       <div className="relative h-full rounded-xl rounded-tl-sm bg-ink-2 p-4 ring-1 ring-rule transition-colors group-hover:bg-ink-3">
         {/* Stretched link: its ::after covers the whole card, so the card is one big tap target,
             while the subtopic links below sit above it (relative z-10) and stay tappable. */}
-        <Link to={`/bits?topic=${topic.id}`} className="flex items-start gap-2 after:absolute after:inset-0 after:rounded-xl after:content-['']">
+        <Link to={`/jokes?topic=${topic.id}`} className="flex items-start gap-2 after:absolute after:inset-0 after:rounded-xl after:content-['']">
           <Folder size={18} className="mt-0.5 shrink-0 text-tape" aria-hidden />
           <span className="min-w-0 flex-1 leading-snug font-medium break-words">{topicName(topic)}</span>
           <span className="sr-only">, {count}</span>
@@ -32,7 +32,7 @@ function FolderCard({ topic, count, subCount }: { topic: Topic; count: number; s
           <ul className="relative z-10 mt-2.5 space-y-0.5">
             {subs.map((s) => (
               <li key={s.id}>
-                <Link to={`/bits?topic=${topic.id}&sub=${s.id}`} className="-mx-1.5 flex items-baseline gap-2 rounded px-1.5 py-1 text-sm text-dim hover:bg-ink-4 hover:text-paper">
+                <Link to={`/jokes?topic=${topic.id}&sub=${s.id}`} className="-mx-1.5 flex items-baseline gap-2 rounded px-1.5 py-1 text-sm text-dim hover:bg-ink-4 hover:text-paper">
                   <span className="min-w-0 flex-1 truncate">{s.name}</span>
                   <span className="text-faint tabular">{subCount(s.id)}</span>
                 </Link>
@@ -48,10 +48,10 @@ function FolderCard({ topic, count, subCount }: { topic: Topic; count: number; s
 
 export function TopicFolders() {
   const { data: topics = [] } = useTopics()
-  const { data: bits = [] } = useBits()
+  const { data: jokes = [] } = useJokes()
   const [managing, setManaging] = useState(false)
   const counts = new Map<string, number>()
-  for (const b of bits) {
+  for (const b of jokes) {
     counts.set(b.topic_id, (counts.get(b.topic_id) ?? 0) + 1)
     if (b.subtopic_id) counts.set(b.subtopic_id, (counts.get(b.subtopic_id) ?? 0) + 1)
   }
@@ -65,7 +65,7 @@ export function TopicFolders() {
       <SectionHead title="Topics">
         <div className="flex items-baseline gap-4">
           <button type="button" onClick={() => setManaging(true)} className="text-sm text-dim hover:text-paper">Edit</button>
-          <Link to="/bits" className="text-sm text-dim hover:text-paper">All {bits.length}</Link>
+          <Link to="/jokes" className="text-sm text-dim hover:text-paper">All {jokes.length}</Link>
         </div>
       </SectionHead>
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">

@@ -47,12 +47,12 @@ decoration.
 
 ## The tape strip
 
-`.tape` in `app.css`, used through `<Tape seed dim>` in [bits.tsx](../web/src/components/ui/bits.tsx):
+`.tape` in `app.css`, used through `<Tape seed dim>` in [jokes.tsx](../web/src/components/ui/jokes.tsx):
 
 - A gradient of tape yellow with a faint vertical fibre texture.
 - Torn ends, made with a zig-zag `clip-path`.
 - A slight tilt (`--tilt`), set per strip from `seed`, so strips look slapped down by hand.
-- `.tape-dim` desaturates and darkens a strip (bits already in the set, or not yet reached on
+- `.tape-dim` desaturates and darkens a strip (jokes already in the set, or not yet reached on
   stage).
 
 ## Layout
@@ -101,7 +101,7 @@ under `prefers-reduced-motion`.
 The copy matters as much as the colours. These rules keep the text accurate and consistent.
 
 1. **Speak comedian, not database.** Joke, set, show, slot, tag line, premise, punch. The UI
-   never says bit, record, entry or item. See the glossary in [product.md](product.md#the-words-the-app-uses).
+   never says joke, record, entry or item. See the glossary in [product.md](product.md#the-words-the-app-uses).
 2. **Say what happens.** Buttons name their result: "Save joke", "Log a show", "Start a rewrite",
    "Export as CSV", "Delete joke". A toast uses the same verb as its button: "Joke saved",
    "Analysis saved".

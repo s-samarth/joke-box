@@ -1,7 +1,7 @@
-/** Recolour, rename or delete a type across every bit. Renaming onto an existing type merges them. */
+/** Recolour, rename or delete a type across every joke. Renaming onto an existing type merges them. */
 import { Pencil, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-import { useBits, useTypeActions, useTypes } from '../../api/library'
+import { useJokes, useTypeActions, useTypes } from '../../api/library'
 import { useSetTypeColor } from '../../api/typeColors'
 import type { Named } from '../../api/types'
 import { IconButton } from '../../components/ui/Button'
@@ -20,14 +20,14 @@ interface Props {
 
 export function TypeManager({ open, onClose, onRenamed, onRemoved }: Props) {
   const { data: types = [] } = useTypes()
-  const { data: bits = [] } = useBits()
+  const { data: jokes = [] } = useJokes()
   const a = useTypeActions()
   const setColor = useSetTypeColor()
   // The type whose colour grid is open, by id. One at a time keeps the list short.
   const [coloring, setColoring] = useState<string | null>(null)
   const { prompt, confirm, toast } = useFeedback()
   const fail = (e: Error) => toast(e.message)
-  const count = (name: string) => bits.filter((b) => b.types.some((t) => t.toLowerCase() === name.toLowerCase())).length
+  const count = (name: string) => jokes.filter((b) => b.types.some((t) => t.toLowerCase() === name.toLowerCase())).length
 
   const rename = async (t: Named) => {
     const name = await prompt({ title: 'Rename type', initial: t.name, confirmLabel: 'Rename' })

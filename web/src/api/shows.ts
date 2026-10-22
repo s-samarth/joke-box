@@ -34,7 +34,7 @@ export const useLogs = () =>
   useQuery({ queryKey: keys.logs, queryFn: () => api<PerformanceLog[]>('/api/logs') })
 
 export interface BrainstormInput {
-  bit_id: string
+  joke_id: string
   title: string
   content: string
   timer_seconds: number
@@ -55,7 +55,7 @@ export interface SetlistInput {
   venue_name: string | null
   rating: number | null
   tag_ids: string[]
-  items: { bit_id: string; duration_seconds: number; optional: boolean }[]
+  items: { joke_id: string; duration_seconds: number; optional: boolean }[]
 }
 
 export function useSetlistActions() {

@@ -12,11 +12,11 @@ import { FolderOpen } from 'lucide-react'
 import { useState, type ChangeEvent } from 'react'
 import { Link } from 'react-router'
 import { useCraftNotes } from '../../api/craft'
-import { useBits, useTopics } from '../../api/library'
+import { useJokes, useTopics } from '../../api/library'
 import { useObservations, useObservationTopics } from '../../api/notebook'
 import { useVoiceNotes } from '../../api/voice'
 import { Button } from '../../components/ui/Button'
-import { PageHead } from '../../components/ui/bits'
+import { PageHead } from '../../components/ui/pieces'
 import { normalise, parseBundle, planImport, topicNames, type ImportPlan } from './bundle'
 import { runImport, type Progress } from './runImport'
 
@@ -25,7 +25,7 @@ const folderPicker = { webkitdirectory: '', directory: '' } as Record<string, st
 
 export function ImportPage() {
   const qc = useQueryClient()
-  const { data: bits = [] } = useBits()
+  const { data: jokes = [] } = useJokes()
   const { data: observations = [] } = useObservations()
   const { data: notes = [] } = useVoiceNotes()
   const { data: craft = [] } = useCraftNotes()
@@ -48,8 +48,8 @@ export function ImportPage() {
       const bundle = parseBundle(await json.text())
       setAudio(new Map(files.filter((f) => f.webkitRelativePath.includes('/audio/')).map((f) => [f.name, f])))
       setPlan(planImport(bundle, {
-        ids: new Set([...bits, ...observations, ...notes, ...craft].map((x) => x.id)),
-        jokeSetups: new Set(bits.map((b) => normalise(b.setup))),
+        ids: new Set([...jokes, ...observations, ...notes, ...craft].map((x) => x.id)),
+        jokeSetups: new Set(jokes.map((b) => normalise(b.setup))),
         observationTexts: new Set(observations.map((o) => normalise(o.text))),
         craftTitles: new Set(craft.map((n) => normalise(n.title))),
       }))
@@ -113,7 +113,7 @@ export function ImportPage() {
           </p>
           {finished && (
             <p className="mt-4 flex gap-4 text-tape">
-              <Link to="/bits">Jokes</Link><Link to="/observations">Observations</Link><Link to="/voice">Voice notes</Link><Link to="/craft">Craft</Link>
+              <Link to="/jokes">Jokes</Link><Link to="/observations">Observations</Link><Link to="/voice">Voice notes</Link><Link to="/craft">Craft</Link>
             </p>
           )}
           {progress.failures.length > 0 && (

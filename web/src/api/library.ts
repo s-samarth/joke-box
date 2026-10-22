@@ -1,9 +1,9 @@
-/** Hooks for the library: profile, topics, types, statuses and bits. */
+/** Hooks for the library: profile, topics, types, statuses and jokes. */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
-import { deleteBitKey, saveBitKey, type SaveBitVars } from './bitSaves'
+import { deleteJokeKey, saveJokeKey, type SaveJokeVars } from './jokeSaves'
 import { keys } from './queryClient'
-import type { Bit, BitTypeInfo, Me, Named, Subtopic, Topic } from './types'
+import type { Joke, JokeTypeInfo, Me, Named, Subtopic, Topic } from './types'
 
 export const useMe = () =>
   useQuery({ queryKey: keys.me, queryFn: () => api<Me>('/api/me'), staleTime: 5 * 60_000 })
@@ -12,22 +12,22 @@ export const useTopics = () =>
   useQuery({ queryKey: keys.topics, queryFn: () => api<Topic[]>('/api/topics') })
 
 export const useTypes = () =>
-  useQuery({ queryKey: keys.types, queryFn: () => api<BitTypeInfo[]>('/api/types') })
+  useQuery({ queryKey: keys.types, queryFn: () => api<JokeTypeInfo[]>('/api/types') })
 
 export const useStatuses = () =>
   useQuery({ queryKey: keys.statuses, queryFn: () => api<Named[]>('/api/statuses') })
 
-export const useBits = () => useQuery({ queryKey: keys.bits, queryFn: () => api<Bit[]>('/api/bits') })
+export const useJokes = () => useQuery({ queryKey: keys.jokes, queryFn: () => api<Joke[]>('/api/jokes') })
 
-export const useSaveBit = () => useMutation<Bit, Error, SaveBitVars>({ mutationKey: saveBitKey })
+export const useSaveJoke = () => useMutation<Joke, Error, SaveJokeVars>({ mutationKey: saveJokeKey })
 
-export const useDeleteBit = () => useMutation<void, Error, string>({ mutationKey: deleteBitKey })
+export const useDeleteJoke = () => useMutation<void, Error, string>({ mutationKey: deleteJokeKey })
 
 /** Invalidate everything a topic/type change can touch. */
 function useRefreshLibrary() {
   const qc = useQueryClient()
   return () => {
-    for (const key of [keys.topics, keys.types, keys.bits, keys.logs]) {
+    for (const key of [keys.topics, keys.types, keys.jokes, keys.logs]) {
       void qc.invalidateQueries({ queryKey: key })
     }
   }

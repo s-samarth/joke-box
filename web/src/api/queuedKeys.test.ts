@@ -3,7 +3,7 @@
  * it's sent. A release that renamed a key or changed the cache buster would strand those saves.
  */
 import { describe, expect, it } from 'vitest'
-import './bitSaves'
+import './jokeSaves'
 import './craft'
 import { CACHE_BUSTER, persistMaxAge, queryClient } from './queryClient'
 import './showSaves'
@@ -13,7 +13,7 @@ import './voice'
 
 /** Every key ever shipped for a queued save. Add new ones; never remove or rename one. */
 const SHIPPED = [
-  'bit/save', 'bit/delete', 'observation/save', 'observation/delete', 'session/save', 'session/delete',
+  'bit/save', 'bit/delete', 'joke/save', 'joke/delete', 'observation/save', 'observation/delete', 'session/save', 'session/delete',
   'watch/save', 'watch/delete', 'analysis/save', 'analysis/delete', 'craft/save', 'craft/delete',
   'log/save', 'log/delete', 'setlist/save', 'setlist/delete', 'brainstorm/save', 'brainstorm/delete',
   'brainstorm-version/delete', 'voice/save', 'voice/delete', 'trash/restore', 'trash/erase', 'trash/empty',

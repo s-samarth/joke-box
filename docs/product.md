@@ -1,7 +1,7 @@
 # JokeBox: product overview
 
 JokeBox is a private notebook for a stand-up comedian. It holds every stage of the work: a
-half-thought on the bus, a voice memo, a premise, a finished bit, the set it goes into, how it
+half-thought on the bus, a voice memo, a premise, a finished joke, the set it goes into, how it
 went at the mic, and what you learned from watching other comics.
 
 It runs in the browser and installs on a phone as an app. Capture works offline.
@@ -18,7 +18,7 @@ What they need, in order of how often it comes up:
 1. **Catch an idea before it's gone:** typed, spoken, or written by hand, in a couple of seconds,
    with or without a signal.
 2. **Work an idea into a joke:** premise, punch, tag lines, rewrites against a clock.
-3. **Build and run a set:** pick the bits, order them, fit them to the slot, rehearse, perform.
+3. **Build and run a set:** pick the jokes, order them, fit them to the slot, rehearse, perform.
 4. **Learn from each show:** log it on the way home, see the trend over weeks.
 5. **Study the craft:** what you've learned about doing stand-up (checklists, writing techniques,
    reference and goals), a watchlist of routines, and written analyses of sets.
@@ -32,7 +32,7 @@ own data. Today that is one comedian, but the system works for more than one.
 |---|---|
 | Ideas spread across Notes, WhatsApp-to-self, voice memos and paper | One app: jokes, observations, voice notes and brainstorms, all searchable |
 | Setlists on paper; timing guessed | Sets are timed against the slot, with the open-mic "light" built in |
-| No record of how bits did on stage | Shows are logged in under a minute; totals follow any filter; Timeline and Insights show trends and what's working |
+| No record of how jokes did on stage | Shows are logged in under a minute; totals follow any filter; Timeline and Insights show trends and what's working |
 | The old Bit Vault (Firebase) broke on phones, served stale builds, and lost data on rename | Built again with ids, transactions, a proper offline queue and an update prompt |
 
 ## Product principles
@@ -59,19 +59,19 @@ own data. Today that is one comedian, but the system works for more than one.
 |---|---|---|
 | **Home** | The daily joke nudge, quick capture, record a voice note, log an observation, start a brainstorm, study shortcuts, topic folders, next set, "Needs work", last show | `/` |
 | **Daily joke** | One new joke a day: today's box, streaks, a calendar of ticks; the nudge on Home goes from green to yellow, red and spooky | `/daily` |
-| **Jokes** | Searchable list with topic, type, status and sort filters; each joke edited in place; CSV export | `/bits`, `/bits/:id` |
+| **Jokes** | Searchable list with topic, type, status and sort filters; each joke edited in place; CSV export | `/jokes`, `/jokes/:id` |
 | **New joke** | The + button anywhere: a full sheet with every field, prefilled from where you are | sheet |
-| **Rewrite** | Full-screen timed rewrite of one joke; every save keeps a version | `/bits/:id/rewrite` |
+| **Rewrite** | Full-screen timed rewrite of one joke; every save keeps a version | `/jokes/:id/rewrite` |
 | **Observations** | Things you noticed that aren't jokes yet, with their own topics; turn one into a joke | `/observations` |
 | **Brainstorm** | Free writing sessions with a timer: type or handwrite (Apple Pencil), link jokes and observations | `/brainstorm`, `/brainstorm/:id` |
 | **Voice notes** | Record, see the level meter, name and tag it straight away, play back, search by label or hashtag | `/voice` |
-| **Sets** | Bits as masking-tape strips: drag to order, time against the slot, opener and closer marked | `/sets`, `/sets/:id` |
+| **Sets** | Jokes as masking-tape strips: drag to order, time against the slot, opener and closer marked | `/sets`, `/sets/:id` |
 | **Stage** | Full-screen rehearse and perform mode with a clock and the open-mic light | `/sets/:id/stage` |
-| **Print** | A set on paper with each bit's running time | `/sets/:id/print` |
+| **Print** | A set on paper with each joke's running time | `/sets/:id/print` |
 | **Shows** | Log a show; totals, filters, a sortable table, CSV export; Timeline and Insights views | `/shows` |
 | **Craft** | What you know about doing stand-up: your path as a staircase, techniques to write with, and your own areas as folders of note cards | `/craft`, `/craft/area/:id`, `/craft/:id` |
 | **Watchlist** | 100 routines from the persona dossier plus your own, scored and ticked off | `/watchlist` |
-| **Analysis** | Your write-ups of sets and online bits, optionally tied to a routine | `/analysis` |
+| **Analysis** | Your write-ups of sets and online jokes, optionally tied to a routine | `/analysis` |
 | **External links** | Your persona site and Comedy Atlas | `/links` |
 
 Each screen is described in [screens.md](screens.md), and the end-to-end journeys are in
@@ -83,7 +83,7 @@ The vocabulary is a comic's, not a database's. Keep to it in the code and in the
 
 | Term | Meaning |
 |---|---|
-| **Joke** (or **bit**) | The unit of material: a setup (premise), a punchline, and its details. The UI says "joke"; the code and API say `bit`. |
+| **Joke** (or **joke**) | The unit of material: a setup (premise), a punchline, and its details. The UI says "joke"; the code and API say `joke`. |
 | **Premise / punch** | The setup and the punchline. |
 | **Tag line** | An extra punchline that follows the main punch. |
 | **Thoughts** | The default topic for anything unfiled. Stored as the protected `Random` topic, which can't be renamed or deleted, and picks up the jokes of any deleted topic. |
@@ -109,7 +109,7 @@ The vocabulary is a comic's, not a database's. Keep to it in the code and in the
 
 These aren't built yet; the schema leaves room for them:
 
-- **Per-joke stage results:** which bits in a set landed at a given show, so strength can follow real
+- **Per-joke stage results:** which jokes in a set landed at a given show, so strength can follow real
   data.
 - **Trend charts:** rating, crowd and stage time across weeks.
 - **Linking voice notes to jokes**, the way brainstorm sessions already link.

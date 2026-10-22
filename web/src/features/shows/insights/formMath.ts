@@ -3,7 +3,7 @@
  * month. Both count shows rather than dates, so they work however long ago you last went up.
  */
 import type { PerformanceLog, Topic } from '../../../api/types'
-import { topicName } from '../../../lib/bitMeta'
+import { topicName } from '../../../lib/jokeMeta'
 import { toIstInput } from '../../../lib/time'
 import { weightedRating } from '../logStats'
 import { MIN_SHOWS } from './insightMath'

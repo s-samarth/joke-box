@@ -5,14 +5,14 @@
 import { Link2, X } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { useBits } from '../../api/library'
+import { useJokes } from '../../api/library'
 import { useObservations } from '../../api/notebook'
 import { LinkPicker } from './LinkPicker'
 
 interface Props {
-  bitIds: string[]
+  jokeIds: string[]
   observationIds: string[]
-  onChange: (bitIds: string[], observationIds: string[]) => void
+  onChange: (jokeIds: string[], observationIds: string[]) => void
 }
 
 const card = 'group relative flex max-w-full items-start gap-2 rounded-lg bg-ink-2 py-2 pr-9 pl-3 ring-1 ring-rule sm:max-w-sm'
@@ -25,22 +25,22 @@ function Unlink({ onClick }: { onClick: () => void }) {
   )
 }
 
-export function SessionLinks({ bitIds, observationIds, onChange }: Props) {
+export function SessionLinks({ jokeIds, observationIds, onChange }: Props) {
   const [picking, setPicking] = useState(false)
-  const { data: bits = [] } = useBits()
+  const { data: jokes = [] } = useJokes()
   const { data: observations = [] } = useObservations()
-  const jokes = bitIds.flatMap((id) => bits.filter((b) => b.id === id))
+  const linked = jokeIds.flatMap((id) => jokes.filter((b) => b.id === id))
   const notes = observationIds.flatMap((id) => observations.filter((o) => o.id === id))
 
   return (
     <div className="flex flex-wrap items-start gap-2">
-      {jokes.map((b) => (
+      {linked.map((b) => (
         <div key={b.id} className={card}>
-          <Link to={`/bits/${b.id}`} className="min-w-0 text-sm hover:text-tape">
+          <Link to={`/jokes/${b.id}`} className="min-w-0 text-sm hover:text-tape">
             <span className="block text-xs text-tape">Joke</span>
             <span className="line-clamp-2">{b.setup}</span>
           </Link>
-          <Unlink onClick={() => onChange(bitIds.filter((x) => x !== b.id), observationIds)} />
+          <Unlink onClick={() => onChange(jokeIds.filter((x) => x !== b.id), observationIds)} />
         </div>
       ))}
       {notes.map((o) => (
@@ -49,13 +49,13 @@ export function SessionLinks({ bitIds, observationIds, onChange }: Props) {
             <span className="block text-xs text-dim">Observation</span>
             <span className="line-clamp-2">{o.text}</span>
           </span>
-          <Unlink onClick={() => onChange(bitIds, observationIds.filter((x) => x !== o.id))} />
+          <Unlink onClick={() => onChange(jokeIds, observationIds.filter((x) => x !== o.id))} />
         </div>
       ))}
       <button type="button" onClick={() => setPicking(true)} className="inline-flex h-10 items-center gap-2 rounded-lg px-3 text-sm text-tape ring-1 ring-rule ring-inset hover:bg-ink-3">
         <Link2 size={16} /> Link jokes or observations
       </button>
-      {picking && <LinkPicker bitIds={bitIds} observationIds={observationIds} onChange={onChange} onClose={() => setPicking(false)} />}
+      {picking && <LinkPicker jokeIds={jokeIds} observationIds={observationIds} onChange={onChange} onClose={() => setPicking(false)} />}
     </div>
   )
 }

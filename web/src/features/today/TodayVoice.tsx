@@ -1,6 +1,6 @@
 /** Record a voice note straight from Today, the screen the app opens on. */
 import { Link } from 'react-router'
-import { SectionHead } from '../../components/ui/bits'
+import { SectionHead } from '../../components/ui/pieces'
 import { Recorder } from '../voice/Recorder'
 import { useVoiceLibrary } from '../voice/useVoiceLibrary'
 

@@ -23,7 +23,7 @@ describe('pickMimeType', () => {
 })
 
 describe('bitrateFor', () => {
-  it('gives AAC (iPhone) more bits than Opus', () => {
+  it('gives AAC (iPhone) more jokes than Opus', () => {
     expect(bitrateFor('audio/mp4;codecs=mp4a.40.2')).toBe(64_000)
     expect(bitrateFor('audio/webm;codecs=opus')).toBe(48_000)
     expect(bitrateFor(undefined)).toBe(48_000)

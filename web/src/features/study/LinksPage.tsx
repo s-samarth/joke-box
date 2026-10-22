@@ -1,6 +1,6 @@
 /** External links: your own comedy sites, a tap away. */
 import { ExternalLink } from 'lucide-react'
-import { PageHead } from '../../components/ui/bits'
+import { PageHead } from '../../components/ui/pieces'
 
 const LINKS = [
   {

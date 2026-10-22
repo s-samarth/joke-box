@@ -1,4 +1,4 @@
-"""Bits and the things that organise them: topics, subtopics, types and statuses."""
+"""Jokes and the things that organise them: topics, subtopics, types and statuses."""
 
 import uuid
 
@@ -26,7 +26,7 @@ RANDOM_TOPIC = "Random"
 
 
 class Topic(OwnedMixin, Base):
-    """A folder of bits. 'Random' is the protected system topic every user has."""
+    """A folder of jokes. 'Random' is the protected system topic every user has."""
 
     __tablename__ = "topics"
     __table_args__ = (Index("uq_topics_user_name", "user_id", text("lower(name)"), unique=True),)
@@ -55,19 +55,21 @@ class Subtopic(OwnedMixin, Base):
     topic: Mapped[Topic] = relationship(back_populates="subtopics")
 
 
-bit_type_links = Table(
-    "bit_type_links",
+joke_type_links = Table(
+    "joke_type_links",
     Base.metadata,
-    Column("bit_id", Uuid, ForeignKey("bits.id", ondelete="CASCADE"), primary_key=True),
-    Column("type_id", Uuid, ForeignKey("bit_types.id", ondelete="CASCADE"), primary_key=True),
+    Column("joke_id", Uuid, ForeignKey("jokes.id", ondelete="CASCADE"), primary_key=True),
+    Column("type_id", Uuid, ForeignKey("joke_types.id", ondelete="CASCADE"), primary_key=True),
 )
 
 
-class BitType(OwnedMixin, Base):
-    """A form of joke (One-Liner, Story...). Exists only while at least one bit uses it."""
+class JokeType(OwnedMixin, Base):
+    """A form of joke (One-Liner, Story...). Exists only while at least one joke uses it."""
 
-    __tablename__ = "bit_types"
-    __table_args__ = (Index("uq_bit_types_user_name", "user_id", text("lower(name)"), unique=True),)
+    __tablename__ = "joke_types"
+    __table_args__ = (
+        Index("uq_joke_types_user_name", "user_id", text("lower(name)"), unique=True),
+    )
 
     name: Mapped[str] = mapped_column(String(80))
 
@@ -92,10 +94,10 @@ class Status(OwnedMixin, Base):
     position: Mapped[int] = mapped_column(Integer, default=0)
 
 
-class Bit(Trashable, OwnedMixin, Base):
+class Joke(Trashable, OwnedMixin, Base):
     """The atomic unit of material: a setup, a punchline and its metadata."""
 
-    __tablename__ = "bits"
+    __tablename__ = "jokes"
     __table_args__ = (
         CheckConstraint("strength BETWEEN 1 AND 5", name="strength_range"),
         CheckConstraint(
@@ -123,10 +125,10 @@ class Bit(Trashable, OwnedMixin, Base):
     comments: Mapped[str] = mapped_column(Text, default="")
     # The joke this one continues from. Many jokes can follow one, so chains branch into trees.
     follows_id: Mapped[uuid.UUID | None] = mapped_column(
-        Uuid, ForeignKey("bits.id", ondelete="SET NULL"), index=True
+        Uuid, ForeignKey("jokes.id", ondelete="SET NULL"), index=True
     )
     # Goes up by one on every save; a save edited from an older version is a conflict.
     version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
 
-    types: Mapped[list[BitType]] = relationship(secondary=bit_type_links, order_by=BitType.name)
+    types: Mapped[list[JokeType]] = relationship(secondary=joke_type_links, order_by=JokeType.name)
     status: Mapped[Status | None] = relationship()

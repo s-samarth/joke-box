@@ -33,9 +33,9 @@ def new_note(client: TestClient, **fields: object) -> str:
 
 
 def test_record_upload_and_play_back(alice: TestClient, store: LocalAudioStore) -> None:
-    note_id = new_note(alice, label="  Airport bit  ", hashtags=["#travel", " "])
+    note_id = new_note(alice, label="  Airport joke  ", hashtags=["#travel", " "])
     listed = alice.get("/api/voice-notes").json()
-    assert listed[0]["label"] == "Airport bit" and listed[0]["hashtags"] == ["#travel"]
+    assert listed[0]["label"] == "Airport joke" and listed[0]["hashtags"] == ["#travel"]
     assert listed[0]["has_audio"] is False
 
     uploaded = alice.put(f"/api/voice-notes/{note_id}/audio", content=FAKE_AUDIO, headers=AUDIO)

@@ -4,12 +4,12 @@ import { useState, type ReactNode } from 'react'
 import { useStatuses, useTopics, useTypes } from '../../api/library'
 import { Input } from '../../components/ui/Field'
 import { Dropdown, type MenuItem } from '../../components/ui/Menu'
-import { UNDEFINED_TYPE, topicName } from '../../lib/bitMeta'
+import { UNDEFINED_TYPE, topicName } from '../../lib/jokeMeta'
 import { TopicManager } from './TopicManager'
 import { TypeManager } from './TypeManager'
-import { SORTS, type SortKey, type useBitFilters } from './useBitFilters'
+import { SORTS, type SortKey, type useJokeFilters } from './useJokeFilters'
 
-type Filters = ReturnType<typeof useBitFilters>
+type Filters = ReturnType<typeof useJokeFilters>
 
 function MenuButton({ label, on, children }: { label: string; on: boolean; children?: ReactNode }) {
   return (
@@ -20,7 +20,7 @@ function MenuButton({ label, on, children }: { label: string; on: boolean; child
   )
 }
 
-export function BitFilters({ f }: { f: Filters }) {
+export function JokeFilters({ f }: { f: Filters }) {
   const { data: topics = [] } = useTopics()
   const { data: types = [] } = useTypes()
   const { data: statuses = [] } = useStatuses()

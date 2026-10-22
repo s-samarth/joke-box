@@ -1,16 +1,16 @@
 /**
- * Rewrite: a quiet full-screen page for reworking one bit against the clock. The original stays
+ * Rewrite: a quiet full-screen page for reworking one joke against the clock. The original stays
  * pinned at the top, the timer runs while you write, and every save keeps a version.
  */
 import { History, ListChecks, Pause, Play, Plus, RotateCcw, X } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { newId } from '../../api/client'
-import { useBits } from '../../api/library'
+import { useJokes } from '../../api/library'
 import { useBrainstormActions, useBrainstorms } from '../../api/shows'
-import type { Bit, Brainstorm } from '../../api/types'
+import type { Joke, Brainstorm } from '../../api/types'
 import { Button, IconButton } from '../../components/ui/Button'
-import { Spinner } from '../../components/ui/bits'
+import { Spinner } from '../../components/ui/pieces'
 import { GrowingText } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { Modal } from '../../components/ui/Modal'
@@ -20,7 +20,7 @@ import { RewriteHistory } from './RewriteHistory'
 import { useTimer } from './useTimer'
 import { announceSave } from '../../lib/announce'
 
-function Workspace({ bit, sessions, startId }: { bit: Bit; sessions: Brainstorm[]; startId: string | null }) {
+function Workspace({ joke, sessions, startId }: { joke: Joke; sessions: Brainstorm[]; startId: string | null }) {
   const start = sessions.find((s) => s.id === startId)
   const [id, setId] = useState(() => start?.id ?? newId())
   const [title, setTitle] = useState(start?.title ?? '')
@@ -41,7 +41,7 @@ function Workspace({ bit, sessions, startId }: { bit: Bit; sessions: Brainstorm[
     setHistoryOpen(false)
   }
   const save = () => {
-    const saving = actions.save.mutateAsync({ id, input: { bit_id: bit.id, title, content, timer_seconds: timer.seconds } })
+    const saving = actions.save.mutateAsync({ id, input: { joke_id: joke.id, title, content, timer_seconds: timer.seconds } })
     saving.then((b) => toast(`Version ${b.versions.length} saved`), (e: Error) => toast(`Not saved: ${e.message}`))
     announceSave(saving, toast, null) // says so if it's waiting; the version number comes when it lands
   }
@@ -58,7 +58,7 @@ function Workspace({ bit, sessions, startId }: { bit: Bit; sessions: Brainstorm[
   return (
     <div className="pt-safe min-h-dvh">
       <header className="sticky top-0 z-10 flex items-center gap-2 border-b border-rule bg-ink/95 px-3 py-2 backdrop-blur sm:px-6">
-        <Link to={`/bits/${bit.id}`} aria-label="Close rewrite" className="inline-flex size-10 items-center justify-center rounded-lg text-dim hover:bg-ink-3 hover:text-paper"><X size={20} /></Link>
+        <Link to={`/jokes/${joke.id}`} aria-label="Close rewrite" className="inline-flex size-10 items-center justify-center rounded-lg text-dim hover:bg-ink-3 hover:text-paper"><X size={20} /></Link>
         <button type="button" onClick={timer.running ? timer.pause : timer.start} className={`inline-flex h-10 items-center gap-2 rounded-lg px-3 ${timer.running ? 'bg-tape text-tape-ink' : 'bg-ink-3'}`} aria-label={timer.running ? 'Pause timer' : 'Start timer'}>
           {timer.running ? <Pause size={16} /> : <Play size={16} />}
           <span className="headline text-xl tabular">{clock(timer.seconds)}</span>
@@ -75,8 +75,8 @@ function Workspace({ bit, sessions, startId }: { bit: Bit; sessions: Brainstorm[
       <div className="mx-auto flex max-w-6xl gap-10 px-5 sm:px-8">
         <main className="mx-auto min-w-0 max-w-2xl flex-1 py-8">
           <div className="border-l-2 border-tape/60 pl-4 text-dim">
-            <p className="leading-snug">{bit.setup}</p>
-            {bit.punchline && <p className="mt-1 leading-snug text-tape/80">{bit.punchline}</p>}
+            <p className="leading-snug">{joke.setup}</p>
+            {joke.punchline && <p className="mt-1 leading-snug text-tape/80">{joke.punchline}</p>}
           </div>
           <GrowingText aria-label="Session title" placeholder="Name this session (optional)" className="headline mt-8 text-3xl" value={title} onChange={(e) => setTitle(e.target.value)} />
           <GrowingText aria-label="Rewrite" autoFocus placeholder="Write it again. Other punches, tags, an act-out, a new angle." className="mt-4 min-h-[50dvh] text-lg leading-relaxed" value={content} onChange={(e) => setContent(e.target.value)} />
@@ -92,11 +92,11 @@ function Workspace({ bit, sessions, startId }: { bit: Bit; sessions: Brainstorm[
 }
 
 export function RewritePage() {
-  const { bitId } = useParams()
+  const { jokeId } = useParams()
   const [params] = useSearchParams()
-  const { data: bits } = useBits()
+  const { data: jokes } = useJokes()
   const { data: brainstorms, isPending } = useBrainstorms()
-  const bit = bits?.find((b) => b.id === bitId)
-  if (!bit || (isPending && !brainstorms)) return <div className="p-8"><Spinner /></div>
-  return <Workspace bit={bit} sessions={(brainstorms ?? []).filter((b) => b.bit_id === bit.id)} startId={params.get('session')} />
+  const joke = jokes?.find((b) => b.id === jokeId)
+  if (!joke || (isPending && !brainstorms)) return <div className="p-8"><Spinner /></div>
+  return <Workspace joke={joke} sessions={(brainstorms ?? []).filter((b) => b.joke_id === joke.id)} startId={params.get('session')} />
 }

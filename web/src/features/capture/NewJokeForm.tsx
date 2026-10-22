@@ -4,7 +4,7 @@
  * language, hashtags), notes, and a first brainstorm.
  *
  * Pattern: the form keeps a local draft in useState and hands `draft` + `update` to
- * BitDetails, the same component the joke page uses with its autosaving draft. One set of
+ * JokeDetails, the same component the joke page uses with its autosaving draft. One set of
  * controls, two owners of the state, so the two screens can't drift apart.
  */
 import { useQueryClient } from '@tanstack/react-query'
@@ -13,14 +13,14 @@ import { api, newId } from '../../api/client'
 import { useTopics } from '../../api/library'
 import { keys } from '../../api/queryClient'
 import type { BrainstormInput } from '../../api/shows'
-import type { BitInput } from '../../api/types'
+import type { JokeInput } from '../../api/types'
 import { Button } from '../../components/ui/Button'
 import { GrowingText, Textarea } from '../../components/ui/Field'
 import { Modal } from '../../components/ui/Modal'
 import { useFeedback } from '../../components/ui/feedbackContext'
-import { BitDetails } from '../bits/BitDetails'
-import { TagLines } from '../bits/TagLines'
-import { blankBit, useCaptureBit } from './newBit'
+import { JokeDetails } from '../jokes/JokeDetails'
+import { TagLines } from '../jokes/TagLines'
+import { blankJoke, useCaptureJoke } from './newJoke'
 
 export interface Prefill {
   topicId?: string
@@ -33,14 +33,14 @@ export interface Prefill {
 export function NewJokeForm({ prefill, onClose }: { prefill: Prefill; onClose: () => void }) {
   const { data: topics = [] } = useTopics()
   const thoughtsId = topics.find((t) => t.is_system)?.id ?? ''
-  const [draft, setDraft] = useState<BitInput>(() => ({ ...blankBit(prefill.topicId), subtopic_id: prefill.subtopicId ?? null, setup: prefill.setup ?? '', follows_id: prefill.followsId ?? null }))
+  const [draft, setDraft] = useState<JokeInput>(() => ({ ...blankJoke(prefill.topicId), subtopic_id: prefill.subtopicId ?? null, setup: prefill.setup ?? '', follows_id: prefill.followsId ?? null }))
   const [brainstorm, setBrainstorm] = useState('')
-  const capture = useCaptureBit()
+  const capture = useCaptureJoke()
   const qc = useQueryClient()
   const { toast } = useFeedback()
   // Topics may still be loading when the sheet opens, so "Thoughts" is filled in at render time.
   const input = { ...draft, topic_id: draft.topic_id || thoughtsId }
-  const update = (patch: Partial<BitInput>) => setDraft((d) => ({ ...d, ...patch }))
+  const update = (patch: Partial<JokeInput>) => setDraft((d) => ({ ...d, ...patch }))
   const ready = draft.setup.trim().length > 0
 
   const submit = (open: boolean) => {
@@ -49,8 +49,8 @@ export function NewJokeForm({ prefill, onClose }: { prefill: Prefill; onClose: (
     // A brainstorm belongs to a joke, so it's saved once the server has the joke. The sheet
     // has closed by then, so this calls the API directly rather than through a hook.
     const onSaved = notes
-      ? (bitId: string) => {
-          const input: BrainstormInput = { bit_id: bitId, title: 'First brainstorm', content: notes, timer_seconds: 0 }
+      ? (jokeId: string) => {
+          const input: BrainstormInput = { joke_id: jokeId, title: 'First brainstorm', content: notes, timer_seconds: 0 }
           api(`/api/brainstorms/${newId()}`, 'PUT', input).then(
             () => qc.invalidateQueries({ queryKey: keys.brainstorms }),
             (e: Error) => toast(`Brainstorm not saved: ${e.message}`),
@@ -79,7 +79,7 @@ export function NewJokeForm({ prefill, onClose }: { prefill: Prefill; onClose: (
           <TagLines lines={draft.tag_lines} onChange={(tag_lines) => update({ tag_lines })} />
         </div>
 
-        <BitDetails draft={input} update={update} />
+        <JokeDetails draft={input} update={update} />
 
         <div className="space-y-2">
           <label htmlFor="new-joke-notes" className="text-sm text-dim">Notes</label>

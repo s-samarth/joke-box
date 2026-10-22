@@ -1,4 +1,4 @@
-"""Analyses: your write-ups of sets and online bits, each with a name, a link and the text."""
+"""Analyses: your write-ups of sets and online jokes, each with a name, a link and the text."""
 
 import uuid
 

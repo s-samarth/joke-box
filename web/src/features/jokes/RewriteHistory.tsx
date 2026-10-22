@@ -1,4 +1,4 @@
-/** Saved versions of this session, and earlier sessions on the same bit. */
+/** Saved versions of this session, and earlier sessions on the same joke. */
 import { RotateCcw, Trash2 } from 'lucide-react'
 import type { Brainstorm, BrainstormVersion } from '../../api/types'
 import { formatDateTime } from '../../lib/time'

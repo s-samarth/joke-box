@@ -4,7 +4,7 @@
  * own overall rating, so "+0.4" means that topic goes better than you usually do.
  */
 import type { PerformanceLog, Topic } from '../../../api/types'
-import { topicName } from '../../../lib/bitMeta'
+import { topicName } from '../../../lib/jokeMeta'
 import { toIstInput } from '../../../lib/time'
 import { DURATION_BANDS } from '../logMath'
 import { weightedRating } from '../logStats'

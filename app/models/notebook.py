@@ -51,7 +51,7 @@ class WritingSession(Trashable, OwnedMixin, Base):
     ink: Mapped[list[dict[str, Any]]] = mapped_column(JSON, default=list)
     ink_pages: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
     timer_seconds: Mapped[int] = mapped_column(Integer, default=0)
-    bit_ids: Mapped[list[str]] = mapped_column(JSON, default=list)
+    joke_ids: Mapped[list[str]] = mapped_column(JSON, default=list)
     observation_ids: Mapped[list[str]] = mapped_column(JSON, default=list)
     # The craft technique the session runs, if any (Ranting HWSS, joke webs...).
     technique_id: Mapped[uuid.UUID | None] = mapped_column(

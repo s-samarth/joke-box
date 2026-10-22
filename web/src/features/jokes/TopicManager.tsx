@@ -3,14 +3,14 @@
  * Thoughts, which always stays first.
  */
 import { Pencil, Plus, Trash2 } from 'lucide-react'
-import { useBits, useTopicActions, useTopics } from '../../api/library'
+import { useJokes, useTopicActions, useTopics } from '../../api/library'
 import { useReorderSubtopics, useReorderTopics } from '../../api/ordering'
 import type { Subtopic, Topic } from '../../api/types'
 import { Button, IconButton } from '../../components/ui/Button'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { Modal } from '../../components/ui/Modal'
 import { SortableList } from '../../components/ui/SortableList'
-import { topicName } from '../../lib/bitMeta'
+import { topicName } from '../../lib/jokeMeta'
 
 interface Props {
   open: boolean
@@ -21,13 +21,13 @@ interface Props {
 
 export function TopicManager({ open, onClose, onRemoved }: Props) {
   const { data: topics = [] } = useTopics()
-  const { data: bits = [] } = useBits()
+  const { data: jokes = [] } = useJokes()
   const a = useTopicActions()
   const reorder = useReorderTopics()
   const reorderSubs = useReorderSubtopics()
   const { prompt, confirm, toast } = useFeedback()
   const fail = (e: Error) => toast(e.message)
-  const count = (id: string) => bits.filter((b) => b.topic_id === id || b.subtopic_id === id).length
+  const count = (id: string) => jokes.filter((b) => b.topic_id === id || b.subtopic_id === id).length
 
   const addTopic = async () => {
     const name = await prompt({ title: 'New topic', label: 'Topic name', confirmLabel: 'Add topic' })

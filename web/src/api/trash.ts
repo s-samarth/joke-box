@@ -26,7 +26,7 @@ export type TrashVars = { kind: TrashKind; id: string }
 
 /** Each kind's name in the Trash, and the lists that change when one comes back. */
 export const TRASH_KINDS: Record<TrashKind, { label: string; lists: QueryKey[] }> = {
-  jokes: { label: 'Jokes', lists: [keys.bits, keys.brainstorms, keys.setlists, keys.types] },
+  jokes: { label: 'Jokes', lists: [keys.jokes, keys.brainstorms, keys.setlists, keys.types] },
   rewrites: { label: 'Rewrites', lists: [keys.brainstorms] },
   observations: { label: 'Observations', lists: [keys.observations] },
   brainstorms: { label: 'Brainstorms', lists: [keys.sessions] },

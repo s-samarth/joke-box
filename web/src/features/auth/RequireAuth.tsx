@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { Navigate } from 'react-router'
 import { ApiError } from '../../api/client'
 import { useMe } from '../../api/library'
-import { Spinner } from '../../components/ui/bits'
+import { Spinner } from '../../components/ui/pieces'
 
 export function RequireAuth({ children }: { children: ReactNode }) {
   const { data, error, isPending } = useMe()

@@ -2,10 +2,11 @@ import { PersistQueryClientProvider, persistQueryClientSave } from '@tanstack/re
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
+import { upgradeOldCache } from './api/legacy'
 import { persistOptions } from './api/persist'
 import { queryClient, resumeQueued } from './api/queryClient'
 // Registers the queued saves (jokes, shows, sets, study, craft, voice) before they're replayed.
-import './api/bitSaves'
+import './api/jokeSaves'
 import './api/showSaves'
 import './api/study'
 import './api/craft'
@@ -38,7 +39,7 @@ async function boot() {
         persistOptions={persistOptions}
         // After the saved cache loads, check who's signed in, replay the saves waiting on the
         // phone, then refresh.
-        onSuccess={() => checkAccount().then(resumeQueued).then(() => queryClient.invalidateQueries())}
+        onSuccess={() => { upgradeOldCache(queryClient); return checkAccount().then(resumeQueued).then(() => queryClient.invalidateQueries()) }}
       >
         <BrowserRouter>
           <FeedbackProvider>

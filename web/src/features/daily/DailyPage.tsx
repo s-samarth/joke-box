@@ -5,7 +5,7 @@
  */
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { PageHead } from '../../components/ui/bits'
+import { PageHead } from '../../components/ui/pieces'
 import { formatDate } from '../../lib/time'
 import { QuickCapture } from '../today/QuickCapture'
 import { DailyBanner } from './DailyBanner'
@@ -53,7 +53,7 @@ export function DailyPage() {
             <ul className="divide-y divide-rule border-y border-rule">
               {picked.map((b) => (
                 <li key={b.id}>
-                  <Link to={`/bits/${b.id}`} className="block truncate py-3 hover:bg-ink-2/60">{b.setup}</Link>
+                  <Link to={`/jokes/${b.id}`} className="block truncate py-3 hover:bg-ink-2/60">{b.setup}</Link>
                 </li>
               ))}
             </ul>

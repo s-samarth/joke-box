@@ -1,7 +1,7 @@
 /**
  * TanStack Query setup: the cache that holds all server data in the browser.
  *
- * Pattern: "server state" (bits, topics...) lives here, not in useState. Screens read it with
+ * Pattern: "server state" (jokes, topics...) lives here, not in useState. Screens read it with
  * useQuery and change it with useMutation; after a change we invalidate the affected keys and
  * TanStack refetches them. The cache is saved to IndexedDB, so the app opens offline.
  */
@@ -21,7 +21,7 @@ export const keys = {
   types: ['types'],
   typeColors: ['type-colors'],
   statuses: ['statuses'],
-  bits: ['bits'],
+  jokes: ['jokes'],
   brainstorms: ['brainstorms'],
   setlists: ['setlists'],
   venues: ['venues'],

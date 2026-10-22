@@ -1,4 +1,4 @@
-"""Studying other comics: a watchlist of routines and written analyses of sets and bits."""
+"""Studying other comics: a watchlist of routines and written analyses of sets and jokes."""
 
 import uuid
 
@@ -27,7 +27,7 @@ class WatchItem(Trashable, OwnedMixin, Base):
 
 
 class Analysis(Trashable, OwnedMixin, Base):
-    """Your write-up of a set or an online bit. Optionally tied to a watchlist routine."""
+    """Your write-up of a set or an online joke. Optionally tied to a watchlist routine."""
 
     __tablename__ = "analyses"
 

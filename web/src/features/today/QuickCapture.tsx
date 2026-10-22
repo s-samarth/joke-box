@@ -4,15 +4,15 @@
  */
 import { CornerDownLeft } from 'lucide-react'
 import { useState, type KeyboardEvent } from 'react'
-import { THOUGHTS } from '../../lib/bitMeta'
-import { useCaptureBit } from '../capture/newBit'
+import { THOUGHTS } from '../../lib/jokeMeta'
+import { useCaptureJoke } from '../capture/newJoke'
 
 const field = 'block w-full resize-none bg-transparent px-4 text-xl leading-snug outline-none placeholder:text-faint'
 
 export function QuickCapture() {
   const [setup, setSetup] = useState('')
   const [punchline, setPunchline] = useState('')
-  const capture = useCaptureBit()
+  const capture = useCaptureJoke()
   const save = () => {
     if (!capture({ setup, punchline })) return
     setSetup('')

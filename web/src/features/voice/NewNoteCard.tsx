@@ -6,7 +6,7 @@ import { Check, LoaderCircle, Trash2 } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { Button } from '../../components/ui/Button'
 import { clock } from '../../lib/duration'
-import { HashtagField } from '../bits/DetailControls'
+import { HashtagField } from '../jokes/DetailControls'
 import { PlayButton } from './PlayButton'
 import { usePlayer } from './usePlayer'
 

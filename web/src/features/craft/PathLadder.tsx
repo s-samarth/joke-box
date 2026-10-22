@@ -6,8 +6,8 @@
  */
 import { Link } from 'react-router'
 import { useCraftNotes } from '../../api/craft'
-import { useBits, useTopics } from '../../api/library'
-import { topicName } from '../../lib/bitMeta'
+import { useJokes, useTopics } from '../../api/library'
+import { topicName } from '../../lib/jokeMeta'
 import { clock } from '../../lib/duration'
 import { inlineRuns, listItems } from './bodyFormat'
 import { mostSolidTopic, nextStep, targetMinutes } from './path'
@@ -16,13 +16,13 @@ const STEP_MIN = 18 // % height of the first step, so it's still visible
 
 export function PathLadder({ compact }: { compact?: boolean }) {
   const { data: notes = [] } = useCraftNotes()
-  const { data: bits = [] } = useBits()
+  const { data: jokes = [] } = useJokes()
   const { data: topics = [] } = useTopics()
   const step = nextStep(notes)
   if (!step) return null
   const boxes = listItems(step.note.body).filter((i) => i.checked !== null)
   const target = targetMinutes(step.next.text)
-  const best = mostSolidTopic(bits)
+  const best = mostSolidTopic(jokes)
   const topic = topics.find((t) => t.id === best?.topicId)
   const share = target && best ? Math.min(1, best.seconds / (target * 60)) : 0
 

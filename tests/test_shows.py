@@ -6,15 +6,15 @@ from datetime import UTC, datetime
 from fastapi.testclient import TestClient
 
 from tests.conftest import random_topic_id
-from tests.test_bits import put_bit
+from tests.test_jokes import put_joke
 
 NOW = "2026-10-01T20:30:00+05:30"
 
 
 def test_brainstorm_saves_append_versions(alice: TestClient) -> None:
-    bit = put_bit(alice).json()
+    joke = put_joke(alice).json()
     bs_id = str(uuid.uuid4())
-    body = {"bit_id": bit["id"], "title": "Take 1", "content": "draft", "timer_seconds": 42}
+    body = {"joke_id": joke["id"], "title": "Take 1", "content": "draft", "timer_seconds": 42}
     alice.put(f"/api/brainstorms/{bs_id}", json=body)
     saved = alice.put(f"/api/brainstorms/{bs_id}", json={**body, "content": "draft 2"}).json()
     assert [v["content"] for v in saved["versions"]] == ["draft", "draft 2"]
@@ -23,39 +23,39 @@ def test_brainstorm_saves_append_versions(alice: TestClient) -> None:
     assert len(alice.get("/api/brainstorms").json()[0]["versions"]) == 1
 
 
-def test_deleting_a_bit_removes_its_brainstorms_and_set_entries(alice: TestClient) -> None:
-    bit = put_bit(alice).json()
-    alice.put(f"/api/brainstorms/{uuid.uuid4()}", json={"bit_id": bit["id"]})
+def test_deleting_a_joke_removes_its_brainstorms_and_set_entries(alice: TestClient) -> None:
+    joke = put_joke(alice).json()
+    alice.put(f"/api/brainstorms/{uuid.uuid4()}", json={"joke_id": joke["id"]})
     set_id = str(uuid.uuid4())
-    alice.put(f"/api/setlists/{set_id}", json={"items": [{"bit_id": bit["id"]}]})
-    alice.delete(f"/api/bits/{bit['id']}")
+    alice.put(f"/api/setlists/{set_id}", json={"items": [{"joke_id": joke["id"]}]})
+    alice.delete(f"/api/jokes/{joke['id']}")
     assert alice.get("/api/brainstorms").json() == []
     assert alice.get("/api/setlists").json()[0]["items"] == []
 
 
 def test_setlist_keeps_order_and_creates_venue(alice: TestClient) -> None:
-    a, b = put_bit(alice).json(), put_bit(alice).json()
+    a, b = put_joke(alice).json(), put_joke(alice).json()
     set_id = str(uuid.uuid4())
     body = {
         "name": "Friday",
         "target_seconds": 300,
         "venue_name": "Garage",
         "items": [
-            {"bit_id": b["id"], "duration_seconds": 60},
-            {"bit_id": a["id"], "duration_seconds": 30},
+            {"joke_id": b["id"], "duration_seconds": 60},
+            {"joke_id": a["id"], "duration_seconds": 30},
         ],
     }
     saved = alice.put(f"/api/setlists/{set_id}", json=body).json()
-    assert [i["bit_id"] for i in saved["items"]] == [b["id"], a["id"]]
+    assert [i["joke_id"] for i in saved["items"]] == [b["id"], a["id"]]
     assert saved["venue_name"] == "Garage"
     assert [v["name"] for v in alice.get("/api/venues").json()] == ["Garage"]
     reordered = alice.put(f"/api/setlists/{set_id}", json={**body, "items": body["items"][::-1]})
-    assert [i["bit_id"] for i in reordered.json()["items"]] == [a["id"], b["id"]]
+    assert [i["joke_id"] for i in reordered.json()["items"]] == [a["id"], b["id"]]
 
 
-def test_setlist_rejects_other_users_bits(alice: TestClient, bob: TestClient) -> None:
-    bit = put_bit(alice).json()
-    response = bob.put(f"/api/setlists/{uuid.uuid4()}", json={"items": [{"bit_id": bit["id"]}]})
+def test_setlist_rejects_other_users_jokes(alice: TestClient, bob: TestClient) -> None:
+    joke = put_joke(alice).json()
+    response = bob.put(f"/api/setlists/{uuid.uuid4()}", json={"items": [{"joke_id": joke["id"]}]})
     assert response.status_code == 422
 
 
@@ -110,7 +110,7 @@ def test_other_users_cannot_see_my_shows(alice: TestClient, bob: TestClient) -> 
 
 def test_demo_reseed(alice: TestClient) -> None:
     assert alice.post("/api/dev/reseed").status_code == 204
-    assert len(alice.get("/api/bits").json()) == 17
+    assert len(alice.get("/api/jokes").json()) == 17
     assert len(alice.get("/api/logs").json()) == 4
     assert len(alice.get("/api/setlists").json()[0]["items"]) == 3
 

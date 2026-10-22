@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react'
-import { Navigate, Route, Routes } from 'react-router'
-import { Spinner } from './components/ui/bits'
+import { Navigate, Route, Routes, useLocation } from 'react-router'
+import { Spinner } from './components/ui/pieces'
 import { LoginPage } from './features/auth/LoginPage'
 import { RequireAuth } from './features/auth/RequireAuth'
 import { TodayPage } from './features/today/TodayPage'
@@ -10,10 +10,10 @@ const named = <K extends string>(load: () => Promise<Record<K, React.ComponentTy
   lazy(() => load().then((m) => ({ default: m[name] })))
 
 // Screens beyond Home load on first visit, so the app opens fast on a phone.
-const BitsLayout = named(() => import('./features/bits/BitsLayout'), 'BitsLayout')
-const NoBitSelected = named(() => import('./features/bits/BitsLayout'), 'NoBitSelected')
-const BitPage = named(() => import('./features/bits/BitPage'), 'BitPage')
-const RewritePage = named(() => import('./features/bits/RewritePage'), 'RewritePage')
+const JokesLayout = named(() => import('./features/jokes/JokesLayout'), 'JokesLayout')
+const NoJokeSelected = named(() => import('./features/jokes/JokesLayout'), 'NoJokeSelected')
+const JokePage = named(() => import('./features/jokes/JokePage'), 'JokePage')
+const RewritePage = named(() => import('./features/jokes/RewritePage'), 'RewritePage')
 const SetsPage = named(() => import('./features/sets/SetsPage'), 'SetsPage')
 const SetBuilder = named(() => import('./features/sets/SetBuilder'), 'SetBuilder')
 const StageView = named(() => import('./features/sets/StageView'), 'StageView')
@@ -36,6 +36,12 @@ const ImportPage = named(() => import('./features/import/ImportPage'), 'ImportPa
 
 const full = (el: React.ReactNode) => <RequireAuth>{el}</RequireAuth>
 
+/** /bits/… from before jokes were renamed: the same page under /jokes, filters and all. */
+function OldJokesAddress() {
+  const { pathname, search, hash } = useLocation()
+  return <Navigate to={pathname.replace(/^\/bits/, '/jokes') + search + hash} replace />
+}
+
 export function App() {
   return (
     <Suspense fallback={<div className="p-8"><Spinner /></div>}>
@@ -43,9 +49,9 @@ export function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route element={full(<AppShell />)}>
           <Route index element={<TodayPage />} />
-          <Route path="bits" element={<BitsLayout />}>
-            <Route index element={<NoBitSelected />} />
-            <Route path=":bitId" element={<BitPage />} />
+          <Route path="jokes" element={<JokesLayout />}>
+            <Route index element={<NoJokeSelected />} />
+            <Route path=":jokeId" element={<JokePage />} />
           </Route>
           <Route path="sets" element={<SetsPage />} />
           <Route path="sets/:setId" element={<SetBuilder />} />
@@ -66,11 +72,12 @@ export function App() {
         </Route>
         {/* Full-screen modes without the app frame. */}
         <Route path="/brainstorm/:sessionId" element={full(<SessionPage />)} />
-        <Route path="/bits/:bitId/rewrite" element={full(<RewritePage />)} />
+        <Route path="/jokes/:jokeId/rewrite" element={full(<RewritePage />)} />
         <Route path="/sets/:setId/stage" element={full(<StageView />)} />
         <Route path="/sets/:setId/print" element={full(<PrintView />)} />
         {/* Old addresses from the first version. */}
-        <Route path="/studio/*" element={<Navigate to="/bits" replace />} />
+        <Route path="/bits/*" element={<OldJokesAddress />} />
+        <Route path="/studio/*" element={<Navigate to="/jokes" replace />} />
         <Route path="/setlist/*" element={<Navigate to="/sets" replace />} />
         <Route path="/performance" element={<Navigate to="/shows" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />

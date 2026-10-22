@@ -1,34 +1,34 @@
 /**
- * One bit, one page. The words are edited in place (no form popup), details sit below, then
+ * One joke, one page. The words are edited in place (no form popup), details sit below, then
  * its rewrites and sets. Every change saves on its own, offline included.
  */
 import { ArrowLeft, Trash2 } from 'lucide-react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
-import { useBits, useDeleteBit } from '../../api/library'
-import type { Bit } from '../../api/types'
+import { useJokes, useDeleteJoke } from '../../api/library'
+import type { Joke } from '../../api/types'
 import { Button } from '../../components/ui/Button'
-import { EmptyState, Spinner } from '../../components/ui/bits'
+import { EmptyState, Spinner } from '../../components/ui/pieces'
 import { GrowingText, Textarea } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { formatDateTime } from '../../lib/time'
-import { BitDetails } from './BitDetails'
-import { BitExtras } from './BitExtras'
+import { JokeDetails } from './JokeDetails'
+import { JokeExtras } from './JokeExtras'
 import { TagLines } from './TagLines'
-import { useAutosaveBit } from './useAutosaveBit'
+import { useAutosaveJoke } from './useAutosaveJoke'
 
-function Editor({ bit }: { bit: Bit }) {
-  const { draft, update, flush } = useAutosaveBit(bit)
-  const remove = useDeleteBit()
+function Editor({ joke }: { joke: Joke }) {
+  const { draft, update, flush } = useAutosaveJoke(joke)
+  const remove = useDeleteJoke()
   const { confirm, toast } = useFeedback()
   const navigate = useNavigate()
   const [params] = useSearchParams()
-  const back = `/bits${params.toString() ? `?${params}` : ''}`
+  const back = `/jokes${params.toString() ? `?${params}` : ''}`
 
   const onDelete = async () => {
     const ok = await confirm({ title: 'Delete this joke?', message: 'It goes to the Trash for 30 days, with its rewrites. Put it back and it returns to its sets.', confirmLabel: 'Delete joke', danger: true })
     if (!ok) return
     flush() // an edit still waiting saves first, so it's in the Trash too (and not sent after)
-    remove.mutate(bit.id, { onError: (e) => toast(`Not deleted: ${e.message}`) })
+    remove.mutate(joke.id, { onError: (e) => toast(`Not deleted: ${e.message}`) })
     navigate(back)
     toast('Joke deleted')
   }
@@ -44,25 +44,25 @@ function Editor({ bit }: { bit: Bit }) {
         {!draft.setup.trim() && <p className="mt-2 text-sm text-light">A joke needs a premise to be saved.</p>}
       </div>
       <div className="mt-6"><TagLines lines={draft.tag_lines} onChange={(tag_lines) => update({ tag_lines })} /></div>
-      <div className="mt-10"><BitDetails bitId={bit.id} draft={draft} update={update} /></div>
+      <div className="mt-10"><JokeDetails jokeId={joke.id} draft={draft} update={update} /></div>
       <div className="mt-8">
-        <label htmlFor="bit-notes" className="text-sm text-dim">Notes</label>
-        <Textarea id="bit-notes" className="mt-2" placeholder="Where it kills, where it dies, what to try next" value={draft.comments} onChange={(e) => update({ comments: e.target.value })} />
+        <label htmlFor="joke-notes" className="text-sm text-dim">Notes</label>
+        <Textarea id="joke-notes" className="mt-2" placeholder="Where it kills, where it dies, what to try next" value={draft.comments} onChange={(e) => update({ comments: e.target.value })} />
       </div>
-      <div className="mt-12"><BitExtras bit={bit} /></div>
+      <div className="mt-12"><JokeExtras joke={joke} /></div>
       <footer className="mt-12 flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-5 text-sm text-faint">
-        <span>Written {formatDateTime(bit.created_at)}. Last changed {formatDateTime(bit.updated_at)}.</span>
+        <span>Written {formatDateTime(joke.created_at)}. Last changed {formatDateTime(joke.updated_at)}.</span>
         <Button variant="danger" small icon={<Trash2 size={15} />} onClick={onDelete}>Delete joke</Button>
       </footer>
     </article>
   )
 }
 
-export function BitPage() {
-  const { bitId } = useParams()
-  const { data: bits, isPending } = useBits()
-  const bit = bits?.find((b) => b.id === bitId)
-  if (isPending && !bits) return <div className="py-16"><Spinner /></div>
-  if (!bit) return <EmptyState title="Joke not found" action={<Link to="/bits" className="text-tape">Back to jokes</Link>}>It may have been deleted.</EmptyState>
-  return <Editor key={bit.id} bit={bit} />
+export function JokePage() {
+  const { jokeId } = useParams()
+  const { data: jokes, isPending } = useJokes()
+  const joke = jokes?.find((b) => b.id === jokeId)
+  if (isPending && !jokes) return <div className="py-16"><Spinner /></div>
+  if (!joke) return <EmptyState title="Joke not found" action={<Link to="/jokes" className="text-tape">Back to jokes</Link>}>It may have been deleted.</EmptyState>
+  return <Editor key={joke.id} joke={joke} />
 }
