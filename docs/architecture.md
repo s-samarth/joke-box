@@ -190,5 +190,6 @@ its own `preview/<git branch>` database branch, and Neon's free plan allows only
 | Hashtags, tag lines and brainstorm links as JSON lists | Simple and portable. A link to a deleted joke just drops out of view instead of blocking the delete |
 | Joke types exist only while used | Matches how comics think ("a type is what my jokes are"); a rename onto an existing name merges them |
 | Type colours kept by name in their own table | A type that is pruned and used again keeps its colour, and a new type can be coloured before its joke saves |
+| A joke names one joke it follows (`bits.follows_id`) | Each joke has one line back to the start of its chain while many can follow it, so chains branch into trees without a separate links table; adding a joke to a set walks that line and brings the earlier jokes |
 | Handwriting stored as strokes, not images | Small, sharp at any size, and editable; costs a canvas renderer |
 | One allowlisted Google sign-in | No password handling at all; adding a user means editing an environment variable |

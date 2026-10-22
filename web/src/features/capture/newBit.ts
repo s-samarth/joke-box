@@ -25,6 +25,7 @@ export const blankBit = (topicId = ''): BitInput => ({
   clean_rating: 'clean',
   language: 'Hinglish',
   comments: '',
+  follows_id: null,
 })
 
 interface Options {

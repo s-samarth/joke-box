@@ -13,6 +13,7 @@ import type { Bit, Setlist } from '../../api/types'
 import { Button } from '../../components/ui/Button'
 import { EmptyState, Spinner } from '../../components/ui/bits'
 import { Field, GrowingText, Input } from '../../components/ui/Field'
+import { useFeedback } from '../../components/ui/feedbackContext'
 import { Modal } from '../../components/ui/Modal'
 import { clock, parse } from '../../lib/duration'
 import { BitPeek } from '../bits/BitPeek'
@@ -20,7 +21,7 @@ import { CraftSheet } from '../craft/CraftSheet'
 import { AddBits } from './AddBits'
 import { LightBar } from './LightBar'
 import { SetMeta } from './SetMeta'
-import { draftItems, move, optionalSeconds, positionLabel, totalSeconds } from './setlistMath'
+import { chainItems, chainNote, draftItems, move, optionalSeconds, positionLabel, totalSeconds } from './setlistMath'
 import { TapeRow } from './TapeRow'
 import { useAutosaveSet } from './useAutosaveSet'
 
@@ -41,6 +42,7 @@ function Builder({ setlist }: { setlist: Setlist }) {
   const [reading, setReading] = useState<Bit | null>(null)
   const [craft, setCraft] = useState(false)
   const [target, setTarget] = useState(clock(draft.target_seconds))
+  const { toast } = useFeedback()
   const byId = new Map(bits.map((b) => [b.id, b]))
   const used = new Set(draft.items.map((i) => i.bit_id))
   const items = draftItems(draft.items)
@@ -51,12 +53,18 @@ function Builder({ setlist }: { setlist: Setlist }) {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
 
-  const add = (bit: Bit, at?: number) =>
-    !used.has(bit.id) && update((d) => {
+  // A joke that follows others brings the ones before it that aren't in the set yet.
+  const add = (bit: Bit, at?: number) => {
+    if (used.has(bit.id)) return
+    const added = chainItems(bit, byId, used)
+    update((d) => {
       const list = [...d.items]
-      list.splice(at ?? list.length, 0, { bit_id: bit.id, duration_seconds: bit.duration_seconds, optional: false })
+      list.splice(at ?? list.length, 0, ...added)
       return { ...d, items: list }
     })
+    const note = chainNote(added.length)
+    if (note) toast(note)
+  }
   const onDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over) return
     const id = String(active.id)

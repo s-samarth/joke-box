@@ -121,6 +121,10 @@ class Bit(Trashable, OwnedMixin, Base):
     clean_rating: Mapped[str | None] = mapped_column(String(10))
     language: Mapped[str | None] = mapped_column(String(40))
     comments: Mapped[str] = mapped_column(Text, default="")
+    # The joke this one continues from. Many jokes can follow one, so chains branch into trees.
+    follows_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("bits.id", ondelete="SET NULL"), index=True
+    )
     # Goes up by one on every save; a save edited from an older version is a conflict.
     version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
 

@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.models import Bit, BitType, Status, Subtopic, Topic, User, bit_type_links
 from app.models.base import written_at
 from app.schemas.library import BitIn, BitOut
-from app.services import type_colors
+from app.services import chains, type_colors
 
 
 def to_out(bit: Bit) -> BitOut:
@@ -29,6 +29,7 @@ def to_out(bit: Bit) -> BitOut:
         clean_rating=bit.clean_rating,  # type: ignore[arg-type]
         language=bit.language,
         comments=bit.comments,
+        follows_id=bit.follows_id,
         version=bit.version,
         created_at=bit.created_at,
         updated_at=bit.updated_at,
@@ -70,10 +71,21 @@ def check_placement(db: Session, user: User, data: BitIn) -> None:
             raise HTTPException(422, "Subtopic does not belong to that topic")
 
 
+def plain_fields(data: BitIn) -> dict[str, object]:
+    """The fields copied as they are. An app too old to know about chains leaves follows_id out,
+    and then the link is kept rather than cleared."""
+    skip = {"types", "status", "created_at", "base_version"}
+    if "follows_id" not in data.model_fields_set:
+        skip.add("follows_id")
+    return data.model_dump(exclude=skip)
+
+
 def apply(db: Session, user: User, bit: Bit, data: BitIn) -> None:
     """Copy editor fields onto the bit, creating any new type or status by name."""
     check_placement(db, user, data)
-    fields = data.model_dump(exclude={"types", "status", "created_at", "base_version"})
+    fields = plain_fields(data)
+    if "follows_id" in fields:
+        chains.check_follows(db, user, bit.id, data.follows_id)
     for key, value in fields.items():
         setattr(bit, key, value)
     if data.created_at and bit.created_at is None:
@@ -105,9 +117,8 @@ def type_names(names: list[str]) -> set[str]:
 def same_content(bit: Bit, data: BitIn) -> bool:
     """Would this save leave the joke as it is? Then a stale version is harmless (a retry)."""
     now = to_out(bit)
-    sent = data.model_dump(exclude={"types", "status", "created_at", "base_version"})
     return (
-        all(getattr(now, k) == v for k, v in sent.items())
+        all(getattr(now, k) == v for k, v in plain_fields(data).items())
         and type_names(now.types) == type_names(data.types)
         and (now.status or "").lower() == (data.status or "").lower()
     )
