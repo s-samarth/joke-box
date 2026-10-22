@@ -44,7 +44,7 @@ function Editor({ bit }: { bit: Bit }) {
         {!draft.setup.trim() && <p className="mt-2 text-sm text-light">A joke needs a premise to be saved.</p>}
       </div>
       <div className="mt-6"><TagLines lines={draft.tag_lines} onChange={(tag_lines) => update({ tag_lines })} /></div>
-      <div className="mt-10"><BitDetails draft={draft} update={update} /></div>
+      <div className="mt-10"><BitDetails bitId={bit.id} draft={draft} update={update} /></div>
       <div className="mt-8">
         <label htmlFor="bit-notes" className="text-sm text-dim">Notes</label>
         <Textarea id="bit-notes" className="mt-2" placeholder="Where it kills, where it dies, what to try next" value={draft.comments} onChange={(e) => update({ comments: e.target.value })} />

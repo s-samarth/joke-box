@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { draftItems, lightState, move, optionalSeconds, positionLabel, progress, totalSeconds } from './setlistMath'
+import type { Bit } from '../../api/types'
+import { chainItems, chainNote, draftItems, lightState, move, optionalSeconds, positionLabel, progress, totalSeconds } from './setlistMath'
 
 describe('setlist math', () => {
   it('sums durations', () => {
@@ -36,4 +37,18 @@ describe('optional jokes', () => {
     expect(draftItems([{ bit_id: 'a', duration_seconds: 5 }, { bit_id: 'b', duration_seconds: 7, optional: true }])).toEqual([
       { bitId: 'a', duration: 5, optional: false }, { bitId: 'b', duration: 7, optional: true },
     ]))
+})
+
+describe('chainItems', () => {
+  const bit = (id: string, follows_id: string | null) => ({ id, follows_id, duration_seconds: 30 }) as Bit
+  const bits = [bit('a', null), bit('b', 'a'), bit('c', 'b')]
+  const byId = new Map(bits.map((b) => [b.id, b]))
+
+  it('brings the jokes before it that are not in the set yet', () => {
+    expect(chainItems(bits[2], byId, new Set()).map((i) => i.bit_id)).toEqual(['a', 'b', 'c'])
+    expect(chainItems(bits[2], byId, new Set(['a'])).map((i) => i.bit_id)).toEqual(['b', 'c'])
+    expect(chainNote(3)).toBe('Also added the 2 jokes before it')
+    expect(chainNote(2)).toBe('Also added the joke before it')
+    expect(chainNote(1)).toBeNull()
+  })
 })

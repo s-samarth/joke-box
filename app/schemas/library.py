@@ -83,6 +83,8 @@ class BitIn(BaseModel):
     clean_rating: CleanRating | None = None
     language: str | None = None
     comments: str = ""
+    # The joke this one follows. Left out (an older app), the link stays as it is.
+    follows_id: uuid.UUID | None = None
     created_at: datetime | None = None
     # The version this edit started from. Omitted (a new joke, an import), nothing is checked.
     base_version: int | None = None
@@ -115,6 +117,7 @@ class BitOut(BaseModel):
     clean_rating: CleanRating | None
     language: str | None
     comments: str
+    follows_id: uuid.UUID | None
     version: int
     created_at: datetime
     updated_at: datetime

@@ -1,4 +1,6 @@
 /** Timing and labels for a set. Opener and closer are simply the first and last bit. */
+import type { Bit } from '../../api/types'
+import { chainTo } from '../../lib/chains'
 
 export interface DraftItem {
   bitId: string
@@ -44,3 +46,13 @@ export function move<T>(list: T[], from: number, to: number): T[] {
   next.splice(to, 0, item)
   return next
 }
+
+/** What adding `bit` puts in a set: the jokes before it in its chain that aren't in yet, in order, then the joke. */
+export const chainItems = (bit: Bit, byId: Map<string, Bit>, used: Set<string>) =>
+  chainTo(bit, byId)
+    .filter((b) => !used.has(b.id))
+    .map((b) => ({ bit_id: b.id, duration_seconds: b.duration_seconds, optional: false }))
+
+/** The toast for a joke added with the ones before it, or null when it came alone. */
+export const chainNote = (added: number) =>
+  added > 1 ? `Also added the ${added - 1 === 1 ? 'joke' : `${added - 1} jokes`} before it` : null

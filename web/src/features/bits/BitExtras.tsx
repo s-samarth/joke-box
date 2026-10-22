@@ -2,6 +2,7 @@
 import { PenLine, Plus } from 'lucide-react'
 import { Link, useNavigate } from 'react-router'
 import { newId } from '../../api/client'
+import { useBits } from '../../api/library'
 import { useBrainstorms, useSetlistActions, useSetlists } from '../../api/shows'
 import type { Bit } from '../../api/types'
 import { Button } from '../../components/ui/Button'
@@ -9,6 +10,7 @@ import { SectionHead } from '../../components/ui/bits'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { Dropdown } from '../../components/ui/Menu'
 import { formatDate } from '../../lib/time'
+import { chainItems, chainNote } from '../sets/setlistMath'
 import { setlistInput } from '../sets/setlistInput'
 
 const words = (text: string) => (text.trim() ? text.trim().split(/\s+/).length : 0)
@@ -16,6 +18,7 @@ const words = (text: string) => (text.trim() ? text.trim().split(/\s+/).length :
 export function BitExtras({ bit }: { bit: Bit }) {
   const { data: brainstorms = [] } = useBrainstorms()
   const { data: sets = [] } = useSetlists()
+  const { data: bits = [] } = useBits()
   const { save } = useSetlistActions()
   const { toast } = useFeedback()
   const navigate = useNavigate()
@@ -27,9 +30,11 @@ export function BitExtras({ bit }: { bit: Bit }) {
     const target = sets.find((s) => s.id === setId)
     const id = target?.id ?? newId()
     const base = target ? setlistInput(target) : { name: 'Untitled set', show_date: null, target_seconds: 420, venue_name: null, rating: null, tag_ids: [], items: [] }
-    save.mutateAsync({ id, input: { ...base, items: [...base.items, { bit_id: bit.id, duration_seconds: bit.duration_seconds, optional: false }] } })
+    const added = chainItems(bit, new Map(bits.map((b) => [b.id, b])), new Set(base.items.map((i) => i.bit_id)))
+    save.mutateAsync({ id, input: { ...base, items: [...base.items, ...added] } })
       .catch((e: Error) => toast(`Not added: ${e.message}`))
-    toast(`Added to ${base.name}`, { label: 'Open set', onClick: () => navigate(`/sets/${id}`) })
+    const note = chainNote(added.length)
+    toast(`Added to ${base.name}${note ? `. ${note}` : ''}`, { label: 'Open set', onClick: () => navigate(`/sets/${id}`) })
   }
 
   return (

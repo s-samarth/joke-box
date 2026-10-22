@@ -5,7 +5,7 @@
 import { Check, PenLine, Plus } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
-import { useTopics } from '../../api/library'
+import { useBits, useTopics } from '../../api/library'
 import type { Bit } from '../../api/types'
 import { Button } from '../../components/ui/Button'
 import { StrengthTicks, TypeLabel } from '../../components/ui/bits'
@@ -25,10 +25,13 @@ export function BitPeek({ bit, onClose, onAdd, inSet }: Props) {
   const { data: topics = [] } = useTopics()
   const topic = topics.find((t) => t.id === bit.topic_id)
   const subtopic = topic?.subtopics.find((s) => s.id === bit.subtopic_id)
+  const { data: bits = [] } = useBits()
+  const before = bit.follows_id ? bits.find((b) => b.id === bit.follows_id) : undefined
   const rows: [string, ReactNode][] = [
     ['Strength', <span key="s" className="inline-flex items-center gap-2"><StrengthTicks strength={bit.strength} />{strengthLabel(bit.strength)}</span>],
     ['Runs for', <span key="d" className="tabular">{bit.duration_seconds ? clock(bit.duration_seconds) : 'Not timed'}</span>],
     ['Type', <span key="t" className="inline-flex flex-wrap justify-end gap-x-3">{displayTypes(bit.types).map((t) => <TypeLabel key={t} name={t} />)}</span>],
+    ...(bit.follows_id ? [['Follows', <span key="f" className="line-clamp-1">{before?.setup ?? 'A joke in the Trash'}</span>] as [string, ReactNode]] : []),
     ['Filed under', [topicName(topic), subtopic?.name].filter(Boolean).join(' / ')],
     ...(bit.status ? [['Status', bit.status] as [string, ReactNode]] : []),
     ...(bit.clean_rating ? [['Clean rating', CLEAN_LABELS[bit.clean_rating]] as [string, ReactNode]] : []),

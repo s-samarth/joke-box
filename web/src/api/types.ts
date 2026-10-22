@@ -54,6 +54,8 @@ export interface BitInput {
   clean_rating: CleanRating | null
   language: string | null
   comments: string
+  /** The joke this one continues from. Many jokes can follow one, so chains branch. */
+  follows_id: string | null
   /** Sent when creating, so something written offline keeps the time it was written. */
   created_at?: string
 }

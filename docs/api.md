@@ -73,6 +73,7 @@ A JSON API under `/api`, served from the same origin as the app. Running locally
   "clean_rating": "clean | mild | dirty | null",
   "language": "Hinglish",
   "comments": "",
+  "follows_id": "optional: the joke this one continues from (yours), or null to unlink",
   "created_at": "optional, kept only on create and capped at now (imports, and jokes written offline)",
   "base_version": "optional: the version this edit started from"
 }
@@ -82,6 +83,11 @@ The answer includes `version`, which goes up by one on every save. With `base_ve
 made from an older version that would change the joke answers **409** ("This joke was changed on
 another device after you edited it.") rather than overwriting; resending the same edit is fine.
 Without it, nothing is checked.
+
+`follows_id` links a joke to the one before it. Many jokes can follow one, so chains branch into
+trees. Following itself or a joke that comes after it, or someone else's joke, answers **422**.
+Left out of the body (an older app), the link is kept as it is. A link to a joke in the Trash
+stays; erasing that joke for good clears it.
 
 The response (`BitOut`) adds `id`, `created_at` and `updated_at`, and returns `types` and
 `status` as names.

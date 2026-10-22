@@ -5,6 +5,8 @@ import type { BitInput } from '../../api/types'
 import { Select } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { LANGUAGES, topicName } from '../../lib/bitMeta'
+import { followersOf } from '../../lib/chains'
+import { FollowedBy, FollowsField } from './ChainFields'
 import { CleanPicker, HashtagField, StrengthPicker, TypeToggles } from './DetailControls'
 import { RuntimeField } from './RuntimeField'
 import { TopicManager } from './TopicManager'
@@ -25,7 +27,8 @@ function Row({ label, edit, children }: { label: string; edit?: { label: string;
   )
 }
 
-export function BitDetails({ draft, update }: { draft: BitInput; update: (p: Partial<BitInput>) => void }) {
+/** `bitId` is the joke being edited; none while writing a new one. */
+export function BitDetails({ bitId, draft, update }: { bitId?: string; draft: BitInput; update: (p: Partial<BitInput>) => void }) {
   const { data: topics = [] } = useTopics()
   const { data: statuses = [] } = useStatuses()
   const { data: bits = [] } = useBits()
@@ -37,6 +40,7 @@ export function BitDetails({ draft, update }: { draft: BitInput; update: (p: Par
   if (draft.status && !statusNames.includes(draft.status)) statusNames.push(draft.status)
   // Older jokes may have no language or another one; show it rather than pretend it's Hinglish.
   const languages = draft.language && !LANGUAGES.includes(draft.language) ? [...LANGUAGES, draft.language] : LANGUAGES
+  const next = bitId ? followersOf(bitId, bits) : []
   const hashtags = useMemo(() => [...new Set(bits.flatMap((b) => b.hashtags))].sort(), [bits])
 
   // Keep this joke's draft in step with the managers (the server already moved saved jokes).
@@ -82,6 +86,8 @@ export function BitDetails({ draft, update }: { draft: BitInput; update: (p: Par
           </Select>
         </div>
       </Row>
+      <Row label="Follows"><FollowsField bitId={bitId} value={draft.follows_id ?? null} onChange={(follows_id) => update({ follows_id })} /></Row>
+      {next.length > 0 && <Row label="Followed by"><FollowedBy next={next} /></Row>}
       <Row label="Status">
         <Select aria-label="Status" value={draft.status ?? ''} onChange={(e) => pickStatus(e.target.value)} className="sm:max-w-xs">
           <option value="">No status</option>
