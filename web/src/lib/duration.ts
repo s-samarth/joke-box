@@ -1,5 +1,8 @@
 /** Durations are stored as whole seconds and shown as "m:ss" or "Xm YYs". */
 
+/** A new joke's runtime, and where the stepper starts on a joke with none set. */
+export const DEFAULT_RUNTIME = 15
+
 /** 150 -> "2:30" */
 export function clock(seconds: number): string {
   const s = Math.max(0, Math.round(seconds))

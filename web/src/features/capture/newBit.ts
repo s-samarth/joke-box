@@ -5,6 +5,7 @@ import { useSaveBit, useTopics } from '../../api/library'
 import type { BitInput } from '../../api/types'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { announceSave } from '../../lib/announce'
+import { DEFAULT_RUNTIME } from '../../lib/duration'
 
 /**
  * Everything a new joke starts with: Thoughts (unless you pick a topic), Incomplete, 15 seconds,
@@ -18,7 +19,7 @@ export const blankBit = (topicId = ''): BitInput => ({
   types: [],
   status: 'Incomplete',
   strength: 3,
-  duration_seconds: 15,
+  duration_seconds: DEFAULT_RUNTIME,
   hashtags: [],
   tag_lines: [],
   clean_rating: 'clean',
