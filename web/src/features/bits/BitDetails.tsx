@@ -4,9 +4,9 @@ import { useBits, useStatuses, useTopicActions, useTopics } from '../../api/libr
 import type { BitInput } from '../../api/types'
 import { Select } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
-import { LANGUAGE_SUGGESTIONS, topicName } from '../../lib/bitMeta'
-import { clock, parse } from '../../lib/duration'
+import { LANGUAGES, topicName } from '../../lib/bitMeta'
 import { CleanPicker, HashtagField, StrengthPicker, TypeToggles } from './DetailControls'
+import { RuntimeField } from './RuntimeField'
 import { TopicManager } from './TopicManager'
 import { TypeManager } from './TypeManager'
 
@@ -32,10 +32,11 @@ export function BitDetails({ draft, update }: { draft: BitInput; update: (p: Par
   const actions = useTopicActions()
   const { prompt, toast } = useFeedback()
   const [managing, setManaging] = useState<'topics' | 'types' | null>(null)
-  const [duration, setDuration] = useState(draft.duration_seconds ? clock(draft.duration_seconds) : '')
   const topic = topics.find((t) => t.id === draft.topic_id)
   const statusNames = statuses.map((s) => s.name)
   if (draft.status && !statusNames.includes(draft.status)) statusNames.push(draft.status)
+  // Older jokes may have no language or another one; show it rather than pretend it's Hinglish.
+  const languages = draft.language && !LANGUAGES.includes(draft.language) ? [...LANGUAGES, draft.language] : LANGUAGES
   const hashtags = useMemo(() => [...new Set(bits.flatMap((b) => b.hashtags))].sort(), [bits])
 
   // Keep this joke's draft in step with the managers (the server already moved saved jokes).
@@ -88,16 +89,13 @@ export function BitDetails({ draft, update }: { draft: BitInput; update: (p: Par
           <option value={NEW}>New status…</option>
         </Select>
       </Row>
-      <Row label="Runs for">
-        <input aria-label="Duration" inputMode="numeric" placeholder="0:30" value={duration} onChange={(e) => setDuration(e.target.value)}
-          onBlur={() => { const s = parse(duration); if (s !== null) update({ duration_seconds: s }); setDuration(s ? clock(s) : '') }}
-          className="h-10 w-24 rounded-lg bg-ink-3 px-3 text-[16px] tabular outline-none focus:ring-2 focus:ring-tape sm:text-[15px]" />
-      </Row>
+      <Row label="Runs for"><RuntimeField value={draft.duration_seconds} onChange={(duration_seconds) => update({ duration_seconds })} /></Row>
       <Row label="Clean rating"><CleanPicker value={draft.clean_rating} onChange={(clean_rating) => update({ clean_rating })} /></Row>
       <Row label="Language">
-        <input list="jb-languages" aria-label="Language" placeholder="Hinglish" value={draft.language ?? ''} onChange={(e) => update({ language: e.target.value || null })}
-          className="h-10 w-40 rounded-lg bg-ink-3 px-3 text-[16px] outline-none focus:ring-2 focus:ring-tape sm:text-[15px]" />
-        <datalist id="jb-languages">{LANGUAGE_SUGGESTIONS.map((l) => <option key={l} value={l} />)}</datalist>
+        <Select aria-label="Language" value={draft.language ?? ''} onChange={(e) => update({ language: e.target.value || null })} className="sm:max-w-xs">
+          {!draft.language && <option value="">Not set</option>}
+          {languages.map((l) => <option key={l} value={l}>{l}</option>)}
+        </Select>
       </Row>
       <Row label="Hashtags"><HashtagField value={draft.hashtags} onChange={(h) => update({ hashtags: h })} suggestions={hashtags} /></Row>
       <TopicManager open={managing === 'topics'} onClose={() => setManaging(null)} onRemoved={topicRemoved} />

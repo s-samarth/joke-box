@@ -66,7 +66,7 @@ export async function runImport(plan: ImportPlan, ctx: Context): Promise<Progres
         punchline: j.punchline ?? '',
         types: j.types ?? [],
         hashtags: j.hashtags ?? [],
-        language: j.language ?? null,
+        language: j.language ?? blankBit().language,
         created_at: j.created_at,
       }),
     )
