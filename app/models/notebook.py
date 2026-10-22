@@ -20,6 +20,7 @@ class ObservationTopic(OwnedMixin, Base):
     )
 
     name: Mapped[str] = mapped_column(String(120))
+    position: Mapped[int] = mapped_column(Integer, default=0)
 
 
 class Observation(Trashable, OwnedMixin, Base):

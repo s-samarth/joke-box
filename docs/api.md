@@ -36,11 +36,13 @@ A JSON API under `/api`, served from the same origin as the app. Running locally
 
 | Method | Path | Body / notes |
 |---|---|---|
-| GET | `/api/topics` | Topics with their subtopics; Thoughts (`is_system`) first |
-| POST | `/api/topics` | `{name}` → 201. 409 on a duplicate name |
+| GET | `/api/topics` | Topics with their subtopics, in your order; Thoughts (`is_system`) first |
+| POST | `/api/topics` | `{name}` → 201, at the end. 409 on a duplicate name |
+| PUT | `/api/topics/order` | `{ids}` → 204. Your topics in this order; Thoughts stays first. Unknown ids are skipped and ones left out keep their order after the rest |
 | PATCH | `/api/topics/{id}` | `{name}`. The system topic can't be renamed |
 | DELETE | `/api/topics/{id}` | Moves its jokes and show links to Thoughts first. 400 for the system topic |
-| POST | `/api/topics/{id}/subtopics` | `{name}` → 201 |
+| POST | `/api/topics/{id}/subtopics` | `{name}` → 201, at the end |
+| PUT | `/api/topics/{id}/subtopics/order` | `{ids}` → 204. Same rules as topics |
 | PATCH | `/api/subtopics/{id}` | `{name}` |
 | DELETE | `/api/subtopics/{id}` | Its jokes lose the subtopic |
 | GET | `/api/types` | `[{id, name}]` |
@@ -99,8 +101,9 @@ The response (`BitOut`) adds `id`, `created_at` and `updated_at`, and returns `t
 | GET | `/api/observations` | Newest first |
 | PUT | `/api/observations/{id}` | `{text, topic_id?, created_at?}`. The text must not be blank. `created_at` is kept only on create (imports) |
 | DELETE | `/api/observations/{id}` | |
-| GET | `/api/observation-topics` | `[{id, name}]` |
-| POST | `/api/observation-topics` | `{name}` → 201 |
+| GET | `/api/observation-topics` | `[{id, name}]`, in your order |
+| POST | `/api/observation-topics` | `{name}` → 201, at the end |
+| PUT | `/api/observation-topics/order` | `{ids}` → 204. Same rules as topics |
 | PATCH | `/api/observation-topics/{id}` | `{name}` |
 | DELETE | `/api/observation-topics/{id}` | Its observations keep existing, with no topic |
 | GET | `/api/sessions` | Brainstorm sessions |

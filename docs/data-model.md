@@ -52,8 +52,8 @@ erDiagram
 | Table | Columns | Rules |
 |---|---|---|
 | `users` | `google_sub` (unique), `email` (unique, lowercase), `display_name`, `avatar_url`, `plan` (default "Pro"), `last_login_at` | Created on first sign-in |
-| `topics` | `name`, `position`, `is_system` | One `is_system` topic per user, named `Random` and shown as **Thoughts**. It can't be deleted; deleting another topic moves its jokes there |
-| `subtopics` | `topic_id → topics` (cascade), `name` | Unique per topic. Deleting one clears it from its jokes |
+| `topics` | `name`, `position`, `is_system` | One `is_system` topic per user, named `Random` and shown as **Thoughts**. It can't be deleted; deleting another topic moves its jokes there. `position` is the order you drag them into (new ones go last) |
+| `subtopics` | `topic_id → topics` (cascade), `name`, `position` | Unique per topic, in the order you drag them into. Deleting one clears it from its jokes |
 | `bit_types` | `name` | Pruned whenever no joke uses it. Renaming onto an existing name merges the two |
 | `bit_type_links` | `bit_id`, `type_id` (both cascade) | Many-to-many |
 | `statuses` | `name`, `position` | Six defaults made on first sign-in; new ones are created by name when a joke uses them |
@@ -65,7 +65,7 @@ erDiagram
 |---|---|---|
 | `brainstorms` | `bit_id → bits` (cascade), `title`, `content`, `timer_seconds` | A **Rewrite** session on one joke |
 | `brainstorm_versions` | `brainstorm_id` (cascade), `title`, `content`, `saved_at` | One row appended per save |
-| `observation_topics` | `name` | Separate from joke topics |
+| `observation_topics` | `name`, `position` | Separate from joke topics, in the order you drag them into |
 | `observations` | `text`, `topic_id` (set null) | Deleting the topic keeps the observation |
 | `writing_sessions` | `title`, `content`, `ink` JSON (strokes: colour, size, page, `[x, y, pressure]` points), `ink_pages` (1–20), `timer_seconds`, `bit_ids` JSON, `observation_ids` JSON, `technique_id → craft_notes` (set null) | A free **Brainstorm** session. Links are id lists; deleted targets just drop out of view. Deleting the technique keeps the session |
 | `voice_notes` | `label`, `hashtags` JSON, `duration_seconds`, `content_type`, `size_bytes`, `audio_path` | `audio_path` stays empty until the upload lands. The audio itself lives in Blob storage |

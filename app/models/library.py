@@ -35,7 +35,9 @@ class Topic(OwnedMixin, Base):
     position: Mapped[int] = mapped_column(Integer, default=0)
     is_system: Mapped[bool] = mapped_column(Boolean, default=False)
     subtopics: Mapped[list["Subtopic"]] = relationship(
-        back_populates="topic", cascade="all, delete-orphan", order_by="Subtopic.name"
+        back_populates="topic",
+        cascade="all, delete-orphan",
+        order_by="(Subtopic.position, Subtopic.name)",
     )
 
 
@@ -49,6 +51,7 @@ class Subtopic(OwnedMixin, Base):
         Uuid, ForeignKey("topics.id", ondelete="CASCADE"), index=True
     )
     name: Mapped[str] = mapped_column(String(120))
+    position: Mapped[int] = mapped_column(Integer, default=0)
     topic: Mapped[Topic] = relationship(back_populates="subtopics")
 
 

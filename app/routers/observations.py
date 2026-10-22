@@ -8,8 +8,9 @@ from sqlalchemy import select, update
 from app.auth.deps import CurrentUser, DbSession, find_owned, get_owned
 from app.models import Observation, ObservationTopic
 from app.models.base import written_at
-from app.schemas.library import NamedOut, NameIn
+from app.schemas.library import NamedOut, NameIn, OrderIn
 from app.schemas.notebook import ObservationIn, ObservationOut
+from app.services.ordering import next_position, set_order
 from app.services.topics import commit_or_conflict
 from app.services.trash import move_to_trash
 
@@ -58,17 +59,25 @@ def list_observation_topics(user: CurrentUser, db: DbSession) -> list[Observatio
     query = (
         select(ObservationTopic)
         .where(ObservationTopic.user_id == user.id)
-        .order_by(ObservationTopic.name)
+        .order_by(ObservationTopic.position, ObservationTopic.name)
     )
     return list(db.scalars(query))
 
 
 @router.post("/observation-topics", response_model=NamedOut, status_code=201)
 def create_observation_topic(body: NameIn, user: CurrentUser, db: DbSession) -> ObservationTopic:
-    topic = ObservationTopic(user_id=user.id, name=body.name)
+    position = next_position(db, ObservationTopic.position, ObservationTopic.user_id == user.id)
+    topic = ObservationTopic(user_id=user.id, name=body.name, position=position)
     db.add(topic)
     commit_or_conflict(db, TOPIC_CLASH)
     return topic
+
+
+@router.put("/observation-topics/order", status_code=204)
+def reorder_observation_topics(body: OrderIn, user: CurrentUser, db: DbSession) -> None:
+    query = select(ObservationTopic).where(ObservationTopic.user_id == user.id)
+    set_order(list(db.scalars(query)), body.ids)
+    db.commit()
 
 
 @router.patch("/observation-topics/{topic_id}", response_model=NamedOut)
