@@ -58,7 +58,7 @@ under fixed keys (`setMutationDefaults`), each spreading the shared `QUEUED` opt
   earlier would show the server's older copy and make a waiting change seem to vanish. On
   reconnect TanStack also resumes saves before it refetches queries.
 
-Anything not queued (renaming a topic, deleting a venue, the dossier import) uses the default
+Anything not queued (renaming a topic, deleting a venue) uses the default
 `networkMode: 'always'` with no retries: offline it fails at once with "You're offline" instead
 of spinning.
 

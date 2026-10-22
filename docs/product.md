@@ -70,9 +70,8 @@ own data. Today that is one comedian, but the system works for more than one.
 | **Print** | A set on paper with each joke's running time | `/sets/:id/print` |
 | **Shows** | Log a show; totals, filters, a sortable table, CSV export; Timeline and Insights views | `/shows` |
 | **Craft** | What you know about doing stand-up: your path as a staircase, techniques to write with, and your own areas as folders of note cards | `/craft`, `/craft/area/:id`, `/craft/:id` |
-| **Watchlist** | 100 routines from the persona dossier plus your own, scored and ticked off | `/watchlist` |
+| **Watchlist** | Routines you add to study, scored and ticked off | `/watchlist` |
 | **Analysis** | Your write-ups of sets and online jokes, optionally tied to a routine | `/analysis` |
-| **External links** | Your persona site and Comedy Atlas | `/links` |
 
 Each screen is described in [screens.md](screens.md), and the end-to-end journeys are in
 [user-flows.md](user-flows.md).
@@ -103,7 +102,7 @@ The vocabulary is a comic's, not a database's. Keep to it in the code and in the
 | **LPM** | Laughs per minute: each laugh scored 1 (a few giggles) to 5 (laughs and applause), the points divided by the minutes on stage. |
 | **Path** | Your goals as tick boxes in a Path note (levels, a task list). Home shows the next step. |
 | **Routine** | An item on the watchlist: a known set by another comic. |
-| **SI / LD / DP** | The dossier's three 0–10 scores for a routine: Schemer Index, Logic Density, Dark Pragmatism. |
+| **SI / LD / DP** | A routine's three optional 0–10 scores: Schemer Index, Logic Density, Dark Pragmatism. |
 
 ## Where the product is going
 

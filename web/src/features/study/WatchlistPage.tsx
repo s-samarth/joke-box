@@ -1,7 +1,7 @@
-/** The watchlist: the dossier's routines and your own, ticked off as you watch them. */
+/** The watchlist: routines to study, ticked off as you watch them. */
 import { Plus, Search } from 'lucide-react'
 import { useState } from 'react'
-import { useDeleteWatchItem, useImportDossier, useSaveWatchItem, useWatchlist } from '../../api/study'
+import { useDeleteWatchItem, useSaveWatchItem, useWatchlist } from '../../api/study'
 import type { WatchItem } from '../../api/types'
 import { Button } from '../../components/ui/Button'
 import { EmptyState, PageHead, Spinner } from '../../components/ui/pieces'
@@ -18,7 +18,6 @@ export function WatchlistPage() {
   const { data: items = [], isPending } = useWatchlist()
   const save = useSaveWatchItem()
   const del = useDeleteWatchItem()
-  const load = useImportDossier()
   const { confirm, toast } = useFeedback()
   const [filter, setFilter] = useState<WatchFilter>('all')
   const [query, setQuery] = useState('')
@@ -30,7 +29,6 @@ export function WatchlistPage() {
   const remove = async (item: WatchItem) => {
     if (await confirm({ title: `Remove ${item.title}?`, message: 'It goes to the Trash for 30 days. Analyses you wrote about it stay.', confirmLabel: 'Remove', danger: true })) del.mutate(item.id)
   }
-  const loadDossier = () => load.mutate(undefined, { onSuccess: (all) => toast(`${all.length} routines on your watchlist`), onError: (e) => toast(e.message) })
 
   if (isPending) return <div className="py-16"><Spinner /></div>
 
@@ -42,8 +40,8 @@ export function WatchlistPage() {
 
       {items.length === 0 ? (
         <EmptyState title="Nothing to watch yet"
-          action={<Button variant="tape" onClick={loadDossier} disabled={load.isPending}>{load.isPending ? 'Loading…' : 'Load the 100-routine dossier'}</Button>}>
-          Start with the Relatable Schemer dossier: 100 routines in five categories, scored for Schemer Index, Logic Density and Dark Pragmatism. Or add routines of your own.
+          action={<Button variant="tape" icon={<Plus size={16} />} onClick={() => setAdding(true)}>Add routine</Button>}>
+          Add the routines you want to study, grouped by category. Score each for Schemer Index, Logic Density and Dark Pragmatism, then tick it off once you've watched it.
         </EmptyState>
       ) : (
         <>

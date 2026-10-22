@@ -18,7 +18,7 @@ visit, so the app opens fast on a phone.
 - **Phone:** a slim header (wordmark, sync icon, avatar) and a bottom bar laid out as
   **Home · Jokes · + · Shows · More**. The **+** opens the New joke sheet. **More** opens a
   bottom sheet that groups every other screen: **Write** (Voice notes, Observations,
-  Brainstorm), **Perform** (Sets), **Study** (Watchlist, Analysis, External links) and **Deleted**
+  Brainstorm), **Perform** (Sets), **Study** (Watchlist, Analysis) and **Deleted**
   (Trash). While
   you're on one of those screens, the More tab shows as the current one.
 - One list in `nav.ts` feeds both the rail and the bar, so they can't drift apart.
@@ -71,7 +71,7 @@ in IST and the headline **"Got something?"**, followed by these sections from to
 | Observations | `TodayObservations.tsx` | The observation box and the last few logged |
 | Brainstorm | `TodayBrainstorm.tsx` | Start a session, or pick up the last one |
 | Craft | `TodayCraft.tsx`, `craft/PathLadder.tsx` | **Path:** a small copy of the Craft staircase: the first Path note with tick boxes still open, how many are done, and the next step. When the step names minutes, it shows your most solid material on one topic (Strong and Killer jokes, by runtime) against that target. Below it, a box to save a lesson to one of your areas (chips in their colours) |
-| Study | `TodayStudy.tsx` | Craft notes, watchlist progress, analyses, external links |
+| Study | `TodayStudy.tsx` | Craft notes, watchlist progress, analyses |
 | Topics | `TopicFolders.tsx` | Topics as folders with live counts; tap through to a subtopic |
 | Next up | (inline) | The soonest upcoming set (or the latest), its first three strips, the light bar and **Rehearse** |
 | Needs work | (inline) | Up to five jokes with strength ≤ 2 or an unfinished status, weakest first |
@@ -229,5 +229,5 @@ How recording, the meter, the outbox and playback work is covered in
 
 ## Perform and study screens
 
-Sets, Stage, Print, Shows, Watchlist, Analysis and External links are in
+Sets, Stage, Print, Shows, Watchlist and Analysis are in
 [screens-perform.md](screens-perform.md).

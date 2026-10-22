@@ -74,13 +74,6 @@ export const useWatchlist = () => useQuery({ queryKey: keys.watchlist, queryFn: 
 export const useSaveWatchItem = () => useMutation<WatchItem, Error, SaveWatchVars>({ mutationKey: saveWatchKey })
 export const useDeleteWatchItem = () => useMutation<void, Error, string>({ mutationKey: deleteWatchKey })
 
-/** Load the 100-routine dossier. Safe to run again: routines you already have are skipped. */
-export const useImportDossier = () =>
-  useMutation({
-    mutationFn: () => api<WatchItem[]>('/api/watchlist/import-dossier', 'POST'),
-    onSuccess: (items) => queryClient.setQueryData(keys.watchlist, items),
-  })
-
 export const useAnalyses = () => useQuery({ queryKey: keys.analyses, queryFn: () => api<Analysis[]>('/api/analyses') })
 export const useSaveAnalysis = () => useMutation<Analysis, Error, SaveAnalysisVars>({ mutationKey: saveAnalysisKey })
 export const useDeleteAnalysis = () => useMutation<void, Error, string>({ mutationKey: deleteAnalysisKey })

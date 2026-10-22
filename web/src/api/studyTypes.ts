@@ -1,6 +1,6 @@
 /** Shapes for study and craft: the watchlist, analyses, and craft notes, kinds and areas. */
 
-/** A routine on the watchlist. Scores (0-10) come from the Relatable Schemer dossier. */
+/** A routine on the watchlist. Its three optional scores are 0-10. */
 export interface WatchItemInput {
   title: string
   comedian: string

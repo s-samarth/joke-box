@@ -1,22 +1,10 @@
-"""Watchlist and analyses: the dossier import, ticking routines off, links, and privacy.
-
-Titles and analyses here are made up; the dossier itself is a list of other comics' routines.
-"""
+"""Watchlist and analyses: ticking routines off, links, and privacy. Everything here is made up."""
 
 import uuid
 
 from fastapi.testclient import TestClient
 
 ROUTINE = {"title": "Fake Routine", "comedian": "Fake Comic", "category": "Fake Category"}
-
-
-def test_dossier_loads_once(alice: TestClient) -> None:
-    first = alice.post("/api/watchlist/import-dossier").json()
-    assert len(first) == 100
-    assert first[0]["position"] == 1 and first[0]["schemer_index"] is not None
-    assert len({i["category"] for i in first}) == 5
-    again = alice.post("/api/watchlist/import-dossier").json()
-    assert len(again) == 100  # nothing doubled
 
 
 def test_tick_a_routine_watched(alice: TestClient) -> None:

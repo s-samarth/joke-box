@@ -155,13 +155,14 @@ def writing(jokes: list[Any], observation_ids: list[str], technique: str) -> Non
 
 
 def study() -> None:
-    """The watchlist from the dossier, some of it watched, and an analysis of one routine."""
-    watch = ok(c.post("/api/watchlist/import-dossier"))
-    fields = ["title", "comedian", "category", "description", "url", "position",
-              "schemer_index", "logic_density", "dark_pragmatism"]  # fmt: skip
-    for w in watch[:7]:
-        ok(c.put(f"/api/watchlist/{w['id']}", json={k: w[k] for k in fields} | {"watched": True}))
-    title = f"How {watch[0]['comedian'] or 'the set'} builds a premise"
+    """A made-up watchlist, some of it watched, and an analysis of one routine."""
+    rows = DATA["watchlist"]
+    watch = []
+    for position, row in enumerate(rows["rows"], start=1):
+        item = dict(zip(rows["fields"], row, strict=True))
+        item |= {"position": position, "watched": position <= 6}
+        watch.append(ok(c.put(f"/api/watchlist/{new_id()}", json=item)))
+    title = f"How {watch[0]['comedian']} builds a premise"
     body = {"title": title, "url": "", "watch_item_id": watch[0]["id"], "body": DATA["analysis"]}
     ok(c.put(f"/api/analyses/{new_id()}", json=body))
 

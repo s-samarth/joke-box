@@ -30,7 +30,6 @@ const CraftPage = named(() => import('./features/craft/CraftPage'), 'CraftPage')
 const AreaPage = named(() => import('./features/craft/AreaPage'), 'AreaPage')
 const CraftNotePage = named(() => import('./features/craft/CraftNotePage'), 'CraftNotePage')
 const DailyPage = named(() => import('./features/daily/DailyPage'), 'DailyPage')
-const LinksPage = named(() => import('./features/study/LinksPage'), 'LinksPage')
 const TrashPage = named(() => import('./features/trash/TrashPage'), 'TrashPage')
 const ImportPage = named(() => import('./features/import/ImportPage'), 'ImportPage')
 
@@ -66,7 +65,7 @@ export function App() {
           <Route path="craft" element={<CraftPage />} />
           <Route path="craft/area/:areaId" element={<AreaPage />} />
           <Route path="craft/:noteId" element={<CraftNotePage />} />
-          <Route path="links" element={<LinksPage />} />
+          <Route path="links" element={<Navigate to="/craft" replace />} />
           <Route path="trash" element={<TrashPage />} />
           <Route path="import" element={<ImportPage />} />
         </Route>

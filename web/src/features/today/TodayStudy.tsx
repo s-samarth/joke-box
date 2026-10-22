@@ -1,5 +1,5 @@
-/** Study, from Home: your craft notes, the watchlist, your analyses and your external links. */
-import { ExternalLink, GraduationCap, ListChecks, NotebookPen } from 'lucide-react'
+/** Study, from Home: your craft notes, the watchlist, and your analyses. */
+import { GraduationCap, ListChecks, NotebookPen } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { useCraftNotes } from '../../api/craft'
@@ -24,11 +24,10 @@ export function TodayStudy() {
   return (
     <section className="mt-12">
       <SectionHead title="Study" />
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
         <Tile to="/craft" icon={<GraduationCap size={18} />} title="Craft" detail={notes.length === 1 ? '1 note' : `${notes.length} notes`} />
         <Tile to="/watchlist" icon={<ListChecks size={18} />} title="Watchlist" detail={items.length ? `${watched}/${items.length} watched` : 'Set it up'} />
         <Tile to="/analysis" icon={<NotebookPen size={18} />} title="Analysis" detail={analyses.length === 1 ? '1 written' : `${analyses.length} written`} />
-        <Tile to="/links" icon={<ExternalLink size={18} />} title="External links" detail="2 sites" />
       </div>
     </section>
   )
