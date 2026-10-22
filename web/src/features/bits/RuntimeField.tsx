@@ -1,17 +1,18 @@
 /**
- * A joke's runtime: type it ("1:30", "2m", "45") or step it with − and +. The text box keeps its
- * own draft while you type and only reports a value on blur, so a half-typed "1:" never saves.
+ * A joke's runtime: type it ("1:30", "2m", "45") or step it a second at a time with − and +.
+ * The text box keeps its own draft while you type and only reports a value on blur, so a
+ * half-typed "1:" never saves.
  */
 import { Minus, Plus } from 'lucide-react'
 import { useState } from 'react'
-import { clock, nudge, parse } from '../../lib/duration'
+import { clock, parse } from '../../lib/duration'
 
 const button = 'inline-flex size-10 items-center justify-center rounded-lg bg-ink-3 text-dim hover:text-paper disabled:opacity-40'
 
 export function RuntimeField({ value, onChange }: { value: number; onChange: (seconds: number) => void }) {
   const [text, setText] = useState(value ? clock(value) : '')
   const set = (s: number) => { onChange(s); setText(s ? clock(s) : '') }
-  const step = (up: boolean) => set(nudge(parse(text) ?? value, up))
+  const step = (up: boolean) => set(Math.max(0, (parse(text) ?? value) + (up ? 1 : -1)))
   return (
     <div className="flex items-center gap-1.5">
       <button type="button" aria-label="Shorter" onClick={() => step(false)} disabled={!value} className={button}><Minus size={16} /></button>
