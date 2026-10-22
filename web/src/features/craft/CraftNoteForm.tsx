@@ -14,7 +14,7 @@ import { KindSheet } from './KindSheet'
 
 const NEW = '__new'
 
-const FORMAT_HINT = 'Start a line with "# " for a heading, "- " for a list, "- [ ] " for a tick box. **Bold** works too.'
+const FORMAT_HINT = 'Start a line with "# " for a heading, "- " for a list, "- [ ] " for a tick box, "> " for a callout, "| a | b |" for a table row. A line like "Setup → Punch → Tag" draws as steps. **Bold** works too.'
 
 interface Props {
   initial: CraftNoteInput

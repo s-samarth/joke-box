@@ -48,7 +48,7 @@ CI runs the same checks, plus the migrations on Postgres 16 and a production bui
 | Suite | Where | Covers |
 |---|---|---|
 | pytest (108 tests) | `tests/` | Auth and allowlist, CSRF header, user isolation on every resource, topic and type transactions, setlist ownership, deleting and merging venues, UTC round trips, offline written-at times, joke version clashes, voice upload limits, the Trash (put back, sets, rewrites, 30 days, erasing), set ratings, tags and optional jokes, the order of topics, subtopics and observation topics, the importer, the watchlist dossier, craft notes, areas and kinds |
-| Vitest (124 tests) | `web/src/**/*.test.ts` | Durations and IST dates, lists by month, set timing (optional jokes too), picking several sets for a show, show filters and weighted rating, show insights and the timeline, ink geometry, voice format choice, the loudness curve, watchlist helpers, import bundles, the craft note format, LPM and the path, the daily joke streak and calendar, which failed saves retry, the shipped save keys, the Couldn't sync summaries, upload time limits, honest save messages, reordering a cached list |
+| Vitest (126 tests) | `web/src/**/*.test.ts` | Durations and IST dates, lists by month, set timing (optional jokes too), picking several sets for a show, show filters and weighted rating, show insights and the timeline, ink geometry, voice format choice, the loudness curve, watchlist helpers, import bundles, the craft note format (tables, callouts, flows), LPM and the path, the daily joke streak and calendar, which failed saves retry, the shipped save keys, the Couldn't sync summaries, upload time limits, honest save messages, reordering a cached list |
 
 ## Conventions
 

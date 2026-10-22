@@ -1,7 +1,9 @@
 /**
  * A craft note's body is plain text with a little formatting, read line by line:
- * "# " headings, "- " or "1. " list items, "- [ ] " / "- [x] " tick boxes, **bold**,
- * and blank lines between paragraphs. Parsing it here keeps rendering free of raw HTML.
+ * "# " headings, "- " or "1. " list items, "- [ ] " / "- [x] " tick boxes, **bold**, and blank
+ * lines between paragraphs. Also "| a | b |" tables (a "|---|" line under the first row makes it
+ * the header), "> " callouts, "---" dividers, and a line of short steps joined by arrows
+ * ("Setup → Premise → Punch") drawn as a flow. Parsing it here keeps rendering free of raw HTML.
  */
 
 export interface ListItem {
@@ -18,21 +20,70 @@ export type Block =
   | { type: 'heading'; level: 1 | 2 | 3; text: string }
   | { type: 'para'; text: string }
   | { type: 'list'; ordered: boolean; items: ListItem[] }
+  | { type: 'table'; head: string[]; rows: string[][] }
+  | { type: 'quote'; text: string }
+  | { type: 'flow'; steps: string[] }
+  | { type: 'rule' }
 
 const HEADING = /^(#{1,3})\s+(.*)$/
 const ITEM = /^(\s*)(?:([-*])|(\d+)[.)])\s+(?:\[([ xX])\]\s+)?(.*)$/
+const RULE = /^\s*(-{3,}|\*{3,})\s*$/
+const QUOTE = /^\s*>\s?(.*)$/
+const ROW = /^\s*\|(.*)$/
+const DIVIDER_CELL = /^\s*:?-{2,}:?\s*$/
+const ARROW = /\s+(?:→|->)\s+/
+
+/** The cells of a "| a | b |" line. */
+const cells = (row: string): string[] => row.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim())
+
+/** A lone line of two or more short steps joined by arrows. */
+function flowSteps(line: string): string[] | null {
+  const steps = line.split(ARROW).map((s) => s.trim())
+  return steps.length >= 2 && steps.every((s) => s && s.length <= 40) ? steps : null
+}
+
+function tableBlock(rows: string[][]): Block {
+  const hasHead = rows.length > 1 && rows[1].every((c) => DIVIDER_CELL.test(c))
+  return hasHead ? { type: 'table', head: rows[0], rows: rows.slice(2) } : { type: 'table', head: [], rows }
+}
 
 export function parseBody(body: string): Block[] {
   const blocks: Block[] = []
   let para: string[] = []
+  let table: string[][] = []
+  let quote: string[] = []
   const flush = () => {
-    if (para.length) blocks.push({ type: 'para', text: para.join('\n') })
+    const steps = para.length === 1 ? flowSteps(para[0]) : null
+    if (steps) blocks.push({ type: 'flow', steps })
+    else if (para.length) blocks.push({ type: 'para', text: para.join('\n') })
+    if (table.length) blocks.push(tableBlock(table))
+    if (quote.length) blocks.push({ type: 'quote', text: quote.join('\n') })
     para = []
+    table = []
+    quote = []
   }
   body.split('\n').forEach((raw, line) => {
+    if (!raw.trim()) return flush()
+    const row = raw.match(ROW)
+    if (row) {
+      if (!table.length) flush()
+      table.push(cells(raw))
+      return
+    }
+    const q = raw.match(QUOTE)
+    if (q) {
+      if (!quote.length) flush()
+      quote.push(q[1])
+      return
+    }
+    if (table.length || quote.length) flush()
+    if (RULE.test(raw)) {
+      flush()
+      blocks.push({ type: 'rule' })
+      return
+    }
     const heading = raw.match(HEADING)
     const item = raw.match(ITEM)
-    if (!raw.trim()) return flush()
     if (heading) {
       flush()
       blocks.push({ type: 'heading', level: heading[1].length as 1 | 2 | 3, text: heading[2].trim() })
@@ -80,6 +131,17 @@ export function inlineRuns(text: string): Run[] {
     }
   }
   return runs
+}
+
+/** Top-level items, each with the indented items that follow it. */
+export function groupItems(items: ListItem[]): { item: ListItem; children: ListItem[] }[] {
+  const groups: { item: ListItem; children: ListItem[] }[] = []
+  for (const item of items) {
+    const last = groups.at(-1)
+    if (item.nested && last) last.children.push(item)
+    else groups.push({ item, children: [] })
+  }
+  return groups
 }
 
 /** Every top-level list item in the note, for ticking through a checklist. */

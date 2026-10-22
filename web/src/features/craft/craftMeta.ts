@@ -91,4 +91,7 @@ export function lessonFrom(text: string, notes: CraftNote[], filing: Filing, pat
 
 /** Plain text of a body with the formatting marks taken out, for previews. */
 export const plainText = (body: string): string =>
-  body.split('\n').map((l) => l.replace(/^\s*(#+\s+|[-*]\s+|\d+[.)]\s+)?(\[[ xX]\]\s+)?/, '').replaceAll('**', '').trim()).filter(Boolean).join(' ')
+  body.split('\n')
+    .filter((l) => !/^\s*(\|[\s:|-]*|-{3,}|\*{3,})\s*$/.test(l))
+    .map((l) => l.replace(/^\s*(#+\s+|>\s?|[-*]\s+|\d+[.)]\s+)?(\[[ xX]\]\s+)?/, '').replace(/\s*\|\s*/g, ' · ').replace(/^ · | · $/g, '').replaceAll('**', '').trim())
+    .filter(Boolean).join(' ')

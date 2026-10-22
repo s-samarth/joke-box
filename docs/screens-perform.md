@@ -125,7 +125,7 @@ each with its premise in marker, the punch, its runtime and "by m:ss" (the runni
 [NoteCard.tsx](../web/src/features/craft/NoteCard.tsx), [PathLadder.tsx](../web/src/features/craft/PathLadder.tsx),
 [TechniqueShelf.tsx](../web/src/features/craft/TechniqueShelf.tsx), [AreaFolders.tsx](../web/src/features/craft/AreaFolders.tsx),
 [AreaSheet.tsx](../web/src/features/craft/AreaSheet.tsx), [ArrangeAreas.tsx](../web/src/features/craft/ArrangeAreas.tsx),
-[NoteBody.tsx](../web/src/features/craft/NoteBody.tsx), [bodyFormat.ts](../web/src/features/craft/bodyFormat.ts),
+[NoteBody.tsx](../web/src/features/craft/NoteBody.tsx), [NoteList.tsx](../web/src/features/craft/NoteList.tsx), [NoteTable.tsx](../web/src/features/craft/NoteTable.tsx), [bodyFormat.ts](../web/src/features/craft/bodyFormat.ts),
 [craftMeta.ts](../web/src/features/craft/craftMeta.ts).
 
 What you've learned about doing stand-up, kept apart from your material. The page reads top to
@@ -150,7 +150,9 @@ a technique a prompt and **Start**, a path its progress, a reference the start o
 card's ⋯ menu moves it to another area or deletes it. Searching swaps the folders for matching
 cards from every area.
 
-A note opens formatted: headings, lists, **bold**, and tick boxes you can tick straight away (the
+A note opens formatted: headings, lists (numbered items get a badge, indented items sit quietly under
+their parent), **bold**, callouts, dividers, a line of steps joined by arrows drawn as a flow, tables
+(cards on a phone, so nothing scrolls sideways), and tick boxes you can tick straight away (the
 tick is saved into the note). Its area chip at the top moves it to another area. **Edit note** switches to the form: name, kind, area, the note,
 where you learned it, a link and hashtags, saved with **Save note** (offline too). The kind and
 area menus end with **New kind…** and **New area…**; what you make there is picked straight away.
