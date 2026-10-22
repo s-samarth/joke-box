@@ -3,8 +3,9 @@ import { Plus, X } from 'lucide-react'
 import { useId, useState } from 'react'
 import { useTypes } from '../../api/library'
 import type { CleanRating } from '../../api/types'
-import { useFeedback } from '../../components/ui/feedbackContext'
-import { CLEAN_LABELS, DEFAULT_TYPES, STRENGTH_LABELS, typeDot } from '../../lib/bitMeta'
+import { useTypeColor } from '../../api/typeColors'
+import { CLEAN_LABELS, DEFAULT_TYPES, STRENGTH_LABELS } from '../../lib/bitMeta'
+import { NewTypeDialog } from './NewTypeDialog'
 
 const choice = (on: boolean) =>
   `h-9 rounded-lg px-3 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'bg-ink-3 text-dim hover:text-paper'}`
@@ -27,23 +28,21 @@ export function StrengthPicker({ value, onChange }: { value: number; onChange: (
 
 export function TypeToggles({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
   const { data: types = [] } = useTypes()
-  const { prompt } = useFeedback()
+  const colorOf = useTypeColor()
+  const [adding, setAdding] = useState(false)
   const has = (n: string) => value.some((v) => v.toLowerCase() === n.toLowerCase())
   const options = [...DEFAULT_TYPES]
   for (const n of [...types.map((t) => t.name), ...value]) if (!options.some((o) => o.toLowerCase() === n.toLowerCase())) options.push(n)
   const toggle = (n: string) => onChange(has(n) ? value.filter((v) => v.toLowerCase() !== n.toLowerCase()) : [...value, n])
-  const other = async () => {
-    const name = await prompt({ title: 'New type', label: 'e.g. Callback', confirmLabel: 'Add type' })
-    if (name && !has(name)) onChange([...value, name])
-  }
   return (
     <div className="flex flex-wrap gap-2">
       {options.map((n) => (
         <button key={n} type="button" aria-pressed={has(n)} onClick={() => toggle(n)} className={`${choice(has(n))} inline-flex items-center gap-2`}>
-          <span className={`size-1.5 rounded-full ${typeDot(n)}`} aria-hidden />{n}
+          <span className="size-1.5 rounded-full" style={{ backgroundColor: colorOf(n) }} aria-hidden />{n}
         </button>
       ))}
-      <button type="button" onClick={other} className="inline-flex h-9 items-center gap-1 rounded-lg px-2.5 text-sm text-tape hover:bg-ink-3"><Plus size={15} />Other</button>
+      <button type="button" onClick={() => setAdding(true)} className="inline-flex h-9 items-center gap-1 rounded-lg px-2.5 text-sm text-tape hover:bg-ink-3"><Plus size={15} />Other</button>
+      <NewTypeDialog open={adding} onClose={() => setAdding(false)} onAdd={(n) => !has(n) && onChange([...value, n])} />
     </div>
   )
 }

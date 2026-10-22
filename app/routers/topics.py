@@ -8,8 +8,17 @@ from sqlalchemy.orm import selectinload
 
 from app.auth.deps import CurrentUser, DbSession, get_owned
 from app.models import BitType, Status, Subtopic, Topic
-from app.schemas.library import NamedOut, NameIn, OrderIn, SubtopicOut, TopicOut
+from app.schemas.library import (
+    NamedOut,
+    NameIn,
+    OrderIn,
+    SubtopicOut,
+    TopicOut,
+    TypeColorIn,
+    TypeOut,
+)
 from app.services import topics as svc
+from app.services import type_colors
 from app.services.bits import get_or_create_status
 from app.services.ordering import next_position, set_order
 
@@ -89,11 +98,24 @@ def delete_subtopic(sub_id: uuid.UUID, user: CurrentUser, db: DbSession) -> None
     svc.delete_subtopic(db, user, get_owned(db, Subtopic, sub_id, user))
 
 
-@router.get("/types", response_model=list[NamedOut])
-def list_types(user: CurrentUser, db: DbSession) -> list[BitType]:
-    return list(
-        db.scalars(select(BitType).where(BitType.user_id == user.id).order_by(BitType.name))
-    )
+@router.get("/types", response_model=list[TypeOut])
+def list_types(user: CurrentUser, db: DbSession) -> list[TypeOut]:
+    types = db.scalars(select(BitType).where(BitType.user_id == user.id).order_by(BitType.name))
+    colors = type_colors.colors_by_name(db, user)
+    return [
+        TypeOut(
+            id=t.id,
+            name=t.name,
+            color=colors.get(t.name.lower()) or type_colors.pick_color(t.name, set()),
+        )
+        for t in types
+    ]
+
+
+@router.put("/types/color", status_code=204)
+def set_type_color(body: TypeColorIn, user: CurrentUser, db: DbSession) -> None:
+    type_colors.set_color(db, user, body.name, body.color)
+    db.commit()
 
 
 @router.patch("/types/{type_id}", status_code=204)

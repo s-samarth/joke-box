@@ -189,5 +189,6 @@ its own `preview/<git branch>` database branch, and Neon's free plan allows only
 | Filtering and totals in the browser | Works offline and feels instant; fine at one comedian's scale (thousands of rows), revisit if lists grow large |
 | Hashtags, tag lines and brainstorm links as JSON lists | Simple and portable. A link to a deleted joke just drops out of view instead of blocking the delete |
 | Joke types exist only while used | Matches how comics think ("a type is what my jokes are"); a rename onto an existing name merges them |
+| Type colours kept by name in their own table | A type that is pruned and used again keeps its colour, and a new type can be coloured before its joke saves |
 | Handwriting stored as strokes, not images | Small, sharp at any size, and editable; costs a canvas renderer |
 | One allowlisted Google sign-in | No password handling at all; adding a user means editing an environment variable |

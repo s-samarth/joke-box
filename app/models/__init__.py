@@ -9,6 +9,7 @@ from app.models.library import (
     Status,
     Subtopic,
     Topic,
+    TypeColor,
     bit_type_links,
 )
 from app.models.notebook import Observation, ObservationTopic, WritingSession
@@ -46,6 +47,7 @@ __all__ = [
     "Status",
     "Subtopic",
     "Topic",
+    "TypeColor",
     "User",
     "Venue",
     "VoiceNote",

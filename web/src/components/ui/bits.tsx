@@ -1,7 +1,8 @@
 /** Small presentational pieces shared across screens. */
 import { Star } from 'lucide-react'
 import type { CSSProperties, ReactNode } from 'react'
-import { strengthLabel, typeDot } from '../../lib/bitMeta'
+import { useTypeColor } from '../../api/typeColors'
+import { strengthLabel } from '../../lib/bitMeta'
 
 /** Strength as five ticks, like marks scratched into a notebook margin. */
 export function StrengthTicks({ strength, size = 'sm', fill = 'bg-tape' }: { strength: number; size?: 'sm' | 'lg'; fill?: string }) {
@@ -17,9 +18,10 @@ export function StrengthTicks({ strength, size = 'sm', fill = 'bg-tape' }: { str
 
 /** A type as a coloured dot and its name. Lighter than a pill, so lists stay calm. */
 export function TypeLabel({ name }: { name: string }) {
+  const colorOf = useTypeColor()
   return (
     <span className="inline-flex items-center gap-1.5 text-[13px] text-dim">
-      <span className={`size-1.5 rounded-full ${typeDot(name)}`} aria-hidden />
+      <span className="size-1.5 rounded-full" style={{ backgroundColor: colorOf(name) }} aria-hidden />
       {name}
     </span>
   )
