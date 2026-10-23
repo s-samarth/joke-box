@@ -13,9 +13,9 @@ DEFAULT_STATUSES = [
     "Incomplete",
     "Work in Progress",
     "Complete",
-    "Status Unknown",
     "Draft",
     "Stage Ready",
+    "Need Tags",
 ]
 
 

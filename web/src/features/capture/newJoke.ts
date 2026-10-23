@@ -6,9 +6,10 @@ import type { JokeInput } from '../../api/types'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { announceSave } from '../../lib/announce'
 import { DEFAULT_RUNTIME } from '../../lib/duration'
+import { DEFAULT_STATUS } from '../../lib/jokeMeta'
 
 /**
- * Everything a new joke starts with: Thoughts (unless you pick a topic), Incomplete, 15 seconds,
+ * Everything a new joke starts with: Thoughts (unless you pick a topic), Draft, 15 seconds,
  * clean and in Hinglish.
  */
 export const blankJoke = (topicId = ''): JokeInput => ({
@@ -17,7 +18,7 @@ export const blankJoke = (topicId = ''): JokeInput => ({
   topic_id: topicId,
   subtopic_id: null,
   types: [],
-  status: 'Incomplete',
+  status: DEFAULT_STATUS,
   strength: 3,
   duration_seconds: DEFAULT_RUNTIME,
   hashtags: [],

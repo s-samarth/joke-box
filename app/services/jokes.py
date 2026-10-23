@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.models import Joke, JokeType, Status, Subtopic, Topic, User, joke_type_links
 from app.models.base import written_at
-from app.schemas.library import JokeIn, JokeOut
+from app.schemas.library import JokeIn, JokeOut, status_name
 from app.services import chains, type_colors
 
 
@@ -51,6 +51,7 @@ def get_or_create_type(db: Session, user: User, name: str) -> JokeType:
 
 
 def get_or_create_status(db: Session, user: User, name: str) -> Status:
+    name = status_name(name)
     found = db.scalar(
         select(Status).where(Status.user_id == user.id, func.lower(Status.name) == name.lower())
     )
@@ -99,7 +100,7 @@ def apply(db: Session, user: User, joke: Joke, data: JokeIn) -> None:
         if name.lower() != "undefined":
             seen.setdefault(name.lower(), get_or_create_type(db, user, name))
     joke.types = list(seen.values())
-    joke.status = get_or_create_status(db, user, data.status) if data.status else None
+    joke.status = get_or_create_status(db, user, data.status)
 
 
 def prune_unused_types(db: Session, user: User) -> None:
@@ -122,7 +123,7 @@ def same_content(joke: Joke, data: JokeIn) -> bool:
     return (
         all(getattr(now, k) == v for k, v in plain_fields(data).items())
         and type_names(now.types) == type_names(data.types)
-        and (now.status or "").lower() == (data.status or "").lower()
+        and (now.status or "").lower() == data.status.lower()
     )
 
 

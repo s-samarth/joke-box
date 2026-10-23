@@ -17,7 +17,12 @@ export const CLEAN_LABELS: Record<CleanRating, string> = { clean: 'Clean', mild:
 export const LANGUAGES = ['Hinglish', 'Hindi', 'English']
 
 /** Statuses that mean "still being written". */
-export const UNFINISHED = new Set(['incomplete', 'work in progress', 'draft', 'status unknown'])
+export const UNFINISHED = new Set(['incomplete', 'work in progress', 'draft', 'need tags'])
+
+/** Every joke has a status. None, or the retired "Status Unknown", means Draft (the server agrees). */
+export const DEFAULT_STATUS = 'Draft'
+export const statusOf = (status: string | null): string =>
+  !status?.trim() || status.trim().toLowerCase() === 'status unknown' ? DEFAULT_STATUS : status
 
 /** The protected default topic is stored as "Random"; the app calls it Thoughts. */
 export const THOUGHTS = 'Thoughts'

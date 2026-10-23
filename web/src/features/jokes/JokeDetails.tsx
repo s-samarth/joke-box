@@ -5,7 +5,7 @@ import type { JokeInput } from '../../api/types'
 import { Select } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { useCapture } from '../capture/captureContext'
-import { LANGUAGES, topicName } from '../../lib/jokeMeta'
+import { LANGUAGES, statusOf, topicName } from '../../lib/jokeMeta'
 import { followersOf } from '../../lib/chains'
 import { FollowedBy, FollowsField } from './ChainFields'
 import { CleanPicker, HashtagField, StrengthPicker, TypeToggles } from './DetailControls'
@@ -37,8 +37,9 @@ export function JokeDetails({ jokeId, draft, update }: { jokeId?: string; draft:
   const { prompt, toast } = useFeedback()
   const [managing, setManaging] = useState<'topics' | 'types' | null>(null)
   const topic = topics.find((t) => t.id === draft.topic_id)
+  const status = statusOf(draft.status)
   const statusNames = statuses.map((s) => s.name)
-  if (draft.status && !statusNames.includes(draft.status)) statusNames.push(draft.status)
+  if (!statusNames.includes(status)) statusNames.push(status)
   // Older jokes may have no language or another one; show it rather than pretend it's Hinglish.
   const languages = draft.language && !LANGUAGES.includes(draft.language) ? [...LANGUAGES, draft.language] : LANGUAGES
   const next = jokeId ? followersOf(jokeId, jokes) : []
@@ -66,8 +67,8 @@ export function JokeDetails({ jokeId, draft, update }: { jokeId?: string; draft:
     if (name && topic) actions.addSubtopic.mutate({ topicId: topic.id, name }, { onSuccess: (s) => update({ subtopic_id: s.id }), onError: (e) => toast(e.message) })
   }
   const pickStatus = async (value: string) => {
-    if (value !== NEW) return update({ status: value || null })
-    const name = await prompt({ title: 'New status', label: 'e.g. Needs a tag', confirmLabel: 'Add status' })
+    if (value !== NEW) return update({ status: value })
+    const name = await prompt({ title: 'New status', label: 'e.g. Ready to record', confirmLabel: 'Add status' })
     if (name) update({ status: name })
   }
 
@@ -96,8 +97,7 @@ export function JokeDetails({ jokeId, draft, update }: { jokeId?: string; draft:
         </Row>
       )}
       <Row label="Status">
-        <Select aria-label="Status" value={draft.status ?? ''} onChange={(e) => pickStatus(e.target.value)} className="sm:max-w-xs">
-          <option value="">No status</option>
+        <Select aria-label="Status" value={status} onChange={(e) => pickStatus(e.target.value)} className="sm:max-w-xs">
           {statusNames.map((s) => <option key={s} value={s}>{s}</option>)}
           <option value={NEW}>New status…</option>
         </Select>

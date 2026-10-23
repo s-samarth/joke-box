@@ -17,7 +17,7 @@ from app.models import (
     User,
     Venue,
 )
-from app.schemas.library import JokeIn
+from app.schemas.library import JokeIn, status_name
 from app.seed.convert import Json, seconds, split_tags, when, wipe
 from app.services import jokes as joke_svc
 
@@ -78,7 +78,7 @@ class Loader:
             topic_id=topic.id,
             subtopic_id=sub.id if sub else None,
             types=raw_types if isinstance(raw_types, list) else [raw_types],
-            status=b.get("status"),
+            status=status_name(b.get("status")),
             strength=min(max(int(b.get("rating") or 3), 1), 5),
             duration_seconds=seconds(b.get("duration")),
             hashtags=b.get("tags") or [],
