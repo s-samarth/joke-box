@@ -96,14 +96,15 @@ the jokes' created dates, so there's no separate log to fall out of step.
   when there were several; today is outlined in yellow; days to come are dimmed. Arrows move
   between months. Tap a day to list its jokes, each linking to the joke.
 
-## Jokes: `/jokes` and `/jokes/:jokeId`
+## Jokes: `/jokes`, `/jokes/map` and `/jokes/:jokeId`
 
 [JokesLayout.tsx](../web/src/features/jokes/JokesLayout.tsx), [JokeFilters.tsx](../web/src/features/jokes/JokeFilters.tsx),
 [useJokeFilters.ts](../web/src/features/jokes/useJokeFilters.ts), [JokePage.tsx](../web/src/features/jokes/JokePage.tsx),
 [JokeDetails.tsx](../web/src/features/jokes/JokeDetails.tsx), [DetailControls.tsx](../web/src/features/jokes/DetailControls.tsx),
 [TagLines.tsx](../web/src/features/jokes/TagLines.tsx), [JokeExtras.tsx](../web/src/features/jokes/JokeExtras.tsx),
 [useAutosaveJoke.ts](../web/src/features/jokes/useAutosaveJoke.ts), [TopicManager.tsx](../web/src/features/jokes/TopicManager.tsx),
-[TypeManager.tsx](../web/src/features/jokes/TypeManager.tsx).
+[TypeManager.tsx](../web/src/features/jokes/TypeManager.tsx). The map: [map/](../web/src/features/jokes/map/) ([mapLayout.ts](../web/src/features/jokes/map/mapLayout.ts),
+[JokeMap.tsx](../web/src/features/jokes/map/JokeMap.tsx), [MapCanvas.tsx](../web/src/features/jokes/map/MapCanvas.tsx), [MapPeek.tsx](../web/src/features/jokes/map/MapPeek.tsx)).
 
 - **List:** a search box ("Search words, tags, notes") and four menus: Topic (with subtopics), Type,
   Status, and Sort (Newest, Oldest, Recently edited, Strongest, Weakest, Longest). Each row shows the
@@ -114,6 +115,21 @@ the jokes' created dates, so there's no separate log to fall out of step.
   arrived. The ⋯ menu has **Export as CSV** (with Created At and Edited At).
 - **Layout:** like a mail app. On desktop the selected joke opens in a pane beside the list; on a
   phone it opens as its own page with a back link.
+- **The joke map:** with no joke open, the desktop pane shows the jokes the list is showing (same
+  filters) as a map. The map button in the Jokes header opens it as its own page, `/jokes/map`,
+  which is how a phone gets to it.
+  - **Chains** are drawn left to right as boxes, with an arrow from each joke to the joke that
+    follows it. Branches stack, with the joke before them level with their middle. Chains come in
+    the order their jokes appear in the list.
+  - A chain is drawn whole: jokes the filters hide come back dimmed, with dashed edges and arrows,
+    so a chain never has a gap.
+  - **On their own:** jokes in no chain, in a grid under the map.
+  - **Tap a box** to read the joke in a panel beside the map (above the bottom bar on a phone):
+    its setup, punchline, tag lines, strength and types, **Comes after** and **Followed by**
+    (tap one to walk along the chain; the map scrolls to it) and **Open joke**. The joke's chain
+    lights up and the others step back; hovering a box does the same. Escape closes the panel.
+  - **Move around** by scrolling, or with a mouse by dragging the map (a drag that ends on a box
+    doesn't open it). Zoom out, zoom in and **Fit to width**; a phone starts at 70%.
 - **The joke page:** the setup and punchline (in tape yellow) are edited in place, followed by tag
   lines. Below them, a row of details: Strength, Type (with Edit types), Filed under (topic and
   subtopic, with Edit topics), Status, Runs for (type it, or step it a second at a time with −

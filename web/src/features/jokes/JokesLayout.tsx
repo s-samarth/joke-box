@@ -1,9 +1,9 @@
 /**
- * Jokes: a scannable list. On desktop the selected joke opens beside the list (like a mail app);
- * on a phone it opens as its own page.
+ * Jokes: a scannable list. On desktop the selected joke opens beside the list (like a mail app),
+ * and with none open the joke map fills that space; on a phone each opens as its own page.
  */
-import { Download, MoreHorizontal } from 'lucide-react'
-import { Outlet, useParams } from 'react-router'
+import { Download, MoreHorizontal, Network } from 'lucide-react'
+import { Link, Outlet, useMatch, useParams } from 'react-router'
 import { useTopics } from '../../api/library'
 import type { Joke, Topic } from '../../api/types'
 import { IconButton } from '../../components/ui/Button'
@@ -16,6 +16,7 @@ import { formatDateTime, todayIst } from '../../lib/time'
 import { useCapture } from '../capture/captureContext'
 import { JokeFilters } from './JokeFilters'
 import { JokeList } from './JokeList'
+import { JokeMapPage } from './map/JokeMapPage'
 import { sortDate, useJokeFilters } from './useJokeFilters'
 
 function exportCsv(jokes: Joke[], topics: Topic[]) {
@@ -31,14 +32,21 @@ function exportCsv(jokes: Joke[], topics: Topic[]) {
 
 export function JokesLayout() {
   const { jokeId } = useParams()
+  // On a phone the list gives way to whatever's open: a joke, or the map.
+  const onMap = useMatch('/jokes/map')
+  const open = Boolean(jokeId || onMap)
   const f = useJokeFilters()
   const { data: topics = [] } = useTopics()
   const { openCapture } = useCapture()
 
   return (
     <div className="lg:-mx-10 lg:flex lg:h-dvh">
-      <section className={`lg:flex lg:w-[26rem] lg:shrink-0 lg:flex-col lg:border-r lg:border-rule lg:px-6 ${jokeId ? 'hidden lg:flex' : ''}`}>
+      <section className={`lg:flex lg:w-[26rem] lg:shrink-0 lg:flex-col lg:border-r lg:border-rule lg:px-6 ${open ? 'hidden lg:flex' : ''}`}>
         <PageHead title="Jokes">
+          <Link to={`/jokes/map${f.query ? `?${f.query}` : ''}`} aria-label="Joke map" title="Joke map"
+            className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg text-dim transition-colors hover:bg-ink-3 hover:text-paper">
+            <Network size={19} />
+          </Link>
           <Dropdown items={[{ label: 'Export as CSV', icon: <Download size={16} />, onSelect: () => exportCsv(f.visible, topics), disabled: !f.visible.length }]}
             trigger={<IconButton label="More"><MoreHorizontal size={20} /></IconButton>} />
         </PageHead>
@@ -61,17 +69,15 @@ export function JokesLayout() {
         </div>
         </div>
       </section>
-      <section className={`min-w-0 flex-1 lg:overflow-y-auto lg:px-10 ${jokeId ? '' : 'hidden lg:block'}`}>
+      <section className={`min-w-0 flex-1 lg:overflow-y-auto lg:px-10 ${open ? '' : 'hidden lg:block'}`}>
         <Outlet />
       </section>
     </div>
   )
 }
 
-export function NoJokeSelected() {
-  return (
-    <div className="flex h-full items-center">
-      <EmptyState title="Pick a joke">Choose one from the list to read it, rework it or start a rewrite.</EmptyState>
-    </div>
-  )
-}
+/** With no joke open, desktop shows the map of the list beside it. */
+export const NoJokeSelected = () => <JokeMapPage />
+
+/** /jokes/map: the map on its own, with a way back to the list on a phone. */
+export const JokeMapScreen = () => <JokeMapPage own />
