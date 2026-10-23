@@ -17,11 +17,19 @@ import { App } from './App'
 import { FeedbackProvider } from './components/ui/feedback'
 import { startOutbox } from './features/voice/outbox'
 import { AsideScreen } from './layout/AsideScreen'
+import { CrashScreen } from './layout/CrashScreen'
 import { keepStorage } from './lib/keepStorage'
 import { claim, isAside, stepAsideWhenClaimed } from './lib/oneTab'
+import { repairIfStale } from './lib/recover'
 import './app.css'
 
 const root = createRoot(document.getElementById('root')!)
+
+// Vite reports a file it couldn't load (an old copy of the app after a release) here, before
+// anything crashes: repair once instead of letting it fail.
+window.addEventListener('vite:preloadError', (e) => {
+  if (repairIfStale(e.payload)) e.preventDefault()
+})
 
 async function boot() {
   if (isAside()) return root.render(<AsideScreen />)
@@ -34,19 +42,21 @@ async function boot() {
   void startOutbox(alone)
   root.render(
     <StrictMode>
-      <PersistQueryClientProvider
-        client={queryClient}
-        persistOptions={persistOptions}
-        // After the saved cache loads, check who's signed in, replay the saves waiting on the
-        // phone, then refresh.
-        onSuccess={() => { upgradeOldCache(queryClient); return checkAccount().then(resumeQueued).then(() => queryClient.invalidateQueries()) }}
-      >
-        <BrowserRouter>
-          <FeedbackProvider>
-            <App />
-          </FeedbackProvider>
-        </BrowserRouter>
-      </PersistQueryClientProvider>
+      <CrashScreen>
+        <PersistQueryClientProvider
+          client={queryClient}
+          persistOptions={persistOptions}
+          // After the saved cache loads, check who's signed in, replay the saves waiting on the
+          // phone, then refresh.
+          onSuccess={() => { upgradeOldCache(queryClient); return checkAccount().then(resumeQueued).then(() => queryClient.invalidateQueries()) }}
+        >
+          <BrowserRouter>
+            <FeedbackProvider>
+              <App />
+            </FeedbackProvider>
+          </BrowserRouter>
+        </PersistQueryClientProvider>
+      </CrashScreen>
     </StrictMode>,
   )
 }
