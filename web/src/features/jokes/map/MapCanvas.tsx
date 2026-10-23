@@ -2,47 +2,16 @@
  * The drawing part of the joke map: boxes placed by mapLayout, arrows in one SVG under them, all
  * scaled by `zoom` inside a wrapper sized to the scaled drawing, so the scrollbars stay right.
  *
- * Move around by scrolling, or with a mouse by dragging the map. A drag that ends on a box
- * doesn't count as a tap on it. On a touch screen the finger already scrolls, so dragging is
- * left to the browser.
+ * Move around by scrolling, or with a mouse by dragging the map (usePan).
  */
-import { useId, useMemo, useRef, type MouseEvent, type PointerEvent, type RefObject } from 'react'
+import { useId, useMemo, type RefObject } from 'react'
 import type { Joke } from '../../../api/types'
 import type { MapEdge, MapLayout } from './mapLayout'
 import { MapBox } from './MapBox'
+import { usePan } from './usePan'
 
 /** A gentle S from the right of one box to the left of the next, so branches fan out. */
 const curve = ({ x1, y1, x2, y2 }: MapEdge) => `M ${x1} ${y1} C ${x1 + 28} ${y1}, ${x2 - 28} ${y2}, ${x2 - 2} ${y2}`
-
-function usePan(ref: RefObject<HTMLDivElement | null>) {
-  const drag = useRef<{ x: number; y: number; left: number; top: number; moved: boolean } | null>(null)
-  return {
-    onPointerDown: (e: PointerEvent) => {
-      const el = ref.current
-      if (!el || e.pointerType !== 'mouse' || e.button !== 0) return
-      drag.current = { x: e.clientX, y: e.clientY, left: el.scrollLeft, top: el.scrollTop, moved: false }
-    },
-    onPointerMove: (e: PointerEvent) => {
-      const d = drag.current
-      const el = ref.current
-      if (!d || !el) return
-      const dx = e.clientX - d.x
-      const dy = e.clientY - d.y
-      if (!d.moved && Math.abs(dx) + Math.abs(dy) < 5) return
-      if (!d.moved) el.setPointerCapture(e.pointerId)
-      d.moved = true
-      el.scrollLeft = d.left - dx
-      el.scrollTop = d.top - dy
-    },
-    // The click after a drag comes straight after this, so the flag is cleared just after it.
-    onPointerUp: () => setTimeout(() => { drag.current = null }),
-    onClickCapture: (e: MouseEvent) => {
-      if (!drag.current?.moved) return
-      e.preventDefault()
-      e.stopPropagation()
-    },
-  }
-}
 
 interface Props {
   map: MapLayout<Joke>

@@ -10,6 +10,7 @@ import './showSaves'
 import './study'
 import './trash'
 import './voice'
+import './board'
 
 /** Every key ever shipped for a queued save. Add new ones; never remove or rename one. */
 const SHIPPED = [
@@ -17,6 +18,7 @@ const SHIPPED = [
   'watch/save', 'watch/delete', 'analysis/save', 'analysis/delete', 'craft/save', 'craft/delete',
   'log/save', 'log/delete', 'setlist/save', 'setlist/delete', 'brainstorm/save', 'brainstorm/delete',
   'brainstorm-version/delete', 'voice/save', 'voice/delete', 'trash/restore', 'trash/erase', 'trash/empty',
+  'board/save', 'board/tidy',
 ]
 
 describe('saves waiting on phones', () => {

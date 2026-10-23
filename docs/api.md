@@ -99,6 +99,14 @@ stays; erasing that joke for good clears it.
 The response (`JokeOut`) adds `id`, `created_at` and `updated_at`, and returns `types` and
 `status` as names.
 
+### The joke board
+
+| Method | Path | Body / notes |
+|---|---|---|
+| GET | `/api/board` | `[{joke_id, topic_id, x, y}]`: every joke you've placed by hand |
+| PUT | `/api/board/{joke_id}` | `{topic_id, x, y}`: put a joke where you dropped it. `x` and `y` are 0 to 100,000, measured from the top left of its topic island. Doesn't touch the joke's `version` or `updated_at`. 404 for someone else's joke or one in the Trash |
+| POST | `/api/board/tidy` | `{joke_ids}` → 204. Forget where these jokes were put; an empty list forgets every one |
+
 ## Rewrites (Studio)
 
 | Method | Path | Body / notes |

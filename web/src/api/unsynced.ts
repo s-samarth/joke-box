@@ -73,7 +73,7 @@ export async function retryUnsynced(client: QueryClient, item: Unsynced) {
 const KINDS: Record<string, string> = {
   joke: 'Joke', observation: 'Observation', session: 'Brainstorm session', watch: 'Watchlist routine',
   analysis: 'Analysis', craft: 'Craft note', log: 'Show', setlist: 'Set', brainstorm: 'Rewrite',
-  'brainstorm-version': 'Rewrite version', voice: 'Voice note',
+  'brainstorm-version': 'Rewrite version', voice: 'Voice note', board: 'Joke moved on the board',
 }
 
 const TRASH: Record<string, string> = { restore: 'Put back from the Trash', erase: 'Delete from the Trash', empty: 'Empty the Trash' }
@@ -85,6 +85,7 @@ const WORDS = ['setup', 'punchline', 'text', 'title', 'name', 'label', 'venue_na
 export function summary(saved: string[], variables: unknown): { title: string; text: string } {
   const key = renamedKey(saved) as string[]
   if (key[0] === 'trash') return { title: TRASH[key[1]] ?? 'Trash', text: '' }
+  if (key[0] === 'board' && key[1] === 'tidy') return { title: 'Tidy up the board', text: '' }
   const kind = KINDS[key[0]] ?? 'Change'
   if (key[1] === 'delete') return { title: `Delete ${kind.toLowerCase()}`, text: '' }
   const input = (variables as { input?: Record<string, unknown> } | null)?.input ?? {}

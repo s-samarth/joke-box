@@ -130,6 +130,23 @@ the jokes' created dates, so there's no separate log to fall out of step.
     lights up and the others step back; hovering a box does the same. Escape closes the panel.
   - **Move around** by scrolling, or with a mouse by dragging the map (a drag that ends on a box
     doesn't open it). Zoom out, zoom in and **Fit to width**; a phone starts at 70%.
+- **The joke board** (the **Board** tab beside **Map**, remembered on the device;
+  [boardLayout.ts](../web/src/features/jokes/map/boardLayout.ts), [JokeBoard.tsx](../web/src/features/jokes/map/JokeBoard.tsx),
+  [BoardCanvas.tsx](../web/src/features/jokes/map/BoardCanvas.tsx), [useBoxDrag.ts](../web/src/features/jokes/map/useBoxDrag.ts)):
+  the same jokes as cards scattered over topic islands, like a corkboard.
+  - **Islands:** one per topic, in your topic order, wrapping to the width on screen (at least two
+    cards wide). Cards sit on a loose grid with a small nudge and tilt worked out from each joke's
+    id, so they look hand-placed, never overlap, and land in the same place every time.
+  - **Chains** stay together in their first joke's island, with arrows; dimmed cards are jokes the
+    filters hide, kept so a chain isn't broken.
+  - **Move a card:** drag it with a mouse, or on a phone hold it a moment and then drag; the arrow
+    keys move a focused card (Shift for bigger steps). It stays where you put it, relative to its
+    island, and the grid makes room. The save waits offline like any other. **Tidy up** (after
+    asking) puts the moved cards back.
+  - **Read a card:** tap it for the same panel as the map. Drag the background to move around.
+  - **Lots of jokes:** zoomed to 55% or less, cards show their first few words in big type, and
+    island names grow. Past 300 cards, only those near the screen are drawn. A phone starts at
+    55%.
 - **The joke page:** the setup and punchline (in tape yellow) are edited in place, followed by tag
   lines. Below them, a row of details: Strength, Type (with Edit types), Filed under (topic and
   subtopic, with Edit topics), Status, Runs for (type it, or step it a second at a time with −

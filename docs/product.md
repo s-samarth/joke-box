@@ -43,7 +43,7 @@ own data. Today that is one comedian, but the system works for more than one.
    save a moment after you stop, and when you leave the page.
 3. **Offline is normal.** Basements, green rooms and metros have no signal, or one bar, or wifi
    that wants a sign-in. Reading works offline, and so does saving jokes, observations, shows,
-   sets, brainstorms, craft notes, watchlist ticks, analyses and voice notes. It all syncs in
+   sets, brainstorms, craft notes, watchlist ticks, analyses, voice notes and jokes moved on the board. It all syncs in
    order when you're back, keeps the time you wrote it, and nothing is dropped: a save the server
    refuses waits in Couldn't sync with what you wrote.
 4. **Phone first, laptop comfortable.** Every screen is designed at 390 px wide, with large tap
