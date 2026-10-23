@@ -139,7 +139,9 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 3. Tap the notebook icon to start an **analysis**: the name and link are filled in from the routine.
 4. Analyses are listed on **Analysis**, where you can search them.
 5. Learned something about doing stand-up? On **Craft**, tap **New note**, pick its kind and area,
-   and write it down. Open an area's folder to see its notes as cards. Move a note with its ⋯ menu
+   and write it down. The toolbar writes headings, lists, tick boxes, callouts, steps and tables
+   for you, and Preview shows how it will look. Later, tap any part of a note to change just that
+   part, or a table to edit it as boxes. Open an area's folder to see its notes as cards. Move a note with its ⋯ menu
    or the area chip on the note, and add, rename, recolour or delete areas with **New area**,
    **Arrange** and **Edit area**.
 

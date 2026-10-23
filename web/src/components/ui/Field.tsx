@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
+import { useImperativeHandle, useLayoutEffect, useRef, type InputHTMLAttributes, type ReactNode, type Ref, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
 
 const box =
   'w-full rounded-lg bg-ink-2 px-3 text-[16px] text-paper placeholder:text-faint ring-1 ring-rule-strong outline-none transition focus:ring-2 focus:ring-tape sm:text-[15px]'
@@ -34,8 +34,10 @@ export function Textarea({ className = '', ...rest }: TextareaHTMLAttributes<HTM
  * A textarea with no box that grows with its text: used for editing a joke in place,
  * so the page reads like the joke itself rather than a form.
  */
-export function GrowingText({ className = '', value, ...rest }: TextareaHTMLAttributes<HTMLTextAreaElement> & { value: string }) {
+export function GrowingText({ className = '', value, ref: outer, ...rest }: TextareaHTMLAttributes<HTMLTextAreaElement> & { value: string; ref?: Ref<HTMLTextAreaElement> }) {
   const ref = useRef<HTMLTextAreaElement>(null)
+  // The box needs its own ref to measure itself; a caller's ref gets the same element.
+  useImperativeHandle(outer, () => ref.current!, [])
   useLayoutEffect(() => {
     const el = ref.current
     if (!el) return

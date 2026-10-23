@@ -3,9 +3,10 @@
  * note can inject markup. Web addresses become links that open in a new tab. Tick boxes are buttons when `onTick` is given, otherwise just marks.
  */
 import { ChevronRight } from 'lucide-react'
-import { inlineRuns, parseBody } from './bodyFormat'
+import { inlineRuns, parseBody, type Block } from './bodyFormat'
 import { NoteList } from './NoteList'
 import { NoteTable } from './NoteTable'
+import { BODY_TEXT, HEADING_GAP } from './noteStyle'
 
 function Inline({ text }: { text: string }) {
   return (
@@ -34,29 +35,32 @@ function Flow({ steps }: { steps: string[] }) {
   )
 }
 
-const HEADINGS = { 1: 'headline text-2xl mt-7', 2: 'text-lg font-semibold mt-6', 3: 'font-semibold text-dim mt-4' } as const
+const HEADINGS = { 1: 'headline text-2xl', 2: 'text-lg font-semibold', 3: 'font-semibold text-dim' } as const
+
+/** One block of a note. `gap` adds a heading's top margin here; the editable view puts it on its own wrapper. */
+export function BlockView({ block, onTick, gap = true }: { block: Block; onTick?: (line: number) => void; gap?: boolean }) {
+  switch (block.type) {
+    case 'heading':
+      return <p className={`${HEADINGS[block.level]} ${gap ? `${HEADING_GAP[block.level]} first:mt-0` : ''}`}>{inline(block.text)}</p>
+    case 'para':
+      return <p className="whitespace-pre-line">{inline(block.text)}</p>
+    case 'table':
+      return <NoteTable head={block.head} rows={block.rows} cell={inline} />
+    case 'quote':
+      return <p className="whitespace-pre-line rounded-r-xl border-l-2 border-tape bg-tape/[0.07] px-4 py-2.5 text-paper">{inline(block.text)}</p>
+    case 'flow':
+      return <Flow steps={block.steps} />
+    case 'rule':
+      return <hr className="my-5 border-rule" />
+    case 'list':
+      return <NoteList ordered={block.ordered} items={block.items} inline={inline} onTick={onTick} />
+  }
+}
 
 export function NoteBody({ body, onTick }: { body: string; onTick?: (line: number) => void }) {
   return (
-    <div className="space-y-3 text-[15px] leading-relaxed text-paper/90">
-      {parseBody(body).map((block, i) => {
-        switch (block.type) {
-          case 'heading':
-            return <p key={i} className={`${HEADINGS[block.level]} first:mt-0`}>{inline(block.text)}</p>
-          case 'para':
-            return <p key={i} className="whitespace-pre-line">{inline(block.text)}</p>
-          case 'table':
-            return <NoteTable key={i} head={block.head} rows={block.rows} cell={inline} />
-          case 'quote':
-            return <p key={i} className="whitespace-pre-line rounded-r-xl border-l-2 border-tape bg-tape/[0.07] px-4 py-2.5 text-paper">{inline(block.text)}</p>
-          case 'flow':
-            return <Flow key={i} steps={block.steps} />
-          case 'rule':
-            return <hr key={i} className="my-5 border-rule" />
-          case 'list':
-            return <NoteList key={i} ordered={block.ordered} items={block.items} inline={inline} onTick={onTick} />
-        }
-      })}
+    <div className={BODY_TEXT}>
+      {parseBody(body).map((block, i) => <BlockView key={i} block={block} onTick={onTick} />)}
     </div>
   )
 }

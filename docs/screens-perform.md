@@ -126,7 +126,12 @@ each with its premise in marker, the punch, its runtime and "by m:ss" (the runni
 [TechniqueShelf.tsx](../web/src/features/craft/TechniqueShelf.tsx), [AreaFolders.tsx](../web/src/features/craft/AreaFolders.tsx),
 [AreaSheet.tsx](../web/src/features/craft/AreaSheet.tsx), [ArrangeAreas.tsx](../web/src/features/craft/ArrangeAreas.tsx),
 [NoteBody.tsx](../web/src/features/craft/NoteBody.tsx), [NoteList.tsx](../web/src/features/craft/NoteList.tsx), [NoteTable.tsx](../web/src/features/craft/NoteTable.tsx), [bodyFormat.ts](../web/src/features/craft/bodyFormat.ts),
-[craftMeta.ts](../web/src/features/craft/craftMeta.ts).
+[craftMeta.ts](../web/src/features/craft/craftMeta.ts). Editing: [NoteEditor.tsx](../web/src/features/craft/NoteEditor.tsx),
+[FormatToolbar.tsx](../web/src/features/craft/FormatToolbar.tsx), [editText.ts](../web/src/features/craft/editText.ts),
+[applyEdit.ts](../web/src/features/craft/applyEdit.ts), [TableEditor.tsx](../web/src/features/craft/TableEditor.tsx),
+[tableText.ts](../web/src/features/craft/tableText.ts), [EditableBody.tsx](../web/src/features/craft/EditableBody.tsx),
+[BlockEditor.tsx](../web/src/features/craft/BlockEditor.tsx), [AddBlockMenu.tsx](../web/src/features/craft/AddBlockMenu.tsx),
+[blockEdit.ts](../web/src/features/craft/blockEdit.ts).
 
 What you've learned about doing stand-up, kept apart from your material. The page reads top to
 bottom:
@@ -153,8 +158,25 @@ cards from every area.
 A note opens formatted: headings, lists (numbered items get a badge, indented items sit quietly under
 their parent), **bold**, callouts, dividers, a line of steps joined by arrows drawn as a flow, tables
 (cards on a phone, so nothing scrolls sideways), and tick boxes you can tick straight away (the
-tick is saved into the note). Its area chip at the top moves it to another area. **Edit note** switches to the form: name, kind, area, the note,
-where you learned it, a link and hashtags, saved with **Save note** (offline too). The kind and
+tick is saved into the note). Its area chip at the top moves it to another area.
+
+**Edit in place:** tap any part of the note (a paragraph, a list, a callout, a heading) and only that
+part opens as a small editor, with **Save** (Cmd/Ctrl+Enter), **Cancel** (Escape), **Delete** and
+**Add below**. Tapping a table opens the table editor instead. With a mouse, hovering a part shows a
+pencil and a **+** that adds a block under it (text, heading, list, numbered list, tick boxes,
+callout, steps, table or divider); **Add to the note** at the end adds one at the bottom. Links and
+tick boxes still work as usual, and selecting text to copy doesn't open anything. If a part changed
+elsewhere while it was open (on another device, say), the edit isn't placed and a toast says so.
+
+**Edit note** switches to the form: name, kind, area, the note, where you learned it, a link and
+hashtags, saved with **Save note** (offline too). The note's text box has a toolbar (heading, bold,
+list, numbered list, tick boxes, callout, steps, table, divider) and **Write** / **Preview** tabs.
+Enter carries a list, tick boxes or a callout on to the next line (Enter on an empty item ends it),
+Tab and Shift+Tab indent list items, and Cmd/Ctrl+B bolds. Every change can be undone with Cmd+Z.
+New blocks go after the cursor's line, never over selected text. With the cursor in a table, the
+table button opens it as boxes: rows as cards you can drag into order (cells stack on a phone),
+column names you can switch off, and columns and rows to add or remove. A "|" typed in a cell is
+saved as "/", since "|" splits cells. The kind and
 area menus end with **New kind…** and **New area…**; what you make there is picked straight away.
 `/craft/new?area=<id>&kind=checklist` starts one with those filled in (`?screen=stage` picks the
 area that shows on Stage); `?show=<id>` or
