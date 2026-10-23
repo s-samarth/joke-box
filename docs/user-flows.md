@@ -68,6 +68,8 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 6. To see how jokes lead into each other, look at the **joke map** (beside the list on desktop, or
    the map button on Jokes). Tap a joke to read it there, walk along its chain with **Comes
    after** and **Followed by**, and **Open joke** to edit it.
+7. Switch to **Board** to see every joke as a card on topic islands. Drag a card (on a phone, hold
+   it first) to put it where you like; it stays there. **Tidy up** puts the moved ones back.
 
 ## 5. Brainstorm against the clock
 
@@ -160,7 +162,7 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 1. Everything you've already opened stays readable. Each list is kept on the device for a week
    after you last opened it.
 2. Saves keep working: jokes, observations, shows (with their lesson), sets, rewrites, voice
-   notes and craft notes. Sheets close as usual and say "Saved offline, will sync". The cloud
+   notes, craft notes and jokes moved on the board. Sheets close as usual and say "Saved offline, will sync". The cloud
    icon turns amber and says "Offline, N waiting to sync", counting recordings still to upload.
 3. A weak signal counts too: a save that can't reach the server waits like an offline one, and
    the app checks every few seconds for the server to come back.

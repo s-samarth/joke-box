@@ -43,7 +43,7 @@ export function JokesLayout() {
     <div className="lg:-mx-10 lg:flex lg:h-dvh">
       <section className={`lg:flex lg:w-[26rem] lg:shrink-0 lg:flex-col lg:border-r lg:border-rule lg:px-6 ${open ? 'hidden lg:flex' : ''}`}>
         <PageHead title="Jokes">
-          <Link to={`/jokes/map${f.query ? `?${f.query}` : ''}`} aria-label="Joke map" title="Joke map"
+          <Link to={`/jokes/map${f.query ? `?${f.query}` : ''}`} aria-label="Joke map and board" title="Joke map and board"
             className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg text-dim transition-colors hover:bg-ink-3 hover:text-paper">
             <Network size={19} />
           </Link>

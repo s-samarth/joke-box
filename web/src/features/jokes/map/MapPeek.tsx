@@ -31,7 +31,16 @@ function Neighbour({ joke, dir, onPick }: { joke: Joke; dir: 'before' | 'after';
   )
 }
 
-export function MapPeek({ joke, before, beforeGone, after, query, onPick, onClose }: Props) {
+/** The panel for the joke with this id, with its neighbours looked up in `all`. */
+export function PeekOf({ id, all, query, onPick, onClose }: { id: string | null; all: Joke[]; query: string; onPick: (id: string) => void; onClose: () => void }) {
+  const joke = id ? all.find((j) => j.id === id) : undefined
+  if (!joke) return null
+  const before = joke.follows_id ? all.find((j) => j.id === joke.follows_id) : undefined
+  const after = all.filter((j) => j.follows_id === joke.id).sort((a, b) => a.created_at.localeCompare(b.created_at))
+  return <MapPeek joke={joke} before={before} beforeGone={Boolean(joke.follows_id && !before)} after={after} query={query} onPick={onPick} onClose={onClose} />
+}
+
+function MapPeek({ joke, before, beforeGone, after, query, onPick, onClose }: Props) {
   return (
     <aside aria-label="The joke"
       className="fixed inset-x-3 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] z-30 flex max-h-[48dvh] flex-col rounded-2xl bg-ink-2 shadow-lift ring-1 ring-rule-strong lg:inset-x-auto lg:right-6 lg:bottom-6 lg:max-h-[70dvh] lg:w-[23rem]">

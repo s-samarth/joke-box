@@ -11,6 +11,7 @@ from app.auth.routes import router as auth_router
 from app.config import get_settings
 from app.routers import (
     analyses,
+    board,
     craft,
     craft_areas,
     craft_kinds,
@@ -63,6 +64,7 @@ def create_app() -> FastAPI:
     )
     routers = (
         system,
+        board,
         topics,
         jokes,
         studio,
