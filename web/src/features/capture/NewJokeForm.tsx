@@ -71,10 +71,10 @@ export function NewJokeForm({ prefill, onClose }: { prefill: Prefill; onClose: (
     <Modal open onOpenChange={(o) => !o && onClose()} title="New joke" footer={footer} wide>
       <form className="space-y-8" onSubmit={(e) => { e.preventDefault(); submit(false) }}>
         <div className="space-y-3 rounded-xl bg-ink p-4 ring-1 ring-rule">
-          <GrowingText autoFocus aria-label="Premise" placeholder="The premise…" className="text-xl leading-snug" value={draft.setup}
+          <GrowingText autoFocus aria-label="Setup" placeholder="The setup…" className="text-xl leading-snug" value={draft.setup}
             onChange={(e) => update({ setup: e.target.value })} />
           <div className="h-px bg-rule" />
-          <GrowingText aria-label="Punchline" placeholder="The punch" className="text-xl leading-snug text-tape placeholder:text-faint" value={draft.punchline}
+          <GrowingText aria-label="Punchline" placeholder="The punchline" className="text-xl leading-snug text-tape placeholder:text-faint" value={draft.punchline}
             onChange={(e) => update({ punchline: e.target.value })} />
           <TagLines lines={draft.tag_lines} onChange={(tag_lines) => update({ tag_lines })} />
         </div>

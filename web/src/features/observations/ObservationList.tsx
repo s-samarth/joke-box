@@ -1,7 +1,7 @@
 /**
  * Observations by month, newest or oldest first, with a time scrubber to jump back months or
  * years. Each one can be edited, deleted, or turned into a joke: that opens the New joke sheet
- * with the observation as the premise, and the observation stays.
+ * with the observation as the setup, and the observation stays.
  */
 import { MoreHorizontal, Pencil, Sparkles, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'

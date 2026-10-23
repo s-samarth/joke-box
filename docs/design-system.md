@@ -100,7 +100,7 @@ under `prefers-reduced-motion`.
 
 The copy matters as much as the colours. These rules keep the text accurate and consistent.
 
-1. **Speak comedian, not database.** Joke, set, show, slot, tag line, premise, punch. The UI
+1. **Speak comedian, not database.** Joke, set, show, slot, setup, punchline, tag line. The UI
    never says joke, record, entry or item. See the glossary in [product.md](product.md#the-words-the-app-uses).
 2. **Say what happens.** Buttons name their result: "Save joke", "Log a show", "Start a rewrite",
    "Export as CSV", "Delete joke". A toast uses the same verb as its button: "Joke saved",
@@ -108,7 +108,7 @@ The copy matters as much as the colours. These rules keep the text accurate and 
 3. **Sentence case, plain verbs.** "Log a show", not "Log A Show" or "Submit".
 4. **Offline is a state, not an error.** "Saved offline, will sync". "Offline, 2 waiting to sync".
 5. **Errors say what to do.** "Can't reach JokeBox. Check your connection, then try again." "A joke
-   needs a premise to be saved." No apologies, no "Oops".
+   needs a setup to be saved." No apologies, no "Oops".
 6. **Empty screens invite the next step.** "No sets yet. Build one for your next spot." "No shows
    logged yet. After your next spot, log it while it's fresh."
 7. **Confirm only what can't be undone,** and say what goes with it: "Delete this joke? Its

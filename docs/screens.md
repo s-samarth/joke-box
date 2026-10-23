@@ -66,7 +66,7 @@ in IST and the headline **"Got something?"**, followed by these sections from to
 | Section | File | Notes |
 |---|---|---|
 | Daily joke nudge | `daily/DailyBanner.tsx` | Days since your last new joke: today written, a small green line with your streak; 1 or 2 days, yellow **Write a joke today**; 3 to 7, red **N days without a joke**; over a week, a dark, spooky card (a drifting ghost, a cobweb, a flickering line; still under reduced motion). Waits for the jokes to load so it never flashes the wrong state. Links to Daily joke |
-| Quick capture | `QuickCapture.tsx` | Premise and punch in one box. Enter saves to Thoughts; Shift+Enter adds a new line |
+| Quick capture | `QuickCapture.tsx` | Setup and punchline in one box. Enter saves to Thoughts; Shift+Enter adds a new line |
 | Voice notes | `TodayVoice.tsx` | The same recorder as the Voice screen, plus "All N" |
 | Observations | `TodayObservations.tsx` | The observation box and the last few logged |
 | Brainstorm | `TodayBrainstorm.tsx` | Start a session, or pick up the last one |
@@ -107,14 +107,14 @@ the jokes' created dates, so there's no separate log to fall out of step.
 
 - **List:** a search box ("Search words, tags, notes") and four menus: Topic (with subtopics), Type,
   Status, and Sort (Newest, Oldest, Recently edited, Strongest, Weakest, Longest). Each row shows the
-  premise, the start of the punch, strength ticks, type dots, the topic, the date it was added (or
+  setup, the start of the punchline, strength ticks, type dots, the topic, the date it was added (or
   last edited, under Recently edited) and the runtime. Sorted by a date, the list is grouped into
   months under pinned headings, with the time scrubber down its side ([JokeList.tsx](../web/src/features/jokes/JokeList.tsx)).
   A joke brought in with an older date (an import) counts as last edited then, not on the day it
   arrived. The ⋯ menu has **Export as CSV** (with Created At and Edited At).
 - **Layout:** like a mail app. On desktop the selected joke opens in a pane beside the list; on a
   phone it opens as its own page with a back link.
-- **The joke page:** the premise and punch (in tape yellow) are edited in place, followed by tag
+- **The joke page:** the setup and punchline (in tape yellow) are edited in place, followed by tag
   lines. Below them, a row of details: Strength, Type (with Edit types), Filed under (topic and
   subtopic, with Edit topics), Status, Runs for (type it, or step it a second at a time with −
   and +), Clean rating, Language (Hinglish, Hindi or English) and Hashtags, followed by a Notes box. Then

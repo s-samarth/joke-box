@@ -37,11 +37,11 @@ function Editor({ joke }: { joke: Joke }) {
     <article className="mx-auto max-w-2xl pb-10">
       <Link to={back} className="inline-flex h-12 items-center gap-1.5 text-dim hover:text-paper lg:hidden"><ArrowLeft size={18} /> Jokes</Link>
       <div className="pt-2 lg:pt-10">
-        <GrowingText aria-label="Setup" placeholder="The premise" className="text-[26px] leading-tight font-medium sm:text-[30px]" value={draft.setup}
+        <GrowingText aria-label="Setup" placeholder="The setup" className="text-[26px] leading-tight font-medium sm:text-[30px]" value={draft.setup}
           onChange={(e) => update({ setup: e.target.value })} />
-        <GrowingText aria-label="Punchline" placeholder="The punch" className="mt-4 text-[26px] leading-tight text-tape sm:text-[30px]" value={draft.punchline}
+        <GrowingText aria-label="Punchline" placeholder="The punchline" className="mt-4 text-[26px] leading-tight text-tape sm:text-[30px]" value={draft.punchline}
           onChange={(e) => update({ punchline: e.target.value })} />
-        {!draft.setup.trim() && <p className="mt-2 text-sm text-light">A joke needs a premise to be saved.</p>}
+        {!draft.setup.trim() && <p className="mt-2 text-sm text-light">A joke needs a setup to be saved.</p>}
       </div>
       <div className="mt-6"><TagLines lines={draft.tag_lines} onChange={(tag_lines) => update({ tag_lines })} /></div>
       <div className="mt-10"><JokeDetails jokeId={joke.id} draft={draft} update={update} /></div>
