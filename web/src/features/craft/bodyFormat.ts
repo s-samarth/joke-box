@@ -47,61 +47,84 @@ function tableBlock(rows: string[][]): Block {
   return hasHead ? { type: 'table', head: rows[0], rows: rows.slice(2) } : { type: 'table', head: [], rows }
 }
 
-export function parseBody(body: string): Block[] {
-  const blocks: Block[] = []
+/** A block and the lines of the body it came from, `from` to `to` inclusive. */
+export interface Span {
+  block: Block
+  from: number
+  to: number
+}
+
+export const parseBody = (body: string): Block[] => parseSpans(body).map((s) => s.block)
+
+/** The blocks of a note with where each one sits, so one block can be edited on its own. */
+export function parseSpans(body: string): Span[] {
+  const spans: Span[] = []
   let para: string[] = []
   let table: string[][] = []
   let quote: string[] = []
+  // The first and last line of whichever of para, table or quote is being collected.
+  let start = 0
+  let end = 0
+  const push = (block: Block, from = start, to = end) => spans.push({ block, from, to })
   const flush = () => {
     const steps = para.length === 1 ? flowSteps(para[0]) : null
-    if (steps) blocks.push({ type: 'flow', steps })
-    else if (para.length) blocks.push({ type: 'para', text: para.join('\n') })
-    if (table.length) blocks.push(tableBlock(table))
-    if (quote.length) blocks.push({ type: 'quote', text: quote.join('\n') })
+    if (steps) push({ type: 'flow', steps })
+    else if (para.length) push({ type: 'para', text: para.join('\n') })
+    if (table.length) push(tableBlock(table))
+    if (quote.length) push({ type: 'quote', text: quote.join('\n') })
     para = []
     table = []
     quote = []
+  }
+  const collect = (line: number, empty: boolean) => {
+    if (empty) start = line
+    end = line
   }
   body.split('\n').forEach((raw, line) => {
     if (!raw.trim()) return flush()
     const row = raw.match(ROW)
     if (row) {
       if (!table.length) flush()
+      collect(line, !table.length)
       table.push(cells(raw))
       return
     }
     const q = raw.match(QUOTE)
     if (q) {
       if (!quote.length) flush()
+      collect(line, !quote.length)
       quote.push(q[1])
       return
     }
     if (table.length || quote.length) flush()
     if (RULE.test(raw)) {
       flush()
-      blocks.push({ type: 'rule' })
+      push({ type: 'rule' }, line, line)
       return
     }
     const heading = raw.match(HEADING)
     const item = raw.match(ITEM)
     if (heading) {
       flush()
-      blocks.push({ type: 'heading', level: heading[1].length as 1 | 2 | 3, text: heading[2].trim() })
+      push({ type: 'heading', level: heading[1].length as 1 | 2 | 3, text: heading[2].trim() }, line, line)
       return
     }
     if (item) {
       flush()
       const ordered = Boolean(item[3])
       const entry: ListItem = { text: item[5], checked: item[4] === undefined ? null : item[4] !== ' ', nested: item[1].length >= 2, line }
-      const last = blocks.at(-1)
-      if (last?.type === 'list' && (last.ordered === ordered || entry.nested)) last.items.push(entry)
-      else blocks.push({ type: 'list', ordered, items: [entry] })
+      const last = spans.at(-1)
+      if (last?.block.type === 'list' && (last.block.ordered === ordered || entry.nested)) {
+        last.block.items.push(entry)
+        last.to = line
+      } else push({ type: 'list', ordered, items: [entry] }, line, line)
       return
     }
+    collect(line, !para.length)
     para.push(raw.trim())
   })
   flush()
-  return blocks
+  return spans
 }
 
 /** Flip the tick box on one line of the body. Lines without one are left alone. */

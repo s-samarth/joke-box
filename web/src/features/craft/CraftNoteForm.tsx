@@ -7,14 +7,15 @@ import { useState } from 'react'
 import { useCraftAreas, useCraftKinds } from '../../api/craft'
 import type { CraftNoteInput } from '../../api/types'
 import { Button } from '../../components/ui/Button'
-import { Field, Input, Select, Textarea } from '../../components/ui/Field'
+import { Field, Input, Select } from '../../components/ui/Field'
 import { AreaSheet } from './AreaSheet'
 import { BEHAVIOURS } from './craftMeta'
 import { KindSheet } from './KindSheet'
+import { NoteEditor } from './NoteEditor'
 
 const NEW = '__new'
 
-const FORMAT_HINT = 'Start a line with "# " for a heading, "- " for a list, "- [ ] " for a tick box, "> " for a callout, "| a | b |" for a table row. A line like "Setup → Punch → Tag" draws as steps. **Bold** works too.'
+const FORMAT_HINT = 'Use the buttons, or type "# " for a heading, "- " for a list, "- [ ] " for a tick box, "> " for a callout. Enter carries a list on; Tab indents it. Put the cursor in a table and tap the table button to edit it as boxes.'
 
 interface Props {
   initial: CraftNoteInput
@@ -63,9 +64,12 @@ export function CraftNoteForm({ initial, isNew, onSave, onDelete }: Props) {
           </Select>
         </Field>
       </div>
-      <Field label="The note" hint={FORMAT_HINT}>
-        <Textarea value={form.body} className="min-h-72 font-[inherit]" placeholder="What you learned, in your own words" onChange={(e) => set({ body: e.target.value })} />
-      </Field>
+      {/* Not a <Field>: that's a <label>, and a click on a label presses the first button in it. */}
+      <div className="space-y-1.5">
+        <span className="block text-sm text-dim">The note</span>
+        <NoteEditor value={form.body} label="The note" placeholder="What you learned, in your own words" onChange={(body) => set({ body })} />
+        <span className="block text-xs text-faint">{FORMAT_HINT}</span>
+      </div>
       <Field label="Learned from" hint="A comic, a course, a book, a show of yours">
         <Input value={form.source} maxLength={200} placeholder="e.g. OneNote, Standup Comedy" onChange={(e) => set({ source: e.target.value })} />
       </Field>

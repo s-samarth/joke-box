@@ -38,12 +38,21 @@ function Items({ items, Item }: { items: (MenuItem | 'divider')[]; Item: typeof 
   )
 }
 
-export function Dropdown({ trigger, items, align = 'end' }: { trigger: ReactNode; items: (MenuItem | 'divider')[]; align?: 'start' | 'end' }) {
+interface DropdownProps {
+  trigger: ReactNode
+  items: (MenuItem | 'divider')[]
+  align?: 'start' | 'end'
+  /** True when the item picked last put focus somewhere itself (a text box it opened), so the
+   * menu shouldn't hand focus back to its button on closing. */
+  keepFocus?: () => boolean
+}
+
+export function Dropdown({ trigger, items, align = 'end', keepFocus }: DropdownProps) {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>{trigger}</DropdownMenu.Trigger>
       <DropdownMenu.Portal>
-        <DropdownMenu.Content align={align} sideOffset={6} className={panel}>
+        <DropdownMenu.Content align={align} sideOffset={6} className={panel} onCloseAutoFocus={(e) => keepFocus?.() && e.preventDefault()}>
           <Items items={items} Item={DropdownMenu.Item} />
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
