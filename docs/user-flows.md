@@ -65,6 +65,9 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
    original at the top and runs a timer. Write freely and tap **Save version** to keep a snapshot.
    Earlier versions and earlier sessions sit on the right.
 5. Tap the **Checklists** icon to tick through your review questions as you go.
+6. To see how jokes lead into each other, look at the **joke map** (beside the list on desktop, or
+   the map button on Jokes). Tap a joke to read it there, walk along its chain with **Comes
+   after** and **Followed by**, and **Open joke** to edit it.
 
 ## 5. Brainstorm against the clock
 

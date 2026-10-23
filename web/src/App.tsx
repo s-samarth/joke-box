@@ -12,6 +12,7 @@ const named = <K extends string>(load: () => Promise<Record<K, React.ComponentTy
 // Screens beyond Home load on first visit, so the app opens fast on a phone.
 const JokesLayout = named(() => import('./features/jokes/JokesLayout'), 'JokesLayout')
 const NoJokeSelected = named(() => import('./features/jokes/JokesLayout'), 'NoJokeSelected')
+const JokeMapScreen = named(() => import('./features/jokes/JokesLayout'), 'JokeMapScreen')
 const JokePage = named(() => import('./features/jokes/JokePage'), 'JokePage')
 const RewritePage = named(() => import('./features/jokes/RewritePage'), 'RewritePage')
 const SetsPage = named(() => import('./features/sets/SetsPage'), 'SetsPage')
@@ -50,6 +51,7 @@ export function App() {
           <Route index element={<TodayPage />} />
           <Route path="jokes" element={<JokesLayout />}>
             <Route index element={<NoJokeSelected />} />
+            <Route path="map" element={<JokeMapScreen />} />
             <Route path=":jokeId" element={<JokePage />} />
           </Route>
           <Route path="sets" element={<SetsPage />} />

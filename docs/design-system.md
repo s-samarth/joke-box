@@ -101,7 +101,7 @@ under `prefers-reduced-motion`.
 The copy matters as much as the colours. These rules keep the text accurate and consistent.
 
 1. **Speak comedian, not database.** Joke, set, show, slot, setup, punchline, tag line. The UI
-   never says joke, record, entry or item. See the glossary in [product.md](product.md#the-words-the-app-uses).
+   never says record, entry or item. See the glossary in [product.md](product.md#the-words-the-app-uses).
 2. **Say what happens.** Buttons name their result: "Save joke", "Log a show", "Start a rewrite",
    "Export as CSV", "Delete joke". A toast uses the same verb as its button: "Joke saved",
    "Analysis saved".
