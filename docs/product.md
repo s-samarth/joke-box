@@ -17,7 +17,7 @@ What they need, in order of how often it comes up:
 
 1. **Catch an idea before it's gone:** typed, spoken, or written by hand, in a couple of seconds,
    with or without a signal.
-2. **Work an idea into a joke:** premise, punch, tag lines, rewrites against a clock.
+2. **Work an idea into a joke:** setup, punchline, tag lines, rewrites against a clock.
 3. **Build and run a set:** pick the jokes, order them, fit them to the slot, rehearse, perform.
 4. **Learn from each show:** log it on the way home, see the trend over weeks.
 5. **Study the craft:** what you've learned about doing stand-up (checklists, writing techniques,
@@ -82,8 +82,9 @@ The vocabulary is a comic's, not a database's. Keep to it in the code and in the
 
 | Term | Meaning |
 |---|---|
-| **Joke** (or **joke**) | The unit of material: a setup (premise), a punchline, and its details. The UI says "joke"; the code and API say `joke`. |
-| **Premise / punch** | The setup and the punchline. |
+| **Joke** (or **joke**) | The unit of material: a setup, a punchline, and its details. The UI says "joke"; the code and API say `joke`. |
+| **Setup / punchline** | The two parts of a joke: the plain words that make the audience assume something, and the line that breaks it. The UI calls the punchline "the punch" in passing. |
+| **Premise** | The idea or opinion under a joke ("X is Y, because Z"). It isn't a field on a joke: it lives in your head, a brainstorm or a craft note, and one premise can feed many setups. **Premise** is also one of the default types. |
 | **Tag line** | An extra punchline that follows the main punch. |
 | **Thoughts** | The default topic for anything unfiled. Stored as the protected `Random` topic, which can't be renamed or deleted, and picks up the jokes of any deleted topic. |
 | **Topic / subtopic** | Folders for jokes. Observations have their own separate topics. |

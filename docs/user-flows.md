@@ -15,8 +15,8 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 ## 2. Catch an idea in two seconds
 
 **Typed (Home):**
-1. The app opens on Home with the cursor-ready box "What's the premise?".
-2. Type the premise, and the punch if you have one (Shift+Enter for a new line).
+1. The app opens on Home with the cursor-ready box "What's the setup?".
+2. Type the setup, and the punchline if you have one (Shift+Enter for a new line).
 3. Press **Enter**. The joke is saved to **Thoughts** with sensible defaults (Draft status,
    strength 3) and appears in Jokes at once. A toast offers to open it.
 
@@ -43,7 +43,7 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 
 1. Home opens with the daily joke nudge. Yellow means today is still open; red means it's been three
    days or more; dark and spooky means over a week.
-2. Tap **Write it** (or open **Daily joke**). Type a premise, and the punch if you have it, and press
+2. Tap **Write it** (or open **Daily joke**). Type a setup, and the punchline if you have it, and press
    Enter. It saves to Thoughts.
 3. The nudge turns into a small green line with your streak, and today gets a tick on the calendar.
 4. On **Daily joke**, tap any day to see what you wrote, or page back through earlier months.
@@ -51,8 +51,8 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 ## 3. Work an observation into a joke
 
 1. On **Observations**, open the ⋯ menu on an observation and choose **Turn into a joke**.
-2. The New joke sheet opens with the observation as the premise. The observation itself stays.
-3. Write the punch, file it, and save.
+2. The New joke sheet opens with the observation as the setup. The observation itself stays.
+3. Write the punchline, file it, and save.
 
 ## 4. Rework a joke
 

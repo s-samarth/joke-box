@@ -17,7 +17,7 @@ Sets, stage, print, shows and the study screens. The frame, capture and writing 
 - **Builder:** the set name, then Show date, Slot length and Venue. Then **Rating** (five stars; tap
   the same star again to clear it) and **Tags** (tap a tag on or off; **Edit tags** opens a sheet to
   add, rename and delete them, with how many sets use each). Below them, the total against the slot
-  with "N left", and the light bar. Then one **tape strip** per joke: a drag handle, the premise in
+  with "N left", and the light bar. Then one **tape strip** per joke: a drag handle, the setup in
   marker, the joke's strength as periwinkle ticks, an **optional** toggle (the dashed circle), an
   editable runtime, up and down arrows, and remove. The opener and closer are labelled on their
   strips. An optional joke (one to cut if time is short) is on faded paper tape, labelled Optional;
@@ -55,7 +55,7 @@ tick through.
 [PrintView.tsx](../web/src/features/sets/PrintView.tsx).
 
 A white page. It shows the set name, then date, venue and slot. Below that, the jokes, numbered,
-each with its premise in marker, the punch, its runtime and "by m:ss" (the running total). A
+each with its setup in marker, the punchline, its runtime and "by m:ss" (the running total). A
 **Print** button opens the browser's print dialog.
 
 <img src="screenshots/desktop-print.webp" alt="Print view">
