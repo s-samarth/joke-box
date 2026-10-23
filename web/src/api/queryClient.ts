@@ -81,9 +81,12 @@ export async function refreshWhenSynced(...lists: QueryKey[]) {
 export const resumeQueued = () =>
   Promise.all(queryClient.getMutationCache().getAll().filter((m) => m.state.status === 'pending').map((m) => m.continue().catch(() => {})))
 
+/** Where the saved copy lives in IndexedDB. Never rename it: waiting saves are stored under it. */
+export const CACHE_KEY = 'jokebox-cache'
+
 export const persister = createAsyncStoragePersister({
   storage: { getItem: get, setItem: set, removeItem: del },
-  key: 'jokebox-cache',
+  key: CACHE_KEY,
   throttleTime: 300, // a save is on the phone within a moment, even if the app is closed straight away
 })
 

@@ -194,3 +194,17 @@ flowchart LR
 - **`registerType: 'prompt'`:** a new version installs in the background and waits, so the open
   app never changes under you. The update banner switches to it with one tap.
 
+
+## When the app crashes
+
+- **An error screen, not a blank one** ([CrashScreen.tsx](../web/src/layout/CrashScreen.tsx)): an
+  error boundary around the whole app. If a component throws while rendering, it shows "Something
+  broke" with **Reload**, **Reload a fresh copy**, and the error under "What went wrong" with
+  **Copy the details**.
+- **An old copy repairs itself** ([recover.ts](../web/src/lib/recover.ts)): an installed app can
+  outlive a release and ask for a file the release replaced. When loading a file fails that way,
+  the app repairs itself once, showing "Updating JokeBox…": it removes the service worker and its
+  cached files, drops the saved lists (keeping saves waiting to sync), and reloads from the
+  network. It does this at most once a minute, so a crash that a repair doesn't fix shows the error
+  screen instead of looping. Offline it only reloads, since without the cached files there'd be no
+  app to open.
