@@ -67,6 +67,17 @@ class TypeColorIn(NameIn):
         return value.lower()
 
 
+# A joke always has a status: none, or the retired "Status Unknown", means Draft.
+DEFAULT_STATUS = "Draft"
+RETIRED_STATUSES = {"status unknown"}
+
+
+def status_name(name: str | None) -> str:
+    """The status a joke is saved with, given the one asked for."""
+    name = (name or "").strip()
+    return DEFAULT_STATUS if not name or name.lower() in RETIRED_STATUSES else name
+
+
 class JokeIn(BaseModel):
     """A joke as the editor sends it. Types and status are names, created on the fly."""
 
@@ -75,7 +86,7 @@ class JokeIn(BaseModel):
     topic_id: uuid.UUID
     subtopic_id: uuid.UUID | None = None
     types: list[str] = Field(default_factory=list)
-    status: str | None = None
+    status: str = DEFAULT_STATUS
     strength: int = Field(default=3, ge=1, le=5)
     duration_seconds: int = Field(default=0, ge=0)
     hashtags: list[str] = Field(default_factory=list)
@@ -95,6 +106,11 @@ class JokeIn(BaseModel):
         if not value.strip():
             raise ValueError("Setup is required")
         return value
+
+    @field_validator("status", mode="before")
+    @classmethod
+    def status_or_draft(cls, value: str | None) -> str:
+        return status_name(value)
 
     @field_validator("types", "hashtags", "tag_lines")
     @classmethod

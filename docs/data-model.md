@@ -56,7 +56,7 @@ erDiagram
 | `subtopics` | `topic_id → topics` (cascade), `name`, `position` | Unique per topic, in the order you drag them into. Deleting one clears it from its jokes |
 | `joke_types` | `name` | Pruned whenever no joke uses it. Renaming onto an existing name merges the two |
 | `joke_type_links` | `joke_id`, `type_id` (both cascade) | Many-to-many |
-| `statuses` | `name`, `position` | Six defaults made on first sign-in; new ones are created by name when a joke uses them |
+| `statuses` | `name`, `position` | Six defaults made on first sign-in; new ones are created by name when a joke uses them. A joke saved with no status (or the retired "Status Unknown") gets Draft |
 | `board_spots` | `joke_id → jokes` (cascade, unique), `topic_id`, `x`, `y` | Where you placed a joke on the joke board, relative to its topic island. Its own table, so moving a box never changes the joke's version or edit time. A spot from another topic (the joke moved since) is ignored by the app |
 | `jokes` | `topic_id` (required), `subtopic_id` (set null), `status_id` (set null), `setup`, `punchline`, `strength` 1–5, `duration_seconds`, `hashtags` JSON, `tag_lines` JSON, `clean_rating` (clean / mild / dirty / null), `language`, `comments`, `version` (up by one per save) | Check constraints on strength and clean rating. The API sends types and status as names. `version` catches edits made on two devices |
 

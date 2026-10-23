@@ -5,7 +5,7 @@ import { Link } from 'react-router'
 import { useJokes, useTopics } from '../../api/library'
 import { useLogs, useSetlists } from '../../api/shows'
 import { SectionHead, Stars, StrengthTicks, Tape } from '../../components/ui/pieces'
-import { THOUGHTS, UNFINISHED } from '../../lib/jokeMeta'
+import { statusOf, THOUGHTS, UNFINISHED } from '../../lib/jokeMeta'
 import { clock } from '../../lib/duration'
 import { formatDate, todayIst } from '../../lib/time'
 import { DailyBanner } from '../daily/DailyBanner'
@@ -36,7 +36,7 @@ export function TodayPage() {
   const nextSet = upcoming[0] ?? sets[0]
   const byId = new Map(jokes.map((b) => [b.id, b]))
   const needsWork = jokes
-    .filter((b) => b.strength <= 2 || UNFINISHED.has((b.status ?? '').toLowerCase()))
+    .filter((b) => b.strength <= 2 || UNFINISHED.has(statusOf(b.status).toLowerCase()))
     .sort((a, b) => a.strength - b.strength || b.updated_at.localeCompare(a.updated_at))
   const lastShow = logs[0]
   const daily = useHabit()
@@ -104,7 +104,7 @@ export function TodayPage() {
               <li key={b.id}>
                 <Link to={`/jokes/${b.id}`} className="flex items-center gap-4 py-3.5 hover:bg-ink-2/60">
                   <span className="min-w-0 flex-1 truncate">{b.setup}</span>
-                  <span className="shrink-0 text-sm text-faint">{b.status}</span>
+                  <span className="shrink-0 text-sm text-faint">{statusOf(b.status)}</span>
                   <StrengthTicks strength={b.strength} />
                 </Link>
               </li>

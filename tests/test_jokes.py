@@ -57,6 +57,14 @@ def test_new_status_is_created_inline(alice: TestClient) -> None:
     assert "Needs Tag" in [s["name"] for s in alice.get("/api/statuses").json()]
 
 
+def test_no_status_or_status_unknown_saves_as_draft(alice: TestClient) -> None:
+    assert put_joke(alice).json()["status"] == "Draft"
+    assert put_joke(alice, status=None).json()["status"] == "Draft"
+    assert put_joke(alice, status="Status Unknown").json()["status"] == "Draft"
+    names = [s["name"] for s in alice.get("/api/statuses").json()]
+    assert "Status Unknown" not in names and "Need Tags" in names
+
+
 def test_validation(alice: TestClient) -> None:
     assert put_joke(alice, setup="   ").status_code == 422
     assert put_joke(alice, strength=6).status_code == 422

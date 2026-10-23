@@ -10,7 +10,7 @@ import type { Joke } from '../../api/types'
 import { Button } from '../../components/ui/Button'
 import { StrengthTicks, TypeLabel } from '../../components/ui/pieces'
 import { Modal } from '../../components/ui/Modal'
-import { CLEAN_LABELS, displayTypes, strengthLabel, topicName } from '../../lib/jokeMeta'
+import { CLEAN_LABELS, displayTypes, statusOf, strengthLabel, topicName } from '../../lib/jokeMeta'
 import { clock } from '../../lib/duration'
 
 interface Props {
@@ -33,7 +33,7 @@ export function JokePeek({ joke, onClose, onAdd, inSet }: Props) {
     ['Type', <span key="t" className="inline-flex flex-wrap justify-end gap-x-3">{displayTypes(joke.types).map((t) => <TypeLabel key={t} name={t} />)}</span>],
     ...(joke.follows_id ? [['Follows', <span key="f" className="line-clamp-1">{before?.setup ?? 'A joke in the Trash'}</span>] as [string, ReactNode]] : []),
     ['Filed under', [topicName(topic), subtopic?.name].filter(Boolean).join(' / ')],
-    ...(joke.status ? [['Status', joke.status] as [string, ReactNode]] : []),
+    ['Status', statusOf(joke.status)],
     ...(joke.clean_rating ? [['Clean rating', CLEAN_LABELS[joke.clean_rating]] as [string, ReactNode]] : []),
     ...(joke.language ? [['Language', joke.language] as [string, ReactNode]] : []),
     ...(joke.hashtags.length ? [['Hashtags', joke.hashtags.map((h) => (h.startsWith('#') ? h : `#${h}`)).join(' ')] as [string, ReactNode]] : []),

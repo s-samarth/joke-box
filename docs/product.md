@@ -90,7 +90,7 @@ The vocabulary is a comic's, not a database's. Keep to it in the code and in the
 | **Topic / subtopic** | Folders for jokes. Observations have their own separate topics. |
 | **Type** | The form of a joke: One-Liner, Story, Crowd Work, Roast, Observation, Premise, Act Out, or your own. A type exists only while some joke uses it; a joke with no type shows as "Undefined". |
 | **Strength** | 1–5: Weak, Needs work, Decent, Strong, Killer. Drawn as five ticks. |
-| **Status** | Incomplete, Work in Progress, Complete, Status Unknown, Draft, Stage Ready, or your own. |
+| **Status** | Incomplete, Work in Progress, Complete, Draft, Stage Ready, Need Tags, or your own. Every joke has one; new jokes start as Draft. |
 | **Runs for** | How long the joke takes on stage (m:ss). |
 | **Clean rating** | Clean, Mild or Dirty. |
 | **Set** | An ordered list of jokes for one show, with a slot length. The first is the **opener**, the last the **closer**. |
