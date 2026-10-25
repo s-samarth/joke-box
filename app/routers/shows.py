@@ -42,7 +42,20 @@ def check_all_owned(
         raise HTTPException(422, f"Unknown {model.__name__.lower()} in request")
 
 
-def setlist_out(s: Setlist, hidden: set[uuid.UUID]) -> SetlistOut:
+def joke_runtimes(db: Session, user: User) -> dict[uuid.UUID, int]:
+    """Each live joke's runtime. A set shows a joke as it is now, so its time comes from here."""
+    rows = db.execute(select(Joke.id, Joke.duration_seconds).where(Joke.user_id == user.id))
+    return {joke_id: seconds for joke_id, seconds in rows}
+
+
+def item_out(item: SetlistItem, runtimes: dict[uuid.UUID, int]) -> SetlistItemOut:
+    """One place in a set, timed by its joke's current runtime."""
+    out = SetlistItemOut.model_validate(item)
+    out.duration_seconds = runtimes.get(item.joke_id, item.duration_seconds)
+    return out
+
+
+def setlist_out(s: Setlist, hidden: set[uuid.UUID], runtimes: dict[uuid.UUID, int]) -> SetlistOut:
     """A set as the app sees it: jokes in the Trash are left out until they come back."""
     return SetlistOut(
         id=s.id,
@@ -52,7 +65,7 @@ def setlist_out(s: Setlist, hidden: set[uuid.UUID]) -> SetlistOut:
         venue_name=s.venue.name if s.venue else None,
         rating=s.rating,
         tag_ids=[t.id for t in s.tags],
-        items=[SetlistItemOut.model_validate(i) for i in s.items if i.joke_id not in hidden],
+        items=[item_out(i, runtimes) for i in s.items if i.joke_id not in hidden],
         created_at=s.created_at,
         updated_at=s.updated_at,
     )
@@ -69,7 +82,8 @@ def list_setlists(user: CurrentUser, db: DbSession) -> list[SetlistOut]:
         .order_by(Setlist.updated_at.desc())
     )
     hidden = trashed_joke_ids(db, user)
-    return [setlist_out(s, hidden) for s in db.scalars(query)]
+    runtimes = joke_runtimes(db, user)
+    return [setlist_out(s, hidden, runtimes) for s in db.scalars(query)]
 
 
 @router.put("/setlists/{setlist_id}", response_model=SetlistOut)
@@ -103,7 +117,7 @@ def save_setlist(
     setlist.items = [SetlistItem(position=n, **item.model_dump()) for n, item in enumerate(items)]
     db.commit()
     db.refresh(setlist)
-    return setlist_out(setlist, hidden)
+    return setlist_out(setlist, hidden, joke_runtimes(db, user))
 
 
 @router.delete("/setlists/{setlist_id}", status_code=204)

@@ -148,3 +148,13 @@ def test_cannot_delete_or_move_into_another_users_venue(alice: TestClient, bob: 
     assert bob.delete(f"/api/venues/{alices}").status_code == 404
     assert alice.delete(f"/api/venues/{alices}", params={"move_to": bobs}).status_code == 404
     assert [v["name"] for v in alice.get("/api/venues").json()] == ["Alice Room"]
+
+
+def test_sets_show_a_jokes_current_runtime(alice: TestClient) -> None:
+    joke = put_joke(alice, duration_seconds=20).json()
+    set_id = str(uuid.uuid4())
+    item = {"joke_id": joke["id"], "duration_seconds": 45}
+    saved = alice.put(f"/api/setlists/{set_id}", json={"items": [item]}).json()
+    assert saved["items"][0]["duration_seconds"] == 20
+    put_joke(alice, joke["id"], duration_seconds=25)
+    assert alice.get("/api/setlists").json()[0]["items"][0]["duration_seconds"] == 25

@@ -7,7 +7,7 @@ import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrate
 import { ArrowLeft, GraduationCap, Play, Plus, Printer } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router'
-import { useJokes } from '../../api/library'
+import { useJokes, useSaveJoke } from '../../api/library'
 import { useSetlists } from '../../api/shows'
 import type { Joke, Setlist } from '../../api/types'
 import { Button } from '../../components/ui/Button'
@@ -17,6 +17,7 @@ import { useFeedback } from '../../components/ui/feedbackContext'
 import { Modal } from '../../components/ui/Modal'
 import { clock, parse } from '../../lib/duration'
 import { JokePeek } from '../jokes/JokePeek'
+import { toInput } from '../jokes/useAutosaveJoke'
 import { CraftSheet } from '../craft/CraftSheet'
 import { AddJokes } from './AddJokes'
 import { LightBar } from './LightBar'
@@ -43,6 +44,13 @@ function Builder({ setlist }: { setlist: Setlist }) {
   const [target, setTarget] = useState(clock(draft.target_seconds))
   const { toast } = useFeedback()
   const byId = new Map(jokes.map((b) => [b.id, b]))
+  const saveJoke = useSaveJoke()
+  // A set times each joke by the joke's own runtime, so a new time here is saved on the joke.
+  const setRuntime = (jokeId: string, seconds: number) => {
+    const joke = byId.get(jokeId)
+    if (joke) saveJoke.mutate({ id: jokeId, input: { ...toInput(joke), duration_seconds: seconds } })
+    update((d) => ({ ...d, items: d.items.map((x) => (x.joke_id === jokeId ? { ...x, duration_seconds: seconds } : x)) }))
+  }
   const used = new Set(draft.items.map((i) => i.joke_id))
   const items = draftItems(draft.items)
   const total = totalSeconds(items)
@@ -106,7 +114,7 @@ function Builder({ setlist }: { setlist: Setlist }) {
                 <ol className="space-y-3">
                   {items.map((item, i) => (
                     <TapeRow key={item.jokeId} item={item} joke={byId.get(item.jokeId)} index={i} count={items.length} note={items.length > 1 ? positionLabel(i, items.length) : null}
-                      onDuration={(s) => update((d) => ({ ...d, items: d.items.map((x) => (x.joke_id === item.jokeId ? { ...x, duration_seconds: s } : x)) }))}
+                      onDuration={(s) => setRuntime(item.jokeId, s)}
                       onOptional={() => update((d) => ({ ...d, items: d.items.map((x) => (x.joke_id === item.jokeId ? { ...x, optional: !x.optional } : x)) }))}
                       onMove={(to) => update((d) => ({ ...d, items: move(d.items, i, to) }))}
                       onRemove={() => update((d) => ({ ...d, items: d.items.filter((x) => x.joke_id !== item.jokeId) }))}

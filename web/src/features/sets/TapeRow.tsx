@@ -1,6 +1,6 @@
 /**
  * One joke in a set, as a strip of masking tape with marker writing. Drag by the handle,
- * or use the arrows. The runtime is editable; opener and closer are noted on the strip, and
+ * or use the arrows. The runtime is the joke's own: editing it here changes the joke; opener and closer are noted on the strip, and
  * the joke's strength sits beside it. An optional joke (one to cut if time is short) is on
  * faded tape. Tap the strip to read the whole joke.
  */
@@ -29,6 +29,13 @@ interface Props {
 export function TapeRow({ item, joke, index, count, note, onDuration, onOptional, onMove, onRemove, onOpen }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.jokeId })
   const [text, setText] = useState(clock(item.duration))
+  // The runtime changed from outside (the joke edited elsewhere): show the new one. Setting state
+  // while rendering is React's way to follow a prop; it re-renders straight away.
+  const [shown, setShown] = useState(item.duration)
+  if (shown !== item.duration) {
+    setShown(item.duration)
+    setText(clock(item.duration))
+  }
   const tool = 'inline-flex size-8 items-center justify-center rounded-md text-faint hover:text-paper disabled:opacity-25'
 
   return (
@@ -47,7 +54,7 @@ export function TapeRow({ item, joke, index, count, note, onDuration, onOptional
           <button type="button" aria-pressed={!!item.optional} onClick={onOptional} aria-label="Optional: cut it if time is short" title="Optional: cut it if time is short"
             className={`${tool} ${item.optional ? 'bg-ink-3 text-paper' : ''}`}><CircleDashed size={14} /></button>
           <input aria-label="Runtime" inputMode="numeric" value={text} onChange={(e) => setText(e.target.value)}
-            onBlur={() => { const s = parse(text); if (s !== null) onDuration(s); setText(clock(s ?? item.duration)) }}
+            onBlur={() => { const s = parse(text); if (s !== null && s !== item.duration) onDuration(s); setText(clock(s ?? item.duration)) }}
             className="h-8 w-14 rounded-md bg-ink-3 text-center text-[16px] tabular outline-none focus:ring-2 focus:ring-tape sm:text-sm" />
         </div>
         <div className="flex">

@@ -155,8 +155,8 @@ On a deployment without a Blob store, these answer **503**.
 | GET | `/api/venues` | Each with `shows` and `sets`: how many use it |
 | POST | `/api/venues` | `{name}`. Returns the existing venue if the name is already used |
 | DELETE | `/api/venues/{id}?move_to=` | 409 if shows or sets use it and `move_to` is missing; with `move_to` (another of your venues), they move there first, then the venue is deleted |
-| GET | `/api/setlists` | Most recently edited first, with `items` and `venue_name` |
-| PUT | `/api/setlists/{id}` | `{name, show_date?, target_seconds, venue_name?, rating?, tag_ids[], items: [{joke_id, duration_seconds, optional}]}`. `rating` is 1–5 or null. The items and tags are replaced as a whole, items in the order sent. Jokes in the Trash keep their places |
+| GET | `/api/setlists` | Most recently edited first, with `items` and `venue_name`. Each item's `duration_seconds` is its joke's current runtime |
+| PUT | `/api/setlists/{id}` | `{name, show_date?, target_seconds, venue_name?, rating?, tag_ids[], items: [{joke_id, duration_seconds, optional}]}`. `rating` is 1–5 or null. The items and tags are replaced as a whole, items in the order sent. An item's `duration_seconds` is stored but not shown: sets always time a joke by the joke's own runtime. Jokes in the Trash keep their places |
 | DELETE | `/api/setlists/{id}` | |
 | GET | `/api/set-tags` | Your set tags, in order |
 | POST | `/api/set-tags` | `{name}`. Goes last. 409 if the name is taken |

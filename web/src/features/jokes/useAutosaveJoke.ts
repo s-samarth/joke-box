@@ -8,7 +8,8 @@ import type { Joke, JokeInput } from '../../api/types'
 
 const DELAY = 700
 
-function toInput(b: Joke): JokeInput {
+/** A joke as the editor sends it back. */
+export function toInput(b: Joke): JokeInput {
   const { id: _id, created_at: _c, updated_at: _u, ...input } = b
   return input
 }
