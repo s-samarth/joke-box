@@ -1,9 +1,10 @@
 /**
  * Write or edit one analysis: the set or joke's name, a link, and your analysis. Opened from a
  * watchlist routine (/analysis/new?watch=…), the name and link are filled in for you.
+ * A saved analysis opens formatted, for reading; Edit turns it back into the form.
  * A saved analysis lists its takeaways: craft notes learned from it.
  */
-import { ArrowLeft, ExternalLink, GraduationCap, Plus, Trash2 } from 'lucide-react'
+import { ArrowLeft, ExternalLink, GraduationCap, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { newId } from '../../api/client'
@@ -15,9 +16,25 @@ import { Spinner } from '../../components/ui/pieces'
 import { Field, Input, Textarea } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { announceSave } from '../../lib/announce'
+import { NoteBody } from '../craft/NoteBody'
+
+/** A saved analysis, formatted like a craft note. */
+function Reading({ form, onEdit }: { form: AnalysisInput; onEdit: () => void }) {
+  return (
+    <div className="space-y-5">
+      <div className="flex items-start justify-between gap-3">
+        <h2 className="text-xl font-semibold">{form.title}</h2>
+        <Button small variant="plain" icon={<Pencil size={15} />} onClick={onEdit}>Edit</Button>
+      </div>
+      {form.url && <a href={form.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm text-tape hover:underline"><ExternalLink size={15} /> Open link</a>}
+      <NoteBody body={form.body} />
+    </div>
+  )
+}
 
 function Form({ id, initial, isNew }: { id: string; initial: AnalysisInput; isNew: boolean }) {
   const [form, setForm] = useState(initial)
+  const [reading, setReading] = useState(!isNew && initial.body.trim().length > 0)
   const save = useSaveAnalysis()
   const del = useDeleteAnalysis()
   const { data: items = [] } = useWatchlist()
@@ -41,6 +58,8 @@ function Form({ id, initial, isNew }: { id: string; initial: AnalysisInput; isNe
     del.mutate(id)
     navigate('/analysis')
   }
+
+  if (reading) return <Reading form={form} onEdit={() => setReading(false)} />
 
   return (
     <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); submit() }}>

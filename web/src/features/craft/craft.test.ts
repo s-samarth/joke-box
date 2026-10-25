@@ -31,6 +31,13 @@ describe('note body', () => {
     expect(inlineRuns('javascript:alert(1)').every((r) => !r.href)).toBe(true)
   })
 
+  it('shows a named link by its name', () => {
+    expect(inlineRuns('Read [the review](https://example.com/r) first')).toEqual([
+      { text: 'Read ', bold: false }, { text: 'the review', bold: false, href: 'https://example.com/r' }, { text: ' first', bold: false },
+    ])
+    expect(inlineRuns('[x](javascript:alert(1))').every((r) => !r.href)).toBe(true)
+  })
+
   it('reads tables, callouts, dividers and flows', () => {
     const body = ['| Fake | Col |', '|---|:--:|', '| a | **b** |', '| c |', '', '> Fake tip', '> goes on', '---', 'Setup → Premise -> Punch', '', 'A long fake sentence that is not a step at all → B'].join('\n')
     expect(parseBody(body)).toEqual([

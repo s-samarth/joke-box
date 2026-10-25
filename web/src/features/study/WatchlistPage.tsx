@@ -1,7 +1,8 @@
 /** The watchlist: routines to study, ticked off as you watch them. */
-import { Plus, Search } from 'lucide-react'
+import { BookOpen, Plus, Search } from 'lucide-react'
 import { useState } from 'react'
-import { useDeleteWatchItem, useSaveWatchItem, useWatchlist } from '../../api/study'
+import { Link } from 'react-router'
+import { useAnalyses, useDeleteWatchItem, useSaveWatchItem, useWatchlist } from '../../api/study'
 import type { WatchItem } from '../../api/types'
 import { Button } from '../../components/ui/Button'
 import { EmptyState, PageHead, Spinner } from '../../components/ui/pieces'
@@ -9,13 +10,14 @@ import { Input } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { AddRoutineSheet } from './AddRoutineSheet'
 import { WatchRow } from './WatchRow'
-import { SCORES, filterItems, groupByCategory, toInput, type WatchFilter } from './watchMeta'
+import { SCORES, filterItems, groupByCategory, guideFor, toInput, type WatchFilter } from './watchMeta'
 
 const FILTERS: [WatchFilter, string][] = [['all', 'All'], ['todo', 'To watch'], ['watched', 'Watched']]
 const chip = (on: boolean) => `h-8 shrink-0 rounded-lg px-3 text-sm transition ${on ? 'bg-paper font-medium text-ink' : 'bg-ink-3 text-dim hover:text-paper'}`
 
 export function WatchlistPage() {
   const { data: items = [], isPending } = useWatchlist()
+  const { data: analyses = [] } = useAnalyses()
   const save = useSaveWatchItem()
   const del = useDeleteWatchItem()
   const { confirm, toast } = useFeedback()
@@ -65,15 +67,23 @@ export function WatchlistPage() {
           </div>
 
           {groups.length === 0 && <p className="mt-8 text-dim">{filter === 'watched' && !query ? 'Nothing ticked off yet.' : 'No routines match.'}</p>}
-          {groups.map((g) => (
+          {groups.map((g) => {
+            const guide = guideFor(g.category, analyses)
+            return (
             <section key={g.category} className="mt-8">
               <h2 className="flex items-baseline justify-between gap-3 border-b border-rule pb-2">
                 <span className="headline text-2xl">{g.category}</span>
                 <span className="shrink-0 text-sm text-faint tabular">{g.watched}/{g.total} watched</span>
               </h2>
+              {guide && (
+                <Link to={`/analysis/${guide.id}`} className="mt-2 inline-flex items-center gap-1.5 text-sm text-tape hover:underline">
+                  <BookOpen size={15} /> Read the guide
+                </Link>
+              )}
               <ul className="divide-y divide-rule">{g.items.map((i) => <WatchRow key={i.id} item={i} onToggle={() => toggle(i)} onDelete={() => void remove(i)} />)}</ul>
             </section>
-          ))}
+            )
+          })}
         </>
       )}
       {adding && <AddRoutineSheet items={items} onClose={() => setAdding(false)} />}

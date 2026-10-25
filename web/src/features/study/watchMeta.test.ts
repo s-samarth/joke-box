@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { WatchItem } from '../../api/types'
-import { OWN_CATEGORY, filterItems, groupByCategory, nextPosition, watchUrl } from './watchMeta'
+import { OWN_CATEGORY, filterItems, groupByCategory, guideFor, nextPosition, watchUrl } from './watchMeta'
 
 const item = (over: Partial<WatchItem>): WatchItem => ({
   id: Math.random().toString(), title: 'Fake Joke', comedian: 'Fake Comic', category: 'Fake Logicians', description: '',
@@ -53,5 +53,11 @@ describe('nextPosition', () => {
   it('puts a new routine after the last one', () => {
     expect(nextPosition(items)).toBe(5)
     expect(nextPosition([])).toBe(1)
+  })
+
+  it("finds a category's guide by name, in any case", () => {
+    const analyses = [{ title: 'Fake notes' }, { title: ' fake logicians ' }]
+    expect(guideFor('Fake Logicians', analyses)).toBe(analyses[1])
+    expect(guideFor('Fake Absurdists', analyses)).toBeUndefined()
   })
 })
