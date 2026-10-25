@@ -69,7 +69,7 @@ export function JokeExtras({ joke }: { joke: Joke }) {
               <li key={s.id}>
                 <Link to={`/sets/${s.id}`} className="flex items-baseline justify-between gap-3 py-3 hover:bg-ink-2/60">
                   <span className="truncate">{s.name}</span>
-                  <span className="shrink-0 text-sm text-faint">{s.show_date ? formatDate(s.show_date) : 'No date'}</span>
+                  <span className="shrink-0 text-sm text-faint">{s.items.length} {s.items.length === 1 ? 'joke' : 'jokes'}</span>
                 </Link>
               </li>
             ))}

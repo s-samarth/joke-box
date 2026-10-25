@@ -7,7 +7,7 @@ import { useLogs, useSetlists } from '../../api/shows'
 import { SectionHead, Stars, StrengthTicks, Tape } from '../../components/ui/pieces'
 import { statusOf, THOUGHTS, UNFINISHED } from '../../lib/jokeMeta'
 import { clock } from '../../lib/duration'
-import { formatDate, todayIst } from '../../lib/time'
+import { formatDate } from '../../lib/time'
 import { DailyBanner } from '../daily/DailyBanner'
 import { useHabit } from '../daily/useHabit'
 import { LightBar } from '../sets/LightBar'
@@ -31,9 +31,8 @@ export function TodayPage() {
   const { data: logs = [] } = useLogs()
   const thoughts = topics.find((t) => t.is_system)
   const thoughtsCount = jokes.filter((b) => b.topic_id === thoughts?.id).length
-  const today = todayIst()
-  const upcoming = sets.filter((s) => s.show_date && s.show_date >= today).sort((a, b) => a.show_date!.localeCompare(b.show_date!))
-  const nextSet = upcoming[0] ?? sets[0]
+  // The set you worked on last; sets have no show date.
+  const nextSet = [...sets].sort((a, b) => b.updated_at.localeCompare(a.updated_at))[0]
   const byId = new Map(jokes.map((b) => [b.id, b]))
   const needsWork = jokes
     .filter((b) => b.strength <= 2 || UNFINISHED.has(statusOf(b.status).toLowerCase()))
@@ -59,7 +58,7 @@ export function TodayPage() {
       <TopicFolders />
 
       <section className="mt-12">
-        <SectionHead title={upcoming[0] ? 'Next up' : 'Your latest set'}>
+        <SectionHead title='Your latest set'>
           <Link to="/sets" className="text-sm text-dim hover:text-paper">All sets</Link>
         </SectionHead>
         {nextSet ? (
@@ -68,7 +67,7 @@ export function TodayPage() {
               <Link to={`/sets/${nextSet.id}`} className="min-w-0">
                 <p className="truncate text-lg font-medium">{nextSet.name}</p>
                 <p className="text-sm text-dim">
-                  {nextSet.show_date ? formatDate(nextSet.show_date) : 'No date yet'}
+                  {nextSet.items.length} {nextSet.items.length === 1 ? 'joke' : 'jokes'}, {clock(nextSet.target_seconds)} slot
                 </p>
               </Link>
               <Link to={`/sets/${nextSet.id}/stage`} className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg bg-tape px-3 font-semibold text-tape-ink">

@@ -4,7 +4,6 @@ import { Link, useParams } from 'react-router'
 import { useJokes } from '../../api/library'
 import { useSetlists } from '../../api/shows'
 import { clock } from '../../lib/duration'
-import { formatDate } from '../../lib/time'
 
 export function PrintView() {
   const { setId } = useParams()
@@ -14,7 +13,7 @@ export function PrintView() {
   if (!setlist) return <div className="p-8 text-dim">Set not found.</div>
   // When each joke ends if you do the sure ones; an optional joke is marked instead.
   const ends = setlist.items.map((_, i) => setlist.items.slice(0, i + 1).reduce((sum, it) => sum + (it.optional ? 0 : it.duration_seconds), 0))
-  const details = [setlist.show_date && formatDate(setlist.show_date), `${clock(setlist.target_seconds)} slot`].filter(Boolean)
+  const details = [`${clock(setlist.target_seconds)} slot`]
 
   return (
     <div className="min-h-dvh bg-white text-black">
