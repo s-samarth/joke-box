@@ -1,12 +1,14 @@
 /**
  * Jokes list state lives in the URL (?topic=&sub=&type=&status=&q=&sort=), so back, refresh and
  * links keep your place. Filtering runs in the browser, so it works offline.
+ * Arrive with no filters in the URL and the ones you used last come back (rememberFilters.ts).
  */
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useSearchParams } from 'react-router'
 import { useJokes } from '../../api/library'
 import type { Joke } from '../../api/types'
 import { UNDEFINED_TYPE } from '../../lib/jokeMeta'
+import { recall, remember } from './rememberFilters'
 
 export type SortKey = 'new' | 'old' | 'edited' | 'strong' | 'weak' | 'long'
 
@@ -62,8 +64,18 @@ export function useJokeFilters() {
       if (value) next.set(key, value)
       else next.delete(key)
     }
+    remember(next.toString())
     setParams(next, { replace: true })
   }
+
+  // A link without filters (the nav, a joke opened from Home or a chain) brings the last ones back;
+  // with filters, using them keeps them fresh for the hour.
+  const query = params.toString()
+  useEffect(() => {
+    if (query) return remember(query)
+    const saved = recall()
+    if (saved) setParams(new URLSearchParams(saved), { replace: true })
+  }, [query, setParams])
 
   const visible = useMemo(
     () =>
@@ -81,5 +93,5 @@ export function useJokeFilters() {
   )
 
   const active = Boolean(f.topic || f.type || f.status || f.q)
-  return { ...f, set, visible, total: jokes.length, isPending, active, query: params.toString() }
+  return { ...f, set, visible, total: jokes.length, isPending, active, query }
 }
