@@ -1,74 +1,82 @@
 /**
- * Rehearse or perform: the set taped down in big marker, the current joke bright and the rest
- * dimmed. The clock follows the open-mic light: amber with a minute to go, red when you're over.
- * Tap the right side for the next joke, the left to go back. The screen stays awake.
+ * Rehearse: the whole set as a script to read through before a show. Every joke in full (setup,
+ * punchline, tag lines) in one scrolling column, numbered, with its runtime and where you should
+ * be on the clock by the end of it.
+ *
+ * The clock stays pinned at the top and follows the open-mic light: amber with a minute to go,
+ * red when you're over. The screen stays awake.
  */
 import { GraduationCap, Pause, Play, RotateCcw, X } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { useJokes } from '../../api/library'
 import { useSetlists } from '../../api/shows'
-import { Tape } from '../../components/ui/pieces'
 import { clock } from '../../lib/duration'
 import { useWakeLock } from '../../lib/useWakeLock'
 import { useTimer } from '../jokes/useTimer'
 import { CraftSheet } from '../craft/CraftSheet'
-import { lightState } from './setlistMath'
+import { lightState, positionLabel } from './setlistMath'
+
+const icon = 'inline-flex size-11 items-center justify-center rounded-lg text-faint hover:text-paper'
 
 export function StageView() {
   const { setId } = useParams()
   const { data: sets = [] } = useSetlists()
   const { data: jokes = [] } = useJokes()
-  const [index, setIndex] = useState(0)
   const [notes, setNotes] = useState(false)
   const timer = useTimer()
-  const current = useRef<HTMLLIElement>(null)
   useWakeLock()
-  useEffect(() => {
-    // Braces matter: newer browsers return a Promise from scrollIntoView, and an effect may only return a cleanup.
-    current.current?.scrollIntoView({ block: 'center', behavior: 'smooth' })
-  }, [index])
 
   const setlist = sets.find((s) => s.id === setId)
   if (!setlist) return <div className="p-8 text-dim">Set not found. <Link to="/sets" className="text-tape">Back to sets</Link></div>
   const items = setlist.items.map((i) => ({ ...i, joke: jokes.find((b) => b.id === i.joke_id) }))
+  // When each joke ends if you do the sure ones; an optional joke is marked instead.
+  const ends = items.map((_, i) => items.slice(0, i + 1).reduce((sum, it) => sum + (it.optional ? 0 : it.duration_seconds), 0))
   const state = lightState(timer.seconds, setlist.target_seconds)
-  const go = (d: number) => setIndex((i) => Math.min(Math.max(i + d, 0), items.length - 1))
   const clockTone = state === 'over' ? 'text-light light-pulse' : state === 'light' ? 'text-amber' : 'text-paper'
 
   return (
     <div className="pt-safe pb-safe fixed inset-0 flex flex-col bg-[#0f121a]">
-      <header className="flex items-center gap-2 px-3 py-2">
-        <Link to={`/sets/${setlist.id}`} aria-label="Leave stage view" className="inline-flex size-11 items-center justify-center rounded-lg text-faint hover:text-paper"><X size={24} /></Link>
-        <span className={`headline text-5xl tabular ${clockTone}`} aria-live="off">{clock(timer.seconds)}</span>
+      <header className="flex items-center gap-2 border-b border-rule px-3 py-2">
+        <Link to={`/sets/${setlist.id}`} aria-label="Leave rehearsal" className={icon}><X size={24} /></Link>
+        <span className={`headline text-4xl tabular ${clockTone}`} aria-live="off">{clock(timer.seconds)}</span>
         <span className="text-faint tabular">/ {clock(setlist.target_seconds)}</span>
         {state === 'light' && <span className="ml-1 inline-flex items-center gap-1.5 text-sm text-amber"><span className="size-2.5 rounded-full bg-amber" />Light</span>}
         <div className="ml-auto flex gap-1">
-          <button type="button" onClick={() => setNotes(true)} aria-label="Before you go on" title="Before you go on" className="inline-flex size-11 items-center justify-center rounded-lg text-faint hover:text-paper"><GraduationCap size={20} /></button>
-          <button type="button" onClick={timer.reset} aria-label="Reset clock" className="inline-flex size-11 items-center justify-center rounded-lg text-faint hover:text-paper"><RotateCcw size={20} /></button>
+          <button type="button" onClick={() => setNotes(true)} aria-label="Before you go on" title="Before you go on" className={icon}><GraduationCap size={20} /></button>
+          <button type="button" onClick={timer.reset} aria-label="Reset clock" className={icon}><RotateCcw size={20} /></button>
           <button type="button" onClick={timer.running ? timer.pause : timer.start} aria-label={timer.running ? 'Pause clock' : 'Start clock'}
             className="inline-flex size-11 items-center justify-center rounded-lg bg-tape text-tape-ink">{timer.running ? <Pause size={20} /> : <Play size={20} />}</button>
         </div>
       </header>
-      <div className="relative min-h-0 flex-1">
-        <button type="button" aria-label="Previous joke" className="absolute inset-y-0 left-0 z-10 w-1/3" onClick={() => go(-1)} />
-        <button type="button" aria-label="Next joke" className="absolute inset-y-0 right-0 z-10 w-2/3" onClick={() => go(1)} />
-        <ol className="h-full space-y-5 overflow-y-auto px-5 py-[30vh] sm:px-16">
-          {items.length === 0 && <li className="text-xl text-dim">This set is empty.</li>}
-          {items.map((it, i) => (
-            <li key={it.joke_id} ref={i === index ? current : undefined} aria-current={i === index ? 'step' : undefined}>
-              <Tape seed={i} dim={i !== index} optional={it.optional} className={`px-5 py-4 transition ${i === index ? 'text-3xl sm:text-5xl' : 'text-2xl sm:text-3xl'}`}>
-                {it.optional && <span className="mr-2 text-[0.6em] opacity-60">Optional:</span>}
-                {it.joke?.setup ?? 'Deleted joke'}
-              </Tape>
-              {i === index && it.joke?.punchline && <p className="mt-3 px-2 text-xl leading-snug text-paper/85 sm:text-2xl">{it.joke.punchline}</p>}
-              {i === index && it.joke?.tag_lines.map((t, n) => <p key={n} className="mt-1 px-2 text-lg text-dim">+ {t}</p>)}
-            </li>
-          ))}
-        </ol>
-      </div>
+      <article className="min-h-0 flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-2xl px-5 py-8 sm:px-8">
+          <h1 className="headline text-4xl">{setlist.name}</h1>
+          <p className="mt-1 text-dim">{items.length} {items.length === 1 ? 'joke' : 'jokes'}, {clock(setlist.target_seconds)} slot</p>
+          <ol className="mt-8 space-y-8">
+            {items.length === 0 && <li className="text-xl text-dim">This set is empty.</li>}
+            {items.map((it, i) => {
+              const place = positionLabel(i, items.length)
+              return (
+                <li key={it.joke_id} className="border-t border-rule pt-6">
+                  <p className="flex items-baseline gap-3 text-sm text-faint">
+                    <span className="text-lg font-semibold text-tape tabular">{i + 1}</span>
+                    {place && <span>{place}</span>}
+                    {it.optional && <span>Optional</span>}
+                    <span className="ml-auto tabular">{clock(it.duration_seconds)}{it.optional ? '' : `, by ${clock(ends[i])}`}</span>
+                  </p>
+                  <p className="mt-2 text-2xl leading-snug font-medium whitespace-pre-wrap text-paper">{it.joke?.setup ?? 'Deleted joke'}</p>
+                  {it.joke?.punchline && <p className="mt-3 text-xl leading-snug whitespace-pre-wrap text-tape">{it.joke.punchline}</p>}
+                  {it.joke?.tag_lines.filter((t) => t.trim()).map((t, n) => (
+                    <p key={n} className="mt-2 flex gap-2 text-lg leading-snug whitespace-pre-wrap text-paper/80"><span className="text-tape" aria-hidden>+</span>{t}</p>
+                  ))}
+                </li>
+              )
+            })}
+          </ol>
+        </div>
+      </article>
       <CraftSheet open={notes} onOpenChange={setNotes} title="Before you go on" screen="stage" empty="No notes in the areas that show on Stage." />
-      <p className="px-5 py-2 text-center text-sm text-faint">Joke {items.length ? index + 1 : 0} of {items.length}. Tap right for next, left for back.</p>
     </div>
   )
 }

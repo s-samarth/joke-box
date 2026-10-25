@@ -41,9 +41,10 @@ Sets, stage, print, shows and the study screens. The frame, capture and writing 
 
 [StageView.tsx](../web/src/features/sets/StageView.tsx).
 
-A full screen with no frame. It shows the clock against the slot, reset, and play/pause. The
-current joke is bright tape with its punch under it; the others are dimmed tape. Tap the right half
-of the screen for the next joke and the left half for the previous one. The clock turns amber in
+A full screen with no frame: the set as a script to read before a show. The clock against the
+slot, reset and play/pause stay pinned at the top. Below, every joke in full in one scrolling
+column: its number (and Opener, Closer or Optional), runtime and "by m:ss", then the setup, the
+punchline in tape yellow and each tag line. The clock turns amber in
 the last minute and red when you're over. The screen wake lock keeps the phone awake. The cap icon
 opens **Before you go on**: your On stage notes, like crowd work and hecklers, with checklists to
 tick through.
