@@ -103,10 +103,9 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 ## 7. Rehearse and perform
 
 1. From the set (or from **Next up** on Home), tap **Rehearse**.
-2. **Stage** mode goes full screen: the current joke on bright tape with its punch, and the rest
-   dimmed. The screen stays awake.
-3. Tap ▶ to start the clock. Tap the right half of the screen for the next joke and the left half to
-   go back. The clock turns amber with a minute to go and red when you're over.
+2. Rehearse goes full screen with the whole set as a script: every joke's setup, punchline and
+   tag lines in order, to scroll through. The screen stays awake.
+3. Tap ▶ to start the clock. The clock turns amber with a minute to go and red when you're over.
    Before you start, the cap icon shows **Before you go on**: crowd work, hecklers and delivery notes.
 4. For paper, use the printer icon: **Print** lays out numbered jokes, each with its runtime and
    where you should be by then.
