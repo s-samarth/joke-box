@@ -8,7 +8,7 @@ import { ArrowLeft, GraduationCap, Play, Plus, Printer } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router'
 import { useJokes } from '../../api/library'
-import { useSetlists, useVenues } from '../../api/shows'
+import { useSetlists } from '../../api/shows'
 import type { Joke, Setlist } from '../../api/types'
 import { Button } from '../../components/ui/Button'
 import { EmptyState, Spinner } from '../../components/ui/pieces'
@@ -37,7 +37,6 @@ function DropArea({ empty, children }: { empty: boolean; children: ReactNode }) 
 function Builder({ setlist }: { setlist: Setlist }) {
   const { draft, update } = useAutosaveSet(setlist)
   const { data: jokes = [] } = useJokes()
-  const { data: venues = [] } = useVenues()
   const [picking, setPicking] = useState(false)
   const [reading, setReading] = useState<Joke | null>(null)
   const [craft, setCraft] = useState(false)
@@ -92,18 +91,12 @@ function Builder({ setlist }: { setlist: Setlist }) {
           </div>
           <GrowingText aria-label="Set name" className="headline mt-4 text-[44px] sm:text-[56px]" value={draft.name} placeholder="Untitled set"
             onChange={(e) => update((d) => ({ ...d, name: e.target.value }))} />
-          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <div className="mt-5 grid grid-cols-2 gap-3">
             <Field label="Show date"><Input type="date" value={draft.show_date ?? ''} onChange={(e) => update((d) => ({ ...d, show_date: e.target.value || null }))} /></Field>
             <Field label="Slot length">
               <Input inputMode="numeric" className="tabular" value={target} onChange={(e) => setTarget(e.target.value)}
                 onBlur={() => { const s = parse(target); if (s) update((d) => ({ ...d, target_seconds: s })); setTarget(clock(s || draft.target_seconds)) }} />
             </Field>
-            <div className="col-span-2 sm:col-span-1">
-              <Field label="Venue">
-                <Input list="jb-venues" placeholder="Where?" value={draft.venue_name ?? ''} onChange={(e) => update((d) => ({ ...d, venue_name: e.target.value || null }))} />
-                <datalist id="jb-venues">{venues.map((v) => <option key={v.id} value={v.name} />)}</datalist>
-              </Field>
-            </div>
           </div>
           <SetMeta draft={draft} update={update} />
           <div className="mt-8"><LightBar total={total} optional={optionalSeconds(items)} target={draft.target_seconds} big /></div>

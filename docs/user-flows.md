@@ -86,7 +86,7 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 ## 6. Build a set for tonight
 
 1. On **Sets**, tap **New set**. It opens straight away.
-2. Set the show date, the slot length (for example 15:00) and the venue.
+2. Set the show date, and the slot length (for example 15:00). A set isn't tied to a venue; you name the venue when you log the show.
 3. Add jokes from **Your jokes**, which is beside the set on desktop and behind **Add jokes** on a
    phone. Search or filter, then tap **+** (or drag on desktop). The strongest are listed first.
    Tap a joke to read it in full without leaving.

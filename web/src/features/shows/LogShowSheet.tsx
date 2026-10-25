@@ -60,8 +60,6 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
     const chosen = sets.filter((s) => next.includes(s.id))
     setSetIds(next)
     setTopicIds(swapTopics(topicIds, setTopics(sets.filter((s) => setIds.includes(s.id)), jokes), setTopics(chosen, jokes)))
-    const named = chosen.find((s) => s.venue_name)?.venue_name
-    if (named && !venue) setVenue(named)
   }
   const submit = () => {
     const seconds = parse(duration)
