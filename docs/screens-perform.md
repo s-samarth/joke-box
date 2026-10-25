@@ -24,7 +24,7 @@ Sets, stage, print, shows and the study screens. The frame, capture and writing 
   it doesn't count towards the slot, and the total says "+N optional". Stage, Print and Home show
   optional jokes the same way.
 - **Your jokes:** a column on desktop and a sheet behind **Add jokes** on a phone. It has search,
-  topic and type filters, and lists the strongest first; jokes already in the set are dimmed. Tap a
+  topic and type filters and a sort (Recently edited by default, or Newest or Strongest); jokes already in the set are dimmed. Tap a
   joke to read it in full (`JokePeek`).
 - **Drag and drop** uses dnd-kit, with pointer, touch and keyboard sensors, so it works on phones.
 - **Saving:** the set autosaves shortly after each change.
