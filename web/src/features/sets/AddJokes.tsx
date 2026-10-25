@@ -1,17 +1,19 @@
 /**
- * Pick jokes for a set: search, filter by topic and type, tap + (or drag on desktop). Tap a joke to read it.
+ * Pick jokes for a set: search, filter by topic, status and clean rating, tap + (or drag on desktop). Tap a joke to read it.
  * The jokes you worked on last come first, since those are usually the ones you're building the set from.
  */
 import { useDraggable } from '@dnd-kit/core'
 import { Check, Plus, Search } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useJokes, useTopics } from '../../api/library'
 import type { Joke } from '../../api/types'
 import { StrengthTicks } from '../../components/ui/pieces'
 import { Input, Select } from '../../components/ui/Field'
-import { UNDEFINED_TYPE, topicName } from '../../lib/jokeMeta'
+import { topicName } from '../../lib/jokeMeta'
 import { clock } from '../../lib/duration'
-import { matchesSearch, matchesType } from '../jokes/useJokeFilters'
+import { matchesSearch } from '../jokes/useJokeFilters'
+import { PickFilters } from './PickFilters'
+import { matchesPicks, NO_PICKS, type PickState } from './pickMatch'
 
 // Keys pressed on a button inside a draggable row shouldn't start a keyboard drag of the row.
 const SORTS = {
@@ -51,11 +53,10 @@ export function AddJokes({ used, onAdd, onOpen, draggable = false }: Props) {
   const { data: topics = [] } = useTopics()
   const [q, setQ] = useState('')
   const [topic, setTopic] = useState('')
-  const [type, setType] = useState('')
+  const [picks, setPicks] = useState<PickState>(NO_PICKS)
   const [sort, setSort] = useState<SortKey>('edited')
-  const types = useMemo(() => [...new Set(jokes.flatMap((b) => b.types))].sort(), [jokes])
   const shown = jokes
-    .filter((b) => (!topic || b.topic_id === topic) && matchesType(b, type || null) && matchesSearch(b, q))
+    .filter((b) => (!topic || b.topic_id === topic) && matchesPicks(b, picks) && matchesSearch(b, q))
     .sort(SORTS[sort].by)
 
   return (
@@ -69,14 +70,10 @@ export function AddJokes({ used, onAdd, onOpen, draggable = false }: Props) {
           <option value="">All topics</option>
           {topics.map((t) => <option key={t.id} value={t.id}>{topicName(t)}</option>)}
         </Select>
-        <Select aria-label="Type" value={type} onChange={(e) => setType(e.target.value)}>
-          <option value="">All types</option>
-          {types.map((t) => <option key={t} value={t}>{t}</option>)}
-          <option value={UNDEFINED_TYPE}>No type yet</option>
-        </Select>
-        <Select aria-label="Sort" className="col-span-2" value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>
+        <Select aria-label="Sort" value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>
           {Object.entries(SORTS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
         </Select>
+        <PickFilters value={picks} onChange={setPicks} />
       </div>
       {draggable && <p className="text-sm text-faint">Drag onto the set or tap +.</p>}
       <ul className="min-h-0 flex-1 divide-y divide-rule overflow-y-auto">
