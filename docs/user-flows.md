@@ -59,7 +59,7 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 1. Open **Jokes**. Search, or filter by topic, type and status, and sort by newest, strongest,
    weakest or longest.
 2. Tap a joke. On desktop it opens beside the list; on a phone it opens as its own page.
-3. Edit the words in place. Add tag lines, move the strength ticks, change type or topic. Each
+3. Edit the words in place. Add tag lines (drag the grip to reorder them), move the strength ticks, change type or topic. Each
    change saves on its own; the cloud icon shows "Saving…" and then "All changes saved".
 4. For a deeper pass, scroll to Rewrites and choose **Start a rewrite**. The full-screen **Rewrite** page pins the
    original at the top and runs a timer. Write freely and tap **Save version** to keep a snapshot.
