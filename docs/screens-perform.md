@@ -10,11 +10,11 @@ Sets, stage, print, shows and the study screens. The frame, capture and writing 
 [LightBar.tsx](../web/src/features/sets/LightBar.tsx), [setlistMath.ts](../web/src/features/sets/setlistMath.ts),
 [useAutosaveSet.ts](../web/src/features/sets/useAutosaveSet.ts), [JokePeek.tsx](../web/src/features/jokes/JokePeek.tsx).
 
-- **List:** sets with the soonest show first. Each card shows the date, joke count, its
+- **List:** sets you worked on last first. Each card shows the joke count, slot length, its
   stars and tags, and the light bar, with Rehearse and a ⋯ menu (Open set, Print, Delete set).
   Chips above the list (All, then each tag in use) show only the sets with that tag. **New set**
   creates one and opens it.
-- **Builder:** the set name, then Show date and Slot length. Then **Rating** (five stars; tap
+- **Builder:** the set name, then Slot length (a set has no show date; the show is logged separately). Then **Rating** (five stars; tap
   the same star again to clear it) and **Tags** (tap a tag on or off; **Edit tags** opens a sheet to
   add, rename and delete them, with how many sets use each). Below them, the total against the slot
   with "N left", and the light bar. Then one **tape strip** per joke: a drag handle, the setup in
@@ -25,7 +25,8 @@ Sets, stage, print, shows and the study screens. The frame, capture and writing 
   optional jokes the same way.
 - **Your jokes:** a column on desktop and a sheet behind **Add jokes** on a phone. It has search,
   a topic filter, a sort (Recently edited by default, or Newest or Strongest), and **Status and clean rating**: chips you tap once to show only those, again to hide them (so you can ask for Stage Ready or Interesting jokes, and leave out Dirty ones); jokes already in the set are dimmed. Tap a
-  joke to read it in full (`JokePeek`).
+  joke to read it in full (`JokePeek`). The search, topic, filters and sort are remembered for an hour in that
+  browser tab ([sessionMemory.ts](../web/src/lib/sessionMemory.ts)), so you can leave and come back mid-build.
 - **Drag and drop** uses dnd-kit, with pointer, touch and keyboard sensors, so it works on phones.
 - **Saving:** the set autosaves shortly after each change.
 - **Notes on building a set** (the cap icon) opens your Craft notes from Building a set in a sheet:

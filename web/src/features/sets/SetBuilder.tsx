@@ -100,7 +100,6 @@ function Builder({ setlist }: { setlist: Setlist }) {
           <GrowingText aria-label="Set name" className="headline mt-4 text-[44px] sm:text-[56px]" value={draft.name} placeholder="Untitled set"
             onChange={(e) => update((d) => ({ ...d, name: e.target.value }))} />
           <div className="mt-5 grid grid-cols-2 gap-3">
-            <Field label="Show date"><Input type="date" value={draft.show_date ?? ''} onChange={(e) => update((d) => ({ ...d, show_date: e.target.value || null }))} /></Field>
             <Field label="Slot length">
               <Input inputMode="numeric" className="tabular" value={target} onChange={(e) => setTarget(e.target.value)}
                 onBlur={() => { const s = parse(target); if (s) update((d) => ({ ...d, target_seconds: s })); setTarget(clock(s || draft.target_seconds)) }} />

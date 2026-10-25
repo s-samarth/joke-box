@@ -13,7 +13,7 @@ import { Button, IconButton } from '../../components/ui/Button'
 import { EmptyState, PageHead, Spinner, Stars } from '../../components/ui/pieces'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { Dropdown } from '../../components/ui/Menu'
-import { formatDate, todayIst } from '../../lib/time'
+import { clock } from '../../lib/duration'
 import { tagChip } from './chips'
 import { LightBar } from './LightBar'
 import { draftItems, optionalSeconds, totalSeconds } from './setlistMath'
@@ -28,17 +28,12 @@ export function SetsPage() {
   const { save, remove } = useSetlistActions()
   const { confirm, toast } = useFeedback()
   const navigate = useNavigate()
-  const today = todayIst()
-  const sorted = sets.filter((s) => !showing || s.tag_ids?.includes(showing)).sort((a, b) => {
-    const [ua, ub] = [a.show_date && a.show_date >= today, b.show_date && b.show_date >= today]
-    if (ua !== ub) return ua ? -1 : 1
-    return ua ? a.show_date!.localeCompare(b.show_date!) : b.updated_at.localeCompare(a.updated_at)
-  })
+  const sorted = sets.filter((s) => !showing || s.tag_ids?.includes(showing)).sort((a, b) => b.updated_at.localeCompare(a.updated_at))
 
   const create = () => {
     const id = newId()
     // Shown at once and saved in the background (offline too), like a new joke.
-    save.mutateAsync({ id, input: { name: 'Untitled set', show_date: today, target_seconds: 420, venue_name: null, rating: null, tag_ids: [], items: [] } }).catch((e: Error) => toast(`Set not saved: ${e.message}`))
+    save.mutateAsync({ id, input: { name: 'Untitled set', show_date: null, target_seconds: 420, venue_name: null, rating: null, tag_ids: [], items: [] } }).catch((e: Error) => toast(`Set not saved: ${e.message}`))
     navigate(`/sets/${id}`)
   }
   const onDelete = async (s: Setlist) => {
@@ -70,7 +65,7 @@ export function SetsPage() {
                 <Link to={`/sets/${s.id}`} className="min-w-0 flex-1">
                   <p className="headline truncate text-[26px]">{s.name}</p>
                   <p className="mt-1 text-sm text-dim">
-                    {[s.show_date && formatDate(s.show_date), `${s.items.length} jokes`].filter(Boolean).join(', ')}
+                    {s.items.length} {s.items.length === 1 ? 'joke' : 'jokes'}, {clock(s.target_seconds)} slot
                   </p>
                   {(s.rating || s.tag_ids?.length > 0) && (
                     <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-dim">

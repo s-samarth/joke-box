@@ -1,16 +1,19 @@
 /**
  * Pick jokes for a set: search, filter by topic, status and clean rating, tap + (or drag on desktop). Tap a joke to read it.
  * The jokes you worked on last come first, since those are usually the ones you're building the set from.
+ * The search, topic, filters and sort are remembered for an hour (lib/sessionMemory), so leaving to
+ * look at a joke or another screen and coming back finds the list as you left it.
  */
 import { useDraggable } from '@dnd-kit/core'
 import { Check, Plus, Search } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useJokes, useTopics } from '../../api/library'
 import type { Joke } from '../../api/types'
 import { StrengthTicks } from '../../components/ui/pieces'
 import { Input, Select } from '../../components/ui/Field'
 import { topicName } from '../../lib/jokeMeta'
 import { clock } from '../../lib/duration'
+import { recall, remember } from '../../lib/sessionMemory'
 import { matchesSearch } from '../jokes/useJokeFilters'
 import { PickFilters } from './PickFilters'
 import { matchesPicks, NO_PICKS, type PickState } from './pickMatch'
@@ -22,6 +25,10 @@ const SORTS = {
   strongest: { label: 'Strongest', by: (a: Joke, b: Joke) => b.strength - a.strength },
 }
 type SortKey = keyof typeof SORTS
+
+type Picker = { q: string; topic: string; picks: PickState; sort: SortKey }
+const MEMORY = 'set-picker'
+const FRESH: Picker = { q: '', topic: '', picks: NO_PICKS, sort: 'edited' }
 
 const own = { onKeyDown: (e: React.KeyboardEvent) => e.stopPropagation() }
 
@@ -51,10 +58,12 @@ interface Props {
 export function AddJokes({ used, onAdd, onOpen, draggable = false }: Props) {
   const { data: jokes = [] } = useJokes()
   const { data: topics = [] } = useTopics()
-  const [q, setQ] = useState('')
-  const [topic, setTopic] = useState('')
-  const [picks, setPicks] = useState<PickState>(NO_PICKS)
-  const [sort, setSort] = useState<SortKey>('edited')
+  const [start] = useState(() => ({ ...FRESH, ...recall<Picker>(MEMORY) }))
+  const [q, setQ] = useState(start.q)
+  const [topic, setTopic] = useState(start.topic)
+  const [picks, setPicks] = useState<PickState>(start.picks)
+  const [sort, setSort] = useState<SortKey>(start.sort in SORTS ? start.sort : 'edited')
+  useEffect(() => remember<Picker>(MEMORY, { q, topic, picks, sort }), [q, topic, picks, sort])
   const shown = jokes
     .filter((b) => (!topic || b.topic_id === topic) && matchesPicks(b, picks) && matchesSearch(b, q))
     .sort(SORTS[sort].by)

@@ -76,7 +76,7 @@ erDiagram
 | Table | Columns | Rules |
 |---|---|---|
 | `venues` | `name` | Created by name when a set or show uses one; "Unidentified Venue" is the default |
-| `setlists` | `name`, `show_date`, `target_seconds` (default 900), `venue_id` (set null), `rating` (1–5 or null) | Saved whole: `PUT` replaces the items and tags in one transaction |
+| `setlists` | `name`, `show_date` (no longer shown or set by the app), `target_seconds` (default 900), `venue_id` (set null), `rating` (1–5 or null) | Saved whole: `PUT` replaces the items and tags in one transaction |
 | `set_tags` | `name` (unique per user, any case), `position` | Your labels for sets (In progress, Weak, Opener set...). Everyone got eight to start, once; deleting them all sticks |
 | `setlist_tag_links` | `setlist_id`, `tag_id` (both cascade) | Many-to-many. Deleting a tag takes it off its sets |
 | `setlist_items` | `setlist_id` (cascade), `joke_id` (cascade), `position`, `duration_seconds`, `optional` | A set refers to its jokes: their words, strength and runtime are always read from the joke (`duration_seconds` here is only a fallback). Opener and closer are the first and last positions, not stored. An optional joke is one to cut if time is short; it doesn't count towards the slot |
