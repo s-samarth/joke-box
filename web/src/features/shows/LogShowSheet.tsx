@@ -16,7 +16,8 @@ import { Field, Input, Textarea } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { Modal } from '../../components/ui/Modal'
 import { topicName } from '../../lib/jokeMeta'
-import { clock, parse } from '../../lib/duration'
+import { StageTimeField } from './StageTimeField'
+import { type StageTime, stageSeconds, toStageTime } from './stageTime'
 import { formatDate, fromIstInput, toIstInput } from '../../lib/time'
 import { areaFor, kindFor, lessonFrom } from '../craft/craftMeta'
 import { LaughTally } from './LaughTally'
@@ -41,7 +42,7 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
   const [venue, setVenue] = useState(log?.venue_name ?? '')
   const [when, setWhen] = useState(() => toIstInput(log?.performed_at ?? new Date().toISOString()))
   const [rating, setRating] = useState(log?.rating ?? 0)
-  const [duration, setDuration] = useState(log ? clock(log.duration_seconds) : '')
+  const [duration, setDuration] = useState<StageTime>(log ? toStageTime(log.duration_seconds) : { min: '', sec: '' })
   const [crowd, setCrowd] = useState(log ? String(log.audience_size) : '')
   const [topicIds, setTopicIds] = useState<string[]>(log?.topic_ids ?? [])
   const [notes, setNotes] = useState(log?.notes ?? '')
@@ -62,9 +63,8 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
     setTopicIds(swapTopics(topicIds, setTopics(sets.filter((s) => setIds.includes(s.id)), jokes), setTopics(chosen, jokes)))
   }
   const submit = () => {
-    const seconds = parse(duration)
+    const seconds = stageSeconds(duration)
     if (!rating) return setError('Give it a rating from one to five stars.')
-    if (seconds === null) return setError('Time on stage should look like 6:30.')
     const venueName = venue.trim() || UNKNOWN
     const performedAt = fromIstInput(when)
     // Both saves are queued and close the sheet at once, signal or not. The queue sends them in
@@ -113,7 +113,7 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
           </div>
         )}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <Field label="Time on stage"><Input inputMode="numeric" className="tabular" placeholder="6:30" value={duration} onChange={(e) => setDuration(e.target.value)} /></Field>
+          <StageTimeField value={duration} onChange={setDuration} />
           <Field label="People in the room"><Input type="number" inputMode="numeric" min={0} placeholder="25" value={crowd} onChange={(e) => setCrowd(e.target.value)} /></Field>
           <div className="col-span-2 sm:col-span-1"><Field label="When (IST)"><Input type="datetime-local" value={when} onChange={(e) => setWhen(e.target.value)} /></Field></div>
         </div>
@@ -126,7 +126,7 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
             })}
           </div>
         </div>
-        <LaughTally laughs={laughs} seconds={parse(duration)} onChange={setLaughs} />
+        <LaughTally laughs={laughs} seconds={stageSeconds(duration)} onChange={setLaughs} />
         <Field label="Remarks"><Textarea placeholder="What went right, what went wrong, what the crowd was like" value={notes} onChange={(e) => setNotes(e.target.value)} /></Field>
         <Field label="What did you learn?" hint="Saved to Craft, linked to this show, in the area that shows on Stage">
           <Textarea placeholder="e.g. Slow down before the punch" className="min-h-16" value={lesson} onChange={(e) => setLesson(e.target.value)} />
