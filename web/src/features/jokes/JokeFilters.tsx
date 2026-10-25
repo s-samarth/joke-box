@@ -1,4 +1,7 @@
-/** Search plus four menus: topic, type, status and sort. Each menu shows what's chosen. */
+/**
+ * Search plus menus for topic, type, status and sort. Each menu shows what's chosen. Once you pick a
+ * topic that has subtopics, a Subtopic menu appears beside it, so the topic list stays topics only.
+ */
 import { ChevronDown, Search, X } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { useStatuses, useTopics, useTypes } from '../../api/library'
@@ -30,12 +33,13 @@ export function JokeFilters({ f }: { f: Filters }) {
 
   const topicItems: (MenuItem | 'divider')[] = [
     { label: 'All topics', onSelect: () => f.set({ topic: null, sub: null }), checked: !f.topic },
-    ...topics.flatMap((t) => [
-      { label: topicName(t), onSelect: () => f.set({ topic: t.id, sub: null }), checked: f.topic === t.id && !f.sub },
-      ...t.subtopics.map((s) => ({ label: `   ${s.name}`, onSelect: () => f.set({ topic: t.id, sub: s.id }), checked: f.sub === s.id })),
-    ]),
+    ...topics.map((t) => ({ label: topicName(t), onSelect: () => f.set({ topic: t.id, sub: null }), checked: f.topic === t.id })),
     'divider',
     { label: 'Manage topics…', onSelect: () => setManaging('topics') },
+  ]
+  const subItems: MenuItem[] = [
+    { label: 'All subtopics', onSelect: () => f.set({ sub: null }), checked: !f.sub },
+    ...(topic?.subtopics ?? []).map((s) => ({ label: s.name, onSelect: () => f.set({ sub: s.id }), checked: f.sub === s.id })),
   ]
   const typeItems: (MenuItem | 'divider')[] = [
     { label: 'All types', onSelect: () => f.set({ type: null }), checked: !f.type },
@@ -57,7 +61,10 @@ export function JokeFilters({ f }: { f: Filters }) {
         <Input type="search" aria-label="Search jokes" placeholder="Search words, tags, notes" className="pl-10" value={f.q} onChange={(e) => f.set({ q: e.target.value })} />
       </div>
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0">
-        <Dropdown align="start" items={topicItems} trigger={<span><MenuButton label={sub ? sub.name : topic ? topicName(topic) : 'Topic'} on={Boolean(topic)} /></span>} />
+        <Dropdown align="start" items={topicItems} trigger={<span><MenuButton label={topic ? topicName(topic) : 'Topic'} on={Boolean(topic)} /></span>} />
+        {topic && topic.subtopics.length > 0 && (
+          <Dropdown align="start" items={subItems} trigger={<span><MenuButton label={sub ? sub.name : 'Subtopic'} on={Boolean(sub)} /></span>} />
+        )}
         <Dropdown align="start" items={typeItems} trigger={<span><MenuButton label={f.type === UNDEFINED_TYPE ? 'No type yet' : (f.type ?? 'Type')} on={Boolean(f.type)} /></span>} />
         <Dropdown align="start" items={statusItems} trigger={<span><MenuButton label={f.status ?? 'Status'} on={Boolean(f.status)} /></span>} />
         <Dropdown align="start" items={sortItems} trigger={<span><MenuButton label={SORTS[f.sort]} on={false} /></span>} />
