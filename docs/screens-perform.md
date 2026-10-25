@@ -10,11 +10,11 @@ Sets, stage, print, shows and the study screens. The frame, capture and writing 
 [LightBar.tsx](../web/src/features/sets/LightBar.tsx), [setlistMath.ts](../web/src/features/sets/setlistMath.ts),
 [useAutosaveSet.ts](../web/src/features/sets/useAutosaveSet.ts), [JokePeek.tsx](../web/src/features/jokes/JokePeek.tsx).
 
-- **List:** sets with the soonest show first. Each card shows the date, venue, joke count, its
+- **List:** sets with the soonest show first. Each card shows the date, joke count, its
   stars and tags, and the light bar, with Rehearse and a ⋯ menu (Open set, Print, Delete set).
   Chips above the list (All, then each tag in use) show only the sets with that tag. **New set**
   creates one and opens it.
-- **Builder:** the set name, then Show date, Slot length and Venue. Then **Rating** (five stars; tap
+- **Builder:** the set name, then Show date and Slot length. Then **Rating** (five stars; tap
   the same star again to clear it) and **Tags** (tap a tag on or off; **Edit tags** opens a sheet to
   add, rename and delete them, with how many sets use each). Below them, the total against the slot
   with "N left", and the light bar. Then one **tape strip** per joke: a drag handle, the setup in
@@ -54,7 +54,7 @@ tick through.
 
 [PrintView.tsx](../web/src/features/sets/PrintView.tsx).
 
-A white page. It shows the set name, then date, venue and slot. Below that, the jokes, numbered,
+A white page. It shows the set name, then date and slot. Below that, the jokes, numbered,
 each with its setup in marker, the punchline, its runtime and "by m:ss" (the running total). A
 **Print** button opens the browser's print dialog.
 

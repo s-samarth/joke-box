@@ -14,7 +14,7 @@ export function PrintView() {
   if (!setlist) return <div className="p-8 text-dim">Set not found.</div>
   // When each joke ends if you do the sure ones; an optional joke is marked instead.
   const ends = setlist.items.map((_, i) => setlist.items.slice(0, i + 1).reduce((sum, it) => sum + (it.optional ? 0 : it.duration_seconds), 0))
-  const details = [setlist.show_date && formatDate(setlist.show_date), setlist.venue_name, `${clock(setlist.target_seconds)} slot`].filter(Boolean)
+  const details = [setlist.show_date && formatDate(setlist.show_date), `${clock(setlist.target_seconds)} slot`].filter(Boolean)
 
   return (
     <div className="min-h-dvh bg-white text-black">

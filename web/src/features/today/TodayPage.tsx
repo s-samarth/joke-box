@@ -68,7 +68,7 @@ export function TodayPage() {
               <Link to={`/sets/${nextSet.id}`} className="min-w-0">
                 <p className="truncate text-lg font-medium">{nextSet.name}</p>
                 <p className="text-sm text-dim">
-                  {[nextSet.show_date ? formatDate(nextSet.show_date) : null, nextSet.venue_name].filter(Boolean).join(', ') || 'No date yet'}
+                  {nextSet.show_date ? formatDate(nextSet.show_date) : 'No date yet'}
                 </p>
               </Link>
               <Link to={`/sets/${nextSet.id}/stage`} className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg bg-tape px-3 font-semibold text-tape-ink">
