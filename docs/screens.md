@@ -156,6 +156,10 @@ the jokes' created dates, so there's no separate log to fall out of step.
 - **State:** the filters live in the URL (`?topic=&sub=&type=&status=&q=&sort=`). Filtering runs in
   the browser, so it works offline. Edits go into a local draft and save about a moment after you
   stop typing, through the offline-safe joke save.
+- **Remembered filters** ([rememberFilters.ts](../web/src/features/jokes/rememberFilters.ts)): come
+  back to Jokes with no filters in the link (the nav, a joke opened from Home) and the last ones
+  return. They're kept per tab or app window and lapse after an hour away; Clear forgets them.
+  **New joke** opened while the list is filtered to a topic (and subtopic) starts filed there.
 - **Topic and type managers** are sheets for renaming and deleting across every joke. Deleting a
   topic moves its jokes to Thoughts. Renaming a type onto an existing one merges the two.
 
