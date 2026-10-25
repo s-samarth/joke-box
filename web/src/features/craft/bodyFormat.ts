@@ -142,15 +142,24 @@ export interface Run {
 }
 
 const URL = /(https?:\/\/[^\s<>"]+[^\s<>".,;:!?)])/
+/** A named link, [words](https://…). */
+const NAMED = /(\[[^\]]+\]\(https?:\/\/[^\s)]+\))/
 
-/** Text split into plain, **bold** and web-address runs. */
+/** Text split into plain, **bold** and web-address runs. A [named](https://…) link shows its name. */
 export function inlineRuns(text: string): Run[] {
   const runs: Run[] = []
   for (const part of text.split(/(\*\*[^*]+\*\*)/).filter(Boolean)) {
     const bold = part.startsWith('**') && part.endsWith('**') && part.length > 4
     const inner = bold ? part.slice(2, -2) : part
-    for (const piece of inner.split(URL).filter(Boolean)) {
-      runs.push(URL.test(piece) && /^https?:\/\//.test(piece) ? { text: piece, bold, href: piece } : { text: piece, bold })
+    for (const chunk of inner.split(NAMED).filter(Boolean)) {
+      const named = /^\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)$/.exec(chunk)
+      if (named) {
+        runs.push({ text: named[1], bold, href: named[2] })
+        continue
+      }
+      for (const piece of chunk.split(URL).filter(Boolean)) {
+        runs.push(URL.test(piece) && /^https?:\/\//.test(piece) ? { text: piece, bold, href: piece } : { text: piece, bold })
+      }
     }
   }
   return runs

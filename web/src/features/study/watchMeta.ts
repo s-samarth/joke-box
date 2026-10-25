@@ -51,4 +51,8 @@ export function filterItems(items: WatchItem[], filter: WatchFilter, query: stri
 export const watchUrl = (item: Pick<WatchItem, 'url' | 'title' | 'comedian'>): string =>
   item.url || `https://www.youtube.com/results?search_query=${encodeURIComponent(`${item.comedian} ${item.title} stand up`.trim())}`
 
+/** A category's guide: the analysis with the same name as the category (any case), if there is one. */
+export const guideFor = <A extends { title: string }>(category: string, analyses: A[]): A | undefined =>
+  analyses.find((a) => a.title.trim().toLowerCase() === category.trim().toLowerCase())
+
 export const nextPosition = (items: WatchItem[]): number => items.reduce((max, i) => Math.max(max, i.position), 0) + 1

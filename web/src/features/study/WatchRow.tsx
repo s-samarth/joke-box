@@ -1,8 +1,10 @@
-/** One routine: tick it watched, open it to watch, start an analysis, or delete it. */
+/** One routine: tick it watched, read its notes, open it to watch, start an analysis, or delete it. */
 import { Check, ExternalLink, NotebookPen, Trash2 } from 'lucide-react'
+import { useState } from 'react'
 import { Link } from 'react-router'
 import type { WatchItem } from '../../api/types'
 import { IconButton } from '../../components/ui/Button'
+import { NoteBody } from '../craft/NoteBody'
 import { SCORES, watchUrl } from './watchMeta'
 
 interface Props {
@@ -13,6 +15,9 @@ interface Props {
 
 export function WatchRow({ item, onToggle, onDelete }: Props) {
   const scores = SCORES.filter((s) => item[s.key] !== null)
+  const [open, setOpen] = useState(false)
+  // Only long notes get More; a line or two already shows in full.
+  const long = item.description.length > 140 || item.description.includes('\n')
   return (
     <li className="flex gap-3 py-3.5">
       <button type="button" role="checkbox" aria-checked={item.watched} onClick={onToggle}
@@ -26,7 +31,14 @@ export function WatchRow({ item, onToggle, onDelete }: Props) {
           {item.title}
         </p>
         {item.comedian && <p className="text-sm text-dim">{item.comedian}</p>}
-        {item.description && <p className="mt-1 line-clamp-2 text-sm text-faint">{item.description}</p>}
+        {item.description && (open
+          ? <div className="mt-1 text-sm [&_*]:text-sm"><NoteBody body={item.description} /></div>
+          : <p className="mt-1 line-clamp-2 text-sm whitespace-pre-line text-faint">{item.description}</p>)}
+        {long && (
+          <button type="button" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="mt-0.5 text-sm text-dim underline-offset-2 hover:text-paper hover:underline">
+            {open ? 'Less' : 'More'}
+          </button>
+        )}
         {scores.length > 0 && (
           <p className="mt-1.5 flex gap-1.5">
             {scores.map((s) => (

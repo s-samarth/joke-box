@@ -70,8 +70,8 @@ own data. Today that is one comedian, but the system works for more than one.
 | **Print** | A set on paper with each joke's running time | `/sets/:id/print` |
 | **Shows** | Log a show; totals, filters, a sortable table, CSV export; Timeline and Insights views | `/shows` |
 | **Craft** | What you know about doing stand-up: your path as a staircase, techniques to write with, and your own areas as folders of note cards | `/craft`, `/craft/area/:id`, `/craft/:id` |
-| **Watchlist** | Routines you add to study, scored and ticked off | `/watchlist` |
-| **Analysis** | Your write-ups of sets and online jokes, optionally tied to a routine | `/analysis` |
+| **Watchlist** | Routines you add to study, scored and ticked off. Long notes open with More. A category gets a **Read the guide** link when an analysis has the same name as the category | `/watchlist` |
+| **Analysis** | Your write-ups of sets and online jokes, optionally tied to a routine. A saved one opens formatted like a craft note; Edit turns it back into the form | `/analysis` |
 
 Each screen is described in [screens.md](screens.md), and the end-to-end journeys are in
 [user-flows.md](user-flows.md).
