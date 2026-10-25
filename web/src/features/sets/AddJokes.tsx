@@ -1,4 +1,7 @@
-/** Pick jokes for a set: search, filter by topic and type, tap + (or drag on desktop). Tap a joke to read it. */
+/**
+ * Pick jokes for a set: search, filter by topic and type, tap + (or drag on desktop). Tap a joke to read it.
+ * The jokes you worked on last come first, since those are usually the ones you're building the set from.
+ */
 import { useDraggable } from '@dnd-kit/core'
 import { Check, Plus, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
@@ -11,6 +14,13 @@ import { clock } from '../../lib/duration'
 import { matchesSearch, matchesType } from '../jokes/useJokeFilters'
 
 // Keys pressed on a button inside a draggable row shouldn't start a keyboard drag of the row.
+const SORTS = {
+  edited: { label: 'Recently edited', by: (a: Joke, b: Joke) => b.updated_at.localeCompare(a.updated_at) },
+  created: { label: 'Newest', by: (a: Joke, b: Joke) => b.created_at.localeCompare(a.created_at) },
+  strongest: { label: 'Strongest', by: (a: Joke, b: Joke) => b.strength - a.strength },
+}
+type SortKey = keyof typeof SORTS
+
 const own = { onKeyDown: (e: React.KeyboardEvent) => e.stopPropagation() }
 
 function Candidate({ joke, used, onAdd, onOpen, draggable }: { joke: Joke; used: boolean; onAdd: () => void; onOpen: () => void; draggable: boolean }) {
@@ -42,10 +52,11 @@ export function AddJokes({ used, onAdd, onOpen, draggable = false }: Props) {
   const [q, setQ] = useState('')
   const [topic, setTopic] = useState('')
   const [type, setType] = useState('')
+  const [sort, setSort] = useState<SortKey>('edited')
   const types = useMemo(() => [...new Set(jokes.flatMap((b) => b.types))].sort(), [jokes])
   const shown = jokes
     .filter((b) => (!topic || b.topic_id === topic) && matchesType(b, type || null) && matchesSearch(b, q))
-    .sort((a, b) => b.strength - a.strength)
+    .sort(SORTS[sort].by)
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
@@ -63,8 +74,11 @@ export function AddJokes({ used, onAdd, onOpen, draggable = false }: Props) {
           {types.map((t) => <option key={t} value={t}>{t}</option>)}
           <option value={UNDEFINED_TYPE}>No type yet</option>
         </Select>
+        <Select aria-label="Sort" className="col-span-2" value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>
+          {Object.entries(SORTS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+        </Select>
       </div>
-      <p className="text-sm text-faint">Strongest first{draggable ? '. Drag onto the set or tap +.' : '.'}</p>
+      {draggable && <p className="text-sm text-faint">Drag onto the set or tap +.</p>}
       <ul className="min-h-0 flex-1 divide-y divide-rule overflow-y-auto">
         {shown.length === 0 && <li className="py-6 text-dim">No jokes match.</li>}
         {shown.map((b) => <Candidate key={b.id} joke={b} used={used.has(b.id)} onAdd={() => onAdd(b)} onOpen={() => onOpen(b)} draggable={draggable} />)}
