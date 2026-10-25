@@ -6,7 +6,7 @@ import { api } from './client'
 import { keys, queryClient, refreshWhenSynced } from './queryClient'
 import { OLD_SAVE_KEYS } from './legacy'
 import { QUEUED } from './sync'
-import type { Joke, JokeInput } from './types'
+import type { Joke, JokeInput, Setlist } from './types'
 
 /* ---- Offline-capable joke saves and deletes ----
  * These have defaults registered by key, so a save made offline survives a reload:
@@ -15,6 +15,10 @@ import type { Joke, JokeInput } from './types'
 export type SaveJokeVars = { id: string; input: JokeInput }
 
 export const saveJokeKey = ['joke', 'save']
+
+/** A set times each joke by the joke's own runtime, as the server does: change one and every set follows. */
+export const followRuntime = (sets: Setlist[], id: string, seconds: number): Setlist[] =>
+  sets.map((s) => ({ ...s, items: s.items.map((i) => (i.joke_id === id ? { ...i, duration_seconds: seconds } : i)) }))
 export const deleteJokeKey = ['joke', 'delete']
 
 /*
@@ -35,6 +39,7 @@ queryClient.setMutationDefaults(saveJokeKey, {
   onMutate: async ({ id, input }: SaveJokeVars) => {
     // Optimistic update: show the change immediately, before the server answers.
     await queryClient.cancelQueries({ queryKey: keys.jokes })
+    queryClient.setQueryData<Setlist[]>(keys.setlists, (sets) => sets && followRuntime(sets, id, input.duration_seconds))
     const now = new Date().toISOString()
     queryClient.setQueryData<Joke[]>(keys.jokes, (old = []) => {
       const existing = old.find((b) => b.id === id)
@@ -42,7 +47,7 @@ queryClient.setMutationDefaults(saveJokeKey, {
       return existing ? old.map((b) => (b.id === id ? next : b)) : [next, ...old]
     })
   },
-  onSettled: () => refreshWhenSynced(keys.jokes, keys.types, keys.statuses),
+  onSettled: () => refreshWhenSynced(keys.jokes, keys.types, keys.statuses, keys.setlists),
 })
 
 queryClient.setMutationDefaults(deleteJokeKey, {

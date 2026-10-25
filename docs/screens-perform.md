@@ -19,7 +19,7 @@ Sets, stage, print, shows and the study screens. The frame, capture and writing 
   add, rename and delete them, with how many sets use each). Below them, the total against the slot
   with "N left", and the light bar. Then one **tape strip** per joke: a drag handle, the setup in
   marker, the joke's strength as periwinkle ticks, an **optional** toggle (the dashed circle), an
-  editable runtime, up and down arrows, and remove. The opener and closer are labelled on their
+  the joke's runtime (editing it here changes the joke, and every set it's in), up and down arrows, and remove. The opener and closer are labelled on their
   strips. An optional joke (one to cut if time is short) is on faded paper tape, labelled Optional;
   it doesn't count towards the slot, and the total says "+N optional". Stage, Print and Home show
   optional jokes the same way.

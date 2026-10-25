@@ -79,7 +79,7 @@ erDiagram
 | `setlists` | `name`, `show_date`, `target_seconds` (default 900), `venue_id` (set null), `rating` (1–5 or null) | Saved whole: `PUT` replaces the items and tags in one transaction |
 | `set_tags` | `name` (unique per user, any case), `position` | Your labels for sets (In progress, Weak, Opener set...). Everyone got eight to start, once; deleting them all sticks |
 | `setlist_tag_links` | `setlist_id`, `tag_id` (both cascade) | Many-to-many. Deleting a tag takes it off its sets |
-| `setlist_items` | `setlist_id` (cascade), `joke_id` (cascade), `position`, `duration_seconds`, `optional` | Opener and closer are the first and last positions, not stored. An optional joke is one to cut if time is short; it doesn't count towards the slot |
+| `setlist_items` | `setlist_id` (cascade), `joke_id` (cascade), `position`, `duration_seconds`, `optional` | A set refers to its jokes: their words, strength and runtime are always read from the joke (`duration_seconds` here is only a fallback). Opener and closer are the first and last positions, not stored. An optional joke is one to cut if time is short; it doesn't count towards the slot |
 | `performance_logs` | `venue_id` (set null), `performed_at` (timestamptz), `duration_seconds`, `audience_size`, `rating` 1–5, `notes`, `laughs` JSON (five counts, for laughs scored 1–5 points; null if not counted) | LPM is worked out in the browser from `laughs` and the time on stage |
 | `performance_log_topics` | `log_id`, `topic_id` (both cascade) | "Topics you did". Deleting a topic re-points its links to Thoughts |
 
