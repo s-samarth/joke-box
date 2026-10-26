@@ -20,9 +20,9 @@ class WatchItem(Trashable, OwnedMixin, Base):
     description: Mapped[str] = mapped_column(Text, default="")
     url: Mapped[str] = mapped_column(String(500), default="")
     position: Mapped[int] = mapped_column(Integer, default=0)
-    schemer_index: Mapped[int | None] = mapped_column(Integer)
+    contrast: Mapped[int | None] = mapped_column(Integer)
     logic_density: Mapped[int | None] = mapped_column(Integer)
-    dark_pragmatism: Mapped[int | None] = mapped_column(Integer)
+    has_a_point: Mapped[int | None] = mapped_column(Integer)
     watched: Mapped[bool] = mapped_column(Boolean, default=False)
 
 

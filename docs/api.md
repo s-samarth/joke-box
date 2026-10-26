@@ -174,7 +174,7 @@ Every `joke_id` and `topic_id` must belong to you (otherwise 404).
 | Method | Path | Body / notes |
 |---|---|---|
 | GET | `/api/watchlist` | In order of `position` |
-| PUT | `/api/watchlist/{id}` | `{title, comedian, category, description, url, position, schemer_index, logic_density, dark_pragmatism, watched}`. Scores are 0–10 or null |
+| PUT | `/api/watchlist/{id}` | `{title, comedian, category, description, url, position, contrast, logic_density, has_a_point, watched}`. Scores are 0–10 or null |
 | DELETE | `/api/watchlist/{id}` | |
 | GET | `/api/craft-areas` | In your order. Makes the starting areas if you have none |
 | POST | `/api/craft-areas` | `{name, description, color, screens[]}`; `color` is a preset name or `#rrggbb`. Goes last. 409 if the name is taken |

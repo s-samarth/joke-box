@@ -43,7 +43,7 @@ export function WatchlistPage() {
       {items.length === 0 ? (
         <EmptyState title="Nothing to watch yet"
           action={<Button variant="tape" icon={<Plus size={16} />} onClick={() => setAdding(true)}>Add routine</Button>}>
-          Add the routines you want to study, grouped by category. Score each for Schemer Index, Logic Density and Dark Pragmatism, then tick it off once you've watched it.
+          Add the routines you want to study, grouped by category. Score each for Contrast, Logic Density and Has a Point, then tick it off once you've watched it.
         </EmptyState>
       ) : (
         <>
@@ -51,7 +51,7 @@ export function WatchlistPage() {
             <p className="flex items-baseline justify-between"><span className="text-lg"><span className="font-semibold tabular">{watched}</span> of {items.length} watched</span><span className="text-sm text-faint tabular">{Math.round((watched / items.length) * 100)}%</span></p>
             <div className="h-1.5 overflow-hidden rounded-full bg-ink-3"><div className="h-full rounded-full bg-ok transition-[width]" style={{ width: `${(watched / items.length) * 100}%` }} /></div>
             <details className="text-sm text-faint">
-              <summary className="cursor-pointer select-none hover:text-dim">What do SI, LD and DP mean?</summary>
+              <summary className="cursor-pointer select-none hover:text-dim">What do CT, LD and HP mean?</summary>
               <dl className="mt-2 space-y-1.5">{SCORES.map((s) => <div key={s.key}><dt className="inline text-dim">{s.short}, {s.name}: </dt><dd className="inline">{s.hint}</dd></div>)}</dl>
             </details>
           </div>

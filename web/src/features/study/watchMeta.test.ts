@@ -4,7 +4,7 @@ import { OWN_CATEGORY, filterItems, groupByCategory, guideFor, nextPosition, wat
 
 const item = (over: Partial<WatchItem>): WatchItem => ({
   id: Math.random().toString(), title: 'Fake Joke', comedian: 'Fake Comic', category: 'Fake Logicians', description: '',
-  url: '', position: 1, schemer_index: null, logic_density: null, dark_pragmatism: null, watched: false,
+  url: '', position: 1, contrast: null, logic_density: null, has_a_point: null, watched: false,
   created_at: '2026-10-21T00:00:00Z', updated_at: '2026-10-21T00:00:00Z', ...over,
 })
 

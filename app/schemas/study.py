@@ -31,9 +31,9 @@ class WatchItemIn(BaseModel):
     description: str = Field(default="", max_length=2000)
     url: str = Field(default="", max_length=500)
     position: int = Field(default=0, ge=0)
-    schemer_index: Score = Field(default=None, ge=0, le=10)
+    contrast: Score = Field(default=None, ge=0, le=10)
     logic_density: Score = Field(default=None, ge=0, le=10)
-    dark_pragmatism: Score = Field(default=None, ge=0, le=10)
+    has_a_point: Score = Field(default=None, ge=0, le=10)
     watched: bool = False
 
     _title = field_validator("title")(not_blank)

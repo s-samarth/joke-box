@@ -3,17 +3,17 @@ import type { WatchItem, WatchItemInput } from '../../api/types'
 
 /** The three scores, each 0-10. */
 export const SCORES = [
-  { key: 'schemer_index', short: 'SI', name: 'Schemer Index', hint: "How well the routine embodies the forensic, loophole-finding 'System Hacker' mindset." },
+  { key: 'contrast', short: 'CT', name: 'Contrast', hint: 'How sharply it finds a contradiction, or the one case that breaks a rule everyone believes.' },
   { key: 'logic_density', short: 'LD', name: 'Logic Density', hint: 'How tightly the comedy is built on reasoning chains rather than physical humour.' },
-  { key: 'dark_pragmatism', short: 'DP', name: 'Dark Pragmatism', hint: "How far it pushes taboos with logic, into 'Calculated Apathy' territory." },
+  { key: 'has_a_point', short: 'HP', name: 'Has a Point', hint: "How much you walk out thinking 'he's actually right', not just that it was funny." },
 ] as const
 
 export type WatchFilter = 'all' | 'todo' | 'watched'
 
 export const OWN_CATEGORY = 'Your additions'
 
-export const toInput = ({ title, comedian, category, description, url, position, schemer_index, logic_density, dark_pragmatism, watched }: WatchItem): WatchItemInput =>
-  ({ title, comedian, category, description, url, position, schemer_index, logic_density, dark_pragmatism, watched })
+export const toInput = ({ title, comedian, category, description, url, position, contrast, logic_density, has_a_point, watched }: WatchItem): WatchItemInput =>
+  ({ title, comedian, category, description, url, position, contrast, logic_density, has_a_point, watched })
 
 export interface Group {
   category: string

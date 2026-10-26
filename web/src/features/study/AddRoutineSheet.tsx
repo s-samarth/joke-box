@@ -23,7 +23,7 @@ export function AddRoutineSheet({ items, onClose }: { items: WatchItem[]; onClos
     if (!ready) return
     const input = {
       title: form.title.trim(), comedian: form.comedian.trim(), category: form.category.trim(), url: link,
-      description: '', position: nextPosition(items), schemer_index: null, logic_density: null, dark_pragmatism: null, watched: false,
+      description: '', position: nextPosition(items), contrast: null, logic_density: null, has_a_point: null, watched: false,
     }
     save.mutate({ id: newId(), input }, { onError: (e) => toast(`Not saved: ${e.message}`) })
     onClose()

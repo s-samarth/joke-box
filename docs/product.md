@@ -103,7 +103,7 @@ The vocabulary is a comic's, not a database's. Keep to it in the code and in the
 | **LPM** | Laughs per minute: each laugh scored 1 (a few giggles) to 5 (laughs and applause), the points divided by the minutes on stage. |
 | **Path** | Your goals as tick boxes in a Path note (levels, a task list). Home shows the next step. |
 | **Routine** | An item on the watchlist: a known set by another comic. |
-| **SI / LD / DP** | A routine's three optional 0–10 scores: Schemer Index, Logic Density, Dark Pragmatism. |
+| **CT / LD / HP** | A routine's three optional 0–10 scores: Contrast, Logic Density, Has a Point. |
 
 ## Where the product is going
 

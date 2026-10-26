@@ -76,10 +76,10 @@
   "observation": "Self-checkout machines that need a staff member to approve every carrot."
  },
  "watchlist": {
-  "fields": ["title", "comedian", "category", "description", "schemer_index", "logic_density", "dark_pragmatism"],
+  "fields": ["title", "comedian", "category", "description", "contrast", "logic_density", "has_a_point"],
   "rows": [
    ["Airport Queues", "Fake Comic One", "The Logicians", "Proves the fast lane is always the slow one.", 9, 10, 6],
-   ["The Warranty Card", "Fake Comic One", "The Logicians", "Reads the fine print until it confesses.", 8, 9, 7],
+   ["The Warranty Card", "Fake Comic One", "The Logicians", "Finds the one case that breaks the rule.", 8, 9, 7],
    ["Toll Booths", "Fake Comic Two", "The Logicians", "Charges the road for using his car.", 7, 9, 5],
    ["Group Projects", "Fake Comic Two", "The Logicians", "Works out who did nothing, with a chart.", 8, 8, 4],
    ["The Wrong Wedding", "Fake Comic Three", "The Storytellers", "Ten minutes at a stranger's wedding.", 6, 7, 5],
