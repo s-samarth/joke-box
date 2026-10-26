@@ -65,7 +65,7 @@ app/                    FastAPI application
   routers/              one router per resource, all under /api
   services/             logic that spans tables (joke save, topic delete, audio store)
   seed/                 demo data, Bit Vault importer
-alembic/versions/       migrations 0001-0011 (append-only)
+alembic/versions/       migrations 0001-0022 (append-only)
 tests/                  pytest, against SQLite locally and Postgres in CI
 scripts/                vercel_build.py, export_firestore.py, make_icons.py
 web/                    the React app (Vite)

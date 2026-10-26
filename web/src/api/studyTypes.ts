@@ -8,9 +8,9 @@ export interface WatchItemInput {
   description: string
   url: string
   position: number
-  schemer_index: number | null
+  contrast: number | null
   logic_density: number | null
-  dark_pragmatism: number | null
+  has_a_point: number | null
   watched: boolean
 }
 
