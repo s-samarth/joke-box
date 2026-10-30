@@ -48,10 +48,13 @@ def origin() -> str | None:
     return LOCAL_ORIGIN if settings.is_local else None
 
 
-def security() -> TransportSecuritySettings | None:
-    """Locally, refuse requests from other sites (a web page can reach localhost)."""
+def security() -> TransportSecuritySettings:
+    """Locally, refuse requests from other sites: a web page can reach localhost (DNS
+    rebinding). Deployed, every request needs an access token, which is the real protection,
+    so the host check is off. It must be said explicitly: left unset, the SDK assumes it's on
+    localhost and refuses every other host, which turned Claude away from the real domain."""
     if not get_settings().is_local:
-        return None
+        return TransportSecuritySettings(enable_dns_rebinding_protection=False)
     return TransportSecuritySettings(
         enable_dns_rebinding_protection=True,
         allowed_hosts=["127.0.0.1:*", "localhost:*", "[::1]:*", "testserver"],
