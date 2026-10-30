@@ -9,6 +9,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.auth.routes import router as auth_router
 from app.config import get_settings
+from app.connector import http as connector
 from app.routers import (
     analyses,
     board,
@@ -53,7 +54,11 @@ async def require_csrf_header(request: Request, call_next: RequestResponseEndpoi
 def create_app() -> FastAPI:
     settings = get_settings()
     settings.check_production_safety()
-    app = FastAPI(title="JokeBox", docs_url="/api/docs" if settings.is_local else None)
+    app = FastAPI(
+        title="JokeBox",
+        docs_url="/api/docs" if settings.is_local else None,
+        lifespan=connector.lifespan,
+    )
     app.add_middleware(BaseHTTPMiddleware, dispatch=require_csrf_header)
     app.add_middleware(
         SessionMiddleware,
@@ -87,6 +92,7 @@ def create_app() -> FastAPI:
         app.include_router(module.router)
     app.include_router(jokes.legacy_router)
     app.include_router(auth_router)
+    connector.install(app)
     # The built React app. API routes always win; unknown page URLs get index.html.
     app.frontend("/", directory=WEB_DIST, fallback="index.html", check_dir=False)
     return app
