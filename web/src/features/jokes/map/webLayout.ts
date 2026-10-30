@@ -1,15 +1,15 @@
 /**
  * Where everything goes on the premise web.
  *
- * Each premise is a web: its card in the middle and the jokes resting on it on rings around it,
- * like a clock read from the top, in reading order (jokesOn). A ring fills before the next one
- * starts; each ring is a wider ellipse, since the boxes are wider than they are tall, and the
- * spacing is worked out so no two boxes ever overlap. Webs sit in rows, in topic order.
+ * Each premise is a web: its card in the middle, a green arrow out to the first joke of each
+ * chain, and the jokes after it further out, joined by the chain's own arrows (webRings places
+ * them). Webs sit in rows, in topic order.
  *
  * A web shows all its jokes even when the filters hide some; the hidden ones come back dimmed,
  * like a chain on the map.
  */
 import { jokesOn } from '../../../lib/premises'
+import { placeWeb } from './webRings'
 
 interface Item {
   id: string
@@ -29,27 +29,6 @@ export const WEB_NODE = { w: 256, h: 120 }
 const PAD = 32
 const HEAD = 40
 const GAP = 48
-
-/** Ring k (from 1) holds 4 + 4k jokes on an ellipse this wide and tall. */
-const ring = (k: number) => ({ slots: 4 + 4 * k, rx: 440 + 300 * (k - 1), ry: 260 + 210 * (k - 1) })
-
-/** The centres of `n` jokes around a premise at (0, 0). */
-export function ringSpots(n: number): { x: number; y: number }[] {
-  const out: { x: number; y: number }[] = []
-  for (let k = 1; out.length < n; k++) {
-    const { slots, rx, ry } = ring(k)
-    const here = Math.min(slots, n - out.length)
-    // A ring that isn't full spreads its jokes over its slots, starting at the top. Every ring is
-    // turned half a slot from the one inside it, so neighbours never line up.
-    const step = (2 * Math.PI) / slots
-    for (let i = 0; i < here; i++) {
-      const slot = Math.floor((i * slots) / here)
-      const a = -Math.PI / 2 + slot * step + (k % 2 === 0 ? step / 2 : 0)
-      out.push({ x: Math.round(rx * Math.cos(a)), y: Math.round(ry * Math.sin(a)) })
-    }
-  }
-  return out
-}
 
 export interface WebNode<T> {
   joke: T
@@ -89,14 +68,21 @@ function leave(cx: number, cy: number, hw: number, hh: number, tx: number, ty: n
   return { x: cx + dx * t, y: cy + dy * t }
 }
 
-/** One premise's web with its centre at (0, 0), and how far it reaches each way. */
+/** One premise's web with its centre at (0, 0), and the box around it, so the frame fits it snugly. */
 function buildWeb<T extends Item>(premiseId: string, all: T[], shownIds: Set<string>) {
   const members = jokesOn(premiseId, all)
-  const spots = ringSpots(members.length)
+  const at = placeWeb(members)
+  const spots = members.map((j) => at.get(j.id)!)
   const nodes = members.map((joke, i) => ({ joke, x: spots[i].x - WEB_NODE.w / 2, y: spots[i].y - WEB_NODE.h / 2, dim: !shownIds.has(joke.id) }))
-  const xs = [CARD.w / 2, ...spots.map((s) => Math.abs(s.x) + WEB_NODE.w / 2)]
-  const ys = [CARD.h / 2, ...spots.map((s) => Math.abs(s.y) + WEB_NODE.h / 2)]
-  return { nodes, reach: { x: Math.max(...xs), y: Math.max(...ys) } }
+  const xs = spots.map((s) => s.x)
+  const ys = spots.map((s) => s.y)
+  const bounds = {
+    left: Math.min(-CARD.w / 2, ...xs.map((x) => x - WEB_NODE.w / 2)),
+    right: Math.max(CARD.w / 2, ...xs.map((x) => x + WEB_NODE.w / 2)),
+    top: Math.min(-CARD.h / 2, ...ys.map((y) => y - WEB_NODE.h / 2)),
+    bottom: Math.max(CARD.h / 2, ...ys.map((y) => y + WEB_NODE.h / 2)),
+  }
+  return { nodes, bounds }
 }
 
 /** `to` moved `gap` back towards `from`, so an arrowhead stops just short of the box it points at. */
@@ -116,16 +102,16 @@ export function layoutWebs<T extends Item, P extends PremiseItem>(shown: T[], al
   let rowY = 0
   let rowH = 0
   for (const premise of drawn) {
-    const { nodes, reach } = buildWeb(premise.id, all, shownIds)
-    const w = 2 * (reach.x + PAD)
-    const h = HEAD + 2 * (reach.y + PAD)
+    const { nodes, bounds } = buildWeb(premise.id, all, shownIds)
+    const w = bounds.right - bounds.left + 2 * PAD
+    const h = HEAD + bounds.bottom - bounds.top + 2 * PAD
     if (rowX > 0 && rowX + w > rowWidth) {
       rowX = 0
       rowY += rowH + GAP
       rowH = 0
     }
-    const cx = rowX + w / 2
-    const cy = rowY + HEAD + h / 2 - HEAD / 2
+    const cx = rowX + PAD - bounds.left
+    const cy = rowY + HEAD + PAD - bounds.top
     const placed = nodes.map((n) => ({ ...n, x: n.x + cx, y: n.y + cy }))
     const at = new Map(placed.map((n) => [n.joke.id, n]))
     const lines: WebLine[] = []
@@ -133,9 +119,10 @@ export function layoutWebs<T extends Item, P extends PremiseItem>(shown: T[], al
       const [nx, ny] = [n.x + WEB_NODE.w / 2, n.y + WEB_NODE.h / 2]
       const a = leave(cx, cy, CARD.w / 2, CARD.h / 2, nx, ny)
       const b = short(a, leave(nx, ny, WEB_NODE.w / 2, WEB_NODE.h / 2, cx, cy))
-      lines.push({ key: `s${n.joke.id}`, x1: a.x, y1: a.y, x2: b.x, y2: b.y, kind: 'spoke', dim: n.dim })
       const before = n.joke.follows_id ? at.get(n.joke.follows_id) : undefined
-      if (before) {
+      // The premise points only at a chain's first joke; the rest hang off the joke before them.
+      if (!before) lines.push({ key: `s${n.joke.id}`, x1: a.x, y1: a.y, x2: b.x, y2: b.y, kind: 'spoke', dim: n.dim })
+      else {
         const [px, py] = [before.x + WEB_NODE.w / 2, before.y + WEB_NODE.h / 2]
         const s = leave(px, py, WEB_NODE.w / 2, WEB_NODE.h / 2, nx, ny)
         const e = short(s, leave(nx, ny, WEB_NODE.w / 2, WEB_NODE.h / 2, px, py))
