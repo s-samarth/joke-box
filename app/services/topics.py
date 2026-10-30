@@ -9,6 +9,7 @@ from app.auth.bootstrap import random_topic_for
 from app.models import (
     Joke,
     JokeType,
+    Premise,
     Subtopic,
     Topic,
     User,
@@ -28,7 +29,8 @@ def commit_or_conflict(db: Session, message: str) -> None:
 
 
 def delete_topic(db: Session, user: User, topic: Topic) -> None:
-    """Move the topic's jokes (and log links) to Random, clear their subtopic, then delete it."""
+    """Move the topic's jokes, premises and log links to Random, clear the jokes' subtopic, then
+    delete it."""
     if topic.is_system:
         raise HTTPException(400, "Thoughts can't be deleted")
     random_topic = random_topic_for(db, user)
@@ -36,6 +38,11 @@ def delete_topic(db: Session, user: User, topic: Topic) -> None:
         update(Joke)
         .where(Joke.user_id == user.id, Joke.topic_id == topic.id)
         .values(topic_id=random_topic.id, subtopic_id=None)
+    )
+    db.execute(
+        update(Premise)
+        .where(Premise.user_id == user.id, Premise.topic_id == topic.id)
+        .values(topic_id=random_topic.id)
     )
     linked = select(performance_log_topics.c.log_id).where(
         performance_log_topics.c.topic_id == topic.id

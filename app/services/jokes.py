@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from sqlalchemy import delete, exists, func, select
 from sqlalchemy.orm import Session
 
-from app.models import Joke, JokeType, Status, Subtopic, Topic, User, joke_type_links
+from app.models import Joke, JokeType, Premise, Status, Subtopic, Topic, User, joke_type_links
 from app.models.base import written_at
 from app.schemas.library import JokeIn, JokeOut, status_name
 from app.services import chains, type_colors
@@ -20,6 +20,7 @@ def to_out(joke: Joke) -> JokeOut:
         punchline=joke.punchline,
         topic_id=joke.topic_id,
         subtopic_id=joke.subtopic_id,
+        premise_id=joke.premise_id,
         types=[t.name for t in joke.types],
         status=joke.status.name if joke.status else None,
         strength=joke.strength,
@@ -74,18 +75,32 @@ def check_placement(db: Session, user: User, data: JokeIn) -> None:
             raise HTTPException(422, "Subtopic does not belong to that topic")
 
 
+def check_premise(db: Session, user: User, data: JokeIn) -> None:
+    """Any of the user's premises will do, whatever its topic. One deleted since the edit was
+    made (a save waiting offline) is dropped rather than refused."""
+    if data.premise_id is None:
+        return
+    premise = db.get(Premise, data.premise_id)
+    if premise is None:
+        data.premise_id = None
+    elif premise.user_id != user.id:
+        raise HTTPException(422, "Unknown premise")
+
+
 def plain_fields(data: JokeIn) -> dict[str, object]:
-    """The fields copied as they are. An app too old to know about chains leaves follows_id out,
-    and then the link is kept rather than cleared."""
+    """The fields copied as they are. An app too old to know about chains or premises leaves
+    follows_id or premise_id out, and then the link is kept rather than cleared."""
     skip = {"types", "status", "created_at", "base_version"}
-    if "follows_id" not in data.model_fields_set:
-        skip.add("follows_id")
+    for link in ("follows_id", "premise_id"):
+        if link not in data.model_fields_set:
+            skip.add(link)
     return data.model_dump(exclude=skip)
 
 
 def apply(db: Session, user: User, joke: Joke, data: JokeIn) -> None:
     """Copy editor fields onto the joke, creating any new type or status by name."""
     check_placement(db, user, data)
+    check_premise(db, user, data)
     fields = plain_fields(data)
     if "follows_id" in fields:
         chains.check_follows(db, user, joke.id, data.follows_id)

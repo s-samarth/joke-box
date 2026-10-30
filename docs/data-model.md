@@ -30,6 +30,8 @@ erDiagram
   topics ||--o{ subtopics : has
   topics ||--o{ jokes : files
   subtopics |o--o{ jokes : "files (optional)"
+  topics ||--o{ premises : files
+  premises |o--o{ jokes : "rests on (optional, any topic)"
   statuses |o--o{ jokes : "status (optional)"
   jokes }o--o{ joke_types : joke_type_links
   jokes ||--o{ brainstorms : rewrites
@@ -54,11 +56,12 @@ erDiagram
 | `users` | `google_sub` (unique), `email` (unique, lowercase), `display_name`, `avatar_url`, `plan` (default "Pro"), `last_login_at` | Created on first sign-in |
 | `topics` | `name`, `position`, `is_system` | One `is_system` topic per user, named `Random` and shown as **Thoughts**. It can't be deleted; deleting another topic moves its jokes there. `position` is the order you drag them into (new ones go last) |
 | `subtopics` | `topic_id → topics` (cascade), `name`, `position` | Unique per topic, in the order you drag them into. Deleting one clears it from its jokes |
+| `premises` | `topic_id → topics` (cascade), `take`, `notes`, `position` | The idea under a group of jokes: your take and the reasoning behind it. Filed under a topic, but a joke from any topic can rest on it. Upserted by client id, like jokes |
 | `joke_types` | `name` | Pruned whenever no joke uses it. Renaming onto an existing name merges the two |
 | `joke_type_links` | `joke_id`, `type_id` (both cascade) | Many-to-many |
 | `statuses` | `name`, `position` | Six defaults made on first sign-in; new ones are created by name when a joke uses them. A joke saved with no status (or the retired "Status Unknown") gets Draft |
 | `board_spots` | `joke_id → jokes` (cascade, unique), `topic_id`, `x`, `y` | Where you placed a joke on the joke board, relative to its topic island. Its own table, so moving a box never changes the joke's version or edit time. A spot from another topic (the joke moved since) is ignored by the app |
-| `jokes` | `topic_id` (required), `subtopic_id` (set null), `status_id` (set null), `setup`, `punchline`, `strength` 1–5, `duration_seconds`, `hashtags` JSON, `tag_lines` JSON, `clean_rating` (clean / mild / dirty / null), `language`, `comments`, `version` (up by one per save) | Check constraints on strength and clean rating. The API sends types and status as names. `version` catches edits made on two devices |
+| `jokes` | `topic_id` (required), `subtopic_id` (set null), `premise_id` (set null, any topic), `status_id` (set null), `setup`, `punchline`, `strength` 1–5, `duration_seconds`, `hashtags` JSON, `tag_lines` JSON, `clean_rating` (clean / mild / dirty / null), `language`, `comments`, `version` (up by one per save) | Check constraints on strength and clean rating. The API sends types and status as names. `version` catches edits made on two devices |
 
 ### Writing
 
@@ -107,7 +110,8 @@ happen. Saving something that's in the Trash answers 410.
 |---|---|
 | A joke | To the Trash with its live rewrites (same `deleted_at`, so they come back together). Its set places stay but are hidden; saving a set keeps them where they were. Links to it from shows' lessons and brainstorms stay. Erased: its rewrites, versions and set places go (cascade) |
 | A rewrite, observation, brainstorm, show, analysis, routine or craft note | To the Trash. Links to it (a lesson's show or analysis, an analysis's routine, a brainstorm's technique) stay while it's there and clear when it's erased |
-| A topic | Its jokes move to Thoughts with no subtopic; its show links move to Thoughts; its subtopics go |
+| A topic | Its jokes and premises move to Thoughts, the jokes with no subtopic; its show links move to Thoughts; its subtopics go |
+| A premise | Gone at once, not to the Trash. Its jokes stay, on no premise. A joke saved later (offline) still pointing at it is saved with no premise |
 | A subtopic | Its jokes keep their topic and lose the subtopic |
 | A type | Removed from every joke; a joke left with none shows as "Undefined" |
 | An observation topic | Its observations stay, with no topic |
