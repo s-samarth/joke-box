@@ -1,6 +1,7 @@
 """Request dependencies: who is signed in, and fetching rows they own."""
 
 import uuid
+from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, Request, status
@@ -14,6 +15,21 @@ from app.models.trash import INCLUDE_TRASHED, Trashable
 
 DbSession = Annotated[Session, Depends(get_db)]
 
+
+def today() -> str:
+    """Today's date (UTC), the most a sign-in is renewed: once a day is plenty."""
+    return datetime.now(UTC).date().isoformat()
+
+
+def renew(request: Request) -> None:
+    """Keep a sign-in alive while it's used. The session cookie is only sent again when the
+    session changes, so without this it would run out 30 days after signing in however often
+    the app is opened. Marking the day changes it, so the first request each day sends a fresh
+    cookie, good for another 30 days."""
+    if request.session.get("renewed") != today():
+        request.session["renewed"] = today()
+
+
 IN_TRASH = "This was moved to the Trash. Put it back from the Trash, then try again."
 
 
@@ -26,6 +42,7 @@ def current_user(request: Request, db: DbSession) -> User:
     if user is None:
         request.session.clear()
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Not signed in")
+    renew(request)
     return user
 
 

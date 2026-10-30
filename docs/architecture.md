@@ -87,8 +87,10 @@ Every source file stays under 200 lines; a screen is a folder of small component
    HEAD or OPTIONS and lacks that header (403). Another site can't add a custom header without a
    CORS preflight, which is never allowed. Together with `SameSite=Lax` cookies, that blocks CSRF.
 3. **The session middleware** reads the signed `jokebox_session` cookie (30 days, HttpOnly,
-   Secure outside local). The cookie holds only `user_id`.
-4. **The `current_user` dependency** loads the user, or answers 401.
+   Secure outside local). The cookie holds `user_id` and the day it was last renewed.
+4. **The `current_user` dependency** loads the user, or answers 401. On the first request each
+   day it marks the day in the session, so the cookie is sent again with a fresh 30 days: a
+   sign-in only runs out after 30 days without opening the app.
 5. **The router** loads rows with `get_owned` / `find_owned`, which filter by `user_id`. Another
    user's row is a 404, never a 403, so ids can't be probed.
 6. **The service layer** does multi-row work in one transaction (for example, deleting a topic moves
