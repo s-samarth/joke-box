@@ -65,6 +65,15 @@ CI runs the same checks, plus the migrations on Postgres 16 and a production bui
 - **No real jokes** in seeds, fixtures, tests or screenshots. Use obviously made-up material, like
   the demo set.
 - **Ask before adding a dependency,** and commit the lockfile with it.
+- **Keep the Claude connector in step with the models.** [app/connector/](../app/connector/)
+  reads jokes, premises, sets, shows, observations, brainstorms, Craft notes and analyses
+  directly. When you rename, move or remove a field on any of them, update the connector in the
+  same change. Three things catch a miss: mypy (the connector is typed against the models),
+  [test_connector_contract.py](../tests/test_connector_contract.py) (every tool, run over the
+  demo data plus one of everything, must succeed and return exactly its listed fields), and the
+  per-tool tests. If a tool's output changes on purpose, update the contract test and the tool
+  table in [api.md](api.md#claude-connector-mcp) together: Claude, and the comedy-writer skill,
+  rely on those field names.
 
 ## Git workflow
 
