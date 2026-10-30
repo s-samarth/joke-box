@@ -9,14 +9,14 @@ import { usePremises } from '../../api/premises'
 import { Input } from '../../components/ui/Field'
 import { Dropdown, type MenuItem } from '../../components/ui/Menu'
 import { UNDEFINED_TYPE, topicName } from '../../lib/jokeMeta'
-import { NO_PREMISE } from '../../lib/premises'
+import { NO_PREMISE, ON_A_PREMISE } from '../../lib/premises'
 import { TopicManager } from './TopicManager'
 import { TypeManager } from './TypeManager'
 import { SORTS, type SortKey, type useJokeFilters } from './useJokeFilters'
 
 type Filters = ReturnType<typeof useJokeFilters>
 
-function MenuButton({ label, on, children }: { label: string; on: boolean; children?: ReactNode }) {
+export function MenuButton({ label, on, children }: { label: string; on: boolean; children?: ReactNode }) {
   return (
     <button type="button" className={`inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-3 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'bg-ink-3 text-dim hover:text-paper'}`}>
       {label}
@@ -46,13 +46,15 @@ export function JokeFilters({ f }: { f: Filters }) {
   ]
   const premise = premises.find((p) => p.id === f.premise)
   const short = (take: string) => (take.length > 48 ? `${take.slice(0, 47)}…` : take)
-  const premiseItems: (MenuItem | 'divider')[] = [
-    { label: 'Any premise', onSelect: () => f.set({ premise: null }), checked: !f.premise },
+  // Just these three: with hundreds of premises a list would be no use. One premise's jokes are a
+  // link from its page in Premises, and show here by name.
+  const premiseItems: MenuItem[] = [
+    { label: 'Any or none', onSelect: () => f.set({ premise: null }), checked: !f.premise },
+    { label: 'On a premise', onSelect: () => f.set({ premise: ON_A_PREMISE }), checked: f.premise === ON_A_PREMISE },
     { label: 'No premise yet', onSelect: () => f.set({ premise: NO_PREMISE }), checked: f.premise === NO_PREMISE },
-    ...(premises.length ? ['divider' as const] : []),
-    ...premises.map((p) => ({ label: short(p.take), onSelect: () => f.set({ premise: p.id }), checked: f.premise === p.id })),
+    ...(premise ? [{ label: short(premise.take), onSelect: () => undefined, checked: true }] : []),
   ]
-  const premiseLabel = f.premise === NO_PREMISE ? 'No premise yet' : premise ? short(premise.take) : 'Premise'
+  const premiseLabel = f.premise === NO_PREMISE ? 'No premise yet' : f.premise === ON_A_PREMISE ? 'On a premise' : premise ? short(premise.take) : 'Premise'
   const typeItems: (MenuItem | 'divider')[] = [
     { label: 'All types', onSelect: () => f.set({ type: null }), checked: !f.type },
     ...types.map((t) => ({ label: t.name, onSelect: () => f.set({ type: t.name }), checked: f.type === t.name })),

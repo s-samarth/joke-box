@@ -2,7 +2,7 @@
  * Jokes: a scannable list. On desktop the selected joke opens beside the list (like a mail app),
  * and with none open the joke map fills that space; on a phone each opens as its own page.
  */
-import { Download, Lightbulb, MoreHorizontal, Network } from 'lucide-react'
+import { Download, MoreHorizontal, Network } from 'lucide-react'
 import { Link, Outlet, useMatch, useParams } from 'react-router'
 import { useTopics } from '../../api/library'
 import type { Joke, Topic } from '../../api/types'
@@ -32,10 +32,9 @@ function exportCsv(jokes: Joke[], topics: Topic[]) {
 
 export function JokesLayout() {
   const { jokeId } = useParams()
-  // On a phone the list gives way to whatever's open: a joke, the map or the premises.
+  // On a phone the list gives way to whatever's open: a joke, or the map.
   const onMap = useMatch('/jokes/map')
-  const onPremises = useMatch('/jokes/premises/*')
-  const open = Boolean(jokeId || onMap || onPremises)
+  const open = Boolean(jokeId || onMap)
   const f = useJokeFilters()
   const { data: topics = [] } = useTopics()
   const { openCapture } = useCapture()
@@ -44,10 +43,6 @@ export function JokesLayout() {
     <div className="lg:-mx-10 lg:flex lg:h-dvh">
       <section className={`lg:flex lg:w-[26rem] lg:shrink-0 lg:flex-col lg:border-r lg:border-rule lg:px-6 ${open ? 'hidden lg:flex' : ''}`}>
         <PageHead title="Jokes">
-          <Link to="/jokes/premises" aria-label="Premises" title="Premises"
-            className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg text-dim transition-colors hover:bg-ink-3 hover:text-paper">
-            <Lightbulb size={19} />
-          </Link>
           <Link to={`/jokes/map${f.query ? `?${f.query}` : ''}`} aria-label="Joke map and board" title="Joke map and board"
             className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg text-dim transition-colors hover:bg-ink-3 hover:text-paper">
             <Network size={19} />

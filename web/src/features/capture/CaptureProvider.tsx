@@ -6,7 +6,8 @@
  */
 import { useState, type ReactNode } from 'react'
 import { useLocation, useSearchParams } from 'react-router'
-import { NO_PREMISE } from '../../lib/premises'
+import { usePremises } from '../../api/premises'
+import { NO_PREMISE, ON_A_PREMISE } from '../../lib/premises'
 import { CaptureContext } from './captureContext'
 import { NewJokeForm, type Prefill } from './NewJokeForm'
 
@@ -15,11 +16,13 @@ export function CaptureProvider({ children }: { children: ReactNode }) {
   const [prefill, setPrefill] = useState<Prefill | null>(null)
   const { pathname } = useLocation()
   const [params] = useSearchParams()
+  const { data: premises = [] } = usePremises()
   const here = (): Prefill => {
+    const onPage = /^\/premises\/([^/]+)/.exec(pathname)?.[1]
+    if (onPage) return { topicId: premises.find((x) => x.id === onPage)?.topic_id, premiseId: onPage }
     if (!pathname.startsWith('/jokes')) return {}
-    const onPage = /^\/jokes\/premises\/([^/]+)/.exec(pathname)?.[1]
     const filtered = params.get('premise')
-    const premiseId = onPage ?? (filtered && filtered !== NO_PREMISE ? filtered : null)
+    const premiseId = filtered && filtered !== NO_PREMISE && filtered !== ON_A_PREMISE ? filtered : null
     return { topicId: params.get('topic') ?? undefined, subtopicId: params.get('sub'), premiseId }
   }
 

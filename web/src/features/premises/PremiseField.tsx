@@ -45,7 +45,7 @@ export function PremiseField({ value, topicId, onChange }: Props) {
       {value ? (
         <div className="space-y-2">
           {current
-            ? <Link to={`/jokes/premises/${current.id}`} className="line-clamp-2 rounded-lg bg-ink-3 px-3 py-2.5 leading-snug hover:bg-ink-4">{current.take}</Link>
+            ? <Link to={`/premises/${current.id}`} className="line-clamp-2 rounded-lg bg-ink-3 px-3 py-2.5 leading-snug hover:bg-ink-4">{current.take}</Link>
             : <p className="text-dim">A premise that's been deleted</p>}
           <div className="flex gap-5 text-sm">
             <button type="button" onClick={() => setPicking(true)} className="text-tape hover:underline">Change</button>

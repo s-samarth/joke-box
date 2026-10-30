@@ -50,7 +50,7 @@ export function JokeWeb({ shown, all, query, everything }: Props) {
         <WebCanvas webs={layout.webs} width={layout.width} height={layout.height} topics={topics} zoom={zoom} selected={selected} onSelect={pick} scroller={scroller} />
       ) : (
         <p className="max-w-md text-[15px] leading-relaxed text-dim">
-          Open <Link to="/jokes/premises" className="text-tape hover:underline">Premises</Link> to write one, or pick a premise on any joke under <span className="text-paper">Premise</span>.
+          Open <Link to="/premises" className="text-tape hover:underline">Premises</Link> to write one, or pick a premise on any joke under <span className="text-paper">Premise</span>.
         </p>
       )}
       <PeekOf id={selected} all={all} query={query} onPick={pick} onClose={close} />

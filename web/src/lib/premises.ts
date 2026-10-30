@@ -10,8 +10,9 @@ interface OnPremise {
   created_at: string
 }
 
-/** Filter value for jokes resting on no premise. */
+/** Filter values for jokes resting on no premise, and on any premise at all. */
 export const NO_PREMISE = 'none'
+export const ON_A_PREMISE = 'any'
 
 /**
  * The jokes resting on a premise, in reading order: oldest first, with each joke's followers

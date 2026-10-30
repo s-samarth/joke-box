@@ -51,7 +51,7 @@ export function WebCanvas({ webs, width, height, topics, zoom, selected, onSelec
             ))}
           </svg>
           {webs.map((w) => (
-            <Link key={w.premise.id} to={`/jokes/premises/${w.premise.id}`} style={{ position: 'absolute', left: w.card.x, top: w.card.y, width: CARD.w, height: CARD.h }}
+            <Link key={w.premise.id} to={`/premises/${w.premise.id}`} style={{ position: 'absolute', left: w.card.x, top: w.card.y, width: CARD.w, height: CARD.h }}
               className="flex flex-col justify-between rounded-2xl border-2 border-tape/70 bg-ink-3 p-4 text-left shadow-lift hover:border-tape">
               <span className="flex gap-2">
                 <Lightbulb size={18} className="mt-0.5 shrink-0 text-tape" aria-hidden />

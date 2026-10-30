@@ -5,7 +5,7 @@
  */
 import { ArrowLeft, ListPlus, Plus, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
+import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { useJokes, useSaveJoke, useTopics } from '../../api/library'
 import { useDeletePremise, usePremises, type Premise } from '../../api/premises'
 import { Button, IconButton } from '../../components/ui/Button'
@@ -31,6 +31,7 @@ function Editor({ premise }: { premise: Premise }) {
   const { openCapture } = useCapture()
   const { confirm, toast } = useFeedback()
   const navigate = useNavigate()
+  const { search } = useLocation()
   const [adding, setAdding] = useState(false)
   const jokes = jokesOn(premise.id, all)
   const runtime = jokes.reduce((s, j) => s + j.duration_seconds, 0)
@@ -43,13 +44,13 @@ function Editor({ premise }: { premise: Premise }) {
     const ok = await confirm({ title: 'Delete this premise?', message: 'Its jokes stay where they are, just not on a premise. This can’t be undone.', confirmLabel: 'Delete premise', danger: true })
     if (!ok) return
     remove.mutate(premise.id, { onError: (e) => toast(`Not deleted: ${e.message}`) })
-    navigate('/jokes/premises')
+    navigate(`/premises${search}`)
   }
 
   return (
     <article className="mx-auto max-w-2xl pb-10">
-      <Link to="/jokes/premises" className="inline-flex h-12 items-center gap-1.5 text-dim hover:text-paper"><ArrowLeft size={18} /> Premises</Link>
-      <GrowingText aria-label="Your take" placeholder="Your take: X is Y" className="mt-2 text-[26px] leading-tight font-medium sm:text-[30px]"
+      <Link to={`/premises${search}`} className="inline-flex h-12 items-center gap-1.5 text-dim hover:text-paper lg:hidden"><ArrowLeft size={18} /> Premises</Link>
+      <GrowingText aria-label="Your take" placeholder="Your take: X is Y" className="mt-2 lg:mt-10 text-[26px] leading-tight font-medium sm:text-[30px]"
         value={draft.take} onChange={(e) => update({ take: e.target.value })} />
       {!draft.take.trim() && <p className="mt-2 text-sm text-light">A premise needs a take to be saved.</p>}
       <div className="mt-6 grid gap-4">
@@ -61,13 +62,16 @@ function Editor({ premise }: { premise: Premise }) {
             {topics.map((t) => <option key={t.id} value={t.id}>{topicName(t)}</option>)}
           </Select>
         </Field>
-        <PremiseGuide />
+        <PremiseGuide open={jokes.length === 0 && !premise.notes.trim()} />
       </div>
 
       <section className="mt-10">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="headline text-2xl">Jokes on it</h2>
-          <p className="text-sm text-dim">{premiseSize(jokes.length)}{runtime > 0 && `, ${long(runtime)}`}</p>
+          <p className="text-sm text-dim">
+            {premiseSize(jokes.length)}{runtime > 0 && `, ${long(runtime)}`}
+            {jokes.length > 0 && <> · <Link to={`/jokes?premise=${premise.id}`} className="text-tape hover:underline">Open in Jokes</Link></>}
+          </p>
         </div>
         {jokes.length === 0 ? (
           <p className="mt-3 text-[15px] text-dim">One premise feeds many setups. Ask "if this is true, what else is true?" and write each answer as a joke.</p>
@@ -107,6 +111,6 @@ export function PremisePage() {
   const { data: premises, isPending } = usePremises()
   const premise = premises?.find((p) => p.id === premiseId)
   if (isPending && !premises) return <div className="py-16"><Spinner /></div>
-  if (!premise) return <EmptyState title="Premise not found" action={<Link to="/jokes/premises" className="text-tape">All premises</Link>}>It may have been deleted.</EmptyState>
+  if (!premise) return <EmptyState title="Premise not found" action={<Link to="/premises" className="text-tape">All premises</Link>}>It may have been deleted.</EmptyState>
   return <Editor key={premise.id} premise={premise} />
 }

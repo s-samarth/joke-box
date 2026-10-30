@@ -8,7 +8,7 @@ import { useSearchParams } from 'react-router'
 import { useJokes } from '../../api/library'
 import type { Joke } from '../../api/types'
 import { UNDEFINED_TYPE } from '../../lib/jokeMeta'
-import { NO_PREMISE } from '../../lib/premises'
+import { NO_PREMISE, ON_A_PREMISE } from '../../lib/premises'
 import { recall, remember } from './rememberFilters'
 
 export type SortKey = 'new' | 'old' | 'edited' | 'strong' | 'weak' | 'long'
@@ -34,7 +34,9 @@ export function matchesSearch(joke: Joke, q: string): boolean {
 
 export function matchesPremise(joke: Joke, premise: string | null): boolean {
   if (!premise) return true
-  return premise === NO_PREMISE ? !joke.premise_id : joke.premise_id === premise
+  if (premise === NO_PREMISE) return !joke.premise_id
+  if (premise === ON_A_PREMISE) return Boolean(joke.premise_id)
+  return joke.premise_id === premise
 }
 
 export function matchesType(joke: Joke, type: string | null): boolean {

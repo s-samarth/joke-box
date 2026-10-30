@@ -4,7 +4,7 @@
  * everything else sits in the More sheet, grouped by what you're doing.
  */
 import type { LucideIcon } from 'lucide-react'
-import { AudioLines, CalendarCheck, GraduationCap, Eye, Home, ListChecks, ListOrdered, Mic, NotebookPen, PenLine, StickyNote, Trash2 } from 'lucide-react'
+import { AudioLines, Lightbulb, CalendarCheck, GraduationCap, Eye, Home, ListChecks, ListOrdered, Mic, NotebookPen, PenLine, StickyNote, Trash2 } from 'lucide-react'
 
 export interface NavItem {
   to: string
@@ -18,6 +18,7 @@ export interface NavItem {
 
 const home: NavItem = { to: '/', label: 'Home', icon: Home, end: true }
 const jokes: NavItem = { to: '/jokes', label: 'Jokes', icon: StickyNote }
+const premises: NavItem = { to: '/premises', label: 'Premises', icon: Lightbulb, hint: 'The ideas under your jokes' }
 const daily: NavItem = { to: '/daily', label: 'Daily joke', icon: CalendarCheck, hint: 'One new joke a day, ticked off' }
 const sets: NavItem = { to: '/sets', label: 'Sets', icon: ListOrdered, hint: 'Build a setlist and run it on stage' }
 const voice: NavItem = { to: '/voice', label: 'Voice notes', icon: AudioLines, hint: 'Record an idea out loud' }
@@ -30,14 +31,14 @@ const analysis: NavItem = { to: '/analysis', label: 'Analysis', icon: NotebookPe
 const trash: NavItem = { to: '/trash', label: 'Trash', icon: Trash2, hint: 'What you deleted, kept for 30 days' }
 
 /** The desktop rail, top to bottom. */
-export const NAV: NavItem[] = [home, jokes, daily, observations, brainstorm, voice, sets, shows, craft, watchlist, analysis, trash]
+export const NAV: NavItem[] = [home, jokes, premises, daily, observations, brainstorm, voice, sets, shows, craft, watchlist, analysis, trash]
 
 /** Phone bottom bar: two either side of the + button, the last slot being More. */
 export const BAR_LEFT: NavItem[] = [home, jokes]
 export const BAR_RIGHT: NavItem[] = [shows]
 
 export const MORE_GROUPS: { title: string; items: NavItem[] }[] = [
-  { title: 'Write', items: [daily, voice, observations, brainstorm] },
+  { title: 'Write', items: [premises, daily, voice, observations, brainstorm] },
   { title: 'Perform', items: [sets] },
   { title: 'Study', items: [craft, watchlist, analysis] },
   { title: 'Deleted', items: [trash] },
