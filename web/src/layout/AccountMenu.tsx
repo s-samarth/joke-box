@@ -1,5 +1,5 @@
-/** Your avatar: import, several tabs, sign out, and (on your laptop only) reset to demo data. */
-import { AppWindow, FolderInput, LogOut, RefreshCcw } from 'lucide-react'
+/** Your avatar: import, the Claude connector, several tabs, sign out, and (on your laptop only) reset to demo data. */
+import { AppWindow, FolderInput, LogOut, Plug, RefreshCcw } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useMe, useReseed } from '../api/library'
@@ -7,6 +7,7 @@ import { signOut } from '../api/session'
 import { useFeedback } from '../components/ui/feedbackContext'
 import { Dropdown, type MenuItem } from '../components/ui/Menu'
 import { manyTabs, setManyTabs } from '../lib/oneTab'
+import { ClaudeConnector } from './ClaudeConnector'
 import { useWaiting } from './useWaiting'
 
 export function AccountMenu({ showName = false }: { showName?: boolean }) {
@@ -23,6 +24,7 @@ export function AccountMenu({ showName = false }: { showName?: boolean }) {
     void signOut()
   }
   const [many, setMany] = useState(manyTabs)
+  const [connector, setConnector] = useState(false)
   const toggleTabs = async () => {
     if (many) {
       setManyTabs(false)
@@ -37,6 +39,7 @@ export function AccountMenu({ showName = false }: { showName?: boolean }) {
 
   const items: MenuItem[] = [
     { label: 'Import', icon: <FolderInput size={16} />, onSelect: () => navigate('/import') },
+    { label: 'Claude connector', icon: <Plug size={16} />, onSelect: () => setConnector(true) },
     { label: 'Several tabs', icon: <AppWindow size={16} />, checked: many, onSelect: () => void toggleTabs() },
     { label: 'Sign out', icon: <LogOut size={16} />, onSelect: () => void leave() },
   ]
@@ -52,24 +55,27 @@ export function AccountMenu({ showName = false }: { showName?: boolean }) {
   }
 
   return (
-    <Dropdown
-      align="start"
-      items={items}
-      trigger={
-        <button type="button" className="flex min-w-0 items-center gap-3 rounded-lg p-1.5 text-left hover:bg-ink-3" aria-label="Account">
-          {me?.avatar_url ? (
-            <img src={me.avatar_url} alt="" referrerPolicy="no-referrer" className="size-8 rounded-full" />
-          ) : (
-            <span className="flex size-8 items-center justify-center rounded-full bg-ink-4 text-sm font-semibold">{me?.display_name?.[0]?.toUpperCase() ?? '?'}</span>
-          )}
-          {showName && (
-            <span className="min-w-0">
-              <span className="block truncate text-sm">{me?.display_name}</span>
-              <span className="block truncate text-xs text-faint">{me?.email}</span>
-            </span>
-          )}
-        </button>
-      }
-    />
+    <>
+      <ClaudeConnector open={connector} onOpenChange={setConnector} />
+      <Dropdown
+        align="start"
+        items={items}
+        trigger={
+          <button type="button" className="flex min-w-0 items-center gap-3 rounded-lg p-1.5 text-left hover:bg-ink-3" aria-label="Account">
+            {me?.avatar_url ? (
+              <img src={me.avatar_url} alt="" referrerPolicy="no-referrer" className="size-8 rounded-full" />
+            ) : (
+              <span className="flex size-8 items-center justify-center rounded-full bg-ink-4 text-sm font-semibold">{me?.display_name?.[0]?.toUpperCase() ?? '?'}</span>
+            )}
+            {showName && (
+              <span className="min-w-0">
+                <span className="block truncate text-sm">{me?.display_name}</span>
+                <span className="block truncate text-xs text-faint">{me?.email}</span>
+              </span>
+            )}
+          </button>
+        }
+      />
+    </>
   )
 }

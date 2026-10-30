@@ -31,7 +31,9 @@ export default defineConfig({
       workbox: {
         // Page URLs fall back to the cached app shell; API and auth always go to the network.
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api\//, /^\/auth\//, /^\/health/],
+        // Pages the server answers itself, including the Claude connector's sign-in (/authorize and
+        // the consent page), so the installed app never swaps them for itself.
+        navigateFallbackDenylist: [/^\/api\//, /^\/auth\//, /^\/health/, /^\/authorize/, /^\/oauth\//, /^\/mcp/, /^\/\.well-known\//],
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
       },
     }),

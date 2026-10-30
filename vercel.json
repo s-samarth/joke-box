@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
-      "source": "/((?!api/|auth/|health|assets/).*)",
+      "source": "/((?!api/|auth/|health|assets/|mcp|authorize|token|register|revoke|oauth/|\\.well-known/).*)",
       "destination": "/index.html"
     }
   ],

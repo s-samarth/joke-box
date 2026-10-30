@@ -1,13 +1,13 @@
 """Who a tool call is for, and the database session it reads with."""
 
+import uuid
 from collections.abc import Iterator
 from contextlib import contextmanager
 
+from mcp.server.auth.middleware.auth_context import get_access_token
 from mcp.server.mcpserver.exceptions import ToolError
-from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 
-from app.config import get_settings
 from app.db import SessionLocal
 from app.models import User
 
@@ -21,14 +21,11 @@ def use_sessions(factory: sessionmaker[Session]) -> None:
 
 
 def caller(db: Session) -> User:
-    """The user the tools act for. Locally that's the dev sign-in's account; the connector
-    isn't served anywhere else yet."""
-    settings = get_settings()
-    if not settings.is_local:
-        raise PermissionError("The JokeBox connector isn't available here yet.")
-    user = db.scalar(select(User).where(User.email == settings.connector_local_email.lower()))
+    """The user whose access token came with this request (set by the bearer-token check)."""
+    token = get_access_token()
+    user = db.get(User, uuid.UUID(token.subject)) if token and token.subject else None
     if user is None:
-        raise PermissionError("Sign in once at /auth/dev-login so the connector has an account.")
+        raise PermissionError("Not signed in to JokeBox. Connect it again from Claude.")
     return user
 
 

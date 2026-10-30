@@ -20,6 +20,14 @@ oauth.register(
 )
 
 
+def safe_next(target: str | None) -> str:
+    """Where to go after signing in: a path on this site only, never another site (an open
+    redirect would let a link use our sign-in page to send you anywhere)."""
+    if target and target.startswith("/") and not target.startswith("//") and "\\" not in target:
+        return target
+    return "/"
+
+
 def callback_url(request: Request) -> str:
     """Absolute callback URL Google sends the user back to."""
     if settings.public_url:
@@ -28,9 +36,10 @@ def callback_url(request: Request) -> str:
 
 
 @router.get("/google/login")
-async def google_login(request: Request) -> RedirectResponse:
+async def google_login(request: Request, next: str = "") -> RedirectResponse:
     if not settings.google_client_id:
         raise HTTPException(503, "Google sign-in is not configured (GOOGLE_CLIENT_ID).")
+    request.session["next"] = safe_next(next)
     response: RedirectResponse = await oauth.google.authorize_redirect(
         request, callback_url(request), prompt="select_account"
     )
@@ -55,9 +64,10 @@ async def google_callback(request: Request, db: DbSession) -> RedirectResponse:
         name=str(info.get("name", "")),
         avatar=str(info.get("picture", "")),
     )
+    target = safe_next(request.session.get("next"))
     request.session.clear()
     request.session["user_id"] = str(user.id)
-    return RedirectResponse("/", status_code=303)
+    return RedirectResponse(target, status_code=303)
 
 
 @router.post("/logout")
@@ -67,11 +77,13 @@ def logout(request: Request) -> dict[str, bool]:
 
 
 @router.get("/dev-login")
-def dev_login(request: Request, db: DbSession, email: str = "dev@example.com") -> RedirectResponse:
+def dev_login(
+    request: Request, db: DbSession, email: str = "dev@example.com", next: str = ""
+) -> RedirectResponse:
     """Sign in without Google. Exists only when APP_ENV=local."""
     if not settings.is_local:
         raise HTTPException(404)
     user = upsert_user(db, email=email, google_sub=None, name="Dev Comic", avatar="")
     request.session.clear()
     request.session["user_id"] = str(user.id)
-    return RedirectResponse("/", status_code=303)
+    return RedirectResponse(safe_next(next), status_code=303)

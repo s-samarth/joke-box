@@ -2,6 +2,7 @@
 
 from app.models.base import Base
 from app.models.board import BoardSpot
+from app.models.connector import ConnectorClient, ConnectorToken
 from app.models.craft import CraftArea, CraftNote, NoteKind
 from app.models.library import (
     RANDOM_TOPIC,
@@ -38,6 +39,8 @@ __all__ = [
     "JokeType",
     "Brainstorm",
     "BrainstormVersion",
+    "ConnectorClient",
+    "ConnectorToken",
     "CraftArea",
     "CraftNote",
     "NoteKind",

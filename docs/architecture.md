@@ -66,7 +66,7 @@ app/                    FastAPI application
   services/             logic that spans tables (joke save, topic delete, audio store)
   connector/            the MCP server Claude reads JokeBox through (see api.md)
   seed/                 demo data, Bit Vault importer
-alembic/versions/       migrations 0001-0023 (append-only)
+alembic/versions/       migrations 0001-0024 (append-only)
 tests/                  pytest, against SQLite locally and Postgres in CI
 scripts/                vercel_build.py, export_firestore.py, make_icons.py
 web/                    the React app (Vite)
@@ -126,6 +126,27 @@ sequenceDiagram
   running on Vercel (that would expose the dev sign-in). It also refuses a secret shorter than 32
   characters (or the default one), and a SQLite database, outside local.
 - **API docs** (`/api/docs`) exist only locally.
+- **The Claude connector** has its own sign-in: JokeBox is an OAuth server for it, and the
+  consent page uses the Google sign-in above, so the same allowlist decides who can connect.
+  Claude gets a read-only token for one person's JokeBox. Details in [api.md](api.md).
+
+```mermaid
+sequenceDiagram
+  participant C as Claude
+  participant B as Browser
+  participant J as JokeBox
+  C->>J: POST /mcp (no token)
+  J->>C: 401, see /.well-known/oauth-protected-resource/mcp
+  C->>J: POST /register (Claude's callback URL)
+  C->>B: open /authorize (PKCE challenge)
+  B->>J: GET /authorize, then /oauth/consent
+  J->>B: sign in with Google if needed, then Allow?
+  B->>J: POST /oauth/consent (Allow)
+  J->>B: 303 to Claude's callback with a code
+  C->>J: POST /token (code + PKCE verifier)
+  J->>C: access token (1 hour) + refresh token (30 days)
+  C->>J: POST /mcp with Bearer token, tools/call
+```
 
 ## Data isolation
 
@@ -162,7 +183,9 @@ flowchart LR
   database if `DATABASE_URL` is Postgres. `[tool.vercel.fastapi.static] cdn = true` serves
   `web/dist` from the CDN even though the app has middleware.
 - **Page addresses:** [vercel.json](../vercel.json) rewrites every path that isn't a real file and
-  doesn't start with `/api/`, `/auth/`, `/health` or `/assets/` to `/index.html` on the CDN. React
+  doesn't start with `/api/`, `/auth/`, `/health` or `/assets/` (or one of the connector's:
+  `/mcp`, `/authorize`, `/token`, `/register`, `/revoke`, `/oauth/`, `/.well-known/`) to
+  `/index.html` on the CDN. The service worker leaves the connector's pages to the server too. React
   Router then shows the right screen. Without it, opening `/shows` directly in a fresh browser
   reached the Python function, which has no copy of the built frontend, and answered 404.
   Locally, `app.frontend(..., fallback="index.html")` does the same job. Missing files under

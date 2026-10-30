@@ -63,6 +63,13 @@ erDiagram
 | `board_spots` | `joke_id → jokes` (cascade, unique), `topic_id`, `x`, `y` | Where you placed a joke on the joke board, relative to its topic island. Its own table, so moving a box never changes the joke's version or edit time. A spot from another topic (the joke moved since) is ignored by the app |
 | `jokes` | `topic_id` (required), `subtopic_id` (set null), `premise_id` (set null, any topic), `status_id` (set null), `setup`, `punchline`, `strength` 1–5, `duration_seconds`, `hashtags` JSON, `tag_lines` JSON, `clean_rating` (clean / mild / dirty / null), `language`, `comments`, `version` (up by one per save) | Check constraints on strength and clean rating. The API sends types and status as names. `version` catches edits made on two devices |
 
+### Connector sign-in
+
+| Table | Columns | Rules |
+|---|---|---|
+| `connector_clients` | `client_id` (unique), `info` JSON (the registration: name, redirect URLs, secret, auth method) | An app that registered itself to connect (Claude). It reaches no one's data until that person allows it |
+| `connector_tokens` | `user_id` (cascade), `client_id → connector_clients.client_id` (cascade), `kind` (code / access / refresh), `token_hash` (unique, SHA-256), `scopes` JSON, `expires_at`, `details` JSON (a code's PKCE challenge, redirect URL and resource) | Values are never stored, only their hashes. A code or refresh token is deleted as it's used; expired ones are cleared at the next sign-in; disconnecting deletes all of that app's tokens for you |
+
 ### Writing
 
 | Table | Columns | Rules |
@@ -131,6 +138,7 @@ All of these run in one transaction ([services/topics.py](../app/services/topics
 | `0004` | Handwriting page count (`ink_pages`) |
 | `0005` | Voice notes |
 | `0006` | Watchlist and analyses |
+| `0024` | Connector sign-in: `connector_clients` and `connector_tokens` |
 
 Merged migrations are shared history. CI fails a PR that edits, deletes or renames one; fix
 forward with a new revision. CI also runs upgrade → downgrade → upgrade on Postgres 16, so every
