@@ -204,3 +204,33 @@ craft notes wait here 30 days after they're deleted. `{kind}` is one of `jokes`,
 | POST | `/api/trash/{kind}/{id}/restore` | Puts it back (a joke with its rewrites, and into its sets). 404 once erased. 204 if it's not in the Trash |
 | DELETE | `/api/trash/{kind}/{id}` | Erases it now (and a voice note's audio). Only acts on things in the Trash |
 | DELETE | `/api/trash` | Empties the Trash |
+
+## Claude connector (MCP)
+
+`/mcp` is an [MCP](https://modelcontextprotocol.io) server, so Claude can read your JokeBox while
+you write with it. It's in [app/connector/](../app/connector/) and uses the official `mcp` Python
+SDK over streamable HTTP, stateless, with JSON replies: each request stands alone, which suits
+serverless functions.
+
+**Locally only, for now.** With `APP_ENV=local`, `/mcp` reads the account of
+`CONNECTOR_LOCAL_EMAIL` (`dev@example.com` by default, the dev sign-in's account; sign in once at
+`/auth/dev-login` to create it). It's not served on Vercel until it has its own sign-in. Requests
+from other sites are refused (DNS-rebinding protection), since a web page can reach localhost.
+
+Every tool reads; none writes. Each sees only the user's own rows, and the Trash stays hidden.
+
+| Tool | Returns |
+|---|---|
+| `jokebox_overview` | Topics and subtopics with joke counts; how many premises, sets, shows and observations; Craft areas; statuses and types |
+| `search_jokes` | Jokes matching every word of the query, filtered by topic, status, type, strength or premise; short versions, at most 25 |
+| `get_jokes` | Up to 20 jokes in full: tag lines, notes, premise, what it follows and what follows it, the sets it's in, its rewrites |
+| `list_premises`, `get_premise` | Premises with their joke counts; one premise with its notes and jokes in chain order |
+| `list_sets`, `get_set` | Sets with runtime against target; one set in running order (first is the opener, last the closer) with each joke's topic, premise, strength and time |
+| `list_shows` | Logged shows with LPM, rating, topics and notes, and the LPM across them |
+| `search_observations`, `search_brainstorms` | Observations; the typed text of Brainstorms and Rewrites |
+| `search_craft`, `get_craft_notes` | Craft notes (no query lists every title); up to 10 in full |
+| `search_analyses`, `get_analysis` | Analyses with the routine each is about; one in full |
+
+A missing item or a bad id comes back as a tool error Claude can read. To try it, run the app and
+point an MCP client at `http://localhost:8000/mcp`, for example
+`claude mcp add --transport http jokebox http://localhost:8000/mcp`.

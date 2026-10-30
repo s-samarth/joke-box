@@ -64,6 +64,7 @@ app/                    FastAPI application
   schemas/              Pydantic request/response models
   routers/              one router per resource, all under /api
   services/             logic that spans tables (joke save, topic delete, audio store)
+  connector/            the MCP server Claude reads JokeBox through (see api.md)
   seed/                 demo data, Bit Vault importer
 alembic/versions/       migrations 0001-0023 (append-only)
 tests/                  pytest, against SQLite locally and Postgres in CI
