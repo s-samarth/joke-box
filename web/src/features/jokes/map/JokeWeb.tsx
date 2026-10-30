@@ -30,7 +30,7 @@ export function JokeWeb({ shown, all, query, everything }: Props) {
   const { data: premises = [] } = usePremises()
   const scroller = useRef<HTMLDivElement>(null)
   const room = useRoom(scroller)
-  const [zoom, setZoom] = useState(() => (window.innerWidth < 640 ? 0.4 : 0.7))
+  const [zoom, setZoom] = useState(() => (window.innerWidth < 640 ? 0.4 : 0.85))
   const { selected, pick, close } = useSelection()
   const rowWidth = Math.max(room / zoom, 1200)
   const layout = useMemo(() => layoutWebs(shown, all, premises, topics.map((t) => t.id), everything, rowWidth), [shown, all, premises, topics, everything, rowWidth])

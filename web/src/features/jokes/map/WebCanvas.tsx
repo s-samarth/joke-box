@@ -1,6 +1,7 @@
 /**
- * The drawing part of the premise web: a frame per premise with its topic, the premise card in the
- * middle, spokes out to its jokes, and arrows where one joke follows another. Scaled by `zoom`
+ * The drawing part of the premise web: a frame per premise with its topic, the premise card in green
+ * in the middle, arrows flowing out from it to each joke, and yellow arrows where one joke follows
+ * another. Scaled by `zoom`
  * like the map; drag the background or scroll to move around.
  */
 import { Lightbulb } from 'lucide-react'
@@ -10,8 +11,8 @@ import type { Premise } from '../../../api/premises'
 import type { Joke, Topic } from '../../../api/types'
 import { topicName } from '../../../lib/jokeMeta'
 import { premiseSize } from '../../../lib/premises'
-import { MapBox } from './MapBox'
 import { usePan } from './usePan'
+import { WebBox } from './WebBox'
 import { CARD, type Web } from './webLayout'
 
 interface Props {
@@ -33,35 +34,37 @@ export function WebCanvas({ webs, width, height, topics, zoom, selected, onSelec
       <div className="relative" style={{ width: width * zoom, height: height * zoom }}>
         <div className="absolute top-0 left-0 origin-top-left" style={{ width, height, transform: `scale(${zoom})` }}>
           {webs.map((w) => (
-            <div key={w.premise.id} className="absolute rounded-3xl bg-ink-2/50 ring-1 ring-rule" style={{ left: w.x, top: w.y, width: w.w, height: w.h }}>
-              <p className="px-6 pt-3 text-[15px] font-semibold text-dim">{topicName(topics.find((t) => t.id === w.premise.topic_id))}</p>
+            <div key={w.premise.id} className="absolute rounded-[2rem] border-2 border-rule bg-ink-2/40" style={{ left: w.x, top: w.y, width: w.w, height: w.h }}>
+              <p className="px-7 pt-4 text-[20px] font-semibold text-dim">{topicName(topics.find((t) => t.id === w.premise.topic_id))}</p>
             </div>
           ))}
           <svg width={width} height={height} className="pointer-events-none absolute inset-0 overflow-visible" aria-hidden>
             <defs>
-              <marker id={`${ids}a`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--color-tape)" />
-              </marker>
+              {(['ok', 'tape'] as const).map((c) => (
+                <marker key={c} id={`${ids}${c}`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill={`var(--color-${c})`} />
+                </marker>
+              ))}
             </defs>
             {webs.flatMap((w) => w.lines).map((l) => (
-              <line key={l.key} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2}
-                stroke={l.kind === 'chain' ? 'var(--color-tape)' : 'var(--color-rule-strong)'} strokeWidth={2}
-                strokeDasharray={l.dim ? '5 5' : undefined} markerEnd={l.kind === 'chain' ? `url(#${ids}a)` : undefined}
-                className={l.dim ? 'opacity-50' : 'opacity-80'} />
+              <line key={l.key} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} strokeLinecap="round"
+                stroke={`var(--color-${l.kind === 'chain' ? 'tape' : 'ok'})`} strokeWidth={3}
+                strokeDasharray={l.dim ? '6 7' : undefined} markerEnd={`url(#${ids}${l.kind === 'chain' ? 'tape' : 'ok'})`}
+                className={l.dim ? 'opacity-35' : l.kind === 'chain' ? 'opacity-90' : 'opacity-60'} />
             ))}
           </svg>
           {webs.map((w) => (
             <Link key={w.premise.id} to={`/premises/${w.premise.id}`} style={{ position: 'absolute', left: w.card.x, top: w.card.y, width: CARD.w, height: CARD.h }}
-              className="flex flex-col justify-between rounded-2xl border-2 border-tape/70 bg-ink-3 p-4 text-left shadow-lift hover:border-tape">
-              <span className="flex gap-2">
-                <Lightbulb size={18} className="mt-0.5 shrink-0 text-tape" aria-hidden />
-                <span className="line-clamp-3 text-[16px] leading-snug font-medium text-paper">{w.premise.take}</span>
+              className="flex flex-col justify-between rounded-3xl border-[3px] border-ok bg-[color-mix(in_srgb,var(--color-ok)_16%,var(--color-ink-2))] p-5 text-left shadow-lift transition-colors hover:bg-[color-mix(in_srgb,var(--color-ok)_24%,var(--color-ink-2))]">
+              <span className="flex gap-2.5">
+                <Lightbulb size={22} className="mt-0.5 shrink-0 text-ok" aria-hidden />
+                <span className="line-clamp-3 text-[19px] leading-snug font-semibold text-paper">{w.premise.take}</span>
               </span>
-              <span className="text-xs text-dim">{premiseSize(w.nodes.length)}</span>
+              <span className="text-[13px] font-medium text-ok">{premiseSize(w.nodes.length)}</span>
             </Link>
           ))}
           {webs.flatMap((w) => w.nodes).map((n) => (
-            <MapBox key={n.joke.id} joke={n.joke} at={n} dim={n.dim} selected={n.joke.id === selected} onSelect={() => onSelect(n.joke.id)} />
+            <WebBox key={n.joke.id} joke={n.joke} x={n.x} y={n.y} dim={n.dim} selected={n.joke.id === selected} onSelect={() => onSelect(n.joke.id)} />
           ))}
         </div>
       </div>

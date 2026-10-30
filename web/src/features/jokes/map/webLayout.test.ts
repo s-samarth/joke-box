@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { NODE } from './mapLayout'
-import { CARD, layoutWebs, ringSpots } from './webLayout'
+import { CARD, WEB_NODE, layoutWebs, ringSpots } from './webLayout'
 
 type Box = { x: number; y: number; w: number; h: number }
 const overlap = (a: Box, b: Box) => Math.abs(a.x - b.x) < (a.w + b.w) / 2 && Math.abs(a.y - b.y) < (a.h + b.h) / 2
@@ -8,7 +7,7 @@ const overlap = (a: Box, b: Box) => Math.abs(a.x - b.x) < (a.w + b.w) / 2 && Mat
 describe('ringSpots', () => {
   it('never overlaps a joke with another or with the premise card', () => {
     for (let n = 1; n <= 120; n++) {
-      const boxes: Box[] = [{ x: 0, y: 0, ...CARD }, ...ringSpots(n).map((s) => ({ ...s, ...NODE }))]
+      const boxes: Box[] = [{ x: 0, y: 0, ...CARD }, ...ringSpots(n).map((s) => ({ ...s, ...WEB_NODE }))]
       expect(boxes.length).toBe(n + 1)
       for (let i = 0; i < boxes.length; i++) {
         for (let j = i + 1; j < boxes.length; j++) expect(overlap(boxes[i], boxes[j]), `n=${n}: ${i} and ${j}`).toBe(false)
@@ -17,7 +16,7 @@ describe('ringSpots', () => {
   })
 
   it('starts at the top', () => {
-    expect(ringSpots(1)).toEqual([{ x: 0, y: -190 }])
+    expect(ringSpots(1)).toEqual([{ x: 0, y: -260 }])
   })
 })
 

@@ -10,7 +10,6 @@
  * like a chain on the map.
  */
 import { jokesOn } from '../../../lib/premises'
-import { NODE } from './mapLayout'
 
 interface Item {
   id: string
@@ -24,13 +23,15 @@ interface PremiseItem {
   topic_id: string
 }
 
-export const CARD = { w: 264, h: 136 }
+/** The premise card, and the joke boxes around it: bigger than the map's, to read at a glance. */
+export const CARD = { w: 300, h: 152 }
+export const WEB_NODE = { w: 256, h: 120 }
 const PAD = 32
 const HEAD = 40
 const GAP = 48
 
 /** Ring k (from 1) holds 4 + 4k jokes on an ellipse this wide and tall. */
-const ring = (k: number) => ({ slots: 4 + 4 * k, rx: 330 + 270 * (k - 1), ry: 190 + 190 * (k - 1) })
+const ring = (k: number) => ({ slots: 4 + 4 * k, rx: 440 + 300 * (k - 1), ry: 260 + 210 * (k - 1) })
 
 /** The centres of `n` jokes around a premise at (0, 0). */
 export function ringSpots(n: number): { x: number; y: number }[] {
@@ -63,7 +64,7 @@ export interface WebLine {
   y1: number
   x2: number
   y2: number
-  /** A spoke from the premise, or an arrow from a joke to the one that follows it. */
+  /** An arrow out from the premise to a joke, or from a joke to the one that follows it. */
   kind: 'spoke' | 'chain'
   dim: boolean
 }
@@ -92,10 +93,16 @@ function leave(cx: number, cy: number, hw: number, hh: number, tx: number, ty: n
 function buildWeb<T extends Item>(premiseId: string, all: T[], shownIds: Set<string>) {
   const members = jokesOn(premiseId, all)
   const spots = ringSpots(members.length)
-  const nodes = members.map((joke, i) => ({ joke, x: spots[i].x - NODE.w / 2, y: spots[i].y - NODE.h / 2, dim: !shownIds.has(joke.id) }))
-  const xs = [CARD.w / 2, ...spots.map((s) => Math.abs(s.x) + NODE.w / 2)]
-  const ys = [CARD.h / 2, ...spots.map((s) => Math.abs(s.y) + NODE.h / 2)]
+  const nodes = members.map((joke, i) => ({ joke, x: spots[i].x - WEB_NODE.w / 2, y: spots[i].y - WEB_NODE.h / 2, dim: !shownIds.has(joke.id) }))
+  const xs = [CARD.w / 2, ...spots.map((s) => Math.abs(s.x) + WEB_NODE.w / 2)]
+  const ys = [CARD.h / 2, ...spots.map((s) => Math.abs(s.y) + WEB_NODE.h / 2)]
   return { nodes, reach: { x: Math.max(...xs), y: Math.max(...ys) } }
+}
+
+/** `to` moved `gap` back towards `from`, so an arrowhead stops just short of the box it points at. */
+function short(from: { x: number; y: number }, to: { x: number; y: number }, gap = 6) {
+  const len = Math.hypot(to.x - from.x, to.y - from.y) || 1
+  return { x: to.x - ((to.x - from.x) / len) * gap, y: to.y - ((to.y - from.y) / len) * gap }
 }
 
 export function layoutWebs<T extends Item, P extends PremiseItem>(shown: T[], all: T[], premises: P[], topicOrder: string[], includeEmpty: boolean, rowWidth = 1400) {
@@ -123,15 +130,15 @@ export function layoutWebs<T extends Item, P extends PremiseItem>(shown: T[], al
     const at = new Map(placed.map((n) => [n.joke.id, n]))
     const lines: WebLine[] = []
     for (const n of placed) {
-      const [nx, ny] = [n.x + NODE.w / 2, n.y + NODE.h / 2]
+      const [nx, ny] = [n.x + WEB_NODE.w / 2, n.y + WEB_NODE.h / 2]
       const a = leave(cx, cy, CARD.w / 2, CARD.h / 2, nx, ny)
-      const b = leave(nx, ny, NODE.w / 2, NODE.h / 2, cx, cy)
+      const b = short(a, leave(nx, ny, WEB_NODE.w / 2, WEB_NODE.h / 2, cx, cy))
       lines.push({ key: `s${n.joke.id}`, x1: a.x, y1: a.y, x2: b.x, y2: b.y, kind: 'spoke', dim: n.dim })
       const before = n.joke.follows_id ? at.get(n.joke.follows_id) : undefined
       if (before) {
-        const [px, py] = [before.x + NODE.w / 2, before.y + NODE.h / 2]
-        const s = leave(px, py, NODE.w / 2, NODE.h / 2, nx, ny)
-        const e = leave(nx, ny, NODE.w / 2, NODE.h / 2, px, py)
+        const [px, py] = [before.x + WEB_NODE.w / 2, before.y + WEB_NODE.h / 2]
+        const s = leave(px, py, WEB_NODE.w / 2, WEB_NODE.h / 2, nx, ny)
+        const e = short(s, leave(nx, ny, WEB_NODE.w / 2, WEB_NODE.h / 2, px, py))
         lines.push({ key: `c${n.joke.id}`, x1: s.x, y1: s.y, x2: e.x, y2: e.y, kind: 'chain', dim: n.dim || before.dim })
       }
     }
