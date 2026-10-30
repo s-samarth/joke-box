@@ -150,3 +150,13 @@ def test_the_overview_counts(dev: TestClient, db: Session) -> None:
 def test_a_bad_id_is_a_clear_error(db: Session, dev: TestClient) -> None:
     with pytest.raises(ValueError, match="isn't a JokeBox id"):
         library.get_jokes(db, account(db, "dev@example.com"), ["not-an-id"])
+
+
+def test_craft_lists_every_title_without_a_query(dev: TestClient, db: Session) -> None:
+    """The tool promises every title with no query; it once stopped at 25."""
+    for n in range(30):
+        dev.put(f"/api/craft-notes/{uuid.uuid4()}", json=note_in(dev) | {"title": f"Fake {n}"})
+    me = account(db, "dev@example.com")
+    listed = study.search_craft(db, me)
+    assert listed["total"] == len(listed["notes"]) >= 30
+    assert len(study.search_craft(db, me, query="fake")["notes"]) == 25  # searches stay short
