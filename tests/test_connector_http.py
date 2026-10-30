@@ -6,6 +6,8 @@ from collections.abc import Iterator
 import pytest
 from fastapi.testclient import TestClient
 
+from app.config import Settings
+from app.connector import http
 from app.main import app
 from tests.conftest import signed_in
 from tests.connector_auth import call, connect, rpc
@@ -61,3 +63,18 @@ def test_discovery_documents(mcp: TestClient) -> None:
     assert server["issuer"] == "http://localhost:8000"
     assert server["registration_endpoint"] == "http://localhost:8000/register"
     assert server["code_challenge_methods_supported"] == ["S256"]
+
+
+def test_deployed_it_answers_on_its_own_domain(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Locally only localhost may call /mcp; deployed, the real domain must get through (the
+    SDK refused it once, as 'Invalid Host header', when nothing said we weren't local)."""
+    token = connect(signed_in("dev@example.com"))["access_token"]
+    deployed = Settings(app_env="production", public_url="https://jokebox.example")
+    monkeypatch.setattr(http, "get_settings", lambda: deployed)
+    with TestClient(app, base_url="https://jokebox.example") as client:
+        assert rpc(client, token, "tools/list").status_code == 200
+    monkeypatch.undo()
+    with TestClient(app, base_url="https://jokebox.example") as client:
+        assert (
+            rpc(client, token, "tools/list").status_code == 421
+        )  # locally, foreign hosts are refused
