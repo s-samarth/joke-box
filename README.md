@@ -94,13 +94,13 @@ locally it uses SQLite and a folder for voice notes.
 | [System design](docs/architecture.md) | Architecture, request lifecycle, auth, data isolation, deployment, CI, trade-offs |
 | [Frontend architecture](docs/frontend.md) | Server state, optimistic updates, the offline queue, autosave, the voice pipeline, PWA |
 | [Data model](docs/data-model.md) | Every table, what deletes do, migrations, the Bit Vault importer |
-| [API reference](docs/api.md) | Every endpoint, with its body and rules |
+| [API reference](docs/api.md) | Every endpoint, with its body and rules, and the Claude connector (MCP) |
 | [Development and operations](docs/development.md) | Setup, checks, conventions, migrations, deploying to Vercel, runbook |
 
 ## Project layout
 
 ```
-app/        FastAPI: models, schemas, routers, services, auth, seed
+app/        FastAPI: models, schemas, routers, services, auth, seed, connector (MCP for Claude)
 alembic/    migrations (append-only; CI enforces it)
 tests/      pytest
 web/        React app: api/, components/ui/, layout/, features/<area>/, lib/

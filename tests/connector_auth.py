@@ -97,3 +97,17 @@ def call(client: TestClient, token: str, tool: str, **arguments: Any) -> Any:
     response = rpc(client, token, "tools/call", {"name": tool, "arguments": arguments})
     assert response.status_code == 200, response.text
     return response.json()["result"]
+
+
+def result(claude: tuple[TestClient, str], tool: str, **arguments: Any) -> dict[str, Any]:
+    client, token = claude
+    out = call(client, token, tool, **arguments)
+    assert not out.get("isError"), f"{tool} failed: {out['content'][0]['text']}"
+    data: dict[str, Any] = out["structuredContent"]
+    return data
+
+
+def items(data: dict[str, Any], key: str) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = data[key]
+    assert rows, f"expected some {key} in the test data"
+    return rows
