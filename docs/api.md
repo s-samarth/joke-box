@@ -212,10 +212,31 @@ you write with it. It's in [app/connector/](../app/connector/) and uses the offi
 SDK over streamable HTTP, stateless, with JSON replies: each request stands alone, which suits
 serverless functions.
 
-**Locally only, for now.** With `APP_ENV=local`, `/mcp` reads the account of
-`CONNECTOR_LOCAL_EMAIL` (`dev@example.com` by default, the dev sign-in's account; sign in once at
-`/auth/dev-login` to create it). It's not served on Vercel until it has its own sign-in. Requests
-from other sites are refused (DNS-rebinding protection), since a web page can reach localhost.
+**Sign-in** is OAuth 2.1, the way Claude's custom connectors expect, built on the SDK's OAuth
+endpoints with JokeBox's own storage ([oauth.py](../app/connector/oauth.py),
+[tokens.py](../app/connector/tokens.py)):
+
+| Path | What it does |
+|---|---|
+| `GET /.well-known/oauth-protected-resource/mcp` | Says `/mcp` is protected and that JokeBox itself issues the tokens |
+| `GET /.well-known/oauth-authorization-server` | The endpoints below, PKCE `S256`, scope `read` |
+| `POST /register` | Dynamic client registration. Only Claude's callbacks (`https://claude.ai/api/mcp/auth_callback`, and the same on claude.com) and loopback addresses (`http://localhost:*`, for apps on your computer) are accepted; anything else is `400 invalid_redirect_uri` |
+| `GET /authorize` | Checks the request, then sends the browser to the consent page |
+| `GET/POST /oauth/consent` | Sign in (Google, or the dev sign-in locally) and Allow or Don't allow. The request travels in the address, signed and good for 10 minutes; the form is tied to you and the request |
+| `POST /token` | Code for tokens (PKCE checked), or a refresh token for new ones |
+| `POST /revoke` | Ends a sign-in |
+
+- A code works once and lasts 5 minutes. Access tokens last 1 hour; refresh tokens 30 days, and
+  each is replaced when used, so a copy stops working once either side uses it.
+- Codes and tokens are stored only as SHA-256 hashes.
+- `/mcp` without a live token is **401** with a `WWW-Authenticate` header pointing at the
+  protected-resource document, which is how Claude knows to sign in.
+- Locally the issuer is `http://localhost:8000`; deployed it's `PUBLIC_URL`. Without either (a
+  preview with no `PUBLIC_URL`), the connector isn't served. Locally, requests from other sites
+  are refused (DNS-rebinding protection), since a web page can reach localhost.
+
+`GET /api/connections` lists the apps signed in to your JokeBox (name, last used), and
+`DELETE /api/connections/{client_id}` signs one out at once.
 
 Every tool reads; none writes. Each sees only the user's own rows, and the Trash stays hidden.
 
@@ -231,6 +252,7 @@ Every tool reads; none writes. Each sees only the user's own rows, and the Trash
 | `search_craft`, `get_craft_notes` | Craft notes (no query lists every title); up to 10 in full |
 | `search_analyses`, `get_analysis` | Analyses with the routine each is about; one in full |
 
-A missing item or a bad id comes back as a tool error Claude can read. To try it, run the app and
-point an MCP client at `http://localhost:8000/mcp`, for example
-`claude mcp add --transport http jokebox http://localhost:8000/mcp`.
+A missing item or a bad id comes back as a tool error Claude can read. To try it locally, run the
+app and add `http://localhost:8000/mcp` to an MCP client (for example
+`claude mcp add --transport http jokebox http://localhost:8000/mcp`); it opens the consent page,
+where the dev sign-in signs you in.

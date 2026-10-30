@@ -13,6 +13,7 @@ from app.connector import http as connector
 from app.routers import (
     analyses,
     board,
+    connections,
     craft,
     craft_areas,
     craft_kinds,
@@ -87,6 +88,7 @@ def create_app() -> FastAPI:
         craft,
         trash,
         set_tags,
+        connections,
     )
     for module in routers:
         app.include_router(module.router)

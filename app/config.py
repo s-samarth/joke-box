@@ -25,8 +25,6 @@ class Settings(BaseSettings):
     app_version: str = "dev"
     # Local development keeps voice-note audio here; on Vercel it goes to a private Blob store.
     audio_dir: str = ".voice-notes"
-    # Locally the Claude connector reads this account's JokeBox (the dev sign-in's default).
-    connector_local_email: str = "dev@example.com"
 
     @field_validator("database_url")
     @classmethod

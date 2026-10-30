@@ -11,7 +11,8 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session, sessionmaker
 
-from app.db import build_engine, get_db
+from app.connector import identity
+from app.db import SessionLocal, build_engine, get_db
 from app.main import app
 from app.models import Base
 
@@ -40,8 +41,10 @@ def override_db(session_factory: sessionmaker[Session]) -> Iterator[None]:
             yield session
 
     app.dependency_overrides[get_db] = _get_db
+    identity.use_sessions(session_factory)  # the connector opens its own sessions
     yield
     app.dependency_overrides.clear()
+    identity.use_sessions(SessionLocal)
 
 
 def signed_in(email: str) -> TestClient:
