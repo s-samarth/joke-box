@@ -1,20 +1,22 @@
 /**
- * Search plus menus for topic, type, status and sort. Each menu shows what's chosen. Once you pick a
+ * Search plus menus for topic, premise, type, status and sort. Each menu shows what's chosen. Once you pick a
  * topic that has subtopics, a Subtopic menu appears beside it, so the topic list stays topics only.
  */
 import { ChevronDown, Search, X } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { useStatuses, useTopics, useTypes } from '../../api/library'
+import { usePremises } from '../../api/premises'
 import { Input } from '../../components/ui/Field'
 import { Dropdown, type MenuItem } from '../../components/ui/Menu'
 import { UNDEFINED_TYPE, topicName } from '../../lib/jokeMeta'
+import { NO_PREMISE, ON_A_PREMISE } from '../../lib/premises'
 import { TopicManager } from './TopicManager'
 import { TypeManager } from './TypeManager'
 import { SORTS, type SortKey, type useJokeFilters } from './useJokeFilters'
 
 type Filters = ReturnType<typeof useJokeFilters>
 
-function MenuButton({ label, on, children }: { label: string; on: boolean; children?: ReactNode }) {
+export function MenuButton({ label, on, children }: { label: string; on: boolean; children?: ReactNode }) {
   return (
     <button type="button" className={`inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-3 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'bg-ink-3 text-dim hover:text-paper'}`}>
       {label}
@@ -27,6 +29,7 @@ export function JokeFilters({ f }: { f: Filters }) {
   const { data: topics = [] } = useTopics()
   const { data: types = [] } = useTypes()
   const { data: statuses = [] } = useStatuses()
+  const { data: premises = [] } = usePremises()
   const [managing, setManaging] = useState<'topics' | 'types' | null>(null)
   const topic = topics.find((t) => t.id === f.topic)
   const sub = topic?.subtopics.find((s) => s.id === f.sub)
@@ -41,6 +44,17 @@ export function JokeFilters({ f }: { f: Filters }) {
     { label: 'All subtopics', onSelect: () => f.set({ sub: null }), checked: !f.sub },
     ...(topic?.subtopics ?? []).map((s) => ({ label: s.name, onSelect: () => f.set({ sub: s.id }), checked: f.sub === s.id })),
   ]
+  const premise = premises.find((p) => p.id === f.premise)
+  const short = (take: string) => (take.length > 48 ? `${take.slice(0, 47)}…` : take)
+  // Just these three: with hundreds of premises a list would be no use. One premise's jokes are a
+  // link from its page in Premises, and show here by name.
+  const premiseItems: MenuItem[] = [
+    { label: 'Any or none', onSelect: () => f.set({ premise: null }), checked: !f.premise },
+    { label: 'On a premise', onSelect: () => f.set({ premise: ON_A_PREMISE }), checked: f.premise === ON_A_PREMISE },
+    { label: 'No premise yet', onSelect: () => f.set({ premise: NO_PREMISE }), checked: f.premise === NO_PREMISE },
+    ...(premise ? [{ label: short(premise.take), onSelect: () => undefined, checked: true }] : []),
+  ]
+  const premiseLabel = f.premise === NO_PREMISE ? 'No premise yet' : f.premise === ON_A_PREMISE ? 'On a premise' : premise ? short(premise.take) : 'Premise'
   const typeItems: (MenuItem | 'divider')[] = [
     { label: 'All types', onSelect: () => f.set({ type: null }), checked: !f.type },
     ...types.map((t) => ({ label: t.name, onSelect: () => f.set({ type: t.name }), checked: f.type === t.name })),
@@ -65,11 +79,12 @@ export function JokeFilters({ f }: { f: Filters }) {
         {topic && topic.subtopics.length > 0 && (
           <Dropdown align="start" items={subItems} trigger={<span><MenuButton label={sub ? sub.name : 'Subtopic'} on={Boolean(sub)} /></span>} />
         )}
+        <Dropdown align="start" items={premiseItems} trigger={<span><MenuButton label={premiseLabel} on={Boolean(f.premise)} /></span>} />
         <Dropdown align="start" items={typeItems} trigger={<span><MenuButton label={f.type === UNDEFINED_TYPE ? 'No type yet' : (f.type ?? 'Type')} on={Boolean(f.type)} /></span>} />
         <Dropdown align="start" items={statusItems} trigger={<span><MenuButton label={f.status ?? 'Status'} on={Boolean(f.status)} /></span>} />
         <Dropdown align="start" items={sortItems} trigger={<span><MenuButton label={SORTS[f.sort]} on={false} /></span>} />
         {f.active && (
-          <button type="button" onClick={() => f.set({ topic: null, sub: null, type: null, status: null, q: null })} className="inline-flex h-9 shrink-0 items-center gap-1 px-2 text-sm text-dim hover:text-paper">
+          <button type="button" onClick={() => f.set({ topic: null, sub: null, premise: null, type: null, status: null, q: null })} className="inline-flex h-9 shrink-0 items-center gap-1 px-2 text-sm text-dim hover:text-paper">
             <X size={14} /> Clear
           </button>
         )}

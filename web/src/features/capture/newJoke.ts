@@ -17,6 +17,7 @@ export const blankJoke = (topicId = ''): JokeInput => ({
   punchline: '',
   topic_id: topicId,
   subtopic_id: null,
+  premise_id: null,
   types: [],
   status: DEFAULT_STATUS,
   strength: 3,

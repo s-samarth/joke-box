@@ -45,6 +45,8 @@ export interface JokeInput {
   punchline: string
   topic_id: string
   subtopic_id: string | null
+  /** The premise it rests on, from any topic. */
+  premise_id: string | null
   types: string[]
   status: string | null
   strength: number

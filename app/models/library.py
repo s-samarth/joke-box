@@ -1,4 +1,4 @@
-"""Jokes and the things that organise them: topics, subtopics, types and statuses."""
+"""Jokes and the things that organise them: topics, subtopics, premises, types and statuses."""
 
 import uuid
 
@@ -53,6 +53,21 @@ class Subtopic(OwnedMixin, Base):
     name: Mapped[str] = mapped_column(String(120))
     position: Mapped[int] = mapped_column(Integer, default=0)
     topic: Mapped[Topic] = relationship(back_populates="subtopics")
+
+
+class Premise(OwnedMixin, Base):
+    """The idea under a group of jokes: your take, and why it's true. Filed under a topic, but a
+    joke from any topic can rest on it."""
+
+    __tablename__ = "premises"
+
+    topic_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("topics.id", ondelete="CASCADE"), index=True
+    )
+    take: Mapped[str] = mapped_column(Text)
+    # The reasoning behind the take: why it's true, and anything else worth keeping.
+    notes: Mapped[str] = mapped_column(Text, default="")
+    position: Mapped[int] = mapped_column(Integer, default=0)
 
 
 joke_type_links = Table(
@@ -112,6 +127,10 @@ class Joke(Trashable, OwnedMixin, Base):
     )
     status_id: Mapped[uuid.UUID | None] = mapped_column(
         Uuid, ForeignKey("statuses.id", ondelete="SET NULL")
+    )
+    # The premise this joke rests on, from any topic. Deleting the premise keeps the joke.
+    premise_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("premises.id", ondelete="SET NULL"), index=True
     )
     setup: Mapped[str] = mapped_column(Text)
     punchline: Mapped[str] = mapped_column(Text, default="")

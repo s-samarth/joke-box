@@ -6,6 +6,7 @@ import { Check, PenLine, Plus } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { useJokes, useTopics } from '../../api/library'
+import { usePremises } from '../../api/premises'
 import type { Joke } from '../../api/types'
 import { Button } from '../../components/ui/Button'
 import { StrengthTicks, TypeLabel } from '../../components/ui/pieces'
@@ -26,12 +27,15 @@ export function JokePeek({ joke, onClose, onAdd, inSet }: Props) {
   const topic = topics.find((t) => t.id === joke.topic_id)
   const subtopic = topic?.subtopics.find((s) => s.id === joke.subtopic_id)
   const { data: jokes = [] } = useJokes()
+  const { data: premises = [] } = usePremises()
+  const premise = premises.find((p) => p.id === joke.premise_id)
   const before = joke.follows_id ? jokes.find((b) => b.id === joke.follows_id) : undefined
   const rows: [string, ReactNode][] = [
     ['Strength', <span key="s" className="inline-flex items-center gap-2"><StrengthTicks strength={joke.strength} />{strengthLabel(joke.strength)}</span>],
     ['Runs for', <span key="d" className="tabular">{joke.duration_seconds ? clock(joke.duration_seconds) : 'Not timed'}</span>],
     ['Type', <span key="t" className="inline-flex flex-wrap justify-end gap-x-3">{displayTypes(joke.types).map((t) => <TypeLabel key={t} name={t} />)}</span>],
     ...(joke.follows_id ? [['Follows', <span key="f" className="line-clamp-1">{before?.setup ?? 'A joke in the Trash'}</span>] as [string, ReactNode]] : []),
+    ...(premise ? [['Premise', <span key="p" className="line-clamp-2">{premise.take}</span>] as [string, ReactNode]] : []),
     ['Filed under', [topicName(topic), subtopic?.name].filter(Boolean).join(' / ')],
     ['Status', statusOf(joke.status)],
     ...(joke.clean_rating ? [['Clean rating', CLEAN_LABELS[joke.clean_rating]] as [string, ReactNode]] : []),

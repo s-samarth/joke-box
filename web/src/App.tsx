@@ -14,6 +14,9 @@ const JokesLayout = named(() => import('./features/jokes/JokesLayout'), 'JokesLa
 const NoJokeSelected = named(() => import('./features/jokes/JokesLayout'), 'NoJokeSelected')
 const JokeMapScreen = named(() => import('./features/jokes/JokesLayout'), 'JokeMapScreen')
 const JokePage = named(() => import('./features/jokes/JokePage'), 'JokePage')
+const PremisesLayout = named(() => import('./features/premises/PremisesLayout'), 'PremisesLayout')
+const NoPremiseSelected = named(() => import('./features/premises/PremisesLayout'), 'NoPremiseSelected')
+const PremisePage = named(() => import('./features/premises/PremisePage'), 'PremisePage')
 const RewritePage = named(() => import('./features/jokes/RewritePage'), 'RewritePage')
 const SetsPage = named(() => import('./features/sets/SetsPage'), 'SetsPage')
 const SetBuilder = named(() => import('./features/sets/SetBuilder'), 'SetBuilder')
@@ -53,6 +56,10 @@ export function App() {
             <Route index element={<NoJokeSelected />} />
             <Route path="map" element={<JokeMapScreen />} />
             <Route path=":jokeId" element={<JokePage />} />
+          </Route>
+          <Route path="premises" element={<PremisesLayout />}>
+            <Route index element={<NoPremiseSelected />} />
+            <Route path=":premiseId" element={<PremisePage />} />
           </Route>
           <Route path="sets" element={<SetsPage />} />
           <Route path="sets/:setId" element={<SetBuilder />} />

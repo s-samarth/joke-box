@@ -27,7 +27,7 @@ export const useDeleteJoke = () => useMutation<void, Error, string>({ mutationKe
 function useRefreshLibrary() {
   const qc = useQueryClient()
   return () => {
-    for (const key of [keys.topics, keys.types, keys.jokes, keys.logs]) {
+    for (const key of [keys.topics, keys.types, keys.jokes, keys.logs, keys.premises]) {
       void qc.invalidateQueries({ queryKey: key })
     }
   }

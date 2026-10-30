@@ -85,6 +85,8 @@ class JokeIn(BaseModel):
     punchline: str = ""
     topic_id: uuid.UUID
     subtopic_id: uuid.UUID | None = None
+    # The premise it rests on, from any topic. Left out (an older app), the link stays as it is.
+    premise_id: uuid.UUID | None = None
     types: list[str] = Field(default_factory=list)
     status: str = DEFAULT_STATUS
     strength: int = Field(default=3, ge=1, le=5)
@@ -124,6 +126,7 @@ class JokeOut(BaseModel):
     punchline: str
     topic_id: uuid.UUID
     subtopic_id: uuid.UUID | None
+    premise_id: uuid.UUID | None
     types: list[str]
     status: str | None
     strength: int

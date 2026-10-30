@@ -1,5 +1,5 @@
 /**
- * Jokes list state lives in the URL (?topic=&sub=&type=&status=&q=&sort=), so back, refresh and
+ * Jokes list state lives in the URL (?topic=&sub=&premise=&type=&status=&q=&sort=), so back, refresh and
  * links keep your place. Filtering runs in the browser, so it works offline.
  * Arrive with no filters in the URL and the ones you used last come back (rememberFilters.ts).
  */
@@ -8,6 +8,7 @@ import { useSearchParams } from 'react-router'
 import { useJokes } from '../../api/library'
 import type { Joke } from '../../api/types'
 import { UNDEFINED_TYPE } from '../../lib/jokeMeta'
+import { NO_PREMISE, ON_A_PREMISE } from '../../lib/premises'
 import { recall, remember } from './rememberFilters'
 
 export type SortKey = 'new' | 'old' | 'edited' | 'strong' | 'weak' | 'long'
@@ -31,6 +32,13 @@ export function matchesSearch(joke: Joke, q: string): boolean {
   return [joke.setup, joke.punchline, joke.comments, ...joke.hashtags, ...joke.tag_lines].some((t) => t.toLowerCase().includes(needle))
 }
 
+export function matchesPremise(joke: Joke, premise: string | null): boolean {
+  if (!premise) return true
+  if (premise === NO_PREMISE) return !joke.premise_id
+  if (premise === ON_A_PREMISE) return Boolean(joke.premise_id)
+  return joke.premise_id === premise
+}
+
 export function matchesType(joke: Joke, type: string | null): boolean {
   if (!type) return true
   if (type === UNDEFINED_TYPE) return joke.types.length === 0
@@ -52,13 +60,14 @@ export function useJokeFilters() {
   const f = {
     topic: params.get('topic'),
     sub: params.get('sub'),
+    premise: params.get('premise'),
     type: params.get('type'),
     status: params.get('status'),
     q: params.get('q') ?? '',
     sort: (params.get('sort') as SortKey | null) ?? 'new',
   }
 
-  const set = (changes: Partial<Record<'topic' | 'sub' | 'type' | 'status' | 'q' | 'sort', string | null>>) => {
+  const set = (changes: Partial<Record<'topic' | 'sub' | 'premise' | 'type' | 'status' | 'q' | 'sort', string | null>>) => {
     const next = new URLSearchParams(params)
     for (const [key, value] of Object.entries(changes)) {
       if (value) next.set(key, value)
@@ -84,14 +93,15 @@ export function useJokeFilters() {
           (b) =>
             (!f.topic || b.topic_id === f.topic) &&
             (!f.sub || b.subtopic_id === f.sub) &&
+            matchesPremise(b, f.premise) &&
             matchesType(b, f.type) &&
             (!f.status || b.status === f.status) &&
             matchesSearch(b, f.q),
         )
         .sort(SORTERS[f.sort] ?? SORTERS.new),
-    [jokes, f.topic, f.sub, f.type, f.status, f.q, f.sort],
+    [jokes, f.topic, f.sub, f.premise, f.type, f.status, f.q, f.sort],
   )
 
-  const active = Boolean(f.topic || f.type || f.status || f.q)
+  const active = Boolean(f.topic || f.premise || f.type || f.status || f.q)
   return { ...f, set, visible, total: jokes.length, isPending, active, query }
 }
