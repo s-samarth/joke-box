@@ -10,7 +10,7 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
    - **Not on the list:** you land back on Sign in with an "invite-only" message.
    - **On the list:** your account is created on first sign-in, along with the protected
      **Thoughts** topic and the six default statuses. You land on **Home**.
-4. The session lasts 30 days, so reopening the app keeps you signed in.
+4. The session lasts 30 days from the last day you used the app, so reopening it keeps you signed in.
 
 ## 2. Catch an idea in two seconds
 
