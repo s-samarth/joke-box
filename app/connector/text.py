@@ -6,6 +6,8 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 LIMIT = 25
+# Listing titles alone is short, so a whole index fits in one call.
+TITLES_LIMIT = 300
 IST = ZoneInfo("Asia/Kolkata")
 
 
@@ -31,9 +33,9 @@ def ist_date(moment: datetime | None) -> str | None:
     return moment.astimezone(IST).date().isoformat() if moment else None
 
 
-def page[T](rows: list[T], limit: int) -> tuple[list[T], int]:
-    """The first `limit` rows (capped at LIMIT) and how many there were in all."""
-    return rows[: max(1, min(limit, LIMIT))], len(rows)
+def page[T](rows: list[T], limit: int, cap: int = LIMIT) -> tuple[list[T], int]:
+    """The first `limit` rows (no more than `cap`) and how many there were in all."""
+    return rows[: max(1, min(limit, cap))], len(rows)
 
 
 def by_id(rows: Iterable[Any]) -> dict[Any, str]:

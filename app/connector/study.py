@@ -6,7 +6,16 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.connector.library import parse_id
-from app.connector.text import by_id, clip, ist_date, matches, page, same_name
+from app.connector.text import (
+    LIMIT,
+    TITLES_LIMIT,
+    by_id,
+    clip,
+    ist_date,
+    matches,
+    page,
+    same_name,
+)
 from app.models import Analysis, CraftArea, CraftNote, User, WatchItem
 
 
@@ -33,7 +42,8 @@ def search_craft(
         and same_name(area, areas.get(n.area_id))
         and same_name(kind, n.kind.name)
     ]
-    shown, total = page(found, limit if query else 200)
+    # With no query it's the index of titles (no previews), so list every one.
+    shown, total = page(found, limit, LIMIT) if query else page(found, TITLES_LIMIT, TITLES_LIMIT)
     return {
         "total": total,
         "notes": [
