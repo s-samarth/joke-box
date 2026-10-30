@@ -74,12 +74,13 @@ const KINDS: Record<string, string> = {
   joke: 'Joke', observation: 'Observation', session: 'Brainstorm session', watch: 'Watchlist routine',
   analysis: 'Analysis', craft: 'Craft note', log: 'Show', setlist: 'Set', brainstorm: 'Rewrite',
   'brainstorm-version': 'Rewrite version', voice: 'Voice note', board: 'Joke moved on the board',
+  premise: 'Premise',
 }
 
 const TRASH: Record<string, string> = { restore: 'Put back from the Trash', erase: 'Delete from the Trash', empty: 'Empty the Trash' }
 
 /** The fields worth showing (and copying) from a save, in reading order. */
-const WORDS = ['setup', 'punchline', 'text', 'title', 'name', 'label', 'venue_name', 'notes', 'body', 'content']
+const WORDS = ['take', 'setup', 'punchline', 'text', 'title', 'name', 'label', 'venue_name', 'notes', 'body', 'content']
 
 /** What the item was, in words: "Joke", "Delete show", and the text you'd want to copy. */
 export function summary(saved: string[], variables: unknown): { title: string; text: string } {

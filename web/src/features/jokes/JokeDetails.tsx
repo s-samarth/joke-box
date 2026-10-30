@@ -7,6 +7,7 @@ import { useFeedback } from '../../components/ui/feedbackContext'
 import { useCapture } from '../capture/captureContext'
 import { LANGUAGES, statusOf, topicName } from '../../lib/jokeMeta'
 import { followersOf } from '../../lib/chains'
+import { PremiseField } from '../premises/PremiseField'
 import { FollowedBy, FollowsField } from './ChainFields'
 import { CleanPicker, HashtagField, StrengthPicker, TypeToggles } from './DetailControls'
 import { RuntimeField } from './RuntimeField'
@@ -89,11 +90,12 @@ export function JokeDetails({ jokeId, draft, update }: { jokeId?: string; draft:
           </Select>
         </div>
       </Row>
+      <Row label="Premise"><PremiseField value={draft.premise_id ?? null} topicId={draft.topic_id} onChange={(premise_id) => update({ premise_id })} /></Row>
       <Row label="Follows"><FollowsField jokeId={jokeId} value={draft.follows_id ?? null} onChange={(follows_id) => update({ follows_id })} /></Row>
       {jokeId && (
         <Row label="Followed by">
           {/* The next joke starts filed where this one is, already following it. */}
-          <FollowedBy next={next} onWriteNext={() => openCapture({ topicId: draft.topic_id, subtopicId: draft.subtopic_id, followsId: jokeId })} />
+          <FollowedBy next={next} onWriteNext={() => openCapture({ topicId: draft.topic_id, subtopicId: draft.subtopic_id, premiseId: draft.premise_id, followsId: jokeId })} />
         </Row>
       )}
       <Row label="Status">

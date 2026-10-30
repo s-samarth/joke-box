@@ -5,7 +5,7 @@
  * Tap a joke to read it in the same panel as the map.
  */
 import { LayoutGrid } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState, type RefObject } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useBoardSpots, usePlaceJoke, useTidyBoard } from '../../../api/board'
 import { useTopics } from '../../../api/library'
 import type { Joke } from '../../../api/types'
@@ -14,24 +14,11 @@ import { useFeedback } from '../../../components/ui/feedbackContext'
 import { BoardCanvas } from './BoardCanvas'
 import { CELL, layoutBoard, spotIn } from './boardLayout'
 import { PeekOf } from './MapPeek'
+import { useRoom } from './useRoom'
 import { useSelection } from './useSelection'
 import { ZoomControls } from './ZoomControls'
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`
-
-/** Islands wrap at the width of the space there is, so a phone stacks them. */
-function useRoom(scroller: RefObject<HTMLDivElement | null>) {
-  // A first guess from the window, so a phone doesn't start laid out for a desktop.
-  const [room, setRoom] = useState(() => window.innerWidth - 64)
-  useEffect(() => {
-    const el = scroller.current
-    if (!el) return
-    const watch = new ResizeObserver(() => setRoom(el.clientWidth - 32))
-    watch.observe(el)
-    return () => watch.disconnect()
-  }, [scroller])
-  return room
-}
 
 export function JokeBoard({ shown, all, query }: { shown: Joke[]; all: Joke[]; query: string }) {
   const { data: topics = [] } = useTopics()

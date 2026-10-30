@@ -38,6 +38,7 @@ export const keys = {
   trash: ['trash'],
   setTags: ['set-tags'],
   board: ['board'],
+  premises: ['premises'],
 } as const
 
 export const queryClient = new QueryClient({

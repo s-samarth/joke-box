@@ -25,6 +25,8 @@ import { blankJoke, useCaptureJoke } from './newJoke'
 export interface Prefill {
   topicId?: string
   subtopicId?: string | null
+  /** Rests on this premise. */
+  premiseId?: string | null
   setup?: string
   /** Written as the next joke after this one. */
   followsId?: string
@@ -33,7 +35,7 @@ export interface Prefill {
 export function NewJokeForm({ prefill, onClose }: { prefill: Prefill; onClose: () => void }) {
   const { data: topics = [] } = useTopics()
   const thoughtsId = topics.find((t) => t.is_system)?.id ?? ''
-  const [draft, setDraft] = useState<JokeInput>(() => ({ ...blankJoke(prefill.topicId), subtopic_id: prefill.subtopicId ?? null, setup: prefill.setup ?? '', follows_id: prefill.followsId ?? null }))
+  const [draft, setDraft] = useState<JokeInput>(() => ({ ...blankJoke(prefill.topicId), subtopic_id: prefill.subtopicId ?? null, premise_id: prefill.premiseId ?? null, setup: prefill.setup ?? '', follows_id: prefill.followsId ?? null }))
   const [brainstorm, setBrainstorm] = useState('')
   const capture = useCaptureJoke()
   const qc = useQueryClient()
