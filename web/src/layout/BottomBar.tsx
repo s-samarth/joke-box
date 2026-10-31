@@ -1,13 +1,13 @@
 /**
- * The phone's bottom bar: Home, Jokes, a big + for capture, Shows, and More. More opens a sheet
+ * The phone's bottom bar: Home, Jokes, a big + (it adds whatever the current screen holds), Premises, and More. More opens a sheet
  * with every other screen, so nothing is more than two taps away and the + stays in the middle.
  */
 import { LayoutGrid, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router'
 import { Modal } from '../components/ui/Modal'
-import { useCapture } from '../features/capture/captureContext'
 import { BAR_LEFT, BAR_RIGHT, MORE_GROUPS, inMore, type NavItem } from './nav'
+import { useAddAction } from './useAddAction'
 
 const tab = (current: boolean) => `flex h-full flex-1 flex-col items-center justify-center gap-1 text-[11px] ${current ? 'text-paper' : 'text-faint'}`
 
@@ -49,7 +49,7 @@ function MoreSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
 }
 
 export function BottomBar() {
-  const { openCapture } = useCapture()
+  const add = useAddAction()
   const { pathname } = useLocation()
   const [open, setOpen] = useState(false)
   return (
@@ -57,7 +57,7 @@ export function BottomBar() {
       <div className="flex h-16 items-stretch">
         {BAR_LEFT.map((item) => <Tab key={item.to} {...item} />)}
         <div className="flex flex-1 items-center justify-center">
-          <button type="button" onClick={() => openCapture()} aria-label="New joke" className="-mt-6 flex size-14 items-center justify-center rounded-2xl bg-tape text-tape-ink shadow-lift active:bg-tape-deep">
+          <button type="button" onClick={add.run} aria-label={add.label} className="-mt-6 flex size-14 items-center justify-center rounded-2xl bg-tape text-tape-ink shadow-lift active:bg-tape-deep">
             <Plus size={28} strokeWidth={2.4} />
           </button>
         </div>
