@@ -35,11 +35,11 @@ export const NAV: NavItem[] = [home, jokes, premises, daily, observations, brain
 
 /** Phone bottom bar: two either side of the + button, the last slot being More. */
 export const BAR_LEFT: NavItem[] = [home, jokes]
-export const BAR_RIGHT: NavItem[] = [shows]
+export const BAR_RIGHT: NavItem[] = [premises]
 
 export const MORE_GROUPS: { title: string; items: NavItem[] }[] = [
-  { title: 'Write', items: [premises, daily, voice, observations, brainstorm] },
-  { title: 'Perform', items: [sets] },
+  { title: 'Write', items: [daily, voice, observations, brainstorm] },
+  { title: 'Perform', items: [sets, shows] },
   { title: 'Study', items: [craft, watchlist, analysis] },
   { title: 'Deleted', items: [trash] },
 ]

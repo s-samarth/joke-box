@@ -37,7 +37,9 @@ export function ShowsPage() {
   const [moreOpen, setMoreOpen] = useState(false)
   const [sort, setSort] = useState<Sort>({ key: 'date', desc: true })
   const [limit, setLimit] = useState(PAGE_SIZE)
-  const [editing, setEditing] = useState<PerformanceLog | 'new' | null>(params.get('log') ? 'new' : null)
+  const [editingRow, setEditing] = useState<PerformanceLog | 'new' | null>(null)
+  // ?log=1 (the + button, or a link) opens a blank log sheet.
+  const editing = editingRow ?? (params.get('log') ? 'new' : null)
   const [viewing, setViewing] = useState<PerformanceLog | null>(null)
   const [venuesOpen, setVenuesOpen] = useState(false)
   const view: View = params.get('view') === 'timeline' || params.get('view') === 'insights' ? (params.get('view') as View) : 'list'

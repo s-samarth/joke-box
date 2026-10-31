@@ -4,8 +4,8 @@
  * topic, sort by size. On a phone the list gives way to the premise you open.
  */
 import { Lightbulb, Plus, Search, X } from 'lucide-react'
-import { useState } from 'react'
-import { Link, Outlet, useLocation, useNavigate, useParams } from 'react-router'
+import { useRef } from 'react'
+import { Link, Outlet, useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
 import { useTopics } from '../../api/library'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Field'
@@ -22,9 +22,17 @@ export function PremisesLayout() {
   const { premiseId } = useParams()
   const f = usePremiseFilters()
   const { data: topics = [] } = useTopics()
-  const [creating, setCreating] = useState(false)
+  const [params, setParams] = useSearchParams()
   const navigate = useNavigate()
-  const { search } = useLocation()
+  // The New dialog's open state lives in the URL (?new=1), so the + button can open it from anywhere on Premises.
+  const creating = params.has('new')
+  const setCreating = (open: boolean) => setParams((p) => { if (open) p.set('new', '1'); else p.delete('new'); return p }, { replace: true })
+  // Creating navigates to the new premise (which drops ?new=1); the dialog's own close that follows mustn't navigate back.
+  const created = useRef(false)
+  // Links to a premise keep the list's filters, but not the open dialog.
+  const kept = new URLSearchParams(useLocation().search)
+  kept.delete('new')
+  const search = kept.size ? `?${kept}` : ''
   const topic = topics.find((t) => t.id === f.topic)
   const topicItems: MenuItem[] = [
     { label: 'All topics', onSelect: () => f.set({ topic: null }), checked: !f.topic },
@@ -85,7 +93,8 @@ export function PremisesLayout() {
       <section className={`min-w-0 flex-1 lg:overflow-y-auto lg:px-10 ${premiseId ? '' : 'hidden lg:block'}`}>
         <Outlet />
       </section>
-      <NewPremiseDialog open={creating} onOpenChange={setCreating} topicId={f.topic} onCreated={(id) => navigate(`/premises/${id}${search}`)} />
+      <NewPremiseDialog open={creating} onOpenChange={(open) => (created.current && !open ? (created.current = false) : setCreating(open))} topicId={f.topic}
+        onCreated={(id) => { created.current = true; navigate(`/premises/${id}${search}`) }} />
     </div>
   )
 }
