@@ -9,7 +9,7 @@ import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persi
 import { MutationCache, type QueryKey, QueryClient } from '@tanstack/react-query'
 import { del, get, set } from 'idb-keyval'
 import { ApiError, api } from './client'
-import { QUEUED } from './sync'
+import { QUEUED, dropOlderWaiting } from './sync'
 import { keepUnsynced } from './unsynced'
 import type { Observation, ObservationInput, WritingSession, WritingSessionInput } from './types'
 
@@ -149,6 +149,7 @@ queryClient.setMutationDefaults(saveSessionKey, {
   ...QUEUED,
   mutationFn: ({ id, input }: SaveSessionVars) => api<WritingSession>(`/api/sessions/${id}`, 'PUT', input),
   onMutate: async ({ id, input }: SaveSessionVars) => {
+    dropOlderWaiting(queryClient, saveSessionKey, id) // this save has it all: older waiting copies go
     await queryClient.cancelQueries({ queryKey: keys.sessions })
     const now = new Date().toISOString()
     queryClient.setQueryData<WritingSession[]>(keys.sessions, (old = []) => {

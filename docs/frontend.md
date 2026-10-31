@@ -29,6 +29,10 @@ under fixed keys (`setMutationDefaults`), each spreading the shared `QUEUED` opt
 - **One at a time, in order:** every queued save shares `scope: { id: 'sync' }`, so they reach the
   server in the order you made them. A show arrives before the lesson that points at it, and two
   quick edits to one joke can't land the wrong way round.
+- **One waiting copy per brainstorm session:** a session autosaves its whole self (text and
+  handwriting) at every pause, so offline each pause used to queue another full copy. Its save
+  now drops that session's older saves that haven't been sent yet (`dropOlderWaiting` in
+  sync.ts): the newest copy holds everything they did. A save already on its way is left alone.
 - **Retries:** a save that never reached the server is retried (pausing while offline, which
   costs no tries) up to 20 times while the server answers `/health`, so one stuck request can't
   hold up the queue forever. A 5xx, 408 or 429 gets three more tries. A 401 (the sign-in ran out)
