@@ -80,7 +80,7 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 3. When handwriting, draw with Apple Pencil, a finger or a mouse. Once the device has seen a
    Pencil, only the Pencil draws: one finger pans and two pinch to zoom, as in OneNote (the hand
    button turns finger drawing back on). You get a pen, an eraser, quick colours and three
-   thicknesses, undo, and up to 20 pages.
+   thicknesses, undo, and up to 8 pages, each two screens wide: pan sideways for the right half.
 4. Tap **Link jokes or observations** to attach whatever the session touches.
 5. Leave whenever you like: the session saves itself.
 

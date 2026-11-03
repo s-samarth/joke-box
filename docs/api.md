@@ -135,7 +135,8 @@ The response (`JokeOut`) adds `id`, `created_at` and `updated_at`, and returns `
 | DELETE | `/api/sessions/{id}` | |
 
 `ink` holds at most 10,000 strokes, each `{color, size, page, points: [[x, y, pressure], …]}`, with
-up to 5,000 points per stroke and at most 20 pages.
+up to 5,000 points per stroke and at most 20 pages (the app adds no more than 8; the server keeps
+20 so sessions from before that still save). `x` runs to 2000 on a double-width page.
 
 **Packed bodies** ([packed.py](../app/packed.py), [packed.ts](../web/src/api/packed.ts)): Vercel
 refuses requests and responses over 4.5 MB, and a session of dense handwriting is several times

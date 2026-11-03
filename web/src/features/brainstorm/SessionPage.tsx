@@ -156,6 +156,12 @@ export function SessionPage() {
   // Offline as soon as the app knows, not only once a waiting download has paused.
   const offline = !useOnline() || session.fetchStatus === 'paused'
   const wait = <div className="p-8"><Spinner /></div>
+  // Once open, the session stays open: a refresh in the background must never swap the page
+  // you're writing on for a spinner (that would lose the zoom and the undo history).
+  const [opened, setOpened] = useState<string | null>(null)
+  // key: opening a different session starts a fresh workspace instead of reusing the old state.
+  const workspace = <Workspace key={sessionId} id={sessionId} start={session.data ?? undefined} technique={params.get('technique')} />
+  if (opened === sessionId) return workspace
   if (session.data === undefined) {
     // Never open an empty editor over a session whose ink isn't here: its autosave would wipe the
     // pages. A session that isn't in the list (or a list we can't load) is one just started.
@@ -165,8 +171,8 @@ export function SessionPage() {
   }
   // A copy older than the list says: wait for the fresh one rather than edit over it.
   if (session.data && summary && session.data.updated_at !== summary.updated_at && session.isFetching) return wait
-  // key: opening a different session starts a fresh workspace instead of reusing the old state.
-  return <Workspace key={sessionId} id={sessionId} start={session.data ?? undefined} technique={params.get('technique')} />
+  setOpened(sessionId) // React re-renders straight away, and from then on it stays open
+  return workspace
 }
 
 function NotOnDevice({ failed, onRetry }: { failed?: boolean; onRetry?: () => void }) {

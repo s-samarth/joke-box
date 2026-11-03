@@ -155,7 +155,12 @@ export const toSummary = ({ ink, ...rest }: WritingSession): SessionSummary => (
 
 queryClient.setMutationDefaults(saveSessionKey, {
   ...QUEUED,
-  mutationFn: ({ id, input }: SaveSessionVars) => api<SessionSummary>(`/api/sessions/${id}`, 'PUT', input),
+  mutationFn: async ({ id, input }: SaveSessionVars) => {
+    const saved = await api<SessionSummary>(`/api/sessions/${id}`, 'PUT', input)
+    // Take the server's time, so this copy reads as current and isn't downloaded again.
+    queryClient.setQueryData<WritingSession | null>(sessionKey(id), (old) => old && { ...old, updated_at: saved.updated_at })
+    return saved
+  },
   onMutate: async ({ id, input }: SaveSessionVars) => {
     dropOlderWaiting(queryClient, saveSessionKey, id) // this save has it all: older waiting copies go
     await queryClient.cancelQueries({ queryKey: keys.sessionList })

@@ -89,6 +89,12 @@ describe('keeping sessions on the device', () => {
 })
 
 describe('saving a session', () => {
+  it("takes the server's time once saved, so the session isn't downloaded again", async () => {
+    vi.stubGlobal('fetch', async () => Response.json({ ...summary(session('s1')), updated_at: '2026-05-05T05:05:05Z' }))
+    await new MutationObserver<unknown, Error, SaveSessionVars>(queryClient, { mutationKey: saveSessionKey }).mutate({ id: 's1', input: session('s1') })
+    expect(queryClient.getQueryData<WritingSession>(sessionKey('s1'))?.updated_at).toBe('2026-05-05T05:05:05Z')
+  })
+
   it('updates the session and the list at once, and the list stays without ink', async () => {
     onlineManager.setOnline(false)
     queryClient.setQueryData(keys.sessionList, [summary(session('other'))])
