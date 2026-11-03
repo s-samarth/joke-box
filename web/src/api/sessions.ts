@@ -9,6 +9,7 @@ import { type QueryClient, useMutation, useQuery, useQueryClient } from '@tansta
 import { useEffect } from 'react'
 import { ApiError, api } from './client'
 import { deleteSessionKey, keys, saveSessionKey, sessionKey, type SaveSessionVars } from './queryClient'
+import { savesOf } from './sessionSaves'
 import { QUEUED } from './sync'
 import type { SessionSummary, WritingSession } from './types'
 
@@ -69,7 +70,19 @@ export function useSessionList() {
   return list
 }
 
-export const useSession = (id: string) => useQuery({ queryKey: sessionKey(id), queryFn: () => fetchSession(id) })
+/**
+ * One session with its ink. While a save of it waits, the copy here is newer than the server's,
+ * so it's kept rather than fetched: a fetch then would put the older copy back.
+ */
+export function readSession(client: QueryClient, id: string): Promise<WritingSession | null> {
+  const here = client.getQueryData<WritingSession | null>(sessionKey(id))
+  return here && savesOf(id) > 0 ? Promise.resolve(here) : fetchSession(id)
+}
+
+export const useSession = (id: string) => {
+  const client = useQueryClient()
+  return useQuery({ queryKey: sessionKey(id), queryFn: () => readSession(client, id) })
+}
 
 export const useSaveSession = () => useMutation<SessionSummary, Error, SaveSessionVars>({ mutationKey: saveSessionKey })
 

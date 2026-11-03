@@ -60,6 +60,8 @@ export interface JokeInput {
   follows_id: string | null
   /** Sent when creating, so something written offline keeps the time it was written. */
   created_at?: string
+  /** The version this edit was made from (toInput keeps it): the base of the clash check. */
+  version?: number
 }
 
 export interface Joke extends JokeInput {

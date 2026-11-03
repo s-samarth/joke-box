@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Stroke } from '../../api/types'
-import { eraseAt, pageCount, removePage, replacePage, strokesOn, undoOn } from './ink'
+import { eraseAt, pageCount, pageHeight, removePage, replacePage, strokesOn, undoOn } from './ink'
 
 const stroke = (page: number | undefined, x = 100, y = 100): Stroke => ({ color: '#fff', size: 2.4, page, points: [[x, y, 0.5]] })
 
@@ -36,5 +36,12 @@ describe('handwriting pages', () => {
   it('the eraser takes whole strokes', () => {
     const long: Stroke = { color: '#fff', size: 2.4, points: [[0, 0, 0.5], [500, 500, 0.5]] }
     expect(eraseAt([long, stroke(0, 900, 900)], 500, 500)).toHaveLength(1)
+  })
+
+  it("measures a page too dense to spread into Math.max", () => {
+    const dense: Stroke[] = Array.from({ length: 50 }, (_, i) => ({ color: '#fff', size: 2.4, points: Array.from({ length: 4000 }, (_, j) => [j, i === 7 && j === 9 ? 2000 : 100, 0.5]) }))
+    expect(pageHeight(dense)).toBe(2000)
+    expect(pageHeight([stroke(0)])).toBe(1414)
+    expect(pageCount(Array.from({ length: 200_000 }, (_, i) => stroke(i === 5 ? 3 : 0)))).toBe(4)
   })
 })

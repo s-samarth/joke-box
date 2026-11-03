@@ -5,6 +5,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSaveJoke } from '../../api/library'
 import type { Joke, JokeInput } from '../../api/types'
+import { onHide } from '../../lib/saveOnHide'
 
 const DELAY = 700
 
@@ -38,11 +39,11 @@ export function useAutosaveJoke(joke: Joke) {
     timer.current = setTimeout(flush, DELAY)
   }
 
-  // Save anything still waiting when you navigate away or close the tab.
+  // Save anything still waiting when you navigate away, close the tab or switch apps.
   useEffect(() => {
-    window.addEventListener('pagehide', flush)
+    const stop = onHide(flush)
     return () => {
-      window.removeEventListener('pagehide', flush)
+      stop()
       flush()
     }
     // Only on mount/unmount for this joke; flush reads the latest values through refs.

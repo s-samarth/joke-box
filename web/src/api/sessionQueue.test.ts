@@ -5,6 +5,7 @@
 import { MutationObserver, onlineManager } from '@tanstack/react-query'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { queryClient, saveSessionKey, type SaveSessionVars } from './queryClient'
+import './sessionSaves'
 
 const input = (content: string) => ({
   title: '', content, ink: [], ink_pages: 1, timer_seconds: 0, joke_ids: [], observation_ids: [], technique_id: null,

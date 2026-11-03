@@ -1,6 +1,7 @@
 /** Edit-in-place for one premise, saved after a short pause or when you leave, like a joke. */
 import { useEffect, useRef, useState } from 'react'
 import { useSavePremise, type Premise, type PremiseInput } from '../../api/premises'
+import { onHide } from '../../lib/saveOnHide'
 
 const DELAY = 700
 
@@ -30,9 +31,9 @@ export function usePremiseDraft(premise: Premise) {
   }
 
   useEffect(() => {
-    window.addEventListener('pagehide', flush)
+    const stop = onHide(flush)
     return () => {
-      window.removeEventListener('pagehide', flush)
+      stop()
       flush()
     }
     // Only on mount/unmount for this premise; flush reads the latest values through refs.

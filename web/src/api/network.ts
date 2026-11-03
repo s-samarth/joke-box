@@ -26,9 +26,9 @@ let probeTimer: ReturnType<typeof setInterval> | undefined
  * Wifi with a sign-in page (venues, cafés) answers every request with its own page until you sign
  * in, so a plain "did something answer" isn't enough: it has to be our server saying ok.
  */
-async function serverAnswers(): Promise<boolean> {
+export async function serverAnswers(timeout = 8_000): Promise<boolean> {
   try {
-    const response = await fetch('/health', { cache: 'no-store', signal: AbortSignal.timeout(8_000) })
+    const response = await fetch('/health', { cache: 'no-store', signal: AbortSignal.timeout(timeout) })
     if (!response.ok || isForeign(response)) return false
     return ((await response.json()) as { status?: string }).status === 'ok'
   } catch {

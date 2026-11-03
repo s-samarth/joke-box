@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { useSaveSession } from '../../api/sessions'
 import type { WritingSessionInput } from '../../api/types'
-
+import { onHide } from '../../lib/saveOnHide'
 
 const isEmpty = (s: WritingSessionInput) =>
   !s.title.trim() && !s.content.trim() && !s.ink.length && !s.joke_ids.length && !s.observation_ids.length
@@ -39,6 +39,8 @@ export function useSessionAutosave(id: string, input: WritingSessionInput, delay
   }, [title, content, ink, ink_pages, joke_ids, observation_ids, technique_id, flush, delay])
 
   useEffect(() => flush, [flush])
+  // Switching apps or locking the phone mid-pause: save now, the app may not come back to it.
+  useEffect(() => onHide(flush), [flush])
 
   return {
     /** Call on every edit so the next pause saves it. */

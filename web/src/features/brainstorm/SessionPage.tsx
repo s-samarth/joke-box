@@ -6,6 +6,7 @@
 import { Keyboard, Pause, PenLine, Play, RotateCcw, X } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
+import { tooBig } from '../../api/sessionLimits'
 import { useSession, useSessionList } from '../../api/sessions'
 import type { Stroke, WritingSession } from '../../api/types'
 import { IconButton } from '../../components/ui/Button'
@@ -49,7 +50,10 @@ function Workspace({ id, start, technique }: { id: string; start?: WritingSessio
   const { confirm } = useFeedback()
   // Handwriting saves after a longer pause: a big session takes a moment to package, and that
   // shouldn't land mid-word.
-  const autosave = useSessionAutosave(id, { title, content, ink, ink_pages: pages, timer_seconds: timer.seconds, joke_ids: jokeIds, observation_ids: observationIds, technique_id: techniqueId ?? null }, mode === 'write' ? 3000 : 1200)
+  const input = { title, content, ink, ink_pages: pages, timer_seconds: timer.seconds, joke_ids: jokeIds, observation_ids: observationIds, technique_id: techniqueId ?? null }
+  const autosave = useSessionAutosave(id, input, mode === 'write' ? 3000 : 1200)
+  // Over what the server takes, saves stay on this device: say so here, not only in Couldn't sync.
+  const problem = tooBig(input)
   const words = content.trim() ? content.trim().split(/\s+/).length : 0
 
   // Wrap each setter so any edit marks the session for the next autosave.
@@ -106,6 +110,7 @@ function Workspace({ id, start, technique }: { id: string; start?: WritingSessio
               fingerDraws={finger} onFingerDraws={changeFinger} fullScreen={full} onFullScreen={changeFocus} />
           </div>
         )}
+        {problem && <p role="alert" className="border-t border-rule px-3 py-2 text-sm text-paper sm:px-6">{problem}</p>}
       </header>
 
       {/* Handwriting takes the whole width (the page is two screens of it); the rest stays a readable column. */}
