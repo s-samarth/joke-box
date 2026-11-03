@@ -249,7 +249,14 @@ separate from joke topics: drag the grips to reorder them; deleting one keeps it
     pans (sideways too), two pinch to zoom up to 2.5x around the fingers, or out to 50%, where the whole double-width page fits on screen. A trackpad's sideways
     swipe pans as well. During the pinch the canvas is only
     stretched (CSS transform); when the fingers lift it is redrawn sharp at the new size, capped
-    at 12 million pixels to stay under Safari's canvas limit. A second finger mid-stroke turns the stroke into a pinch.
+    at 12 million pixels to stay under Safari's canvas limit. A flick keeps the page gliding,
+    slowing like iOS scrolling ([glide.ts](../web/src/features/brainstorm/glide.ts)); touching the
+    page stops it.
+  - **Smooth ink** ([usePagePaint.ts](../web/src/features/brainstorm/usePagePaint.ts)): the canvas
+    draws only what's new. A finished stroke adds itself; an unrelated re-render (the timer, the
+    "Saving…" label) draws nothing, so the stroke being written never flickers away. Only an
+    erase, an undo, a page change or a new size redraws the whole page, and the canvas is rebuilt
+    only when its size changes. A second finger mid-stroke turns the stroke into a pinch.
   - **Pens** ([PenStyle.tsx](../web/src/features/brainstorm/PenStyle.tsx)): on a tablet or laptop,
     five everyday colours and three thicknesses (Fine, Medium, Thick) sit on the toolbar; the
     menu holds the full twelve colours, and is all a phone shows.

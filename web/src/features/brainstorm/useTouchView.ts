@@ -1,5 +1,6 @@
 /**
- * Fingers on a handwriting page: one finger pans, two pinch to zoom (and pan as they move).
+ * Fingers on a handwriting page: one finger pans (a flick keeps it gliding, see glide.ts), two
+ * pinch to zoom (and pan as they move).
  * Pinched out all the way, the whole double-width page fits on screen.
  *
  * Pattern: during a pinch the canvas is only stretched with a CSS transform, which is instant.
@@ -10,6 +11,7 @@
  * (a resting palm) are ignored.
  */
 import { type RefObject, useLayoutEffect, useRef } from 'react'
+import { flingVelocity, glide, type Sample } from './glide'
 import { MAX_ZOOM, MIN_ZOOM, scrollAfterZoom } from './ink'
 
 interface Pinch {
@@ -44,6 +46,14 @@ export function useTouchView({ frameRef, canvasRef, zoom, scale, onZoom }: Optio
   const pinch = useRef<Pinch | null>(null)
   const pen = useRef(false)
   const pendingScroll = useRef<{ left: number; top: number } | null>(null)
+  /** Where the panning finger has been lately, for the speed of a flick. */
+  const trail = useRef<Sample[]>([])
+  const gliding = useRef<(() => void) | null>(null)
+  const stopGlide = () => { gliding.current?.(); gliding.current = null }
+  const pan = (dx: number, dy: number) => {
+    if (frameRef.current) frameRef.current.scrollLeft += dx
+    window.scrollBy(0, dy)
+  }
 
   const settle = (to: { left: number; top: number }) => {
     if (canvasRef.current) canvasRef.current.style.transform = ''
@@ -103,15 +113,20 @@ export function useTouchView({ frameRef, canvasRef, zoom, scale, onZoom }: Optio
     has: (id: number) => touches.current.has(id),
     fingersDown: () => touches.current.size,
     penActive: () => pen.current,
+    /** Anything touching the page stops a glide. */
+    stopGlide,
     penDown() {
+      stopGlide()
       pen.current = true
       if (pinch.current) endPinch(pinch.current, false)
       touches.current.clear()
     },
     penUp() { pen.current = false },
     fingerDown(id: number, spot: Spot) {
+      stopGlide()
       if (pen.current) return
       touches.current.set(id, spot)
+      trail.current = [{ t: performance.now(), ...spot }]
       if (touches.current.size === 2) startPinch()
     },
     fingerMove(id: number, spot: Spot) {
@@ -119,12 +134,15 @@ export function useTouchView({ frameRef, canvasRef, zoom, scale, onZoom }: Optio
       if (!last) return
       touches.current.set(id, spot)
       if (pinch.current) return movePinch(pinch.current)
-      if (frameRef.current) frameRef.current.scrollLeft -= spot.x - last.x
-      window.scrollBy(0, last.y - spot.y)
+      pan(last.x - spot.x, last.y - spot.y)
+      const now = performance.now()
+      trail.current = [...trail.current.filter((s) => now - s.t < 150), { t: now, ...spot }]
     },
     fingerUp(id: number) {
       if (!touches.current.delete(id)) return
-      if (pinch.current) endPinch(pinch.current, true)
+      if (pinch.current) return endPinch(pinch.current, true)
+      const fling = touches.current.size === 0 && flingVelocity(trail.current, performance.now())
+      if (fling) gliding.current = glide(fling, pan)
     },
   }
 }

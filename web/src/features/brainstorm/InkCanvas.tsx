@@ -11,10 +11,11 @@
  * Zoomed, the canvas is wider than the page area: the frame around it clips it and scrolls
  * sideways, while the window still scrolls up and down.
  */
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { Stroke } from '../../api/types'
-import { drawSegment, drawStroke, eraseAt, PAGE_SPAN, PAGE_WIDTH, pageHeight, pixelRatio } from './ink'
+import { drawSegment, drawStroke, eraseAt, PAGE_SPAN, PAGE_WIDTH, pageHeight } from './ink'
 import { PageNav } from './PageNav'
+import { usePagePaint } from './usePagePaint'
 import { useTouchView } from './useTouchView'
 
 export type InkTool = 'pen' | 'eraser'
@@ -40,8 +41,11 @@ export function InkCanvas({ strokes, page, onChange, tool, color, size, fingerDr
   const [width, setWidth] = useState(0)
   const [scrollX, setScrollX] = useState(0)
   const live = useRef<Stroke | null>(null)
-  /** The pointer drawing right now, and where it is (a finger may yet turn into a pinch). */
-  const drawer = useRef<{ id: number; finger: boolean; x: number; y: number } | null>(null)
+  /**
+   * The pointer drawing right now, and where it is (a finger may yet turn into a pinch). The
+   * canvas can't move mid-stroke, so its position is read once, not on every point.
+   */
+  const drawer = useRef<{ id: number; finger: boolean; x: number; y: number; rect: DOMRect } | null>(null)
   // The newest strokes, so back-to-back strokes never build on a stale list.
   const current = useRef(strokes)
   useLayoutEffect(() => { current.current = strokes }, [strokes])
@@ -70,23 +74,10 @@ export function InkCanvas({ strokes, page, onChange, tool, color, size, fingerDr
     return () => observer.disconnect()
   }, [])
 
-  // Redraw everything. Drawn at the screen's pixel density so lines stay crisp on a Retina iPad,
-  // a little under it when zoomed far in (see pixelRatio).
-  const paint = useCallback(() => {
-    const canvas = canvasRef.current
-    const ctx = canvas?.getContext('2d')
-    if (!canvas || !ctx || !cssWidth) return
-    const dpr = pixelRatio(cssWidth, height, window.devicePixelRatio || 1)
-    canvas.width = Math.floor(cssWidth * dpr)
-    canvas.height = Math.floor(height * dpr)
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-    ctx.clearRect(0, 0, cssWidth, height)
-    for (const s of strokes) drawStroke(ctx, s, scale)
-  }, [strokes, cssWidth, height, scale])
-  useLayoutEffect(paint, [paint])
+  // Drawn at the screen's pixel density so lines stay crisp on a Retina iPad (see usePagePaint).
+  const painter = usePagePaint({ canvasRef, strokes, live, cssWidth, height, scale })
 
-  const toPoint = (e: React.PointerEvent | PointerEvent): Stroke['points'][number] => {
-    const rect = canvasRef.current!.getBoundingClientRect()
+  const toPoint = (e: React.PointerEvent | PointerEvent, rect = canvasRef.current!.getBoundingClientRect()): Stroke['points'][number] => {
     const pressure = e.pointerType === 'mouse' || !e.pressure ? 0.5 : e.pressure
     const round = (n: number) => Math.round(n * 10) / 10
     return [round((e.clientX - rect.left) / scale), round((e.clientY - rect.top) / scale), round(pressure * 100) / 100]
@@ -98,12 +89,13 @@ export function InkCanvas({ strokes, page, onChange, tool, color, size, fingerDr
     if (!d?.finger) return
     drawer.current = null
     live.current = null
-    paint()
+    painter.redraw()
     view.fingerDown(d.id, d)
   }
 
   const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const finger = e.pointerType === 'touch'
+    view.stopGlide()
     // Capture keeps the pointer ours if it slides off the canvas edge.
     try { e.currentTarget.setPointerCapture(e.pointerId) } catch { /* pointer already gone */ }
     if (e.pointerType === 'pen') {
@@ -113,7 +105,7 @@ export function InkCanvas({ strokes, page, onChange, tool, color, size, fingerDr
         // A finger "drawing" when the Pencil lands was a resting palm: drop its line.
         drawer.current = null
         live.current = null
-        paint()
+        painter.redraw()
       }
     }
     if (finger && (!fingerDraws || view.penActive() || view.fingersDown() > 0 || drawer.current)) {
@@ -122,8 +114,9 @@ export function InkCanvas({ strokes, page, onChange, tool, color, size, fingerDr
       return
     }
     if (drawer.current) return // already drawing with another pointer
-    drawer.current = { id: e.pointerId, finger, x: e.clientX, y: e.clientY }
-    const point = toPoint(e)
+    const rect = e.currentTarget.getBoundingClientRect()
+    drawer.current = { id: e.pointerId, finger, x: e.clientX, y: e.clientY, rect }
+    const point = toPoint(e, rect)
     if (tool === 'eraser') {
       commit(eraseAt(current.current, point[0], point[1]))
       return
@@ -140,7 +133,7 @@ export function InkCanvas({ strokes, page, onChange, tool, color, size, fingerDr
     d.x = e.clientX
     d.y = e.clientY
     if (tool === 'eraser') {
-      const [x, y] = toPoint(e)
+      const [x, y] = toPoint(e, d.rect)
       const next = eraseAt(current.current, x, y)
       if (next !== current.current) commit(next)
       return
@@ -152,7 +145,7 @@ export function InkCanvas({ strokes, page, onChange, tool, color, size, fingerDr
     // "coalesced" events, and using them all keeps fast handwriting smooth.
     const events = e.nativeEvent.getCoalescedEvents?.() ?? [e.nativeEvent]
     for (const ev of events.length ? events : [e.nativeEvent]) {
-      stroke.points.push(toPoint(ev))
+      stroke.points.push(toPoint(ev, d.rect))
       drawSegment(ctx, stroke, stroke.points.length - 1, scale)
     }
   }
@@ -164,7 +157,10 @@ export function InkCanvas({ strokes, page, onChange, tool, color, size, fingerDr
     drawer.current = null
     const stroke = live.current
     live.current = null
-    if (stroke) commit([...current.current, stroke])
+    if (!stroke) return
+    const next = [...current.current, stroke]
+    painter.finished(stroke, next)
+    commit(next)
   }
 
   // A trackpad's sideways swipe (or Shift + wheel) pans the page; the frame can't scroll itself.

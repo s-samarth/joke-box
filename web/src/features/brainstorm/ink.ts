@@ -112,7 +112,11 @@ export function drawSegment(ctx: CanvasRenderingContext2D, s: Stroke, i: number,
   ctx.stroke()
 }
 
-export function drawStroke(ctx: CanvasRenderingContext2D, s: Stroke, scale: number) {
+/**
+ * A whole stroke. `open` leaves off its last bit: for a stroke still being written, which
+ * carries on from there.
+ */
+export function drawStroke(ctx: CanvasRenderingContext2D, s: Stroke, scale: number, open = false) {
   ctx.lineCap = 'round'
   ctx.lineJoin = 'round'
   const pts = s.points
@@ -124,10 +128,17 @@ export function drawStroke(ctx: CanvasRenderingContext2D, s: Stroke, scale: numb
     return
   }
   for (let i = 1; i < pts.length; i++) drawSegment(ctx, s, i, scale)
-  // Close the small gap between the last midpoint and the final point.
+  if (!open) drawTail(ctx, s, scale)
+}
+
+/** Close the small gap between a stroke's last midpoint and its final point, once the pen lifts. */
+export function drawTail(ctx: CanvasRenderingContext2D, s: Stroke, scale: number) {
+  const pts = s.points
+  if (pts.length < 2) return
   const last = pts[pts.length - 1]
   const tail = mid(pts[pts.length - 2], last)
   ctx.beginPath()
+  ctx.strokeStyle = s.color
   ctx.lineWidth = widthAt(s, last, scale)
   ctx.moveTo(tail[0] * scale, tail[1] * scale)
   ctx.lineTo(last[0] * scale, last[1] * scale)
