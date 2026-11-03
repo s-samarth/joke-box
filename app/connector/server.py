@@ -20,7 +20,10 @@ items you need. Quote Craft notes by title when you apply them. Handwritten brai
 images of their pages from get_brainstorm: read the handwriting from them. Everything here is \
 read-only: the comic writes and edits in JokeBox themselves."""
 
-server = MCPServer("JokeBox", instructions=INSTRUCTIONS)
+# No subscriptions: the tool list never changes while running, and a listen request is a
+# stream that a stateless JSON server never answers, so each one held a function open until
+# Vercel's 300-second timeout and Claude opened another.
+server = MCPServer("JokeBox", instructions=INSTRUCTIONS, subscriptions=False)
 READ = ToolAnnotations(read_only_hint=True, open_world_hint=False)
 
 

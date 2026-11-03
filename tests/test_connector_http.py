@@ -1,16 +1,23 @@
 """The connector over HTTP, the way Claude talks to it: MCP's streamable HTTP, stateless JSON,
 with an access token. Everything here is made up."""
 
-from collections.abc import Iterator
+import threading
+from collections.abc import Callable, Iterator
+from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
+from mcp.types import (
+    CLIENT_CAPABILITIES_META_KEY,
+    CLIENT_INFO_META_KEY,
+    PROTOCOL_VERSION_META_KEY,
+)
 
 from app.config import Settings
 from app.connector import http
 from app.main import app
 from tests.conftest import signed_in
-from tests.connector_auth import call, connect, rpc
+from tests.connector_auth import ACCEPT, call, connect, rpc
 from tests.test_jokes import put_joke
 
 
@@ -78,3 +85,58 @@ def test_deployed_it_answers_on_its_own_domain(monkeypatch: pytest.MonkeyPatch) 
         assert (
             rpc(client, token, "tools/list").status_code == 421
         )  # locally, foreign hosts are refused
+
+
+MODERN = "2026-07-28"
+
+
+def modern(client: TestClient, token: str, method: str, **params: Any) -> Any:
+    """A request in the 2026-07-28 protocol, where the envelope rides in params._meta."""
+    meta = {
+        PROTOCOL_VERSION_META_KEY: MODERN,
+        CLIENT_INFO_META_KEY: {"name": "t", "version": "1"},
+        CLIENT_CAPABILITIES_META_KEY: {},
+    }
+    headers = {
+        **ACCEPT,
+        "Authorization": f"Bearer {token}",
+        "mcp-protocol-version": MODERN,
+        "mcp-method": method,
+    }
+    body = {"jsonrpc": "2.0", "id": 1, "method": method, "params": {"_meta": meta, **params}}
+    return client.post("/mcp", json=body, headers=headers)
+
+
+def within(seconds: float, request: Callable[[], Any]) -> Any:
+    """Run a request, failing (not hanging) if it doesn't answer in time."""
+    answer: list[Any] = []
+    worker = threading.Thread(target=lambda: answer.append(request()), daemon=True)
+    worker.start()
+    worker.join(seconds)
+    assert answer, f"no answer within {seconds}s"
+    return answer[0]
+
+
+def test_discover_offers_no_change_notifications(mcp: TestClient) -> None:
+    """Advertising list changes made Claude open a listen stream that never answered."""
+    token = connect(signed_in("dev@example.com"))["access_token"]
+    response = within(10, lambda: modern(mcp, token, "server/discover"))
+    capabilities = response.json()["result"]["capabilities"]
+    assert capabilities["tools"].get("listChanged") is not True
+    assert not capabilities.get("resources", {}).get("subscribe")
+
+
+def test_listen_is_refused_at_once(mcp: TestClient) -> None:
+    token = connect(signed_in("dev@example.com"))["access_token"]
+    listen = {"toolsListChanged": True}
+    response = within(10, lambda: modern(mcp, token, "subscriptions/listen", notifications=listen))
+    assert "-32601" in response.text  # method not found
+
+
+def test_get_is_not_a_stream(mcp: TestClient) -> None:
+    """A GET would open a stream a stateless server never writes to, until the timeout."""
+    token = connect(signed_in("dev@example.com"))["access_token"]
+    headers = {"Accept": "text/event-stream", "Authorization": f"Bearer {token}"}
+    response = within(10, lambda: mcp.get("/mcp", headers=headers))
+    assert response.status_code == 405
+    assert response.headers["allow"] == "POST"
