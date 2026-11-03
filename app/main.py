@@ -10,6 +10,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.auth.routes import router as auth_router
 from app.config import get_settings
 from app.connector import http as connector
+from app.packed import UnpackRequests
 from app.routers import (
     analyses,
     board,
@@ -61,6 +62,7 @@ def create_app() -> FastAPI:
         lifespan=connector.lifespan,
     )
     app.add_middleware(BaseHTTPMiddleware, dispatch=require_csrf_header)
+    app.add_middleware(UnpackRequests)  # large saves arrive gzip-packed (see packed.py)
     app.add_middleware(
         SessionMiddleware,
         secret_key=settings.session_secret,

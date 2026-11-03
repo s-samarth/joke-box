@@ -29,7 +29,7 @@ export const TRASH_KINDS: Record<TrashKind, { label: string; lists: QueryKey[] }
   jokes: { label: 'Jokes', lists: [keys.jokes, keys.brainstorms, keys.setlists, keys.types] },
   rewrites: { label: 'Rewrites', lists: [keys.brainstorms] },
   observations: { label: 'Observations', lists: [keys.observations] },
-  brainstorms: { label: 'Brainstorms', lists: [keys.sessions] },
+  brainstorms: { label: 'Brainstorms', lists: [keys.sessionList] },
   'voice-notes': { label: 'Voice notes', lists: [keys.voiceNotes] },
   shows: { label: 'Shows', lists: [keys.logs, keys.venues] },
   analyses: { label: 'Analyses', lists: [keys.analyses] },

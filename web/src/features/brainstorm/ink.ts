@@ -1,15 +1,21 @@
 /**
- * Drawing pen strokes on a canvas. Strokes are stored on a page 1000 units wide, so the same
- * handwriting fits an iPad, a phone or a laptop: everything is multiplied by `scale` (the
- * canvas's real width / 1000) when drawn.
+ * Drawing pen strokes on a canvas. The screen's width is 1000 units, so the same handwriting
+ * fits an iPad, a phone or a laptop: everything is multiplied by `scale` (the page area's real
+ * width / 1000) when drawn. A page is two screens wide (PAGE_SPAN): you see its left half and
+ * pan sideways for the rest.
  */
 import type { Stroke } from '../../api/types'
 
 export const PAGE_WIDTH = 1000
-/** A blank sheet with A4 proportions, so a whole page fits a phone screen. */
+/** How wide a page is: two screens, for room to write across. */
+export const PAGE_SPAN = 2 * PAGE_WIDTH
+/** As tall as an A4 sheet one screen wide. */
 const PAGE_HEIGHT = 1414
-/** The server refuses more (one session is saved in one request, and requests have a size cap). */
-export const MAX_PAGES = 20
+/**
+ * New pages stop here: eight double-width pages stay well inside what one save can carry. The
+ * server still takes up to 20, so a session from before this keeps saving.
+ */
+export const MAX_PAGES = 8
 
 /** All of these show up on the dark page. */
 export const INK_COLORS = [
@@ -33,8 +39,8 @@ export const INK_SIZES = [
 export const nearestSize = (size: number) =>
   INK_SIZES.reduce((best, s) => (Math.abs(s.size - size) < Math.abs(best - size) ? s.size : best), INK_SIZES[1].size as number)
 
-/** How far a page zooms in with two fingers. */
-export const MAX_ZOOM = 3
+/** How far a page zooms in with two fingers. A double-width page past this would draw blurry (see pixelRatio). */
+export const MAX_ZOOM = 2.5
 
 /*
  * Safari refuses a canvas much over 16 million pixels, and each one costs 4 bytes of memory. A

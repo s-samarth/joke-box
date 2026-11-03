@@ -3,7 +3,7 @@ import { GraduationCap, Plus, Trash2 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router'
 import { newId } from '../../api/client'
 import { useCraftNotes } from '../../api/craft'
-import { useDeleteSession, useSessions } from '../../api/sessions'
+import { useDeleteSession, useSessionList } from '../../api/sessions'
 import { Button, IconButton } from '../../components/ui/Button'
 import { EmptyState, PageHead, Spinner } from '../../components/ui/pieces'
 import { useFeedback } from '../../components/ui/feedbackContext'
@@ -12,7 +12,7 @@ import { formatDate } from '../../lib/time'
 import { sessionName, sessionSummary } from './sessionMeta'
 
 export function BrainstormPage() {
-  const { data: sessions, isPending } = useSessions()
+  const { data: sessions, isPending } = useSessionList()
   const remove = useDeleteSession()
   const navigate = useNavigate()
   const { confirm, toast } = useFeedback()

@@ -2,12 +2,12 @@
 import { PenLine } from 'lucide-react'
 import { Link, useNavigate } from 'react-router'
 import { newId } from '../../api/client'
-import { useSessions } from '../../api/sessions'
+import { useSessionList } from '../../api/sessions'
 import { SectionHead } from '../../components/ui/pieces'
 import { sessionName } from '../brainstorm/sessionMeta'
 
 export function TodayBrainstorm() {
-  const { data: sessions = [] } = useSessions()
+  const { data: sessions = [] } = useSessionList()
   const last = sessions[0]
   const navigate = useNavigate()
   return (

@@ -11,7 +11,7 @@ import { del, get, set } from 'idb-keyval'
 import { ApiError, api } from './client'
 import { QUEUED, dropOlderWaiting } from './sync'
 import { keepUnsynced } from './unsynced'
-import type { Observation, ObservationInput, WritingSession, WritingSessionInput } from './types'
+import type { Observation, ObservationInput, SessionSummary, WritingSession, WritingSessionInput } from './types'
 
 const WEEK = 1000 * 60 * 60 * 24 * 7
 
@@ -29,7 +29,9 @@ export const keys = {
   logs: ['logs'],
   observations: ['observations'],
   observationTopics: ['observation-topics'],
+  /** The old list with every session's ink: only an older app's cached copy still uses it. */
   sessions: ['sessions'],
+  sessionList: ['session-list'],
   voiceNotes: ['voice-notes'],
   watchlist: ['watchlist'],
   analyses: ['analyses'],
@@ -139,34 +141,47 @@ queryClient.setMutationDefaults(deleteObservationKey, {
   onSettled: () => refreshWhenSynced(keys.observations),
 })
 
-/* Brainstorm sessions autosave the same way, so a session written offline syncs later. */
+/* Brainstorm sessions autosave the same way, so a session written offline syncs later. The list
+ * leaves out the ink (it outgrows the host's size limit); each session's ink is its own query,
+ * kept on the device indefinitely so a session opens offline (see sessions.ts). */
 export type SaveSessionVars = { id: string; input: WritingSessionInput }
 
 export const saveSessionKey = ['session', 'save']
 export const deleteSessionKey = ['session', 'delete']
+export const sessionKey = (id: string) => ['session-detail', id]
+queryClient.setQueryDefaults(['session-detail'], { gcTime: Infinity })
+
+export const toSummary = ({ ink, ...rest }: WritingSession): SessionSummary => ({ ...rest, ink_strokes: ink.length })
 
 queryClient.setMutationDefaults(saveSessionKey, {
   ...QUEUED,
-  mutationFn: ({ id, input }: SaveSessionVars) => api<WritingSession>(`/api/sessions/${id}`, 'PUT', input),
+  mutationFn: async ({ id, input }: SaveSessionVars) => {
+    const saved = await api<SessionSummary>(`/api/sessions/${id}`, 'PUT', input)
+    // Take the server's time, so this copy reads as current and isn't downloaded again.
+    queryClient.setQueryData<WritingSession | null>(sessionKey(id), (old) => old && { ...old, updated_at: saved.updated_at })
+    return saved
+  },
   onMutate: async ({ id, input }: SaveSessionVars) => {
     dropOlderWaiting(queryClient, saveSessionKey, id) // this save has it all: older waiting copies go
-    await queryClient.cancelQueries({ queryKey: keys.sessions })
+    await queryClient.cancelQueries({ queryKey: keys.sessionList })
+    await queryClient.cancelQueries({ queryKey: sessionKey(id) })
+    const known = queryClient.getQueryData<WritingSession | null>(sessionKey(id))
+      ?? queryClient.getQueryData<SessionSummary[]>(keys.sessionList)?.find((s) => s.id === id)
     const now = new Date().toISOString()
-    queryClient.setQueryData<WritingSession[]>(keys.sessions, (old = []) => {
-      const existing = old.find((s) => s.id === id)
-      const next: WritingSession = { ...input, id, created_at: existing?.created_at ?? now, updated_at: now }
-      return [next, ...old.filter((s) => s.id !== id)]
-    })
+    const next: WritingSession = { ...input, id, created_at: known?.created_at ?? now, updated_at: now }
+    queryClient.setQueryData(sessionKey(id), next)
+    queryClient.setQueryData<SessionSummary[]>(keys.sessionList, (old = []) => [toSummary(next), ...old.filter((s) => s.id !== id)])
   },
-  onSettled: () => refreshWhenSynced(keys.sessions),
+  onSettled: () => refreshWhenSynced(keys.sessionList),
 })
 
 queryClient.setMutationDefaults(deleteSessionKey, {
   ...QUEUED,
   mutationFn: (id: string) => api<void>(`/api/sessions/${id}`, 'DELETE'),
   onMutate: async (id: string) => {
-    await queryClient.cancelQueries({ queryKey: keys.sessions })
-    queryClient.setQueryData<WritingSession[]>(keys.sessions, (old = []) => old.filter((s) => s.id !== id))
+    await queryClient.cancelQueries({ queryKey: keys.sessionList })
+    queryClient.setQueryData<SessionSummary[]>(keys.sessionList, (old = []) => old.filter((s) => s.id !== id))
+    queryClient.removeQueries({ queryKey: sessionKey(id), exact: true })
   },
-  onSettled: () => refreshWhenSynced(keys.sessions),
+  onSettled: () => refreshWhenSynced(keys.sessionList),
 })

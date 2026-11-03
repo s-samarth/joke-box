@@ -6,12 +6,13 @@
 import { Keyboard, Pause, PenLine, Play, RotateCcw, X } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
-import { useSessions } from '../../api/sessions'
+import { useSession, useSessionList } from '../../api/sessions'
 import type { Stroke, WritingSession } from '../../api/types'
 import { IconButton } from '../../components/ui/Button'
-import { Spinner } from '../../components/ui/pieces'
+import { EmptyState, Spinner } from '../../components/ui/pieces'
 import { GrowingText } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
+import { useOnline } from '../../layout/useOnline'
 import { clock } from '../../lib/duration'
 import { useTimer } from '../jokes/useTimer'
 import { chooseFingerDraws, fingerDraws, pencilSeen } from './fingerDraw'
@@ -149,8 +150,40 @@ function Workspace({ id, start, technique }: { id: string; start?: WritingSessio
 export function SessionPage() {
   const { sessionId = '' } = useParams()
   const [params] = useSearchParams()
-  const { data: sessions, isPending } = useSessions()
-  if (isPending && !sessions) return <div className="p-8"><Spinner /></div>
+  const list = useSessionList()
+  const session = useSession(sessionId)
+  const summary = list.data?.find((s) => s.id === sessionId)
+  // Offline as soon as the app knows, not only once a waiting download has paused.
+  const offline = !useOnline() || session.fetchStatus === 'paused'
+  const wait = <div className="p-8"><Spinner /></div>
+  // Once open, the session stays open: a refresh in the background must never swap the page
+  // you're writing on for a spinner (that would lose the zoom and the undo history).
+  const [opened, setOpened] = useState<string | null>(null)
   // key: opening a different session starts a fresh workspace instead of reusing the old state.
-  return <Workspace key={sessionId} id={sessionId} start={sessions?.find((s) => s.id === sessionId)} technique={params.get('technique')} />
+  const workspace = <Workspace key={sessionId} id={sessionId} start={session.data ?? undefined} technique={params.get('technique')} />
+  if (opened === sessionId) return workspace
+  if (session.data === undefined) {
+    // Never open an empty editor over a session whose ink isn't here: its autosave would wipe the
+    // pages. A session that isn't in the list (or a list we can't load) is one just started.
+    if (offline && (summary || !list.data)) return <NotOnDevice />
+    if (session.isError) return <NotOnDevice failed onRetry={() => void session.refetch()} />
+    if (!offline) return wait
+  }
+  // A copy older than the list says: wait for the fresh one rather than edit over it.
+  if (session.data && summary && session.data.updated_at !== summary.updated_at && session.isFetching) return wait
+  setOpened(sessionId) // React re-renders straight away, and from then on it stays open
+  return workspace
+}
+
+function NotOnDevice({ failed, onRetry }: { failed?: boolean; onRetry?: () => void }) {
+  return (
+    <div className="mx-auto max-w-xl p-8">
+      <EmptyState title={failed ? "Couldn't open this session" : "This session isn't on this device yet"}
+        action={<Link to="/brainstorm" className="text-tape hover:underline">Back to Brainstorm</Link>}>
+        {failed ? (
+          <button type="button" onClick={onRetry} className="text-dim underline hover:text-paper">Try again</button>
+        ) : 'Open it once with signal and it stays here for offline.'}
+      </EmptyState>
+    </div>
+  )
 }

@@ -166,6 +166,11 @@ export interface WritingSession extends WritingSessionInput {
   updated_at: string
 }
 
+/** A session as the list sends it: without its ink, which comes one session at a time. */
+export interface SessionSummary extends Omit<WritingSession, 'ink'> {
+  ink_strokes: number
+}
+
 /** A voice note's details. The audio is uploaded separately and lives in Blob storage. */
 export interface VoiceNoteInput {
   label: string

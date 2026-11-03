@@ -34,8 +34,8 @@ class ObservationOut(BaseModel):
     updated_at: datetime
 
 
-# A session is saved in one request and Vercel caps request bodies at 4.5 MB, so the page count
-# is capped well below where a session full of dense handwriting would hit that.
+# A session is saved in one request and Vercel caps request bodies at 4.5 MB. Large saves are
+# sent gzip-packed (app/packed.py), which fits about 17 pages of dense handwriting.
 MAX_INK_PAGES = 20
 
 
@@ -73,6 +73,38 @@ class WritingSessionOut(WritingSessionIn):
     id: uuid.UUID
     created_at: datetime
     updated_at: datetime
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def bit_ids(self) -> list[uuid.UUID]:
+        """The old name, for app versions from before the rename (see app/schemas/legacy.py)."""
+        return self.joke_ids
+
+
+class WritingSessionSummary(BaseModel):
+    """A session without its handwriting: for the list, and the answer to a save. A session's
+    ink is fetched on its own (GET /api/sessions/{id}), so the list stays small however much
+    you've drawn."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    title: str
+    content: str
+    ink_pages: int
+    # How many strokes there are, read from the ink itself.
+    ink_strokes: int = Field(validation_alias="ink")
+    timer_seconds: int
+    joke_ids: list[uuid.UUID]
+    observation_ids: list[uuid.UUID]
+    technique_id: uuid.UUID | None
+    created_at: datetime
+    updated_at: datetime
+
+    @field_validator("ink_strokes", mode="before")
+    @classmethod
+    def count_strokes(cls, ink: list[object] | None) -> int:
+        return len(ink or [])
 
     @computed_field  # type: ignore[prop-decorator]
     @property

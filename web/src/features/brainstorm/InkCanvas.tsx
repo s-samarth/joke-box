@@ -1,5 +1,5 @@
 /**
- * One blank handwriting page. The Pencil and a mouse always draw. A finger draws only when
+ * One blank handwriting page, two screens wide: it opens on the left half and pans sideways. The Pencil and a mouse always draw. A finger draws only when
  * "Draw with finger" is on (see fingerDraw.ts); otherwise one finger pans and two pinch to zoom,
  * as in OneNote. Two fingers always zoom, even mid-stroke: the half-drawn stroke is dropped.
  *
@@ -12,7 +12,8 @@
  */
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { Stroke } from '../../api/types'
-import { drawSegment, drawStroke, eraseAt, PAGE_WIDTH, pageHeight, pixelRatio } from './ink'
+import { drawSegment, drawStroke, eraseAt, PAGE_SPAN, PAGE_WIDTH, pageHeight, pixelRatio } from './ink'
+import { PageScrollbar } from './PageScrollbar'
 import { useTouchView } from './useTouchView'
 
 export type InkTool = 'pen' | 'eraser'
@@ -36,6 +37,7 @@ export function InkCanvas({ strokes, page, onChange, tool, color, size, fingerDr
   const frameRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [width, setWidth] = useState(0)
+  const [scrollX, setScrollX] = useState(0)
   const live = useRef<Stroke | null>(null)
   /** The pointer drawing right now, and where it is (a finger may yet turn into a pinch). */
   const drawer = useRef<{ id: number; finger: boolean; x: number; y: number } | null>(null)
@@ -44,7 +46,7 @@ export function InkCanvas({ strokes, page, onChange, tool, color, size, fingerDr
   useLayoutEffect(() => { current.current = strokes }, [strokes])
   const commit = (next: Stroke[]) => { current.current = next; onChange(next) }
   const scale = (width * zoom) / PAGE_WIDTH
-  const cssWidth = Math.round(width * zoom)
+  const cssWidth = Math.round((width * zoom * PAGE_SPAN) / PAGE_WIDTH)
   const height = Math.round(pageHeight(strokes) * scale)
   const view = useTouchView({ frameRef, canvasRef, zoom, scale, onZoom })
 
@@ -64,8 +66,8 @@ export function InkCanvas({ strokes, page, onChange, tool, color, size, fingerDr
     const ctx = canvas?.getContext('2d')
     if (!canvas || !ctx || !cssWidth) return
     const dpr = pixelRatio(cssWidth, height, window.devicePixelRatio || 1)
-    canvas.width = Math.round(cssWidth * dpr)
-    canvas.height = Math.round(height * dpr)
+    canvas.width = Math.floor(cssWidth * dpr)
+    canvas.height = Math.floor(height * dpr)
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     ctx.clearRect(0, 0, cssWidth, height)
     for (const s of strokes) drawStroke(ctx, s, scale)
@@ -154,11 +156,20 @@ export function InkCanvas({ strokes, page, onChange, tool, color, size, fingerDr
     if (stroke) commit([...current.current, stroke])
   }
 
+  // A trackpad's sideways swipe (or Shift + wheel) pans the page; the frame can't scroll itself.
+  const onWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    const dx = e.deltaX || (e.shiftKey ? e.deltaY : 0)
+    if (dx) e.currentTarget.scrollLeft += dx
+  }
+
   return (
-    <div ref={frameRef} className="overflow-hidden rounded-xl bg-ink-2 ring-1 ring-rule">
-      <canvas ref={canvasRef} aria-label={`Handwriting page ${page + 1}`} style={{ width: cssWidth, height, touchAction: 'none', transformOrigin: '0 0' }}
-        className={`block ${tool === 'eraser' ? 'cursor-cell' : 'cursor-crosshair'}`}
-        onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={finish} onPointerCancel={finish} />
+    <div>
+      <div ref={frameRef} onScroll={(e) => setScrollX(e.currentTarget.scrollLeft)} onWheel={onWheel} className="overflow-hidden rounded-xl bg-ink-2 ring-1 ring-rule">
+        <canvas ref={canvasRef} aria-label={`Handwriting page ${page + 1}`} style={{ width: cssWidth, height, touchAction: 'none', transformOrigin: '0 0' }}
+          className={`block ${tool === 'eraser' ? 'cursor-cell' : 'cursor-crosshair'}`}
+          onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={finish} onPointerCancel={finish} />
+      </div>
+      <PageScrollbar shown={width} total={cssWidth} at={scrollX} />
     </div>
   )
 }

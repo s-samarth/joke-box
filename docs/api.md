@@ -128,13 +128,22 @@ The response (`JokeOut`) adds `id`, `created_at` and `updated_at`, and returns `
 | PUT | `/api/observation-topics/order` | `{ids}` → 204. Same rules as topics |
 | PATCH | `/api/observation-topics/{id}` | `{name}` |
 | DELETE | `/api/observation-topics/{id}` | Its observations keep existing, with no topic |
-| GET | `/api/sessions` | Brainstorm sessions |
-| PUT | `/api/sessions/{id}` | `{title, content, ink[], ink_pages, timer_seconds, joke_ids[], observation_ids[], technique_id?}`. The technique must be your own craft note |
+| GET | `/api/sessions/summaries` | Brainstorm sessions without their ink (`ink_strokes` counts it), newest first. What the app lists |
+| GET | `/api/sessions/{id}` | One session with its ink, **gzip-packed** (see below). 404 if it isn't yours, is in the Trash, or doesn't exist yet |
+| GET | `/api/sessions` | Every session with all its ink. Kept for older app versions only: all the ink at once outgrows the 4.5 MB response limit |
+| PUT | `/api/sessions/{id}` | `{title, content, ink[], ink_pages, timer_seconds, joke_ids[], observation_ids[], technique_id?}`, plain or gzip-packed. The technique must be your own craft note. Answers with the summary (no ink) |
 | DELETE | `/api/sessions/{id}` | |
 
 `ink` holds at most 10,000 strokes, each `{color, size, page, points: [[x, y, pressure], …]}`, with
-up to 5,000 points per stroke and at most 20 pages. Those caps keep one session under Vercel's
-4.5 MB request limit.
+up to 5,000 points per stroke and at most 20 pages (the app adds no more than 8; the server keeps
+20 so sessions from before that still save). `x` runs to 2000 on a double-width page.
+
+**Packed bodies** ([packed.py](../app/packed.py), [packed.ts](../web/src/api/packed.ts)): Vercel
+refuses requests and responses over 4.5 MB, and a session of dense handwriting is several times
+that as JSON. So a body over 64 KB is sent gzip-packed with `Content-Type:
+application/x-jokebox-gzip-json` (not `Content-Encoding`, so nothing on the way unpacks or
+recounts it), and `GET /api/sessions/{id}` answers the same way. Packed, about 17 pages of dense
+handwriting fit. A packed body that unpacks past 64 MB is refused with 413, a damaged one with 400.
 
 ## Voice notes
 
