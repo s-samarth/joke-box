@@ -11,7 +11,7 @@ import { EmptyState, PageHead, SectionHead, Spinner } from '../../components/ui/
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { TrashRow } from './TrashRow'
 
-const chip = (on: boolean) => `h-8 shrink-0 rounded-lg px-3 text-sm transition ${on ? 'bg-paper font-medium text-ink' : 'bg-ink-3 text-dim hover:text-paper'}`
+const chip = (on: boolean) => `hit relative h-8 shrink-0 rounded-lg px-3 text-sm transition ${on ? 'bg-paper font-medium text-ink' : 'bg-ink-3 text-dim hover:text-paper'}`
 const KIND_ORDER = Object.keys(TRASH_KINDS) as TrashKind[]
 const things = (n: number) => `${n} ${n === 1 ? 'thing' : 'things'}`
 

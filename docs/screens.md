@@ -19,11 +19,13 @@ visit, so the app opens fast on a phone.
   only the list of screens scrolls when the window is too short (an iPad in landscape). The rail
   and the pages start below the iPad's status bar, where iPadOS blurs whatever sits under it.
 - **Phone:** a slim header (wordmark, sync icon, avatar) and a bottom bar laid out as
-  **Home · Jokes · + · Shows · More**. The **+** opens the New joke sheet. **More** opens a
-  bottom sheet that groups every other screen: **Write** (Voice notes, Observations,
-  Brainstorm), **Perform** (Sets), **Study** (Watchlist, Analysis) and **Deleted**
-  (Trash). While
-  you're on one of those screens, the More tab shows as the current one.
+  **Home · Jokes · + · Sets · More**. Sets has the slot because it's what you reach for at a gig.
+  The **+** adds whatever the screen holds ([useAddAction.ts](../web/src/layout/useAddAction.ts)):
+  a premise on Premises, a show on Shows, an observation on Observations, and a New joke
+  anywhere else. **More** opens a bottom sheet that groups every other screen: **Write**
+  (Premises, Daily joke, Voice notes, Observations, Brainstorm), **Perform** (Shows), **Study**
+  (Craft, Watchlist, Analysis) and **Deleted** (Trash). While you're on one of those screens,
+  the More tab shows as the current one.
 - One list in `nav.ts` feeds both the rail and the bar, so they can't drift apart.
 - **Sync light:** "All changes saved", "Saving…", or "Offline, N waiting to sync". It counts
   queued saves plus recordings still to upload, and reads whether the server can be reached
@@ -180,9 +182,21 @@ the jokes' created dates, so there's no separate log to fall out of step.
 The sheet is opened by **+**, by **New joke**, or by "Turn into a joke" on an observation. It
 renders the same `JokeDetails` controls as the joke page, but owns its own draft: one set of
 controls with two owners of the state, so the two screens can't drift apart. Its buttons are
-**Save and open** and **Save joke**. A new joke starts as Incomplete, 15 seconds, Clean and in
+**Save and open** and **Save joke**. A new joke starts as Draft, 15 seconds, Clean and in
 Hinglish. It's a bottom sheet on phones and a centred panel on desktop
 (see `Modal`).
+
+Closing it without saving (Escape, a tap on the dimmed area, the X) never loses the joke: what
+you typed is kept on the device as you type ([keptDraft.ts](../web/src/features/capture/keptDraft.ts)),
+a toast says "Unsaved joke kept for next time" with **Discard**, and the next **+** picks it up
+with "Picked up the joke you didn't save" and **Start fresh**. It survives a reload or the
+phone closing the app, and goes on sign-out. There's one kept joke: a sheet opened for something
+else (from an observation, or after a joke) while one is waiting leaves it alone, and asks
+"Discard changes?" before closing with typing of its own instead.
+
+Other sheets that hold typing you haven't saved (Log a show, New premise, Edit observation, Add a
+routine, a Craft table, area or kind) ask "Discard changes?" the same way. Their own **Cancel**
+button still closes at once.
 
 ## Rewrite: `/jokes/:jokeId/rewrite`
 

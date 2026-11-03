@@ -6,9 +6,11 @@
  * Pattern: the form keeps a local draft in useState and hands `draft` + `update` to
  * JokeDetails, the same component the joke page uses with its autosaving draft. One set of
  * controls, two owners of the state, so the two screens can't drift apart.
+ *
+ * Closing without saving keeps what you typed (keptDraft), so a stray tap never loses a joke.
  */
 import { useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { api, newId } from '../../api/client'
 import { useTopics } from '../../api/library'
 import { keys } from '../../api/queryClient'
@@ -20,6 +22,7 @@ import { Modal } from '../../components/ui/Modal'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { JokeDetails } from '../jokes/JokeDetails'
 import { TagLines } from '../jokes/TagLines'
+import { forgetDraft, hasText, keepDraft, keptDraft, startDraft } from './keptDraft'
 import { blankJoke, useCaptureJoke } from './newJoke'
 
 export interface Prefill {
@@ -32,11 +35,16 @@ export interface Prefill {
   followsId?: string
 }
 
-export function NewJokeForm({ prefill, onClose }: { prefill: Prefill; onClose: () => void }) {
+/** `plain`: opened from the + button, not for something in particular, so a kept draft comes back. */
+export function NewJokeForm({ prefill, plain, onClose }: { prefill: Prefill; plain: boolean; onClose: () => void }) {
   const { data: topics = [] } = useTopics()
   const thoughtsId = topics.find((t) => t.is_system)?.id ?? ''
-  const [draft, setDraft] = useState<JokeInput>(() => ({ ...blankJoke(prefill.topicId), subtopic_id: prefill.subtopicId ?? null, premise_id: prefill.premiseId ?? null, setup: prefill.setup ?? '', follows_id: prefill.followsId ?? null }))
-  const [brainstorm, setBrainstorm] = useState('')
+  const fresh = (): JokeInput => ({ ...blankJoke(prefill.topicId), subtopic_id: prefill.subtopicId ?? null, premise_id: prefill.premiseId ?? null, setup: prefill.setup ?? '', follows_id: prefill.followsId ?? null })
+  const [start] = useState(() => startDraft(fresh(), plain, keptDraft()))
+  const [draft, setDraft] = useState<JokeInput>(start.draft)
+  const [brainstorm, setBrainstorm] = useState(start.brainstorm)
+  const [restored, setRestored] = useState(start.restored)
+  const changed = restored || JSON.stringify([draft, brainstorm]) !== JSON.stringify([start.draft, start.brainstorm])
   const capture = useCaptureJoke()
   const qc = useQueryClient()
   const { toast } = useFeedback()
@@ -44,6 +52,24 @@ export function NewJokeForm({ prefill, onClose }: { prefill: Prefill; onClose: (
   const input = { ...draft, topic_id: draft.topic_id || thoughtsId }
   const update = (patch: Partial<JokeInput>) => setDraft((d) => ({ ...d, ...patch }))
   const ready = draft.setup.trim().length > 0
+
+  // Keep the text on this device as you type, so it outlives the sheet and the app.
+  useEffect(() => {
+    if (!start.owns || !changed) return
+    if (hasText({ draft, brainstorm })) keepDraft({ draft, brainstorm })
+    else forgetDraft()
+  }, [start.owns, changed, draft, brainstorm])
+
+  const close = () => {
+    if (start.owns && changed && hasText({ draft, brainstorm })) toast('Unsaved joke kept for next time', { label: 'Discard', onClick: forgetDraft })
+    onClose()
+  }
+  const startFresh = () => {
+    forgetDraft()
+    setDraft(fresh())
+    setBrainstorm('')
+    setRestored(false)
+  }
 
   const submit = (open: boolean) => {
     if (!ready) return
@@ -59,7 +85,9 @@ export function NewJokeForm({ prefill, onClose }: { prefill: Prefill; onClose: (
           )
         }
       : undefined
-    if (capture({ ...input, tag_lines: input.tag_lines.filter((t) => t.trim()) }, { open, onSaved })) onClose()
+    if (!capture({ ...input, tag_lines: input.tag_lines.filter((t) => t.trim()) }, { open, onSaved })) return
+    if (start.owns) forgetDraft()
+    onClose()
   }
 
   const footer = (
@@ -70,7 +98,13 @@ export function NewJokeForm({ prefill, onClose }: { prefill: Prefill; onClose: (
   )
 
   return (
-    <Modal open onOpenChange={(o) => !o && onClose()} title="New joke" footer={footer} wide>
+    <Modal open onOpenChange={(o) => !o && close()} dirty={!start.owns && changed} title="New joke" footer={footer} wide>
+      {restored && (
+        <p className="mb-3 flex items-center justify-between gap-3 rounded-lg bg-ink-3 py-1 pr-1 pl-3 text-sm text-dim">
+          <span>Picked up the joke you didn't save.</span>
+          <button type="button" onClick={startFresh} className="h-11 shrink-0 rounded-md px-3 font-medium text-paper hover:bg-ink-4">Start fresh</button>
+        </p>
+      )}
       <form className="space-y-8" onSubmit={(e) => { e.preventDefault(); submit(false) }}>
         <div className="space-y-3 rounded-xl bg-ink p-4 ring-1 ring-rule">
           <GrowingText autoFocus aria-label="Setup" placeholder="The setup…" className="text-xl leading-snug" value={draft.setup}

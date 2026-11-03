@@ -4,6 +4,7 @@
  */
 import { Check, Pipette, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { useChanged } from '../../lib/useChanged'
 import { useCreateArea, useDeleteArea, useUpdateArea } from '../../api/craft'
 import type { CraftArea, CraftAreaInput, CraftScreen } from '../../api/types'
 import { Button } from '../../components/ui/Button'
@@ -12,7 +13,7 @@ import { Modal } from '../../components/ui/Modal'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { AREA_COLORS, SCREENS, areaColor, nextColor } from './craftMeta'
 
-const chip = (on: boolean) => `h-9 rounded-lg px-3 text-sm transition ${on ? 'bg-paper font-medium text-ink' : 'bg-ink-3 text-dim hover:text-paper'}`
+const chip = (on: boolean) => `hit relative h-9 rounded-lg px-3 text-sm transition ${on ? 'bg-paper font-medium text-ink' : 'bg-ink-3 text-dim hover:text-paper'}`
 
 interface Props {
   area?: CraftArea
@@ -25,6 +26,7 @@ interface Props {
 
 export function AreaSheet({ area, areas, noteCount, onClose, onDeleted, onCreated }: Props) {
   const [form, setForm] = useState<CraftAreaInput>(area ? { name: area.name, description: area.description, color: area.color, screens: area.screens } : { name: '', description: '', color: nextColor(areas), screens: [] })
+  const dirty = useChanged(form)
   const others = areas.filter((a) => a.id !== area?.id)
   const [moveTo, setMoveTo] = useState(others[0]?.id ?? '')
   const create = useCreateArea()
@@ -50,7 +52,7 @@ export function AreaSheet({ area, areas, noteCount, onClose, onDeleted, onCreate
   }
 
   return (
-    <Modal open onOpenChange={(o) => !o && onClose()} title={area ? 'Edit area' : 'New area'}
+    <Modal open onOpenChange={(o) => !o && onClose()} dirty={dirty} title={area ? 'Edit area' : 'New area'}
       footer={<><Button variant="quiet" onClick={onClose}>Cancel</Button><Button variant="tape" onClick={save} disabled={!form.name.trim() || create.isPending || update.isPending}>{area ? 'Save area' : 'Add area'}</Button></>}>
       <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); save() }}>
         <Field label="Name"><Input value={form.name} maxLength={80} placeholder="e.g. Callbacks" onChange={(e) => set({ name: e.target.value })} /></Field>

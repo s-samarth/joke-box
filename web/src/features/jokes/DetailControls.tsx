@@ -8,15 +8,15 @@ import { CLEAN_LABELS, DEFAULT_TYPES, STRENGTH_LABELS } from '../../lib/jokeMeta
 import { NewTypeDialog } from './NewTypeDialog'
 
 const choice = (on: boolean) =>
-  `h-9 rounded-lg px-3 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'bg-ink-3 text-dim hover:text-paper'}`
+  `hit relative h-9 rounded-lg px-3 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'bg-ink-3 text-dim hover:text-paper'}`
 
 export function StrengthPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
     <div className="flex flex-wrap items-center gap-3" role="radiogroup" aria-label="Strength">
-      <div className="flex items-end gap-1">
+      <div className="-ml-2 flex items-end">
         {[1, 2, 3, 4, 5].map((n) => (
           <button key={n} type="button" role="radio" aria-checked={value === n} aria-label={STRENGTH_LABELS[n - 1]} onClick={() => onChange(n)}
-            className="flex h-9 w-7 items-end justify-center rounded-md pb-1.5 hover:bg-ink-3">
+            className="flex size-11 items-end justify-center rounded-md pb-2 hover:bg-ink-3">
             <span className={`w-2 rounded-[2px] ${n <= value ? 'bg-tape' : 'bg-ink-4'}`} style={{ height: `${8 + n * 3}px` }} />
           </button>
         ))}

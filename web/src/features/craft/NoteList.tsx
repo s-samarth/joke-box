@@ -18,7 +18,7 @@ function Tick({ item, onTick }: { item: ListItem; onTick?: (line: number) => voi
   const mark = item.checked && <Check size={14} strokeWidth={3} />
   if (!onTick) return <span className={box} aria-hidden>{mark}</span>
   return (
-    <button type="button" role="checkbox" aria-checked={Boolean(item.checked)} aria-label={item.text} onClick={() => onTick(item.line)} className={`${box} hover:ring-tape`}>
+    <button type="button" role="checkbox" aria-checked={Boolean(item.checked)} aria-label={item.text} onClick={() => onTick(item.line)} className={`${box} hit relative hover:ring-tape`}>
       {mark}
     </button>
   )
@@ -34,7 +34,7 @@ function Marker({ item, n, ordered, onTick }: { item: ListItem; n: number; order
 export function NoteList({ ordered, items, inline, onTick }: Props) {
   const List = ordered ? 'ol' : 'ul'
   return (
-    <List className="space-y-2">
+    <List className={items.some((i) => i.checked !== null) ? 'space-y-3' : 'space-y-2'}>
       {groupItems(items).map(({ item, children }, i) => (
         <li key={item.line}>
           <div className="flex gap-2.5">

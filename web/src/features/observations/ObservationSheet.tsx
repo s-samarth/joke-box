@@ -30,7 +30,7 @@ export function ObservationSheet({ observation, onClose }: { observation: Observ
   }
 
   return (
-    <Modal open onOpenChange={(o) => !o && onClose()} title="Edit observation"
+    <Modal open onOpenChange={(o) => !o && onClose()} dirty={text !== observation.text || topicId !== observation.topic_id} title="Edit observation"
       footer={<Button variant="tape" onClick={submit} disabled={!text.trim()}>Save</Button>}>
       <div className="space-y-4">
         <Field label="What you noticed">

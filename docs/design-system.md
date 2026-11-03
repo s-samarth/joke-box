@@ -76,11 +76,12 @@ accessibility (focus trapping, Escape, screen readers); Tailwind supplies the lo
 | `Button` | Variants `tape` (the primary action), `plain`, `quiet` and `danger`; `small`; an optional icon |
 | `IconButton` | Square icon button with a required `label` for screen readers |
 | `Field`, `Input`, `Select`, `Textarea`, `GrowingText` | A labelled row and inputs; `GrowingText` grows with its content |
-| `Modal` | Radix Dialog as a sheet or panel, with title, description and footer |
+| `Modal` | Radix Dialog as a sheet or panel, with title, description and footer; `dirty` makes Escape, the dimmed area and the X ask "Discard changes?" first |
 | `Dropdown`, `WithContextMenu` | Radix menus; the context menu opens on right-click or long-press |
 | `StrengthTicks`, `Stars`, `TypeLabel`, `Tape` | Small displays for a joke and a show |
 | `PageHead`, `SectionHead`, `EmptyState`, `Spinner` | Page structure |
-| `FeedbackProvider` / `useFeedback()` | `toast(msg, action?)`, `confirm({...})`, `prompt({...})` from anywhere |
+| `FeedbackProvider` / `useFeedback()` | `toast(msg, action?)`, `confirm({...})`, `prompt({...})` from anywhere. Toasts sit above the bottom bar, and move to the top of the screen while a sheet is open so they never cover its fields |
+| `hit` (a CSS utility) | Gives a control drawn smaller than 44px a 44 by 44 tap area without changing its look; the control needs `relative` (or `absolute`) |
 
 ## Motion
 

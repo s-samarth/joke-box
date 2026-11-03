@@ -58,7 +58,7 @@ function Workspace({ joke, sessions, startId }: { joke: Joke; sessions: Brainsto
   return (
     <div className="pt-safe min-h-dvh">
       <header className="sticky top-0 z-10 flex items-center gap-2 border-b border-rule bg-ink/95 px-3 py-2 backdrop-blur sm:px-6">
-        <Link to={`/jokes/${joke.id}`} aria-label="Close rewrite" className="inline-flex size-10 items-center justify-center rounded-lg text-dim hover:bg-ink-3 hover:text-paper"><X size={20} /></Link>
+        <Link to={`/jokes/${joke.id}`} aria-label="Close rewrite" className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-dim hover:bg-ink-3 hover:text-paper"><X size={20} /></Link>
         <button type="button" onClick={timer.running ? timer.pause : timer.start} className={`inline-flex h-10 items-center gap-2 rounded-lg px-3 ${timer.running ? 'bg-tape text-tape-ink' : 'bg-ink-3'}`} aria-label={timer.running ? 'Pause timer' : 'Start timer'}>
           {timer.running ? <Pause size={16} /> : <Play size={16} />}
           <span className="headline text-xl tabular">{clock(timer.seconds)}</span>

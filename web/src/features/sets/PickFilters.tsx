@@ -22,7 +22,7 @@ function Chips({ label, options, picks, onChange }: { label: string; options: [s
           const state = picks[v]
           return (
             <button key={v} type="button" onClick={() => tap(v)} aria-label={`${name}: ${state === 'only' ? 'only these' : state === 'not' ? 'hidden' : 'any'}`}
-              className={`inline-flex h-8 items-center gap-1 rounded-full px-3 text-[13px] transition ${state === 'only' ? 'bg-paper font-medium text-ink' : state === 'not' ? 'bg-ink-3 text-faint line-through' : 'bg-ink-3 text-dim hover:text-paper'}`}>
+              className={`hit relative inline-flex h-8 items-center gap-1 rounded-full px-3 text-[13px] transition ${state === 'only' ? 'bg-paper font-medium text-ink' : state === 'not' ? 'bg-ink-3 text-faint line-through' : 'bg-ink-3 text-dim hover:text-paper'}`}>
               {state === 'not' && <X size={12} className="no-underline" aria-hidden />}
               {name}
             </button>

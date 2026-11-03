@@ -3,6 +3,7 @@
  * them. Signing out wipes them (the account menu warns first); a different account signing in
  * on this phone drops the previous one's instead of filing them under the new account.
  */
+import { forgetDraft } from '../features/capture/keptDraft'
 import { clearOutbox } from '../features/voice/outbox'
 import { forgetAllAudio } from '../features/voice/audioCache'
 import { api } from './client'
@@ -10,9 +11,10 @@ import { keys, persister, queryClient } from './queryClient'
 import type { Me } from './types'
 import { clearUnsynced } from './unsynced'
 
-/** Everything on this phone that hasn't reached the server: queued saves, recordings, the Couldn't sync list. */
+/** Everything on this phone that hasn't reached the server: queued saves, recordings, the Couldn't sync list, an unsaved New joke. */
 async function forgetWaiting() {
   queryClient.getMutationCache().clear()
+  forgetDraft()
   await Promise.all([clearOutbox(), clearUnsynced(), forgetAllAudio()])
 }
 

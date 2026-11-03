@@ -19,7 +19,9 @@ Sets, stage, print, shows and the study screens. The frame, capture and writing 
   add, rename and delete them, with how many sets use each). Below them, the total against the slot
   with "N left", and the light bar. Then one **tape strip** per joke: a drag handle, the setup in
   marker, the joke's strength as periwinkle ticks, an **optional** toggle (the dashed circle), an
-  the joke's runtime (editing it here changes the joke, and every set it's in), up and down arrows, and remove. The opener and closer are labelled on their
+  the joke's runtime (editing it here changes the joke, and every set it's in), up and down arrows, and remove. Every control is a full 44px tap
+  target: on a phone they sit in a row under the strip (so the words keep the whole width), with
+  remove set apart from the arrows; from tablet width up they sit beside it. The opener and closer are labelled on their
   strips. An optional joke (one to cut if time is short) is on faded paper tape, labelled Optional;
   it doesn't count towards the slot, and the total says "+N optional". Stage, Print and Home show
   optional jokes the same way.
@@ -48,7 +50,9 @@ column: its number (and Opener, Closer or Optional), runtime and "by m:ss", then
 punchline in tape yellow and each tag line. The clock turns amber in
 the last minute and red when you're over. The screen wake lock keeps the phone awake. The cap icon
 opens **Before you go on**: your On stage notes, like crowd work and hecklers, with checklists to
-tick through.
+tick through. Leaving with 30 seconds or more on the clock asks **Log this show?**: **Log this
+show** opens Log a show with this set ticked and the clock's time filled in; **Just leave** goes
+back to the set; closing the sheet stays on Stage.
 
 <img src="screenshots/desktop-stage.webp" alt="Stage mode">
 
@@ -71,7 +75,8 @@ each with its setup in marker, the punchline, its runtime and "by m:ss" (the run
 [logStats.ts](../web/src/features/shows/logStats.ts).
 
 - **Toolbar:** Lifetime / This month / This week, a venue picker and **More filters** (date range,
-  stars, set length band, crowd band).
+  stars, set length band, crowd band). It wraps onto a second line on a narrow phone rather than
+  scrolling sideways, so nothing hides off the edge.
 - **Totals:** Shows, On stage, Avg rating (weighted by stage time) and Median crowd. They always
   follow the filters. Under them, the LPM across the shows you counted laughs for (all points over
   all minutes), with its band: beast (12+), decent (9–12), poor (6–9), rough (under 6).
@@ -104,7 +109,7 @@ each with its setup in marker, the punchline, its runtime and "by m:ss" (the run
     every mark shows a readout on hover or keyboard focus.
 - **Table:** Date, Venue, On stage, Crowd, Rating, Topics and Remarks. Click a heading to sort and
   click again to flip the order. On a phone the table scrolls sideways with the date pinned.
-- **Log a show** (a sheet, also opened by `?log=1`): venue, stars and length up top (separate minutes and seconds boxes, so a 10 minute spot is just "10"). Optional: the
+- **Log a show** (a sheet, also opened by `?log=1`; Stage adds `&set=<id>&time=<seconds>` to start with that set ticked and that time): venue, stars and length up top (separate minutes and seconds boxes, so a 10 minute spot is just "10"). Optional: the
   sets you did (none, one or more: their topics are ticked, time on stage is left to you,
   [setPick.ts](../web/src/features/shows/setPick.ts)), date and time, crowd and remarks.
   **Count laughs for LPM** folds out five counters, one per laugh score from 1 (a few giggles) to 5

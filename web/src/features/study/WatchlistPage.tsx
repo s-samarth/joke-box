@@ -13,7 +13,7 @@ import { WatchRow } from './WatchRow'
 import { SCORES, filterItems, groupByCategory, guideFor, toInput, type WatchFilter } from './watchMeta'
 
 const FILTERS: [WatchFilter, string][] = [['all', 'All'], ['todo', 'To watch'], ['watched', 'Watched']]
-const chip = (on: boolean) => `h-8 shrink-0 rounded-lg px-3 text-sm transition ${on ? 'bg-paper font-medium text-ink' : 'bg-ink-3 text-dim hover:text-paper'}`
+const chip = (on: boolean) => `hit relative h-8 shrink-0 rounded-lg px-3 text-sm transition ${on ? 'bg-paper font-medium text-ink' : 'bg-ink-3 text-dim hover:text-paper'}`
 
 export function WatchlistPage() {
   const { data: items = [], isPending } = useWatchlist()
