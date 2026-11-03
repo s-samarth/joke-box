@@ -107,6 +107,15 @@ def result(claude: tuple[TestClient, str], tool: str, **arguments: Any) -> dict[
     return data
 
 
+def content(claude: tuple[TestClient, str], tool: str, **arguments: Any) -> list[dict[str, Any]]:
+    """What a tool that answers in content blocks (text and images) sent back."""
+    client, token = claude
+    out = call(client, token, tool, **arguments)
+    assert not out.get("isError"), f"{tool} failed: {out['content'][0]['text']}"
+    blocks: list[dict[str, Any]] = out["content"]
+    return blocks
+
+
 def items(data: dict[str, Any], key: str) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = data[key]
     assert rows, f"expected some {key} in the test data"
