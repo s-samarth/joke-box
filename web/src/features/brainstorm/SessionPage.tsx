@@ -47,7 +47,9 @@ function Workspace({ id, start, technique }: { id: string; start?: WritingSessio
   const full = mode === 'write' && focus
   const timer = useTimer(start?.timer_seconds ?? 0)
   const { confirm } = useFeedback()
-  const autosave = useSessionAutosave(id, { title, content, ink, ink_pages: pages, timer_seconds: timer.seconds, joke_ids: jokeIds, observation_ids: observationIds, technique_id: techniqueId ?? null })
+  // Handwriting saves after a longer pause: a big session takes a moment to package, and that
+  // shouldn't land mid-word.
+  const autosave = useSessionAutosave(id, { title, content, ink, ink_pages: pages, timer_seconds: timer.seconds, joke_ids: jokeIds, observation_ids: observationIds, technique_id: techniqueId ?? null }, mode === 'write' ? 3000 : 1200)
   const words = content.trim() ? content.trim().split(/\s+/).length : 0
 
   // Wrap each setter so any edit marks the session for the next autosave.
@@ -80,7 +82,8 @@ function Workspace({ id, start, technique }: { id: string; start?: WritingSessio
   }
 
   return (
-    <div className="pt-safe min-h-dvh pb-24">
+    // Handwriting: nothing on the page can be selected, so a resting Pencil never picks up text.
+    <div className={`pt-safe min-h-dvh pb-24 ${mode === 'write' ? 'select-none [-webkit-touch-callout:none]' : ''}`}>
       <header className="sticky top-0 z-10 border-b border-rule bg-ink/95 backdrop-blur">
         {!full && <div className="flex items-center gap-2 px-3 py-2 sm:px-6">
           <Link to="/brainstorm" aria-label="Close session" className="inline-flex size-10 items-center justify-center rounded-lg text-dim hover:bg-ink-3 hover:text-paper"><X size={20} /></Link>
@@ -108,8 +111,8 @@ function Workspace({ id, start, technique }: { id: string; start?: WritingSessio
       <main className={mode === 'write' ? 'mx-auto max-w-[1440px] px-2 pt-3 sm:px-4' : 'mx-auto max-w-3xl px-4 pt-6 sm:px-8'}>
         {!full && <div className={mode === 'write' ? 'max-w-3xl px-2 pt-3 pb-6' : 'pb-6'}>
         <div className="flex items-baseline justify-between gap-3">
-          <GrowingText aria-label="Session title" placeholder="Name this session (optional)" className="headline text-3xl" value={title} onChange={(e) => edit(setTitle)(e.target.value)} />
-          <span className="shrink-0 text-sm text-faint tabular" aria-live="polite">{autosave.saving ? 'Saving…' : mode === 'type' ? `${words} words` : ''}</span>
+          <GrowingText aria-label="Session title" placeholder="Name this session (optional)" className="headline text-3xl select-text" value={title} onChange={(e) => edit(setTitle)(e.target.value)} />
+          <span className="shrink-0 text-sm text-faint tabular" aria-live="polite">{mode === 'write' ? '' : autosave.saving ? 'Saving…' : `${words} words`}</span>
         </div>
         <div className="mt-4">
           <TechniquePanel techniqueId={techniqueId ?? null} onChange={edit(setTechniqueId)} />

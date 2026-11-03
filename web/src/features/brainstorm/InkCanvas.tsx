@@ -74,6 +74,18 @@ export function InkCanvas({ strokes, page, onChange, tool, color, size, fingerDr
     return () => observer.disconnect()
   }, [])
 
+  // iPadOS reads a Pencil or finger resting still for half a second as a long-press, selects the
+  // nearest text on the page and cancels the stroke. Cancelling the touch itself stops iOS
+  // starting any gesture of its own (select, magnifier, callout); the pointer events that draw,
+  // pan and zoom still arrive. React's touch handlers are passive and can't cancel, hence this.
+  useEffect(() => {
+    const el = canvasRef.current
+    if (!el) return
+    const stop = (e: TouchEvent) => e.preventDefault()
+    el.addEventListener('touchstart', stop, { passive: false })
+    return () => el.removeEventListener('touchstart', stop)
+  }, [])
+
   // Drawn at the screen's pixel density so lines stay crisp on a Retina iPad (see usePagePaint).
   const painter = usePagePaint({ canvasRef, strokes, live, cssWidth, height, scale })
 
@@ -171,7 +183,7 @@ export function InkCanvas({ strokes, page, onChange, tool, color, size, fingerDr
 
   return (
     <div>
-      <div ref={frameRef} onScroll={onScroll} onWheel={onWheel} className="overflow-hidden rounded-xl bg-ink-2 ring-1 ring-rule">
+      <div ref={frameRef} onScroll={onScroll} onWheel={onWheel} className="overflow-hidden rounded-xl bg-ink-2 ring-1 ring-rule [-webkit-touch-callout:none]">
         <canvas ref={canvasRef} aria-label={`Handwriting page ${page + 1}`} style={{ width: cssWidth, height, touchAction: 'none', transformOrigin: '0 0' }}
           className={`block ${tool === 'eraser' ? 'cursor-cell' : 'cursor-crosshair'}`}
           onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={finish} onPointerCancel={finish} />

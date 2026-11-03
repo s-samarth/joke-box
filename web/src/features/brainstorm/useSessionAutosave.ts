@@ -9,12 +9,12 @@ import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { useSaveSession } from '../../api/sessions'
 import type { WritingSessionInput } from '../../api/types'
 
-const DELAY_MS = 1200
 
 const isEmpty = (s: WritingSessionInput) =>
   !s.title.trim() && !s.content.trim() && !s.ink.length && !s.joke_ids.length && !s.observation_ids.length
 
-export function useSessionAutosave(id: string, input: WritingSessionInput) {
+/** `delay`: how long a pause (ms) before saving. */
+export function useSessionAutosave(id: string, input: WritingSessionInput, delay = 1200) {
   const save = useSaveSession()
   const latest = useRef(input)
   const dirty = useRef(false)
@@ -34,9 +34,9 @@ export function useSessionAutosave(id: string, input: WritingSessionInput) {
   const { title, content, ink, ink_pages, joke_ids, observation_ids, technique_id } = input
   useEffect(() => {
     if (!dirty.current) return
-    const t = setTimeout(flush, DELAY_MS)
+    const t = setTimeout(flush, delay)
     return () => clearTimeout(t)
-  }, [title, content, ink, ink_pages, joke_ids, observation_ids, technique_id, flush])
+  }, [title, content, ink, ink_pages, joke_ids, observation_ids, technique_id, flush, delay])
 
   useEffect(() => flush, [flush])
 
