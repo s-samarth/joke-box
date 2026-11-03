@@ -1,6 +1,6 @@
 /**
- * Fingers on a handwriting page: one finger pans (a flick keeps it gliding, see glide.ts), two
- * pinch to zoom (and pan as they move).
+ * Fingers on a handwriting page: one finger scrolls (a flick keeps it gliding, see glide.ts).
+ * Two fingers scroll too, or pinch to zoom: whichever they clearly do first (see gestures.ts).
  * Pinched out all the way, the whole double-width page fits on screen.
  *
  * Pattern: during a pinch the canvas is only stretched with a CSS transform, which is instant.
@@ -11,6 +11,7 @@
  * (a resting palm) are ignored.
  */
 import { type RefObject, useLayoutEffect, useRef } from 'react'
+import { apart, framePanner, middle, snapZoom, type Spot, twoFingers } from './gestures'
 import { flingVelocity, glide, type Sample } from './glide'
 import { MAX_ZOOM, MIN_ZOOM, scrollAfterZoom } from './ink'
 
@@ -26,11 +27,6 @@ interface Pinch {
   /** The pinch so far: the zoom and where the fingers are now. */
   now: { zoom: number; x: number; y: number }
 }
-
-type Spot = { x: number; y: number }
-
-const middle = (a: Spot, b: Spot) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 })
-const apart = (a: Spot, b: Spot) => Math.max(1, Math.hypot(a.x - b.x, a.y - b.y))
 
 interface Options {
   frameRef: RefObject<HTMLDivElement | null>
@@ -50,10 +46,16 @@ export function useTouchView({ frameRef, canvasRef, zoom, scale, onZoom }: Optio
   const trail = useRef<Sample[]>([])
   const gliding = useRef<(() => void) | null>(null)
   const stopGlide = () => { gliding.current?.(); gliding.current = null }
-  const pan = (dx: number, dy: number) => {
+  const scrollBy = (dx: number, dy: number) => {
     if (frameRef.current) frameRef.current.scrollLeft += dx
     window.scrollBy(0, dy)
   }
+  // A dragging finger's movements, applied once a frame in whole pixels.
+  const panner = useRef<ReturnType<typeof framePanner> | null>(null)
+  const panBy = (dx: number, dy: number) => { panner.current ??= framePanner(scrollBy); panner.current.add(dx, dy) }
+  /** Two fingers down: where they landed, and whether they've turned out to be scrolling. */
+  const pair = useRef<{ start: [Spot, Spot]; scrolling: boolean } | null>(null)
+  const twoDown = () => [...touches.current.values()].slice(0, 2) as [Spot, Spot]
 
   const settle = (to: { left: number; top: number }) => {
     if (canvasRef.current) canvasRef.current.style.transform = ''
@@ -99,13 +101,14 @@ export function useTouchView({ frameRef, canvasRef, zoom, scale, onZoom }: Optio
     // Any finger still down stays out of it, so the page doesn't jump when the pinch ends.
     touches.current.clear()
     if (!commit) return settle({ left: frameRef.current?.scrollLeft ?? 0, top: window.scrollY })
+    const target = snapZoom(p.now.zoom)
     const to = scrollAfterZoom({
       focusX: p.now.x, focusY: p.now.y, pageX: p.pageX, pageY: p.pageY, frameLeft: p.frameLeft,
-      canvasTop: p.canvasTop + window.scrollY, scale: (p.scale * p.now.zoom) / p.zoom,
+      canvasTop: p.canvasTop + window.scrollY, scale: (p.scale * target) / p.zoom,
     })
-    if (p.now.zoom === zoom) return settle(to)
+    if (target === zoom) return settle(to)
     pendingScroll.current = to
-    onZoom(p.now.zoom)
+    onZoom(target)
   }
 
   return {
@@ -119,6 +122,7 @@ export function useTouchView({ frameRef, canvasRef, zoom, scale, onZoom }: Optio
       stopGlide()
       pen.current = true
       if (pinch.current) endPinch(pinch.current, false)
+      pair.current = null
       touches.current.clear()
     },
     penUp() { pen.current = false },
@@ -126,23 +130,55 @@ export function useTouchView({ frameRef, canvasRef, zoom, scale, onZoom }: Optio
       stopGlide()
       if (pen.current) return
       touches.current.set(id, spot)
-      trail.current = [{ t: performance.now(), ...spot }]
-      if (touches.current.size === 2) startPinch()
+      if (touches.current.size === 1) {
+        panner.current?.reset()
+        trail.current = [{ t: performance.now(), ...spot }]
+      }
+      if (touches.current.size === 2) {
+        pair.current = { start: twoDown(), scrolling: false }
+        trail.current = []
+      }
     },
     fingerMove(id: number, spot: Spot) {
       const last = touches.current.get(id)
       if (!last) return
+      const two = touches.current.size === 2 ? pair.current : null
+      const before = two ? middle(...twoDown()) : last
       touches.current.set(id, spot)
       if (pinch.current) return movePinch(pinch.current)
-      pan(last.x - spot.x, last.y - spot.y)
-      const now = performance.now()
-      trail.current = [...trail.current.filter((s) => now - s.t < 150), { t: now, ...spot }]
+      if (touches.current.size > 2 || (touches.current.size === 2 && !two)) return
+      let from = before
+      let to = spot
+      if (two) {
+        const now = twoDown()
+        to = middle(...now)
+        if (!two.scrolling) {
+          const intent = twoFingers(two.start, now)
+          if (intent === 'pinch') {
+            pair.current = null
+            return startPinch()
+          }
+          if (!intent) return
+          two.scrolling = true
+          from = middle(...two.start) // catch up with how far they've already moved
+        }
+      }
+      panBy(from.x - to.x, from.y - to.y)
+      const t = performance.now()
+      trail.current = [...trail.current.filter((s) => t - s.t < 150), { t, ...to }]
     },
     fingerUp(id: number) {
       if (!touches.current.delete(id)) return
       if (pinch.current) return endPinch(pinch.current, true)
+      const two = pair.current
+      if (two) {
+        // The other finger stays out of it, as after a pinch, so the page doesn't jump.
+        pair.current = null
+        touches.current.clear()
+        if (!two.scrolling) return
+      }
       const fling = touches.current.size === 0 && flingVelocity(trail.current, performance.now())
-      if (fling) gliding.current = glide(fling, pan)
+      if (fling) gliding.current = glide(fling, scrollBy)
     },
   }
 }

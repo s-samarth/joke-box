@@ -39,7 +39,7 @@ export function PageNav({ shown, total, at, onPan, zoom, onFit }: Props) {
   }
   return (
     <div className="pb-safe pointer-events-none fixed inset-x-0 bottom-0 z-10 flex justify-center">
-      <div className="pointer-events-auto mb-4 flex items-center gap-1 rounded-full bg-ink-3/95 p-1 shadow-lift ring-1 ring-rule-strong backdrop-blur">
+      <div className="pointer-events-auto mb-4 flex items-center gap-1 rounded-full bg-ink-3 p-1 shadow-lift ring-1 ring-rule-strong">
         {pans && (
           <div role="scrollbar" aria-label="Move across the page" aria-orientation="horizontal" tabIndex={0}
             aria-valuemin={0} aria-valuemax={100} aria-valuenow={room ? Math.round((at / room) * 100) : 0}
