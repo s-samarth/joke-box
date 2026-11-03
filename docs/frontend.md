@@ -33,6 +33,12 @@ under fixed keys (`setMutationDefaults`), each spreading the shared `QUEUED` opt
   handwriting) at every pause, so offline each pause used to queue another full copy. Its save
   now drops that session's older saves that haven't been sent yet (`dropOlderWaiting` in
   sync.ts): the newest copy holds everything they did. A save already on its way is left alone.
+- **Brainstorm sessions in pieces:** the list (`session-list`) comes without ink; each session's
+  ink is its own query (`['session-detail', id]`, never garbage-collected) so it stays on the
+  phone. `keepOnDevice` in [sessions.ts](../web/src/api/sessions.ts) downloads, one at a time,
+  each session whose `updated_at` moved on, but never while saves are waiting (it would fetch
+  the server's older copy). A session listed but not on this device yet opens to "This session
+  isn't on this device yet" rather than an empty editor, whose autosave would wipe its pages.
 - **Retries:** a save that never reached the server is retried (pausing while offline, which
   costs no tries) up to 20 times while the server answers `/health`, so one stuck request can't
   hold up the queue forever. A 5xx, 408 or 429 gets three more tries. A 401 (the sign-in ran out)

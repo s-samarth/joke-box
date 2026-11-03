@@ -27,7 +27,8 @@ def test_update_replaces_fields(alice: TestClient) -> None:
     put_session(alice, session_id, ink=[STROKE])
     updated = put_session(alice, session_id, content="Fake rewrite", ink=[]).json()
     assert updated["content"] == "Fake rewrite"
-    assert updated["ink"] == []
+    assert updated["ink_strokes"] == 0
+    assert alice.get("/api/sessions").json()[0]["ink"] == []
     assert len(alice.get("/api/sessions").json()) == 1
 
 
@@ -55,7 +56,8 @@ def test_sessions_are_private(alice: TestClient, bob: TestClient) -> None:
 
 def test_pages_are_kept_and_cover_every_stroke(alice: TestClient) -> None:
     session_id = str(uuid.uuid4())
-    saved = put_session(alice, session_id, ink=[STROKE], ink_pages=3).json()
+    assert put_session(alice, session_id, ink=[STROKE], ink_pages=3).json()["ink_pages"] == 3
+    saved = alice.get("/api/sessions").json()[0]
     assert saved["ink_pages"] == 3  # blank pages 2 and 3 survive
     assert saved["ink"][0]["page"] == 0  # strokes saved before pages existed are on page 1
     on_page_five = {**STROKE, "page": 4}

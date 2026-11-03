@@ -1,5 +1,6 @@
 /** A thin wrapper around fetch for our same-origin JSON API. */
 import { NetworkError, isConnectionFailure, isForeign, lostConnection } from './network'
+import { PACKED_JSON, requestBody, unpack } from './packed'
 
 export class ApiError extends Error {
   status: number
@@ -16,15 +17,17 @@ type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 const TIMEOUT = 20_000
 
 export async function api<T>(path: string, method: Method = 'GET', body?: unknown): Promise<T> {
+  // A big body (a session full of handwriting) goes gzip-packed: see packed.ts.
+  const sent = body === undefined ? undefined : await requestBody(body)
   const response = await reach(path, {
     method,
     credentials: 'same-origin',
     headers: {
       // The server refuses changes without this header: our CSRF protection.
       'X-Requested-With': 'jokebox',
-      ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+      ...(sent ? { 'Content-Type': sent.type } : {}),
     },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body: sent?.data,
     signal: AbortSignal.timeout(TIMEOUT),
   })
   // 511: wifi that wants you to sign in, said politely.
@@ -33,6 +36,15 @@ export async function api<T>(path: string, method: Method = 'GET', body?: unknow
     throw new ApiError(response.status, await errorMessage(response))
   }
   if (response.status === 204) return undefined as T
+  // A whole brainstorm session comes back packed. Checked before the test below, which would
+  // otherwise take it for a wifi sign-in page.
+  if (response.headers.get('content-type')?.startsWith(PACKED_JSON) && response.body) {
+    try {
+      return JSON.parse(await unpack(response.body)) as T
+    } catch {
+      return noConnection() // cut off mid-way
+    }
+  }
   // Our API always answers in JSON. A web page instead means wifi that wants you to sign in
   // first: that's no connection yet, so the save waits rather than failing for good.
   if (!response.headers.get('content-type')?.includes('json')) noConnection()
@@ -62,6 +74,7 @@ export async function reach(path: string, init: RequestInit): Promise<Response> 
 }
 
 async function errorMessage(response: Response): Promise<string> {
+  if (response.status === 413) return 'Too big to sync. Start a new session for more pages.'
   try {
     const data = (await response.json()) as { detail?: unknown }
     if (typeof data.detail === 'string') return data.detail
