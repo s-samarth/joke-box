@@ -1,9 +1,11 @@
 """The Trash: see what you deleted, put it back, or erase it for good."""
 
 import uuid
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from app.auth.deps import CurrentUser, DbSession
 from app.models import (
@@ -13,6 +15,8 @@ from app.models import (
     Joke,
     Observation,
     PerformanceLog,
+    Premise,
+    Setlist,
     User,
     VoiceNote,
     WatchItem,
@@ -33,25 +37,49 @@ def first_line(text: str, fallback: str) -> str:
     return line[:200] or fallback
 
 
-def describe(db: DbSession, user: User, row: Trashable) -> tuple[str, str] | None:
+class Lookups:
+    """What describing the Trash needs beyond the rows themselves, fetched once for all of them
+    rather than once per row."""
+
+    def __init__(self, db: DbSession, user: User, rows: dict[str, list[Trashable]]) -> None:
+        jokes = {j.id: j for j in rows["jokes"] if isinstance(j, Joke)}
+        self.rewrites: dict[tuple[uuid.UUID, object], int] = {}
+        live_ids = set()
+        for r in rows["rewrites"]:
+            if isinstance(r, Brainstorm):
+                key = (r.joke_id, r.deleted_at)
+                self.rewrites[key] = self.rewrites.get(key, 0) + 1
+                if r.joke_id not in jokes:
+                    live_ids.add(r.joke_id)
+        query = select(Joke.id, Joke.setup).where(Joke.user_id == user.id, Joke.id.in_(live_ids))
+        self.live_setups = {i: setup for i, setup in db.execute(query)} if live_ids else {}
+
+
+def describe(row: Trashable, found: Lookups) -> tuple[str, str] | None:
     """A row's title and detail line, or None if it shouldn't be listed on its own."""
     match row:
         case Joke():
-            rewrites = len(svc.rewrites_of(db, row, row.deleted_at))
+            rewrites = found.rewrites.get((row.id, row.deleted_at), 0)
             detail = f"With {rewrites} rewrite{'s' * (rewrites != 1)}" if rewrites else ""
             return first_line(row.setup, "Untitled joke"), detail
         case Brainstorm():
-            joke = svc.find_any(db, Joke, row.joke_id, user)
-            if joke is None or joke.deleted_at is not None:
+            if row.joke_id not in found.live_setups:
                 return None  # it's in the Trash with its joke, and comes back with it
-            setup = first_line(joke.setup, "")
+            setup = first_line(found.live_setups[row.joke_id], "")
             return first_line(row.title or row.content, "Untitled rewrite"), setup
+        case Premise():
+            on_it = len(row.trashed_joke_ids or [])
+            detail = f"{on_it} joke{'s' * (on_it != 1)} go back on it" if on_it else ""
+            return first_line(row.take, "Untitled premise"), detail
         case Observation():
             return first_line(row.text, "Empty observation"), ""
         case WritingSession():
             return first_line(row.title or row.content, "Untitled brainstorm"), ""
         case VoiceNote():
             return row.label or "Voice note", " ".join(f"#{t}" for t in row.hashtags)
+        case Setlist():
+            count = len(row.items)
+            return row.name, f"{count} joke{'s' * (count != 1)}"
         case PerformanceLog():
             return row.venue.name if row.venue else "Unidentified Venue", ""
         case Analysis():
@@ -63,14 +91,28 @@ def describe(db: DbSession, user: User, row: Trashable) -> tuple[str, str] | Non
     return None
 
 
+# Loaded with their rows, so describing them doesn't fetch one at a time.
+WITH: dict[type[Trashable], Any] = {
+    Setlist: selectinload(Setlist.items),
+    PerformanceLog: selectinload(PerformanceLog.venue),
+}
+
+
 @router.get("", response_model=list[TrashItemOut])
 def list_trash(user: CurrentUser, db: DbSession, store: Store) -> list[TrashItemOut]:
     """Everything in the Trash, by kind. Anything kept 30 days is erased first."""
     svc.purge_expired(db, user, store)
-    items = []
+    rows: dict[str, list[Trashable]] = {}
     for kind, model in svc.KINDS.items():
-        for row in svc.trashed(db, model, user):
-            described = describe(db, user, row)
+        query = svc.in_trash(model, user)
+        if model in WITH:
+            query = query.options(WITH[model])
+        rows[kind] = list(db.scalars(query))
+    found = Lookups(db, user, rows)
+    items = []
+    for kind, kept in rows.items():
+        for row in kept:
+            described = describe(row, found)
             if described is None or row.deleted_at is None:
                 continue
             title, detail = described

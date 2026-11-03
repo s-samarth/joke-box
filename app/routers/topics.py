@@ -12,6 +12,7 @@ from app.schemas.library import (
     NamedOut,
     NameIn,
     OrderIn,
+    ShortNameIn,
     SubtopicOut,
     TopicOut,
     TypeColorIn,
@@ -119,7 +120,7 @@ def set_type_color(body: TypeColorIn, user: CurrentUser, db: DbSession) -> None:
 
 
 @router.patch("/types/{type_id}", status_code=204)
-def rename_type(type_id: uuid.UUID, body: NameIn, user: CurrentUser, db: DbSession) -> None:
+def rename_type(type_id: uuid.UUID, body: ShortNameIn, user: CurrentUser, db: DbSession) -> None:
     svc.rename_type(db, user, get_owned(db, JokeType, type_id, user), body.name)
 
 
@@ -137,7 +138,7 @@ def list_statuses(user: CurrentUser, db: DbSession) -> list[Status]:
 
 
 @router.post("/statuses", response_model=NamedOut, status_code=201)
-def create_status(body: NameIn, user: CurrentUser, db: DbSession) -> Status:
+def create_status(body: ShortNameIn, user: CurrentUser, db: DbSession) -> Status:
     status = get_or_create_status(db, user, body.name)
     db.commit()
     return status

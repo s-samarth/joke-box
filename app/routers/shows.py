@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
-from app.auth.deps import CurrentUser, DbSession, find_owned, get_owned
+from app.auth.deps import CurrentUser, DbSession, find_owned
 from app.models import Joke, PerformanceLog, Setlist, SetlistItem, SetTag, Topic, User, Venue
 from app.schemas.shows import (
     LogIn,
@@ -122,8 +122,8 @@ def save_setlist(
 
 @router.delete("/setlists/{setlist_id}", status_code=204)
 def delete_setlist(setlist_id: uuid.UUID, user: CurrentUser, db: DbSession) -> None:
-    db.delete(get_owned(db, Setlist, setlist_id, user))
-    db.commit()
+    """To the Trash, with its jokes in order: putting it back returns the set as it was."""
+    move_to_trash(db, user, Setlist, setlist_id)
 
 
 def log_out(log: PerformanceLog) -> LogOut:

@@ -7,6 +7,7 @@ from typing import Self
 from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator, model_validator
 
 from app.schemas.legacy import JOKE_IDS
+from app.schemas.limits import INT_MAX
 
 
 class ObservationIn(BaseModel):
@@ -53,7 +54,7 @@ class WritingSessionIn(BaseModel):
     content: str = ""
     ink: list[Stroke] = Field(default_factory=list, max_length=10000)
     ink_pages: int = Field(default=1, ge=1, le=MAX_INK_PAGES)
-    timer_seconds: int = Field(default=0, ge=0)
+    timer_seconds: int = Field(default=0, ge=0, le=INT_MAX)
     joke_ids: list[uuid.UUID] = Field(
         default_factory=list, max_length=200, validation_alias=JOKE_IDS
     )
@@ -92,19 +93,14 @@ class WritingSessionSummary(BaseModel):
     title: str
     content: str
     ink_pages: int
-    # How many strokes there are, read from the ink itself.
-    ink_strokes: int = Field(validation_alias="ink")
+    # How many strokes there are, kept beside the ink so the list never has to load it.
+    ink_strokes: int
     timer_seconds: int
     joke_ids: list[uuid.UUID]
     observation_ids: list[uuid.UUID]
     technique_id: uuid.UUID | None
     created_at: datetime
     updated_at: datetime
-
-    @field_validator("ink_strokes", mode="before")
-    @classmethod
-    def count_strokes(cls, ink: list[object] | None) -> int:
-        return len(ink or [])
 
     @computed_field  # type: ignore[prop-decorator]
     @property

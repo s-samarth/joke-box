@@ -13,7 +13,7 @@ A JSON API under `/api`, served from the same origin as the app. Running locally
 - **Upserts:** most resources are created and updated with `PUT /api/<resource>/<id>`, where the
   client picks the UUID. Repeating the same request is safe.
 - **Deletes** answer **204**, including when the row is already gone (so a replayed offline delete
-  succeeds). Most deletes move the row to the Trash (see below); sets and organisers are erased.
+  succeeds). Most deletes move the row to the Trash (see below); organisers are erased.
 - **In the Trash:** a save to a row in the Trash answers **410**. Put it back, then retry.
 - **Lists** return the whole collection. Filtering, searching, sorting and totals happen in the
   browser, so they work offline.
@@ -166,7 +166,7 @@ On a deployment without a Blob store, these answer **503**.
 | DELETE | `/api/venues/{id}?move_to=` | 409 if shows or sets use it and `move_to` is missing; with `move_to` (another of your venues), they move there first, then the venue is deleted |
 | GET | `/api/setlists` | Most recently edited first, with `items` and `venue_name`. Each item's `duration_seconds` is its joke's current runtime |
 | PUT | `/api/setlists/{id}` | `{name, show_date?, target_seconds, venue_name?, rating?, tag_ids[], items: [{joke_id, duration_seconds, optional}]}`. `rating` is 1–5 or null. The items and tags are replaced as a whole, items in the order sent. An item's `duration_seconds` is stored but not shown: sets always time a joke by the joke's own runtime. Jokes in the Trash keep their places |
-| DELETE | `/api/setlists/{id}` | |
+| DELETE | `/api/setlists/{id}` | To the Trash, with its jokes in order |
 | GET | `/api/set-tags` | Your set tags, in order |
 | POST | `/api/set-tags` | `{name}`. Goes last. 409 if the name is taken |
 | PATCH | `/api/set-tags/{id}` | `{name}`. 409 if the name is taken |
@@ -203,14 +203,15 @@ Every `joke_id` and `topic_id` must belong to you (otherwise 404).
 
 ## Trash
 
-Jokes, rewrites, observations, brainstorms, voice notes, shows, analyses, watchlist routines and
-craft notes wait here 30 days after they're deleted. `{kind}` is one of `jokes`, `rewrites`,
-`observations`, `brainstorms`, `voice-notes`, `shows`, `analyses`, `watchlist`, `craft-notes`.
+Jokes, rewrites, premises, observations, brainstorms, voice notes, sets, shows, analyses,
+watchlist routines and craft notes wait here 30 days after they're deleted. `{kind}` is one of
+`jokes`, `rewrites`, `premises`, `observations`, `brainstorms`, `voice-notes`, `sets`, `shows`,
+`analyses`, `watchlist`, `craft-notes`.
 
 | Method | Path | Body / notes |
 |---|---|---|
 | GET | `/api/trash` | `[{kind, id, title, detail, when, deleted_at, erase_at}]`, by kind, newest first. Erases anything older than 30 days first. A joke's rewrites aren't listed on their own; `detail` says how many go with it |
-| POST | `/api/trash/{kind}/{id}/restore` | Puts it back (a joke with its rewrites, and into its sets). 404 once erased. 204 if it's not in the Trash |
+| POST | `/api/trash/{kind}/{id}/restore` | Puts it back (a joke with its rewrites, and into its sets; a premise with the jokes that rested on it). 404 once erased. 204 if it's not in the Trash |
 | DELETE | `/api/trash/{kind}/{id}` | Erases it now (and a voice note's audio). Only acts on things in the Trash |
 | DELETE | `/api/trash` | Empties the Trash |
 

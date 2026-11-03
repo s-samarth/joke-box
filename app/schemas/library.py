@@ -6,6 +6,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.schemas.limits import INT_MAX, ShortName
+
 CleanRating = Literal["clean", "mild", "dirty"]
 
 
@@ -25,6 +27,12 @@ class NameIn(BaseModel):
         if not value:
             raise ValueError("Name cannot be blank")
         return value
+
+
+class ShortNameIn(NameIn):
+    """A joke type's or status's name, which has less room than a topic's."""
+
+    name: str = Field(min_length=1, max_length=80)
 
 
 class SubtopicOut(BaseModel):
@@ -56,7 +64,7 @@ class TypeOut(NamedOut):
     color: str
 
 
-class TypeColorIn(NameIn):
+class TypeColorIn(ShortNameIn):
     """A type's colour. The type need not exist yet: a new one is coloured before it is saved."""
 
     color: str = Field(pattern=r"^#[0-9a-fA-F]{6}$")
@@ -87,20 +95,20 @@ class JokeIn(BaseModel):
     subtopic_id: uuid.UUID | None = None
     # The premise it rests on, from any topic. Left out (an older app), the link stays as it is.
     premise_id: uuid.UUID | None = None
-    types: list[str] = Field(default_factory=list)
-    status: str = DEFAULT_STATUS
+    types: list[ShortName] = Field(default_factory=list, max_length=50)
+    status: str = Field(default=DEFAULT_STATUS, max_length=80)
     strength: int = Field(default=3, ge=1, le=5)
-    duration_seconds: int = Field(default=0, ge=0)
+    duration_seconds: int = Field(default=0, ge=0, le=INT_MAX)
     hashtags: list[str] = Field(default_factory=list)
     tag_lines: list[str] = Field(default_factory=list)
     clean_rating: CleanRating | None = None
-    language: str | None = None
+    language: str | None = Field(default=None, max_length=40)
     comments: str = ""
     # The joke this one follows. Left out (an older app), the link stays as it is.
     follows_id: uuid.UUID | None = None
     created_at: datetime | None = None
     # The version this edit started from. Omitted (a new joke, an import), nothing is checked.
-    base_version: int | None = None
+    base_version: int | None = Field(default=None, le=INT_MAX)
 
     @field_validator("setup")
     @classmethod

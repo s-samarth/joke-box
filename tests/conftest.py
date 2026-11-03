@@ -9,6 +9,7 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import event
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.connector import identity
@@ -68,3 +69,18 @@ def bob() -> TestClient:
 def random_topic_id(client: TestClient) -> str:
     topics = client.get("/api/topics").json()
     return str(next(t["id"] for t in topics if t["is_system"]))
+
+
+@pytest.fixture
+def queries(session_factory: sessionmaker[Session]) -> Iterator[list[str]]:
+    """Every SELECT the app sends while the test runs."""
+    seen: list[str] = []
+    engine = session_factory.kw["bind"]
+
+    def record(_conn, _cursor, statement, *_args):  # type: ignore[no-untyped-def]
+        if statement.lstrip().upper().startswith("SELECT"):
+            seen.append(statement)
+
+    event.listen(engine, "before_cursor_execute", record)
+    yield seen
+    event.remove(engine, "before_cursor_execute", record)

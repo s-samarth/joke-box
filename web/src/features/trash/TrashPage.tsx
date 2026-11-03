@@ -49,7 +49,7 @@ export function TrashPage() {
       <PageHead title="Trash">
         {items.length > 0 && <Button small variant="danger" icon={<Trash2 size={16} />} onClick={emptyAll}>Empty Trash</Button>}
       </PageHead>
-      <p className="text-dim">Things you delete wait here for 30 days, then they’re deleted for good. Sets aren’t kept here.</p>
+      <p className="text-dim">Things you delete wait here for 30 days, then they’re deleted for good.</p>
 
       {isError && items.length === 0 ? (
         <EmptyState title="Can’t open the Trash">It needs a connection. Try again when you’re back online.</EmptyState>
