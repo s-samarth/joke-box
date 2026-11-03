@@ -237,7 +237,9 @@ separate from joke topics: drag the grips to reorder them; deleting one keeps it
   - **Pencil only** ([fingerDraw.ts](../web/src/features/brainstorm/fingerDraw.ts)): fingers draw
     until this device first sees a Pencil; from then on only the Pencil (or a mouse) draws. The
     hand button switches finger drawing on or off, remembered per device. Fingers that land while
-    the Pencil is down (a resting palm) are ignored.
+    the Pencil is down (a resting palm) are ignored. A touch landing on the page is cancelled, so
+    iPadOS can't read a resting Pencil as a long-press (which selected the nearest text and cut
+    the stroke off), and nothing but the title can be selected while handwriting.
   - **Full screen** ([prefs.ts](../web/src/features/brainstorm/prefs.ts)): the last toolbar button
     hides the timer, title, technique and links, leaving the tools and the page, so an iPad works
     like a notebook. Remembered per device. The page keeps its width, so the ink doesn't resize.
@@ -260,7 +262,8 @@ separate from joke topics: drag the grips to reorder them; deleting one keeps it
   - **Pens** ([PenStyle.tsx](../web/src/features/brainstorm/PenStyle.tsx)): on a tablet or laptop,
     five everyday colours and three thicknesses (Fine, Medium, Thick) sit on the toolbar; the
     menu holds the full twelve colours, and is all a phone shows.
-- **Saving:** the session autosaves a moment after you stop, and again when you leave. Nothing is
+- **Saving:** the session autosaves a moment after you stop (1.2 s typing, 3 s handwriting, with
+  no "Saving…" label so it doesn't catch the eye mid-word), and again when you leave. Nothing is
   saved until the session has some content.
 
 <img src="screenshots/desktop-session.webp" alt="A brainstorm session">
