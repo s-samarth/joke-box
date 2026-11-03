@@ -5,6 +5,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.connector.ink_image import pages_with_ink
 from app.connector.text import by_id, clip, ist_date, matches, page, same_name
 from app.models import Brainstorm, CraftNote, Observation, ObservationTopic, User, WritingSession
 
@@ -46,7 +47,8 @@ def search_observations(
 
 
 def search_brainstorms(db: Session, user: User, query: str = "", limit: int = 25) -> dict[str, Any]:
-    """Typed text from Brainstorm sessions and from Rewrites of a joke (not the handwriting)."""
+    """Brainstorm sessions and Rewrites of a joke, by title and typed text (handwriting is
+    counted, and read with get_brainstorm)."""
     techniques = by_id(
         db.execute(select(CraftNote.id, CraftNote.title).where(CraftNote.user_id == user.id))
     )
@@ -68,6 +70,7 @@ def search_brainstorms(db: Session, user: User, query: str = "", limit: int = 25
             "text": clip(s.content, 2000),
             "technique": techniques.get(s.technique_id) if s.technique_id else None,
             "linked_joke_ids": list(s.joke_ids or []),
+            "handwritten_pages": len(pages_with_ink(s.ink or [])),
             "updated": ist_date(s.updated_at),
         }
         for s in sessions

@@ -257,7 +257,8 @@ Every tool reads; none writes. Each sees only the user's own rows, and the Trash
 | `list_premises`, `get_premise` | Premises with their joke counts; one premise with its notes and jokes in chain order |
 | `list_sets`, `get_set` | Sets with runtime against target; one set in running order (first is the opener, last the closer) with each joke's topic, premise, strength and time |
 | `list_shows` | Logged shows with LPM, rating, topics and notes, and the LPM across them |
-| `search_observations`, `search_brainstorms` | Observations; the typed text of Brainstorms and Rewrites |
+| `search_observations`, `search_brainstorms` | Observations; Brainstorms and Rewrites by title and typed text, with how many handwritten pages each Brainstorm has (`handwritten_pages`) |
+| `get_brainstorm` | One Brainstorm in full: a JSON block (title, typed text, technique, linked jokes and observations, `handwritten_pages`, `pages_shown`, `more_from_page`), then "Page N" and a PNG of each handwritten page, drawn as the app shows it ([ink_image.py](../app/connector/ink_image.py)). Claude reads the handwriting from the images. Pages over a 2.5 MB budget continue with `from_page` |
 | `search_craft`, `get_craft_notes` | Craft notes (no query lists every title); up to 10 in full |
 | `search_analyses`, `get_analysis` | Analyses with the routine each is about; one in full |
 

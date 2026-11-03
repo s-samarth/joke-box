@@ -20,7 +20,7 @@ cd web && npx tsc -b && npx oxlint --deny-warnings src && npx vitest run
 
 ## The Claude connector (`app/connector/`)
 
-Claude reads JokeBox through an MCP server at `/mcp`: 14 read-only tools over jokes, premises,
+Claude reads JokeBox through an MCP server at `/mcp`: 15 read-only tools over jokes, premises,
 sets, shows, observations, brainstorms, Craft notes and analyses. The tools read the models
 directly, so a model change can break them, and Claude only finds out mid-conversation.
 

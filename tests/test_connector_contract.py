@@ -6,6 +6,7 @@ what it returns, must fail here first. If you change a tool's output on purpose,
 expected fields below and the tool table in docs/api.md together. Everything here is made up.
 """
 
+import json
 import uuid
 from collections.abc import Iterator
 
@@ -18,7 +19,7 @@ from app.main import app
 from app.models import User
 from app.seed import reseed
 from tests.conftest import random_topic_id, signed_in
-from tests.connector_auth import connect, items, result, rpc
+from tests.connector_auth import connect, content, items, result, rpc
 from tests.test_craft import note_in
 
 BRIEF = {
@@ -76,7 +77,9 @@ def claude(db: Session) -> Iterator[tuple[TestClient, str]]:
         f"/api/brainstorms/{uuid.uuid4()}",
         json={"joke_id": jokes[0]["id"], "content": "Fake rewrite"},
     )
-    browser.put(f"/api/sessions/{uuid.uuid4()}", json={"title": "Fake", "content": "Fake page"})
+    page = {"color": "#ece6da", "size": 2.4, "page": 0, "points": [[10, 20, 0.5], [60, 80, 0.7]]}
+    session = {"title": "Fake", "content": "Fake page", "ink": [page]}
+    browser.put(f"/api/sessions/{uuid.uuid4()}", json=session)
     browser.put(f"/api/observations/{uuid.uuid4()}", json={"text": "Fake noticed"})
     browser.put(f"/api/craft-notes/{uuid.uuid4()}", json=note_in(browser) | {"title": "Fake"})
     browser.put(f"/api/analyses/{uuid.uuid4()}", json={"title": "Fake", "body": "Fake why"})
@@ -98,6 +101,7 @@ def test_every_tool_is_covered_here(claude: tuple[TestClient, str]) -> None:
         "list_shows",
         "search_observations",
         "search_brainstorms",
+        "get_brainstorm",
         "search_craft",
         "get_craft_notes",
         "search_analyses",
@@ -172,9 +176,26 @@ def test_notebook_and_study_tools(claude: tuple[TestClient, str]) -> None:
         "text",
         "technique",
         "linked_joke_ids",
+        "handwritten_pages",
         "updated",
     }
     assert by_kind["rewrite"] == {"kind", "id", "joke_id", "title", "text", "updated"}
+
+    brainstorm_id = next(r["id"] for r in found if r["kind"] == "brainstorm")
+    blocks = content(claude, "get_brainstorm", brainstorm_id=brainstorm_id)
+    assert set(json.loads(blocks[0]["text"])) == {
+        "id",
+        "title",
+        "text",
+        "technique",
+        "linked_joke_ids",
+        "linked_observation_ids",
+        "updated",
+        "handwritten_pages",
+        "pages_shown",
+        "more_from_page",
+    }
+    assert [b["type"] for b in blocks[1:]] == ["text", "image"]  # "Page 1", then the page
 
     notes = items(result(claude, "search_craft"), "notes")
     assert set(notes[0]) == {"id", "title", "area", "kind", "hashtags", "preview"}

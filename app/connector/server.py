@@ -6,18 +6,19 @@ The work lives in the area modules; these wrappers give each tool its name, its 
 
 from typing import Any
 
-from mcp.server.mcpserver import MCPServer
-from mcp.types import ToolAnnotations
+from mcp.server.mcpserver import Image, MCPServer
+from mcp.types import TextContent, ToolAnnotations
 
-from app.connector import library, notebook, performing, study
+from app.connector import brainstorm, library, notebook, performing, study
 from app.connector.identity import reading
 
 INSTRUCTIONS = """JokeBox is a stand-up comic's library: jokes (setup, punchline, tags) filed by \
 topic, premises (a take with a reason) that jokes rest on, sets in running order, logged shows, \
 observations, brainstorms, Craft notes on how comedy works, and analyses of other comics.
 Start with jokebox_overview if you don't know what's there. Search first, then open the few \
-items you need. Quote Craft notes by title when you apply them. Everything here is read-only: \
-the comic writes and edits in JokeBox themselves."""
+items you need. Quote Craft notes by title when you apply them. Handwritten brainstorms come as \
+images of their pages from get_brainstorm: read the handwriting from them. Everything here is \
+read-only: the comic writes and edits in JokeBox themselves."""
 
 server = MCPServer("JokeBox", instructions=INSTRUCTIONS)
 READ = ToolAnnotations(read_only_hint=True, open_world_hint=False)
@@ -111,10 +112,21 @@ def search_observations(query: str = "", topic: str = "", limit: int = 25) -> di
 
 @server.tool(annotations=READ)
 def search_brainstorms(query: str = "", limit: int = 25) -> dict[str, Any]:
-    """Typed text from Brainstorm sessions (free writing, maybe running a Craft technique) and
-    from Rewrites (reworking one joke). Handwriting isn't included."""
+    """Brainstorm sessions (free writing, maybe running a Craft technique) and Rewrites
+    (reworking one joke), searched by title and typed text. Handwriting can't be searched: a
+    brainstorm's handwritten_pages says how many pages it has; read them with get_brainstorm."""
     with reading() as (db, user):
         return notebook.search_brainstorms(db, user, query, limit)
+
+
+@server.tool(annotations=READ)
+def get_brainstorm(brainstorm_id: str, from_page: int = 1) -> list[TextContent | Image]:
+    """One Brainstorm session in full: title, typed text, technique, linked jokes and
+    observations, then each handwritten page as an image, labelled "Page N". Read the
+    handwriting from the images: the app's dark page in the comic's own ink colours, up to two
+    screens wide. If more_from_page is set, call again with from_page for the rest."""
+    with reading() as (db, user):
+        return brainstorm.get_brainstorm(db, user, brainstorm_id, from_page)
 
 
 @server.tool(annotations=READ)
