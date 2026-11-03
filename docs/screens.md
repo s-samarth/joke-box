@@ -14,7 +14,10 @@ visit, so the app opens fast on a phone.
 [UpdatePrompt.tsx](../web/src/layout/UpdatePrompt.tsx), [AccountMenu.tsx](../web/src/layout/AccountMenu.tsx).
 
 - **Desktop (≥1024 px):** a fixed left rail. It holds the wordmark, a yellow **New joke** button,
-  every screen in `NAV` order, the sync light with its label, and your avatar and email.
+  every screen in `NAV` order, the sync light with its label, and your avatar and email. The
+  wordmark and **New joke** stay pinned at the top and the sync light and account at the bottom;
+  only the list of screens scrolls when the window is too short (an iPad in landscape). The rail
+  and the pages start below the iPad's status bar, where iPadOS blurs whatever sits under it.
 - **Phone:** a slim header (wordmark, sync icon, avatar) and a bottom bar laid out as
   **Home · Jokes · + · Shows · More**. The **+** opens the New joke sheet. **More** opens a
   bottom sheet that groups every other screen: **Write** (Voice notes, Observations,
