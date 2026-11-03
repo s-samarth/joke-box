@@ -1,0 +1,144 @@
+name: Backup
+
+# Every night: the whole database and every voice recording, encrypted to your own key, kept as
+# a workflow artifact for 30 days. Setup and restore: docs/backups.md.
+#
+# This repository is public, and so are its Actions logs and artifacts. So nothing unencrypted
+# leaves the runner, nothing secret is printed, and if anything is missing or fails, the run
+# stops before the upload: there is never a partial or plain artifact.
+on:
+  schedule:
+    - cron: "37 21 * * *" # 21:37 UTC, 03:07 in Bangalore, when nobody is writing
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never two at once; a manual run waits for the nightly one instead of cancelling it.
+concurrency:
+  group: backup
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash # with -e and pipefail: any failing command, even mid-pipe, stops the run
+
+jobs:
+  backup:
+    name: backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BACKUP_DIR: ${{ runner.temp }}/jokebox-backup
+    steps:
+      - name: Check the three secrets are set
+        env:
+          DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+          BLOB_TOKEN: ${{ secrets.BACKUP_BLOB_TOKEN }}
+          AGE_RECIPIENT: ${{ secrets.BACKUP_AGE_RECIPIENT }}
+        run: |
+          missing=""
+          [ -n "$DATABASE_URL" ] || missing="$missing BACKUP_DATABASE_URL"
+          [ -n "$BLOB_TOKEN" ] || missing="$missing BACKUP_BLOB_TOKEN"
+          [ -n "$AGE_RECIPIENT" ] || missing="$missing BACKUP_AGE_RECIPIENT"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secrets:$missing. Nothing was backed up. See docs/backups.md."
+            exit 1
+          fi
+          # One age public key per line (blank lines ignored). Anything else, a private key above
+          # all, stops the run here.
+          umask 077
+          printf '%s\n' "$AGE_RECIPIENT" | tr -d '\r' | sed '/^[[:space:]]*$/d' > "$RUNNER_TEMP/recipients.txt"
+          if [ ! -s "$RUNNER_TEMP/recipients.txt" ] || grep -qvE '^age1[0-9a-z]{58}$' "$RUNNER_TEMP/recipients.txt"; then
+            echo "::error::BACKUP_AGE_RECIPIENT must hold only age public keys (age1..., one per line). Nothing was backed up."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v5
+
+      - name: Install pg_dump 17 and age
+        run: |
+          # Postgres's own apt repository, for a pg_dump at least as new as Neon's server.
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          . /etc/os-release
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-17 age
+          /usr/lib/postgresql/17/bin/pg_dump --version
+          age --version
+
+      - name: Dump the database
+        env:
+          DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+        run: |
+          umask 077
+          mkdir -p "$BACKUP_DIR"
+          # Hide the host, user, password and database name too, should an error mention them.
+          # Then take the URL the way pg_dump wants it: plain postgresql://, and Neon's direct
+          # host rather than its pooler, which can't serve a dump.
+          python3 -I -c '
+          import os, re, sys
+          from urllib.parse import urlsplit
+          raw = os.environ["DATABASE_URL"].strip()
+          url = urlsplit(raw)
+          for part in (url.hostname, url.username, url.password, url.path.lstrip("/")):
+              if part:
+                  print(f"::add-mask::{part}")
+          if url.scheme not in ("postgres", "postgresql", "postgresql+psycopg"):
+              sys.exit("::error::BACKUP_DATABASE_URL must be a postgresql:// connection string.")
+          direct = re.sub(r"^postgres(ql)?(\+psycopg)?://", "postgresql://", raw).replace("-pooler.", ".", 1)
+          print(f"::add-mask::{urlsplit(direct).hostname}")
+          with open(os.path.join(os.environ["RUNNER_TEMP"], "db-url"), "w") as out:
+              out.write(direct)
+          '
+          /usr/lib/postgresql/17/bin/pg_dump --format=custom --no-owner --no-privileges \
+            --file="$BACKUP_DIR/jokebox.dump" --dbname="$(< "$RUNNER_TEMP/db-url")"
+          rm -f "$RUNNER_TEMP/db-url"
+          # A dump that pg_restore can't read is no backup.
+          tables=$(/usr/lib/postgresql/17/bin/pg_restore --list "$BACKUP_DIR/jokebox.dump" | grep -c "TABLE DATA" || true)
+          if [ "$tables" -lt 10 ]; then
+            echo "::error::The dump holds only $tables tables. Nothing was backed up."
+            exit 1
+          fi
+          echo "Database: $tables tables, $(du -h "$BACKUP_DIR/jokebox.dump" | cut -f1)"
+
+      - uses: astral-sh/setup-uv@v6
+
+      # Installed without any secret in reach, then run with only the Blob token.
+      - run: uv sync --locked --no-dev
+
+      - name: Download every recording from Blob
+        env:
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BACKUP_BLOB_TOKEN }}
+        run: |
+          umask 077
+          uv run --no-sync python scripts/backup_audio.py "$BACKUP_DIR/blob"
+
+      - name: Encrypt
+        run: |
+          umask 077
+          mkdir -p "$RUNNER_TEMP/out"
+          name="jokebox-backup-$(date -u +%Y-%m-%d-%H%M).tar.age"
+          tar -C "$BACKUP_DIR" -cf - . | age --encrypt --recipients-file "$RUNNER_TEMP/recipients.txt" --output "$RUNNER_TEMP/out/$name"
+          # Belt and braces: the file must start with age's header, never with tar's.
+          if [ "$(head -c 21 "$RUNNER_TEMP/out/$name")" != "age-encryption.org/v1" ]; then
+            echo "::error::The archive isn't encrypted. Nothing was uploaded."
+            exit 1
+          fi
+          rm -rf "$BACKUP_DIR"
+          echo "Encrypted: $name, $(du -h "$RUNNER_TEMP/out/$name" | cut -f1)"
+
+      - name: Keep it for 30 days
+        uses: actions/upload-artifact@v4
+        with:
+          name: jokebox-backup-${{ github.run_id }}
+          path: ${{ runner.temp }}/out/*.tar.age
+          retention-days: 30
+          compression-level: 0 # encrypted data doesn't compress
+          if-no-files-found: error
+
+      - name: Clear the runner
+        if: always()
+        run: rm -rf "$BACKUP_DIR" "$RUNNER_TEMP/out" "$RUNNER_TEMP/recipients.txt" "$RUNNER_TEMP/db-url"
