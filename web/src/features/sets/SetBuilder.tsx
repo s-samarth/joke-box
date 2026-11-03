@@ -125,7 +125,7 @@ function Builder({ setlist }: { setlist: Setlist }) {
           </div>
           <div className="mt-5 lg:hidden"><Button className="w-full" icon={<Plus size={18} />} onClick={() => setPicking(true)}>Add jokes</Button></div>
         </div>
-        <aside className="sticky top-0 hidden h-dvh w-80 shrink-0 flex-col py-10 lg:flex">
+        <aside className="sticky top-[env(safe-area-inset-top)] hidden h-[calc(100dvh-env(safe-area-inset-top))] w-80 shrink-0 flex-col py-10 lg:flex">
           <h2 className="headline mb-3 text-2xl">Your jokes</h2>
           <AddJokes used={used} onAdd={(b) => add(b)} onOpen={setReading} draggable />
         </aside>

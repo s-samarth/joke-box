@@ -43,7 +43,7 @@ export function PremisesLayout() {
   const headingAt = (i: number) => f.sort === 'topic' && (i === 0 || f.visible[i - 1].topic_id !== f.visible[i].topic_id)
 
   return (
-    <div className="lg:-mx-10 lg:flex lg:h-dvh">
+    <div className="lg:-mx-10 lg:flex lg:h-[calc(100dvh-env(safe-area-inset-top))]">
       <section className={`lg:flex lg:w-[26rem] lg:shrink-0 lg:flex-col lg:border-r lg:border-rule lg:px-6 ${premiseId ? 'hidden lg:flex' : ''}`}>
         <PageHead title="Premises">
           <Button variant="tape" small icon={<Plus size={15} />} onClick={() => setCreating(true)}>New</Button>

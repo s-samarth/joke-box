@@ -40,7 +40,7 @@ export function JokesLayout() {
   const { openCapture } = useCapture()
 
   return (
-    <div className="lg:-mx-10 lg:flex lg:h-dvh">
+    <div className="lg:-mx-10 lg:flex lg:h-[calc(100dvh-env(safe-area-inset-top))]">
       <section className={`lg:flex lg:w-[26rem] lg:shrink-0 lg:flex-col lg:border-r lg:border-rule lg:px-6 ${open ? 'hidden lg:flex' : ''}`}>
         <PageHead title="Jokes">
           <Link to={`/jokes/map${f.query ? `?${f.query}` : ''}`} aria-label="Joke map and board" title="Joke map and board"
