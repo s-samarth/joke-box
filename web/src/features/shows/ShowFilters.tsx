@@ -4,7 +4,7 @@ import { Field, Input, Select } from '../../components/ui/Field'
 import { Modal } from '../../components/ui/Modal'
 import { AUDIENCE_BANDS, DURATION_BANDS, type LogFilters } from './logMath'
 
-const chip = (on: boolean) => `h-9 rounded-lg px-3 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'bg-ink-3 text-dim hover:text-paper'}`
+const chip = (on: boolean) => `hit relative h-9 rounded-lg px-3 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'bg-ink-3 text-dim hover:text-paper'}`
 
 interface Props {
   open: boolean

@@ -2,6 +2,7 @@
  * Log a show, ideally on the way home. Venue, how it went and how long are up top; the rest is
  * optional. Picking the sets you did (none, one or several) ticks their topics for you. You can count the
  * laughs for LPM, and write down what you learned: that becomes a craft note linked to the show.
+ * Coming off Stage, it starts with that set ticked and the time from Stage's clock.
  */
 import { Star } from 'lucide-react'
 import { useState } from 'react'
@@ -19,15 +20,22 @@ import { topicName } from '../../lib/jokeMeta'
 import { StageTimeField } from './StageTimeField'
 import { type StageTime, stageSeconds, toStageTime } from './stageTime'
 import { formatDate, fromIstInput, toIstInput } from '../../lib/time'
+import { useChanged } from '../../lib/useChanged'
 import { areaFor, kindFor, lessonFrom } from '../craft/craftMeta'
 import { LaughTally } from './LaughTally'
 import { NO_LAUGHS, counted } from './lpm'
 import { setTopics, swapTopics } from './setPick'
 
 const UNKNOWN = 'Unidentified Venue'
-const chip = (on: boolean) => `h-9 rounded-lg px-3 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'bg-ink-3 text-dim hover:text-paper'}`
+const chip = (on: boolean) => `hit relative h-9 rounded-lg px-3 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'bg-ink-3 text-dim hover:text-paper'}`
 
-export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: () => void }) {
+/** What a new show starts with when you log it straight after doing a set on Stage. */
+export interface ShowPrefill {
+  setId?: string
+  seconds?: number
+}
+
+export function LogShowSheet({ log, prefill, onClose }: { log?: PerformanceLog; prefill?: ShowPrefill; onClose: () => void }) {
   const { data: venues = [] } = useVenues()
   const { data: logs = [] } = useLogs()
   const { data: topics = [] } = useTopics()
@@ -42,16 +50,18 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
   const [venue, setVenue] = useState(log?.venue_name ?? '')
   const [when, setWhen] = useState(() => toIstInput(log?.performed_at ?? new Date().toISOString()))
   const [rating, setRating] = useState(log?.rating ?? 0)
-  const [duration, setDuration] = useState<StageTime>(log ? toStageTime(log.duration_seconds) : { min: '', sec: '' })
+  const [duration, setDuration] = useState<StageTime>(log ? toStageTime(log.duration_seconds) : prefill?.seconds ? toStageTime(prefill.seconds) : { min: '', sec: '' })
   const [crowd, setCrowd] = useState(log ? String(log.audience_size) : '')
-  const [topicIds, setTopicIds] = useState<string[]>(log?.topic_ids ?? [])
+  const [setIds, setSetIds] = useState<string[]>(() => (!log && prefill?.setId && sets.some((s) => s.id === prefill.setId) ? [prefill.setId] : []))
+  const [topicIds, setTopicIds] = useState<string[]>(() => log?.topic_ids ?? setTopics(sets.filter((s) => setIds.includes(s.id)), jokes))
   const [notes, setNotes] = useState(log?.notes ?? '')
   const [laughs, setLaughs] = useState(log?.laughs ?? NO_LAUGHS)
   const [lesson, setLesson] = useState('')
-  const [setIds, setSetIds] = useState<string[]>([])
   const [error, setError] = useState('')
   // One id for this sheet, made once: tapping Log show twice saves the same show twice, not two shows.
   const [id] = useState(() => log?.id ?? newId())
+  // Ask before closing on anything typed, or on the time carried over from Stage (it can't be got back).
+  const dirty = useChanged([venue, when, rating, duration, crowd, topicIds, notes, laughs, lesson, setIds]) || Boolean(prefill?.seconds)
   const recent = [...new Set([...logs.map((l) => l.venue_name), ...venues.map((v) => v.name)])].filter((v) => v !== UNKNOWN).slice(0, 6)
 
   // Ticking a set on or off swaps its topics in or out (topics you tapped yourself stay). Time on
@@ -79,7 +89,7 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
   }
 
   return (
-    <Modal open wide onOpenChange={(o) => !o && onClose()} title={log ? 'Edit show' : 'Log a show'}
+    <Modal open wide onOpenChange={(o) => !o && onClose()} dirty={dirty} title={log ? 'Edit show' : 'Log a show'}
       footer={<><Button variant="quiet" onClick={onClose}>Cancel</Button><Button variant="tape" onClick={submit} disabled={save.isPending && !save.isPaused}>{log ? 'Save changes' : 'Log show'}</Button></>}>
       <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); submit() }}>
         <div className="space-y-2">

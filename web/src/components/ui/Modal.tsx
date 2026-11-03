@@ -1,10 +1,15 @@
 /**
  * Sheet built on Radix Dialog (Radix handles focus, Escape and screen readers; we style it).
  * A bottom sheet on phones, a centred panel on desktop.
+ *
+ * A sheet holding typed text that isn't saved yet passes `dirty`: then Escape, a tap on the
+ * dimmed area or the X asks before closing, so a stray tap can't throw the text away. A
+ * Cancel button in the sheet's own footer still closes at once: that's a deliberate choice.
  */
 import * as Dialog from '@radix-ui/react-dialog'
 import { X } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { useContext, type ReactNode } from 'react'
+import { FeedbackContext } from './feedbackContext'
 
 interface ModalProps {
   open: boolean
@@ -14,6 +19,8 @@ interface ModalProps {
   children: ReactNode
   footer?: ReactNode
   wide?: boolean
+  /** Holds unsaved typing: ask before closing. */
+  dirty?: boolean
 }
 
 /**
@@ -27,9 +34,16 @@ function focusFirstField(e: Event) {
   field.focus()
 }
 
-export function Modal({ open, onOpenChange, title, description, children, footer, wide }: ModalProps) {
+export function Modal({ open, onOpenChange, title, description, children, footer, wide, dirty }: ModalProps) {
+  const feedback = useContext(FeedbackContext)
+  const change = (next: boolean) => {
+    if (next || !dirty || !feedback) return onOpenChange(next)
+    void feedback
+      .confirm({ title: 'Discard changes?', message: "What you've typed here isn't saved yet.", confirmLabel: 'Discard', danger: true })
+      .then((discard) => discard && onOpenChange(false))
+  }
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+    <Dialog.Root open={open} onOpenChange={change}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-[#0b0d13]/75" />
         <Dialog.Content

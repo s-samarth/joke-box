@@ -22,7 +22,7 @@ export function WatchRow({ item, onToggle, onDelete }: Props) {
     <li className="flex gap-3 py-3.5">
       <button type="button" role="checkbox" aria-checked={item.watched} onClick={onToggle}
         aria-label={`${item.watched ? 'Mark as not watched' : 'Mark as watched'}: ${item.title}`}
-        className={`mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full ring-1 transition-colors ${item.watched ? 'bg-ok text-ink ring-ok' : 'ring-rule-strong hover:ring-paper/60'}`}>
+        className={`hit relative mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full ring-1 transition-colors ${item.watched ? 'bg-ok text-ink ring-ok' : 'ring-rule-strong hover:ring-paper/60'}`}>
         {item.watched && <Check size={16} strokeWidth={3} />}
       </button>
       <div className="min-w-0 flex-1">

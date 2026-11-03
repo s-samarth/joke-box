@@ -4,6 +4,7 @@
  */
 import { Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { useChanged } from '../../lib/useChanged'
 import { useCreateKind, useDeleteKind, useUpdateKind } from '../../api/craft'
 import type { NoteKind, NoteKindInput } from '../../api/types'
 import { Button } from '../../components/ui/Button'
@@ -23,6 +24,7 @@ interface Props {
 
 export function KindSheet({ kind, kinds, noteCount, onClose, onCreated }: Props) {
   const [form, setForm] = useState<NoteKindInput>(kind ? { name: kind.name, behaviour: kind.behaviour } : { name: '', behaviour: 'reference' })
+  const dirty = useChanged(form)
   const others = kinds.filter((k) => k.id !== kind?.id)
   const [moveTo, setMoveTo] = useState(others[0]?.id ?? '')
   const create = useCreateKind()
@@ -46,7 +48,7 @@ export function KindSheet({ kind, kinds, noteCount, onClose, onCreated }: Props)
   }
 
   return (
-    <Modal open onOpenChange={(o) => !o && onClose()} title={kind ? 'Edit kind' : 'New kind'}
+    <Modal open onOpenChange={(o) => !o && onClose()} dirty={dirty} title={kind ? 'Edit kind' : 'New kind'}
       footer={<><Button variant="quiet" onClick={onClose}>Cancel</Button><Button variant="tape" onClick={save} disabled={!form.name.trim() || create.isPending || update.isPending}>{kind ? 'Save kind' : 'Add kind'}</Button></>}>
       <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); save() }}>
         <Field label="Name"><Input value={form.name} maxLength={60} placeholder="e.g. Exercise, Quote, Joke breakdown" onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>

@@ -30,7 +30,7 @@ export function AddRoutineSheet({ items, onClose }: { items: WatchItem[]; onClos
   }
 
   return (
-    <Modal open onOpenChange={(o) => !o && onClose()} title="Add a routine"
+    <Modal open onOpenChange={(o) => !o && onClose()} dirty={Object.values(form).some((v) => v.trim())} title="Add a routine"
       footer={<Button variant="tape" onClick={submit} disabled={!ready}>Add to watchlist</Button>}>
       <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); submit() }}>
         <Field label="Routine or special">

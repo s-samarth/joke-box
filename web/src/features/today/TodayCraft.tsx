@@ -9,7 +9,7 @@ import { areaColor, kindFor, lessonFrom } from '../craft/craftMeta'
 import { PathLadder } from '../craft/PathLadder'
 import { announceSave } from '../../lib/announce'
 
-const chip = (on: boolean) => `inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-2.5 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'bg-ink-3 text-dim hover:text-paper'}`
+const chip = (on: boolean) => `hit relative inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-2.5 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'bg-ink-3 text-dim hover:text-paper'}`
 
 function LessonBox() {
   const [text, setText] = useState('')

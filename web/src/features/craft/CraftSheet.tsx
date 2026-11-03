@@ -24,7 +24,7 @@ interface Props {
   empty: string
 }
 
-const chip = (on: boolean) => `h-8 shrink-0 rounded-lg px-3 text-sm transition ${on ? 'bg-paper font-medium text-ink' : 'bg-ink-3 text-dim hover:text-paper'}`
+const chip = (on: boolean) => `hit relative h-8 shrink-0 rounded-lg px-3 text-sm transition ${on ? 'bg-paper font-medium text-ink' : 'bg-ink-3 text-dim hover:text-paper'}`
 
 export function CraftSheet({ open, onOpenChange, title, screen, behaviours, empty }: Props) {
   const { data: all = [] } = useCraftNotes()

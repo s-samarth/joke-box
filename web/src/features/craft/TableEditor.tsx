@@ -5,6 +5,7 @@
  */
 import { Plus, Trash2, X } from 'lucide-react'
 import { useState, type CSSProperties, type KeyboardEvent } from 'react'
+import { useChanged } from '../../lib/useChanged'
 import { newId } from '../../api/client'
 import { Button, IconButton } from '../../components/ui/Button'
 import { GrowingText } from '../../components/ui/Field'
@@ -41,6 +42,7 @@ export function TableEditor({ data, onSave, onClose, onDelete }: Props) {
   const [head, setHead] = useState(fit(data.head ?? []))
   const [rows, setRows] = useState(() => data.rows.map((r) => ({ id: newId(), cells: fit(r) })))
   const cols = head.length
+  const dirty = useChanged([hasHead, head, rows.map((r) => r.cells)])
   const name = (i: number) => (hasHead && head[i]?.trim()) || `Column ${i + 1}`
   const grid = { '--cols': cols } as CSSProperties
   const gridClass = 'grid gap-2 sm:grid-cols-[repeat(var(--cols),minmax(0,1fr))]'
@@ -68,7 +70,7 @@ export function TableEditor({ data, onSave, onClose, onDelete }: Props) {
   )
 
   return (
-    <Modal open onOpenChange={(o) => !o && onClose()} title="Table" description="Rows you leave empty are dropped. A “|” in a cell becomes “/”." wide footer={footer}>
+    <Modal open onOpenChange={(o) => !o && onClose()} dirty={dirty} title="Table" description="Rows you leave empty are dropped. A “|” in a cell becomes “/”." wide footer={footer}>
       <div className="space-y-5">
         <section className="space-y-2">
           <h3 className="text-sm text-dim">Columns</h3>

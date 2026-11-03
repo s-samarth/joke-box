@@ -42,7 +42,7 @@ export function NewPremiseDialog({ open, onOpenChange, topicId, onCreated }: Pro
   }
 
   return (
-    <Modal open={open} onOpenChange={(o) => (o ? onOpenChange(true) : close())} title="New premise" wide
+    <Modal open={open} onOpenChange={(o) => (o ? onOpenChange(true) : close())} dirty={Boolean(take.trim() || notes.trim())} title="New premise" wide
       footer={<Button variant="tape" disabled={!take.trim()} onClick={create}>Add premise</Button>}>
       <div className="space-y-4">
         <Field label="Topic">

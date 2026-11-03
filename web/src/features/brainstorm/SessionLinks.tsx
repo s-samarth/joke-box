@@ -19,7 +19,7 @@ const card = 'group relative flex max-w-full items-start gap-2 rounded-lg bg-ink
 
 function Unlink({ onClick }: { onClick: () => void }) {
   return (
-    <button type="button" aria-label="Unlink" onClick={onClick} className="absolute top-1.5 right-1.5 inline-flex size-7 items-center justify-center rounded-md text-faint hover:bg-ink-3 hover:text-paper">
+    <button type="button" aria-label="Unlink" onClick={onClick} className="hit absolute top-1.5 right-1.5 inline-flex size-7 items-center justify-center rounded-md text-faint hover:bg-ink-3 hover:text-paper">
       <X size={15} />
     </button>
   )

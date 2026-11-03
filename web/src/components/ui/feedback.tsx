@@ -70,7 +70,7 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
           </form>
         )}
       </Modal>
-      <div className="pointer-events-none fixed inset-x-0 bottom-28 z-[60] flex flex-col items-center gap-2 px-4 lg:bottom-8" aria-live="polite">
+      <div className="toasts pointer-events-none fixed inset-x-0 bottom-28 z-[60] flex flex-col items-center gap-2 px-4 lg:bottom-8" aria-live="polite">
         {toasts.map((t) => (
           <div key={t.id} className="pointer-events-auto flex items-center gap-3 rounded-xl bg-paper py-2.5 pr-2 pl-4 text-[15px] text-ink shadow-lift">
             <span>{t.message}</span>

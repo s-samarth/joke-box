@@ -12,7 +12,7 @@ import { useNewObservationTopic } from './useNewObservationTopic'
 import { announceSave } from '../../lib/announce'
 
 const chip = (on: boolean) =>
-  `h-8 shrink-0 rounded-lg px-2.5 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'bg-ink-3 text-dim hover:text-paper'}`
+  `hit relative h-8 shrink-0 rounded-lg px-2.5 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'bg-ink-3 text-dim hover:text-paper'}`
 
 export function ObservationBox({ initialTopicId = null }: { initialTopicId?: string | null }) {
   const [text, setText] = useState('')
