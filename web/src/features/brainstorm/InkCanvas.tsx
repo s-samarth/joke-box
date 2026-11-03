@@ -1,5 +1,6 @@
 /**
- * One blank handwriting page, two screens wide: it opens on the left half and pans sideways. The Pencil and a mouse always draw. A finger draws only when
+ * One blank handwriting page, two screens wide: it opens on the left half and pans sideways
+ * (a finger, the bar at the bottom of the screen, or a trackpad). The Pencil and a mouse always draw. A finger draws only when
  * "Draw with finger" is on (see fingerDraw.ts); otherwise one finger pans and two pinch to zoom,
  * as in OneNote. Two fingers always zoom, even mid-stroke: the half-drawn stroke is dropped.
  *
@@ -13,7 +14,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { Stroke } from '../../api/types'
 import { drawSegment, drawStroke, eraseAt, PAGE_SPAN, PAGE_WIDTH, pageHeight, pixelRatio } from './ink'
-import { PageScrollbar } from './PageScrollbar'
+import { PageNav } from './PageNav'
 import { useTouchView } from './useTouchView'
 
 export type InkTool = 'pen' | 'eraser'
@@ -49,6 +50,16 @@ export function InkCanvas({ strokes, page, onChange, tool, color, size, fingerDr
   const cssWidth = Math.round((width * zoom * PAGE_SPAN) / PAGE_WIDTH)
   const height = Math.round(pageHeight(strokes) * scale)
   const view = useTouchView({ frameRef, canvasRef, zoom, scale, onZoom })
+  // How far across the page the view is (0 to 1), so turning the iPad keeps the same spot in view.
+  const across = useRef(0)
+  const onScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    setScrollX(e.currentTarget.scrollLeft)
+    across.current = cssWidth ? e.currentTarget.scrollLeft / cssWidth : 0
+  }
+  useLayoutEffect(() => {
+    if (frameRef.current) frameRef.current.scrollLeft = across.current * frameRef.current.scrollWidth
+  }, [width])
+  const panTo = (left: number) => { if (frameRef.current) frameRef.current.scrollLeft = left }
 
   // Track the page area's width so handwriting rescales with the window.
   useEffect(() => {
@@ -164,12 +175,12 @@ export function InkCanvas({ strokes, page, onChange, tool, color, size, fingerDr
 
   return (
     <div>
-      <div ref={frameRef} onScroll={(e) => setScrollX(e.currentTarget.scrollLeft)} onWheel={onWheel} className="overflow-hidden rounded-xl bg-ink-2 ring-1 ring-rule">
+      <div ref={frameRef} onScroll={onScroll} onWheel={onWheel} className="overflow-hidden rounded-xl bg-ink-2 ring-1 ring-rule">
         <canvas ref={canvasRef} aria-label={`Handwriting page ${page + 1}`} style={{ width: cssWidth, height, touchAction: 'none', transformOrigin: '0 0' }}
           className={`block ${tool === 'eraser' ? 'cursor-cell' : 'cursor-crosshair'}`}
           onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={finish} onPointerCancel={finish} />
       </div>
-      <PageScrollbar shown={width} total={cssWidth} at={scrollX} />
+      <PageNav shown={width} total={cssWidth} at={scrollX} onPan={panTo} zoom={zoom} onFit={() => onZoom(1)} />
     </div>
   )
 }

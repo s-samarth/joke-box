@@ -41,6 +41,8 @@ export const nearestSize = (size: number) =>
 
 /** How far a page zooms in with two fingers. A double-width page past this would draw blurry (see pixelRatio). */
 export const MAX_ZOOM = 2.5
+/** Pinched all the way out, the whole double-width page fits the screen. */
+export const MIN_ZOOM = PAGE_WIDTH / PAGE_SPAN
 
 /*
  * Safari refuses a canvas much over 16 million pixels, and each one costs 4 bytes of memory. A

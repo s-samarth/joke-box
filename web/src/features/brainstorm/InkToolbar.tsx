@@ -1,8 +1,8 @@
 /**
- * Pen, eraser, ink colour and size, undo, clear, "draw with finger" and the page controls
- * for handwriting. Colour and size are in PenStyle.tsx.
+ * Pen, eraser, ink colour and size, undo, clear, "draw with finger", the page controls and
+ * full screen for handwriting. Colour and size are in PenStyle.tsx.
  */
-import { ChevronLeft, ChevronRight, Eraser, FileMinus, FilePlus, Hand, PenLine, Trash2, Undo2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Eraser, FileMinus, FilePlus, Hand, Maximize2, Minimize2, PenLine, Trash2, Undo2 } from 'lucide-react'
 import { IconButton } from '../../components/ui/Button'
 import { MAX_PAGES } from './ink'
 import type { InkTool } from './InkCanvas'
@@ -25,12 +25,14 @@ interface Props {
   onAddPage: () => void
   fingerDraws: boolean
   onFingerDraws: (on: boolean) => void
+  fullScreen: boolean
+  onFullScreen: (on: boolean) => void
 }
 
 const toolButton = (on: boolean) =>
   `inline-flex size-10 items-center justify-center rounded-lg transition ${on ? 'bg-paper text-ink' : 'text-dim hover:bg-ink-3 hover:text-paper'}`
 
-export function InkToolbar({ tool, color, size, onTool, onColor, onSize, onUndo, onClear, hasInk, page, pages, onPage, onAddPage, fingerDraws, onFingerDraws }: Props) {
+export function InkToolbar({ tool, color, size, onTool, onColor, onSize, onUndo, onClear, hasInk, page, pages, onPage, onAddPage, fingerDraws, onFingerDraws, fullScreen, onFullScreen }: Props) {
   const pen = { color, size, onColor: (c: string) => { onColor(c); onTool('pen') }, onSize: (s: number) => { onSize(s); onTool('pen') } }
   const deletes = !hasInk && pages > 1
   return (
@@ -50,6 +52,8 @@ export function InkToolbar({ tool, color, size, onTool, onColor, onSize, onUndo,
         <span className="min-w-9 text-center text-sm text-dim tabular" aria-live="polite">{page + 1} / {pages}</span>
         <IconButton label="Next page" onClick={() => onPage(page + 1)} disabled={page === pages - 1}><ChevronRight size={18} /></IconButton>
         <IconButton label="Add page" onClick={onAddPage} disabled={pages >= MAX_PAGES}><FilePlus size={17} /></IconButton>
+        <button type="button" aria-label="Full screen" aria-pressed={fullScreen} title={fullScreen ? 'Show the title, timer and links again' : 'Just the page and these tools'}
+          onClick={() => onFullScreen(!fullScreen)} className={toolButton(fullScreen)}>{fullScreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}</button>
       </div>
     </div>
   )
