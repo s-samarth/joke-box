@@ -219,7 +219,9 @@ craft notes wait here 30 days after they're deleted. `{kind}` is one of `jokes`,
 `/mcp` is an [MCP](https://modelcontextprotocol.io) server, so Claude can read your JokeBox while
 you write with it. It's in [app/connector/](../app/connector/) and uses the official `mcp` Python
 SDK over streamable HTTP, stateless, with JSON replies: each request stands alone, which suits
-serverless functions.
+serverless functions. Only `POST /mcp` is answered (a `GET` gets 405), and the server offers no
+subscriptions: both would be streams that a stateless server never writes to, held open until
+the function timed out.
 
 **Sign-in** is OAuth 2.1, the way Claude's custom connectors expect, built on the SDK's OAuth
 endpoints with JokeBox's own storage ([oauth.py](../app/connector/oauth.py),

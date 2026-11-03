@@ -27,6 +27,7 @@ from mcp.server.auth.settings import AuthSettings, ClientRegistrationOptions, Re
 from mcp.server.transport_security import TransportSecuritySettings
 from pydantic import AnyHttpUrl
 from starlette.middleware.authentication import AuthenticationMiddleware
+from starlette.responses import Response
 from starlette.routing import Route
 from starlette.types import ASGIApp, Receive, Scope, Send
 
@@ -73,9 +74,15 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 class Endpoint:
     """A plain ASGI app (a class, so Starlette passes it the raw request), handing each
-    request to the session manager running now."""
+    request to the session manager running now.
+
+    Only POST is answered. A GET asks for a stream of server messages, which a stateless
+    server never sends, so the SDK would hold it open until the function timed out."""
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["method"] != "POST":
+            await Response(status_code=405, headers={"Allow": "POST"})(scope, receive, send)
+            return
         await server.session_manager.handle_request(scope, receive, send)
 
 
