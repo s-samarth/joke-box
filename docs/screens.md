@@ -231,6 +231,18 @@ separate from joke topics: drag the grips to reorder them; deleting one keeps it
 - **Handwriting:** strokes are kept as points on a page 1000 units wide with A4 proportions, so they
   stay sharp at any size and redraw to fit a phone, an iPad or a laptop. Pointer Events handle the
   pen, touch and mouse with one set of handlers. Pencil pressure sets the line width. Up to 20 pages.
+  - **Pencil only** ([fingerDraw.ts](../web/src/features/brainstorm/fingerDraw.ts)): fingers draw
+    until this device first sees a Pencil; from then on only the Pencil (or a mouse) draws. The
+    hand button switches finger drawing on or off, remembered per device. Fingers that land while
+    the Pencil is down (a resting palm) are ignored.
+  - **Pan and zoom** ([useTouchView.ts](../web/src/features/brainstorm/useTouchView.ts)): one finger
+    pans, two pinch to zoom up to 3x around the fingers. During the pinch the canvas is only
+    stretched (CSS transform); when the fingers lift it is redrawn sharp at the new size, capped
+    at 12 million pixels to stay under Safari's canvas limit. A floating **300% · Fit** button
+    zooms back out. A second finger mid-stroke turns the stroke into a pinch.
+  - **Pens** ([PenStyle.tsx](../web/src/features/brainstorm/PenStyle.tsx)): on a tablet or laptop,
+    five everyday colours and three thicknesses (Fine, Medium, Thick) sit on the toolbar; the
+    menu holds the full twelve colours, and is all a phone shows.
 - **Saving:** the session autosaves a moment after you stop, and again when you leave. Nothing is
   saved until the session has some content.
 

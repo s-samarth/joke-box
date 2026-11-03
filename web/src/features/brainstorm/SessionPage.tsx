@@ -14,7 +14,8 @@ import { GrowingText } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { clock } from '../../lib/duration'
 import { useTimer } from '../jokes/useTimer'
-import { INK_COLORS, INK_SIZES, pageCount, removePage, replacePage, strokesOn, undoOn } from './ink'
+import { chooseFingerDraws, fingerDraws, pencilSeen } from './fingerDraw'
+import { INK_COLORS, INK_SIZES, nearestSize, pageCount, removePage, replacePage, strokesOn, undoOn } from './ink'
 import { InkCanvas, type InkTool } from './InkCanvas'
 import { InkToolbar } from './InkToolbar'
 import { SessionLinks } from './SessionLinks'
@@ -33,7 +34,7 @@ function savedPen() {
     const pen = JSON.parse(localStorage.getItem(PEN_KEY) ?? '{}') as Partial<typeof DEFAULT_PEN>
     return {
       color: INK_COLORS.find((c) => c === pen.color) ?? DEFAULT_PEN.color,
-      size: INK_SIZES.find((s) => s.size === pen.size)?.size ?? DEFAULT_PEN.size,
+      size: typeof pen.size === 'number' ? nearestSize(pen.size) : DEFAULT_PEN.size,
     }
   } catch { return DEFAULT_PEN }
 }
@@ -54,6 +55,8 @@ function Workspace({ id, start, technique }: { id: string; start?: WritingSessio
   const [mode, setMode] = useState<Mode>(() => (start?.ink.length && !start.content ? 'write' : savedMode()))
   const [tool, setTool] = useState<InkTool>('pen')
   const [pen, setPen] = useState(savedPen)
+  const [finger, setFinger] = useState(fingerDraws)
+  const [zoom, setZoom] = useState(1)
   const timer = useTimer(start?.timer_seconds ?? 0)
   const { confirm } = useFeedback()
   const autosave = useSessionAutosave(id, { title, content, ink, ink_pages: pages, timer_seconds: timer.seconds, joke_ids: jokeIds, observation_ids: observationIds, technique_id: techniqueId ?? null })
@@ -71,6 +74,8 @@ function Workspace({ id, start, technique }: { id: string; start?: WritingSessio
     setPen(merged)
     try { localStorage.setItem(PEN_KEY, JSON.stringify(merged)) } catch { /* private mode */ }
   }
+  const changeFinger = (on: boolean) => { chooseFingerDraws(on); setFinger(on) }
+  const onPencil = () => { pencilSeen(); setFinger(fingerDraws()) }
   const addPage = () => { autosave.touch(); setPages(pages + 1); setPage(pages) }
   const clearOrDeletePage = async () => {
     if (!pageInk.length) {
@@ -104,7 +109,8 @@ function Workspace({ id, start, technique }: { id: string; start?: WritingSessio
           <div className="border-t border-rule px-3 py-1.5 sm:px-6">
             <InkToolbar tool={tool} color={pen.color} size={pen.size} onTool={setTool} onColor={(color) => changePen({ color })} onSize={(size) => changePen({ size })}
               hasInk={pageInk.length > 0} onUndo={() => editInk((all) => undoOn(all, page))} onClear={clearOrDeletePage}
-              page={page} pages={pages} onPage={setPage} onAddPage={addPage} />
+              page={page} pages={pages} onPage={setPage} onAddPage={addPage}
+              fingerDraws={finger} onFingerDraws={changeFinger} />
           </div>
         )}
       </header>
@@ -124,10 +130,18 @@ function Workspace({ id, start, technique }: { id: string; start?: WritingSessio
           {mode === 'type' ? (
             <GrowingText aria-label="Brainstorm" autoFocus placeholder="Write anything. Premises, angles, tags, a rant that might be a joke." className="min-h-[55dvh] text-lg leading-relaxed" value={content} onChange={(e) => edit(setContent)(e.target.value)} />
           ) : (
-            <InkCanvas strokes={pageInk} page={page} onChange={(next) => editInk((all) => replacePage(all, page, next))} tool={tool} color={pen.color} size={pen.size} />
+            <InkCanvas strokes={pageInk} page={page} onChange={(next) => editInk((all) => replacePage(all, page, next))} tool={tool} color={pen.color} size={pen.size}
+              fingerDraws={finger} onPencil={onPencil} zoom={zoom} onZoom={setZoom} />
           )}
         </div>
       </main>
+      {mode === 'write' && zoom > 1 && (
+        // Floats over the page rather than sitting in the toolbar, so zooming never moves the layout.
+        <button type="button" onClick={() => setZoom(1)} aria-label="Zoom back to fit"
+          className="fixed bottom-6 right-6 z-10 inline-flex h-10 items-center gap-2 rounded-full bg-ink-3/95 px-4 text-sm shadow-lift ring-1 ring-rule-strong tabular">
+          {Math.round(zoom * 100)}%<span className="text-dim">Fit</span>
+        </button>
+      )}
     </div>
   )
 }

@@ -77,9 +77,10 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
    write against its prompts (tap **Next prompt** when one runs dry).
 2. Start the timer. Give the session a title, then either type or switch to **Handwrite**. Both are
    kept, and you can switch at any time.
-3. When handwriting, draw with Apple Pencil, a finger or a mouse. Once the page has seen a Pencil,
-   fingers scroll instead of drawing, as in Notes. You get a pen, an eraser, colours and sizes,
-   undo, and up to 20 pages.
+3. When handwriting, draw with Apple Pencil, a finger or a mouse. Once the device has seen a
+   Pencil, only the Pencil draws: one finger pans and two pinch to zoom, as in OneNote (the hand
+   button turns finger drawing back on). You get a pen, an eraser, quick colours and three
+   thicknesses, undo, and up to 20 pages.
 4. Tap **Link jokes or observations** to attach whatever the session touches.
 5. Leave whenever you like: the session saves itself.
 
