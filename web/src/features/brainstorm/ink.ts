@@ -17,13 +17,43 @@ export const INK_COLORS = [
   '#c084fc', '#7aa2ff', '#5fd4e8', '#74d3a8', '#b5e05a', '#c79a6b',
 ] as const
 
+/** The everyday pen colours, one tap away on the toolbar: light (black wouldn't show on the dark page), yellow, red, blue, green. */
+export const QUICK_COLORS = [
+  { name: 'Light', color: '#ece6da' }, { name: 'Yellow', color: '#f0cf5a' }, { name: 'Red', color: '#ff5a47' },
+  { name: 'Blue', color: '#7aa2ff' }, { name: 'Green', color: '#74d3a8' },
+] as const
+
 export const INK_SIZES = [
   { label: 'Fine', size: 1.2 },
   { label: 'Medium', size: 2.4 },
-  { label: 'Bold', size: 4 },
-  { label: 'Marker', size: 7 },
-  { label: 'Thick marker', size: 12 },
+  { label: 'Thick', size: 6 },
 ] as const
+
+/** The closest of the sizes: a pen remembered from when there were five keeps about its width. */
+export const nearestSize = (size: number) =>
+  INK_SIZES.reduce((best, s) => (Math.abs(s.size - size) < Math.abs(best - size) ? s.size : best), INK_SIZES[1].size as number)
+
+/** How far a page zooms in with two fingers. */
+export const MAX_ZOOM = 3
+
+/*
+ * Safari refuses a canvas much over 16 million pixels, and each one costs 4 bytes of memory. A
+ * zoomed page is drawn at a little less than full Retina sharpness to stay under this.
+ */
+const PIXEL_BUDGET = 12_000_000
+
+/** Pixels per CSS pixel for a canvas this size: the screen's own density, unless that's too big. */
+export const pixelRatio = (cssWidth: number, cssHeight: number, dpr: number) =>
+  Math.min(dpr, Math.sqrt(PIXEL_BUDGET / Math.max(1, cssWidth * cssHeight)))
+
+/**
+ * Where to scroll after a pinch so the spot under your fingers stays under them. `pageX/pageY`
+ * is that spot in page units, `scale` the new CSS pixels per page unit, `frameLeft` the page's
+ * left edge on screen and `canvasTop` its top in the document.
+ */
+export function scrollAfterZoom(o: { focusX: number; focusY: number; pageX: number; pageY: number; frameLeft: number; canvasTop: number; scale: number }) {
+  return { left: o.pageX * o.scale - (o.focusX - o.frameLeft), top: o.pageY * o.scale + o.canvasTop - o.focusY }
+}
 
 /** Pages are a fixed size; a page drawn before that, which grew past it, keeps all its ink. */
 export const pageHeight = (strokes: Stroke[]) =>
