@@ -6,13 +6,20 @@ import { ArrowDownUp } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { monthAnchor, type Order } from '../../lib/months'
 
-/** Clears the phone's top bar; on desktop the list's own scroll box starts at the top. */
-const PINNED = 'top-[calc(3.25rem+env(safe-area-inset-top))] lg:top-0'
+/**
+ * Clears the phone's top bar. On a wide screen it clears the iPad's status bar when the window
+ * scrolls, or sits at the top of a list in its own scroll box (`inBox`, the jokes list).
+ */
+const pinned = (inBox: boolean) => ({
+  top: `top-[calc(3.25rem+env(safe-area-inset-top))] ${inBox ? 'lg:top-0' : 'lg:top-[env(safe-area-inset-top)]'}`,
+  margin: `scroll-mt-[calc(3.25rem+env(safe-area-inset-top))] ${inBox ? 'lg:scroll-mt-0' : 'lg:scroll-mt-[env(safe-area-inset-top)]'}`,
+})
 
-export function MonthSection({ scope, monthKey, label, count, children }: { scope: string; monthKey: string; label: string; count: number; children: ReactNode }) {
+export function MonthSection({ scope, monthKey, label, count, inBox = false, children }: { scope: string; monthKey: string; label: string; count: number; inBox?: boolean; children: ReactNode }) {
+  const { top, margin } = pinned(inBox)
   return (
-    <section id={monthAnchor(scope, monthKey)} className="scroll-mt-[calc(3.25rem+env(safe-area-inset-top))] lg:scroll-mt-0">
-      <h2 className={`sticky z-10 flex items-baseline gap-2 bg-ink/95 py-2 text-sm font-semibold backdrop-blur ${PINNED}`}>
+    <section id={monthAnchor(scope, monthKey)} className={margin}>
+      <h2 className={`sticky z-10 flex items-baseline gap-2 bg-ink/95 py-2 text-sm font-semibold backdrop-blur ${top}`}>
         {label} <span className="font-normal text-faint tabular">{count}</span>
       </h2>
       {children}

@@ -46,7 +46,7 @@ export function JokeList({ jokes, topics, sort, activeId, query }: { jokes: Joke
     <>
       <div className="pr-5 pb-6 lg:pr-6">
         {groups.map((g) => (
-          <MonthSection key={g.key} scope="jokes" monthKey={g.key} label={g.label} count={g.items.length}>
+          <MonthSection key={g.key} inBox scope="jokes" monthKey={g.key} label={g.label} count={g.items.length}>
             <ul className="divide-y divide-rule">{g.items.map(row)}</ul>
           </MonthSection>
         ))}
