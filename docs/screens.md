@@ -248,7 +248,11 @@ separate from joke topics: drag the grips to reorder them; deleting one keeps it
     tap where to go. It holds the **250% · Fit** button too. Turning the iPad keeps the same part
     of the page in view.
   - **Pan and zoom** ([useTouchView.ts](../web/src/features/brainstorm/useTouchView.ts)): one finger
-    pans (sideways too), two pinch to zoom up to 2.5x around the fingers, or out to 50%, where the whole double-width page fits on screen. A trackpad's sideways
+    pans (sideways too), and so do two moving together. Two fingers zoom only once the gap
+    between them clearly changes ([gestures.ts](../web/src/features/brainstorm/gestures.ts)), so a
+    two-finger scroll never zooms by accident, and a pinch ending within 8% of fit snaps to it.
+    A dragging finger scrolls the page once a frame in whole pixels, carrying the fractions over:
+    Safari scrolls only whole pixels, so a slow drag otherwise stuck and jumped. Pinch zooms up to 2.5x around the fingers, or out to 50%, where the whole double-width page fits on screen. A trackpad's sideways
     swipe pans as well. During the pinch the canvas is only
     stretched (CSS transform); when the fingers lift it is redrawn sharp at the new size, capped
     at 12 million pixels to stay under Safari's canvas limit. A flick keeps the page gliding,

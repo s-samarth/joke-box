@@ -84,7 +84,8 @@ function Workspace({ id, start, technique }: { id: string; start?: WritingSessio
   return (
     // Handwriting: nothing on the page can be selected, so a resting Pencil never picks up text.
     <div className={`pt-safe min-h-dvh pb-24 ${mode === 'write' ? 'select-none [-webkit-touch-callout:none]' : ''}`}>
-      <header className="sticky top-0 z-10 border-b border-rule bg-ink/95 backdrop-blur">
+      {/* Solid while handwriting: blurring the big page behind it on every scroll step costs the iPad frames. */}
+      <header className={`sticky top-0 z-10 border-b border-rule ${mode === 'write' ? 'bg-ink' : 'bg-ink/95 backdrop-blur'}`}>
         {!full && <div className="flex items-center gap-2 px-3 py-2 sm:px-6">
           <Link to="/brainstorm" aria-label="Close session" className="inline-flex size-10 items-center justify-center rounded-lg text-dim hover:bg-ink-3 hover:text-paper"><X size={20} /></Link>
           <button type="button" onClick={toggleTimer} aria-label={timer.running ? 'Pause timer' : 'Start timer'} className={`inline-flex h-10 items-center gap-2 rounded-lg px-3 ${timer.running ? 'bg-tape text-tape-ink' : 'bg-ink-3'}`}>
