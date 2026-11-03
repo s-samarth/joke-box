@@ -81,14 +81,16 @@ def search_jokes(
     min_strength: int = 1,
     premise_id: str = "",
     limit: int = 25,
+    subtopic: str = "",
 ) -> dict[str, Any]:
     """Jokes whose words match the query, narrowed by any of the filters."""
     names = load_names(db, user)
     found = [
         j
         for j in user_jokes(db, user)
-        if matches(query, j.setup, j.punchline, " ".join(j.tag_lines or []), j.comments)
+        if matches(query, j.setup, j.punchline, j.comments, *(j.tag_lines or []), *hashtags(j))
         and same_name(topic, topic_name(names, j.topic_id))
+        and same_name(subtopic, names.subtopics.get(j.subtopic_id) if j.subtopic_id else "")
         and same_name(status, j.status.name if j.status else "")
         and (not joke_type or any(same_name(joke_type, t.name) for t in j.types))
         and j.strength >= min_strength
@@ -96,6 +98,11 @@ def search_jokes(
     ]
     shown, total = page(found, limit)
     return {"total": total, "jokes": [brief(j, names) for j in shown]}
+
+
+def hashtags(joke: Joke) -> list[str]:
+    """A joke's hashtags, each with its #, whichever way it was saved."""
+    return ["#" + h.strip().lstrip("#") for h in joke.hashtags or [] if h.strip().lstrip("#")]
 
 
 def get_jokes(db: Session, user: User, ids: list[str]) -> dict[str, Any]:

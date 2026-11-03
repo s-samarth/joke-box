@@ -68,7 +68,7 @@ erDiagram
 | Table | Columns | Rules |
 |---|---|---|
 | `connector_clients` | `client_id` (unique), `info` JSON (the registration: name, redirect URLs, secret, auth method) | An app that registered itself to connect (Claude). It reaches no one's data until that person allows it |
-| `connector_tokens` | `user_id` (cascade), `client_id → connector_clients.client_id` (cascade), `kind` (code / access / refresh), `token_hash` (unique, SHA-256), `scopes` JSON, `expires_at`, `details` JSON (a code's PKCE challenge, redirect URL and resource) | Values are never stored, only their hashes. A code or refresh token is deleted as it's used; expired ones are cleared at the next sign-in; disconnecting deletes all of that app's tokens for you |
+| `connector_tokens` | `user_id` (cascade), `client_id → connector_clients.client_id` (cascade), `kind` (code / access / refresh), `token_hash` (unique, SHA-256), `scopes` JSON, `expires_at`, `details` JSON (a code's PKCE challenge, redirect URL and resource) | Values are never stored, only their hashes. A code is deleted as it's used; a used refresh token expires 60 seconds later (time to retry a lost reply); expired ones are cleared at the next sign-in; disconnecting deletes all of that app's tokens for you |
 
 ### Writing
 

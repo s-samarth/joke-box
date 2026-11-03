@@ -238,7 +238,8 @@ endpoints with JokeBox's own storage ([oauth.py](../app/connector/oauth.py),
 | `POST /revoke` | Ends a sign-in |
 
 - A code works once and lasts 5 minutes. Access tokens last 1 hour; refresh tokens 30 days, and
-  each is replaced when used, so a copy stops working once either side uses it.
+  each is replaced when used. A used refresh token keeps working for 60 seconds more, so Claude
+  can retry if the reply with its replacement was lost; after that a copy stops working.
 - Codes and tokens are stored only as SHA-256 hashes.
 - `/mcp` without a live token is **401** with a `WWW-Authenticate` header pointing at the
   protected-resource document, which is how Claude knows to sign in.
@@ -254,13 +255,13 @@ Every tool reads; none writes. Each sees only the user's own rows, and the Trash
 | Tool | Returns |
 |---|---|
 | `jokebox_overview` | Topics and subtopics with joke counts; how many premises, sets, shows and observations; Craft areas; statuses and types |
-| `search_jokes` | Jokes matching every word of the query, filtered by topic, status, type, strength or premise; short versions, at most 25 |
+| `search_jokes` | Jokes matching every word of the query (in the setup, punchline, tag lines, hashtags or notes; `#name` finds a hashtag), filtered by topic, subtopic, status, type, strength or premise; short versions, at most 25 |
 | `get_jokes` | Up to 20 jokes in full: tag lines, notes, premise, what it follows and what follows it, the sets it's in, its rewrites |
 | `list_premises`, `get_premise` | Premises with their joke counts; one premise with its notes and jokes in chain order |
 | `list_sets`, `get_set` | Sets with runtime against target; one set in running order (first is the opener, last the closer) with each joke's topic, premise, strength and time |
-| `list_shows` | Logged shows with LPM, rating, topics and notes, and the LPM across them |
-| `search_observations`, `search_brainstorms` | Observations; Brainstorms and Rewrites by title and typed text, with how many handwritten pages each Brainstorm has (`handwritten_pages`) |
-| `get_brainstorm` | One Brainstorm in full: a JSON block (title, typed text, technique, linked jokes and observations, `handwritten_pages`, `pages_shown`, `more_from_page`), then "Page N" and a PNG of each handwritten page, drawn as the app shows it ([ink_image.py](../app/connector/ink_image.py)). Claude reads the handwriting from the images. Pages over a 2.5 MB budget continue with `from_page` |
+| `list_shows` | Logged shows with LPM, rating, topics and notes, and the LPM across every show that matches. `since` and `until` narrow by IST date; 25 a call, and `next_offset` says where the next page starts |
+| `search_observations`, `search_brainstorms` | Observations; Brainstorms and Rewrites together, most recently changed first, by title and typed text, with how many handwritten pages each Brainstorm has (`handwritten_pages`) |
+| `get_brainstorm` | Any result of `search_brainstorms` in full. A Brainstorm: a JSON block (`kind`, title, typed text, technique, linked jokes and observations, `handwritten_pages`, `pages_shown`, `more_from_page`), then "Page N" and a PNG of each handwritten page, drawn as the app shows it ([ink_image.py](../app/connector/ink_image.py)). Claude reads the handwriting from the images. Pages over a 2.5 MB budget continue with `from_page`. A Rewrite: one JSON block (`kind`, the joke's id and setup, title, typed text) |
 | `search_craft`, `get_craft_notes` | Craft notes (no query lists every title); up to 10 in full |
 | `search_analyses`, `get_analysis` | Analyses with the routine each is about; one in full |
 

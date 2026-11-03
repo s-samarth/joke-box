@@ -149,7 +149,13 @@ def test_performing_tools(claude: tuple[TestClient, str]) -> None:
     assert set(first) == BRIEF | {"place", "role", "optional", "premise", "follows_id"}
 
     shows = result(claude, "list_shows")
-    assert set(shows) == {"total", "average_lpm", "shows_with_laughs_counted", "shows"}
+    assert set(shows) == {
+        "total",
+        "next_offset",
+        "average_lpm",
+        "shows_with_laughs_counted",
+        "shows",
+    }
     assert set(items(shows, "shows")[0]) == {
         "date",
         "venue",
@@ -184,6 +190,7 @@ def test_notebook_and_study_tools(claude: tuple[TestClient, str]) -> None:
     brainstorm_id = next(r["id"] for r in found if r["kind"] == "brainstorm")
     blocks = content(claude, "get_brainstorm", brainstorm_id=brainstorm_id)
     assert set(json.loads(blocks[0]["text"])) == {
+        "kind",
         "id",
         "title",
         "text",
@@ -196,6 +203,17 @@ def test_notebook_and_study_tools(claude: tuple[TestClient, str]) -> None:
         "more_from_page",
     }
     assert [b["type"] for b in blocks[1:]] == ["text", "image"]  # "Page 1", then the page
+    rewrite_id = next(r["id"] for r in found if r["kind"] == "rewrite")
+    [rewrite] = content(claude, "get_brainstorm", brainstorm_id=rewrite_id)
+    assert set(json.loads(rewrite["text"])) == {
+        "kind",
+        "id",
+        "joke_id",
+        "joke_setup",
+        "title",
+        "text",
+        "updated",
+    }
 
     notes = items(result(claude, "search_craft"), "notes")
     assert set(notes[0]) == {"id", "title", "area", "kind", "hashtags", "preview"}

@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.connector.jokes import brief, load_names, topic_name, user_jokes
 from app.connector.library import parse_id
-from app.connector.text import clip, ist_date, matches, page
+from app.connector.text import clip, day, ist_date, matches, page
 from app.models import Joke, PerformanceLog, Setlist, User
 
 
@@ -92,8 +92,24 @@ def where_and_what(log: PerformanceLog) -> list[str]:
     return [log.venue.name if log.venue else "", *(t.name for t in log.topics)]
 
 
-def list_shows(db: Session, user: User, query: str = "", limit: int = 25) -> dict[str, Any]:
-    """Logged shows, newest first, and the LPM across every show with a laugh count."""
+def on_dates(log: PerformanceLog, since: str, until: str) -> bool:
+    """Whether a show's IST date falls in the range (either end may be empty)."""
+    performed = ist_date(log.performed_at) or ""
+    return since <= performed and (not until or performed <= until)
+
+
+def list_shows(
+    db: Session,
+    user: User,
+    query: str = "",
+    limit: int = 25,
+    since: str = "",
+    until: str = "",
+    offset: int = 0,
+) -> dict[str, Any]:
+    """Logged shows, newest first, on IST dates from `since` to `until` (both included), and the
+    LPM across every one of them with a laugh count, not only the page shown."""
+    since, until = day(since, "since"), day(until, "until")
     logs = db.scalars(
         select(PerformanceLog)
         .where(PerformanceLog.user_id == user.id)
@@ -101,13 +117,19 @@ def list_shows(db: Session, user: User, query: str = "", limit: int = 25) -> dic
         .order_by(PerformanceLog.performed_at.desc())
     )
     names = load_names(db, user)
-    found = [log for log in logs if matches(query, log.notes, *where_and_what(log))]
+    found = [
+        log
+        for log in logs
+        if matches(query, log.notes, *where_and_what(log)) and on_dates(log, since, until)
+    ]
     counted = [log for log in found if lpm(log.laughs, log.duration_seconds) is not None]
     points = sum(sum(n * (i + 1) for i, n in enumerate(log.laughs or [])) for log in counted)
     minutes = sum(log.duration_seconds for log in counted) / 60
-    shown, total = page(found, limit)
+    shown, total = page(found, limit, offset=offset)
+    after = max(0, offset) + len(shown)
     return {
         "total": total,
+        "next_offset": after if after < total else None,
         "average_lpm": round(points / minutes, 1) if minutes else None,
         "shows_with_laughs_counted": len(counted),
         "shows": [
