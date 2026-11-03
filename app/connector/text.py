@@ -1,7 +1,7 @@
 """Small helpers that keep tool results short and searchable."""
 
 from collections.abc import Iterable
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -33,9 +33,21 @@ def ist_date(moment: datetime | None) -> str | None:
     return moment.astimezone(IST).date().isoformat() if moment else None
 
 
-def page[T](rows: list[T], limit: int, cap: int = LIMIT) -> tuple[list[T], int]:
-    """The first `limit` rows (no more than `cap`) and how many there were in all."""
-    return rows[: max(1, min(limit, cap))], len(rows)
+def page[T](rows: list[T], limit: int, cap: int = LIMIT, offset: int = 0) -> tuple[list[T], int]:
+    """`limit` rows (no more than `cap`) from `offset` on, and how many there were in all."""
+    start = max(0, offset)
+    return rows[start : start + max(1, min(limit, cap))], len(rows)
+
+
+def day(value: str, name: str) -> str:
+    """A date filter as an ISO date (empty means no filter). Comparing these as strings
+    orders them by date."""
+    if not value.strip():
+        return ""
+    try:
+        return date.fromisoformat(value.strip()).isoformat()
+    except ValueError:
+        raise ValueError(f"{name} must be a date like 2026-10-31, not {value!r}") from None
 
 
 def by_id(rows: Iterable[Any]) -> dict[Any, str]:

@@ -39,18 +39,29 @@ def jokebox_overview() -> dict[str, Any]:
 def search_jokes(
     query: str = "",
     topic: str = "",
+    subtopic: str = "",
     status: str = "",
     joke_type: str = "",
     min_strength: int = 1,
     premise_id: str = "",
     limit: int = 25,
 ) -> dict[str, Any]:
-    """Find jokes. Every word of `query` must appear in the setup, punchline, tags or notes.
-    Filters are exact names (topic, status, type), a strength from 1 to 5 and up, or a premise
-    id. Returns short versions (at most 25) and the total; open them with get_jokes."""
+    """Find jokes. Every word of `query` must appear in the setup, punchline, tag lines,
+    hashtags or notes; a word starting with # finds that hashtag. Filters are exact names
+    (topic, subtopic, status, type), a strength from 1 to 5 and up, or a premise id. Returns
+    short versions (at most 25) and the total; open them with get_jokes."""
     with reading() as (db, user):
         return library.search_jokes(
-            db, user, query, topic, status, joke_type, min_strength, premise_id, limit
+            db,
+            user,
+            query,
+            topic,
+            status,
+            joke_type,
+            min_strength,
+            premise_id,
+            limit,
+            subtopic=subtopic,
         )
 
 
@@ -96,13 +107,19 @@ def get_set(set_id: str) -> dict[str, Any]:
 
 
 @server.tool(annotations=READ)
-def list_shows(query: str = "", limit: int = 25) -> dict[str, Any]:
+def list_shows(
+    query: str = "", since: str = "", until: str = "", offset: int = 0, limit: int = 25
+) -> dict[str, Any]:
     """Logged shows, newest first: date, venue, minutes, audience, rating (1-5), LPM, the topics
-    done and the comic's notes, plus the LPM across all shows. LPM scores each laugh 1-5 and
-    divides the points by minutes: 12+ is great, 9+ decent, 6+ poor, below 6 rough. Shows
-    record topics, not which jokes were done."""
+    done and the comic's notes, plus the LPM across every show that matches. Narrow by words in
+    the venue, topics or notes, and by date: `since` and `until` are dates like 2026-10-31 (IST,
+    both included). At most 25 a call: when next_offset is set, call again with that offset
+    for the rest. LPM scores each laugh 1-5 and divides the points by minutes: 12+ is great,
+    9+ decent, 6+ poor, below 6 rough. Shows record topics, not which jokes were done."""
     with reading() as (db, user):
-        return performing.list_shows(db, user, query, limit)
+        return performing.list_shows(
+            db, user, query, limit, since=since, until=until, offset=offset
+        )
 
 
 @server.tool(annotations=READ)
@@ -124,10 +141,11 @@ def search_brainstorms(query: str = "", limit: int = 25) -> dict[str, Any]:
 
 @server.tool(annotations=READ)
 def get_brainstorm(brainstorm_id: str, from_page: int = 1) -> list[TextContent | Image]:
-    """One Brainstorm session in full: title, typed text, technique, linked jokes and
-    observations, then each handwritten page as an image, labelled "Page N". Read the
-    handwriting from the images: the app's dark page in the comic's own ink colours, up to two
-    screens wide. If more_from_page is set, call again with from_page for the rest."""
+    """One result of search_brainstorms in full, by its id. A Brainstorm session: title, typed
+    text, technique, linked jokes and observations, then each handwritten page as an image,
+    labelled "Page N". Read the handwriting from the images: the app's dark page in the comic's
+    own ink colours, up to two screens wide. If more_from_page is set, call again with
+    from_page for the rest. A Rewrite (kind "rewrite"): the joke it reworks and the typed text."""
     with reading() as (db, user):
         return brainstorm.get_brainstorm(db, user, brainstorm_id, from_page)
 

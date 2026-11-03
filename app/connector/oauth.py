@@ -25,7 +25,15 @@ from mcp.shared.auth import OAuthClientInformationFull, OAuthToken
 from pydantic import AnyUrl
 
 from app.connector.consent_link import consent_url
-from app.connector.tokens import find, forget, issue, load_client, save_client, use_up
+from app.connector.tokens import (
+    find,
+    forget,
+    issue,
+    load_client,
+    save_client,
+    spend_refresh,
+    use_up,
+)
 
 SCOPE = "read"
 # Claude's sign-in callbacks (claude.com is where it may move). Loopback addresses are allowed
@@ -110,7 +118,7 @@ class Provider(OAuthAuthorizationServerProvider[AuthorizationCode, RefreshToken,
     async def exchange_refresh_token(
         self, client: OAuthClientInformationFull, refresh_token: RefreshToken, scopes: list[str]
     ) -> OAuthToken:
-        if not await run(partial(use_up, refresh_token.token, "refresh")):
+        if not await run(partial(spend_refresh, refresh_token.token)):
             raise TokenError("invalid_grant", "This refresh token was already used.")
         user_id = uuid.UUID(str(refresh_token.subject))
         return await run(partial(issue, user_id, client.client_id, scopes or refresh_token.scopes))

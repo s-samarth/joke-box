@@ -6,10 +6,11 @@ from datetime import timedelta
 from urllib.parse import unquote
 
 from fastapi.testclient import TestClient
-from sqlalchemy import update
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from app.auth.routes import safe_next
+from app.connector.tokens import GRACE, digest
 from app.main import app
 from app.models import ConnectorToken
 from app.models.base import utcnow
@@ -92,13 +93,25 @@ def refresh(client: TestClient, client_id: str, token: str) -> object:
     return client.post("/token", data=form)
 
 
-def test_refresh_tokens_rotate() -> None:
+def test_refresh_tokens_rotate_with_a_minute_to_retry(db: Session) -> None:
+    """A used refresh token works for a minute more, in case the reply with the new one was
+    lost on the way; after that only the newest works."""
     browser = signed_in("dev@example.com")
     first = connect(browser)
-    renewed = refresh(browser, first["client_id"], first["refresh_token"])
-    assert renewed.status_code == 200  # type: ignore[attr-defined]
-    again = refresh(browser, first["client_id"], first["refresh_token"])
-    assert again.status_code == 400  # type: ignore[attr-defined]
+    client_id, old = first["client_id"], first["refresh_token"]
+    assert refresh(browser, client_id, old).status_code == 200  # type: ignore[attr-defined]
+    used = db.scalar(select(ConnectorToken).where(ConnectorToken.token_hash == digest(old)))
+    assert used is not None and used.expires_at <= utcnow() + GRACE
+    retry = refresh(browser, client_id, old)
+    assert retry.status_code == 200  # type: ignore[attr-defined]
+    db.refresh(used)
+    assert used.expires_at <= utcnow() + GRACE  # a retry doesn't stretch the minute
+
+    used.expires_at = utcnow() - timedelta(seconds=1)  # a minute on
+    db.commit()
+    assert refresh(browser, client_id, old).status_code == 400  # type: ignore[attr-defined]
+    newest = retry.json()["refresh_token"]  # type: ignore[attr-defined]
+    assert refresh(browser, client_id, newest).status_code == 200  # type: ignore[attr-defined]
 
 
 def test_disconnect_and_expiry_stop_access(db: Session) -> None:
