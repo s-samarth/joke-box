@@ -16,29 +16,13 @@ import { useOnline } from '../../layout/useOnline'
 import { clock } from '../../lib/duration'
 import { useTimer } from '../jokes/useTimer'
 import { chooseFingerDraws, fingerDraws, pencilSeen } from './fingerDraw'
-import { INK_COLORS, INK_SIZES, nearestSize, pageCount, removePage, replacePage, strokesOn, undoOn } from './ink'
+import { pageCount, removePage, replacePage, strokesOn, undoOn } from './ink'
 import { InkCanvas, type InkTool } from './InkCanvas'
 import { InkToolbar } from './InkToolbar'
+import { type Mode, type Pen, saveFocus, savedFocus, savedMode, savedPen, saveMode, savePen } from './prefs'
 import { SessionLinks } from './SessionLinks'
 import { TechniquePanel } from './TechniquePanel'
 import { useSessionAutosave } from './useSessionAutosave'
-
-type Mode = 'type' | 'write'
-const MODE_KEY = 'jokebox.brainstorm.mode'
-const savedMode = (): Mode => { try { return localStorage.getItem(MODE_KEY) === 'write' ? 'write' : 'type' } catch { return 'type' } }
-
-/** The last pen colour and size you picked, remembered on this device. */
-const PEN_KEY = 'jokebox.brainstorm.pen'
-const DEFAULT_PEN = { color: INK_COLORS[0] as string, size: INK_SIZES[1].size as number }
-function savedPen() {
-  try {
-    const pen = JSON.parse(localStorage.getItem(PEN_KEY) ?? '{}') as Partial<typeof DEFAULT_PEN>
-    return {
-      color: INK_COLORS.find((c) => c === pen.color) ?? DEFAULT_PEN.color,
-      size: typeof pen.size === 'number' ? nearestSize(pen.size) : DEFAULT_PEN.size,
-    }
-  } catch { return DEFAULT_PEN }
-}
 
 const modeButton = (on: boolean) =>
   `inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'text-dim hover:text-paper'}`
@@ -58,6 +42,9 @@ function Workspace({ id, start, technique }: { id: string; start?: WritingSessio
   const [pen, setPen] = useState(savedPen)
   const [finger, setFinger] = useState(fingerDraws)
   const [zoom, setZoom] = useState(1)
+  const [focus, setFocus] = useState(savedFocus)
+  // Full screen: only the handwriting tools and the page, edge to edge.
+  const full = mode === 'write' && focus
   const timer = useTimer(start?.timer_seconds ?? 0)
   const { confirm } = useFeedback()
   const autosave = useSessionAutosave(id, { title, content, ink, ink_pages: pages, timer_seconds: timer.seconds, joke_ids: jokeIds, observation_ids: observationIds, technique_id: techniqueId ?? null })
@@ -65,15 +52,16 @@ function Workspace({ id, start, technique }: { id: string; start?: WritingSessio
 
   // Wrap each setter so any edit marks the session for the next autosave.
   const edit = <T,>(set: (v: T) => void) => (v: T) => { autosave.touch(); set(v) }
-  const switchMode = (m: Mode) => { setMode(m); try { localStorage.setItem(MODE_KEY, m) } catch { /* private mode */ } }
+  const switchMode = (m: Mode) => { setMode(m); saveMode(m) }
+  const changeFocus = (on: boolean) => { setFocus(on); saveFocus(on) }
   const toggleTimer = () => { if (timer.running) { timer.pause(); autosave.saveNow() } else timer.start() }
   const pageInk = strokesOn(ink, page)
   // Functional updates, so two strokes finished before a re-render both land.
   const editInk = (change: (all: Stroke[]) => Stroke[]) => { autosave.touch(); setInk(change) }
-  const changePen = (next: Partial<typeof pen>) => {
+  const changePen = (next: Partial<Pen>) => {
     const merged = { ...pen, ...next }
     setPen(merged)
-    try { localStorage.setItem(PEN_KEY, JSON.stringify(merged)) } catch { /* private mode */ }
+    savePen(merged)
   }
   const changeFinger = (on: boolean) => { chooseFingerDraws(on); setFinger(on) }
   const onPencil = () => { pencilSeen(); setFinger(fingerDraws()) }
@@ -94,7 +82,7 @@ function Workspace({ id, start, technique }: { id: string; start?: WritingSessio
   return (
     <div className="pt-safe min-h-dvh pb-24">
       <header className="sticky top-0 z-10 border-b border-rule bg-ink/95 backdrop-blur">
-        <div className="flex items-center gap-2 px-3 py-2 sm:px-6">
+        {!full && <div className="flex items-center gap-2 px-3 py-2 sm:px-6">
           <Link to="/brainstorm" aria-label="Close session" className="inline-flex size-10 items-center justify-center rounded-lg text-dim hover:bg-ink-3 hover:text-paper"><X size={20} /></Link>
           <button type="button" onClick={toggleTimer} aria-label={timer.running ? 'Pause timer' : 'Start timer'} className={`inline-flex h-10 items-center gap-2 rounded-lg px-3 ${timer.running ? 'bg-tape text-tape-ink' : 'bg-ink-3'}`}>
             {timer.running ? <Pause size={16} /> : <Play size={16} />}
@@ -105,18 +93,20 @@ function Workspace({ id, start, technique }: { id: string; start?: WritingSessio
             <button type="button" aria-pressed={mode === 'type'} onClick={() => switchMode('type')} className={modeButton(mode === 'type')}><Keyboard size={16} /><span className="hidden sm:inline">Type</span></button>
             <button type="button" aria-pressed={mode === 'write'} onClick={() => switchMode('write')} className={modeButton(mode === 'write')}><PenLine size={16} /><span className="hidden sm:inline">Handwrite</span></button>
           </div>
-        </div>
+        </div>}
         {mode === 'write' && (
-          <div className="border-t border-rule px-3 py-1.5 sm:px-6">
+          <div className={`px-3 py-1.5 sm:px-6 ${full ? '' : 'border-t border-rule'}`}>
             <InkToolbar tool={tool} color={pen.color} size={pen.size} onTool={setTool} onColor={(color) => changePen({ color })} onSize={(size) => changePen({ size })}
               hasInk={pageInk.length > 0} onUndo={() => editInk((all) => undoOn(all, page))} onClear={clearOrDeletePage}
               page={page} pages={pages} onPage={setPage} onAddPage={addPage}
-              fingerDraws={finger} onFingerDraws={changeFinger} />
+              fingerDraws={finger} onFingerDraws={changeFinger} fullScreen={full} onFullScreen={changeFocus} />
           </div>
         )}
       </header>
 
-      <main className="mx-auto max-w-3xl px-4 pt-6 sm:px-8">
+      {/* Handwriting takes the whole width (the page is two screens of it); the rest stays a readable column. */}
+      <main className={mode === 'write' ? 'mx-auto max-w-[1440px] px-2 pt-3 sm:px-4' : 'mx-auto max-w-3xl px-4 pt-6 sm:px-8'}>
+        {!full && <div className={mode === 'write' ? 'max-w-3xl px-2 pt-3 pb-6' : 'pb-6'}>
         <div className="flex items-baseline justify-between gap-3">
           <GrowingText aria-label="Session title" placeholder="Name this session (optional)" className="headline text-3xl" value={title} onChange={(e) => edit(setTitle)(e.target.value)} />
           <span className="shrink-0 text-sm text-faint tabular" aria-live="polite">{autosave.saving ? 'Saving…' : mode === 'type' ? `${words} words` : ''}</span>
@@ -127,7 +117,8 @@ function Workspace({ id, start, technique }: { id: string; start?: WritingSessio
         <div className="mt-4">
           <SessionLinks jokeIds={jokeIds} observationIds={observationIds} onChange={(b, o) => { autosave.touch(); setJokeIds(b); setObservationIds(o) }} />
         </div>
-        <div className="mt-6">
+        </div>}
+        <div>
           {mode === 'type' ? (
             <GrowingText aria-label="Brainstorm" autoFocus placeholder="Write anything. Premises, angles, tags, a rant that might be a joke." className="min-h-[55dvh] text-lg leading-relaxed" value={content} onChange={(e) => edit(setContent)(e.target.value)} />
           ) : (
@@ -136,13 +127,6 @@ function Workspace({ id, start, technique }: { id: string; start?: WritingSessio
           )}
         </div>
       </main>
-      {mode === 'write' && zoom > 1 && (
-        // Floats over the page rather than sitting in the toolbar, so zooming never moves the layout.
-        <button type="button" onClick={() => setZoom(1)} aria-label="Zoom back to fit"
-          className="fixed bottom-6 right-6 z-10 inline-flex h-10 items-center gap-2 rounded-full bg-ink-3/95 px-4 text-sm shadow-lift ring-1 ring-rule-strong tabular">
-          {Math.round(zoom * 100)}%<span className="text-dim">Fit</span>
-        </button>
-      )}
     </div>
   )
 }

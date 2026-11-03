@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { chooseFingerDraws, fingerDraws, pencilSeen } from './fingerDraw'
-import { INK_SIZES, nearestSize, pixelRatio, scrollAfterZoom } from './ink'
+import { INK_SIZES, MIN_ZOOM, nearestSize, PAGE_SPAN, PAGE_WIDTH, pixelRatio, scrollAfterZoom } from './ink'
+import { saveFocus, savedFocus } from './prefs'
 
 describe('pen sizes', () => {
   it('has three thicknesses', () => {
@@ -23,6 +24,10 @@ describe('zooming a page', () => {
       expect(o.frameLeft - left + o.pageX * scale).toBeCloseTo(o.focusX) // where the spot lands across
       expect(o.canvasTop - top + o.pageY * scale).toBeCloseTo(o.focusY) // and down
     }
+  })
+
+  it('pinched all the way out, fits the whole double-width page on screen', () => {
+    expect(PAGE_SPAN * MIN_ZOOM).toBe(PAGE_WIDTH)
   })
 
   it('draws at full sharpness until the canvas would get too big for Safari', () => {
@@ -64,5 +69,25 @@ describe('draw with finger', () => {
     vi.stubGlobal('localStorage', { getItem: () => { throw new Error('blocked') }, setItem: () => { throw new Error('blocked') } })
     pencilSeen()
     expect(fingerDraws()).toBe(true)
+  })
+})
+
+describe('full screen', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('starts off, and is remembered once switched on', () => {
+    const kept = new Map<string, string>()
+    vi.stubGlobal('localStorage', { getItem: (k: string) => kept.get(k) ?? null, setItem: (k: string, v: string) => kept.set(k, v) })
+    expect(savedFocus()).toBe(false)
+    saveFocus(true)
+    expect(savedFocus()).toBe(true)
+    saveFocus(false)
+    expect(savedFocus()).toBe(false)
+  })
+
+  it('stays off when storage is blocked', () => {
+    vi.stubGlobal('localStorage', { getItem: () => { throw new Error('blocked') }, setItem: () => { throw new Error('blocked') } })
+    saveFocus(true)
+    expect(savedFocus()).toBe(false)
   })
 })

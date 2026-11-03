@@ -230,20 +230,26 @@ separate from joke topics: drag the grips to reorder them; deleting one keeps it
   out the whole note. Without one, **Use a technique** picks one. The session keeps its technique.
 - **Handwriting:** strokes are kept as points, with the screen's width as 1000 units, so they stay
   sharp at any size and redraw to fit a phone, an iPad or a laptop. A page is two screens wide
-  (2000 units) and as tall as an A4 sheet one screen wide: it opens on its left half, and a thin
-  bar under it shows which part is on screen. Pointer Events handle the pen, touch and mouse with
+  (2000 units) and as tall as an A4 sheet one screen wide: it opens on its left half. Handwriting
+  uses the whole width of the screen (up to 1440 px); typing stays a readable column. Pointer Events handle the pen, touch and mouse with
   one set of handlers. Pencil pressure sets the line width. Up to 8 pages (a session from before
   that cap keeps its extra pages).
   - **Pencil only** ([fingerDraw.ts](../web/src/features/brainstorm/fingerDraw.ts)): fingers draw
     until this device first sees a Pencil; from then on only the Pencil (or a mouse) draws. The
     hand button switches finger drawing on or off, remembered per device. Fingers that land while
     the Pencil is down (a resting palm) are ignored.
+  - **Full screen** ([prefs.ts](../web/src/features/brainstorm/prefs.ts)): the last toolbar button
+    hides the timer, title, technique and links, leaving the tools and the page, so an iPad works
+    like a notebook. Remembered per device. The page keeps its width, so the ink doesn't resize.
+  - **Pan bar** ([PageNav.tsx](../web/src/features/brainstorm/PageNav.tsx)): floats at the bottom of
+    the screen, always in reach. Its thumb shows which part of the page is on screen; drag it, or
+    tap where to go. It holds the **250% · Fit** button too. Turning the iPad keeps the same part
+    of the page in view.
   - **Pan and zoom** ([useTouchView.ts](../web/src/features/brainstorm/useTouchView.ts)): one finger
-    pans (sideways too), two pinch to zoom up to 2.5x around the fingers. A trackpad's sideways
+    pans (sideways too), two pinch to zoom up to 2.5x around the fingers, or out to 50%, where the whole double-width page fits on screen. A trackpad's sideways
     swipe pans as well. During the pinch the canvas is only
     stretched (CSS transform); when the fingers lift it is redrawn sharp at the new size, capped
-    at 12 million pixels to stay under Safari's canvas limit. A floating **250% · Fit** button
-    zooms back out. A second finger mid-stroke turns the stroke into a pinch.
+    at 12 million pixels to stay under Safari's canvas limit. A second finger mid-stroke turns the stroke into a pinch.
   - **Pens** ([PenStyle.tsx](../web/src/features/brainstorm/PenStyle.tsx)): on a tablet or laptop,
     five everyday colours and three thicknesses (Fine, Medium, Thick) sit on the toolbar; the
     menu holds the full twelve colours, and is all a phone shows.

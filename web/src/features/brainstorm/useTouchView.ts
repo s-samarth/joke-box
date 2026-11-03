@@ -1,5 +1,6 @@
 /**
  * Fingers on a handwriting page: one finger pans, two pinch to zoom (and pan as they move).
+ * Pinched out all the way, the whole double-width page fits on screen.
  *
  * Pattern: during a pinch the canvas is only stretched with a CSS transform, which is instant.
  * When the fingers lift, the zoom is committed: the page is redrawn sharp at the new size and
@@ -9,7 +10,7 @@
  * (a resting palm) are ignored.
  */
 import { type RefObject, useLayoutEffect, useRef } from 'react'
-import { MAX_ZOOM, scrollAfterZoom } from './ink'
+import { MAX_ZOOM, MIN_ZOOM, scrollAfterZoom } from './ink'
 
 interface Pinch {
   distance: number
@@ -75,7 +76,7 @@ export function useTouchView({ frameRef, canvasRef, zoom, scale, onZoom }: Optio
   const movePinch = (p: Pinch) => {
     const [a, b] = [...touches.current.values()]
     const focus = middle(a, b)
-    const next = Math.min(MAX_ZOOM, Math.max(1, (p.zoom * apart(a, b)) / p.distance))
+    const next = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, (p.zoom * apart(a, b)) / p.distance))
     const stretch = next / p.zoom
     p.now = { zoom: next, ...focus }
     const x = focus.x - p.canvasLeft - p.pageX * p.scale * stretch
