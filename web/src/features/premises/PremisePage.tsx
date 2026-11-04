@@ -41,7 +41,7 @@ function Editor({ premise }: { premise: Premise }) {
     if (joke) saveJoke.mutate({ id, input: { ...toInput(joke), premise_id: null } })
   }
   const onDelete = async () => {
-    const ok = await confirm({ title: 'Delete this premise?', message: 'Its jokes stay where they are, just not on a premise. This can’t be undone.', confirmLabel: 'Delete premise', danger: true })
+    const ok = await confirm({ title: 'Delete this premise?', message: 'It goes to the Trash for 30 days. Its jokes stay where they are, just not on a premise, until you put it back.', confirmLabel: 'Delete premise', danger: true })
     if (!ok) return
     remove.mutate(premise.id, { onError: (e) => toast(`Not deleted: ${e.message}`) })
     navigate(`/premises${search}`)

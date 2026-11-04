@@ -6,6 +6,8 @@ from app.db import build_engine
 from app.models import Base
 
 target_metadata = Base.metadata
+LOCK_TIMEOUT = "5s"
+STATEMENT_TIMEOUT = "2min"
 
 
 def run_migrations() -> None:
@@ -20,6 +22,12 @@ def run_migrations() -> None:
             compare_type=True,
         )
         with context.begin_transaction():
+            if connection.dialect.name == "postgresql":
+                # Migrations run on production during the Vercel build. A migration waiting on
+                # a lock makes every request behind it wait too, so give up (and fail the
+                # build, leaving the old deployment serving) rather than queue for long.
+                connection.exec_driver_sql(f"SET LOCAL lock_timeout = '{LOCK_TIMEOUT}'")
+                connection.exec_driver_sql(f"SET LOCAL statement_timeout = '{STATEMENT_TIMEOUT}'")
             context.run_migrations()
 
 

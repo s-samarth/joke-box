@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Any
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, undefer
 
 from app.connector.ink_image import pages_with_ink
 from app.connector.text import by_id, clip, ist_date, matches, page, same_name
@@ -53,7 +53,11 @@ def search_brainstorms(db: Session, user: User, query: str = "", limit: int = 25
     techniques = by_id(
         db.execute(select(CraftNote.id, CraftNote.title).where(CraftNote.user_id == user.id))
     )
-    sessions = db.scalars(select(WritingSession).where(WritingSession.user_id == user.id))
+    sessions = db.scalars(
+        select(WritingSession)
+        .where(WritingSession.user_id == user.id)
+        .options(undefer(WritingSession.ink))  # deferred on the model; pages are counted here
+    )
     rewrites = db.scalars(select(Brainstorm).where(Brainstorm.user_id == user.id))
     found: list[tuple[datetime, dict[str, Any]]] = [
         (

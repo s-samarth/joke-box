@@ -6,6 +6,7 @@ from datetime import date, datetime
 from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
 
 from app.schemas.legacy import JOKE_ID
+from app.schemas.limits import INT_MAX
 
 
 class VenueOut(BaseModel):
@@ -18,15 +19,15 @@ class VenueOut(BaseModel):
 
 class SetlistItemIn(BaseModel):
     joke_id: uuid.UUID = Field(validation_alias=JOKE_ID)
-    duration_seconds: int = Field(default=0, ge=0)
+    duration_seconds: int = Field(default=0, ge=0, le=INT_MAX)
     optional: bool = False
 
 
 class SetlistIn(BaseModel):
     name: str = Field(default="Untitled Setlist", min_length=1, max_length=200)
     show_date: date | None = None
-    target_seconds: int = Field(default=900, ge=0)
-    venue_name: str | None = None
+    target_seconds: int = Field(default=900, ge=0, le=INT_MAX)
+    venue_name: str | None = Field(default=None, max_length=160)
     rating: int | None = Field(default=None, ge=1, le=5)
     tag_ids: list[uuid.UUID] = Field(default_factory=list)
     items: list[SetlistItemIn] = Field(default_factory=list)
@@ -63,8 +64,8 @@ class SetlistOut(BaseModel):
 class LogIn(BaseModel):
     venue_name: str = Field(default="Unidentified Venue", min_length=1, max_length=160)
     performed_at: datetime
-    duration_seconds: int = Field(default=0, ge=0)
-    audience_size: int = Field(default=0, ge=0)
+    duration_seconds: int = Field(default=0, ge=0, le=INT_MAX)
+    audience_size: int = Field(default=0, ge=0, le=INT_MAX)
     rating: int = Field(default=3, ge=1, le=5)
     topic_ids: list[uuid.UUID] = Field(default_factory=list)
     notes: str = ""
@@ -96,7 +97,7 @@ class BrainstormIn(BaseModel):
     joke_id: uuid.UUID = Field(validation_alias=JOKE_ID)
     title: str = Field(default="", max_length=200)
     content: str = ""
-    timer_seconds: int = Field(default=0, ge=0)
+    timer_seconds: int = Field(default=0, ge=0, le=INT_MAX)
 
 
 class BrainstormVersionOut(BaseModel):

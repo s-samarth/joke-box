@@ -67,7 +67,7 @@ erDiagram
 
 | Table | Columns | Rules |
 |---|---|---|
-| `connector_clients` | `client_id` (unique), `info` JSON (the registration: name, redirect URLs, secret, auth method) | An app that registered itself to connect (Claude). It reaches no one's data until that person allows it |
+| `connector_clients` | `client_id` (unique), `info` JSON (the registration: name, redirect URLs, secret, auth method), `signed_in_at` (when it first got tokens) | An app that registered itself to connect (Claude). It reaches no one's data until that person allows it. Anyone can register, so one that hasn't signed in a week after registering is deleted at the next registration |
 | `connector_tokens` | `user_id` (cascade), `client_id → connector_clients.client_id` (cascade), `kind` (code / access / refresh), `token_hash` (unique, SHA-256), `scopes` JSON, `expires_at`, `details` JSON (a code's PKCE challenge, redirect URL and resource) | Values are never stored, only their hashes. A code is deleted as it's used; a used refresh token expires 60 seconds later (time to retry a lost reply); expired ones are cleared at the next sign-in; disconnecting deletes all of that app's tokens for you |
 
 ### Writing
@@ -78,7 +78,7 @@ erDiagram
 | `brainstorm_versions` | `brainstorm_id` (cascade), `title`, `content`, `saved_at` | One row appended per save |
 | `observation_topics` | `name`, `position` | Separate from joke topics, in the order you drag them into |
 | `observations` | `text`, `topic_id` (set null) | Deleting the topic keeps the observation |
-| `writing_sessions` | `title`, `content`, `ink` JSON (strokes: colour, size, page, `[x, y, pressure]` points), `ink_pages` (1–20), `timer_seconds`, `joke_ids` JSON, `observation_ids` JSON, `technique_id → craft_notes` (set null) | A free **Brainstorm** session. Links are id lists; deleted targets just drop out of view. Deleting the technique keeps the session |
+| `writing_sessions` | `title`, `content`, `ink` JSON (strokes: colour, size, page, `[x, y, pressure]` points; deferred, so it's loaded only when read), `ink_strokes` (how many, kept on every save so lists never load the ink), `ink_pages` (1–20), `timer_seconds`, `joke_ids` JSON, `observation_ids` JSON, `technique_id → craft_notes` (set null) | A free **Brainstorm** session. Links are id lists; deleted targets just drop out of view. Deleting the technique keeps the session |
 | `voice_notes` | `label`, `hashtags` JSON, `duration_seconds`, `content_type`, `size_bytes`, `audio_path` | `audio_path` stays empty until the upload lands. The audio itself lives in Blob storage |
 
 ### Performing
@@ -105,24 +105,26 @@ erDiagram
 
 ## What happens on delete
 
-Jokes, rewrites, observations, brainstorms, voice notes, shows, analyses, watchlist routines and
-craft notes go to the **Trash** ([models/trash.py](../app/models/trash.py)): `deleted_at` is set
+Jokes, rewrites, premises, observations, brainstorms, voice notes, sets, shows, analyses,
+watchlist routines and craft notes go to the **Trash** ([models/trash.py](../app/models/trash.py)): `deleted_at` is set
 and the row stays. A filter on every ORM query hides trashed rows, so lists, counts and lookups
 never see them; the Trash asks for them explicitly. Bulk updates (moving jokes off a deleted topic,
 shows off a deleted venue) still reach them, so they stay restorable. Put back clears
 `deleted_at`. After 30 days, or on Delete now / Empty Trash, the row is erased and the effects below
-happen. Saving something that's in the Trash answers 410.
+happen. Saving something that's in the Trash answers 410. A voice note's audio file is deleted
+only after the database change is committed, so a failed erase never leaves a note without its
+sound.
 
 | You delete | Effect |
 |---|---|
 | A joke | To the Trash with its live rewrites (same `deleted_at`, so they come back together). Its set places stay but are hidden; saving a set keeps them where they were. Links to it from shows' lessons and brainstorms stay. Erased: its rewrites, versions and set places go (cascade) |
 | A rewrite, observation, brainstorm, show, analysis, routine or craft note | To the Trash. Links to it (a lesson's show or analysis, an analysis's routine, a brainstorm's technique) stay while it's there and clear when it's erased |
 | A topic | Its jokes and premises move to Thoughts, the jokes with no subtopic; its show links move to Thoughts; its subtopics go |
-| A premise | Gone at once, not to the Trash. Its jokes stay, on no premise. A joke saved later (offline) still pointing at it is saved with no premise |
+| A premise | To the Trash. Its jokes (live or in the Trash) stay, on no premise, and `trashed_joke_ids` remembers them: put back, it takes back those still on no premise (one moved to another premise meanwhile stays there). A joke saved later (offline) still pointing at it is saved with no premise. Erased: nothing else changes |
 | A subtopic | Its jokes keep their topic and lose the subtopic |
 | A type | Removed from every joke; a joke left with none shows as "Undefined" |
 | An observation topic | Its observations stay, with no topic |
-| A set | Its items go; the jokes stay |
+| A set | To the Trash with its items and tags, and comes back as it was. Erased: its items go; the jokes stay |
 | A watchlist routine | Analyses of it stay, unlinked |
 | A voice note | To the Trash; the audio file stays until it's erased. One whose recording hasn't uploaded yet is erased at once (the sound was only on the phone). Deleting twice is fine (a replayed delete) |
 
@@ -139,6 +141,7 @@ All of these run in one transaction ([services/topics.py](../app/services/topics
 | `0005` | Voice notes |
 | `0006` | Watchlist and analyses |
 | `0024` | Connector sign-in: `connector_clients` and `connector_tokens` |
+| `0025` | Sets and premises go to the Trash (`deleted_at`, `premises.trashed_joke_ids`); `writing_sessions.ink_strokes`, counted from the ink already there; `connector_clients.signed_in_at` (apps already registered count as signed in) |
 
 Merged migrations are shared history. CI fails a PR that edits, deletes or renames one; fix
 forward with a new revision. CI also runs upgrade → downgrade → upgrade on Postgres 16, so every

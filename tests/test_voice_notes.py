@@ -9,8 +9,11 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import select
+from sqlalchemy.orm import Session, sessionmaker
 
 from app.main import app
+from app.models import VoiceNote
 from app.routers.voice import MAX_AUDIO_BYTES
 from app.services.audio_store import LocalAudioStore, get_audio_store
 
@@ -128,3 +131,31 @@ def test_an_import_keeps_the_original_date(alice: TestClient) -> None:
     assert alice.get("/api/voice-notes").json()[0]["created_at"].startswith("2023-02-13")
     new_note(alice)  # recorded now, so it lists first
     assert alice.get("/api/voice-notes").json()[1]["id"] == note_id
+
+
+def test_a_recording_is_deleted_only_once_its_note_is_erased(
+    alice: TestClient,
+    store: LocalAudioStore,
+    session_factory: sessionmaker[Session],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Deleting the file first left a note in the Trash with nothing to play if erasing the
+    note then failed."""
+    notes = [new_note(alice), new_note(alice)]
+    for note_id in notes:
+        alice.put(f"/api/voice-notes/{note_id}/audio", content=FAKE_AUDIO, headers=AUDIO)
+        alice.delete(f"/api/voice-notes/{note_id}")
+    note_left: list[bool] = []
+    delete_file = store.delete
+
+    def delete(path: str) -> None:
+        with session_factory() as other:  # what the database holds right now
+            rows = other.scalars(select(VoiceNote).execution_options(include_trashed=True))
+            note_left.append(any(str(n.id) in path for n in rows))
+        delete_file(path)
+
+    monkeypatch.setattr(store, "delete", delete)
+    assert alice.delete(f"/api/trash/voice-notes/{notes[0]}").status_code == 204
+    assert alice.delete("/api/trash").status_code == 204
+    assert note_left == [False, False]
+    assert not list(store.root.rglob("*.m4a"))

@@ -9,7 +9,7 @@ import { api } from './client'
 import { keys, queryClient, refreshWhenSynced } from './queryClient'
 import { QUEUED } from './sync'
 
-export type TrashKind = 'jokes' | 'rewrites' | 'observations' | 'brainstorms' | 'voice-notes' | 'shows' | 'analyses' | 'watchlist' | 'craft-notes'
+export type TrashKind = 'jokes' | 'rewrites' | 'premises' | 'observations' | 'brainstorms' | 'voice-notes' | 'sets' | 'shows' | 'analyses' | 'watchlist' | 'craft-notes'
 
 export interface TrashItem {
   kind: TrashKind
@@ -28,9 +28,12 @@ export type TrashVars = { kind: TrashKind; id: string }
 export const TRASH_KINDS: Record<TrashKind, { label: string; lists: QueryKey[] }> = {
   jokes: { label: 'Jokes', lists: [keys.jokes, keys.brainstorms, keys.setlists, keys.types] },
   rewrites: { label: 'Rewrites', lists: [keys.brainstorms] },
+  // A premise comes back with the jokes that rested on it.
+  premises: { label: 'Premises', lists: [keys.premises, keys.jokes] },
   observations: { label: 'Observations', lists: [keys.observations] },
   brainstorms: { label: 'Brainstorms', lists: [keys.sessionList] },
   'voice-notes': { label: 'Voice notes', lists: [keys.voiceNotes] },
+  sets: { label: 'Sets', lists: [keys.setlists, keys.venues] },
   shows: { label: 'Shows', lists: [keys.logs, keys.venues] },
   analyses: { label: 'Analyses', lists: [keys.analyses] },
   watchlist: { label: 'Watchlist', lists: [keys.watchlist] },

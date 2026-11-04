@@ -37,7 +37,7 @@ export function SetsPage() {
     navigate(`/sets/${id}`)
   }
   const onDelete = async (s: Setlist) => {
-    if (await confirm({ title: `Delete ${s.name}?`, message: 'The jokes stay in your library.', confirmLabel: 'Delete set', danger: true })) {
+    if (await confirm({ title: `Delete ${s.name}?`, message: 'It goes to the Trash for 30 days. The jokes stay in your library.', confirmLabel: 'Delete set', danger: true })) {
       remove.mutateAsync(s.id).catch((e: Error) => toast(`Set not deleted: ${e.message}`))
       toast('Set deleted')
     }

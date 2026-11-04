@@ -42,13 +42,17 @@ class WritingSession(Trashable, OwnedMixin, Base):
     a blank page you added is still there next time. Links are id lists: a linked joke or
     observation that was later deleted simply drops out when the page is shown, rather than
     blocking the delete.
+
+    The ink is deferred: it's loaded only when read, so lists and saves don't carry every
+    stroke of every session out of the database. `ink_strokes` counts the strokes for them.
     """
 
     __tablename__ = "writing_sessions"
 
     title: Mapped[str] = mapped_column(String(200), default="")
     content: Mapped[str] = mapped_column(Text, default="")
-    ink: Mapped[list[dict[str, Any]]] = mapped_column(JSON, default=list)
+    ink: Mapped[list[dict[str, Any]]] = mapped_column(JSON, default=list, deferred=True)
+    ink_strokes: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     ink_pages: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
     timer_seconds: Mapped[int] = mapped_column(Integer, default=0)
     joke_ids: Mapped[list[str]] = mapped_column(JSON, default=list)

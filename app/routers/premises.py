@@ -1,14 +1,15 @@
-"""Premises: list, create-or-update by client id, delete."""
+"""Premises: list, create-or-update by client id, delete (to the Trash)."""
 
 import uuid
 
 from fastapi import APIRouter, HTTPException
-from sqlalchemy import select, update
+from sqlalchemy import select
 
-from app.auth.deps import CurrentUser, DbSession, find_owned, get_owned
-from app.models import Joke, Premise, Topic
+from app.auth.deps import CurrentUser, DbSession, find_owned
+from app.models import Premise, Topic
 from app.schemas.premises import PremiseIn, PremiseOut
 from app.services.ordering import next_position
+from app.services.trash import move_to_trash
 
 router = APIRouter(prefix="/api/premises", tags=["premises"])
 
@@ -44,12 +45,5 @@ def put_premise(
 
 @router.delete("/{premise_id}", status_code=204)
 def delete_premise(premise_id: uuid.UUID, user: CurrentUser, db: DbSession) -> None:
-    """The premise goes; its jokes stay where they are, resting on nothing."""
-    premise = get_owned(db, Premise, premise_id, user)
-    db.execute(
-        update(Joke)
-        .where(Joke.user_id == user.id, Joke.premise_id == premise.id)
-        .values(premise_id=None)
-    )
-    db.delete(premise)
-    db.commit()
+    """To the Trash. Its jokes stay where they are, resting on nothing until it's put back."""
+    move_to_trash(db, user, Premise, premise_id)

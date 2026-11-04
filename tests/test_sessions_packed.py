@@ -5,9 +5,12 @@ import gzip
 import json
 import uuid
 
+import pytest
 from fastapi.testclient import TestClient
 
-from app.packed import MAX_UNPACKED, PACKED_JSON
+from app import packed
+from app.main import app
+from app.packed import MAX_PACKED, MAX_UNPACKED, PACKED_JSON
 
 STROKE = {"color": "#f5f5f4", "size": 3, "points": [[10.5, 20.5, 0.5], [30, 40, 0.7]]}
 
@@ -103,3 +106,22 @@ def test_a_packed_save_still_needs_the_csrf_header(alice: TestClient) -> None:
         headers={"content-type": PACKED_JSON, "x-requested-with": ""},
     )
     assert response.status_code == 403
+
+
+def test_nobody_signed_out_gets_a_body_unpacked(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The middleware refuses before reading the body: inflating one is work worth saving for
+    people who are signed in."""
+    unpacks: list[bytes] = []
+    monkeypatch.setattr(packed, "unpack", lambda data: unpacks.append(data) or data)
+    stranger = TestClient(app, headers={"X-Requested-With": "jokebox"})
+    data = gzip.compress(json.dumps({"title": "Fake"}).encode())
+    headers = {"content-type": PACKED_JSON}
+    response = stranger.put(f"/api/sessions/{uuid.uuid4()}", content=data, headers=headers)
+    assert response.status_code == 401
+    assert stranger.put("/elsewhere", content=data, headers=headers).status_code == 403
+    assert unpacks == []
+
+
+def test_a_packed_body_past_the_hosts_limit_is_not_read_on(alice: TestClient) -> None:
+    too_big = b"\x1f\x8b" + b"x" * (MAX_PACKED + 1)
+    assert packed_put(alice, str(uuid.uuid4()), too_big).status_code == 413

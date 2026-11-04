@@ -1,15 +1,19 @@
 """Moving things to the Trash, restoring them, and erasing them for good.
 
 A joke goes to the Trash with its rewrites (stamped with the same time), and comes back with
-them. Its places in sets stay in the database, hidden while it's away. Anything in the Trash
-for 30 days is erased the next time the Trash is opened.
+them. Its places in sets stay in the database, hidden while it's away. A premise's jokes are
+set loose while it's away and put back on it when it returns (see premise_links). A set keeps
+its jokes. Anything in the Trash for 30 days is erased the next time the Trash is opened.
+
+A voice note's recording is deleted only once the database has let the note go: if erasing
+failed halfway, the note would otherwise stay in the Trash with nothing to play.
 """
 
 import uuid
 from datetime import timedelta
 
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import Select, select
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import StaleDataError
 
@@ -20,6 +24,8 @@ from app.models import (
     Joke,
     Observation,
     PerformanceLog,
+    Premise,
+    Setlist,
     User,
     VoiceNote,
     WatchItem,
@@ -27,6 +33,7 @@ from app.models import (
 )
 from app.models.base import utcnow
 from app.models.trash import INCLUDE_TRASHED, Trashable
+from app.services import premise_links
 from app.services.audio_store import AudioStore
 from app.services.jokes import prune_unused_types
 
@@ -36,9 +43,11 @@ KEEP_FOR = timedelta(days=30)
 KINDS: dict[str, type[Trashable]] = {
     "jokes": Joke,
     "rewrites": Brainstorm,
+    "premises": Premise,
     "observations": Observation,
     "brainstorms": WritingSession,
     "voice-notes": VoiceNote,
+    "sets": Setlist,
     "shows": PerformanceLog,
     "analyses": Analysis,
     "watchlist": WatchItem,
@@ -52,14 +61,17 @@ def find_any[T: Trashable](db: Session, model: type[T], row_id: uuid.UUID, user:
     return db.scalar(query.execution_options(**{INCLUDE_TRASHED: True}))
 
 
-def trashed[T: Trashable](db: Session, model: type[T], user: User) -> list[T]:
-    """Everything of one kind in the user's Trash, most recently deleted first."""
-    query = (
-        select(model)
-        .where(model.user_id == user.id, model.deleted_at.is_not(None))  # type: ignore[attr-defined]
-        .order_by(model.deleted_at.desc())
+def in_trash[T: Trashable](model: type[T], user: User) -> Select[T]:
+    """A query for everything of one kind in the user's Trash, most recently deleted first."""
+    query = select(model).where(
+        model.user_id == user.id,  # type: ignore[attr-defined]
+        model.deleted_at.is_not(None),
     )
-    return list(db.scalars(query.execution_options(**{INCLUDE_TRASHED: True})))
+    return query.order_by(model.deleted_at.desc()).execution_options(**{INCLUDE_TRASHED: True})
+
+
+def trashed[T: Trashable](db: Session, model: type[T], user: User) -> list[T]:
+    return list(db.scalars(in_trash(model, user)))
 
 
 def trashed_joke_ids(db: Session, user: User) -> set[uuid.UUID]:
@@ -90,6 +102,8 @@ def move_to_trash(db: Session, user: User, model: type[Trashable], row_id: uuid.
     if isinstance(row, Joke):
         for rewrite in rewrites_of(db, row, None):
             rewrite.deleted_at = row.deleted_at
+    if isinstance(row, Premise):
+        premise_links.set_loose(db, user, row)
     db.commit()
 
 
@@ -105,18 +119,27 @@ def restore(db: Session, user: User, model: type[Trashable], row_id: uuid.UUID) 
     if isinstance(row, Joke):
         for rewrite in rewrites_of(db, row, row.deleted_at):
             rewrite.deleted_at = None
+    if isinstance(row, Premise):
+        premise_links.put_back(db, user, row)
     row.deleted_at = None
     db.commit()
 
 
-def erase(db: Session, user: User, row: Trashable, store: AudioStore) -> None:
-    """Delete one trashed row for good, with its recording if it's a voice note."""
-    if isinstance(row, VoiceNote) and row.audio_path:
-        store.delete(row.audio_path)
+def erase(db: Session, user: User, row: Trashable) -> str | None:
+    """Delete one trashed row for good. Returns its recording, if it's a voice note, to delete
+    once this is committed."""
+    recording = row.audio_path if isinstance(row, VoiceNote) else None
     db.delete(row)
     db.flush()
     if isinstance(row, Joke):
         prune_unused_types(db, user)
+    return recording
+
+
+def delete_recordings(store: AudioStore, recordings: list[str | None]) -> None:
+    for path in recordings:
+        if path:
+            store.delete(path)
 
 
 def delete_forever(
@@ -124,21 +147,27 @@ def delete_forever(
 ) -> None:
     row = find_any(db, model, row_id, user)
     if row is not None and row.deleted_at is not None:
-        erase(db, user, row, store)
+        recording = erase(db, user, row)
         db.commit()
+        delete_recordings(store, [recording])
 
 
 def empty(db: Session, user: User, store: AudioStore, older_than: timedelta | None = None) -> None:
-    """Erase everything in the Trash, or only what has waited longer than `older_than`."""
-    cutoff = utcnow() - older_than if older_than else None
+    """Erase everything in the Trash, or only what has waited longer than `older_than` (asked
+    of the database, so the usual case, nothing that old, loads nothing)."""
+    recordings: list[str | None] = []
     try:
         for model in KINDS.values():
-            for row in trashed(db, model, user):
-                if cutoff is None or row.deleted_at <= cutoff:  # type: ignore[operator]
-                    erase(db, user, row, store)
+            query = in_trash(model, user)
+            if older_than is not None:
+                query = query.where(model.deleted_at <= utcnow() - older_than)
+            for row in list(db.scalars(query)):
+                recordings.append(erase(db, user, row))
         db.commit()
     except StaleDataError:
         db.rollback()  # another request (a second tab) erased them first
+        return
+    delete_recordings(store, recordings)
 
 
 def purge_expired(db: Session, user: User, store: AudioStore) -> None:

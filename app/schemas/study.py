@@ -5,6 +5,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.schemas.limits import INT_MAX
+
 
 def web_link(value: str) -> str:
     """Links open from the app, so only http(s) is allowed (no javascript: or data: URLs)."""
@@ -30,7 +32,7 @@ class WatchItemIn(BaseModel):
     category: str = Field(default="", max_length=120)
     description: str = Field(default="", max_length=2000)
     url: str = Field(default="", max_length=500)
-    position: int = Field(default=0, ge=0)
+    position: int = Field(default=0, ge=0, le=INT_MAX)
     contrast: Score = Field(default=None, ge=0, le=10)
     logic_density: Score = Field(default=None, ge=0, le=10)
     has_a_point: Score = Field(default=None, ge=0, le=10)

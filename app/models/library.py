@@ -55,9 +55,12 @@ class Subtopic(OwnedMixin, Base):
     topic: Mapped[Topic] = relationship(back_populates="subtopics")
 
 
-class Premise(OwnedMixin, Base):
+class Premise(Trashable, OwnedMixin, Base):
     """The idea under a group of jokes: your take, and why it's true. Filed under a topic, but a
-    joke from any topic can rest on it."""
+    joke from any topic can rest on it.
+
+    In the Trash, its jokes rest on nothing (as they would if it were gone), and
+    `trashed_joke_ids` remembers them, so putting the premise back puts them back on it."""
 
     __tablename__ = "premises"
 
@@ -68,6 +71,7 @@ class Premise(OwnedMixin, Base):
     # The reasoning behind the take: why it's true, and anything else worth keeping.
     notes: Mapped[str] = mapped_column(Text, default="")
     position: Mapped[int] = mapped_column(Integer, default=0)
+    trashed_joke_ids: Mapped[list[str] | None] = mapped_column(JSON)
 
 
 joke_type_links = Table(

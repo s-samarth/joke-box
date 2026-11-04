@@ -51,7 +51,7 @@ setlist_tag_links = Table(
 )
 
 
-class Setlist(OwnedMixin, Base):
+class Setlist(Trashable, OwnedMixin, Base):
     __tablename__ = "setlists"
     __table_args__ = (CheckConstraint("rating BETWEEN 1 AND 5", name="rating_range"),)
 

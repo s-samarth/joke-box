@@ -8,6 +8,7 @@ from fastapi import Depends, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.config import get_settings
 from app.db import get_db
 from app.models import User
 from app.models.base import OwnedMixin
@@ -33,13 +34,21 @@ def renew(request: Request) -> None:
 IN_TRASH = "This was moved to the Trash. Put it back from the Trash, then try again."
 
 
+def invited(user: User) -> bool:
+    """Whether the user is still on ALLOWED_EMAILS. Checked on every request, not only at
+    sign-in, so taking an email off the list signs that person out at once (the cookie itself
+    can't be taken back). Locally anyone may sign in, as the dev login does."""
+    settings = get_settings()
+    return settings.is_local or user.email.lower() in settings.allowlist
+
+
 def current_user(request: Request, db: DbSession) -> User:
     """The signed-in user, from the id stored in the signed session cookie."""
     raw_id = request.session.get("user_id")
     if not raw_id:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Not signed in")
     user = db.get(User, uuid.UUID(raw_id))
-    if user is None:
+    if user is None or not invited(user):
         request.session.clear()
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Not signed in")
     renew(request)

@@ -16,8 +16,11 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 PACKED_JSON = "application/x-jokebox-gzip-json"
 
-# Unpacked, a body may be this big: well past 20 dense pages, short of a gzip bomb.
-MAX_UNPACKED = 64 * 1024 * 1024
+# Vercel refuses a request over 4.5 MB, and handwriting packs about 3x, so no real save unpacks
+# past about 15 MB. This leaves room for very regular ink, and stops a gzip bomb well short.
+MAX_UNPACKED = 32 * 1024 * 1024
+# A packed body is read only up to this (Vercel's own limit is 4.5 MB), before unpacking it.
+MAX_PACKED = 8 * 1024 * 1024
 
 
 class TooBig(ValueError):
@@ -51,8 +54,21 @@ def _content_type(scope: Scope) -> bytes:
     return next((v for k, v in scope["headers"] if k == b"content-type"), b"")
 
 
+def _refusal(scope: Scope) -> JSONResponse | None:
+    """Why a packed request isn't worth unpacking, if it isn't: only the app's own saves are
+    (the CSRF header, see main.py), and only from someone signed in. Checked before reading
+    the body, so nobody can make the server inflate one without a sign-in."""
+    headers = dict(scope["headers"])
+    if not scope["path"].startswith("/api/") or headers.get(b"x-requested-with") != b"jokebox":
+        return JSONResponse({"detail": "Missing X-Requested-With header"}, 403)
+    if not scope.get("session", {}).get("user_id"):
+        return JSONResponse({"detail": "Not signed in"}, 401)
+    return None
+
+
 class UnpackRequests:
-    """ASGI middleware: a request sent packed reaches the routes as ordinary JSON."""
+    """ASGI middleware: a request sent packed reaches the routes as ordinary JSON. It sits
+    inside the session middleware, so it can see who is signed in."""
 
     def __init__(self, app: ASGIApp) -> None:
         self.app = app
@@ -61,11 +77,18 @@ class UnpackRequests:
         if scope["type"] != "http" or not _content_type(scope).startswith(PACKED_JSON.encode()):
             await self.app(scope, receive, send)
             return
+        refusal = _refusal(scope)
+        if refusal is not None:
+            await refusal(scope, receive, send)
+            return
         body, more = b"", True
         while more:
             message = await receive()
             body += message.get("body", b"")
             more = message.get("more_body", False)
+            if len(body) > MAX_PACKED:
+                await JSONResponse({"detail": "That's too big to save"}, 413)(scope, receive, send)
+                return
         try:
             data = unpack(body)
         except TooBig:
