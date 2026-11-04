@@ -15,7 +15,8 @@ So JokeBox keeps two copies of its own, for two different jobs:
 [.github/workflows/backup.yml](../.github/workflows/backup.yml) runs on a fresh GitHub Actions
 machine:
 
-1. `pg_dump` copies the database into one file.
+1. `pg_dump` copies the database into one file. It leaves out Neon's own schemas (`neon_auth`,
+   when a database has Neon Auth on), which the app never uses.
 2. `pg_restore` loads that file into a throwaway Postgres on the same machine, and
    [scripts/backup_verify.py](../scripts/backup_verify.py) compares every table's row count with
    the live database. A missing table, or one that came back empty, stops the run. So every

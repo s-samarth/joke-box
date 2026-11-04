@@ -99,7 +99,7 @@ jobs:
       - name: Copy
         run: |
           umask 077
-          /usr/lib/postgresql/18/bin/pg_dump --format=custom --no-owner --no-privileges \
+          /usr/lib/postgresql/18/bin/pg_dump --format=custom --no-owner --no-privileges --exclude-schema='neon*' \
             --file="$RUNNER_TEMP/move.dump" --dbname="$(< "$RUNNER_TEMP/from-url")"
           /usr/lib/postgresql/18/bin/pg_restore --exit-on-error --no-owner --no-privileges \
             --dbname="$(< "$RUNNER_TEMP/to-url")" "$RUNNER_TEMP/move.dump"

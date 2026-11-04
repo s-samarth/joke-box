@@ -109,13 +109,15 @@ uv run alembic downgrade -1 && uv run alembic upgrade head   # prove downgrade w
 
 ## Deploying to Vercel
 
-Production is https://jokebox.samarthsaraswat.com. **Merging to `main` deploys.** Every PR gets
-a preview deployment with its own Neon branch database.
+Production is https://jokebox.samarthsaraswat.com. **Merging to `main` deploys.** It runs in
+Singapore (`sin1`, set in `vercel.json`), next to the Neon database, which is connected to
+Production only: preview builds have no database, so they can't reach real data.
 
 First-time setup:
 
-1. **Database:** in Vercel, go to Storage → create a Neon Postgres database and connect it to the
-   project. That sets `DATABASE_URL`.
+1. **Database:** in Vercel, go to Storage → create a Neon Postgres database in the same region as
+   the server (Singapore), and connect it to the project for Production, with the prefix
+   `DATABASE` and no database branches. That sets `DATABASE_URL`.
 2. **Google sign-in:** in Google Cloud Console, go to APIs & Services → Credentials → Create OAuth
    client (Web application). Add the redirect URI
    `https://jokebox.samarthsaraswat.com/auth/google/callback`, plus
@@ -142,23 +144,6 @@ First-time setup:
 
 Google only accepts the redirect URIs you registered, so sign in on production (or on a
 registered fixed preview domain).
-
-### Preview database cleanup
-
-Every preview deployment gets its own Neon branch (`preview/<git branch>`), a copy of the
-production database. Neon's free plan allows 10 branches per project, so after nine previews new
-ones fail with "Resource provisioning failed". The
-[Neon preview cleanup](../.github/workflows/neon-preview-cleanup.yml) workflow deletes a PR's
-branch when the PR closes, and sweeps stale ones every Monday. It needs two settings, made once:
-
-1. In the Neon console, go to Account settings → API keys → create a key. Then run
-   `gh secret set NEON_API_KEY` and paste the key when prompted.
-2. In the Neon console, go to the project → Settings → copy the **Project ID**. Then run
-   `gh variable set NEON_PROJECT_ID --body <project-id>`.
-
-To clear stale branches by hand, open Actions → **Neon preview cleanup** → Run workflow. A run
-with **dry_run** ticked only lists what it would delete; untick it to delete. The workflow only ever
-touches `preview/*` branches.
 
 ## Operations runbook
 

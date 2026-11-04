@@ -102,10 +102,17 @@ jobs:
               sys.exit("::error::BACKUP_DATABASE_URL must be a postgresql:// connection string.")
           direct = re.sub(r"^postgres(ql)?(\+psycopg)?://", "postgresql://", raw).replace("-pooler.", ".", 1)
           print(f"::add-mask::{urlsplit(direct).hostname}")
+          # Which region it reads from, so a move can be checked; the region alone is no secret.
+          # (No single quotes in here: this whole script sits inside them.)
+          region = re.search(r"\.([a-z]{2}-[a-z]+-[0-9])\.aws\.neon\.tech$", urlsplit(direct).hostname or "")
+          print("Database region: " + (region.group(1) if region else "unknown"))
           with open(os.path.join(os.environ["RUNNER_TEMP"], "db-url"), "w") as out:
               out.write(direct)
           '
-          /usr/lib/postgresql/18/bin/pg_dump --format=custom --no-owner --no-privileges \
+          # Leaves out Neon's own schemas (neon_auth, when a database has Neon Auth on): the app never
+          # uses them, and a plain Postgres can't always restore them. (Not --schema=public: that
+          # dumps a CREATE SCHEMA public, which fails on restore.)
+          /usr/lib/postgresql/18/bin/pg_dump --format=custom --no-owner --no-privileges --exclude-schema='neon*' \
             --file="$BACKUP_DIR/jokebox.dump" --dbname="$(< "$RUNNER_TEMP/db-url")"
           # A dump that pg_restore can't read is no backup.
           tables=$(/usr/lib/postgresql/18/bin/pg_restore --list "$BACKUP_DIR/jokebox.dump" | grep -c "TABLE DATA" || true)

@@ -1,7 +1,8 @@
 """Vercel build step: build the React app, then bring the database schema up to date.
 
 Vercel runs this after installing the Python dependencies (see [tool.vercel.scripts]).
-Preview deployments get their own Neon branch database, so migrating here is safe.
+Only Production has a database (the Neon store is connected to Production alone), so a preview
+build skips the migrations, and a preview app refuses to start without Postgres (app/config.py).
 """
 
 import os
