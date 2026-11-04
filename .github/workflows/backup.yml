@@ -1,7 +1,9 @@
 name: Backup
 
 # Every night: the whole database and every voice recording, encrypted to your own key, kept as
-# a workflow artifact for 30 days. Setup and restore: docs/backups.md.
+# a workflow artifact for 30 days (the run on the 1st of each month for 90). Before it's kept,
+# the dump is restored into a throwaway Postgres and checked table by table, so every kept
+# backup is one that restores. Setup and restore: docs/backups.md.
 #
 # This repository is public, and so are its Actions logs and artifacts. So nothing unencrypted
 # leaves the runner, nothing secret is printed, and if anything is missing or fails, the run
@@ -28,8 +30,16 @@ jobs:
     name: backup
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:
-      BACKUP_DIR: ${{ runner.temp }}/jokebox-backup
+    # A throwaway Postgres on the runner, only for the restore check. Deleted with the runner.
+    services:
+      scratch:
+        image: postgres:18
+        env:
+          POSTGRES_PASSWORD: scratch
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 12
     steps:
       - name: Check the three secrets are set
         env:
@@ -47,6 +57,8 @@ jobs:
           fi
           # One age public key per line (blank lines ignored). Anything else, a private key above
           # all, stops the run here.
+          # The runner's temp folder isn't known until the job runs, so it's set here.
+          echo "BACKUP_DIR=$RUNNER_TEMP/jokebox-backup" >> "$GITHUB_ENV"
           umask 077
           printf '%s\n' "$AGE_RECIPIENT" | tr -d '\r' | sed '/^[[:space:]]*$/d' > "$RUNNER_TEMP/recipients.txt"
           if [ ! -s "$RUNNER_TEMP/recipients.txt" ] || grep -qvE '^age1[0-9a-z]{58}$' "$RUNNER_TEMP/recipients.txt"; then
@@ -56,7 +68,7 @@ jobs:
 
       - uses: actions/checkout@v5
 
-      - name: Install pg_dump 17 and age
+      - name: Install pg_dump 18 and age
         run: |
           # Postgres's own apt repository, for a pg_dump at least as new as Neon's server.
           sudo install -d /usr/share/postgresql-common/pgdg
@@ -65,8 +77,8 @@ jobs:
           echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" \
             | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
           sudo apt-get update -qq
-          sudo apt-get install -y -qq postgresql-client-17 age
-          /usr/lib/postgresql/17/bin/pg_dump --version
+          sudo apt-get install -y -qq postgresql-client-18 age
+          /usr/lib/postgresql/18/bin/pg_dump --version
           age --version
 
       - name: Dump the database
@@ -93,11 +105,10 @@ jobs:
           with open(os.path.join(os.environ["RUNNER_TEMP"], "db-url"), "w") as out:
               out.write(direct)
           '
-          /usr/lib/postgresql/17/bin/pg_dump --format=custom --no-owner --no-privileges \
+          /usr/lib/postgresql/18/bin/pg_dump --format=custom --no-owner --no-privileges \
             --file="$BACKUP_DIR/jokebox.dump" --dbname="$(< "$RUNNER_TEMP/db-url")"
-          rm -f "$RUNNER_TEMP/db-url"
           # A dump that pg_restore can't read is no backup.
-          tables=$(/usr/lib/postgresql/17/bin/pg_restore --list "$BACKUP_DIR/jokebox.dump" | grep -c "TABLE DATA" || true)
+          tables=$(/usr/lib/postgresql/18/bin/pg_restore --list "$BACKUP_DIR/jokebox.dump" | grep -c "TABLE DATA" || true)
           if [ "$tables" -lt 10 ]; then
             echo "::error::The dump holds only $tables tables. Nothing was backed up."
             exit 1
@@ -108,6 +119,15 @@ jobs:
 
       # Installed without any secret in reach, then run with only the Blob token.
       - run: uv sync --locked --no-dev
+
+      - name: Restore the dump into a scratch database and check it
+        env:
+          SCRATCH_URL: postgresql://postgres:scratch@localhost:5432/postgres
+        run: |
+          /usr/lib/postgresql/18/bin/pg_restore --exit-on-error --no-owner --no-privileges \
+            --dbname="$SCRATCH_URL" "$BACKUP_DIR/jokebox.dump"
+          uv run --no-sync python scripts/backup_verify.py "$RUNNER_TEMP/db-url" "$SCRATCH_URL"
+          rm -f "$RUNNER_TEMP/db-url"
 
       - name: Download every recording from Blob
         env:
@@ -130,12 +150,23 @@ jobs:
           rm -rf "$BACKUP_DIR"
           echo "Encrypted: $name, $(du -h "$RUNNER_TEMP/out/$name" | cut -f1)"
 
-      - name: Keep it for 30 days
+      # Most nights' backups last 30 days. The one made on the 1st of each month lasts 90, the
+      # most GitHub keeps for a public repository, so damage noticed late still has a clean copy.
+      - name: Choose how long to keep it
+        id: keep
+        run: |
+          if [ "$(date -u +%d)" = "01" ]; then
+            echo "days=90" >> "$GITHUB_OUTPUT"; echo "label=monthly-" >> "$GITHUB_OUTPUT"
+          else
+            echo "days=30" >> "$GITHUB_OUTPUT"; echo "label=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Keep it
         uses: actions/upload-artifact@v4
         with:
-          name: jokebox-backup-${{ github.run_id }}
+          name: jokebox-backup-${{ steps.keep.outputs.label }}${{ github.run_id }}
           path: ${{ runner.temp }}/out/*.tar.age
-          retention-days: 30
+          retention-days: ${{ steps.keep.outputs.days }}
           compression-level: 0 # encrypted data doesn't compress
           if-no-files-found: error
 
