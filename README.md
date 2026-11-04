@@ -100,6 +100,7 @@ locally it uses SQLite and a folder for voice notes.
 | [API reference](docs/api.md) | Every endpoint, with its body and rules, and the Claude connector (MCP) |
 | [Development and operations](docs/development.md) | Setup, checks, conventions, migrations, deploying to Vercel, runbook |
 | [Backups](docs/backups.md) | The nightly encrypted backup, Download everything, and how to restore |
+| [Moving to Singapore](docs/move-region.md) | Moving the server and database to another region, step by step, with the way back |
 
 ## Project layout
 

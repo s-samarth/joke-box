@@ -1,0 +1,117 @@
+name: Move database
+
+# One-off: copy the whole database from the old Neon database into a new, empty one (for moving
+# to Singapore; any region works). Run by hand from Actions, never on a schedule or a PR.
+# Steps and the switch-over: docs/move-region.md.
+#
+#   FROM: BACKUP_DATABASE_URL (the database the app uses today)
+#   TO:   MOVE_TO_DATABASE_URL (the new database; add it as a repository secret first)
+#
+# It refuses a target that already has tables, so it can't overwrite anything, and it checks
+# every table's row count matches before it says done. Like the backup, it prints only counts:
+# this repository's Actions logs are public.
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "copy" to copy the database into MOVE_TO_DATABASE_URL'
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: move-database
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  copy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check the request and the two secrets
+        env:
+          CONFIRM: ${{ inputs.confirm }}
+          FROM_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+          TO_URL: ${{ secrets.MOVE_TO_DATABASE_URL }}
+        run: |
+          if [ "$CONFIRM" != "copy" ]; then
+            echo "::error::Type copy in the confirm box to run it. Nothing was copied."
+            exit 1
+          fi
+          [ -n "$FROM_URL" ] || { echo "::error::BACKUP_DATABASE_URL is missing."; exit 1; }
+          [ -n "$TO_URL" ] || { echo "::error::Add the new database's URL as the secret MOVE_TO_DATABASE_URL."; exit 1; }
+
+      - uses: actions/checkout@v5
+
+      - name: Install Postgres 18 tools
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          . /etc/os-release
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-18
+
+      # Each URL goes into a file, masked in the log, as plain postgresql:// on Neon's direct host
+      # (its pooler can't serve a dump or a restore).
+      - name: Prepare the two connections
+        env:
+          FROM_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+          TO_URL: ${{ secrets.MOVE_TO_DATABASE_URL }}
+        run: |
+          umask 077
+          python3 -I -c '
+          import os, re, sys
+          from urllib.parse import urlsplit
+          direct = {}
+          for name in ("FROM_URL", "TO_URL"):
+              raw = os.environ[name].strip()
+              url = urlsplit(raw)
+              for part in (url.hostname, url.username, url.password, url.path.lstrip("/")):
+                  if part:
+                      print(f"::add-mask::{part}")
+              if url.scheme not in ("postgres", "postgresql", "postgresql+psycopg"):
+                  sys.exit(f"::error::{name} must be a postgresql:// connection string.")
+              direct[name] = re.sub(r"^postgres(ql)?(\+psycopg)?://", "postgresql://", raw).replace("-pooler.", ".", 1)
+              print(f"::add-mask::{urlsplit(direct[name]).hostname}")
+          if urlsplit(direct["FROM_URL"]).hostname == urlsplit(direct["TO_URL"]).hostname:
+              sys.exit("::error::Both secrets point at the same database. Nothing was copied.")
+          for name, out in (("FROM_URL", "from-url"), ("TO_URL", "to-url")):
+              with open(os.path.join(os.environ["RUNNER_TEMP"], out), "w") as f:
+                  f.write(direct[name])
+          '
+
+      - name: Make sure the new database is empty
+        run: |
+          tables=$(psql "$(< "$RUNNER_TEMP/to-url")" -tAc "select count(*) from information_schema.tables where table_schema = 'public'")
+          if [ "$tables" != "0" ]; then
+            echo "::error::The new database already has $tables tables. It must be empty, so nothing is overwritten. Nothing was copied."
+            exit 1
+          fi
+          echo "The new database is empty"
+
+      - name: Copy
+        run: |
+          umask 077
+          /usr/lib/postgresql/18/bin/pg_dump --format=custom --no-owner --no-privileges \
+            --file="$RUNNER_TEMP/move.dump" --dbname="$(< "$RUNNER_TEMP/from-url")"
+          /usr/lib/postgresql/18/bin/pg_restore --exit-on-error --no-owner --no-privileges \
+            --dbname="$(< "$RUNNER_TEMP/to-url")" "$RUNNER_TEMP/move.dump"
+          rm -f "$RUNNER_TEMP/move.dump"
+
+      - uses: astral-sh/setup-uv@v6
+
+      - run: uv sync --locked --no-dev
+
+      - name: Check every table came across
+        run: uv run --no-sync python scripts/backup_verify.py "$RUNNER_TEMP/from-url" "$(< "$RUNNER_TEMP/to-url")"
+
+      - name: Clear the runner
+        if: always()
+        run: rm -f "$RUNNER_TEMP/from-url" "$RUNNER_TEMP/to-url" "$RUNNER_TEMP/move.dump"
