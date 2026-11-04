@@ -163,6 +163,14 @@ by other sites (`X-Frame-Options: DENY` and `frame-ancestors 'none'`, against cl
 `nosniff`, a `strict-origin-when-cross-origin` referrer policy, and a permissions policy that allows
 only the microphone (for voice notes). Vercel adds HSTS.
 
+The Content Security Policy lets the page run scripts and load fonts, audio, workers and data only
+from JokeBox itself, so injected markup can't run code or send your material elsewhere. The
+exceptions: inline styles (Radix and the connector's consent page use them), `data:` and `blob:`
+images and audio (recordings play from blobs), and Google avatar images
+(`*.googleusercontent.com`). It sets no `form-action`, because the consent page's Allow redirects
+to Claude, which Chrome would count against it. Adding a new outside source (a font CDN,
+analytics) means adding it here, or the browser blocks it.
+
 ## Frontend, voice notes and PWA
 
 Server state, the offline queue, autosave, the voice notes pipeline and the service worker are
