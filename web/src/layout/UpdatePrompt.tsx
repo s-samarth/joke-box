@@ -6,14 +6,26 @@
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { Button } from '../components/ui/Button'
 
+const MINUTE = 60 * 1000
+const HOUR = 60 * MINUTE
+let lastCheck = Date.now()
+
 export function UpdatePrompt() {
   const {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW({
     onRegisteredSW(_url, registration) {
-      // Check for a new version every hour while the app stays open.
-      if (registration) setInterval(() => void registration.update(), 60 * 60 * 1000)
+      if (!registration) return
+      // Check for a new version every hour while the app stays open, and each time it comes back
+      // to the front: an installed app on a phone is mostly resumed, not opened, and the phone
+      // pauses the hourly timer while it's in the background.
+      setInterval(() => void registration.update(), HOUR)
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState !== 'visible' || Date.now() - lastCheck < MINUTE) return
+        lastCheck = Date.now()
+        void registration.update().catch(() => {}) // offline: the next return tries again
+      })
     },
   })
   if (!needRefresh) return null

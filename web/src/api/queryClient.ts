@@ -8,8 +8,9 @@
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister'
 import { MutationCache, type QueryKey, QueryClient } from '@tanstack/react-query'
 import { del, get, set } from 'idb-keyval'
+import { handedOver } from '../lib/oneTab'
 import { ApiError, api } from './client'
-import { QUEUED, dropOlderWaiting } from './sync'
+import { QUEUED } from './sync'
 import { keepUnsynced } from './unsynced'
 import type { Observation, ObservationInput, SessionSummary, WritingSession, WritingSessionInput } from './types'
 
@@ -90,7 +91,8 @@ export const resumeQueued = () =>
 export const CACHE_KEY = 'jokebox-cache'
 
 export const persister = createAsyncStoragePersister({
-  storage: { getItem: get, setItem: set, removeItem: del },
+  // A tab that handed over to another no longer writes: its copy would go over the new tab's.
+  storage: { getItem: get, setItem: (key: string, value: string) => (handedOver() ? Promise.resolve() : set(key, value)), removeItem: del },
   key: CACHE_KEY,
   throttleTime: 300, // a save is on the phone within a moment, even if the app is closed straight away
 })
@@ -141,9 +143,8 @@ queryClient.setMutationDefaults(deleteObservationKey, {
   onSettled: () => refreshWhenSynced(keys.observations),
 })
 
-/* Brainstorm sessions autosave the same way, so a session written offline syncs later. The list
- * leaves out the ink (it outgrows the host's size limit); each session's ink is its own query,
- * kept on the device indefinitely so a session opens offline (see sessions.ts). */
+/* Brainstorm sessions autosave the same way (their saves are in sessionSaves.ts). Each session's
+ * ink is its own query, kept on the device indefinitely so a session opens offline. */
 export type SaveSessionVars = { id: string; input: WritingSessionInput }
 
 export const saveSessionKey = ['session', 'save']
@@ -152,36 +153,3 @@ export const sessionKey = (id: string) => ['session-detail', id]
 queryClient.setQueryDefaults(['session-detail'], { gcTime: Infinity })
 
 export const toSummary = ({ ink, ...rest }: WritingSession): SessionSummary => ({ ...rest, ink_strokes: ink.length })
-
-queryClient.setMutationDefaults(saveSessionKey, {
-  ...QUEUED,
-  mutationFn: async ({ id, input }: SaveSessionVars) => {
-    const saved = await api<SessionSummary>(`/api/sessions/${id}`, 'PUT', input)
-    // Take the server's time, so this copy reads as current and isn't downloaded again.
-    queryClient.setQueryData<WritingSession | null>(sessionKey(id), (old) => old && { ...old, updated_at: saved.updated_at })
-    return saved
-  },
-  onMutate: async ({ id, input }: SaveSessionVars) => {
-    dropOlderWaiting(queryClient, saveSessionKey, id) // this save has it all: older waiting copies go
-    await queryClient.cancelQueries({ queryKey: keys.sessionList })
-    await queryClient.cancelQueries({ queryKey: sessionKey(id) })
-    const known = queryClient.getQueryData<WritingSession | null>(sessionKey(id))
-      ?? queryClient.getQueryData<SessionSummary[]>(keys.sessionList)?.find((s) => s.id === id)
-    const now = new Date().toISOString()
-    const next: WritingSession = { ...input, id, created_at: known?.created_at ?? now, updated_at: now }
-    queryClient.setQueryData(sessionKey(id), next)
-    queryClient.setQueryData<SessionSummary[]>(keys.sessionList, (old = []) => [toSummary(next), ...old.filter((s) => s.id !== id)])
-  },
-  onSettled: () => refreshWhenSynced(keys.sessionList),
-})
-
-queryClient.setMutationDefaults(deleteSessionKey, {
-  ...QUEUED,
-  mutationFn: (id: string) => api<void>(`/api/sessions/${id}`, 'DELETE'),
-  onMutate: async (id: string) => {
-    await queryClient.cancelQueries({ queryKey: keys.sessionList })
-    queryClient.setQueryData<SessionSummary[]>(keys.sessionList, (old = []) => old.filter((s) => s.id !== id))
-    queryClient.removeQueries({ queryKey: sessionKey(id), exact: true })
-  },
-  onSettled: () => refreshWhenSynced(keys.sessionList),
-})

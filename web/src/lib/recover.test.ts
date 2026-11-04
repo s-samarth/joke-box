@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { isStaleBuild, shouldRepair, withoutLists } from './recover'
+import { describe, expect, it, vi } from 'vitest'
+import { freshCopy, isStaleBuild, shouldRepair, withoutLists } from './recover'
 
 describe('crash recovery', () => {
   it('spots an old copy of the app missing a file, in each browser', () => {
@@ -14,6 +14,16 @@ describe('crash recovery', () => {
     expect(shouldRepair(null, 1_000_000)).toBe(true)
     expect(shouldRepair(1_000_000, 1_030_000)).toBe(false)
     expect(shouldRepair(1_000_000, 1_090_000)).toBe(true)
+  })
+
+  it("keeps the installed app when the server can't be reached, even if the phone says online", async () => {
+    const deleted: string[] = []
+    vi.stubGlobal('navigator', { onLine: true })
+    vi.stubGlobal('fetch', async () => { throw new TypeError('Failed to fetch') })
+    vi.stubGlobal('caches', { keys: async () => ['app'], delete: async (k: string) => { deleted.push(k); return true } })
+    expect(await freshCopy({ onlyIfReachable: true })).toBe('offline')
+    expect(deleted).toEqual([])
+    vi.unstubAllGlobals()
   })
 
   it('drops the saved lists and keeps the waiting saves', () => {

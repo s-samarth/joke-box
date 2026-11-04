@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { type SetlistInput, useSetlistActions } from '../../api/shows'
 import type { Setlist } from '../../api/types'
+import { onHide } from '../../lib/saveOnHide'
 import { setlistInput } from './setlistInput'
 
 export function useAutosaveSet(setlist: Setlist) {
@@ -37,9 +38,9 @@ export function useAutosaveSet(setlist: Setlist) {
   }
 
   useEffect(() => {
-    window.addEventListener('pagehide', flush)
+    const stop = onHide(flush)
     return () => {
-      window.removeEventListener('pagehide', flush)
+      stop()
       flush()
     }
     // Only on mount/unmount for this set; flush reads the latest values through refs.

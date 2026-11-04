@@ -48,12 +48,26 @@ const subscribe = (listener: () => void) => {
 
 export const useUnsynced = () => useSyncExternalStore(subscribe, () => items)
 
-/** A queued save failed for good. A delete of something already gone isn't worth keeping. */
+/** The list as it is now, outside React. */
+export const listUnsynced = () => items
+
+/** What a save was about: the same thing saved again replaces it in the list. */
+const subject = (key: readonly unknown[], variables: unknown) => {
+  const id = (variables as { id?: unknown } | null)?.id
+  return typeof id === 'string' ? `${renamedKey(key.map(String)).join('/')}:${id}` : null
+}
+
+/**
+ * A queued save failed for good. A delete of something already gone isn't worth keeping. A save
+ * of something already in the list replaces it (each save sends the whole thing): a session
+ * refused at every autosave was kept once per try, each with all its handwriting.
+ */
 export function keepUnsynced(key: readonly unknown[], variables: unknown, error: Error) {
   if (key[1] === 'delete' && error instanceof ApiError && error.status === 404) return
   const status = error instanceof ApiError ? error.status : undefined
   const entry: Unsynced = { id: crypto.randomUUID(), key: key.map(String), variables, reason: error.message, status, at: new Date().toISOString() }
-  void update((current) => [...current, entry])
+  const same = subject(key, variables)
+  void update((current) => [...current.filter((i) => same === null || subject(i.key, i.variables) !== same), entry])
 }
 
 export const discardUnsynced = (id: string) => update((current) => current.filter((i) => i.id !== id))
@@ -62,12 +76,15 @@ export const clearUnsynced = () => update(() => [])
 
 /**
  * Send it again through the same queued save. If it fails again, it comes back to the list. For a
- * clash (409) this replaces the other device's version: the list has refetched by now, so the
- * save goes out based on the latest version.
+ * clash (409) this replaces the other device's version ("Keep mine"): the joke save then skips
+ * the version check.
  */
 export async function retryUnsynced(client: QueryClient, item: Unsynced) {
   await discardUnsynced(item.id)
-  new MutationObserver<unknown, Error, unknown>(client, { mutationKey: renamedKey(item.key) }).mutate(item.variables).catch(() => {})
+  const key = renamedKey(item.key)
+  const keepMine = item.status === 409 && key[0] === 'joke' && typeof item.variables === 'object'
+  const variables = keepMine ? { ...(item.variables as object), keepMine: true } : item.variables
+  new MutationObserver<unknown, Error, unknown>(client, { mutationKey: key }).mutate(variables).catch(() => {})
 }
 
 const KINDS: Record<string, string> = {
