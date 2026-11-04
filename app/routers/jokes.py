@@ -3,7 +3,6 @@
 import uuid
 
 from fastapi import APIRouter
-from fastapi.routing import APIRoute
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -44,16 +43,3 @@ def put_joke(joke_id: uuid.UUID, body: JokeIn, user: CurrentUser, db: DbSession)
 def delete_joke(joke_id: uuid.UUID, user: CurrentUser, db: DbSession) -> None:
     """To the Trash, with its rewrites. Its places in sets wait for it there."""
     trash.move_to_trash(db, user, Joke, joke_id)
-
-
-# The old address, for app versions from before the rename (see app/schemas/legacy.py).
-legacy_router = APIRouter(include_in_schema=False)
-for route in router.routes:
-    if isinstance(route, APIRoute):
-        legacy_router.add_api_route(
-            route.path.replace("/api/jokes", "/api/bits", 1),
-            route.endpoint,
-            methods=list(route.methods or ()),
-            response_model=route.response_model,
-            status_code=route.status_code,
-        )

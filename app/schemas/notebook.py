@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 from typing import Self
 
-from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.schemas.legacy import JOKE_IDS
 from app.schemas.limits import INT_MAX
@@ -75,12 +75,6 @@ class WritingSessionOut(WritingSessionIn):
     created_at: datetime
     updated_at: datetime
 
-    @computed_field  # type: ignore[prop-decorator]
-    @property
-    def bit_ids(self) -> list[uuid.UUID]:
-        """The old name, for app versions from before the rename (see app/schemas/legacy.py)."""
-        return self.joke_ids
-
 
 class WritingSessionSummary(BaseModel):
     """A session without its handwriting: for the list, and the answer to a save. A session's
@@ -101,9 +95,3 @@ class WritingSessionSummary(BaseModel):
     technique_id: uuid.UUID | None
     created_at: datetime
     updated_at: datetime
-
-    @computed_field  # type: ignore[prop-decorator]
-    @property
-    def bit_ids(self) -> list[uuid.UUID]:
-        """The old name, for app versions from before the rename (see app/schemas/legacy.py)."""
-        return self.joke_ids

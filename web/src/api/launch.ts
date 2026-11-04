@@ -6,14 +6,12 @@
  * signal, or wait for good while signed out, and if the phone ended the app meanwhile, everything
  * written since was lost. So they replay in the background.
  */
-import { upgradeOldCache } from './legacy'
 import { markRestored } from './persist'
 import { queryClient, resumeQueued } from './queryClient'
 import { checkAccount } from './session'
 
 export function afterRestore(): void {
   markRestored()
-  upgradeOldCache(queryClient)
   showWaitingSaves()
   // Who's signed in comes first: waiting saves only ever go to the account that made them.
   void checkAccount().then(resumeQueued).then(() => queryClient.invalidateQueries())

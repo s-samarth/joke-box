@@ -4,7 +4,7 @@ import uuid
 from datetime import date, datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.schemas.legacy import JOKE_ID
 from app.schemas.limits import INT_MAX
@@ -41,12 +41,6 @@ class SetlistItemOut(BaseModel):
     position: int
     duration_seconds: int
     optional: bool
-
-    @computed_field  # type: ignore[prop-decorator]
-    @property
-    def bit_id(self) -> uuid.UUID:
-        """The old name, for app versions from before the rename (see app/schemas/legacy.py)."""
-        return self.joke_id
 
 
 class SetlistOut(BaseModel):
@@ -141,12 +135,6 @@ class BrainstormOut(BaseModel):
     timer_seconds: int
     versions: list[BrainstormVersionOut]
     created_at: datetime
-
-    @computed_field  # type: ignore[prop-decorator]
-    @property
-    def bit_id(self) -> uuid.UUID:
-        """The old name, for app versions from before the rename (see app/schemas/legacy.py)."""
-        return self.joke_id
 
     updated_at: datetime
 
