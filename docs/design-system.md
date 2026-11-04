@@ -47,7 +47,7 @@ decoration.
 
 ## The tape strip
 
-`.tape` in `app.css`, used through `<Tape seed dim>` in [jokes.tsx](../web/src/components/ui/jokes.tsx):
+`.tape` in `app.css`, used through `<Tape seed dim>` in [pieces.tsx](../web/src/components/ui/pieces.tsx):
 
 - A gradient of tape yellow with a faint vertical fibre texture.
 - Torn ends, made with a zig-zag `clip-path`.
@@ -85,9 +85,11 @@ accessibility (focus trapping, Escape, screen readers); Tailwind supplies the lo
 
 ## Motion
 
-There's very little of it, on purpose. Sheets slide and buttons change colour. The one animation
-that loops is `.light-pulse`, the stage clock blinking when you're over time, and it is turned off
-under `prefers-reduced-motion`.
+There's very little of it, on purpose. Sheets slide and buttons change colour. Three animations
+loop, all in [app.css](../web/src/app.css): `.light-pulse`, the stage clock blinking when you're
+over time, and two on the daily joke nudge once you've gone quiet for over a week,
+`.ghost-float` (a drifting ghost) and `.spooky-flicker` (a flickering line). All three are turned
+off under `prefers-reduced-motion`.
 
 ## Focus and accessibility
 

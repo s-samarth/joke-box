@@ -37,14 +37,14 @@ Sets, stage, print, shows and the study screens. The frame, capture and writing 
 <img src="screenshots/desktop-set-builder.webp" alt="Set builder">
 <p>
   <img src="screenshots/phone-set-builder.webp" width="230" alt="Set builder on a phone">
-  <img src="screenshots/phone-stage.webp" width="230" alt="Stage mode on a phone">
+  <img src="screenshots/phone-stage.webp" width="230" alt="Rehearsing a set on a phone">
 </p>
 
-## Stage: `/sets/:setId/stage`
+## Rehearse (Stage): `/sets/:setId/stage`
 
 [StageView.tsx](../web/src/features/sets/StageView.tsx).
 
-A full screen with no frame: the set as a script to read before a show. The clock against the
+A full screen with no frame, opened by **Rehearse**: the set as a script to read before a show. The clock against the
 slot, reset and play/pause stay pinned at the top. Below, every joke in full in one scrolling
 column: its number (and Opener, Closer or Optional), runtime and "by m:ss", then the setup, the
 punchline in tape yellow and each tag line. The clock turns amber in
@@ -54,13 +54,13 @@ tick through. Leaving with 30 seconds or more on the clock asks **Log this show?
 show** opens Log a show with this set ticked and the clock's time filled in; **Just leave** goes
 back to the set; closing the sheet stays on Stage.
 
-<img src="screenshots/desktop-stage.webp" alt="Stage mode">
+<img src="screenshots/desktop-stage.webp" alt="Rehearsing a set">
 
 ## Print: `/sets/:setId/print`
 
 [PrintView.tsx](../web/src/features/sets/PrintView.tsx).
 
-A white page. It shows the set name, then date and slot. Below that, the jokes, numbered,
+A white page. It shows the set name, then the slot (a set has no date). Below that, the jokes, numbered,
 each with its setup in marker, the punchline, its runtime and "by m:ss" (the running total). A
 **Print** button opens the browser's print dialog.
 
@@ -132,6 +132,7 @@ each with its setup in marker, the punchline, its runtime and "by m:ss" (the run
 - ⋯ → **Export as CSV**.
 
 <img src="screenshots/desktop-shows.webp" alt="Shows">
+<img src="screenshots/desktop-log-show.webp" alt="Logging a show, with how each joke went">
 <img src="screenshots/phone-shows.webp" width="230" alt="Shows on a phone">
 
 ## Craft: `/craft`, `/craft/area/:areaId` and `/craft/:noteId`
@@ -203,7 +204,8 @@ area that shows on Stage); `?show=<id>` or
 [WatchlistPage.tsx](../web/src/features/study/WatchlistPage.tsx), [WatchRow.tsx](../web/src/features/study/WatchRow.tsx),
 [AddRoutineSheet.tsx](../web/src/features/study/AddRoutineSheet.tsx), [watchMeta.ts](../web/src/features/study/watchMeta.ts).
 
-The header shows progress ("N of M watched"), an explainer for SI, LD and DP, a search box, and
+The header shows progress ("N of M watched"), an explainer for CT, LD and HP (Contrast, Logic
+Density, Has a Point), a search box, and
 All / To watch / Watched. Routines are grouped by category, each group with its own count. Each
 row has a watched circle, its number, title, comedian, description and score chips, plus open,
 analyse and delete. **Add routine** adds one; with nothing added yet, the empty list offers the same button.
@@ -245,8 +247,8 @@ will skip, then **Import** uploads them one by one with a progress bar and lists
 ## Trash: `/trash`
 
 Like a Mac's Trash. A line says things wait 30 days. Chips filter by kind (All, Jokes, Rewrites,
-Observations, Brainstorms, Voice notes, Shows, Analyses, Watchlist, Craft notes), each with its
-count; All shows a heading per kind. Each row: the title (a show adds its date), a detail line
+Premises, Observations, Brainstorms, Voice notes, Sets, Shows, Analyses, Watchlist, Craft notes),
+each with its count; All shows a heading per kind. Each row: the title (a show adds its date), a detail line
 (a joke's rewrites, a rewrite's joke, a routine's comic, a voice note's tags), "Deleted 22 Oct
 2026, 27 days left", **Put back** and a ✕ to delete now. **Empty Trash** sits top right while
 anything's there. Empty: "Trash is empty".

@@ -61,7 +61,7 @@ from before the rename, `/api/bits` answers like `/api/jokes` and responses repe
 | GET | `/api/jokes` | Every joke, newest first |
 | GET | `/api/jokes/{id}` | One joke |
 | PUT | `/api/jokes/{id}` | See below. Creates any new type or status by name, and prunes types no joke uses |
-| DELETE | `/api/jokes/{id}` | Cascades to its rewrites and set entries |
+| DELETE | `/api/jokes/{id}` | To the Trash, with its live rewrites; its set places are kept, hidden, and come back with it (see [Trash](#trash)) |
 
 **Joke body (`JokeIn`)**
 
@@ -80,6 +80,7 @@ from before the rename, `/api/bits` answers like `/api/jokes` and responses repe
   "clean_rating": "clean | mild | dirty | null",
   "language": "Hinglish",
   "comments": "",
+  "premise_id": "optional: the premise it rests on (yours, any topic), or null",
   "follows_id": "optional: the joke this one continues from (yours), or null to unlink",
   "created_at": "optional, kept only on create and capped at now (imports, and jokes written offline)",
   "base_version": "optional: the version this edit started from"
@@ -98,6 +99,16 @@ stays; erasing that joke for good clears it.
 
 The response (`JokeOut`) adds `id`, `created_at` and `updated_at`, and returns `types` and
 `status` as names.
+
+### Premises
+
+| Method | Path | Body / notes |
+|---|---|---|
+| GET | `/api/premises` | Every premise, in your order: `{id, topic_id, take, notes, created_at, updated_at}` |
+| PUT | `/api/premises/{id}` | `{topic_id, take, notes}`. Create or update by client id. `take` is required (up to 2,000 characters), `notes` up to 20,000. 422 for a topic that isn't yours |
+| DELETE | `/api/premises/{id}` | To the Trash. Its jokes stay, on no premise, and come back to it when it's put back (unless one moved to another premise meanwhile) |
+
+A joke points at its premise with `premise_id`; a premise doesn't list its jokes.
 
 ### The joke board
 
@@ -153,7 +164,7 @@ handwriting fit. A packed body that unpacks past 64 MB is refused with 413, a da
 | PUT | `/api/voice-notes/{id}` | `{label, hashtags[], duration_seconds, created_at?}`. `created_at` is kept only on create (imports) |
 | PUT | `/api/voice-notes/{id}/audio` | Raw bytes with `Content-Type: audio/*`. At most 4 MiB (413 over); 400 if empty; 415 if not audio |
 | GET | `/api/voice-notes/{id}/audio` | The recording. `Cache-Control: private, max-age=31536000` |
-| DELETE | `/api/voice-notes/{id}` | Deletes the row and the file |
+| DELETE | `/api/voice-notes/{id}` | To the Trash; the recording is deleted only when it's erased. One whose audio never uploaded is erased at once |
 
 On a deployment without a Blob store, these answer **503**.
 
@@ -248,8 +259,10 @@ endpoints with JokeBox's own storage ([oauth.py](../app/connector/oauth.py),
   preview with no `PUBLIC_URL`), the connector isn't served. Locally, requests from other sites
   are refused (DNS-rebinding protection), since a web page can reach localhost.
 
-`GET /api/connections` lists the apps signed in to your JokeBox (name, last used), and
-`DELETE /api/connections/{client_id}` signs one out at once.
+| Method | Path | Body / notes |
+|---|---|---|
+| GET | `/api/connections` | The apps signed in to your JokeBox (name, last used) |
+| DELETE | `/api/connections/{client_id}` | Signs that app out at once: all its tokens for you go |
 
 Every tool reads; none writes. Each sees only the user's own rows, and the Trash stays hidden.
 
