@@ -121,6 +121,9 @@ sequenceDiagram
   end
 ```
 
+- **Every request** checks the allowlist again (`invited` in
+  [auth/deps.py](../app/auth/deps.py)): the signed cookie can't be taken back, so taking an
+  email off `ALLOWED_EMAILS` is what signs that person out, and their connector with them.
 - **Local development** has `/auth/dev-login`. It answers 404 unless `APP_ENV=local`.
 - **Safety checks:** `Settings.check_production_safety()` refuses to start if `APP_ENV=local` while
   running on Vercel (that would expose the dev sign-in). It also refuses a secret shorter than 32

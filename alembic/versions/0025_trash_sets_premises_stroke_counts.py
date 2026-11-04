@@ -7,6 +7,9 @@
   back puts them back on it.
 - `writing_sessions.ink_strokes`: how many strokes a session's handwriting has, so the list of
   sessions never has to load the handwriting itself. Counted from the ink already there.
+- `connector_clients.signed_in_at`: when an app that registered first got tokens. Anyone can
+  register, so ones that never sign in are cleared out after a week. Apps already registered
+  count as signed in, since there's no telling which ever did.
 
 Revision ID: 0025
 Revises: 0024
@@ -40,9 +43,14 @@ def upgrade() -> None:
         batch.add_column(sa.Column("ink_strokes", sa.Integer(), nullable=False, server_default="0"))
     # Both Postgres (json) and SQLite count a JSON array with json_array_length.
     op.execute("UPDATE writing_sessions SET ink_strokes = json_array_length(ink)")
+    with op.batch_alter_table("connector_clients") as batch:
+        batch.add_column(sa.Column("signed_in_at", sa.DateTime(timezone=True), nullable=True))
+    op.execute("UPDATE connector_clients SET signed_in_at = created_at")
 
 
 def downgrade() -> None:
+    with op.batch_alter_table("connector_clients") as batch:
+        batch.drop_column("signed_in_at")
     with op.batch_alter_table("writing_sessions") as batch:
         batch.drop_column("ink_strokes")
     with op.batch_alter_table("premises") as batch:

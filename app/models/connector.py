@@ -17,13 +17,16 @@ from app.models.base import Base, IdMixin, TimestampMixin, UTCDateTime
 
 class ConnectorClient(IdMixin, TimestampMixin, Base):
     """An app that registered itself (OAuth dynamic client registration). Not anyone's yet:
-    it reaches a JokeBox only once that person signs in and allows it."""
+    it reaches a JokeBox only once that person signs in and allows it. Anyone can register,
+    so one that hasn't signed in a week after registering is deleted (see tokens.py)."""
 
     __tablename__ = "connector_clients"
 
     client_id: Mapped[str] = mapped_column(String(64), unique=True)
     # The registration as the OAuth library keeps it: name, redirect URLs, secret, auth method.
     info: Mapped[dict[str, Any]] = mapped_column(JSON)
+    # When it first got tokens. Once it has, it's kept, whatever happens to the tokens.
+    signed_in_at: Mapped[datetime | None] = mapped_column(UTCDateTime())
 
 
 class ConnectorToken(IdMixin, TimestampMixin, Base):

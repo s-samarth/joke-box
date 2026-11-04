@@ -100,6 +100,12 @@ uv run alembic downgrade -1 && uv run alembic upgrade head   # prove downgrade w
   changes, and give a `server_default` to new non-null columns.
 - Production migrates during the Vercel build (`scripts/vercel_build.py`). Prefer
   expand-then-contract changes, so the previous deployment keeps working during a rollout.
+- On Postgres a migration waits at most 5 seconds for a lock and 2 minutes for a statement
+  ([alembic/env.py](../alembic/env.py)). Past that it rolls back and the build fails, so the
+  live deployment keeps serving instead of queueing every request behind the migration. Run a
+  slow backfill as its own step, not in a migration.
+- Instant Rollback in Vercel rolls back the code, not the schema: a rolled-back deployment
+  runs against the newer schema, which is another reason to only add things in a migration.
 
 ## Deploying to Vercel
 
@@ -159,12 +165,12 @@ touches `preview/*` branches.
 | Task | How |
 |---|---|
 | Is it up? | `curl https://jokebox.samarthsaraswat.com/health` should return `{"status":"ok",…}` |
-| Invite someone | Add their Google email to `ALLOWED_EMAILS`, then redeploy |
+| Invite someone | Add their Google email to `ALLOWED_EMAILS`, then redeploy. Taking an email off signs that person out (and their Claude connector) on their next request |
 | Roll back | Vercel → Deployments → choose the previous production deployment → **Promote**. Migrations don't roll back automatically, so keep them backwards-compatible |
 | Rotate the session secret | Change `SESSION_SECRET` and redeploy. Everyone is signed out |
 | Logs | Vercel → Project → Logs (runtime) or the deployment's build log |
 | Voice storage filling up | The Voice notes page shows how much of the 1 GB is used. Upgrade the Blob plan or delete old notes |
-| Load demo data into an account | `DATABASE_URL=<url> uv run python -m app.seed someone@example.com` (this replaces their data) |
+| Load demo data into an account | `DATABASE_URL=<url> uv run python -m app.seed someone@example.com` (this replaces their data; a database on another machine also needs `--replace-remote-account`) |
 
 ## Bringing over old Bit Vault data
 
@@ -174,7 +180,8 @@ uv run --with firebase-admin scripts/export_firestore.py --key ~/Downloads/servi
 DATABASE_URL="<neon url>" uv run python -m app.seed you@gmail.com --file ~/bitvault-export.json --dry-run
 ```
 
-Drop `--dry-run` to load it. Loading replaces everything in that account. Keep the service-account
+Drop `--dry-run` and add `--replace-remote-account` to load it: against a database that isn't on
+this machine the command refuses without it. Loading replaces everything in that account. Keep the service-account
 key and the export **out of the repo**.
 
 ## Regenerating icons and screenshots

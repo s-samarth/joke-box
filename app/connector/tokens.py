@@ -27,6 +27,8 @@ LIFETIME = {
     "refresh": timedelta(days=30),
 }
 GRACE = timedelta(seconds=60)
+# How long a registered app has to sign in before it's cleared out.
+UNUSED_CLIENT = timedelta(days=7)
 
 
 def digest(token: str) -> str:
@@ -40,7 +42,15 @@ def load_client(client_id: str) -> OAuthClientInformationFull | None:
 
 
 def save_client(info: OAuthClientInformationFull) -> None:
+    """Keep a registration, and clear out ones that never signed in: anyone can register, so
+    abandoned ones would otherwise pile up."""
     with identity.sessions() as db:
+        db.execute(
+            delete(ConnectorClient).where(
+                ConnectorClient.signed_in_at.is_(None),
+                ConnectorClient.created_at < utcnow() - UNUSED_CLIENT,
+            )
+        )
         db.add(ConnectorClient(client_id=info.client_id, info=info.model_dump(mode="json")))
         db.commit()
 
@@ -95,6 +105,11 @@ def issue(user_id: uuid.UUID, client_id: str, scopes: list[str]) -> OAuthToken:
             delete(ConnectorToken).where(
                 ConnectorToken.user_id == user_id, ConnectorToken.expires_at <= utcnow()
             )
+        )
+        db.execute(
+            update(ConnectorClient)
+            .where(ConnectorClient.client_id == client_id, ConnectorClient.signed_in_at.is_(None))
+            .values(signed_in_at=utcnow())
         )
         db.commit()
     return OAuthToken(

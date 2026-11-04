@@ -8,6 +8,7 @@ from mcp.server.auth.middleware.auth_context import get_access_token
 from mcp.server.mcpserver.exceptions import ToolError
 from sqlalchemy.orm import Session, sessionmaker
 
+from app.auth.deps import invited
 from app.db import SessionLocal
 from app.models import User
 
@@ -24,7 +25,7 @@ def caller(db: Session) -> User:
     """The user whose access token came with this request (set by the bearer-token check)."""
     token = get_access_token()
     user = db.get(User, uuid.UUID(token.subject)) if token and token.subject else None
-    if user is None:
+    if user is None or not invited(user):  # an email taken off the list loses Claude too
         raise PermissionError("Not signed in to JokeBox. Connect it again from Claude.")
     return user
 

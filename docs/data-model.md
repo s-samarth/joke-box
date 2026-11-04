@@ -67,7 +67,7 @@ erDiagram
 
 | Table | Columns | Rules |
 |---|---|---|
-| `connector_clients` | `client_id` (unique), `info` JSON (the registration: name, redirect URLs, secret, auth method) | An app that registered itself to connect (Claude). It reaches no one's data until that person allows it |
+| `connector_clients` | `client_id` (unique), `info` JSON (the registration: name, redirect URLs, secret, auth method), `signed_in_at` (when it first got tokens) | An app that registered itself to connect (Claude). It reaches no one's data until that person allows it. Anyone can register, so one that hasn't signed in a week after registering is deleted at the next registration |
 | `connector_tokens` | `user_id` (cascade), `client_id → connector_clients.client_id` (cascade), `kind` (code / access / refresh), `token_hash` (unique, SHA-256), `scopes` JSON, `expires_at`, `details` JSON (a code's PKCE challenge, redirect URL and resource) | Values are never stored, only their hashes. A code is deleted as it's used; a used refresh token expires 60 seconds later (time to retry a lost reply); expired ones are cleared at the next sign-in; disconnecting deletes all of that app's tokens for you |
 
 ### Writing
@@ -141,7 +141,7 @@ All of these run in one transaction ([services/topics.py](../app/services/topics
 | `0005` | Voice notes |
 | `0006` | Watchlist and analyses |
 | `0024` | Connector sign-in: `connector_clients` and `connector_tokens` |
-| `0025` | Sets and premises go to the Trash (`deleted_at`, `premises.trashed_joke_ids`); `writing_sessions.ink_strokes`, counted from the ink already there |
+| `0025` | Sets and premises go to the Trash (`deleted_at`, `premises.trashed_joke_ids`); `writing_sessions.ink_strokes`, counted from the ink already there; `connector_clients.signed_in_at` (apps already registered count as signed in) |
 
 Merged migrations are shared history. CI fails a PR that edits, deletes or renames one; fix
 forward with a new revision. CI also runs upgrade → downgrade → upgrade on Postgres 16, so every
