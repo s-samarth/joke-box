@@ -60,10 +60,11 @@ erDiagram
 | `subtopics` | `topic_id → topics` (cascade), `name`, `position` | Unique per topic, in the order you drag them into. Deleting one clears it from its jokes |
 | `premises` | `topic_id → topics` (cascade), `take`, `notes`, `position` | The idea under a group of jokes: your take and the reasoning behind it. Filed under a topic, but a joke from any topic can rest on it. Upserted by client id, like jokes |
 | `joke_types` | `name` | Pruned whenever no joke uses it. Renaming onto an existing name merges the two |
+| `type_colors` | `name` (unique per user, any case), `color` (`#rrggbb`) | The colour of a type's dot. Kept by name in its own table, so a type that's pruned and used again keeps its colour |
 | `joke_type_links` | `joke_id`, `type_id` (both cascade) | Many-to-many |
 | `statuses` | `name`, `position` | Six defaults made on first sign-in; new ones are created by name when a joke uses them. A joke saved with no status (or the retired "Status Unknown") gets Draft |
 | `board_spots` | `joke_id → jokes` (cascade, unique), `topic_id`, `x`, `y` | Where you placed a joke on the joke board, relative to its topic island. Its own table, so moving a box never changes the joke's version or edit time. A spot from another topic (the joke moved since) is ignored by the app |
-| `jokes` | `topic_id` (required), `subtopic_id` (set null), `premise_id` (set null, any topic), `status_id` (set null), `setup`, `punchline`, `strength` 1–5, `duration_seconds`, `hashtags` JSON, `tag_lines` JSON, `clean_rating` (clean / mild / dirty / null), `language`, `comments`, `version` (up by one per save) | Check constraints on strength and clean rating. The API sends types and status as names. `version` catches edits made on two devices |
+| `jokes` | `topic_id` (required), `subtopic_id` (set null), `premise_id` (set null, any topic), `follows_id → jokes` (set null: the joke this one continues from; many can follow one, so chains branch), `status_id` (set null), `setup`, `punchline`, `strength` 1–5, `duration_seconds`, `hashtags` JSON, `tag_lines` JSON, `clean_rating` (clean / mild / dirty / null), `language`, `comments`, `version` (up by one per save) | Check constraints on strength and clean rating. The API sends types and status as names. `version` catches edits made on two devices |
 
 ### Connector sign-in
 
@@ -143,6 +144,23 @@ All of these run in one transaction ([services/topics.py](../app/services/topics
 | `0004` | Handwriting page count (`ink_pages`) |
 | `0005` | Voice notes |
 | `0006` | Watchlist and analyses |
+| `0007` | Craft notes |
+| `0008` | A brainstorm session's technique (a craft note) |
+| `0009` | Lessons from shows and analyses (craft notes linked to them), and the laugh tally on shows |
+| `0010` | Craft areas you can add, rename, recolour, reorder and delete |
+| `0011` | Craft kinds you can name |
+| `0012` | Imported jokes count as last edited when they were written, not on the day of the bulk tidy |
+| `0013` | `version` on each joke, to catch edits made on two devices |
+| `0014` | The Trash: `deleted_at` on every kind that can go there |
+| `0015` | Set ratings, your own set tags (`set_tags`, `setlist_tag_links`) and optional jokes in a set |
+| `0016` | Topics, subtopics and observation topics keep the order you drag them into |
+| `0017` | `type_colors`: a colour you choose for each type |
+| `0018` | `jokes.follows_id`: a joke can follow another, so chains form |
+| `0019` | Bits become jokes in every table, column, index and constraint (names only; rows stay) |
+| `0020` | `board_spots`: where you put a joke on the joke board |
+| `0021` | Every joke has a status: Draft by default, Need Tags added, "Status Unknown" gone |
+| `0022` | Watchlist scores become Contrast, Logic Density and Has a Point |
+| `0023` | `premises`, and `jokes.premise_id` |
 | `0024` | Connector sign-in: `connector_clients` and `connector_tokens` |
 | `0025` | Sets and premises go to the Trash (`deleted_at`, `premises.trashed_joke_ids`); `writing_sessions.ink_strokes`, counted from the ink already there; `connector_clients.signed_in_at` (apps already registered count as signed in) |
 | `0026` | `performance_jokes`: which jokes were done at a show, in running order, and how each went |

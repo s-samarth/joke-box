@@ -74,6 +74,18 @@ through everything you've written at once.
    after** and **Followed by**, and **Open joke** to edit it.
 7. Switch to **Board** to see every joke as a card on topic islands. Drag a card (on a phone, hold
    it first) to put it where you like; it stays there. **Tidy up** puts the moved ones back.
+8. Switch to **Web** to see each premise in the middle of the jokes resting on it.
+
+## 4a. Find the premise under your jokes
+
+1. Open **Premises** (in the rail, or under Write in More on a phone) and tap **+** for **New
+   premise**. Write the take ("X is Y, because Z") and, in the notes, why it's true.
+2. Tap **Write a joke on it** for a new joke already resting on it, or **Add jokes you’ve written** to pick ones
+   you've written, from any topic.
+3. On a joke's page, the **Premise** row sets or changes its premise. The premise page lists its
+   jokes in reading order, chains kept together.
+4. Search the takes and notes, narrow to a topic, or sort by Most jokes to see which ideas carry
+   the most material and which are still waiting for a joke.
 
 ## 5. Brainstorm against the clock
 
@@ -97,7 +109,8 @@ through everything you've written at once.
 1. On **Sets**, tap **New set**. It opens straight away.
 2. Set the slot length (for example 15:00). A set isn't tied to a venue; you name the venue when you log the show.
 3. Add jokes from **Your jokes**, which is beside the set on desktop and behind **Add jokes** on a
-   phone. Search or filter, then tap **+** (or drag on desktop). The strongest are listed first.
+   phone. Search or filter, then tap **+** (or drag on desktop). The list starts with the jokes you
+   edited most recently; sort by Newest or Strongest instead.
    Tap a joke to read it in full without leaving.
 4. Reorder by dragging the handle (this works on touch) or with the arrows. Fix each joke's runtime
    on its strip.
@@ -118,6 +131,8 @@ through everything you've written at once.
    Before you start, the cap icon shows **Before you go on**: crowd work, hecklers and delivery notes.
 4. For paper, use the printer icon: **Print** lays out numbered jokes, each with its runtime and
    where you should be by then.
+5. Leave after the clock has run (30 seconds or more) and Rehearse asks **Log this show?**: it
+   opens Log a show with this set ticked and the clock's time filled in.
 
 ## 8. Log the show on the way home
 
@@ -125,9 +140,12 @@ through everything you've written at once.
 2. Choose the venue (or type a new one), how it went (1–5 stars) and how long you were on.
 3. Optionally tick **the sets you did** (none, one or several). Their topics are ticked for you; time
    on stage is yours to type, since it never matches the set exactly. Then add the crowd and remarks.
-4. If you recorded the set, tap **Count laughs for LPM** and count each laugh by its score. Under
+4. Under **Jokes you did**, the ticked sets' jokes are listed in running order. Tap **Bombed**,
+   **OK** or **Killed** for each one you remember, take off any you cut, and **Add a joke you did**
+   for one that wasn't in the set. Each joke's page then says how it has gone across your shows.
+5. If you recorded the set, tap **Count laughs for LPM** and count each laugh by its score. Under
    **What did you learn?**, write down the lesson: it goes to Craft, linked to this show.
-5. Save. The totals on **Shows** update straight away.
+6. Save. The totals on **Shows** update straight away.
 
 ## 9. Review how it's going
 
@@ -147,7 +165,7 @@ through everything you've written at once.
 ## 10. Study other comics
 
 1. On **Watchlist**, add routines with **Add routine**. They're grouped by category, each with
-   its SI, LD and DP scores.
+   its CT, LD and HP scores (Contrast, Logic Density, Has a Point).
 2. Open a routine to watch it (its link, or a YouTube search). Tick the circle once you've watched it.
 3. Tap the notebook icon to start an **analysis**: the name and link are filled in from the routine.
 4. Analyses are listed on **Analysis**, where you can search them.
@@ -194,12 +212,13 @@ through everything you've written at once.
 
 ## 13. Get back something you deleted
 
-1. Deleting a joke, observation, brainstorm, rewrite, voice note, show, analysis, routine or
-   craft note moves it to the **Trash** (in the rail, or More on a phone). Sets are deleted
-   for good.
+1. Deleting a joke, premise, set, observation, brainstorm, rewrite, voice note, show, analysis,
+   routine or craft note moves it to the **Trash** (in the rail, or More on a phone).
 2. The Trash lists everything by kind, with a chip for each kind, and how many days each has
    left. After 30 days it's deleted for good.
-3. **Put back** returns it where it was: a joke comes back with its rewrites and into its sets.
+3. **Put back** returns it where it was: a joke comes back with its rewrites and into its sets, a
+   set with its jokes in order, and a premise with the jokes that were resting on it (those you
+   haven't put on another premise since).
 4. **Delete now** (the ✕) or **Empty Trash** deletes for good, after asking.
 5. Offline, Put back and Delete now wait and sync like any save. Editing something on another
    device after it was deleted waits in "Couldn't sync" until you put it back and retry.

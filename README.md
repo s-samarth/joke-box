@@ -13,7 +13,7 @@ Live at **[jokebox.samarthsaraswat.com](https://jokebox.samarthsaraswat.com)** (
   <img src="docs/screenshots/phone-home.webp" width="19%" alt="Home on a phone">
   <img src="docs/screenshots/phone-new-joke.webp" width="19%" alt="Adding a joke on a phone">
   <img src="docs/screenshots/phone-set-builder.webp" width="19%" alt="Building a set on a phone">
-  <img src="docs/screenshots/phone-stage.webp" width="19%" alt="Stage mode on a phone">
+  <img src="docs/screenshots/phone-stage.webp" width="19%" alt="Rehearsing a set on a phone">
   <img src="docs/screenshots/phone-more.webp" width="19%" alt="The More sheet on a phone">
 </p>
 
@@ -21,15 +21,15 @@ Live at **[jokebox.samarthsaraswat.com](https://jokebox.samarthsaraswat.com)** (
 
 | | |
 |---|---|
-| **Jokes.** Search and filter everything, then edit a joke in place: setup, punchline, tag lines, strength, type, topic, runtime, clean rating, language. Changes save on their own, and an edit made on another device is caught, not overwritten. <br><br> <img src="docs/screenshots/desktop-joke.webp" alt="A joke open beside the list"> | **Daily joke.** One new joke a day, a calendar of ticks and your streak. The nudge on Home goes from yellow to red to spooky the longer you skip. <br><br> <img src="docs/screenshots/desktop-daily.webp" alt="Daily joke with a streak calendar"> |
-| **Observations.** Things you noticed that aren't jokes yet, under their own topics. Turn one into a joke when the angle shows up. <br><br> <img src="docs/screenshots/desktop-observations.webp" alt="Observations grouped by month"> | **Voice notes.** Tap to record, with a live level meter. Name and tag the note the moment you stop and play it before it's uploaded. Offline recordings wait on the phone, and a recording cut off by a locked screen comes back. <br><br> <img src="docs/screenshots/desktop-voice.webp" alt="Voice notes with hashtags"> |
-| **Brainstorm.** Timed writing sessions. Type, or handwrite with Apple Pencil (palm rejection included), start from a technique in Craft, and link the jokes and observations a session touches. <br><br> <img src="docs/screenshots/desktop-session.webp" alt="A brainstorm session with typing and handwriting"> | **Rewrite.** Rework one joke against a timer. Every version is kept, so you can go back. <br><br> <img src="docs/screenshots/desktop-rewrite.webp" alt="Rewriting a joke against a timer"> |
+| **Jokes.** Filter everything, then edit a joke in place: setup, punchline, tag lines, strength, type, topic, premise, runtime, clean rating, language. Changes save on their own, and an edit made on another device is caught, not overwritten. Search finds anything you've written, jokes or not. <br><br> <img src="docs/screenshots/desktop-joke.webp" alt="A joke open beside the list"> | **Daily joke.** One new joke a day, a calendar of ticks and your streak. The nudge on Home goes from yellow to red to spooky the longer you skip. <br><br> <img src="docs/screenshots/desktop-daily.webp" alt="Daily joke with a streak calendar"> |
+| **Observations.** Things you noticed that aren't jokes yet, under their own topics. Search them, and turn one into a joke when the angle shows up. <br><br> <img src="docs/screenshots/desktop-observations.webp" alt="Observations grouped by month"> | **Voice notes.** Tap to record, with a live level meter. Name and tag the note the moment you stop and play it before it's uploaded. Offline recordings wait on the phone, a recording cut off by a locked screen comes back, and any note can become a joke. <br><br> <img src="docs/screenshots/desktop-voice.webp" alt="Voice notes with hashtags"> |
+| **Brainstorm.** Timed writing sessions. Type, or handwrite with Apple Pencil (palm rejection included), start from a technique in Craft, link the jokes and observations a session touches, and turn a session into a joke. <br><br> <img src="docs/screenshots/desktop-session.webp" alt="A brainstorm session with typing and handwriting"> | **Rewrite.** Rework one joke against a timer. Every version is kept, so you can go back. <br><br> <img src="docs/screenshots/desktop-rewrite.webp" alt="Rewriting a joke against a timer"> |
 | **Sets.** Every set with its stars, tags and length against the slot. Filter by tag (In progress, Opener set, One-liners, or your own). <br><br> <img src="docs/screenshots/desktop-sets.webp" alt="Sets with ratings and tags"> | **Set builder.** Your jokes as strips of masking tape. Drag them into order (touch too), rate the set, tag it, and see each joke's strength. Mark a joke optional and it turns to faded paper and stops counting towards the slot. <br><br> <img src="docs/screenshots/desktop-set-builder.webp" alt="Set builder with tape strips, rating and tags"> |
-| **Stage.** Full screen, big marker type, and a clock that goes amber, then red. Tap right for the next joke. The screen stays awake. <br><br> <img src="docs/screenshots/desktop-stage.webp" alt="Stage mode"> | **Print.** A clean sheet of the set to take with you, with runtimes and the optional jokes marked. <br><br> <img src="docs/screenshots/desktop-print.webp" alt="Printable set list"> |
-| **Shows.** Log a show in under a minute; ticking the sets you did fills in the topics. Totals and laughs per minute follow every filter, and the table sorts and exports to CSV. <br><br> <img src="docs/screenshots/desktop-shows.webp" alt="Shows with totals and a sortable table"> | **Timeline.** A mic diary of every night you went up, brighter for better nights, and your rating over time. <br><br> <img src="docs/screenshots/desktop-timeline.webp" alt="Timeline of shows"> |
+| **Rehearse.** The whole set as one scrolling script, every joke in full and numbered, with a clock pinned on top that goes amber, then red. The screen stays awake, and leaving after the clock has run offers to log the show. <br><br> <img src="docs/screenshots/desktop-stage.webp" alt="Rehearsing a set"> | **Print.** A clean sheet of the set to take with you, with runtimes and the optional jokes marked. <br><br> <img src="docs/screenshots/desktop-print.webp" alt="Printable set list"> |
+| **Shows.** Log a show in under a minute: tick the set you did, then tap bombed, ok or killed for each joke. Each joke then shows how it's gone at every show. Totals and laughs per minute follow every filter, and the table sorts and exports to CSV. <br><br> <img src="docs/screenshots/desktop-shows.webp" alt="Shows with totals and a sortable table"> | **Timeline.** A mic diary of every night you went up, brighter for better nights, and your rating over time. <br><br> <img src="docs/screenshots/desktop-timeline.webp" alt="Timeline of shows"> |
 | **Insights.** Recent form against the shows before, each topic month by month, and which topics, rooms, set lengths and slots work. <br><br> <img src="docs/screenshots/desktop-insights.webp" alt="Show insights"> | **Craft.** What you know about doing stand-up, in areas you arrange: checklists, techniques, references, and a path whose next step shows on Home. <br><br> <img src="docs/screenshots/desktop-craft.webp" alt="Craft with the path and techniques"> |
 | **Watchlist.** Routines to study, grouped by category, scored and ticked off as you watch. <br><br> <img src="docs/screenshots/desktop-watchlist.webp" alt="Watchlist"> | **Analysis.** Your write-ups of sets you studied, linked to the routine, with takeaways that go to Craft. <br><br> <img src="docs/screenshots/desktop-analysis.webp" alt="An analysis of a routine"> |
-| **Trash.** Anything you delete (jokes, observations, voice notes, shows, analyses and more) waits here for 30 days. Put it back with a click, joke places in sets included, or empty it. <br><br> <img src="docs/screenshots/desktop-trash.webp" alt="Trash with jokes and observations"> | **Your own order.** Drag topics, subtopics and observation topics into the order you want; every list in the app follows it. <br><br> <img src="docs/screenshots/desktop-topics.webp" alt="Dragging topics into order"> |
+| **Trash.** Anything you delete (jokes, premises, sets, observations, voice notes, shows, analyses and more) waits here for 30 days. Put it back with a click, joke places in sets included, or empty it. <br><br> <img src="docs/screenshots/desktop-trash.webp" alt="Trash with jokes and observations"> | **Your own order.** Drag topics, subtopics and observation topics into the order you want; every list in the app follows it. <br><br> <img src="docs/screenshots/desktop-topics.webp" alt="Dragging topics into order"> |
 
 <p align="center">
   <img src="docs/screenshots/phone-jokes.webp" width="19%" alt="Jokes on a phone">
@@ -44,6 +44,9 @@ Plus:
 - **Installs as an app** on your phone's home screen.
 - **Import** jokes, observations, voice notes and craft notes from a prepared folder, skipping anything already there.
 - **Several tabs** if you want them: one tab at a time by default, so offline saves can't clash, with a switch in the account menu.
+- **Premises:** the ideas under your jokes, each with the jokes resting on it, and a web of them beside the jokes list.
+- **Backups:** a nightly encrypted copy of everything, and Download everything as one ZIP from the account menu ([backups.md](docs/backups.md)).
+- **Claude can read it:** a read-only connector lets Claude search your jokes, sets, shows, notes and brainstorms while you write together.
 - Topic folders on Home, a "needs work" list, and CSV export of your shows.
 
 ## How it's built
@@ -61,8 +64,8 @@ offline saves replay on reconnect                                      ├─ Ve
   signed-in user, CSRF blocked by a required header plus SameSite cookies.
 - **One deploy:** Vercel builds the React app onto its CDN, migrates the database, and runs
   FastAPI as a function. Merging to `main` ships.
-- **Checked on every PR:** ruff, mypy (strict), 63 pytest tests, Alembic up and down on Postgres;
-  tsc, oxlint, 43 Vitest tests and a production build.
+- **Checked on every PR:** ruff, mypy (strict), pytest, Alembic up and down on Postgres; tsc,
+  oxlint, Vitest and a production build (the commands are in [AGENTS.md](AGENTS.md)).
 
 ## Run it locally
 
@@ -88,7 +91,7 @@ locally it uses SQLite and a folder for voice notes.
 | Doc | What's in it |
 |---|---|
 | [Product overview](docs/product.md) | Who it's for, the problems it solves, principles, the feature map, the comedy vocabulary |
-| [User flows](docs/user-flows.md) | Step by step: capture, rework, build a set, perform, log, review, study, offline |
+| [User flows](docs/user-flows.md) | Step by step: capture, rework, build a set, perform, log, review, study, search, offline |
 | [Screens](docs/screens.md) and [more screens](docs/screens-perform.md) | Every screen: layout on phone and desktop, the files behind it, its data and behaviour |
 | [Design system](docs/design-system.md) | The "Taped setlist" look: colour, type, tape strips, components, and how the copy is written |
 | [System design](docs/architecture.md) | Architecture, request lifecycle, auth, data isolation, deployment, CI, trade-offs |
@@ -105,7 +108,7 @@ app/        FastAPI: models, schemas, routers, services, auth, seed, connector (
 alembic/    migrations (append-only; CI enforces it)
 tests/      pytest
 web/        React app: api/, components/ui/, layout/, features/<area>/, lib/
-scripts/    Vercel build, Firestore export, icon generator
+scripts/    Vercel build, backups, screenshot demo data, Firestore export, icon generator
 docs/       documentation and screenshots
 ```
 
