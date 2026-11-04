@@ -13,6 +13,7 @@ import { useFeedback } from '../../components/ui/feedbackContext'
 import { formatDateTime } from '../../lib/time'
 import { JokeDetails } from './JokeDetails'
 import { JokeExtras } from './JokeExtras'
+import { JokeShowRecord } from './JokeShowRecord'
 import { TagLines } from './TagLines'
 import { useAutosaveJoke } from './useAutosaveJoke'
 
@@ -50,6 +51,7 @@ function Editor({ joke }: { joke: Joke }) {
         <Textarea id="joke-notes" className="mt-2" placeholder="Where it kills, where it dies, what to try next" value={draft.comments} onChange={(e) => update({ comments: e.target.value })} />
       </div>
       <div className="mt-12"><JokeExtras joke={joke} /></div>
+      <JokeShowRecord jokeId={joke.id} />
       <footer className="mt-12 flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-5 text-sm text-faint">
         <span>Written {formatDateTime(joke.created_at)}. Last changed {formatDateTime(joke.updated_at)}.</span>
         <Button variant="danger" small icon={<Trash2 size={15} />} onClick={onDelete}>Delete joke</Button>

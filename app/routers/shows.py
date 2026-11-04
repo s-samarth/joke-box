@@ -16,6 +16,7 @@ from app.schemas.shows import (
     SetlistItemOut,
     SetlistOut,
 )
+from app.services.show_jokes import jokes_out, set_jokes, wanted, your_jokes
 from app.services.trash import move_to_trash, trashed_joke_ids
 
 router = APIRouter(prefix="/api", tags=["shows"])
@@ -126,7 +127,7 @@ def delete_setlist(setlist_id: uuid.UUID, user: CurrentUser, db: DbSession) -> N
     move_to_trash(db, user, Setlist, setlist_id)
 
 
-def log_out(log: PerformanceLog) -> LogOut:
+def log_out(log: PerformanceLog, hidden: set[uuid.UUID]) -> LogOut:
     return LogOut(
         id=log.id,
         venue_name=log.venue.name if log.venue else "Unidentified Venue",
@@ -137,6 +138,7 @@ def log_out(log: PerformanceLog) -> LogOut:
         topic_ids=[t.id for t in log.topics],
         notes=log.notes,
         laughs=log.laughs,
+        jokes=jokes_out(log, hidden),
         created_at=log.created_at,
     )
 
@@ -147,16 +149,20 @@ def list_logs(user: CurrentUser, db: DbSession) -> list[LogOut]:
     query = (
         select(PerformanceLog)
         .where(PerformanceLog.user_id == user.id)
-        .options(selectinload(PerformanceLog.venue), selectinload(PerformanceLog.topics))
+        .options(*(selectinload(r) for r in (PerformanceLog.venue, PerformanceLog.topics)))
+        .options(selectinload(PerformanceLog.jokes))
         .order_by(PerformanceLog.performed_at.desc())
     )
-    return [log_out(log) for log in db.scalars(query)]
+    hidden = trashed_joke_ids(db, user)
+    return [log_out(log, hidden) for log in db.scalars(query)]
 
 
 @router.put("/logs/{log_id}", response_model=LogOut)
 def save_log(log_id: uuid.UUID, body: LogIn, user: CurrentUser, db: DbSession) -> LogOut:
     topic_ids = set(body.topic_ids)
     check_all_owned(db, Topic, topic_ids, user)
+    hidden = trashed_joke_ids(db, user)
+    jokes = wanted(body.jokes or [], hidden, your_jokes(db, user, body.jokes or []))
     venue = venue_named(db, user, body.venue_name)
     topics = list(db.scalars(select(Topic).where(Topic.id.in_(topic_ids)))) if topic_ids else []
     log = find_owned(db, PerformanceLog, log_id, user) or PerformanceLog(id=log_id, user_id=user.id)
@@ -168,10 +174,12 @@ def save_log(log_id: uuid.UUID, body: LogIn, user: CurrentUser, db: DbSession) -
     log.notes = body.notes
     log.laughs = body.laughs
     log.topics = topics
+    if body.jokes is not None:  # left out by app versions from before: the jokes stay
+        set_jokes(log, jokes, hidden)
     db.add(log)
     db.commit()
     db.refresh(log)
-    return log_out(log)
+    return log_out(log, hidden)
 
 
 @router.delete("/logs/{log_id}", status_code=204)

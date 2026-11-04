@@ -45,6 +45,7 @@ DETAIL = BRIEF | {
     "followed_by",
     "in_sets",
     "rewrites",
+    "shows",
 }
 SET = {
     "id",
@@ -166,6 +167,7 @@ def test_performing_tools(claude: tuple[TestClient, str]) -> None:
         "lpm",
         "laughs_by_points",
         "topics",
+        "jokes",
         "notes",
     }
 

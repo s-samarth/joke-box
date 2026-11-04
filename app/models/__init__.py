@@ -17,6 +17,7 @@ from app.models.library import (
 )
 from app.models.notebook import Observation, ObservationTopic, WritingSession
 from app.models.shows import (
+    PerformanceJoke,
     PerformanceLog,
     Setlist,
     SetlistItem,
@@ -47,6 +48,7 @@ __all__ = [
     "Premise",
     "Observation",
     "ObservationTopic",
+    "PerformanceJoke",
     "PerformanceLog",
     "Setlist",
     "SetlistItem",

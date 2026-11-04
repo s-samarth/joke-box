@@ -69,7 +69,8 @@ def search_jokes(
 @server.tool(annotations=READ)
 def get_jokes(ids: list[str]) -> dict[str, Any]:
     """Up to 20 jokes in full: setup, punchline, tag lines, notes, premise, the joke each one
-    follows and the jokes that follow it, the sets it's in, and how many rewrites it has."""
+    follows and the jokes that follow it, the sets it's in, how many rewrites it has, and its
+    record at logged shows (shows done, how many killed, ok or bombed, the date last done)."""
     with reading() as (db, user):
         return library.get_jokes(db, user, ids)
 
@@ -116,7 +117,8 @@ def list_shows(
     the venue, topics or notes, and by date: `since` and `until` are dates like 2026-10-31 (IST,
     both included). At most 25 a call: when next_offset is set, call again with that offset
     for the rest. LPM scores each laugh 1-5 and divides the points by minutes: 12+ is great,
-    9+ decent, 6+ poor, below 6 rough. Shows record topics, not which jokes were done."""
+    9+ decent, 6+ poor, below 6 rough. Each show lists the jokes done in running order, each
+    with how it went (killed, ok, bombed, or null if not rated); older shows may list none."""
     with reading() as (db, user):
         return performing.list_shows(
             db, user, query, limit, since=since, until=until, offset=offset

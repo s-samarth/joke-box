@@ -1,7 +1,8 @@
 /**
  * Log a show, ideally on the way home. Venue, how it went and how long are up top; the rest is
- * optional. Picking the sets you did (none, one or several) ticks their topics for you. You can count the
- * laughs for LPM, and write down what you learned: that becomes a craft note linked to the show.
+ * optional. Picking the sets you did (none, one or several) ticks their topics and lists their jokes,
+ * each to mark bombed, OK or killed. You can count the laughs for LPM, and write down what you
+ * learned: that becomes a craft note linked to the show.
  * Coming off Stage, it starts with that set ticked and the time from Stage's clock.
  */
 import { Star } from 'lucide-react'
@@ -11,7 +12,7 @@ import { announceSave } from '../../lib/announce'
 import { useCraftAreas, useCraftKinds, useCraftNotes, useSaveCraftNote } from '../../api/craft'
 import { useJokes, useTopics } from '../../api/library'
 import { useLogActions, useLogs, useSetlists, useVenues } from '../../api/shows'
-import type { PerformanceLog } from '../../api/types'
+import type { LogJoke, PerformanceLog } from '../../api/types'
 import { Button } from '../../components/ui/Button'
 import { Field, Input, Textarea } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
@@ -25,6 +26,8 @@ import { areaFor, kindFor, lessonFrom } from '../craft/craftMeta'
 import { LaughTally } from './LaughTally'
 import { NO_LAUGHS, counted } from './lpm'
 import { setTopics, swapTopics } from './setPick'
+import { ShowJokesField } from './ShowJokesField'
+import { setJokes, swapJokes } from './showJokes'
 
 const UNKNOWN = 'Unidentified Venue'
 const chip = (on: boolean) => `hit relative h-9 rounded-lg px-3 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'bg-ink-3 text-dim hover:text-paper'}`
@@ -54,6 +57,7 @@ export function LogShowSheet({ log, prefill, onClose }: { log?: PerformanceLog; 
   const [crowd, setCrowd] = useState(log ? String(log.audience_size) : '')
   const [setIds, setSetIds] = useState<string[]>(() => (!log && prefill?.setId && sets.some((s) => s.id === prefill.setId) ? [prefill.setId] : []))
   const [topicIds, setTopicIds] = useState<string[]>(() => log?.topic_ids ?? setTopics(sets.filter((s) => setIds.includes(s.id)), jokes))
+  const [done, setDone] = useState<LogJoke[]>(() => log ? (log.jokes ?? []) : setJokes(sets.filter((s) => setIds.includes(s.id))).map((joke_id) => ({ joke_id, result: null })))
   const [notes, setNotes] = useState(log?.notes ?? '')
   const [laughs, setLaughs] = useState(log?.laughs ?? NO_LAUGHS)
   const [lesson, setLesson] = useState('')
@@ -61,7 +65,7 @@ export function LogShowSheet({ log, prefill, onClose }: { log?: PerformanceLog; 
   // One id for this sheet, made once: tapping Log show twice saves the same show twice, not two shows.
   const [id] = useState(() => log?.id ?? newId())
   // Ask before closing on anything typed, or on the time carried over from Stage (it can't be got back).
-  const dirty = useChanged([venue, when, rating, duration, crowd, topicIds, notes, laughs, lesson, setIds]) || Boolean(prefill?.seconds)
+  const dirty = useChanged([venue, when, rating, duration, crowd, topicIds, done, notes, laughs, lesson, setIds]) || Boolean(prefill?.seconds)
   const recent = [...new Set([...logs.map((l) => l.venue_name), ...venues.map((v) => v.name)])].filter((v) => v !== UNKNOWN).slice(0, 6)
 
   // Ticking a set on or off swaps its topics in or out (topics you tapped yourself stay). Time on
@@ -69,9 +73,15 @@ export function LogShowSheet({ log, prefill, onClose }: { log?: PerformanceLog; 
   const toggleSet = (id: string) => {
     const next = setIds.includes(id) ? setIds.filter((x) => x !== id) : [...setIds, id]
     const chosen = sets.filter((s) => next.includes(s.id))
+    const before = sets.filter((s) => setIds.includes(s.id))
     setSetIds(next)
-    setTopicIds(swapTopics(topicIds, setTopics(sets.filter((s) => setIds.includes(s.id)), jokes), setTopics(chosen, jokes)))
+    setTopicIds(swapTopics(topicIds, setTopics(before, jokes), setTopics(chosen, jokes)))
+    setDone(swapJokes(done, setJokes(before), setJokes(chosen)))
   }
+  // Only jokes that still exist. A show cached before shows had jokes, edited without adding any,
+  // leaves them out of the save, so jokes recorded on another device stay as they are.
+  const live = new Set(jokes.map((j) => j.id))
+  const jokesDone = log && !log.jokes && done.length === 0 ? {} : { jokes: done.filter((d) => live.has(d.joke_id)) }
   const submit = () => {
     const seconds = stageSeconds(duration)
     if (!rating) return setError('Give it a rating from one to five stars.')
@@ -80,7 +90,7 @@ export function LogShowSheet({ log, prefill, onClose }: { log?: PerformanceLog; 
     // Both saves are queued and close the sheet at once, signal or not. The queue sends them in
     // order, so the show reaches the server before the lesson that points at it.
     const saving = save.mutateAsync(
-      { id, input: { venue_name: venueName, performed_at: performedAt, duration_seconds: seconds, audience_size: Number(crowd) || 0, rating, topic_ids: topicIds, notes: notes.trim(), laughs: counted(laughs) ? laughs : null } },
+      { id, input: { venue_name: venueName, performed_at: performedAt, duration_seconds: seconds, audience_size: Number(crowd) || 0, rating, topic_ids: topicIds, notes: notes.trim(), laughs: counted(laughs) ? laughs : null, ...jokesDone } },
     )
     saving.catch((e: Error) => toast(`Show not saved: ${e.message}`))
     if (lesson.trim()) saveLesson.mutate({ id: newId(), input: lessonFrom(lesson, craft, { area_id: areaFor(areas, 'stage'), kind_id: kindFor(kinds) }, { performance_log_id: id, source: `Show at ${venueName}, ${formatDate(performedAt)}`, created_at: new Date().toISOString() }) })
@@ -109,7 +119,7 @@ export function LogShowSheet({ log, prefill, onClose }: { log?: PerformanceLog; 
         </div>
         {sets.length > 0 && !log && (
           <div className="space-y-2">
-            <span className="text-sm text-dim">The sets you did (optional; ticks their topics)</span>
+            <span className="text-sm text-dim">The sets you did (optional; ticks their topics and jokes)</span>
             <div className="flex flex-wrap gap-2">
               {sets.map((s) => {
                 const on = setIds.includes(s.id)
@@ -122,6 +132,7 @@ export function LogShowSheet({ log, prefill, onClose }: { log?: PerformanceLog; 
             </div>
           </div>
         )}
+        <ShowJokesField done={done} jokes={jokes} onChange={setDone} />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <StageTimeField value={duration} onChange={setDuration} />
           <Field label="People in the room"><Input type="number" inputMode="numeric" min={0} placeholder="25" value={crowd} onChange={(e) => setCrowd(e.target.value)} /></Field>

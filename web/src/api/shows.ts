@@ -6,7 +6,7 @@ import {
   type SaveBrainstormVars, type SaveLogVars, type SaveSetlistVars, deleteBrainstormKey, deleteBrainstormVersionKey,
   deleteLogKey, deleteSetlistKey, saveBrainstormKey, saveLogKey, saveSetlistKey,
 } from './showSaves'
-import type { Brainstorm, PerformanceLog, Setlist, Venue } from './types'
+import type { Brainstorm, LogJoke, PerformanceLog, Setlist, Venue } from './types'
 
 export const useBrainstorms = () =>
   useQuery({ queryKey: keys.brainstorms, queryFn: () => api<Brainstorm[]>('/api/brainstorms') })
@@ -73,6 +73,8 @@ export interface LogInput {
   topic_ids: string[]
   notes: string
   laughs: number[] | null
+  /** The jokes done, in running order. Left out, the show's jokes stay as they are. */
+  jokes?: LogJoke[]
 }
 
 export function useLogActions() {

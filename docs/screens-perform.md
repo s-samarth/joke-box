@@ -112,11 +112,20 @@ each with its setup in marker, the punchline, its runtime and "by m:ss" (the run
 - **Log a show** (a sheet, also opened by `?log=1`; Stage adds `&set=<id>&time=<seconds>` to start with that set ticked and that time): venue, stars and length up top (separate minutes and seconds boxes, so a 10 minute spot is just "10"). Optional: the
   sets you did (none, one or more: their topics are ticked, time on stage is left to you,
   [setPick.ts](../web/src/features/shows/setPick.ts)), date and time, crowd and remarks.
+  **Jokes you did** lists the ticked sets' jokes in running order, each with **Bombed**, **OK** and
+  **Killed** (tap one, tap again to clear; unrated by default) and an ✕ to take it off; **Add a joke
+  you did** adds any other. Unticking a set takes off its jokes you haven't rated
+  ([ShowJokesField.tsx](../web/src/features/shows/ShowJokesField.tsx),
+  [showJokes.ts](../web/src/features/shows/showJokes.ts)). Editing a show edits its jokes too.
   **Count laughs for LPM** folds out five counters, one per laugh score from 1 (a few giggles) to 5
   (laughs and applause), with the LPM worked out as you count ([lpm.ts](../web/src/features/shows/lpm.ts),
   [LaughTally.tsx](../web/src/features/shows/LaughTally.tsx)). **What did you learn?** saves a craft
   note linked to the show, in the first area that shows on Stage.
-- **A show's detail** shows its LPM, what you learned there, and **Add a lesson**.
+- **A show's detail** shows its LPM, the jokes you did with how each went (each opens the joke),
+  what you learned there, and **Add a lesson**.
+- **A joke's page** says how it has gone at the shows it was logged at: "Done at 3 shows: 2 killed,
+  1 bombed. Last done 4 Nov 2026." Worked out in the browser from the shows, so it works offline;
+  a show in the Trash doesn't count ([JokeShowRecord.tsx](../web/src/features/jokes/JokeShowRecord.tsx)).
 - ⋯ → **Venues** ([VenuesSheet.tsx](../web/src/features/shows/VenuesSheet.tsx)): every venue with how
   many shows and sets use it. Delete an unused one straight away; for one in use, pick the venue its
   shows and sets move to first, which is also how to merge duplicates.
