@@ -4,6 +4,7 @@ import uuid
 
 from fastapi.testclient import TestClient
 
+from app.main import app
 from tests.conftest import random_topic_id
 
 
@@ -14,8 +15,9 @@ def new_joke(client: TestClient) -> str:
     return joke_id
 
 
-def test_the_old_address_is_gone(alice: TestClient) -> None:
-    assert alice.get("/api/bits").status_code == 404
+def test_the_old_address_is_gone() -> None:
+    paths = [getattr(route, "path", "") for route in app.routes]
+    assert not [p for p in paths if p.startswith("/api/bits")]
 
 
 def test_old_field_names_are_still_read(alice: TestClient) -> None:
