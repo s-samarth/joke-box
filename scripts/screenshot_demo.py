@@ -4,6 +4,8 @@ The material is in screenshot_demo.json and is all invented; never put real joke
 "Regenerating icons and screenshots" in docs/development.md for the steps:
 
     PYTHONPATH=. uv run python scripts/screenshot_demo.py <folder with note0-2.m4a>
+
+Premises and how the set's jokes went at the last few shows come from screenshot_extras.py.
 """
 
 import json
@@ -18,6 +20,7 @@ from typing import Any
 from fastapi.testclient import TestClient
 
 from app.main import app
+from scripts import screenshot_extras
 
 DATA = json.loads((Path(__file__).parent / "screenshot_demo.json").read_text())
 NOW = datetime.now(UTC)
@@ -187,6 +190,7 @@ def main() -> None:
     writing(jokes, observation_ids, craft()[0])
     study()
     trash(topics, observation_ids)
+    screenshot_extras.add(c, ok)
     print(f"Done: {len(ok(c.get('/api/jokes')))} jokes, {len(ok(c.get('/api/logs')))} shows")
 
 

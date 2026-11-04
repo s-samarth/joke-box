@@ -153,12 +153,19 @@ the jokes' created dates, so there's no separate log to fall out of step.
   - **Lots of jokes:** zoomed to 55% or less, cards show their first few words in big type, and
     island names grow. Past 300 cards, only those near the screen are drawn. A phone starts at
     55%.
+- **The premise web** (the **Web** tab, [JokeWeb.tsx](../web/src/features/jokes/map/JokeWeb.tsx)):
+  each premise in the middle of the jokes resting on it, whatever topic they're from. Jokes on no
+  premise aren't drawn; a link lists them so you can sort them in. Tap a joke for the same panel
+  as the map.
 - **The joke page:** the setup and punchline (in tape yellow) are edited in place, followed by tag
   lines. Below them, a row of details: Strength, Type (with Edit types), Filed under (topic and
-  subtopic, with Edit topics), Status, Runs for (type it, or step it a second at a time with −
-  and +), Clean rating, Language (Hinglish, Hindi or English) and Hashtags, followed by a Notes box. Then
-  **Rewrites** (earlier sessions and **Start a rewrite**), **In sets** (with Add to a set), and
-  **Delete joke**, which asks for confirmation first.
+  subtopic, with Edit topics), Premise, Follows (the joke this one comes after in a chain),
+  Followed by (with a button to write the next one), Status, Runs for (type it, or step it five
+  seconds at a time with − and +), Clean rating, Language (Hinglish, Hindi or English) and
+  Hashtags, followed by a Notes box. Then **Rewrites** (earlier sessions and **Start a rewrite**),
+  **In sets** (with Add to a set), the show record once the joke has been logged at a show
+  ("Done at 3 shows: 2 killed, 1 ok. Last done 12 Oct", [JokeShowRecord.tsx](../web/src/features/jokes/JokeShowRecord.tsx)),
+  and **Delete joke**, which asks first and sends it to the Trash.
 - **State:** the filters live in the URL (`?topic=&sub=&type=&status=&q=&sort=`). Filtering runs in
   the browser, so it works offline. Edits go into a local draft and save about a moment after you
   stop typing, through the offline-safe joke save.
@@ -175,12 +182,37 @@ the jokes' created dates, so there's no separate log to fall out of step.
   <img src="screenshots/phone-joke.webp" width="230" alt="A joke on a phone">
 </p>
 
+## Premises: `/premises` and `/premises/:premiseId`
+
+[PremisesLayout.tsx](../web/src/features/premises/PremisesLayout.tsx), [usePremiseFilters.ts](../web/src/features/premises/usePremiseFilters.ts),
+[PremisePage.tsx](../web/src/features/premises/PremisePage.tsx), [usePremiseDraft.ts](../web/src/features/premises/usePremiseDraft.ts),
+[NewPremiseDialog.tsx](../web/src/features/premises/NewPremiseDialog.tsx), [AddJokesDialog.tsx](../web/src/features/premises/AddJokesDialog.tsx),
+[PremiseField.tsx](../web/src/features/premises/PremiseField.tsx).
+
+The ideas under your jokes ("X is Y, because Z"). Laid out like Jokes: a list on the left and the
+open premise beside it on desktop; on a phone the list gives way to the premise you open.
+
+- **List:** a search box ("Search takes and notes"), a Topic menu and a sort (By topic, Newest,
+  Most jokes, Fewest jokes). Sorted by topic, a small heading starts each topic's run. Each row
+  shows the take and how many jokes rest on it.
+- **A premise:** the take and its notes (why it's true) are edited in place and save on their own.
+  A short guide ([PremiseGuide.tsx](../web/src/features/premises/PremiseGuide.tsx)) opens while the
+  premise has no notes and no jokes. Below, every joke resting on it in reading order, chains kept
+  together, with **Write a joke on it** and **Add jokes you’ve written** (from any topic). **Delete premise**
+  asks first and sends it to the Trash; its jokes stay where they are, just not on a premise,
+  until you put it back.
+- **On a joke:** the Premise row on the joke page picks one, or starts a new one.
+- **+** on this screen opens **New premise** (`?new=1`).
+
+<img src="screenshots/desktop-premises.webp" alt="A premise with the jokes resting on it">
+
 ## New joke sheet
 
 [CaptureProvider.tsx](../web/src/features/capture/CaptureProvider.tsx), [NewJokeForm.tsx](../web/src/features/capture/NewJokeForm.tsx),
 [newJoke.ts](../web/src/features/capture/newJoke.ts).
 
-The sheet is opened by **+**, by **New joke**, or by "Turn into a joke" on an observation. It
+The sheet is opened by **+** (on screens other than Premises, Shows and Observations), by **New
+joke**, or by "Turn into a joke" on an observation, a voice note or a brainstorm session. It
 renders the same `JokeDetails` controls as the joke page, but owns its own draft: one set of
 controls with two owners of the state, so the two screens can't drift apart. Its buttons are
 **Save and open** and **Save joke**. A new joke starts as Draft, 15 seconds, Clean and in
@@ -228,6 +260,8 @@ browser over the lists already on the device, so it works offline, and fetches a
 yet. Results come grouped by kind in that order, eight each with **Show all**, and each opens where
 the item lives (an observation or voice note opens its page searched for the same words). The
 query is `?q=` in the URL. It's in the rail under Home, in More under **Find**, and on Home.
+
+<img src="screenshots/desktop-search.webp" alt="Search across everything">
 
 ## Observations: `/observations`
 

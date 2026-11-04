@@ -30,9 +30,9 @@ own data. Today that is one comedian, but the system works for more than one.
 
 | Before | In JokeBox |
 |---|---|
-| Ideas spread across Notes, WhatsApp-to-self, voice memos and paper | One app: jokes, observations, voice notes and brainstorms, all searchable |
+| Ideas spread across Notes, WhatsApp-to-self, voice memos and paper | One app: jokes, premises, observations, voice notes and brainstorms, and one search across all of it |
 | Setlists on paper; timing guessed | Sets are timed against the slot, with the open-mic "light" built in |
-| No record of how jokes did on stage | Shows are logged in under a minute; totals follow any filter; Timeline and Insights show trends and what's working |
+| No record of how jokes did on stage | Shows are logged in under a minute, with a bombed / ok / killed tap for each joke you did; totals follow any filter; Timeline and Insights show trends and what's working |
 | The old Bit Vault (Firebase) broke on phones, served stale builds, and lost data on rename | Built again with ids, transactions, a proper offline queue and an update prompt |
 
 ## Product principles
@@ -48,30 +48,36 @@ own data. Today that is one comedian, but the system works for more than one.
    refuses waits in Couldn't sync with what you wrote.
 4. **Phone first, laptop comfortable.** Every screen is designed at 390 px wide, with large tap
    targets and safe-area padding. Desktop adds a side rail and two-pane layouts.
-5. **Stage-ready.** Stage mode is big, high-contrast and tap-anywhere, and it keeps the screen
-   awake. Printing gives clean paper.
+5. **Stage-ready.** Rehearse shows the whole set as one scrolling script in big type, with the
+   clock and the open-mic light pinned on top, and it keeps the screen awake. Printing gives
+   clean paper.
 6. **Your material stays yours.** It's private by default and allowlisted, and real jokes never go
-   into seeds, fixtures or tests.
+   into seeds, fixtures or tests. Deleting anything sends it to the Trash for 30 days first, a
+   nightly encrypted backup keeps a copy of everything, and Download everything gives you all of
+   it as one file ([backups.md](backups.md)).
 
 ## Feature map
 
 | Area | What it does | Screen |
 |---|---|---|
-| **Home** | The daily joke nudge, quick capture, record a voice note, log an observation, start a brainstorm, study shortcuts, topic folders, next set, "Needs work", last show | `/` |
+| **Home** | The daily joke nudge, quick capture, record a voice note, log an observation, start a brainstorm, a search button, study shortcuts, topic folders, next set, "Needs work", last show | `/` |
+| **Search** | One search across everything: jokes, premises, observations, brainstorms (typed words; not handwriting), rewrites, voice notes, sets, shows, Craft, analyses and the watchlist. Works offline, on what the phone already holds | `/search` |
 | **Daily joke** | One new joke a day: today's box, streaks, a calendar of ticks; the nudge on Home goes from green to yellow, red and spooky | `/daily` |
-| **Jokes** | Searchable list with topic, type, status and sort filters; each joke edited in place; CSV export | `/jokes`, `/jokes/:id` |
-| **New joke** | The + button anywhere: a full sheet with every field, prefilled from where you are | sheet |
+| **Jokes** | Searchable list with topic, type, status and sort filters; each joke edited in place; CSV export. Beside the list (or at `/jokes/map` on a phone): the Map of joke chains, the Board of topic islands, and the Web of premises with their jokes | `/jokes`, `/jokes/:id`, `/jokes/map` |
+| **Premises** | The ideas under your jokes ("X is Y, because Z"): each one's take and notes, and every joke resting on it in chain order | `/premises`, `/premises/:id` |
+| **New joke** | The + button: a full sheet with every field, prefilled from where you are. Closing it keeps what you typed for next time. On Premises, Shows and Observations the + makes one of those instead | sheet |
 | **Rewrite** | Full-screen timed rewrite of one joke; every save keeps a version | `/jokes/:id/rewrite` |
-| **Observations** | Things you noticed that aren't jokes yet, with their own topics; turn one into a joke | `/observations` |
-| **Brainstorm** | Free writing sessions with a timer: type or handwrite (Apple Pencil), link jokes and observations | `/brainstorm`, `/brainstorm/:id` |
-| **Voice notes** | Record, see the level meter, name and tag it straight away, play back, search by label or hashtag | `/voice` |
+| **Observations** | Things you noticed that aren't jokes yet, with their own topics and a search; turn one into a joke | `/observations` |
+| **Brainstorm** | Free writing sessions with a timer: type or handwrite (Apple Pencil), link jokes and observations, search the typed words, and turn a session into a joke | `/brainstorm`, `/brainstorm/:id` |
+| **Voice notes** | Record, see the level meter, name and tag it straight away, play back, search by label or hashtag, turn one into a joke | `/voice` |
 | **Sets** | Jokes as masking-tape strips: drag to order, time against the slot, opener and closer marked | `/sets`, `/sets/:id` |
-| **Stage** | Full-screen rehearse and perform mode with a clock and the open-mic light | `/sets/:id/stage` |
+| **Rehearse** | The whole set as one scrolling script, every joke in full, with the clock and the open-mic light pinned on top. Leaving after the clock has run offers to log the show | `/sets/:id/stage` |
 | **Print** | A set on paper with each joke's running time | `/sets/:id/print` |
-| **Shows** | Log a show; totals, filters, a sortable table, CSV export; Timeline and Insights views | `/shows` |
+| **Shows** | Log a show, with each joke you did marked bombed, ok or killed; totals, filters, a sortable table, CSV export; Timeline and Insights views | `/shows` |
 | **Craft** | What you know about doing stand-up: your path as a staircase, techniques to write with, and your own areas as folders of note cards | `/craft`, `/craft/area/:id`, `/craft/:id` |
 | **Watchlist** | Routines you add to study, scored and ticked off. Long notes open with More. A category gets a **Read the guide** link when an analysis has the same name as the category | `/watchlist` |
 | **Analysis** | Your write-ups of sets and online jokes, optionally tied to a routine. A saved one opens formatted like a craft note; Edit turns it back into the form | `/analysis` |
+| **Trash** | Everything you delete (jokes, premises, sets, observations, voice notes, shows, analyses and more) for 30 days, to put back or erase | `/trash` |
 
 Each screen is described in [screens.md](screens.md), and the end-to-end journeys are in
 [user-flows.md](user-flows.md).
@@ -84,7 +90,7 @@ The vocabulary is a comic's, not a database's. Keep to it in the code and in the
 |---|---|
 | **Joke** (or **joke**) | The unit of material: a setup, a punchline, and its details. The UI says "joke"; the code and API say `joke`. |
 | **Setup / punchline** | The two parts of a joke: the plain words that make the audience assume something, and the line that breaks it. The UI calls the punchline "the punch" in passing. |
-| **Premise** | The idea or opinion under a joke ("X is Y, because Z"). It isn't a field on a joke: it lives in your head, a brainstorm or a craft note, and one premise can feed many setups. **Premise** is also one of the default types. |
+| **Premise** | The idea or opinion under a joke ("X is Y, because Z"), kept on the Premises screen with its notes. A joke can rest on one premise, and one premise can feed many jokes, from any topic. **Premise** is also one of the default types. |
 | **Tag line** | An extra punchline that follows the main punch. |
 | **Thoughts** | The default topic for anything unfiled. Stored as the protected `Random` topic, which can't be renamed or deleted, and picks up the jokes of any deleted topic. |
 | **Topic / subtopic** | Folders for jokes. Observations have their own separate topics. |
@@ -95,7 +101,7 @@ The vocabulary is a comic's, not a database's. Keep to it in the code and in the
 | **Clean rating** | Clean, Mild or Dirty. |
 | **Set** | An ordered list of jokes for one show, with a slot length. The first is the **opener**, the last the **closer**. |
 | **Slot** | The time you've been given. The **light** is the open-mic signal: amber with a minute to go, red once you're over. |
-| **Show** | One performance, logged afterwards: venue, date, time on stage, crowd size, 1–5 stars, topics and remarks. |
+| **Show** | One performance, logged afterwards: venue, date, time on stage, crowd size, 1–5 stars, topics, remarks, and the jokes you did with how each went (bombed, ok, killed). |
 | **Rewrite** | A timed session reworking one joke. Each save is a version. |
 | **Brainstorm session** | A free writing session not tied to one joke. |
 | **Observation** | Something you noticed, before it's a joke. |
@@ -109,7 +115,7 @@ The vocabulary is a comic's, not a database's. Keep to it in the code and in the
 
 These aren't built yet; the schema leaves room for them:
 
-- **Per-joke stage results:** which jokes in a set landed at a given show, so strength can follow real
-  data.
+- **Strength from stage results:** shows now record how each joke went; strength could follow
+  that record instead of being set by hand.
 - **Trend charts:** rating, crowd and stage time across weeks.
 - **Linking voice notes to jokes**, the way brainstorm sessions already link.
