@@ -102,9 +102,10 @@ jobs:
               sys.exit("::error::BACKUP_DATABASE_URL must be a postgresql:// connection string.")
           direct = re.sub(r"^postgres(ql)?(\+psycopg)?://", "postgresql://", raw).replace("-pooler.", ".", 1)
           print(f"::add-mask::{urlsplit(direct).hostname}")
-          # Which region it reads from, so a move can be checked; the region alone isn't secret.
+          # Which region it reads from, so a move can be checked; the region alone is no secret.
+          # (No single quotes in here: this whole script sits inside them.)
           region = re.search(r"\.([a-z]{2}-[a-z]+-[0-9])\.aws\.neon\.tech$", urlsplit(direct).hostname or "")
-          print(f"Database region: {region.group(1) if region else 'unknown'}")
+          print("Database region: " + (region.group(1) if region else "unknown"))
           with open(os.path.join(os.environ["RUNNER_TEMP"], "db-url"), "w") as out:
               out.write(direct)
           '
