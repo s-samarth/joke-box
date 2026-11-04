@@ -7,7 +7,7 @@ So JokeBox keeps two copies of its own, for two different jobs:
 |---|---|---|
 | **What** | The whole database (every table, the Trash included) and every recording in Blob | Your material: every list as JSON, each brainstorm with its handwriting, each recording |
 | **When** | Every night at 21:37 UTC (03:07 in Bangalore), and whenever you run it | When you tap it |
-| **Where** | An encrypted file on GitHub, kept 30 days | A ZIP on your device |
+| **Where** | An encrypted file on GitHub, kept 30 days (the one from the 1st of each month, 90) | A ZIP on your device |
 | **For** | Bringing the app back after a disaster | Reading, keeping, or taking your material elsewhere |
 
 ## How the nightly backup works
@@ -16,10 +16,19 @@ So JokeBox keeps two copies of its own, for two different jobs:
 machine:
 
 1. `pg_dump` copies the database into one file.
-2. [scripts/backup_audio.py](../scripts/backup_audio.py) downloads every object from the Blob
+2. `pg_restore` loads that file into a throwaway Postgres on the same machine, and
+   [scripts/backup_verify.py](../scripts/backup_verify.py) compares every table's row count with
+   the live database. A missing table, or one that came back empty, stops the run. So every
+   backup you keep is one that has already been restored once.
+3. [scripts/backup_audio.py](../scripts/backup_audio.py) downloads every object from the Blob
    store, plus a manifest listing their names and sizes.
-3. Both are packed into one `tar` file, which `age` encrypts.
-4. The encrypted file is uploaded as the run's artifact and kept for 30 days.
+4. Both are packed into one `tar` file, which `age` encrypts.
+5. The encrypted file is uploaded as the run's artifact. It's kept for 30 days, or 90 if it was
+   made on the 1st of the month (`jokebox-backup-monthly-...`).
+
+**Mental model: dated photos, not a mirror.** Each night adds a new, separate backup and never
+touches the older ones. If something goes wrong on the 10th, the backups from the 1st to the 9th
+still hold the data from before. A run that fails keeps nothing, and the older backups stay.
 
 **Mental model: a padlock and its key.** `age` encrypts to a *public key* (the open padlock),
 which can lock but never unlock. Only the matching *private key* opens the file, and it never
@@ -42,18 +51,24 @@ private key: keep it in your password manager and on a USB stick. **Never commit
 into GitHub.** If you lose it, no backup can ever be opened.
 
 **2. Get a database URL.** The safest choice is a role that can only read. In the Neon console,
-open the SQL Editor on the production branch and run this. Use a long random password, and as
-`<owner>` give the role that owns the tables (usually `neondb_owner`):
+open the SQL Editor on the production branch and run this, with a long random password:
 
 ```sql
 CREATE ROLE jokebox_backup WITH LOGIN PASSWORD '<long random password>';
 GRANT USAGE ON SCHEMA public TO jokebox_backup;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO jokebox_backup;
 GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO jokebox_backup;
--- Tables that future migrations add, too: without these lines the backup breaks on the first new table.
-ALTER DEFAULT PRIVILEGES FOR ROLE <owner> IN SCHEMA public GRANT SELECT ON TABLES TO jokebox_backup;
-ALTER DEFAULT PRIVILEGES FOR ROLE <owner> IN SCHEMA public GRANT SELECT ON SEQUENCES TO jokebox_backup;
+-- Tables that future migrations add, too: without this the backup breaks on the first new table.
+-- It finds the role that owns the tables itself.
+DO $$
+DECLARE owner text := (SELECT tableowner FROM pg_tables WHERE schemaname = 'public' AND tablename = 'jokes');
+BEGIN
+  EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA public GRANT SELECT ON TABLES TO jokebox_backup', owner);
+  EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA public GRANT SELECT ON SEQUENCES TO jokebox_backup', owner);
+END $$;
 ```
+
+Use only letters and digits in the password: other characters have to be escaped in a URL.
 
 Then go to **Connect**, pick that role, and turn **Connection pooling** off. Copy the
 `postgresql://...` string. (You can also use the app's own production URL. The workflow accepts
@@ -79,9 +94,13 @@ The workflow never runs on pull requests, so code from a fork can't reach these 
 ## Test it
 
 On GitHub open **Actions → Backup → Run workflow** (on `main`). It takes a couple of minutes. A
-green run has one artifact, `jokebox-backup-<run id>`, holding one `.tar.age` file. Then do one
-practice restore into a Neon branch (below). A backup you've never restored is a hope, not a
-backup.
+green run has one artifact, `jokebox-backup-<run id>`, holding one `.tar.age` file. Every run
+already restores its own dump before keeping it, so the one thing left to prove is that your key
+opens it: download the artifact once and do step 1 of the restore below.
+
+GitHub emails you when a run fails. It also turns the nightly schedule off if the repository
+has no commits for 60 days; it emails before it does, and **Actions → Backup → Enable workflow**
+turns it back on.
 
 ## Restore
 
@@ -133,8 +152,10 @@ sign-ins: connect Claude to JokeBox again.
   recording once. That counts towards Blob's data transfer: about 25 MB a night now.
 - **Postgres versions.** `pg_dump` 17 reads Postgres 17 and older. If Neon moves the project to
   18, change `postgresql-client-17` and the `/usr/lib/postgresql/17` paths in `backup.yml`.
-- **Retention.** GitHub deletes each artifact after 30 days. For anything older, download a
-  backup now and then and keep it with the key.
+- **Retention.** GitHub deletes each artifact after 30 days, or 90 for the monthly one, the
+  most it allows a public repository. For anything older, download a monthly backup now and then
+  and put it somewhere else, such as Google Drive. It's encrypted, so that's safe. Keep the key
+  apart from it, in your password manager.
 
 ## Download everything
 
