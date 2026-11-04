@@ -96,6 +96,7 @@ locally it uses SQLite and a folder for voice notes.
 | [Data model](docs/data-model.md) | Every table, what deletes do, migrations, the Bit Vault importer |
 | [API reference](docs/api.md) | Every endpoint, with its body and rules, and the Claude connector (MCP) |
 | [Development and operations](docs/development.md) | Setup, checks, conventions, migrations, deploying to Vercel, runbook |
+| [Backups](docs/backups.md) | The nightly encrypted backup, Download everything, and how to restore |
 
 ## Project layout
 
