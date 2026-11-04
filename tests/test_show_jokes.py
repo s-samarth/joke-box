@@ -15,6 +15,27 @@ def put_log(client: TestClient, log_id: str, **fields: Any) -> Any:
     return client.put(f"/api/logs/{log_id}", json=body)
 
 
+def done(joke_id: str, result: str | None = None, note: str = "") -> dict[str, Any]:
+    """A joke as a show lists it."""
+    return {"joke_id": joke_id, "result": result, "note": note}
+
+
+def test_a_joke_can_carry_a_comment(alice: TestClient) -> None:
+    joke = put_joke(alice).json()["id"]
+    log_id = str(uuid.uuid4())
+    sent = [{"joke_id": joke, "result": "bombed", "note": "  Rushed the tag  "}]
+    assert put_log(alice, log_id, jokes=sent).json()["jokes"] == [
+        done(joke, "bombed", "Rushed the tag")
+    ]
+    # A save from an app older than comments sends none: the comment stays.
+    older = put_log(alice, log_id, jokes=[{"joke_id": joke, "result": "ok"}]).json()
+    assert older["jokes"] == [done(joke, "ok", "Rushed the tag")]
+    cleared = put_log(alice, log_id, jokes=[{"joke_id": joke, "result": "ok", "note": ""}])
+    assert cleared.json()["jokes"] == [done(joke, "ok")]
+    too_long = [{"joke_id": joke, "note": "x" * 2001}]
+    assert put_log(alice, log_id, jokes=too_long).status_code == 422
+
+
 def test_a_show_keeps_its_jokes_in_order_with_results(alice: TestClient) -> None:
     a, b, c = (put_joke(alice, setup=f"Fake setup {n}").json()["id"] for n in range(3))
     log_id = str(uuid.uuid4())
@@ -24,13 +45,9 @@ def test_a_show_keeps_its_jokes_in_order_with_results(alice: TestClient) -> None
         {"joke_id": c, "result": "bombed"},
     ]
     saved = put_log(alice, log_id, jokes=sent).json()
-    assert saved["jokes"] == [
-        {"joke_id": b, "result": "killed"},
-        {"joke_id": a, "result": None},
-        {"joke_id": c, "result": "bombed"},
-    ]
+    assert saved["jokes"] == [done(b, "killed"), done(a), done(c, "bombed")]
     # Re-rate and reorder: the same jokes, updated in place.
-    again = [{"joke_id": a, "result": "ok"}, {"joke_id": b, "result": "killed"}]
+    again = [done(a, "ok"), done(b, "killed")]
     assert put_log(alice, log_id, jokes=again).json()["jokes"] == again
     assert alice.get("/api/logs").json()[0]["jokes"] == again
 
@@ -40,7 +57,7 @@ def test_a_save_without_jokes_leaves_them(alice: TestClient) -> None:
     joke = put_joke(alice).json()["id"]
     log_id = str(uuid.uuid4())
     put_log(alice, log_id, jokes=[{"joke_id": joke, "result": "ok"}])
-    assert put_log(alice, log_id, rating=5).json()["jokes"] == [{"joke_id": joke, "result": "ok"}]
+    assert put_log(alice, log_id, rating=5).json()["jokes"] == [done(joke, "ok")]
     assert put_log(alice, log_id, jokes=[]).json()["jokes"] == []
 
 
@@ -48,7 +65,7 @@ def test_a_joke_appears_once(alice: TestClient) -> None:
     joke = put_joke(alice).json()["id"]
     sent = [{"joke_id": joke, "result": "ok"}, {"joke_id": joke, "result": "bombed"}]
     saved = put_log(alice, str(uuid.uuid4()), jokes=sent).json()
-    assert saved["jokes"] == [{"joke_id": joke, "result": "ok"}]
+    assert saved["jokes"] == [done(joke, "ok")]
 
 
 def test_only_your_own_jokes_and_known_results(alice: TestClient, bob: TestClient) -> None:
@@ -58,7 +75,7 @@ def test_only_your_own_jokes_and_known_results(alice: TestClient, bob: TestClien
     mine = put_joke(alice).json()["id"]
     sent = [{"joke_id": bobs}, {"joke_id": str(uuid.uuid4())}, {"joke_id": mine}]
     saved = put_log(alice, str(uuid.uuid4()), jokes=sent).json()
-    assert saved["jokes"] == [{"joke_id": mine, "result": None}]
+    assert saved["jokes"] == [done(mine)]
     wrong = put_log(alice, str(uuid.uuid4()), jokes=[{"joke_id": mine, "result": "great"}])
     assert wrong.status_code == 422
     too_many = [{"joke_id": str(uuid.uuid4())} for _ in range(201)]
@@ -80,11 +97,7 @@ def test_a_trashed_joke_is_hidden_and_keeps_its_place(alice: TestClient) -> None
     joke = next(item for item in trash if item["id"] == b)
     alice.post(f"/api/trash/{joke['kind']}/{b}/restore")
     back = alice.get("/api/logs").json()[0]["jokes"]
-    assert back == [
-        {"joke_id": a, "result": None},
-        {"joke_id": b, "result": "killed"},
-        {"joke_id": c, "result": None},
-    ]
+    assert back == [done(a), done(b, "killed"), done(c)]
 
 
 def test_erasing_a_joke_for_good_drops_it_from_shows(alice: TestClient) -> None:

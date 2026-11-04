@@ -39,6 +39,8 @@ def set_jokes(log: PerformanceLog, sent: list[LogJokeIn], hidden: set[uuid.UUID]
     for joke in sent:
         row = existing.get(joke.joke_id) or PerformanceJoke(joke_id=joke.joke_id, position=0)
         row.result = joke.result
+        if joke.note is not None:
+            row.note = joke.note.strip()
         rows.append(row)
     for away in sorted(log.jokes, key=lambda r: r.position):
         if away.joke_id in hidden:
@@ -51,7 +53,7 @@ def set_jokes(log: PerformanceLog, sent: list[LogJokeIn], hidden: set[uuid.UUID]
 def jokes_out(log: PerformanceLog, hidden: set[uuid.UUID]) -> list[LogJokeOut]:
     """A show's jokes as the app sees them: ones in the Trash are left out until they're back."""
     return [
-        LogJokeOut(joke_id=row.joke_id, result=row.result)  # type: ignore[arg-type]
+        LogJokeOut(joke_id=row.joke_id, result=row.result, note=row.note or "")  # type: ignore[arg-type]
         for row in log.jokes
         if row.joke_id not in hidden
     ]

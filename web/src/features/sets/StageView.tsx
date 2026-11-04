@@ -4,16 +4,13 @@
  * be on the clock by the end of it.
  *
  * The clock stays pinned at the top and follows the open-mic light: amber with a minute to go,
- * red when you're over. The screen stays awake. Leaving after the clock has run offers to log
- * the show, with this set ticked and the clock's time filled in.
+ * red when you're over. The screen stays awake.
  */
 import { GraduationCap, Pause, Play, RotateCcw, X } from 'lucide-react'
 import { useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
+import { Link, useParams } from 'react-router'
 import { useJokes } from '../../api/library'
 import { useSetlists } from '../../api/shows'
-import { Button } from '../../components/ui/Button'
-import { Modal } from '../../components/ui/Modal'
 import { clock } from '../../lib/duration'
 import { useWakeLock } from '../../lib/useWakeLock'
 import { useTimer } from '../jokes/useTimer'
@@ -21,16 +18,12 @@ import { CraftSheet } from '../craft/CraftSheet'
 import { lightState, positionLabel } from './setlistMath'
 
 const icon = 'inline-flex size-11 items-center justify-center rounded-lg text-faint hover:text-paper'
-/** Less than this on the clock and leaving just leaves: you only peeked at the set. */
-const LOGGABLE_SECONDS = 30
 
 export function StageView() {
   const { setId } = useParams()
   const { data: sets = [] } = useSetlists()
   const { data: jokes = [] } = useJokes()
   const [notes, setNotes] = useState(false)
-  const [leaving, setLeaving] = useState<number | null>(null)
-  const navigate = useNavigate()
   const timer = useTimer()
   useWakeLock()
 
@@ -45,9 +38,7 @@ export function StageView() {
   return (
     <div className="pt-safe pb-safe fixed inset-0 flex flex-col bg-[#0f121a]">
       <header className="flex items-center gap-2 border-b border-rule px-3 py-2">
-        {timer.seconds >= LOGGABLE_SECONDS
-          ? <button type="button" onClick={() => setLeaving(timer.seconds)} aria-label="Leave rehearsal" className={icon}><X size={24} /></button>
-          : <Link to={`/sets/${setlist.id}`} aria-label="Leave rehearsal" className={icon}><X size={24} /></Link>}
+        <Link to={`/sets/${setlist.id}`} aria-label="Leave rehearsal" className={icon}><X size={24} /></Link>
         <span className={`headline text-4xl tabular ${clockTone}`} aria-live="off">{clock(timer.seconds)}</span>
         <span className="text-faint tabular">/ {clock(setlist.target_seconds)}</span>
         {state === 'light' && <span className="ml-1 inline-flex items-center gap-1.5 text-sm text-amber"><span className="size-2.5 rounded-full bg-amber" />Light</span>}
@@ -85,14 +76,6 @@ export function StageView() {
           </ol>
         </div>
       </article>
-      <Modal open={leaving !== null} onOpenChange={(o) => !o && setLeaving(null)} title="Log this show?"
-        description={`The clock says ${clock(leaving ?? 0)}. Log it while it's fresh: this set is ticked and the time is filled in.`}
-        footer={<>
-          <Button variant="quiet" onClick={() => navigate(`/sets/${setlist.id}`)}>Just leave</Button>
-          <Button variant="tape" onClick={() => navigate(`/shows?log=1&set=${setlist.id}&time=${leaving ?? 0}`)}>Log this show</Button>
-        </>}>
-        <p className="text-sm text-dim">Close this to stay on Stage.</p>
-      </Modal>
       <CraftSheet open={notes} onOpenChange={setNotes} title="Before you go on" screen="stage" empty="No notes in the areas that show on Stage." />
     </div>
   )

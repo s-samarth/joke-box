@@ -1,22 +1,27 @@
 /**
- * Which jokes were done at a show and how each went. Ticking a set lists its jokes in running
- * order; a joke's record across shows is worked out here from the cached shows.
+ * Which jokes were done at a show and how each went. You add the ones you want to remember by
+ * searching for them; a joke's record across shows is worked out here from the cached shows.
  */
-import type { LogJoke, PerformanceLog, Setlist } from '../../api/types'
+import type { Joke, LogJoke, PerformanceLog } from '../../api/types'
+import { hasAll, haystack, searchWords } from '../../lib/search'
 
-/** The jokes in these sets, in running order, each once. */
-export function setJokes(chosen: Setlist[]): string[] {
-  return [...new Set(chosen.flatMap((s) => s.items.map((i) => i.joke_id)))]
-}
+/** At most this many jokes come up as you search for one you did. */
+export const MATCHES = 3
 
 /**
- * The jokes after the chosen sets change: the old sets' jokes go unless you rated them or they're
- * in a set still ticked, and the new sets' jokes come in after the rest, in running order.
+ * The jokes that match the search, best first, leaving out ones already on the show. A joke
+ * whose setup holds the words beats one where they're only in the punchline, tags or notes;
+ * then the most recently edited. No words, no matches: the list stays out of the way.
  */
-export function swapJokes(current: LogJoke[], before: string[], after: string[]): LogJoke[] {
-  const kept = current.filter((j) => j.result !== null || !before.includes(j.joke_id) || after.includes(j.joke_id))
-  const have = new Set(kept.map((j) => j.joke_id))
-  return [...kept, ...after.filter((id) => !have.has(id)).map((joke_id) => ({ joke_id, result: null }))]
+export function findJokes(jokes: Joke[], done: LogJoke[], query: string, limit = MATCHES): Joke[] {
+  const words = searchWords(query)
+  if (!words.length) return []
+  const have = new Set(done.map((d) => d.joke_id))
+  const inSetup = (j: Joke) => hasAll(j.setup.toLowerCase(), words)
+  return jokes
+    .filter((j) => !have.has(j.id) && hasAll(haystack([j.setup, j.punchline, ...j.tag_lines, j.comments], j.hashtags), words))
+    .sort((a, b) => Number(inSetup(b)) - Number(inSetup(a)) || b.updated_at.localeCompare(a.updated_at))
+    .slice(0, limit)
 }
 
 /** A joke's record at logged shows. */

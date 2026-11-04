@@ -118,7 +118,8 @@ def list_shows(
     both included). At most 25 a call: when next_offset is set, call again with that offset
     for the rest. LPM scores each laugh 1-5 and divides the points by minutes: 12+ is great,
     9+ decent, 6+ poor, below 6 rough. Each show lists the jokes done in running order, each
-    with how it went (killed, ok, bombed, or null if not rated); older shows may list none."""
+    with how it went (killed, ok, bombed, or null if not rated) and the comic's note on it;
+    most shows list none."""
     with reading() as (db, user):
         return performing.list_shows(
             db, user, query, limit, since=since, until=until, offset=offset

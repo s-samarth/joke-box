@@ -131,8 +131,7 @@ through everything you've written at once.
    Before you start, the cap icon shows **Before you go on**: crowd work, hecklers and delivery notes.
 4. For paper, use the printer icon: **Print** lays out numbered jokes, each with its runtime and
    where you should be by then.
-5. Leave after the clock has run (30 seconds or more) and Rehearse asks **Log this show?**: it
-   opens Log a show with this set ticked and the clock's time filled in.
+5. ✕ takes you back to the set. Rehearsing logs nothing: log a show yourself when you've done one.
 
 ## 8. Log the show on the way home
 
@@ -140,9 +139,9 @@ through everything you've written at once.
 2. Choose the venue (or type a new one), how it went (1–5 stars) and how long you were on.
 3. Optionally tick **the sets you did** (none, one or several). Their topics are ticked for you; time
    on stage is yours to type, since it never matches the set exactly. Then add the crowd and remarks.
-4. Under **Jokes you did**, the ticked sets' jokes are listed in running order. Tap **Bombed**,
-   **OK** or **Killed** for each one you remember, take off any you cut, and **Add a joke you did**
-   for one that wasn't in the set. Each joke's page then says how it has gone across your shows.
+4. Optionally, open **How particular jokes went** for a joke worth remembering: search for it, tap
+   it from the top three matches, mark **Bombed**, **OK** or **Killed** and add a comment. Each
+   joke's page then says how it has gone across your shows.
 5. If you recorded the set, tap **Count laughs for LPM** and count each laugh by its score. Under
    **What did you learn?**, write down the lesson: it goes to Craft, linked to this show.
 6. Save. The totals on **Shows** update straight away.

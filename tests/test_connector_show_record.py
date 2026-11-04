@@ -39,7 +39,7 @@ def test_shows_list_their_jokes_and_jokes_their_record(dev: TestClient, db: Sess
     log(dev, "2026-10-01T20:00:00+05:30", [{"joke_id": a, "result": "killed"}])
     shows = performing.list_shows(db, me(db))["shows"]
     assert shows[0]["jokes"] == [
-        {"id": a, "setup": "Fake opener about a fridge", "result": "killed"}
+        {"id": a, "setup": "Fake opener about a fridge", "result": "killed", "note": ""}
     ]
     assert [j["id"] for j in shows[1]["jokes"]] == [a, b]
     jokes = {j["id"]: j for j in library.get_jokes(db, me(db), [a, b])["jokes"]}

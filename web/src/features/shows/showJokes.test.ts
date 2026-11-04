@@ -1,20 +1,32 @@
 import { describe, expect, it } from 'vitest'
-import type { PerformanceLog, Setlist } from '../../api/types'
-import { recordLine, setJokes, showRecord, swapJokes } from './showJokes'
+import type { Joke, PerformanceLog } from '../../api/types'
+import { findJokes, recordLine, showRecord } from './showJokes'
 
-const set = (...ids: string[]) => ({ items: ids.map((joke_id, position) => ({ joke_id, position })) }) as unknown as Setlist
 const show = (performed_at: string, jokes?: PerformanceLog['jokes']) => ({ performed_at, jokes }) as PerformanceLog
 
-describe('the jokes done at a show', () => {
-  it('come from the ticked sets in running order, each once', () => {
-    expect(setJokes([set('a', 'b'), set('b', 'c')])).toEqual(['a', 'b', 'c'])
+describe('finding a joke you did', () => {
+  const joke = (id: string, setup: string, more: Partial<Joke> = {}) =>
+    ({ id, setup, punchline: '', tag_lines: [], comments: '', hashtags: [], updated_at: '2026-10-01T00:00:00Z', ...more }) as Joke
+  const jokes = [
+    joke('a', 'A made-up line about a kettle', { punchline: 'it boils over' }),
+    joke('b', 'Another invented fridge bit', { updated_at: '2026-10-05T00:00:00Z' }),
+    joke('c', 'Fridge magnets, made up'),
+    joke('d', 'Fake one about a fridge door'),
+    joke('e', 'Something else', { punchline: 'the fridge again' }),
+  ]
+
+  it('finds nothing until you type', () => {
+    expect(findJokes(jokes, [], '  ')).toEqual([])
   })
 
-  it('swap with the sets, keeping rated jokes and ones still in a ticked set', () => {
-    const current = [{ joke_id: 'a', result: null }, { joke_id: 'b', result: 'killed' as const }, { joke_id: 'x', result: null }]
-    const swapped = swapJokes(current, ['a', 'b'], ['c'])
-    expect(swapped).toEqual([{ joke_id: 'b', result: 'killed' }, { joke_id: 'x', result: null }, { joke_id: 'c', result: null }])
-    expect(swapJokes([{ joke_id: 'a', result: null }], ['a'], ['a', 'd']).map((j) => j.joke_id)).toEqual(['a', 'd'])
+  it('shows at most three, setup matches first, then the latest edited', () => {
+    expect(findJokes(jokes, [], 'fridge').map((j) => j.id)).toEqual(['b', 'c', 'd'])
+    expect(findJokes(jokes, [], 'fridge', 10).map((j) => j.id)).toEqual(['b', 'c', 'd', 'e'])
+  })
+
+  it('matches every word anywhere in the joke, and leaves out ones already added', () => {
+    expect(findJokes(jokes, [], 'kettle boils').map((j) => j.id)).toEqual(['a'])
+    expect(findJokes(jokes, [{ joke_id: 'b', result: null }], 'fridge').map((j) => j.id)).toEqual(['c', 'd', 'e'])
   })
 })
 

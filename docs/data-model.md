@@ -95,7 +95,7 @@ erDiagram
 | `setlist_items` | `setlist_id` (cascade), `joke_id` (cascade), `position`, `duration_seconds`, `optional` | A set refers to its jokes: their words, strength and runtime are always read from the joke (`duration_seconds` here is only a fallback). Opener and closer are the first and last positions, not stored. An optional joke is one to cut if time is short; it doesn't count towards the slot |
 | `performance_logs` | `venue_id` (set null), `performed_at` (timestamptz), `duration_seconds`, `audience_size`, `rating` 1–5, `notes`, `laughs` JSON (five counts, for laughs scored 1–5 points; null if not counted) | LPM is worked out in the browser from `laughs` and the time on stage |
 | `performance_log_topics` | `log_id`, `topic_id` (both cascade) | "Topics you did". Deleting a topic re-points its links to Thoughts |
-| `performance_jokes` | `log_id` (cascade), `joke_id` (cascade), `position`, `result` (`bombed` / `ok` / `killed`, or null if not rated); unique (`log_id`, `joke_id`) | The jokes done at a show, in running order. Owned through the show. A joke in the Trash keeps its place but isn't listed; a show in the Trash doesn't count towards a joke's record (worked out in the browser for the joke page, and in the connector's `get_jokes`) |
+| `performance_jokes` | `log_id` (cascade), `joke_id` (cascade), `position`, `result` (`bombed` / `ok` / `killed`, or null if not rated), `note` (a comment, empty if none); unique (`log_id`, `joke_id`) | The jokes done at a show, in running order. Owned through the show. A joke in the Trash keeps its place but isn't listed; a show in the Trash doesn't count towards a joke's record (worked out in the browser for the joke page, and in the connector's `get_jokes`) |
 
 ### Study
 
@@ -164,6 +164,7 @@ All of these run in one transaction ([services/topics.py](../app/services/topics
 | `0024` | Connector sign-in: `connector_clients` and `connector_tokens` |
 | `0025` | Sets and premises go to the Trash (`deleted_at`, `premises.trashed_joke_ids`); `writing_sessions.ink_strokes`, counted from the ink already there; `connector_clients.signed_in_at` (apps already registered count as signed in) |
 | `0026` | `performance_jokes`: which jokes were done at a show, in running order, and how each went |
+| `0027` | `performance_jokes.note`: a comment on how a joke went |
 
 Merged migrations are shared history. CI fails a PR that edits, deletes or renames one; fix
 forward with a new revision. CI also runs upgrade → downgrade → upgrade on Postgres 16, so every

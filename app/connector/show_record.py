@@ -18,18 +18,25 @@ from app.models import Joke, PerformanceJoke, PerformanceLog, User
 def jokes_done(
     db: Session, user: User, logs: Iterable[PerformanceLog]
 ) -> dict[uuid.UUID, list[dict[str, Any]]]:
-    """Each show's jokes in running order: id, the start of the setup, and how it went."""
+    """Each show's jokes in running order: id, the start of the setup, how it went and the
+    comment on it."""
     log_ids = [log.id for log in logs]
     rows = db.execute(
-        select(PerformanceJoke.log_id, PerformanceJoke.joke_id, Joke.setup, PerformanceJoke.result)
+        select(
+            PerformanceJoke.log_id,
+            PerformanceJoke.joke_id,
+            Joke.setup,
+            PerformanceJoke.result,
+            PerformanceJoke.note,
+        )
         .join(Joke, Joke.id == PerformanceJoke.joke_id)
         .where(PerformanceJoke.log_id.in_(log_ids), Joke.user_id == user.id)
         .order_by(PerformanceJoke.log_id, PerformanceJoke.position)
     )
     done: dict[uuid.UUID, list[dict[str, Any]]] = {}
-    for log_id, joke_id, setup, result in rows:
+    for log_id, joke_id, setup, result, note in rows:
         done.setdefault(log_id, []).append(
-            {"id": str(joke_id), "setup": clip(setup, 120), "result": result}
+            {"id": str(joke_id), "setup": clip(setup, 120), "result": result, "note": note}
         )
     return done
 
