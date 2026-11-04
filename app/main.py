@@ -92,7 +92,6 @@ def create_app() -> FastAPI:
     )
     for module in routers:
         app.include_router(module.router)
-    app.include_router(jokes.legacy_router)
     app.include_router(auth_router)
     connector.install(app)
     # The built React app. API routes always win; unknown page URLs get index.html.

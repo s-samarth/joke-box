@@ -23,9 +23,8 @@ A JSON API under `/api`, served from the same origin as the app. Running locally
 ## Old names
 
 Jokes were called bits until October 2026. Saves can wait on a phone for months, so requests
-still accept the old `bit_id` and `bit_ids` for good. Until 2026-11-30, for app versions still open
-from before the rename, `/api/bits` answers like `/api/jokes` and responses repeat `joke_id` and
-`joke_ids` as `bit_id` and `bit_ids`. See `app/schemas/legacy.py`.
+still accept the old `bit_id` and `bit_ids` for good. Responses use only the new names, and
+`/api/bits` is gone. See `app/schemas/legacy.py`.
 
 ## System and auth
 
