@@ -1,4 +1,4 @@
-/** Zoom out, zoom in and fit to width, shared by the joke map and the joke board. */
+/** Zoom out, zoom in and fit to width, shared by the joke map and the premise web. */
 import { Maximize2, ZoomIn, ZoomOut } from 'lucide-react'
 import { IconButton } from '../../../components/ui/Button'
 

@@ -1,10 +1,11 @@
 /**
  * Your sets, soonest show first, with their rating and tags; the chips show only sets with a tag.
- * "New set" creates one and opens it straight away.
+ * "New set" creates one and opens it straight away; so does /sets?new=1, which is what the +
+ * button opens on this screen.
  */
 import { MoreHorizontal, Play, Plus, Printer, Trash2 } from 'lucide-react'
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router'
 import { newId } from '../../api/client'
 import { useSetTags } from '../../api/setTags'
 import { useSetlistActions, useSetlists } from '../../api/shows'
@@ -36,6 +37,15 @@ export function SetsPage() {
     save.mutateAsync({ id, input: { name: 'Untitled set', show_date: null, target_seconds: 420, venue_name: null, rating: null, tag_ids: [], items: [] } }).catch((e: Error) => toast(`Set not saved: ${e.message}`))
     navigate(`/sets/${id}`)
   }
+  // The + button's flag. The ref stops a second set when React runs the effect twice in development.
+  const [params] = useSearchParams()
+  const started = useRef(false)
+  useEffect(() => {
+    if (params.has('new') && !started.current) {
+      started.current = true
+      create()
+    }
+  })
   const onDelete = async (s: Setlist) => {
     if (await confirm({ title: `Delete ${s.name}?`, message: 'It goes to the Trash for 30 days. The jokes stay in your library.', confirmLabel: 'Delete set', danger: true })) {
       remove.mutateAsync(s.id).catch((e: Error) => toast(`Set not deleted: ${e.message}`))

@@ -5,7 +5,7 @@ import { BrowserRouter } from 'react-router'
 import { afterRestore } from './api/launch'
 import { persistOptions, saveNow } from './api/persist'
 import { queryClient } from './api/queryClient'
-// Registers the queued saves (jokes, sessions, shows, sets, study, craft, voice, board) before they're replayed.
+// Registers the queued saves (jokes, sessions, shows, sets, study, craft, voice, and the retired board) before they're replayed.
 import './api/jokeSaves'
 import './api/sessionSaves'
 import './api/showSaves'

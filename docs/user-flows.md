@@ -18,7 +18,7 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 1. The app opens on Home with the cursor-ready box "What's the setup?".
 2. Type the setup, and the punchline if you have one (Shift+Enter for a new line).
 3. Press **Enter**. The joke is saved to **Thoughts** with sensible defaults (Draft status,
-   strength 3) and appears in Jokes at once. A toast offers to open it.
+   unrated) and appears in Jokes at once. A toast offers to open it.
 
 **With details (+ button):**
 1. Tap **+** in the phone bar (or **New joke** on the desktop rail).
@@ -72,9 +72,7 @@ through everything you've written at once.
 6. To see how jokes lead into each other, look at the **joke map** (beside the list on desktop, or
    the map button on Jokes). Tap a joke to read it there, walk along its chain with **Comes
    after** and **Followed by**, and **Open joke** to edit it.
-7. Switch to **Board** to see every joke as a card on topic islands. Drag a card (on a phone, hold
-   it first) to put it where you like; it stays there. **Tidy up** puts the moved ones back.
-8. Switch to **Web** to see each premise in the middle of the jokes resting on it.
+7. Switch to **Web** to see each premise in the middle of the jokes resting on it.
 
 ## 4a. Find the premise under your jokes
 
@@ -187,7 +185,7 @@ through everything you've written at once.
 1. Everything you've already opened stays readable. Each list is kept on the device for a week
    after you last opened it.
 2. Saves keep working: jokes, observations, shows (with their lesson), sets, rewrites, voice
-   notes, craft notes and jokes moved on the board. Sheets close as usual and say "Saved offline, will sync". The cloud
+   notes and craft notes. Sheets close as usual and say "Saved offline, will sync". The cloud
    icon turns amber and says "Offline, N waiting to sync", counting recordings still to upload.
 3. A weak signal counts too: a save that can't reach the server waits like an offline one, and
    the app checks every few seconds for the server to come back.

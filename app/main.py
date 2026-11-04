@@ -13,7 +13,6 @@ from app.connector import http as connector
 from app.packed import UnpackRequests
 from app.routers import (
     analyses,
-    board,
     connections,
     craft,
     craft_areas,
@@ -73,7 +72,6 @@ def create_app() -> FastAPI:
     )
     routers = (
         system,
-        board,
         topics,
         jokes,
         premises,

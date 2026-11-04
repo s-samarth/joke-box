@@ -49,7 +49,7 @@ export interface JokeInput {
   premise_id: string | null
   types: string[]
   status: string | null
-  strength: number
+  strength: number | null // null: not rated yet
   duration_seconds: number
   hashtags: string[]
   tag_lines: string[]

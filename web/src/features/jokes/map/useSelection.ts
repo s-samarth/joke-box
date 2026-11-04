@@ -1,5 +1,5 @@
 /**
- * The joke open in the panel on the map or the board. Picking one also scrolls its box into view
+ * The joke open in the panel on the map or the web. Picking one also scrolls its box into view
  * (once it has rendered), and Escape closes the panel.
  */
 import { useEffect, useState } from 'react'

@@ -71,6 +71,17 @@ def test_validation(alice: TestClient) -> None:
     assert put_joke(alice, topic_id=str(uuid.uuid4())).status_code == 422
 
 
+def test_a_new_joke_is_unrated_until_rated(alice: TestClient) -> None:
+    joke_id = str(uuid.uuid4())
+    assert put_joke(alice, joke_id).json()["strength"] is None
+    assert put_joke(alice, joke_id, strength=3).json()["strength"] == 3
+    # A save that leaves strength out (an older app, an import) keeps the rating...
+    assert put_joke(alice, joke_id, setup="Edited").json()["strength"] == 3
+    # ...and only an explicit null takes it away again.
+    assert put_joke(alice, joke_id, strength=None).json()["strength"] is None
+    assert put_joke(alice, strength=0).status_code == 422
+
+
 def test_other_users_cannot_touch_my_jokes(alice: TestClient, bob: TestClient) -> None:
     joke_id = put_joke(alice).json()["id"]
     assert bob.get(f"/api/jokes/{joke_id}").status_code == 404

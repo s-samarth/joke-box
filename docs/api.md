@@ -73,7 +73,7 @@ from before the rename, `/api/bits` answers like `/api/jokes` and responses repe
   "subtopic_id": "uuid in that topic, or null",
   "types": ["One-Liner"],
   "status": "Draft",
-  "strength": 3,
+  "strength": "1 to 5, or null for unrated (new jokes); left out, the rating is kept",
   "duration_seconds": 30,
   "hashtags": ["#dating"],
   "tag_lines": ["an extra punch"],
@@ -109,14 +109,6 @@ The response (`JokeOut`) adds `id`, `created_at` and `updated_at`, and returns `
 | DELETE | `/api/premises/{id}` | To the Trash. Its jokes stay, on no premise, and come back to it when it's put back (unless one moved to another premise meanwhile) |
 
 A joke points at its premise with `premise_id`; a premise doesn't list its jokes.
-
-### The joke board
-
-| Method | Path | Body / notes |
-|---|---|---|
-| GET | `/api/board` | `[{joke_id, topic_id, x, y}]`: every joke you've placed by hand |
-| PUT | `/api/board/{joke_id}` | `{topic_id, x, y}`: put a joke where you dropped it. `x` and `y` are 0 to 100,000, measured from the top left of its topic island. Doesn't touch the joke's `version` or `updated_at`. 404 for someone else's joke or one in the Trash |
-| POST | `/api/board/tidy` | `{joke_ids}` → 204. Forget where these jokes were put; an empty list forgets every one |
 
 ## Rewrites (Studio)
 
@@ -269,7 +261,7 @@ Every tool reads; none writes. Each sees only the user's own rows, and the Trash
 | Tool | Returns |
 |---|---|
 | `jokebox_overview` | Topics and subtopics with joke counts; how many premises, sets, shows and observations; Craft areas; statuses and types |
-| `search_jokes` | Jokes matching every word of the query (in the setup, punchline, tag lines, hashtags or notes; `#name` finds a hashtag), filtered by topic, subtopic, status, type, strength or premise; short versions, at most 25 |
+| `search_jokes` | Jokes matching every word of the query (in the setup, punchline, tag lines, hashtags or notes; `#name` finds a hashtag), filtered by topic, subtopic, status, type, strength or premise; short versions, at most 25. `strength` is null for an unrated joke, and a `min_strength` above 1 leaves those out |
 | `get_jokes` | Up to 20 jokes in full: tag lines, notes, premise, what it follows and what follows it, the sets it's in, its rewrites, and `shows`: its record at logged shows (`shows_done`, `killed`, `ok`, `bombed`, `last_done`) |
 | `list_premises`, `get_premise` | Premises with their joke counts; one premise with its notes and jokes in chain order |
 | `list_sets`, `get_set` | Sets with runtime against target; one set in running order (first is the opener, last the closer) with each joke's topic, premise, strength and time |

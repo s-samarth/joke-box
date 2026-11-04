@@ -11,7 +11,7 @@ import { useJokes, useTopics } from '../../api/library'
 import type { Joke } from '../../api/types'
 import { StrengthTicks } from '../../components/ui/pieces'
 import { Input, Select } from '../../components/ui/Field'
-import { topicName } from '../../lib/jokeMeta'
+import { byStrength, topicName } from '../../lib/jokeMeta'
 import { clock } from '../../lib/duration'
 import { recall, remember } from '../../lib/sessionMemory'
 import { matchesSearch } from '../jokes/useJokeFilters'
@@ -22,7 +22,7 @@ import { matchesPicks, NO_PICKS, type PickState } from './pickMatch'
 const SORTS = {
   edited: { label: 'Recently edited', by: (a: Joke, b: Joke) => b.updated_at.localeCompare(a.updated_at) },
   created: { label: 'Newest', by: (a: Joke, b: Joke) => b.created_at.localeCompare(a.created_at) },
-  strongest: { label: 'Strongest', by: (a: Joke, b: Joke) => b.strength - a.strength },
+  strongest: { label: 'Strongest', by: (a: Joke, b: Joke) => byStrength(a.strength, b.strength, true) },
 }
 type SortKey = keyof typeof SORTS
 

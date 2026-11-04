@@ -1,4 +1,4 @@
-/** The width there is to lay out in: islands on the board and webs wrap at it, so a phone stacks them. */
+/** The width there is to lay out in: webs wrap at it, so a phone stacks them. */
 import { useEffect, useState, type RefObject } from 'react'
 
 export function useRoom(scroller: RefObject<HTMLDivElement | null>) {

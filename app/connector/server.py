@@ -49,8 +49,10 @@ def search_jokes(
 ) -> dict[str, Any]:
     """Find jokes. Every word of `query` must appear in the setup, punchline, tag lines,
     hashtags or notes; a word starting with # finds that hashtag. Filters are exact names
-    (topic, subtopic, status, type), a strength from 1 to 5 and up, or a premise id. Returns
-    short versions (at most 25) and the total; open them with get_jokes."""
+    (topic, subtopic, status, type), a strength from 1 to 5 and up, or a premise id. Strength is
+    1 (Weak) to 5 (Killer), or null when the comic hasn't rated the joke yet; a min_strength
+    above 1 leaves unrated jokes out. Returns short versions (at most 25) and the total; open
+    them with get_jokes."""
     with reading() as (db, user):
         return library.search_jokes(
             db,

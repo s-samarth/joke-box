@@ -97,7 +97,8 @@ class JokeIn(BaseModel):
     premise_id: uuid.UUID | None = None
     types: list[ShortName] = Field(default_factory=list, max_length=50)
     status: str = Field(default=DEFAULT_STATUS, max_length=80)
-    strength: int = Field(default=3, ge=1, le=5)
+    # 1 to 5, or None for unrated. Left out (a partial save), the rating stays as it is.
+    strength: int | None = Field(default=None, ge=1, le=5)
     duration_seconds: int = Field(default=0, ge=0, le=INT_MAX)
     hashtags: list[str] = Field(default_factory=list)
     tag_lines: list[str] = Field(default_factory=list)
@@ -137,7 +138,7 @@ class JokeOut(BaseModel):
     premise_id: uuid.UUID | None
     types: list[str]
     status: str | None
-    strength: int
+    strength: int | None
     duration_seconds: int
     hashtags: list[str]
     tag_lines: list[str]

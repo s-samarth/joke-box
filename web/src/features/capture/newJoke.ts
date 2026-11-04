@@ -20,7 +20,7 @@ export const blankJoke = (topicId = ''): JokeInput => ({
   premise_id: null,
   types: [],
   status: DEFAULT_STATUS,
-  strength: 3,
+  strength: null, // unrated until you've tried it
   duration_seconds: DEFAULT_RUNTIME,
   hashtags: [],
   tag_lines: [],

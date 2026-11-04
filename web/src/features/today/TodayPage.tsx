@@ -1,11 +1,10 @@
-/** Today: the daily joke nudge, then capture, then voice notes, observations, brainstorming, craft (your path and a lesson box), study (watchlist, analysis, links), your topic folders, what's coming up, what needs work, and how the last show went. */
+/** Today: the daily joke nudge, then capture, then voice notes, observations, brainstorming, craft (your path and a lesson box), study (watchlist, analysis, links), your topic folders, what's coming up, and how the last show went. */
 import { Play, Search } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { useJokes, useTopics } from '../../api/library'
+import { useJokes } from '../../api/library'
 import { useLogs, useSetlists } from '../../api/shows'
-import { SectionHead, Stars, StrengthTicks, Tape } from '../../components/ui/pieces'
-import { statusOf, THOUGHTS, UNFINISHED } from '../../lib/jokeMeta'
+import { SectionHead, Stars, Tape } from '../../components/ui/pieces'
 import { clock } from '../../lib/duration'
 import { formatDate } from '../../lib/time'
 import { DailyBanner } from '../daily/DailyBanner'
@@ -26,17 +25,11 @@ const longDate = new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', we
 export function TodayPage() {
   const [dateLabel] = useState(() => longDate.format(new Date()))
   const { data: jokes = [] } = useJokes()
-  const { data: topics = [] } = useTopics()
   const { data: sets = [] } = useSetlists()
   const { data: logs = [] } = useLogs()
-  const thoughts = topics.find((t) => t.is_system)
-  const thoughtsCount = jokes.filter((b) => b.topic_id === thoughts?.id).length
   // The set you worked on last; sets have no show date.
   const nextSet = [...sets].sort((a, b) => b.updated_at.localeCompare(a.updated_at))[0]
   const byId = new Map(jokes.map((b) => [b.id, b]))
-  const needsWork = jokes
-    .filter((b) => b.strength <= 2 || UNFINISHED.has(statusOf(b.status).toLowerCase()))
-    .sort((a, b) => a.strength - b.strength || b.updated_at.localeCompare(a.updated_at))
   const lastShow = logs[0]
   const daily = useHabit()
 
@@ -93,27 +86,6 @@ export function TodayPage() {
           </div>
         ) : (
           <p className="text-dim">No sets yet. <Link to="/sets" className="text-tape underline-offset-4 hover:underline">Build one</Link> for your next spot.</p>
-        )}
-      </section>
-
-      <section className="mt-12">
-        <SectionHead title="Needs work">
-          {thoughtsCount > 0 && <Link to={`/jokes?topic=${thoughts?.id}`} className="text-sm text-dim hover:text-paper">{thoughtsCount} in {THOUGHTS}</Link>}
-        </SectionHead>
-        {needsWork.length === 0 ? (
-          <p className="text-dim">Nothing flagged. Every joke is marked done or strong.</p>
-        ) : (
-          <ul className="divide-y divide-rule border-y border-rule">
-            {needsWork.slice(0, 5).map((b) => (
-              <li key={b.id}>
-                <Link to={`/jokes/${b.id}`} className="flex items-center gap-4 py-3.5 hover:bg-ink-2/60">
-                  <span className="min-w-0 flex-1 truncate">{b.setup}</span>
-                  <span className="shrink-0 text-sm text-faint">{statusOf(b.status)}</span>
-                  <StrengthTicks strength={b.strength} />
-                </Link>
-              </li>
-            ))}
-          </ul>
         )}
       </section>
 
