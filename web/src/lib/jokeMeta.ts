@@ -8,16 +8,20 @@ export const DEFAULT_TYPES = ['One-Liner', 'Story', 'Crowd Work', 'Roast', 'Obse
 
 export const STRENGTH_LABELS = ['Weak', 'Needs work', 'Decent', 'Strong', 'Killer']
 
-export const strengthLabel = (strength: number): string =>
-  STRENGTH_LABELS[Math.min(Math.max(strength, 1), 5) - 1]
+/** What a joke shows when nobody has rated it yet. New jokes start this way. */
+export const UNRATED = 'Unrated'
+
+export const strengthLabel = (strength: number | null): string =>
+  strength == null ? UNRATED : STRENGTH_LABELS[Math.min(Math.max(strength, 1), 5) - 1]
+
+/** For sorting: unrated jokes go after every rated one, whichever way round. */
+export const byStrength = (a: number | null, b: number | null, strongestFirst: boolean): number =>
+  a == null || b == null ? Number(a == null) - Number(b == null) : strongestFirst ? b - a : a - b
 
 export const CLEAN_LABELS: Record<CleanRating, string> = { clean: 'Clean', mild: 'Mild', dirty: 'Dirty' }
 
 /** The languages a joke can be in. New jokes start in Hinglish. */
 export const LANGUAGES = ['Hinglish', 'Hindi', 'English']
-
-/** Statuses that mean "still being written". */
-export const UNFINISHED = new Set(['incomplete', 'work in progress', 'draft', 'need tags'])
 
 /** Every joke has a status. None, or the retired "Status Unknown", means Draft (the server agrees). */
 export const DEFAULT_STATUS = 'Draft'

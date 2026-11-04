@@ -1,5 +1,5 @@
 /**
- * Move around a map or board by dragging it with a mouse. A drag that ends on a box doesn't count
+ * Move around the map or the web by dragging it with a mouse. A drag that ends on a box doesn't count
  * as a tap on it. On a touch screen the finger already scrolls, so that's left to the browser.
  */
 import { useRef, type MouseEvent, type PointerEvent, type RefObject } from 'react'

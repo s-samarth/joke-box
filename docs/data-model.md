@@ -63,8 +63,7 @@ erDiagram
 | `type_colors` | `name` (unique per user, any case), `color` (`#rrggbb`) | The colour of a type's dot. Kept by name in its own table, so a type that's pruned and used again keeps its colour |
 | `joke_type_links` | `joke_id`, `type_id` (both cascade) | Many-to-many |
 | `statuses` | `name`, `position` | Six defaults made on first sign-in; new ones are created by name when a joke uses them. A joke saved with no status (or the retired "Status Unknown") gets Draft |
-| `board_spots` | `joke_id → jokes` (cascade, unique), `topic_id`, `x`, `y` | Where you placed a joke on the joke board, relative to its topic island. Its own table, so moving a box never changes the joke's version or edit time. A spot from another topic (the joke moved since) is ignored by the app |
-| `jokes` | `topic_id` (required), `subtopic_id` (set null), `premise_id` (set null, any topic), `follows_id → jokes` (set null: the joke this one continues from; many can follow one, so chains branch), `status_id` (set null), `setup`, `punchline`, `strength` 1–5, `duration_seconds`, `hashtags` JSON, `tag_lines` JSON, `clean_rating` (clean / mild / dirty / null), `language`, `comments`, `version` (up by one per save) | Check constraints on strength and clean rating. The API sends types and status as names. `version` catches edits made on two devices |
+| `jokes` | `topic_id` (required), `subtopic_id` (set null), `premise_id` (set null, any topic), `follows_id → jokes` (set null: the joke this one continues from; many can follow one, so chains branch), `status_id` (set null), `setup`, `punchline`, `strength` 1–5 or null (unrated; new jokes start that way), `duration_seconds`, `hashtags` JSON, `tag_lines` JSON, `clean_rating` (clean / mild / dirty / null), `language`, `comments`, `version` (up by one per save) | Check constraints on strength and clean rating. The API sends types and status as names. `version` catches edits made on two devices |
 
 ### Connector sign-in
 
@@ -165,6 +164,8 @@ All of these run in one transaction ([services/topics.py](../app/services/topics
 | `0025` | Sets and premises go to the Trash (`deleted_at`, `premises.trashed_joke_ids`); `writing_sessions.ink_strokes`, counted from the ink already there; `connector_clients.signed_in_at` (apps already registered count as signed in) |
 | `0026` | `performance_jokes`: which jokes were done at a show, in running order, and how each went |
 | `0027` | `performance_jokes.note`: a comment on how a joke went |
+| `0028` | `jokes.strength` can be null: unrated. New jokes start unrated; existing ratings stay |
+| `0029` | `board_spots` dropped, with the joke board |
 
 Merged migrations are shared history. CI fails a PR that edits, deletes or renames one; fix
 forward with a new revision. CI also runs upgrade → downgrade → upgrade on Postgres 16, so every

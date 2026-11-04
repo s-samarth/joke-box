@@ -2,10 +2,14 @@
 import { Star } from 'lucide-react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTypeColor } from '../../api/typeColors'
-import { strengthLabel } from '../../lib/jokeMeta'
+import { strengthLabel, UNRATED } from '../../lib/jokeMeta'
 
-/** Strength as five ticks, like marks scratched into a notebook margin. */
-export function StrengthTicks({ strength, size = 'sm', fill = 'bg-tape' }: { strength: number; size?: 'sm' | 'lg'; fill?: string }) {
+/**
+ * Strength as five ticks, like marks scratched into a notebook margin. An unrated joke says
+ * "Unrated" in faint type instead: five grey ticks would read as a score, and a 1 as Weak.
+ */
+export function StrengthTicks({ strength, size = 'sm', fill = 'bg-tape' }: { strength: number | null; size?: 'sm' | 'lg'; fill?: string }) {
+  if (strength == null) return <span className="text-[12px] leading-3 text-faint">{UNRATED}</span>
   const tick = size === 'lg' ? 'h-4 w-1.5' : 'h-3 w-1'
   return (
     <span className="inline-flex items-end gap-[3px]" role="img" aria-label={`Strength: ${strengthLabel(strength)}`} title={strengthLabel(strength)}>

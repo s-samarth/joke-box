@@ -39,7 +39,6 @@ export const LISTS: [file: string, path: string, step: string][] = [
   ['topics.json', '/api/topics', 'Topics'],
   ['types.json', '/api/types', 'Types'],
   ['statuses.json', '/api/statuses', 'Statuses'],
-  ['board.json', '/api/board', 'Board'],
   ['sets.json', '/api/setlists', 'Sets'],
   ['set-tags.json', '/api/set-tags', 'Set tags'],
   ['venues.json', '/api/venues', 'Venues'],

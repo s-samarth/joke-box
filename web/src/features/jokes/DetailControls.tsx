@@ -4,24 +4,29 @@ import { useId, useState } from 'react'
 import { useTypes } from '../../api/library'
 import type { CleanRating } from '../../api/types'
 import { useTypeColor } from '../../api/typeColors'
-import { CLEAN_LABELS, DEFAULT_TYPES, STRENGTH_LABELS } from '../../lib/jokeMeta'
+import { CLEAN_LABELS, DEFAULT_TYPES, STRENGTH_LABELS, UNRATED } from '../../lib/jokeMeta'
 import { NewTypeDialog } from './NewTypeDialog'
 
 const choice = (on: boolean) =>
   `hit relative h-9 rounded-lg px-3 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'bg-ink-3 text-dim hover:text-paper'}`
 
-export function StrengthPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+/**
+ * Unrated, or one of five bars. New jokes start Unrated; tapping the bar that's already picked
+ * clears it again, so a rating is never forced on a joke you haven't tried yet.
+ */
+export function StrengthPicker({ value, onChange }: { value: number | null; onChange: (v: number | null) => void }) {
   return (
     <div className="flex flex-wrap items-center gap-3" role="radiogroup" aria-label="Strength">
-      <div className="-ml-2 flex items-end">
+      <button type="button" role="radio" aria-checked={value == null} onClick={() => onChange(null)} className={choice(value == null)}>{UNRATED}</button>
+      <div className="-ml-1 flex items-end">
         {[1, 2, 3, 4, 5].map((n) => (
-          <button key={n} type="button" role="radio" aria-checked={value === n} aria-label={STRENGTH_LABELS[n - 1]} onClick={() => onChange(n)}
+          <button key={n} type="button" role="radio" aria-checked={value === n} aria-label={STRENGTH_LABELS[n - 1]} onClick={() => onChange(value === n ? null : n)}
             className="flex size-11 items-end justify-center rounded-md pb-2 hover:bg-ink-3">
-            <span className={`w-2 rounded-[2px] ${n <= value ? 'bg-tape' : 'bg-ink-4'}`} style={{ height: `${8 + n * 3}px` }} />
+            <span className={`w-2 rounded-[2px] ${value != null && n <= value ? 'bg-tape' : 'bg-ink-4'}`} style={{ height: `${8 + n * 3}px` }} />
           </button>
         ))}
       </div>
-      <span className="text-sm text-dim">{STRENGTH_LABELS[value - 1]}</span>
+      {value != null && <span className="text-sm text-dim">{STRENGTH_LABELS[value - 1]}</span>}
     </div>
   )
 }

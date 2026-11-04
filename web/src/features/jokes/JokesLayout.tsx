@@ -24,7 +24,7 @@ function exportCsv(jokes: Joke[], topics: Topic[]) {
   const headers = ['Setup', 'Punchline', 'Type', 'Topic', 'Subtopic', 'Rating', 'Status', 'Duration', 'Tags', 'Comments', 'Created At', 'Edited At', 'Tag Lines', 'Clean', 'Language']
   const rows = jokes.map((b) => [
     b.setup, b.punchline, b.types.join('; '), topicName(topicOf(b)), topicOf(b)?.subtopics.find((s) => s.id === b.subtopic_id)?.name ?? '',
-    b.strength, b.status ?? '', long(b.duration_seconds), b.hashtags.join(' '), b.comments, formatDateTime(b.created_at), formatDateTime(b.updated_at),
+    b.strength ?? '', b.status ?? '', long(b.duration_seconds), b.hashtags.join(' '), b.comments, formatDateTime(b.created_at), formatDateTime(b.updated_at),
     b.tag_lines.join(' | '), b.clean_rating ? CLEAN_LABELS[b.clean_rating] : '', b.language ?? '',
   ])
   downloadCsv(`jokebox-jokes-${todayIst()}.csv`, headers, rows)
@@ -43,7 +43,7 @@ export function JokesLayout() {
     <div className="lg:-mx-10 lg:flex lg:h-[calc(100dvh-env(safe-area-inset-top))]">
       <section className={`lg:flex lg:w-[26rem] lg:shrink-0 lg:flex-col lg:border-r lg:border-rule lg:px-6 ${open ? 'hidden lg:flex' : ''}`}>
         <PageHead title="Jokes">
-          <Link to={`/jokes/map${f.query ? `?${f.query}` : ''}`} aria-label="Joke map and board" title="Joke map and board"
+          <Link to={`/jokes/map${f.query ? `?${f.query}` : ''}`} aria-label="Joke map and premise web" title="Joke map and premise web"
             className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg text-dim transition-colors hover:bg-ink-3 hover:text-paper">
             <Network size={19} />
           </Link>

@@ -138,7 +138,8 @@ class Joke(Trashable, OwnedMixin, Base):
     )
     setup: Mapped[str] = mapped_column(Text)
     punchline: Mapped[str] = mapped_column(Text, default="")
-    strength: Mapped[int] = mapped_column(SmallInteger, default=3)
+    # 1 (Weak) to 5 (Killer), or None: not rated yet, which is how every new joke starts.
+    strength: Mapped[int | None] = mapped_column(SmallInteger, default=None)
     duration_seconds: Mapped[int] = mapped_column(Integer, default=0)
     hashtags: Mapped[list[str]] = mapped_column(JSON, default=list)
     # Comedy tags: extra punchlines that follow the main punch.

@@ -30,9 +30,10 @@ def account(db: Session, email: str) -> User:
 def test_search_finds_words_anywhere_and_filters(dev: TestClient, db: Session) -> None:
     put_joke(dev, setup="Fake lift mirror", punchline="Fake reveal", strength=5)
     put_joke(dev, setup="Fake gym", tag_lines=["fake mirror tag"], strength=2)
+    put_joke(dev, setup="Fake unrated mirror")
     me = account(db, "dev@example.com")
     found = library.search_jokes(db, me, query="MIRROR")
-    assert found["total"] == 2
+    assert found["total"] == 3  # unrated jokes count unless a min_strength is asked for
     strong = library.search_jokes(db, me, query="mirror", min_strength=4)
     assert [j["setup"] for j in strong["jokes"]] == ["Fake lift mirror"]
     assert strong["jokes"][0]["topic"] == "Thoughts"

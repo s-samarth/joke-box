@@ -31,7 +31,7 @@ export function JokePeek({ joke, onClose, onAdd, inSet }: Props) {
   const premise = premises.find((p) => p.id === joke.premise_id)
   const before = joke.follows_id ? jokes.find((b) => b.id === joke.follows_id) : undefined
   const rows: [string, ReactNode][] = [
-    ['Strength', <span key="s" className="inline-flex items-center gap-2"><StrengthTicks strength={joke.strength} />{strengthLabel(joke.strength)}</span>],
+    ['Strength', <span key="s" className="inline-flex items-center gap-2"><StrengthTicks strength={joke.strength} />{joke.strength != null && strengthLabel(joke.strength)}</span>],
     ['Runs for', <span key="d" className="tabular">{joke.duration_seconds ? clock(joke.duration_seconds) : 'Not timed'}</span>],
     ['Type', <span key="t" className="inline-flex flex-wrap justify-end gap-x-3">{displayTypes(joke.types).map((t) => <TypeLabel key={t} name={t} />)}</span>],
     ...(joke.follows_id ? [['Follows', <span key="f" className="line-clamp-1">{before?.setup ?? 'A joke in the Trash'}</span>] as [string, ReactNode]] : []),

@@ -1,7 +1,6 @@
 """All tables, imported in one place so Alembic sees every model."""
 
 from app.models.base import Base
-from app.models.board import BoardSpot
 from app.models.connector import ConnectorClient, ConnectorToken
 from app.models.craft import CraftArea, CraftNote, NoteKind
 from app.models.library import (
@@ -32,7 +31,6 @@ from app.models.user import User
 from app.models.voice import VoiceNote
 
 __all__ = [
-    "BoardSpot",
     "RANDOM_TOPIC",
     "Analysis",
     "Base",

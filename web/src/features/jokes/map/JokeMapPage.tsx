@@ -1,10 +1,10 @@
 /**
- * The joke map and the joke board, as a screen. On desktop it fills the space beside the list when
- * no joke is open; /jokes/map opens it on its own, which is how a phone gets to it. Both show
+ * The joke map and the premise web, as a screen. On desktop it fills the space beside the list
+ * when no joke is open; /jokes/map opens it on its own, which is how a phone gets to it. Both show
  * whatever the list is showing, since the filters live in the URL.
  *
- * Map draws chains left to right; Board scatters every joke over topic islands; Web puts each
- * premise in the middle of its jokes. The choice is remembered on this device.
+ * Map draws chains left to right; Web puts each premise in the middle of its jokes. The choice is
+ * remembered on this device (a device that last used the old Board opens on the Map).
  */
 import { ArrowLeft } from 'lucide-react'
 import { useState } from 'react'
@@ -12,14 +12,12 @@ import { Link } from 'react-router'
 import { useJokes } from '../../../api/library'
 import { EmptyState, Spinner } from '../../../components/ui/pieces'
 import { useJokeFilters } from '../useJokeFilters'
-import { JokeBoard } from './JokeBoard'
 import { JokeMap } from './JokeMap'
 import { JokeWeb } from './JokeWeb'
 
-type View = 'map' | 'board' | 'web'
+type View = 'map' | 'web'
 const VIEWS: Record<View, { tab: string; title: string }> = {
   map: { tab: 'Map', title: 'Joke map' },
-  board: { tab: 'Board', title: 'Joke board' },
   web: { tab: 'Web', title: 'Premise web' },
 }
 const VIEW_KEY = 'jokebox.jokeView'
@@ -27,7 +25,7 @@ const VIEW_KEY = 'jokebox.jokeView'
 function savedView(): View {
   try {
     const saved = localStorage.getItem(VIEW_KEY)
-    return saved === 'board' || saved === 'web' ? saved : 'map'
+    return saved === 'web' ? saved : 'map'
   } catch {
     return 'map'
   }
@@ -55,7 +53,7 @@ export function JokeMapPage({ own = false }: { own?: boolean }) {
       )}
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <h2 className="headline text-4xl">{VIEWS[view].title}</h2>
-        <div role="tablist" aria-label="Map, board or web" className="flex rounded-lg bg-ink-3 p-0.5 text-sm">
+        <div role="tablist" aria-label="Map or web" className="flex rounded-lg bg-ink-3 p-0.5 text-sm">
           {(Object.keys(VIEWS) as View[]).map((v) => (
             <button key={v} type="button" role="tab" aria-selected={view === v} onClick={() => choose(v)}
               className={`h-9 rounded-md px-4 ${view === v ? 'bg-ink-4 text-paper' : 'text-dim hover:text-paper'}`}>{VIEWS[v].tab}</button>
@@ -68,8 +66,6 @@ export function JokeMapPage({ own = false }: { own?: boolean }) {
         <EmptyState title="Nothing here">{f.active ? 'No jokes match these filters. Clear them to see everything.' : 'Write a joke and it shows up here.'}</EmptyState>
       ) : view === 'map' ? (
         <JokeMap shown={f.visible} all={all} query={f.query} />
-      ) : view === 'board' ? (
-        <JokeBoard shown={f.visible} all={all} query={f.query} />
       ) : (
         <JokeWeb shown={f.visible} all={all} query={f.query} everything={!f.active} />
       )}

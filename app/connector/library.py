@@ -94,7 +94,7 @@ def search_jokes(
         and same_name(subtopic, names.subtopics.get(j.subtopic_id) if j.subtopic_id else "")
         and same_name(status, j.status.name if j.status else "")
         and (not joke_type or any(same_name(joke_type, t.name) for t in j.types))
-        and j.strength >= min_strength
+        and (min_strength <= 1 or (j.strength or 0) >= min_strength)
         and (not premise_id or str(j.premise_id) == premise_id)
     ]
     shown, total = page(found, limit)

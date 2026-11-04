@@ -43,7 +43,7 @@ own data. Today that is one comedian, but the system works for more than one.
    save a moment after you stop, and when you leave the page.
 3. **Offline is normal.** Basements, green rooms and metros have no signal, or one bar, or wifi
    that wants a sign-in. Reading works offline, and so does saving jokes, observations, shows,
-   sets, brainstorms, craft notes, watchlist ticks, analyses, voice notes and jokes moved on the board. It all syncs in
+   sets, brainstorms, craft notes, watchlist ticks, analyses and voice notes. It all syncs in
    order when you're back, keeps the time you wrote it, and nothing is dropped: a save the server
    refuses waits in Couldn't sync with what you wrote.
 4. **Phone first, laptop comfortable.** Every screen is designed at 390 px wide, with large tap
@@ -60,10 +60,10 @@ own data. Today that is one comedian, but the system works for more than one.
 
 | Area | What it does | Screen |
 |---|---|---|
-| **Home** | The daily joke nudge, quick capture, record a voice note, log an observation, start a brainstorm, a search button, study shortcuts, topic folders, next set, "Needs work", last show | `/` |
+| **Home** | The daily joke nudge, quick capture, record a voice note, log an observation, start a brainstorm, a search button, study shortcuts, topic folders, next set, last show | `/` |
 | **Search** | One search across everything: jokes, premises, observations, brainstorms (typed words; not handwriting), rewrites, voice notes, sets, shows, Craft, analyses and the watchlist. Works offline, on what the phone already holds | `/search` |
 | **Daily joke** | One new joke a day: today's box, streaks, a calendar of ticks; the nudge on Home goes from green to yellow, red and spooky | `/daily` |
-| **Jokes** | Searchable list with topic, type, status and sort filters; each joke edited in place; CSV export. Beside the list (or at `/jokes/map` on a phone): the Map of joke chains, the Board of topic islands, and the Web of premises with their jokes | `/jokes`, `/jokes/:id`, `/jokes/map` |
+| **Jokes** | Searchable list with topic, type, status and sort filters; each joke edited in place; CSV export. Beside the list (or at `/jokes/map` on a phone): the Map of joke chains and the Web of premises with their jokes | `/jokes`, `/jokes/:id`, `/jokes/map` |
 | **Premises** | The ideas under your jokes ("X is Y, because Z"): each one's take and notes, and every joke resting on it in chain order | `/premises`, `/premises/:id` |
 | **New joke** | The + button: a full sheet with every field, prefilled from where you are. Closing it keeps what you typed for next time. On Premises, Shows and Observations the + makes one of those instead | sheet |
 | **Rewrite** | Full-screen timed rewrite of one joke; every save keeps a version | `/jokes/:id/rewrite` |
@@ -95,7 +95,7 @@ The vocabulary is a comic's, not a database's. Keep to it in the code and in the
 | **Thoughts** | The default topic for anything unfiled. Stored as the protected `Random` topic, which can't be renamed or deleted, and picks up the jokes of any deleted topic. |
 | **Topic / subtopic** | Folders for jokes. Observations have their own separate topics. |
 | **Type** | The form of a joke: One-Liner, Story, Crowd Work, Roast, Observation, Premise, Act Out, or your own. A type exists only while some joke uses it; a joke with no type shows as "Undefined". |
-| **Strength** | 1–5: Weak, Needs work, Decent, Strong, Killer. Drawn as five ticks. |
+| **Strength** | 1–5: Weak, Needs work, Decent, Strong, Killer, drawn as five ticks; or **Unrated**, which is how every new joke starts, so a 3 always means you chose it. Sorting by strength puts unrated jokes last. |
 | **Status** | Incomplete, Work in Progress, Complete, Draft, Stage Ready, Need Tags, or your own. Every joke has one; new jokes start as Draft. |
 | **Runs for** | How long the joke takes on stage (m:ss). |
 | **Clean rating** | Clean, Mild or Dirty. |

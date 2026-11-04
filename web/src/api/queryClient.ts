@@ -41,7 +41,6 @@ export const keys = {
   craftKinds: ['craft-kinds'],
   trash: ['trash'],
   setTags: ['set-tags'],
-  board: ['board'],
   premises: ['premises'],
 } as const
 

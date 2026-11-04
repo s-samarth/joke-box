@@ -89,9 +89,10 @@ def check_premise(db: Session, user: User, data: JokeIn) -> None:
 
 def plain_fields(data: JokeIn) -> dict[str, object]:
     """The fields copied as they are. An app too old to know about chains or premises leaves
-    follows_id or premise_id out, and then the link is kept rather than cleared."""
+    follows_id or premise_id out, and then the link is kept rather than cleared. A save without
+    strength keeps the rating too: only an explicit null makes a joke unrated."""
     skip = {"types", "status", "created_at", "base_version"}
-    for link in ("follows_id", "premise_id"):
+    for link in ("follows_id", "premise_id", "strength"):
         if link not in data.model_fields_set:
             skip.add(link)
     return data.model_dump(exclude=skip)

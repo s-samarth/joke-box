@@ -21,8 +21,8 @@ visit, so the app opens fast on a phone.
 - **Phone:** a slim header (wordmark, sync icon, avatar) and a bottom bar laid out as
   **Home · Jokes · + · Premises · More**.
   The **+** adds whatever the screen holds ([useAddAction.ts](../web/src/layout/useAddAction.ts)):
-  a premise on Premises, a show on Shows, an observation on Observations, and a New joke
-  anywhere else. **More** opens a bottom sheet that groups every other screen: **Find**
+  a premise on Premises, a show on Shows, a set on the list of Sets, an observation on
+  Observations, and a New joke anywhere else (inside a set you're building too). **More** opens a bottom sheet that groups every other screen: **Find**
   (Search), **Write** (Daily joke, Voice notes, Observations, Brainstorm), **Perform** (Sets, Shows), **Study**
   (Craft, Watchlist, Analysis) and **Deleted** (Trash). While you're on one of those screens,
   the More tab shows as the current one.
@@ -80,7 +80,6 @@ in IST and the headline **"Got something?"** with a search button beside it (it 
 | Study | `TodayStudy.tsx` | Craft notes, watchlist progress, analyses |
 | Topics | `TopicFolders.tsx` | Topics as folders with live counts; tap through to a subtopic |
 | Your latest set | (inline) | The set you edited last, its joke count and slot, its first three strips, the light bar and **Rehearse** |
-| Needs work | (inline) | Up to five jokes with strength ≤ 2 or an unfinished status, weakest first |
 | Last show | (inline) | Venue, date, time on stage, crowd and stars, plus **Log a show** |
 
 <img src="screenshots/desktop-home.webp" alt="Home on desktop">
@@ -114,7 +113,7 @@ the jokes' created dates, so there's no separate log to fall out of step.
 
 - **List:** a search box ("Search words, tags, notes") and menus: Topic, then Subtopic once a topic with subtopics is picked, Type,
   Status, and Sort (Newest, Oldest, Recently edited, Strongest, Weakest, Longest). Each row shows the
-  setup, the start of the punchline, strength ticks, type dots, the topic, the date it was added (or
+  setup, the start of the punchline, strength ticks (or a faint "Unrated"), type dots, the topic, the date it was added (or
   last edited, under Recently edited) and the runtime. Sorted by a date, the list is grouped into
   months under pinned headings, with the time scrubber down its side ([JokeList.tsx](../web/src/features/jokes/JokeList.tsx)).
   A joke brought in with an older date (an import) counts as last edited then, not on the day it
@@ -136,29 +135,13 @@ the jokes' created dates, so there's no separate log to fall out of step.
     lights up and the others step back; hovering a box does the same. Escape closes the panel.
   - **Move around** by scrolling, or with a mouse by dragging the map (a drag that ends on a box
     doesn't open it). Zoom out, zoom in and **Fit to width**; a phone starts at 70%.
-- **The joke board** (the **Board** tab beside **Map**, remembered on the device;
-  [boardLayout.ts](../web/src/features/jokes/map/boardLayout.ts), [JokeBoard.tsx](../web/src/features/jokes/map/JokeBoard.tsx),
-  [BoardCanvas.tsx](../web/src/features/jokes/map/BoardCanvas.tsx), [useBoxDrag.ts](../web/src/features/jokes/map/useBoxDrag.ts)):
-  the same jokes as cards scattered over topic islands, like a corkboard.
-  - **Islands:** one per topic, in your topic order, wrapping to the width on screen (at least two
-    cards wide). Cards sit on a loose grid with a small nudge and tilt worked out from each joke's
-    id, so they look hand-placed, never overlap, and land in the same place every time.
-  - **Chains** stay together in their first joke's island, with arrows; dimmed cards are jokes the
-    filters hide, kept so a chain isn't broken.
-  - **Move a card:** drag it with a mouse, or on a phone hold it a moment and then drag; the arrow
-    keys move a focused card (Shift for bigger steps). It stays where you put it, relative to its
-    island, and the grid makes room. The save waits offline like any other. **Tidy up** (after
-    asking) puts the moved cards back.
-  - **Read a card:** tap it for the same panel as the map. Drag the background to move around.
-  - **Lots of jokes:** zoomed to 55% or less, cards show their first few words in big type, and
-    island names grow. Past 300 cards, only those near the screen are drawn. A phone starts at
-    55%.
 - **The premise web** (the **Web** tab, [JokeWeb.tsx](../web/src/features/jokes/map/JokeWeb.tsx)):
   each premise in the middle of the jokes resting on it, whatever topic they're from. Jokes on no
   premise aren't drawn; a link lists them so you can sort them in. Tap a joke for the same panel
   as the map.
 - **The joke page:** the setup and punchline (in tape yellow) are edited in place, followed by tag
-  lines. Below them, a row of details: Strength, Type (with Edit types), Filed under (topic and
+  lines. Below them, a row of details: Strength (**Unrated**, then five bars; tap the lit bar again
+  to clear it), Type (with Edit types), Filed under (topic and
   subtopic, with Edit topics), Premise, Follows (the joke this one comes after in a chain),
   Followed by (with a button to write the next one), Status, Runs for (type it, or step it five
   seconds at a time with − and +), Clean rating, Language (Hinglish, Hindi or English) and

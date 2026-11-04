@@ -7,7 +7,7 @@ import { useEffect, useMemo } from 'react'
 import { useSearchParams } from 'react-router'
 import { useJokes } from '../../api/library'
 import type { Joke } from '../../api/types'
-import { UNDEFINED_TYPE } from '../../lib/jokeMeta'
+import { byStrength, UNDEFINED_TYPE } from '../../lib/jokeMeta'
 import { NO_PREMISE, ON_A_PREMISE } from '../../lib/premises'
 import { recall, remember } from './rememberFilters'
 
@@ -49,8 +49,8 @@ const SORTERS: Record<SortKey, (a: Joke, b: Joke) => number> = {
   new: (a, b) => b.created_at.localeCompare(a.created_at),
   old: (a, b) => a.created_at.localeCompare(b.created_at),
   edited: (a, b) => b.updated_at.localeCompare(a.updated_at),
-  strong: (a, b) => b.strength - a.strength || b.created_at.localeCompare(a.created_at),
-  weak: (a, b) => a.strength - b.strength || b.created_at.localeCompare(a.created_at),
+  strong: (a, b) => byStrength(a.strength, b.strength, true) || b.created_at.localeCompare(a.created_at),
+  weak: (a, b) => byStrength(a.strength, b.strength, false) || b.created_at.localeCompare(a.created_at),
   long: (a, b) => b.duration_seconds - a.duration_seconds,
 }
 
