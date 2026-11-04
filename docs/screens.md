@@ -19,11 +19,11 @@ visit, so the app opens fast on a phone.
   only the list of screens scrolls when the window is too short (an iPad in landscape). The rail
   and the pages start below the iPad's status bar, where iPadOS blurs whatever sits under it.
 - **Phone:** a slim header (wordmark, sync icon, avatar) and a bottom bar laid out as
-  **Home · Jokes · + · Sets · More**. Sets has the slot because it's what you reach for at a gig.
+  **Home · Jokes · + · Premises · More**.
   The **+** adds whatever the screen holds ([useAddAction.ts](../web/src/layout/useAddAction.ts)):
   a premise on Premises, a show on Shows, an observation on Observations, and a New joke
   anywhere else. **More** opens a bottom sheet that groups every other screen: **Find**
-  (Search), **Write** (Premises, Daily joke, Voice notes, Observations, Brainstorm), **Perform** (Shows), **Study**
+  (Search), **Write** (Daily joke, Voice notes, Observations, Brainstorm), **Perform** (Sets, Shows), **Study**
   (Craft, Watchlist, Analysis) and **Deleted** (Trash). While you're on one of those screens,
   the More tab shows as the current one.
 - One list in `nav.ts` feeds both the rail and the bar, so they can't drift apart.
