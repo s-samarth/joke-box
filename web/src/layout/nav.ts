@@ -5,7 +5,7 @@
  * grouped by what you're doing.
  */
 import type { LucideIcon } from 'lucide-react'
-import { AudioLines, Lightbulb, CalendarCheck, GraduationCap, Eye, Home, ListChecks, ListOrdered, Mic, NotebookPen, PenLine, StickyNote, Trash2 } from 'lucide-react'
+import { AudioLines, Lightbulb, CalendarCheck, GraduationCap, Eye, Home, ListChecks, ListOrdered, Mic, NotebookPen, PenLine, Search, StickyNote, Trash2 } from 'lucide-react'
 
 export interface NavItem {
   to: string
@@ -29,16 +29,18 @@ const shows: NavItem = { to: '/shows', label: 'Shows', icon: Mic, hint: 'Log a m
 const craft: NavItem = { to: '/craft', label: 'Craft', icon: GraduationCap, hint: 'What you know about doing stand-up' }
 const watchlist: NavItem = { to: '/watchlist', label: 'Watchlist', icon: ListChecks, hint: 'Routines to study' }
 const analysis: NavItem = { to: '/analysis', label: 'Analysis', icon: NotebookPen, hint: 'Your write-ups of sets and jokes' }
+const search: NavItem = { to: '/search', label: 'Search', icon: Search, hint: 'Find anything you’ve written' }
 const trash: NavItem = { to: '/trash', label: 'Trash', icon: Trash2, hint: 'What you deleted, kept for 30 days' }
 
 /** The desktop rail, top to bottom. */
-export const NAV: NavItem[] = [home, jokes, premises, daily, observations, brainstorm, voice, sets, shows, craft, watchlist, analysis, trash]
+export const NAV: NavItem[] = [home, search, jokes, premises, daily, observations, brainstorm, voice, sets, shows, craft, watchlist, analysis, trash]
 
 /** Phone bottom bar: two either side of the + button, the last slot being More. */
 export const BAR_LEFT: NavItem[] = [home, jokes]
 export const BAR_RIGHT: NavItem[] = [sets]
 
 export const MORE_GROUPS: { title: string; items: NavItem[] }[] = [
+  { title: 'Find', items: [search] },
   { title: 'Write', items: [premises, daily, voice, observations, brainstorm] },
   { title: 'Perform', items: [shows] },
   { title: 'Study', items: [craft, watchlist, analysis] },

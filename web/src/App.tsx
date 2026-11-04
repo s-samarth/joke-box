@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router'
 import { Spinner } from './components/ui/pieces'
 import { LoginPage } from './features/auth/LoginPage'
 import { RequireAuth } from './features/auth/RequireAuth'
+import { CaptureProvider } from './features/capture/CaptureProvider'
 import { TodayPage } from './features/today/TodayPage'
 import { AppShell } from './layout/AppShell'
 
@@ -36,6 +37,7 @@ const CraftNotePage = named(() => import('./features/craft/CraftNotePage'), 'Cra
 const DailyPage = named(() => import('./features/daily/DailyPage'), 'DailyPage')
 const TrashPage = named(() => import('./features/trash/TrashPage'), 'TrashPage')
 const ImportPage = named(() => import('./features/import/ImportPage'), 'ImportPage')
+const SearchPage = named(() => import('./features/search/SearchPage'), 'SearchPage')
 
 const full = (el: React.ReactNode) => <RequireAuth>{el}</RequireAuth>
 
@@ -77,9 +79,11 @@ export function App() {
           <Route path="links" element={<Navigate to="/craft" replace />} />
           <Route path="trash" element={<TrashPage />} />
           <Route path="import" element={<ImportPage />} />
+          <Route path="search" element={<SearchPage />} />
         </Route>
         {/* Full-screen modes without the app frame. */}
-        <Route path="/brainstorm/:sessionId" element={full(<SessionPage />)} />
+        {/* A session can turn into a joke, so it has the New joke sheet too. */}
+        <Route path="/brainstorm/:sessionId" element={full(<CaptureProvider><SessionPage /></CaptureProvider>)} />
         <Route path="/jokes/:jokeId/rewrite" element={full(<RewritePage />)} />
         <Route path="/sets/:setId/stage" element={full(<StageView />)} />
         <Route path="/sets/:setId/print" element={full(<PrintView />)} />

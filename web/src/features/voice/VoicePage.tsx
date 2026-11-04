@@ -34,10 +34,11 @@ function StorageBar({ used }: { used: number }) {
 
 export function VoicePage() {
   const { notes, loading, edit, remove, usedBytes } = useVoiceLibrary()
-  const [query, setQuery] = useState('')
+  const [params, setParams] = useSearchParams()
+  // Search opens here with ?q= (from Search everything); after that the box is the page's own.
+  const [query, setQuery] = useState(() => params.get('q') ?? '')
   const tags = hashtagCounts(notes)
   const shown = filterNotes(notes, query)
-  const [params, setParams] = useSearchParams()
   const order: Order = params.get('order') === 'old' ? 'old' : 'new'
   const groups = useMemo(() => groupByMonth([...shown].sort(byDate((n) => n.created_at, order)), (n) => n.created_at), [shown, order])
 

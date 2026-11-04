@@ -20,12 +20,12 @@ cd web && npx tsc -b && npx oxlint --deny-warnings src && npx vitest run
 
 ## The Claude connector (`app/connector/`)
 
-Claude reads JokeBox through an MCP server at `/mcp`: 15 read-only tools over jokes, premises,
-sets, shows, observations, brainstorms, Craft notes and analyses. The tools read the models
+Claude reads JokeBox through an MCP server at `/mcp`: 16 read-only tools over jokes, premises,
+sets, shows, observations, voice notes, brainstorms, Craft notes and analyses. The tools read the models
 directly, so a model change can break them, and Claude only finds out mid-conversation.
 
 - **Change a model, check the connector in the same change.** Renaming, moving or removing a
-  field on `Joke`, `Premise`, `Setlist`, `PerformanceLog`, `Observation`, `WritingSession`,
+  field on `Joke`, `Premise`, `Setlist`, `PerformanceLog`, `Observation`, `VoiceNote`, `WritingSession`,
   `Brainstorm`, `CraftNote`, `Analysis` or their topics means updating `app/connector/`.
 - **`tests/test_connector_contract.py` must pass.** It runs every tool over the demo data plus
   one of everything and checks each returns exactly its listed fields. A new tool must be added

@@ -1,8 +1,12 @@
 import { createContext, useContext } from 'react'
+import type { Prefill } from './NewJokeForm'
 
 export interface CaptureApi {
-  /** Open the new joke sheet, optionally filed under a topic, started from some text, or following a joke. */
-  openCapture: (prefill?: { topicId?: string; subtopicId?: string | null; premiseId?: string | null; setup?: string; followsId?: string }) => void
+  /**
+   * Open the new joke sheet, optionally filed under a topic, started from some text and hashtags,
+   * or following a joke. `onCreated` gets the new joke's id once it's saved.
+   */
+  openCapture: (prefill?: Prefill) => void
 }
 
 export const CaptureContext = createContext<CaptureApi | null>(null)

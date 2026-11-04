@@ -9,12 +9,13 @@ from typing import Any
 from mcp.server.mcpserver import Image, MCPServer
 from mcp.types import TextContent, ToolAnnotations
 
-from app.connector import brainstorm, library, notebook, performing, study
+from app.connector import brainstorm, library, notebook, performing, study, voice
 from app.connector.identity import reading
 
 INSTRUCTIONS = """JokeBox is a stand-up comic's library: jokes (setup, punchline, tags) filed by \
 topic, premises (a take with a reason) that jokes rest on, sets in running order, logged shows, \
-observations, brainstorms, Craft notes on how comedy works, and analyses of other comics.
+observations, voice notes, brainstorms, Craft notes on how comedy works, and analyses of other \
+comics.
 Start with jokebox_overview if you don't know what's there. Search first, then open the few \
 items you need. Quote Craft notes by title when you apply them. Handwritten brainstorms come as \
 images of their pages from get_brainstorm: read the handwriting from them. Everything here is \
@@ -128,6 +129,15 @@ def search_observations(query: str = "", topic: str = "", limit: int = 25) -> di
     are separate from joke topics."""
     with reading() as (db, user):
         return notebook.search_observations(db, user, query, topic, limit)
+
+
+@server.tool(annotations=READ)
+def search_voice_notes(query: str = "", limit: int = 25) -> dict[str, Any]:
+    """Voice notes: ideas the comic recorded out loud, newest first, by label and hashtags.
+    Only what each is called and tagged, how long it runs and when it was recorded: the
+    recordings themselves can't be heard here."""
+    with reading() as (db, user):
+        return voice.search_voice_notes(db, user, query, limit)
 
 
 @server.tool(annotations=READ)

@@ -1,9 +1,10 @@
-/** One voice note: play it, see its label and hashtags, edit them, or delete it. */
-import { CloudOff, Pencil, Trash2 } from 'lucide-react'
+/** One voice note: play it, see its label and hashtags, edit them, turn it into a joke, or delete it. */
+import { CloudOff, Pencil, Sparkles, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { IconButton } from '../../components/ui/Button'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { clock } from '../../lib/duration'
+import { useCapture } from '../capture/captureContext'
 import { formatDateTime } from '../../lib/time'
 import { NoteEditor } from './NoteEditor'
 import { PlayButton } from './PlayButton'
@@ -29,6 +30,7 @@ export function VoiceNoteRow({ note, suggestions, onEdit, onDelete, onTag }: Pro
   const player = usePlayer(note.id, note.duration_seconds)
   const [editing, setEditing] = useState(false)
   const { confirm } = useFeedback()
+  const { openCapture } = useCapture()
   const status = note.problem ?? STATUS[note.state]
   const remove = async () => {
     const message = !note.local ? 'It goes to the Trash for 30 days.' : 'It hasn’t uploaded yet, so the recording is deleted for good, not kept in the Trash.'
@@ -47,6 +49,7 @@ export function VoiceNoteRow({ note, suggestions, onEdit, onDelete, onTag }: Pro
             {status && <span className={`inline-flex items-center gap-1 ${note.state === 'failed' ? 'text-light' : 'text-amber'}`}><CloudOff size={13} />{status}</span>}
           </p>
         </div>
+        <IconButton label="Turn into a joke" onClick={() => openCapture({ setup: note.label, hashtags: note.hashtags })}><Sparkles size={16} /></IconButton>
         <IconButton label="Edit label and hashtags" onClick={() => setEditing((e) => !e)}><Pencil size={16} /></IconButton>
         <IconButton label="Delete voice note" onClick={remove} className="hover:text-light"><Trash2 size={16} /></IconButton>
       </div>

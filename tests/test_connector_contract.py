@@ -100,6 +100,7 @@ def test_every_tool_is_covered_here(claude: tuple[TestClient, str]) -> None:
         "get_set",
         "list_shows",
         "search_observations",
+        "search_voice_notes",
         "search_brainstorms",
         "get_brainstorm",
         "search_craft",
@@ -172,6 +173,8 @@ def test_performing_tools(claude: tuple[TestClient, str]) -> None:
 def test_notebook_and_study_tools(claude: tuple[TestClient, str]) -> None:
     observations = result(claude, "search_observations")
     assert set(items(observations, "observations")[0]) == {"id", "text", "topic", "noted"}
+    # Each voice note's fields are checked in test_connector_voice.py.
+    assert set(result(claude, "search_voice_notes")) == {"total", "voice_notes"}
 
     found = items(result(claude, "search_brainstorms"), "results")
     by_kind = {r["kind"]: set(r) for r in found}
