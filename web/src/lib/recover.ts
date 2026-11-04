@@ -7,6 +7,7 @@
  * saved lists, keep the saves still waiting to sync, and reload.
  */
 import { get, set } from 'idb-keyval'
+import { serverAnswers } from '../api/network'
 import { CACHE_KEY } from '../api/queryClient'
 
 const REPAIRED_AT = 'jokebox.repairedAt'
@@ -48,16 +49,20 @@ export function repairIfStale(error: unknown): boolean {
 }
 
 /**
- * Reload into a fresh copy of the app. Offline it only reloads: without the installed files
- * there'd be no app to open until the signal comes back.
+ * Reload into a fresh copy of the app. Only once the server has answered: without the installed
+ * files there'd be no app to open until the signal comes back, and the phone's own "online"
+ * says yes on one bar or on wifi that reaches nothing. Without an answer it only reloads, or
+ * (`onlyIfReachable`, the button) does nothing and says 'offline' so the screen can tell you.
  */
-export async function freshCopy() {
+export async function freshCopy({ onlyIfReachable = false } = {}): Promise<'offline' | void> {
+  const reachable = navigator.onLine && (await serverAnswers(5_000))
+  if (!reachable && onlyIfReachable) return 'offline'
   try {
     sessionStorage.setItem(REPAIRED_AT, String(Date.now()))
   } catch {
     // Private mode can refuse storage; the repair still works, it just may repeat.
   }
-  if (navigator.onLine) {
+  if (reachable) {
     const steps = [
       async () => Promise.all((await navigator.serviceWorker.getRegistrations()).map((r) => r.unregister())),
       async () => Promise.all((await caches.keys()).map((k) => caches.delete(k))),

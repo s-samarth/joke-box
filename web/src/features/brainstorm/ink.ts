@@ -63,15 +63,24 @@ export function scrollAfterZoom(o: { focusX: number; focusY: number; pageX: numb
   return { left: o.pageX * o.scale - (o.focusX - o.frameLeft), top: o.pageY * o.scale + o.canvasTop - o.focusY }
 }
 
-/** Pages are a fixed size; a page drawn before that, which grew past it, keeps all its ink. */
-export const pageHeight = (strokes: Stroke[]) =>
-  Math.max(PAGE_HEIGHT, ...strokes.flatMap((s) => s.points.map((p) => p[1])))
+/**
+ * Pages are a fixed size; a page drawn before that, which grew past it, keeps all its ink.
+ * A loop, not Math.max(...points): spreading a dense page's points (past about 125,000) throws.
+ */
+export function pageHeight(strokes: Stroke[]) {
+  let height = PAGE_HEIGHT
+  for (const s of strokes) for (const p of s.points) if (p[1] > height) height = p[1]
+  return height
+}
 
 const pageOf = (s: Stroke) => s.page ?? 0
 
 /** How many pages to show: the saved count, or more if some stroke sits beyond it. */
-export const pageCount = (strokes: Stroke[], saved = 1) =>
-  Math.max(saved, ...strokes.map((s) => pageOf(s) + 1))
+export function pageCount(strokes: Stroke[], saved = 1) {
+  let count = saved
+  for (const s of strokes) count = Math.max(count, pageOf(s) + 1)
+  return count
+}
 
 export const strokesOn = (strokes: Stroke[], page: number) => strokes.filter((s) => pageOf(s) === page)
 

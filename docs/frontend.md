@@ -26,6 +26,12 @@ under fixed keys (`setMutationDefaults`), each spreading the shared `QUEUED` opt
   sheet has closed).
 - **Offline, the save pauses:** `networkMode: 'online'` makes TanStack Query hold it, and the
   persister writes it to IndexedDB with the rest of the cache (`throttleTime` 300 ms).
+- **Saved before the phone puts the app away:** iOS often skips `pagehide` when you switch apps
+  or lock the phone, so every editor (joke, set, premise, brainstorm session) also sends its
+  waiting change on `visibilitychange` to hidden (`onHide` in
+  [saveOnHide.ts](../web/src/lib/saveOnHide.ts)), and the saved copy is then written straight to
+  IndexedDB (`saveNow` in [persist.ts](../web/src/api/persist.ts)), not after the throttle, which
+  may still be waiting when the app is frozen.
 - **One at a time, in order:** every queued save shares `scope: { id: 'sync' }`, so they reach the
   server in the order you made them. A show arrives before the lesson that points at it, and two
   quick edits to one joke can't land the wrong way round.
@@ -37,8 +43,18 @@ under fixed keys (`setMutationDefaults`), each spreading the shared `QUEUED` opt
   ink is its own query (`['session-detail', id]`, never garbage-collected) so it stays on the
   phone. `keepOnDevice` in [sessions.ts](../web/src/api/sessions.ts) downloads, one at a time,
   each session whose `updated_at` moved on, but never while saves are waiting (it would fetch
-  the server's older copy). A session listed but not on this device yet opens to "This session
-  isn't on this device yet" rather than an empty editor, whose autosave would wipe its pages.
+  the server's older copy). An open session isn't refetched while its own save waits either, and
+  once saved the copy kept is what was saved, with the server's time
+  ([sessionSaves.ts](../web/src/api/sessionSaves.ts)): stamping that time on whatever copy was
+  there let an older one pass for current. A session listed but not on this device yet opens to
+  "This session isn't on this device yet" rather than an empty editor, whose autosave would wipe
+  its pages.
+- **Sessions the server would refuse:** [sessionLimits.ts](../web/src/api/sessionLimits.ts)
+  splits a stroke longer than 5,000 points into joined pieces, and a session over 10,000 strokes
+  (or a title over 200 characters) is refused before it's sent, with a note on the session page.
+  `api()` refuses any body over the host's 4.5 MB the same way, without uploading it. Before,
+  each autosave sent it again and Couldn't sync kept a full copy of the ink per try; now that list
+  keeps one entry per thing saved.
 - **Retries:** a save that never reached the server is retried (pausing while offline, which
   costs no tries) up to 20 times while the server answers `/health`, so one stuck request can't
   hold up the queue forever. A 5xx, 408 or 429 gets three more tries. A 401 (the sign-in ran out)
@@ -50,10 +66,13 @@ under fixed keys (`setMutationDefaults`), each spreading the shared `QUEUED` opt
   something written offline keeps the time it was written; the server keeps it on create only and
   caps it at now.
 - **Edits on two devices (jokes):** every joke has a `version`. A save sends the version it was
-  edited from (`base_version`, read from the cache when the save is sent, so a chain of autosaves
-  each sees the last answer). If the joke moved on elsewhere and the save would change it, the
-  server answers 409 and the edit goes to Couldn't sync, where **Keep mine** resends it on top
-  of the latest version. Resending the very same edit is never a clash.
+  edited from as `base_version`: the input carries it (`toInput` keeps the version of the joke the
+  editor opened), not the cached list, which a refresh moves on to the other device's edit while
+  the editor still shows the old text. Only this device's own answers move it on (the chain of
+  own versions in [jokeSaves.ts](../web/src/api/jokeSaves.ts), kept with the cache), so a run of
+  autosaves never clashes with itself. If the joke moved on elsewhere and the save would change
+  it, the server answers 409 and the edit goes to Couldn't sync, where **Keep mine** resends it
+  without the check. Resending the very same edit is never a clash.
 - **On restart, saved changes replay:** the persister keeps every queued save that hasn't
   finished, including one that was mid-request when the app closed. The saved copy never expires
   (`maxAge: Infinity`; lists still drop a week after last use), and `CACHE_BUSTER` and every
@@ -62,7 +81,18 @@ under fixed keys (`setMutationDefaults`), each spreading the shared `QUEUED` opt
   account is now signed in, the last one's waiting saves are dropped rather than filed under the
   new one. Then `resumeQueued()` restarts them all. Because the mutation function is registered by key rather than held in a closure, a save
   made before a reload can still run, and since saves are idempotent `PUT`s and deletes, sending
-  one twice is harmless.
+  one twice is harmless. This all runs in the background (`afterRestore` in
+  [launch.ts](../web/src/api/launch.ts)): the provider counts the app as loading until its
+  `onSuccess` returns, and while it loads no screen fetches and nothing is written back to the
+  phone. Returning the replay there held the app that way until every waiting save got through,
+  which on a weak signal took minutes and while signed out never ended.
+- **Waiting saves show again at launch:** `showWaitingSaves()` reruns each restored save's
+  `onMutate`, oldest first. A save can reach the phone before its `onMutate` has shown it (that
+  waits a moment for `cancelQueries`), and TanStack doesn't rerun `onMutate` for a restored save,
+  so a joke editor would open on the older text and save it back over the newer one. Each
+  `onMutate` sets or drops an item, so running it twice is harmless. Writing the saved copy on
+  hide or handover also waits a tick so it carries the change, and an open joke editor takes a
+  newer copy of its joke while nothing's been typed (`followNewer` in useAutosaveJoke.ts).
 - **Afterwards, the data refreshes, once:** `onSettled` calls `refreshWhenSynced(...)`, which
   collects the keys and invalidates them only when the last queued save settles. Refetching
   earlier would show the server's older copy and make a waiting change seem to vanish. On
@@ -76,7 +106,8 @@ of spinning.
 [network.ts](../web/src/api/network.ts) drives TanStack's `onlineManager`. It starts from
 `navigator.onLine`, so flight mode counts as offline from the first moment. The phone's flag
 isn't enough on its own, though: one bar in a basement, or wifi with no internet, says online
-while every request fails. So `api()` gives each request 20 seconds, and a request that never
+while every request fails. So `api()` gives each request 20 seconds (a big upload a second more
+per 50 KB, up to two minutes, so a session full of handwriting gets through), and a request that never
 reaches the server (`TypeError` or a timeout) calls `lostConnection()`: we count as offline and
 ask `/health` every 10 seconds, on the `online` event and when the app comes back to the front,
 until it answers. The sync light and the voice outbox follow the same flag.
@@ -93,10 +124,14 @@ them with everything else on the phone.
 ### One tab at a time
 Two tabs would keep separate queues and overwrite each other's saved copy.
 [oneTab.ts](../web/src/lib/oneTab.ts): the open tab holds a Web Lock. A new tab that finds it
-held posts a claim on a BroadcastChannel; the open tab saves (`persistQueryClientSave`), answers,
-and reloads into "Open in another tab" with **Use it here**. Only then does the new tab restore
-the cache and start the voice outbox (`startOutbox`), so it can't take a recording still going
-in the other tab.
+held posts a claim on a BroadcastChannel; the open tab sends every editor's waiting change
+(`flushAll`), writes the saved copy straight away (`saveNow`: the throttled persister could
+return before writing), answers, and reloads into "Open in another tab" with **Use it here**.
+Only then does the new tab restore the cache and start the voice outbox (`startOutbox`), so it
+can't take a recording still going in the other tab. From the answer on, the old tab is handed
+over (`handedOver()`): it writes nothing more to the saved copy and sends nothing, so a late write
+can't land over the new tab's. A tab the browser froze can't answer; the new tab takes the lock
+after 2 seconds, and when the frozen one wakes it finds the lock gone and steps aside the same way.
 
 **Several tabs** (account menu, or **Keep both open** on that screen) turns this off for one
 browser (`localStorage`). Each tab then holds the lock shared, only so a new tab knows it isn't
@@ -202,7 +237,9 @@ flowchart LR
 - **Precache:** all JS, CSS, HTML, SVG, PNG and WOFF2. Page URLs fall back to `index.html`;
   `/api`, `/auth` and `/health` always go to the network.
 - **`registerType: 'prompt'`:** a new version installs in the background and waits, so the open
-  app never changes under you. The update banner switches to it with one tap.
+  app never changes under you. The update banner switches to it with one tap. It checks for one
+  every hour and each time the app comes back to the front (at most once a minute): an installed
+  app on a phone is mostly resumed rather than opened, and the phone pauses the hourly timer.
 
 
 ## When the app crashes
@@ -216,5 +253,7 @@ flowchart LR
   the app repairs itself once, showing "Updating JokeBox…": it removes the service worker and its
   cached files, drops the saved lists (keeping saves waiting to sync), and reloads from the
   network. It does this at most once a minute, so a crash that a repair doesn't fix shows the error
-  screen instead of looping. Offline it only reloads, since without the cached files there'd be no
-  app to open.
+  screen instead of looping. Without signal it only reloads, since without the cached files
+  there'd be no app to open; and "signal" means `/health` answered, not the phone's own flag,
+  which says online on one bar. **Reload a fresh copy** checks the same way and, if the server
+  can't be reached, keeps this copy and says so.

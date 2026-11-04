@@ -16,6 +16,8 @@ import { freshCopy, repairIfStale } from '../lib/recover'
 interface State {
   error: Error | null
   repairing: boolean
+  /** The fresh-copy button: checking the server answers first, or it didn't. */
+  fresh?: 'checking' | 'offline'
 }
 
 const button = 'h-11 rounded-lg px-5 font-semibold'
@@ -32,6 +34,11 @@ export class CrashScreen extends Component<{ children: ReactNode }, State> {
     if (repairIfStale(error)) this.setState({ repairing: true })
   }
 
+  private freshCopy = () => {
+    this.setState({ fresh: 'checking' })
+    void freshCopy({ onlyIfReachable: true }).then((result) => { if (result === 'offline') this.setState({ fresh: 'offline' }) })
+  }
+
   private copy = () => {
     const { error } = this.state
     const details = [`${error?.name}: ${error?.message}`, error?.stack, `At ${location.pathname}, ${new Date().toISOString()}`, navigator.userAgent].join('\n\n')
@@ -39,7 +46,7 @@ export class CrashScreen extends Component<{ children: ReactNode }, State> {
   }
 
   render() {
-    const { error, repairing } = this.state
+    const { error, repairing, fresh } = this.state
     if (!error) return this.props.children
     if (repairing) {
       return <div className="pt-safe flex min-h-dvh items-center justify-center px-6 text-dim">Updating JokeBox…</div>
@@ -49,8 +56,14 @@ export class CrashScreen extends Component<{ children: ReactNode }, State> {
         <p className="headline text-4xl">Something broke</p>
         <p className="text-dim">JokeBox hit an error and stopped. Saves waiting on this phone are kept, and Reload usually fixes it.</p>
         <button type="button" onClick={() => location.reload()} className={`${button} bg-tape text-tape-ink hover:bg-[#f5da77]`}>Reload</button>
-        <button type="button" onClick={() => void freshCopy()} className={`${button} bg-ink-3 text-paper hover:bg-ink-4`}>Reload a fresh copy</button>
-        <p className="text-sm text-faint">A fresh copy downloads the app again and reloads your lists from the server. Saves waiting to sync stay. Needs a signal.</p>
+        <button type="button" onClick={this.freshCopy} disabled={fresh === 'checking'} className={`${button} bg-ink-3 text-paper hover:bg-ink-4`}>
+          {fresh === 'checking' ? 'Checking the connection…' : 'Reload a fresh copy'}
+        </button>
+        <p className="text-sm text-faint" role={fresh === 'offline' ? 'alert' : undefined}>
+          {fresh === 'offline'
+            ? "JokeBox can't be reached right now, so a fresh copy can't download and this one is kept. Try again with signal; Reload works offline."
+            : 'A fresh copy downloads the app again and reloads your lists from the server. Saves waiting to sync stay. Needs a signal.'}
+        </p>
         <details className="rounded-lg bg-ink-2 px-4 py-3 text-sm ring-1 ring-rule">
           <summary className="cursor-pointer text-dim">What went wrong</summary>
           <p className="mt-2 break-words text-paper/85">{error.name}: {error.message}</p>

@@ -19,6 +19,21 @@ const forever = () => new Promise<void>(() => {})
 
 type Message = { type: 'claim'; id: string } | { type: 'released'; to: string }
 
+/*
+ * Handed over: another tab took over. From then on this one must not write the saved copy or send
+ * saves, or its older copy would go over the new tab's (queryClient.ts and client.ts check). A
+ * tab the browser froze can't answer a claim; when it wakes it finds its lock taken and stops.
+ */
+let handed = false
+let request = 0
+export const handedOver = () => handed
+
+function goAside() {
+  handed = true
+  try { sessionStorage.setItem(ASIDE, '1') } catch { /* it'll just take over again on reload */ }
+  location.reload()
+}
+
 /** This tab stepped aside for another one. */
 export function isAside(): boolean {
   try { return sessionStorage.getItem(ASIDE) === '1' } catch { return false }
@@ -69,20 +84,30 @@ export async function claim(): Promise<boolean> {
       setTimeout(done, 2_000) // the other tab is frozen or gone: go ahead
     })
   }
-  // Stealing also ends this tab's own shared hold when going back to one tab; that's fine.
-  void navigator.locks.request(LOCK, { steal: true }, forever).catch(() => {})
+  // Stealing also ends this tab's own shared hold when going back to one tab; that's fine. Losing
+  // this hold later means another tab stole it without an answer (this one was frozen): stop.
+  const mine = ++request
+  void navigator.locks.request(LOCK, { steal: true }, forever).catch(async () => {
+    if (mine !== request || handed) return
+    // Only if another tab holds it now: the browser letting go of it alone isn't a takeover.
+    const { held = [] } = await navigator.locks.query()
+    if (held.some((l) => l.name === LOCK)) goAside()
+  })
   return true
 }
 
-/** In the open tab: when a new tab claims, save everything, answer it, and step aside. */
+/**
+ * In the open tab: when a new tab claims, save everything, answer it, and step aside. `save`
+ * must have written everything to the phone by the time it resolves: the new tab reads it next.
+ */
 export function stepAsideWhenClaimed(save: () => Promise<void>) {
   channel?.addEventListener('message', (e: MessageEvent<Message>) => {
     if (e.data.type !== 'claim') return
     const { id } = e.data
     void save().catch(() => {}).then(() => {
+      handed = true // before answering: nothing from here may land over the new tab's copy
       channel.postMessage({ type: 'released', to: id } satisfies Message)
-      try { sessionStorage.setItem(ASIDE, '1') } catch { /* it'll just take over again on reload */ }
-      location.reload()
+      goAside()
     })
   })
 }
