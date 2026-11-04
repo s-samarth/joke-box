@@ -213,9 +213,9 @@ flowchart LR
 | `api` | `ruff check`, `ruff format --check`, `mypy app`; Alembic upgrade → downgrade → upgrade on Postgres 16; `pytest` |
 | `web` | `tsc -b`, `oxlint --deny-warnings`, `vitest run`, `vite build` |
 
-[neon-preview-cleanup.yml](../.github/workflows/neon-preview-cleanup.yml) deletes a PR's Neon
-preview branch when the PR closes, and sweeps up stale ones weekly. Each preview deployment gets
-its own `preview/<git branch>` database branch, and Neon's free plan allows only 10 per project.
+[backup.yml](../.github/workflows/backup.yml) runs the nightly encrypted backup
+([backups.md](backups.md)), and [move-database.yml](../.github/workflows/move-database.yml) the
+one-off copy for a move to another region ([move-region.md](move-region.md)).
 
 ## Decisions and trade-offs
 
