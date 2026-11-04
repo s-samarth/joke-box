@@ -38,7 +38,7 @@ export function ShowsPage() {
   const [sort, setSort] = useState<Sort>({ key: 'date', desc: true })
   const [limit, setLimit] = useState(PAGE_SIZE)
   const [editingRow, setEditing] = useState<PerformanceLog | 'new' | null>(null)
-  // ?log=1 (the + button, or a link) opens a blank log sheet; Stage adds &set=<id>&time=<seconds>.
+  // ?log=1 (the + button, or a link) opens a blank log sheet.
   const editing = editingRow ?? (params.get('log') ? 'new' : null)
   const [viewing, setViewing] = useState<PerformanceLog | null>(null)
   const [venuesOpen, setVenuesOpen] = useState(false)
@@ -57,7 +57,7 @@ export function ShowsPage() {
   const sortBy = (key: SortKey) => setSort((s) => (s.key === key ? { key, desc: !s.desc } : { key, desc: key !== 'venue' }))
   const closeEditor = () => {
     setEditing(null)
-    if (params.get('log')) setParams((p) => { p.delete('log'); p.delete('set'); p.delete('time'); return p }, { replace: true })
+    if (params.get('log')) setParams((p) => { p.delete('log'); return p }, { replace: true })
   }
   const changeView = (v: View) => setParams((p) => { if (v === 'list') p.delete('view'); else p.set('view', v); return p }, { replace: true })
   const exportCsv = () =>
@@ -94,7 +94,7 @@ export function ShowsPage() {
 
       {venuesOpen && <VenuesSheet onClose={() => setVenuesOpen(false)} />}
       <ShowFilters open={moreOpen} onClose={() => setMoreOpen(false)} value={filters} onChange={changeFilters} />
-      {editing && <LogShowSheet log={editing === 'new' ? undefined : editing} prefill={{ setId: params.get('set') ?? undefined, seconds: Number(params.get('time')) || undefined }} onClose={closeEditor} />}
+      {editing && <LogShowSheet log={editing === 'new' ? undefined : editing} onClose={closeEditor} />}
       {viewing && <ShowDetail log={viewing} topics={topicNames(viewing.topic_ids)} onClose={() => setViewing(null)} onEdit={() => { setEditing(viewing); setViewing(null) }} />}
     </div>
   )

@@ -138,3 +138,5 @@ class PerformanceJoke(IdMixin, Base):
     )
     position: Mapped[int] = mapped_column(Integer)
     result: Mapped[str | None] = mapped_column(String(10))
+    # A comment on how this joke went on the night.
+    note: Mapped[str] = mapped_column(Text, default="", server_default="")

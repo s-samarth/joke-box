@@ -7,6 +7,8 @@ export type ShowResult = 'bombed' | 'ok' | 'killed'
 export interface LogJoke {
   joke_id: string
   result: ShowResult | null
+  /** A comment on how it went. Left out by app versions older than comments. */
+  note?: string
 }
 
 export interface PerformanceLog {

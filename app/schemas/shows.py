@@ -69,11 +69,14 @@ Result = Literal["bombed", "ok", "killed"] | None
 class LogJokeIn(BaseModel):
     joke_id: uuid.UUID
     result: Result = None
+    # None keeps the comment there is: a save from an app older than comments sends none.
+    note: str | None = Field(default=None, max_length=2000)
 
 
 class LogJokeOut(BaseModel):
     joke_id: uuid.UUID
     result: Result
+    note: str
 
 
 class LogIn(BaseModel):

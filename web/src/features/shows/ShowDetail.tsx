@@ -1,5 +1,5 @@
-/** One show, read back: with Edit and Delete, its LPM if counted, the jokes done and how each
- * went, and what you learned there. */
+/** One show, read back: with Edit and Delete, its LPM if counted, how particular jokes went
+ * (with any comment), and what you learned there. */
 import { GraduationCap, Plus } from 'lucide-react'
 import { Link } from 'react-router'
 import { useCraftNotes } from '../../api/craft'
@@ -53,12 +53,15 @@ export function ShowDetail({ log, topics, onClose, onEdit }: { log: PerformanceL
       </dl>
       {done.length > 0 && (
         <div className="mt-5">
-          <h3 className="text-sm text-dim">Jokes you did</h3>
-          <ol className="mt-1.5 space-y-1">
-            {done.map((d, n) => (
-              <li key={d.joke_id} className="flex items-baseline justify-between gap-3">
-                <Link to={`/jokes/${d.joke_id}`} className="min-w-0 truncate hover:text-tape"><span className="text-faint">{n + 1}.</span> {setupOf.get(d.joke_id)}</Link>
-                <span className={`shrink-0 text-sm ${RESULT_STYLE[d.result ?? 'none']}`}>{RESULT_LABEL[d.result ?? 'none']}</span>
+          <h3 className="text-sm text-dim">How particular jokes went</h3>
+          <ol className="mt-1.5 space-y-1.5">
+            {done.map((d) => (
+              <li key={d.joke_id}>
+                <div className="flex items-baseline justify-between gap-3">
+                  <Link to={`/jokes/${d.joke_id}`} className="min-w-0 truncate hover:text-tape">{setupOf.get(d.joke_id)}</Link>
+                  <span className={`shrink-0 text-sm ${RESULT_STYLE[d.result ?? 'none']}`}>{RESULT_LABEL[d.result ?? 'none']}</span>
+                </div>
+                {d.note && <p className="text-sm text-dim">{d.note}</p>}
               </li>
             ))}
           </ol>

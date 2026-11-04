@@ -32,7 +32,7 @@ own data. Today that is one comedian, but the system works for more than one.
 |---|---|
 | Ideas spread across Notes, WhatsApp-to-self, voice memos and paper | One app: jokes, premises, observations, voice notes and brainstorms, and one search across all of it |
 | Setlists on paper; timing guessed | Sets are timed against the slot, with the open-mic "light" built in |
-| No record of how jokes did on stage | Shows are logged in under a minute, with a bombed / ok / killed tap for each joke you did; totals follow any filter; Timeline and Insights show trends and what's working |
+| No record of how jokes did on stage | Shows are logged in under a minute, and any joke worth remembering marked bombed / ok / killed with a comment; totals follow any filter; Timeline and Insights show trends and what's working |
 | The old Bit Vault (Firebase) broke on phones, served stale builds, and lost data on rename | Built again with ids, transactions, a proper offline queue and an update prompt |
 
 ## Product principles
@@ -73,7 +73,7 @@ own data. Today that is one comedian, but the system works for more than one.
 | **Sets** | Jokes as masking-tape strips: drag to order, time against the slot, opener and closer marked | `/sets`, `/sets/:id` |
 | **Rehearse** | The whole set as one scrolling script, every joke in full, with the clock and the open-mic light pinned on top. Leaving after the clock has run offers to log the show | `/sets/:id/stage` |
 | **Print** | A set on paper with each joke's running time | `/sets/:id/print` |
-| **Shows** | Log a show, with each joke you did marked bombed, ok or killed; totals, filters, a sortable table, CSV export; Timeline and Insights views | `/shows` |
+| **Shows** | Log a show, optionally marking particular jokes bombed, ok or killed with a comment; totals, filters, a sortable table, CSV export; Timeline and Insights views | `/shows` |
 | **Craft** | What you know about doing stand-up: your path as a staircase, techniques to write with, and your own areas as folders of note cards | `/craft`, `/craft/area/:id`, `/craft/:id` |
 | **Watchlist** | Routines you add to study, scored and ticked off. Long notes open with More. A category gets a **Read the guide** link when an analysis has the same name as the category | `/watchlist` |
 | **Analysis** | Your write-ups of sets and online jokes, optionally tied to a routine. A saved one opens formatted like a craft note; Edit turns it back into the form | `/analysis` |
@@ -101,7 +101,7 @@ The vocabulary is a comic's, not a database's. Keep to it in the code and in the
 | **Clean rating** | Clean, Mild or Dirty. |
 | **Set** | An ordered list of jokes for one show, with a slot length. The first is the **opener**, the last the **closer**. |
 | **Slot** | The time you've been given. The **light** is the open-mic signal: amber with a minute to go, red once you're over. |
-| **Show** | One performance, logged afterwards: venue, date, time on stage, crowd size, 1–5 stars, topics, remarks, and the jokes you did with how each went (bombed, ok, killed). |
+| **Show** | One performance, logged afterwards: venue, date, time on stage, crowd size, 1–5 stars, topics, remarks, and optionally particular jokes with how each went (bombed, ok, killed) and a comment. |
 | **Rewrite** | A timed session reworking one joke. Each save is a version. |
 | **Brainstorm session** | A free writing session not tied to one joke. |
 | **Observation** | Something you noticed, before it's a joke. |

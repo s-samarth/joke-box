@@ -50,9 +50,8 @@ column: its number (and Opener, Closer or Optional), runtime and "by m:ss", then
 punchline in tape yellow and each tag line. The clock turns amber in
 the last minute and red when you're over. The screen wake lock keeps the phone awake. The cap icon
 opens **Before you go on**: your On stage notes, like crowd work and hecklers, with checklists to
-tick through. Leaving with 30 seconds or more on the clock asks **Log this show?**: **Log this
-show** opens Log a show with this set ticked and the clock's time filled in; **Just leave** goes
-back to the set; closing the sheet stays on Stage.
+tick through. Leaving (the ✕) goes straight back to the set: rehearsing
+doesn't mean you did a show.
 
 <img src="screenshots/desktop-stage.webp" alt="Rehearsing a set">
 
@@ -109,19 +108,20 @@ each with its setup in marker, the punchline, its runtime and "by m:ss" (the run
     every mark shows a readout on hover or keyboard focus.
 - **Table:** Date, Venue, On stage, Crowd, Rating, Topics and Remarks. Click a heading to sort and
   click again to flip the order. On a phone the table scrolls sideways with the date pinned.
-- **Log a show** (a sheet, also opened by `?log=1`; Stage adds `&set=<id>&time=<seconds>` to start with that set ticked and that time): venue, stars and length up top (separate minutes and seconds boxes, so a 10 minute spot is just "10"). Optional: the
+- **Log a show** (a sheet, also opened by `?log=1`): venue, stars and length up top (separate minutes and seconds boxes, so a 10 minute spot is just "10"). Optional: the
   sets you did (none, one or more: their topics are ticked, time on stage is left to you,
   [setPick.ts](../web/src/features/shows/setPick.ts)), date and time, crowd and remarks.
-  **Jokes you did** lists the ticked sets' jokes in running order, each with **Bombed**, **OK** and
-  **Killed** (tap one, tap again to clear; unrated by default) and an ✕ to take it off; **Add a joke
-  you did** adds any other. Unticking a set takes off its jokes you haven't rated
+  **How particular jokes went** folds out, and ticking a set adds nothing to it: search for a joke
+  you did and the best three matches come up (every word must appear in the joke; setup matches
+  first). Tap one to add it, then **Bombed**, **OK** or **Killed** (tap again to clear) and a
+  comment, or ✕ to take it off. Enter adds the top match
   ([ShowJokesField.tsx](../web/src/features/shows/ShowJokesField.tsx),
   [showJokes.ts](../web/src/features/shows/showJokes.ts)). Editing a show edits its jokes too.
   **Count laughs for LPM** folds out five counters, one per laugh score from 1 (a few giggles) to 5
   (laughs and applause), with the LPM worked out as you count ([lpm.ts](../web/src/features/shows/lpm.ts),
   [LaughTally.tsx](../web/src/features/shows/LaughTally.tsx)). **What did you learn?** saves a craft
   note linked to the show, in the first area that shows on Stage.
-- **A show's detail** shows its LPM, the jokes you did with how each went (each opens the joke),
+- **A show's detail** shows its LPM, how particular jokes went with their comments (each opens the joke),
   what you learned there, and **Add a lesson**.
 - **A joke's page** says how it has gone at the shows it was logged at: "Done at 3 shows: 2 killed,
   1 bombed. Last done 4 Nov 2026." Worked out in the browser from the shows, so it works offline;
@@ -132,7 +132,7 @@ each with its setup in marker, the punchline, its runtime and "by m:ss" (the run
 - ⋯ → **Export as CSV**.
 
 <img src="screenshots/desktop-shows.webp" alt="Shows">
-<img src="screenshots/desktop-log-show.webp" alt="Logging a show, with how each joke went">
+<img src="screenshots/desktop-log-show.webp" alt="Logging a show, with how one joke went and a comment">
 <img src="screenshots/phone-shows.webp" width="230" alt="Shows on a phone">
 
 ## Craft: `/craft`, `/craft/area/:areaId` and `/craft/:noteId`
