@@ -15,11 +15,36 @@ export function toInput(b: Joke): JokeInput {
   return input
 }
 
+/** The same words and settings, whatever version each came from. */
+function sameFields(a: JokeInput, b: JokeInput): boolean {
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)])
+  keys.delete('version')
+  return [...keys].every((k) => JSON.stringify(a[k as keyof JokeInput]) === JSON.stringify(b[k as keyof JokeInput]))
+}
+
+/**
+ * The draft once a newer copy of the joke arrives: that copy, if nothing's been typed since the
+ * last one was shown (`typing`: a change still waiting to be sent); otherwise the draft as it is.
+ */
+export function followNewer(draft: JokeInput, shown: JokeInput, newer: JokeInput, typing: boolean): JokeInput {
+  return !typing && sameFields(draft, shown) ? newer : draft
+}
+
 export function useAutosaveJoke(joke: Joke) {
   const [draft, setDraft] = useState<JokeInput>(() => toInput(joke))
   const save = useSaveJoke()
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const pending = useRef<JokeInput | null>(null)
+  // The joke as last shown. A newer copy (a waiting save shown, a refresh, another device's edit)
+  // replaces the draft while nothing's been typed since: an editor left on older text would
+  // otherwise save it back over the newer one.
+  const shown = useRef(joke)
+  useEffect(() => {
+    if (joke === shown.current) return
+    const before = toInput(shown.current)
+    shown.current = joke
+    setDraft((d) => followNewer(d, before, toInput(joke), pending.current !== null))
+  }, [joke])
   const mutate = useRef(save.mutate)
   mutate.current = save.mutate
 

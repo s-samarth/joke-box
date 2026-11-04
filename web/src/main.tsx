@@ -28,6 +28,9 @@ import './app.css'
 
 const root = createRoot(document.getElementById('root')!)
 
+/** Write the saved copy once the changes just sent have shown in the lists (a moment after). */
+const shownThenSaved = () => new Promise((wait) => setTimeout(wait)).then(saveNow)
+
 // Vite reports a file it couldn't load (an old copy of the app after a release) here, before
 // anything crashes: repair once instead of letting it fail.
 window.addEventListener('vite:preloadError', (e) => {
@@ -41,8 +44,8 @@ async function boot() {
   const alone = await claim()
   // Handing over to a new tab, or the phone putting the app away: send every editor's waiting
   // change and write the saved copy now, not after the persister's throttle.
-  stepAsideWhenClaimed(() => { flushAll(); return saveNow() })
-  writeWhenHidden(saveNow)
+  stepAsideWhenClaimed(() => { flushAll(); return shownThenSaved() })
+  writeWhenHidden(shownThenSaved)
   // Ask the phone not to clear our storage, where saves wait to sync.
   void keepStorage()
   void startOutbox(alone)

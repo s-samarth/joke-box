@@ -86,6 +86,13 @@ under fixed keys (`setMutationDefaults`), each spreading the shared `QUEUED` opt
   `onSuccess` returns, and while it loads no screen fetches and nothing is written back to the
   phone. Returning the replay there held the app that way until every waiting save got through,
   which on a weak signal took minutes and while signed out never ended.
+- **Waiting saves show again at launch:** `showWaitingSaves()` reruns each restored save's
+  `onMutate`, oldest first. A save can reach the phone before its `onMutate` has shown it (that
+  waits a moment for `cancelQueries`), and TanStack doesn't rerun `onMutate` for a restored save,
+  so a joke editor would open on the older text and save it back over the newer one. Each
+  `onMutate` sets or drops an item, so running it twice is harmless. Writing the saved copy on
+  hide or handover also waits a tick so it carries the change, and an open joke editor takes a
+  newer copy of its joke while nothing's been typed (`followNewer` in useAutosaveJoke.ts).
 - **Afterwards, the data refreshes, once:** `onSettled` calls `refreshWhenSynced(...)`, which
   collects the keys and invalidates them only when the last queued save settles. Refetching
   earlier would show the server's older copy and make a waiting change seem to vanish. On
