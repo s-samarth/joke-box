@@ -3,7 +3,8 @@
 Claude reads these results, and the comedy-writer skill is written against their field names.
 So a change to a joke, premise, set or any other model that breaks a tool, or quietly changes
 what it returns, must fail here first. If you change a tool's output on purpose, update the
-expected fields below and the tool table in docs/api.md together. Everything here is made up.
+expected fields (here and in tests/connector_fields.py) and the tool table in docs/api.md
+together. Everything here is made up.
 """
 
 import json
@@ -20,44 +21,8 @@ from app.models import User
 from app.seed import reseed
 from tests.conftest import random_topic_id, signed_in
 from tests.connector_auth import connect, content, items, result, rpc
+from tests.connector_fields import BRIEF, DETAIL, SET
 from tests.test_craft import note_in
-
-BRIEF = {
-    "id",
-    "setup",
-    "punchline",
-    "topic",
-    "subtopic",
-    "premise_id",
-    "status",
-    "strength",
-    "seconds",
-    "types",
-}
-DETAIL = BRIEF | {
-    "tag_lines",
-    "hashtags",
-    "notes",
-    "premise",
-    "clean_rating",
-    "language",
-    "follows",
-    "followed_by",
-    "in_sets",
-    "rewrites",
-    "shows",
-}
-SET = {
-    "id",
-    "name",
-    "tags",
-    "rating",
-    "venue",
-    "target_seconds",
-    "runtime_seconds",
-    "jokes",
-    "updated",
-}
 
 
 @pytest.fixture
