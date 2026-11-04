@@ -33,13 +33,13 @@ jobs:
     # A throwaway Postgres on the runner, only for the restore check. Deleted with the runner.
     services:
       scratch:
-        image: postgres:17
+        image: postgres:18
         env:
           POSTGRES_PASSWORD: scratch
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 12
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 12
     steps:
       - name: Check the three secrets are set
         env:
@@ -68,7 +68,7 @@ jobs:
 
       - uses: actions/checkout@v5
 
-      - name: Install pg_dump 17 and age
+      - name: Install pg_dump 18 and age
         run: |
           # Postgres's own apt repository, for a pg_dump at least as new as Neon's server.
           sudo install -d /usr/share/postgresql-common/pgdg
@@ -77,8 +77,8 @@ jobs:
           echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" \
             | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
           sudo apt-get update -qq
-          sudo apt-get install -y -qq postgresql-client-17 age
-          /usr/lib/postgresql/17/bin/pg_dump --version
+          sudo apt-get install -y -qq postgresql-client-18 age
+          /usr/lib/postgresql/18/bin/pg_dump --version
           age --version
 
       - name: Dump the database
@@ -105,10 +105,10 @@ jobs:
           with open(os.path.join(os.environ["RUNNER_TEMP"], "db-url"), "w") as out:
               out.write(direct)
           '
-          /usr/lib/postgresql/17/bin/pg_dump --format=custom --no-owner --no-privileges \
+          /usr/lib/postgresql/18/bin/pg_dump --format=custom --no-owner --no-privileges \
             --file="$BACKUP_DIR/jokebox.dump" --dbname="$(< "$RUNNER_TEMP/db-url")"
           # A dump that pg_restore can't read is no backup.
-          tables=$(/usr/lib/postgresql/17/bin/pg_restore --list "$BACKUP_DIR/jokebox.dump" | grep -c "TABLE DATA" || true)
+          tables=$(/usr/lib/postgresql/18/bin/pg_restore --list "$BACKUP_DIR/jokebox.dump" | grep -c "TABLE DATA" || true)
           if [ "$tables" -lt 10 ]; then
             echo "::error::The dump holds only $tables tables. Nothing was backed up."
             exit 1
@@ -124,7 +124,7 @@ jobs:
         env:
           SCRATCH_URL: postgresql://postgres:scratch@localhost:5432/postgres
         run: |
-          /usr/lib/postgresql/17/bin/pg_restore --exit-on-error --no-owner --no-privileges \
+          /usr/lib/postgresql/18/bin/pg_restore --exit-on-error --no-owner --no-privileges \
             --dbname="$SCRATCH_URL" "$BACKUP_DIR/jokebox.dump"
           uv run --no-sync python scripts/backup_verify.py "$RUNNER_TEMP/db-url" "$SCRATCH_URL"
           rm -f "$RUNNER_TEMP/db-url"

@@ -104,7 +104,7 @@ turns it back on.
 
 ## Restore
 
-You need `age` and a Postgres 17 client (`brew install age postgresql@17`).
+You need `age` and a Postgres 18 client (`brew install age postgresql@18`).
 
 1. **Download and unlock.** Open the run, download the artifact (GitHub wraps it in a `.zip`),
    then:
@@ -150,8 +150,10 @@ sign-ins: connect Claude to JokeBox again.
   set the cron in `backup.yml` to `37 21 * * 0`.
 - **Vercel Blob.** Each run lists the store (one call per 1,000 objects) and downloads every
   recording once. That counts towards Blob's data transfer: about 25 MB a night now.
-- **Postgres versions.** `pg_dump` 17 reads Postgres 17 and older. If Neon moves the project to
-  18, change `postgresql-client-17` and the `/usr/lib/postgresql/17` paths in `backup.yml`.
+- **Postgres versions.** The database runs Postgres 18, and `pg_dump` 18 reads 18 and older. If
+  Neon moves the project to 19, the run fails with "server version mismatch": change
+  `postgresql-client-18`, the `/usr/lib/postgresql/18` paths and the `postgres:18` image in
+  `backup.yml`.
 - **Retention.** GitHub deletes each artifact after 30 days, or 90 for the monthly one, the
   most it allows a public repository. For anything older, download a monthly backup now and then
   and put it somewhere else, such as Google Drive. It's encrypted, so that's safe. Keep the key
