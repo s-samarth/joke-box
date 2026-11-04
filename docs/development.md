@@ -111,7 +111,13 @@ uv run alembic downgrade -1 && uv run alembic upgrade head   # prove downgrade w
 
 Production is https://jokebox.samarthsaraswat.com. **Merging to `main` deploys.** It runs in
 Singapore (`sin1`, set in `vercel.json`), next to the Neon database, which is connected to
-Production only: preview builds have no database, so they can't reach real data.
+Production only, so other branches don't deploy at all (`git.deploymentEnabled` in `vercel.json`):
+a preview would have no database to start with, and each deployment keeps a ~38 MB copy of the
+server against the free plan's 10 GB Functions Storage. Try a change locally; CI checks the PR.
+
+**Old deployments add up too.** Vercel keeps every deployment, and on the free plan you can only
+roll back to the previous one. If Usage → Functions Storage climbs toward 10 GB, delete old
+deployments in Project → Deployments, keeping the newest three production ones.
 
 First-time setup:
 
@@ -127,7 +133,7 @@ First-time setup:
 
    | Name | Value |
    |---|---|
-   | `APP_ENV` | `production` (`preview` for preview deployments) |
+   | `APP_ENV` | `production` |
    | `SESSION_SECRET` | `python3 -c "import secrets; print(secrets.token_urlsafe(48))"` |
    | `ALLOWED_EMAILS` | Google accounts allowed in, comma-separated |
    | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | From step 2 |
@@ -143,7 +149,7 @@ First-time setup:
    provider.
 
 Google only accepts the redirect URIs you registered, so sign in on production (or on a
-registered fixed preview domain).
+registered fixed domain).
 
 ## Operations runbook
 

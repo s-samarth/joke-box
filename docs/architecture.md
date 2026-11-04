@@ -41,7 +41,7 @@ CORS, the session is a plain HttpOnly cookie, and CSRF protection is one header 
 |---|---|---|
 | API | **FastAPI** on Python 3.12, Pydantic v2 | Typed request and response schemas; the owner is strongest in Python |
 | ORM and migrations | **SQLAlchemy 2.0** and **Alembic** | Explicit transactions for many-row changes; append-only migrations checked by CI |
-| Database | **Postgres** on Neon (production and CI), **SQLite** locally | Zero-setup local development; Neon gives each preview deployment its own branch database |
+| Database | **Postgres** on Neon (production and CI), **SQLite** locally | Zero-setup local development; only Production has a database |
 | Files | **Vercel Blob** (private) | Voice recordings, without managing a bucket or keys |
 | Auth | **Authlib** (Google OIDC with PKCE) and Starlette's signed session cookie | No passwords to store; an allowlist decides who gets in |
 | Frontend | **React 19**, **TypeScript** (strict), **Vite 8**, **React Router 8** | |
@@ -181,7 +181,6 @@ in [frontend.md](frontend.md).
 ```mermaid
 flowchart LR
   PR[Pull request] --> CI{GitHub Actions<br/>migrations · api · web}
-  PR --> Prev[Vercel preview<br/>+ Neon branch DB]
   CI -->|green, squash merge| Main[main]
   Main --> Build["Vercel build<br/>scripts/vercel_build.py"]
   Build -->|"npm ci && npm run build"| Dist[web/dist → CDN]
@@ -201,6 +200,11 @@ flowchart LR
   reached the Python function, which has no copy of the built frontend, and answered 404.
   Locally, `app.frontend(..., fallback="index.html")` does the same job. Missing files under
   `/assets/` still 404, so a stale code chunk fails loudly instead of loading HTML.
+- **Only `main` deploys:** `git.deploymentEnabled` in [vercel.json](../vercel.json) turns off
+  every other branch's deployment. A preview has no database and refuses to start, yet each one
+  kept a full copy of the server (about 38 MB of Python libraries) against the free plan's 10 GB
+  Functions Storage. 75 previews in two weeks were 2.9 GB of copies that never served a request.
+  The key is `**`, not `*`: branch names like `feat/premises` have a slash, which `*` doesn't match.
 - **Database connections:** each serverless invocation opens a connection through Neon's pooler
   (`NullPool`, `pool_pre_ping`) instead of keeping its own pool.
 - **Health:** `GET /health` runs `SELECT 1` and returns `{status, env, version}`.
@@ -221,7 +225,8 @@ one-off copy for a move to another region ([move-region.md](move-region.md)).
 
 | Decision | Trade-off |
 |---|---|
-| Serverless on Vercel instead of a VM with Docker | No servers to patch, and previews for free; in exchange, cold starts and a request size cap (hence the 4 MB voice limit) |
+| Serverless on Vercel instead of a VM with Docker | No servers to patch; in exchange, cold starts, a request size cap (hence the 4 MB voice limit), and a copy of the server kept per deployment against the free plan's 10 GB |
+| No preview deployments; PRs are checked by CI only | Previews would need their own database to be any use, and each cost ~38 MB of Functions Storage. Rejected: keeping them with a short retention policy (still a build and a copy per push, for a page that can't load) |
 | SQLite locally, Postgres in deployment | Instant setup; JSON columns and case-insensitive unique indexes are written to work on both, and CI runs migrations on real Postgres |
 | Filtering and totals in the browser | Works offline and feels instant; fine at one comedian's scale (thousands of rows), revisit if lists grow large |
 | Hashtags, tag lines and brainstorm links as JSON lists | Simple and portable. A link to a deleted joke just drops out of view instead of blocking the delete |
