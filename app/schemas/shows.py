@@ -2,6 +2,7 @@
 
 import uuid
 from datetime import date, datetime
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
 
@@ -61,6 +62,20 @@ class SetlistOut(BaseModel):
     updated_at: datetime
 
 
+# How a joke went at a show; None: done, not rated.
+Result = Literal["bombed", "ok", "killed"] | None
+
+
+class LogJokeIn(BaseModel):
+    joke_id: uuid.UUID
+    result: Result = None
+
+
+class LogJokeOut(BaseModel):
+    joke_id: uuid.UUID
+    result: Result
+
+
 class LogIn(BaseModel):
     venue_name: str = Field(default="Unidentified Venue", min_length=1, max_length=160)
     performed_at: datetime
@@ -70,6 +85,9 @@ class LogIn(BaseModel):
     topic_ids: list[uuid.UUID] = Field(default_factory=list)
     notes: str = ""
     laughs: list[int] | None = None
+    # The jokes done, in running order. Left out (as by app versions from before), the show's
+    # jokes stay as they are.
+    jokes: list[LogJokeIn] | None = Field(default=None, max_length=200)
 
     @field_validator("laughs")
     @classmethod
@@ -90,6 +108,7 @@ class LogOut(BaseModel):
     topic_ids: list[uuid.UUID]
     notes: str
     laughs: list[int] | None
+    jokes: list[LogJokeOut]
     created_at: datetime
 
 

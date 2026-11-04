@@ -1,7 +1,9 @@
-/** One show, read back: with Edit and Delete, its LPM if counted, and what you learned there. */
+/** One show, read back: with Edit and Delete, its LPM if counted, the jokes done and how each
+ * went, and what you learned there. */
 import { GraduationCap, Plus } from 'lucide-react'
 import { Link } from 'react-router'
 import { useCraftNotes } from '../../api/craft'
+import { useJokes } from '../../api/library'
 import { useLogActions } from '../../api/shows'
 import type { PerformanceLog } from '../../api/types'
 import { Button } from '../../components/ui/Button'
@@ -12,10 +14,16 @@ import { long } from '../../lib/duration'
 import { formatDateTime } from '../../lib/time'
 import { formatLpm, lpm } from './lpm'
 
+const RESULT_LABEL = { killed: 'Killed', ok: 'OK', bombed: 'Bombed', none: 'Not rated' }
+const RESULT_STYLE = { killed: 'text-tape', ok: 'text-paper', bombed: 'text-light', none: 'text-faint' }
+
 export function ShowDetail({ log, topics, onClose, onEdit }: { log: PerformanceLog; topics: string; onClose: () => void; onEdit: () => void }) {
   const { remove } = useLogActions()
   const { confirm, toast } = useFeedback()
   const { data: craft = [] } = useCraftNotes()
+  const { data: jokes = [] } = useJokes()
+  const setupOf = new Map(jokes.map((j) => [j.id, j.setup]))
+  const done = (log.jokes ?? []).filter((d) => setupOf.has(d.joke_id))
   const lessons = craft.filter((n) => n.performance_log_id === log.id)
   const score = lpm(log.laughs, log.duration_seconds)
   const onDelete = async () => {
@@ -43,6 +51,19 @@ export function ShowDetail({ log, topics, onClose, onEdit }: { log: PerformanceL
           </div>
         ))}
       </dl>
+      {done.length > 0 && (
+        <div className="mt-5">
+          <h3 className="text-sm text-dim">Jokes you did</h3>
+          <ol className="mt-1.5 space-y-1">
+            {done.map((d, n) => (
+              <li key={d.joke_id} className="flex items-baseline justify-between gap-3">
+                <Link to={`/jokes/${d.joke_id}`} className="min-w-0 truncate hover:text-tape"><span className="text-faint">{n + 1}.</span> {setupOf.get(d.joke_id)}</Link>
+                <span className={`shrink-0 text-sm ${RESULT_STYLE[d.result ?? 'none']}`}>{RESULT_LABEL[d.result ?? 'none']}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
       {log.notes && (
         <div className="mt-5">
           <h3 className="text-sm text-dim">Remarks</h3>

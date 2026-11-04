@@ -15,6 +15,7 @@ from app.connector.jokes import (
     topic_name,
     user_jokes,
 )
+from app.connector.show_record import EMPTY, records
 from app.connector.text import clip, matches, page, same_name
 from app.models import (
     CraftArea,
@@ -111,8 +112,13 @@ def get_jokes(db: Session, user: User, ids: list[str]) -> dict[str, Any]:
     jokes = {j.id: j for j in user_jokes(db, user)}
     sets, rewrites = sets_by_joke(db, user), rewrite_counts(db, user)
     wanted = [parse_id(i) for i in ids[:20]]
+    done = records(db, user, (i for i in wanted if i in jokes))
     return {
-        "jokes": [detail(jokes[i], names, jokes, sets, rewrites) for i in wanted if i in jokes],
+        "jokes": [
+            detail(jokes[i], names, jokes, sets, rewrites) | {"shows": done.get(i, EMPTY)}
+            for i in wanted
+            if i in jokes
+        ],
         "not_found": [str(i) for i in wanted if i not in jokes],
     }
 

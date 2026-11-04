@@ -112,20 +112,6 @@ export interface Setlist {
   updated_at: string
 }
 
-export interface PerformanceLog {
-  id: string
-  venue_name: string
-  performed_at: string
-  duration_seconds: number
-  audience_size: number
-  rating: number
-  topic_ids: string[]
-  notes: string
-  /** Laugh tally for LPM: how many laughs scored 1 to 5 points. Null if not counted. */
-  laughs: number[] | null
-  created_at: string
-}
-
 export interface ObservationInput {
   text: string
   topic_id: string | null
@@ -193,4 +179,5 @@ export interface VoiceNote extends VoiceNoteInput {
 }
 
 // Study and craft shapes live in their own file; re-exported so every import stays `./types`.
+export * from './showTypes'
 export * from './studyTypes'

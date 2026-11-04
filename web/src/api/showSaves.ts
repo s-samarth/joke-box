@@ -39,8 +39,11 @@ const createdAt = <T extends { id: string; created_at: string }>(list: readonly 
 queryClient.setMutationDefaults(saveLogKey, {
   ...QUEUED,
   mutationFn: ({ id, input }: SaveLogVars) => api<PerformanceLog>(`/api/logs/${id}`, 'PUT', input),
-  onMutate: ({ id, input }: SaveLogVars) =>
-    upsert<PerformanceLog>(keys.logs, { ...input, id, created_at: createdAt<PerformanceLog>(keys.logs, id) }),
+  // A save that leaves out the jokes (an older app version's, waiting on a phone) keeps them.
+  onMutate: ({ id, input }: SaveLogVars) => {
+    const jokes = input.jokes ?? queryClient.getQueryData<PerformanceLog[]>(keys.logs)?.find((l) => l.id === id)?.jokes
+    return upsert<PerformanceLog>(keys.logs, { ...input, jokes, id, created_at: createdAt<PerformanceLog>(keys.logs, id) })
+  },
   onSettled: () => refreshWhenSynced(keys.logs, keys.venues),
 })
 

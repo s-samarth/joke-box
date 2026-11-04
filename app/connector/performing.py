@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.connector.jokes import brief, load_names, topic_name, user_jokes
 from app.connector.library import parse_id
+from app.connector.show_record import jokes_done
 from app.connector.text import clip, day, ist_date, matches, page
 from app.models import Joke, PerformanceLog, Setlist, User
 
@@ -127,6 +128,7 @@ def list_shows(
     minutes = sum(log.duration_seconds for log in counted) / 60
     shown, total = page(found, limit, offset=offset)
     after = max(0, offset) + len(shown)
+    done = jokes_done(db, user, shown)
     return {
         "total": total,
         "next_offset": after if after < total else None,
@@ -142,6 +144,7 @@ def list_shows(
                 "lpm": lpm(log.laughs, log.duration_seconds),
                 "laughs_by_points": log.laughs,
                 "topics": [topic_name(names, t.id) for t in log.topics],
+                "jokes": done.get(log.id, []),
                 "notes": clip(log.notes, 600),
             }
             for log in shown

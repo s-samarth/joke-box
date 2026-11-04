@@ -15,6 +15,7 @@ from sqlalchemy import (
     String,
     Table,
     Text,
+    UniqueConstraint,
     Uuid,
     false,
     text,
@@ -111,3 +112,29 @@ class PerformanceLog(Trashable, OwnedMixin, Base):
     laughs: Mapped[list[int] | None] = mapped_column(JSON)
     venue: Mapped[Venue | None] = relationship()
     topics: Mapped[list[Topic]] = relationship(secondary=performance_log_topics)
+    jokes: Mapped[list["PerformanceJoke"]] = relationship(
+        cascade="all, delete-orphan", order_by="PerformanceJoke.position"
+    )
+
+
+# How a joke went at a show. None: done, not rated.
+RESULTS = ("bombed", "ok", "killed")
+
+
+class PerformanceJoke(IdMixin, Base):
+    """One joke done at a show, in running order, and how it went. Owned through its show."""
+
+    __tablename__ = "performance_jokes"
+    __table_args__ = (
+        UniqueConstraint("log_id", "joke_id"),
+        CheckConstraint("result IN ('bombed', 'ok', 'killed')", name="result_kind"),
+    )
+
+    log_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("performance_logs.id", ondelete="CASCADE"), index=True
+    )
+    joke_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("jokes.id", ondelete="CASCADE"), index=True
+    )
+    position: Mapped[int] = mapped_column(Integer)
+    result: Mapped[str | None] = mapped_column(String(10))
