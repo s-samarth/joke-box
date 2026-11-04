@@ -1,13 +1,18 @@
-/** All your free brainstorm sessions, newest first, and buttons to start one, plain or with a technique. */
-import { GraduationCap, Plus, Trash2 } from 'lucide-react'
-import { Link, useNavigate } from 'react-router'
+/**
+ * All your free brainstorm sessions, newest first, searchable by title and typed words (?q=;
+ * handwriting can't be searched), and buttons to start one, plain or with a technique.
+ */
+import { GraduationCap, Plus, Search, Trash2 } from 'lucide-react'
+import { Link, useNavigate, useSearchParams } from 'react-router'
 import { newId } from '../../api/client'
 import { useCraftNotes } from '../../api/craft'
 import { useDeleteSession, useSessionList } from '../../api/sessions'
 import { Button, IconButton } from '../../components/ui/Button'
+import { Input } from '../../components/ui/Field'
 import { EmptyState, PageHead, Spinner } from '../../components/ui/pieces'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { clock } from '../../lib/duration'
+import { matchesWords } from '../../lib/search'
 import { formatDate } from '../../lib/time'
 import { sessionName, sessionSummary } from './sessionMeta'
 
@@ -18,6 +23,10 @@ export function BrainstormPage() {
   const { confirm, toast } = useFeedback()
   const { data: notes = [] } = useCraftNotes()
   const techniques = notes.filter((n) => n.behaviour === 'technique')
+  const [params, setParams] = useSearchParams()
+  const query = params.get('q') ?? ''
+  const shown = (sessions ?? []).filter((s) => matchesWords(query, [s.title, s.content]))
+  const setQuery = (q: string) => setParams((p) => { if (q) p.set('q', q); else p.delete('q'); return p }, { replace: true })
   const start = (technique?: string) => navigate(`/brainstorm/${newId()}${technique ? `?technique=${technique}` : ''}`)
 
   const onDelete = async (id: string) => {
@@ -51,8 +60,14 @@ export function BrainstormPage() {
           Start the timer and write whatever comes. Sessions save as you go.
         </EmptyState>
       ) : (
+        <>
+        <div className="relative mb-3">
+          <Search size={18} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-faint" />
+          <Input type="search" aria-label="Search brainstorms" placeholder="Search titles and typed words" className="pl-10" value={query} onChange={(e) => setQuery(e.target.value)} />
+        </div>
+        {shown.length === 0 && <p className="py-6 text-dim">No session matches. Handwriting can't be searched, only titles and typed words.</p>}
         <ul className="divide-y divide-rule border-y border-rule">
-          {sessions.map((s) => (
+          {shown.map((s) => (
             <li key={s.id} className="flex items-center gap-2">
               <Link to={`/brainstorm/${s.id}`} className="min-w-0 flex-1 py-3.5 hover:text-tape">
                 <span className="block truncate text-[17px]">{sessionName(s)}</span>
@@ -64,6 +79,7 @@ export function BrainstormPage() {
             </li>
           ))}
         </ul>
+        </>
       )}
     </div>
   )

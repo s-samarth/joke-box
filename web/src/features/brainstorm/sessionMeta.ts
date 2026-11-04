@@ -15,3 +15,9 @@ export function sessionSummary(s: SessionSummary): string {
     links ? `${links} linked` : null,
   ].filter(Boolean).join(', ')
 }
+
+/** The first idea in some typed writing, to start a joke from: its first paragraph, cut short if long. */
+export function firstIdea(text: string, max = 400): string {
+  const para = text.split(/\n\s*\n/).map((p) => p.trim()).find(Boolean) ?? ''
+  return para.length > max ? `${para.slice(0, max).trimEnd()}…` : para
+}

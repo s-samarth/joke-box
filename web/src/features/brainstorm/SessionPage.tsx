@@ -21,6 +21,7 @@ import { pageCount, removePage, replacePage, strokesOn, undoOn } from './ink'
 import { InkCanvas, type InkTool } from './InkCanvas'
 import { InkToolbar } from './InkToolbar'
 import { type Mode, type Pen, saveFocus, savedFocus, savedMode, savedPen, saveMode, savePen } from './prefs'
+import { firstIdea } from './sessionMeta'
 import { SessionLinks } from './SessionLinks'
 import { TechniquePanel } from './TechniquePanel'
 import { useSessionAutosave } from './useSessionAutosave'
@@ -124,7 +125,7 @@ function Workspace({ id, start, technique }: { id: string; start?: WritingSessio
           <TechniquePanel techniqueId={techniqueId ?? null} onChange={edit(setTechniqueId)} />
         </div>
         <div className="mt-4">
-          <SessionLinks jokeIds={jokeIds} observationIds={observationIds} onChange={(b, o) => { autosave.touch(); setJokeIds(b); setObservationIds(o) }} />
+          <SessionLinks jokeIds={jokeIds} observationIds={observationIds} idea={firstIdea(content) || title.trim()} onChange={(b, o) => { autosave.touch(); setJokeIds(b); setObservationIds(o) }} />
         </div>
         </div>}
         <div>

@@ -22,8 +22,8 @@ visit, so the app opens fast on a phone.
   **Home · Jokes · + · Sets · More**. Sets has the slot because it's what you reach for at a gig.
   The **+** adds whatever the screen holds ([useAddAction.ts](../web/src/layout/useAddAction.ts)):
   a premise on Premises, a show on Shows, an observation on Observations, and a New joke
-  anywhere else. **More** opens a bottom sheet that groups every other screen: **Write**
-  (Premises, Daily joke, Voice notes, Observations, Brainstorm), **Perform** (Shows), **Study**
+  anywhere else. **More** opens a bottom sheet that groups every other screen: **Find**
+  (Search), **Write** (Premises, Daily joke, Voice notes, Observations, Brainstorm), **Perform** (Shows), **Study**
   (Craft, Watchlist, Analysis) and **Deleted** (Trash). While you're on one of those screens,
   the More tab shows as the current one.
 - One list in `nav.ts` feeds both the rail and the bar, so they can't drift apart.
@@ -66,7 +66,8 @@ offline, it uses the cached profile, so the app still opens.
 [TodayPage.tsx](../web/src/features/today/TodayPage.tsx) and its siblings in `features/today/`.
 
 The page is one column, at most 672 px wide. It opens with the daily joke nudge, then today's date
-in IST and the headline **"Got something?"**, followed by these sections from top to bottom:
+in IST and the headline **"Got something?"** with a search button beside it (it opens
+[Search](#search-search)), followed by these sections from top to bottom:
 
 | Section | File | Notes |
 |---|---|---|
@@ -214,13 +215,28 @@ tick through it; the ticks count up and don't change the note, so the next rewri
 
 <img src="screenshots/desktop-rewrite.webp" alt="Rewrite">
 
+## Search: `/search`
+
+[SearchPage.tsx](../web/src/features/search/SearchPage.tsx), [searchIndex.ts](../web/src/features/search/searchIndex.ts),
+[search.ts](../web/src/lib/search.ts).
+
+One box over everything: jokes (setup, punchline, tag lines, notes, hashtags), premises,
+observations, brainstorms (title and typed words; handwriting can't be searched), rewrites, voice
+notes (label and hashtags), sets, shows (venue and notes), Craft notes, analyses and the watchlist.
+Every word has to appear, in any order; `#name` and `name` both find a hashtag. It runs in the
+browser over the lists already on the device, so it works offline, and fetches any list not loaded
+yet. Results come grouped by kind in that order, eight each with **Show all**, and each opens where
+the item lives (an observation or voice note opens its page searched for the same words). The
+query is `?q=` in the URL. It's in the rail under Home, in More under **Find**, and on Home.
+
 ## Observations: `/observations`
 
 [ObservationsPage.tsx](../web/src/features/observations/ObservationsPage.tsx), [ObservationBox.tsx](../web/src/features/observations/ObservationBox.tsx),
 [ObservationList.tsx](../web/src/features/observations/ObservationList.tsx), [ObservationSheet.tsx](../web/src/features/observations/ObservationSheet.tsx),
 [ObservationTopicManager.tsx](../web/src/features/observations/ObservationTopicManager.tsx).
 
-The page has a box with topic chips and **Log it**. Below it are filter tabs (All, each topic with
+The page has a box with topic chips and **Log it**. Below it are a search box (every word has to
+appear; `?q=` in the URL, so Search links straight to the matches) and filter tabs (All, each topic with
 its count, No topic), then the list by month under pinned headings, **Newest first** or **Oldest first** (`?order=old`),
 with the time scrubber down the right edge. Each row's ⋯ menu offers Edit, **Turn into a joke** and
 Delete. A **Topics** button manages the observation topics, which are
@@ -236,11 +252,13 @@ separate from joke topics: drag the grips to reorder them; deleting one keeps it
 [SessionLinks.tsx](../web/src/features/brainstorm/SessionLinks.tsx), [useSessionAutosave.ts](../web/src/features/brainstorm/useSessionAutosave.ts).
 
 - **List:** sessions newest first, each with its date, time spent and a summary (words,
-  handwriting, links), plus **New session**. **Start with a technique** lists your Craft techniques;
+  handwriting, links), plus **New session**. A search box finds sessions by title and typed words
+  (`?q=`); handwriting can't be searched. **Start with a technique** lists your Craft techniques;
   tapping one opens a new session running it.
 - **Session (full screen):** the timer, and a **Type / Handwrite** toggle (both are kept). Below
-  them, the title, **Link jokes or observations** (shown as small cards you can open or unlink), and
-  the page itself.
+  them, the title, **Link jokes or observations** (shown as small cards you can open or unlink),
+  **Turn into a joke** (opens New joke with the session's first typed paragraph, and links the joke
+  to the session as it's saved), and the page itself.
 - **Technique** ([TechniquePanel.tsx](../web/src/features/brainstorm/TechniquePanel.tsx)): a
   session can run one of your Craft techniques. Its prompts (the list under a "Prompts" heading in
   the note) show one at a time with **Next prompt** and **Any prompt**, and **How it works** folds
@@ -307,7 +325,8 @@ separate from joke topics: drag the grips to reorder them; deleting one keeps it
   hashtags, while the recording uploads in the background. **Done** files the note and
   **Delete** throws it away.
 - **Library:** a search box over labels and hashtags, hashtag chips with their counts, and one row
-  per note (play, label, length, date, hashtags, edit, delete), grouped by month under pinned
+  per note (play, label, length, date, hashtags, **Turn into a joke**, edit, delete; Turn into a
+  joke opens New joke with the label and hashtags), grouped by month under pinned
   headings, **Newest first** or **Oldest first** (`?order=old`), with the time scrubber down the
   right edge.
 - **Storage bar:** how much of the 1 GB of free Blob storage the recordings use.

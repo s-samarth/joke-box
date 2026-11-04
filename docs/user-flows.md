@@ -54,6 +54,10 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 2. The New joke sheet opens with the observation as the setup. The observation itself stays.
 3. Write the punchline, file it, and save.
 
+A voice note works the same way: its **Turn into a joke** button starts New joke from its label
+and hashtags. To find an old one first, **Search** (on Home, or in the rail or More) looks
+through everything you've written at once.
+
 ## 4. Rework a joke
 
 1. Open **Jokes**. Search, or filter by topic, type and status, and sort by newest, strongest,
@@ -83,7 +87,9 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
    thicknesses, undo, and up to 8 pages, each two screens wide: drag the bar at the bottom of the
    screen (or pan with a finger) for the right half, or pinch out to see the whole page. The
    **Full screen** button at the end of the toolbar leaves just the tools and the page.
-4. Tap **Link jokes or observations** to attach whatever the session touches.
+4. Tap **Link jokes or observations** to attach whatever the session touches, or **Turn into a
+   joke** to start one from the session's first typed paragraph: it's linked to the session as
+   it's saved.
 5. Leave whenever you like: the session saves itself.
 
 ## 6. Build a set for tonight
@@ -206,7 +212,7 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
    Claude opens JokeBox's sign-in: sign in with Google if asked, then **Allow**. It works in
    Claude on your phone afterwards too.
 3. In a chat, talk about an observation, a premise, a setup, a joke or a set. Claude looks up
-   what it needs (your premises and their jokes, a set's running order, your shows, your Craft
-   notes) and quotes the notes it applies. It only reads: you write and edit in JokeBox.
+   what it needs (your premises and their jokes, a set's running order, your shows, your voice
+   notes' labels, your Craft notes) and quotes the notes it applies. It only reads: you write and edit in JokeBox.
 4. **Claude connector** in the account menu lists what's connected and when it was last used.
    **Disconnect** stops it at once; connect again any time.

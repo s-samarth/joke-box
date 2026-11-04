@@ -33,13 +33,16 @@ export interface Prefill {
   setup?: string
   /** Written as the next joke after this one. */
   followsId?: string
+  hashtags?: string[]
+  /** Runs with the new joke's id as it's saved (offline too): e.g. to link it to a brainstorm. */
+  onCreated?: (jokeId: string) => void
 }
 
 /** `plain`: opened from the + button, not for something in particular, so a kept draft comes back. */
 export function NewJokeForm({ prefill, plain, onClose }: { prefill: Prefill; plain: boolean; onClose: () => void }) {
   const { data: topics = [] } = useTopics()
   const thoughtsId = topics.find((t) => t.is_system)?.id ?? ''
-  const fresh = (): JokeInput => ({ ...blankJoke(prefill.topicId), subtopic_id: prefill.subtopicId ?? null, premise_id: prefill.premiseId ?? null, setup: prefill.setup ?? '', follows_id: prefill.followsId ?? null })
+  const fresh = (): JokeInput => ({ ...blankJoke(prefill.topicId), subtopic_id: prefill.subtopicId ?? null, premise_id: prefill.premiseId ?? null, setup: prefill.setup ?? '', follows_id: prefill.followsId ?? null, hashtags: prefill.hashtags ?? [] })
   const [start] = useState(() => startDraft(fresh(), plain, keptDraft()))
   const [draft, setDraft] = useState<JokeInput>(start.draft)
   const [brainstorm, setBrainstorm] = useState(start.brainstorm)
@@ -85,7 +88,9 @@ export function NewJokeForm({ prefill, plain, onClose }: { prefill: Prefill; pla
           )
         }
       : undefined
-    if (!capture({ ...input, tag_lines: input.tag_lines.filter((t) => t.trim()) }, { open, onSaved })) return
+    const id = capture({ ...input, tag_lines: input.tag_lines.filter((t) => t.trim()) }, { open, onSaved })
+    if (!id) return
+    prefill.onCreated?.(id)
     if (start.owns) forgetDraft()
     onClose()
   }

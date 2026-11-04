@@ -1,5 +1,5 @@
 /** Today: the daily joke nudge, then capture, then voice notes, observations, brainstorming, craft (your path and a lesson box), study (watchlist, analysis, links), your topic folders, what's coming up, what needs work, and how the last show went. */
-import { Play } from 'lucide-react'
+import { Play, Search } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { useJokes, useTopics } from '../../api/library'
@@ -45,9 +45,14 @@ export function TodayPage() {
       {/* Waits for the jokes to load, so it never flashes "write a joke" at someone who already has. */}
       {!daily.loading && <div className="pt-6 lg:pt-10"><DailyBanner habit={daily.habit} /></div>}
       <InstallHint />
-      <div className="pt-6 pb-6 lg:pt-10">
-        <p className="text-dim">{dateLabel}</p>
-        <h1 className="headline mt-1 text-[44px] sm:text-[56px]">Got something?</h1>
+      <div className="flex items-start justify-between gap-3 pt-6 pb-6 lg:pt-10">
+        <div>
+          <p className="text-dim">{dateLabel}</p>
+          <h1 className="headline mt-1 text-[44px] sm:text-[56px]">Got something?</h1>
+        </div>
+        <Link to="/search" aria-label="Search everything" className="mt-1 inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-dim ring-1 ring-rule hover:bg-ink-3 hover:text-paper">
+          <Search size={20} />
+        </Link>
       </div>
       <QuickCapture />
       <TodayVoice />
