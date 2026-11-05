@@ -236,7 +236,7 @@ will skip, then **Import** uploads them one by one with a progress bar and lists
 
 - Every item has a fixed id, so importing the same folder twice adds nothing. Jokes and observations
   whose words are already in JokeBox are skipped too.
-- Original dates are kept. A joke with no topic goes to Thoughts; topics named in the folder are
+- Original dates are kept. A joke with no topic (or the topic "Random") goes to Random; topics named in the folder are
   matched by name (any case) or created. Jokes can carry types (the WhatsApp import uses
   "To review" to flag everything that still needs a look).
 - `craft_notes` is optional in `import.json`; craft notes whose name is already in JokeBox are

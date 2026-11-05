@@ -33,9 +33,8 @@ def load_names(db: Session, user: User) -> Names:
 
 
 def topic_name(names: Names, topic_id: uuid.UUID) -> str:
-    """The topic as the app shows it: the system topic is called Thoughts."""
-    name = names.topics.get(topic_id, "")
-    return "Thoughts" if name == "Random" else name
+    """The topic as the app shows it. The protected topic is stored and shown as Random."""
+    return names.topics.get(topic_id, "")
 
 
 def user_jokes(db: Session, user: User) -> list[Joke]:

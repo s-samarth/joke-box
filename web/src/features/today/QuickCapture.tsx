@@ -1,10 +1,10 @@
 /**
- * The fastest way in: the setup, and the punchline if you have it. Enter saves it to Thoughts.
+ * The fastest way in: the setup, and the punchline if you have it. Enter saves it to Random.
  * Both fields sit in one box so it reads as one joke, not a form.
  */
 import { CornerDownLeft } from 'lucide-react'
 import { useState, type KeyboardEvent } from 'react'
-import { THOUGHTS } from '../../lib/jokeMeta'
+import { RANDOM } from '../../lib/jokeMeta'
 import { useCaptureJoke } from '../capture/newJoke'
 
 const field = 'block w-full resize-none bg-transparent px-4 text-xl leading-snug outline-none placeholder:text-faint'
@@ -37,11 +37,11 @@ export function QuickCapture() {
         <label htmlFor="quick-capture-punch" className="sr-only">Punchline (optional)</label>
         <textarea id="quick-capture-punch" rows={1} value={punchline} onChange={(e) => setPunchline(e.target.value)} onKeyDown={enterSaves}
           placeholder="And the punchline? (optional)" className={`${field} pt-2 pr-16 pb-4 text-tape`} />
-        <button type="submit" disabled={!setup.trim()} aria-label={`Save to ${THOUGHTS}`} className="absolute right-3 bottom-3 inline-flex size-10 items-center justify-center rounded-lg bg-tape text-tape-ink transition disabled:bg-ink-4 disabled:text-faint">
+        <button type="submit" disabled={!setup.trim()} aria-label={`Save to ${RANDOM}`} className="absolute right-3 bottom-3 inline-flex size-10 items-center justify-center rounded-lg bg-tape text-tape-ink transition disabled:bg-ink-4 disabled:text-faint">
           <CornerDownLeft size={18} />
         </button>
       </div>
-      <p className="mt-2 text-sm text-faint">Enter saves to {THOUGHTS}. Shift+Enter for a new line.</p>
+      <p className="mt-2 text-sm text-faint">Enter saves to {RANDOM}. Shift+Enter for a new line.</p>
     </form>
   )
 }

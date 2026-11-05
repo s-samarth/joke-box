@@ -1,5 +1,5 @@
 /** Wording for what happens to a topic's things when it's deleted. */
-import { THOUGHTS } from './jokeMeta'
+import { RANDOM } from './jokeMeta'
 
 export interface TopicUse {
   jokes: number
@@ -9,7 +9,7 @@ export interface TopicUse {
 
 export const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`
 
-/** "Its 3 jokes, 1 premise and 2 logged shows move to Thoughts.", naming only what it has. */
+/** "Its 3 jokes, 1 premise and 2 logged shows move to Random.", naming only what it has. */
 export function topicMoveMessage({ jokes, premises, shows }: TopicUse): string {
   const parts = [
     jokes && count(jokes, 'joke', 'jokes'),
@@ -19,5 +19,5 @@ export function topicMoveMessage({ jokes, premises, shows }: TopicUse): string {
   if (!parts.length) return 'Nothing is filed under it.'
   const list = parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)}`
   const single = jokes + premises + shows === 1
-  return `Its ${list} ${single ? 'moves' : 'move'} to ${THOUGHTS}.`
+  return `Its ${list} ${single ? 'moves' : 'move'} to ${RANDOM}.`
 }

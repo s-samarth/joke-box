@@ -32,7 +32,7 @@ def delete_topic(db: Session, user: User, topic: Topic) -> None:
     """Move the topic's jokes, premises and log links to Random, clear the jokes' subtopic, then
     delete it."""
     if topic.is_system:
-        raise HTTPException(400, "Thoughts can't be deleted")
+        raise HTTPException(400, "Random can't be deleted")
     random_topic = random_topic_for(db, user)
     db.execute(
         update(Joke)

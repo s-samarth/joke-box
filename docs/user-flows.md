@@ -9,7 +9,7 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 3. The server checks that Google has verified the email and that the email is on the allowlist.
    - **Not on the list:** you land back on Sign in with an "invite-only" message.
    - **On the list:** your account is created on first sign-in, along with the protected
-     **Thoughts** topic and the six default statuses. You land on **Home**.
+     **Random** topic and the six default statuses. You land on **Home**.
 4. The session lasts 30 days from the last day you used the app, so reopening it keeps you signed in.
 
 ## 2. Catch an idea in two seconds
@@ -17,7 +17,7 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 **Typed (Home):**
 1. The app opens on Home with the cursor-ready box "What's the setup?".
 2. Type the setup, and the punchline if you have one (Shift+Enter for a new line).
-3. Press **Enter**. The joke is saved to **Thoughts** with sensible defaults (Draft status,
+3. Press **Enter**. The joke is saved to **Random** with sensible defaults (Draft status,
    unrated) and appears in Jokes at once. A toast offers to open it.
 
 **With details (+ button):**
@@ -44,7 +44,7 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 1. Home opens with the daily joke nudge. Yellow means today is still open; red means it's been three
    days or more; dark and spooky means over a week.
 2. Tap **Write it** (or open **Daily joke**). Type a setup, and the punchline if you have it, and press
-   Enter. It saves to Thoughts.
+   Enter. It saves to Random.
 3. The nudge turns into a small green line with your streak, and today gets a tick on the calendar.
 4. On **Daily joke**, tap any day to see what you wrote, or page back through earlier months.
 

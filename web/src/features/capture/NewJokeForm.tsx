@@ -41,7 +41,7 @@ export interface Prefill {
 /** `plain`: opened from the + button, not for something in particular, so a kept draft comes back. */
 export function NewJokeForm({ prefill, plain, onClose }: { prefill: Prefill; plain: boolean; onClose: () => void }) {
   const { data: topics = [] } = useTopics()
-  const thoughtsId = topics.find((t) => t.is_system)?.id ?? ''
+  const randomId = topics.find((t) => t.is_system)?.id ?? ''
   const fresh = (): JokeInput => ({ ...blankJoke(prefill.topicId), subtopic_id: prefill.subtopicId ?? null, premise_id: prefill.premiseId ?? null, setup: prefill.setup ?? '', follows_id: prefill.followsId ?? null, hashtags: prefill.hashtags ?? [] })
   const [start] = useState(() => startDraft(fresh(), plain, keptDraft()))
   const [draft, setDraft] = useState<JokeInput>(start.draft)
@@ -51,8 +51,8 @@ export function NewJokeForm({ prefill, plain, onClose }: { prefill: Prefill; pla
   const capture = useCaptureJoke()
   const qc = useQueryClient()
   const { toast } = useFeedback()
-  // Topics may still be loading when the sheet opens, so "Thoughts" is filled in at render time.
-  const input = { ...draft, topic_id: draft.topic_id || thoughtsId }
+  // Topics may still be loading when the sheet opens, so "Random" is filled in at render time.
+  const input = { ...draft, topic_id: draft.topic_id || randomId }
   const update = (patch: Partial<JokeInput>) => setDraft((d) => ({ ...d, ...patch }))
   const ready = draft.setup.trim().length > 0
 

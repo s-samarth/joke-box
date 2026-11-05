@@ -9,7 +9,7 @@ import { DEFAULT_RUNTIME } from '../../lib/duration'
 import { DEFAULT_STATUS } from '../../lib/jokeMeta'
 
 /**
- * Everything a new joke starts with: Thoughts (unless you pick a topic), Draft, 15 seconds,
+ * Everything a new joke starts with: Random (unless you pick a topic), Draft, 15 seconds,
  * clean and in Hinglish.
  */
 export const blankJoke = (topicId = ''): JokeInput => ({
@@ -42,11 +42,11 @@ export function useCaptureJoke() {
   const { data: topics = [] } = useTopics()
   const { toast } = useFeedback()
   const navigate = useNavigate()
-  const thoughtsId = topics.find((t) => t.is_system)?.id
+  const randomId = topics.find((t) => t.is_system)?.id
 
   /** Saves (works offline) and returns the new joke's id. */
   return (c: Partial<JokeInput> & { setup: string }, { open = false, onSaved }: Options = {}): string | null => {
-    const topicId = c.topic_id || thoughtsId
+    const topicId = c.topic_id || randomId
     if (!c.setup.trim() || !topicId) return null
     const id = newId()
     const input: JokeInput = {

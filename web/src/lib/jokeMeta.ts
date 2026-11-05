@@ -1,4 +1,4 @@
-/** Display rules for jokes: strength words, Thoughts, and editor suggestions. Type colours: typeColors.ts. */
+/** Display rules for jokes: strength words, the Random topic, and editor suggestions. Type colours: typeColors.ts. */
 import type { CleanRating, Topic } from '../api/types'
 
 export const UNDEFINED_TYPE = 'Undefined'
@@ -28,8 +28,8 @@ export const DEFAULT_STATUS = 'Draft'
 export const statusOf = (status: string | null): string =>
   !status?.trim() || status.trim().toLowerCase() === 'status unknown' ? DEFAULT_STATUS : status
 
-/** The protected default topic is stored as "Random"; the app calls it Thoughts. */
-export const THOUGHTS = 'Thoughts'
-export const topicName = (topic?: Topic): string => (!topic ? '' : topic.is_system ? THOUGHTS : topic.name)
+/** The protected default topic, where new and unfiled jokes land. Stored and shown as "Random". */
+export const RANDOM = 'Random'
+export const topicName = (topic?: Topic): string => (!topic ? '' : topic.is_system ? RANDOM : topic.name)
 
 export const displayTypes = (types: string[]): string[] => (types.length ? types : [UNDEFINED_TYPE])
