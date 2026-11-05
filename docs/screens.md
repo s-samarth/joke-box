@@ -188,7 +188,8 @@ the jokes' created dates, so there's no separate log to fall out of step.
 [PremisesLayout.tsx](../web/src/features/premises/PremisesLayout.tsx), [usePremiseFilters.ts](../web/src/features/premises/usePremiseFilters.ts),
 [PremisePage.tsx](../web/src/features/premises/PremisePage.tsx), [usePremiseDraft.ts](../web/src/features/premises/usePremiseDraft.ts),
 [NewPremiseDialog.tsx](../web/src/features/premises/NewPremiseDialog.tsx), [AddJokesDialog.tsx](../web/src/features/premises/AddJokesDialog.tsx),
-[PremiseField.tsx](../web/src/features/premises/PremiseField.tsx).
+[PremiseField.tsx](../web/src/features/premises/PremiseField.tsx), [PremiseJokes.tsx](../web/src/features/premises/PremiseJokes.tsx),
+[PremiseWeb.tsx](../web/src/features/premises/PremiseWeb.tsx).
 
 The ideas under your jokes ("X is Y, because Z"). Laid out like Jokes (see its **Layout**): on an
 iPad the list fills the screen, two across, until you open a premise, which then sits beside it
@@ -202,8 +203,12 @@ writing a premise sits beside the list; on a phone the list gives way to the pre
   shows the take and how many jokes rest on it.
 - **A premise:** the take and its notes (why it's true) are edited in place and save on their own.
   A short guide ([PremiseGuide.tsx](../web/src/features/premises/PremiseGuide.tsx)) opens while the
-  premise has no notes and no jokes. Below, every joke resting on it in reading order, chains kept
-  together, with **Write a joke on it** and **Add jokes you’ve written** (from any topic). **Delete premise**
+  premise has no notes and no jokes. Below, **Jokes on it**: every joke resting on it in reading
+  order, chains kept together, with **Write a joke on it** and **Add jokes you’ve written** (from
+  any topic). Once it has a joke, a **List / Web** switch shows the same jokes as this premise's
+  web: the drawing the premise web on Jokes uses, for this premise alone, fitted to the width
+  until you zoom. Tap a joke for the same reading panel. The device remembers which you used last;
+  jokes come off the premise from the List. **Delete premise**
   asks first and sends it to the Trash; its jokes stay where they are, just not on a premise,
   until you put it back.
 - **On a joke:** the Premise row on the joke page picks one, or starts a new one.
