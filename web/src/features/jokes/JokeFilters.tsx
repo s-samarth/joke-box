@@ -1,11 +1,13 @@
 /**
- * Search plus menus for topic, premise, type, status and sort. Each menu shows what's chosen. Once you pick a
- * topic that has subtopics, a Subtopic menu appears beside it, so the topic list stays topics only.
+ * Search plus menus for topic, premise, type, status and sort, in one row that scrolls sideways (see
+ * ChipRow). Each menu shows what's chosen. Once you pick a topic that has subtopics, a Subtopic menu
+ * appears beside it, so the topic list stays topics only.
  */
 import { ChevronDown, Plus, Search, X } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { useStatuses, useTopics, useTypes } from '../../api/library'
 import { usePremises } from '../../api/premises'
+import { ChipRow } from '../../components/ui/ChipRow'
 import { Input } from '../../components/ui/Field'
 import { Dropdown, type MenuItem } from '../../components/ui/Menu'
 import { UNDEFINED_TYPE, topicName } from '../../lib/jokeMeta'
@@ -50,7 +52,7 @@ export function JokeFilters({ f }: { f: Filters }) {
     ...(topic?.subtopics ?? []).map((s) => ({ label: s.name, onSelect: () => f.set({ sub: s.id }), checked: f.sub === s.id })),
   ]
   const premise = premises.find((p) => p.id === f.premise)
-  const short = (take: string) => (take.length > 48 ? `${take.slice(0, 47)}…` : take)
+  const short = (take: string, most = 48) => (take.length > most ? `${take.slice(0, most - 1).trimEnd()}…` : take)
   // Just these three: with hundreds of premises a list would be no use. One premise's jokes are a
   // link from its page in Premises, and show here by name.
   const premiseItems: MenuItem[] = [
@@ -59,7 +61,7 @@ export function JokeFilters({ f }: { f: Filters }) {
     { label: 'No premise yet', onSelect: () => f.set({ premise: NO_PREMISE }), checked: f.premise === NO_PREMISE },
     ...(premise ? [{ label: short(premise.take), onSelect: () => undefined, checked: true }] : []),
   ]
-  const premiseLabel = f.premise === NO_PREMISE ? 'No premise yet' : f.premise === ON_A_PREMISE ? 'On a premise' : premise ? short(premise.take) : 'Premise'
+  const premiseLabel = f.premise === NO_PREMISE ? 'No premise yet' : f.premise === ON_A_PREMISE ? 'On a premise' : premise ? short(premise.take, 30) : 'Premise'
   const typeItems: (MenuItem | 'divider')[] = [
     { label: 'All types', onSelect: () => f.set({ type: null }), checked: !f.type },
     ...types.map((t) => ({ label: t.name, onSelect: () => f.set({ type: t.name }), checked: f.type === t.name })),
@@ -79,7 +81,7 @@ export function JokeFilters({ f }: { f: Filters }) {
         <Search size={18} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-faint" />
         <Input type="search" aria-label="Search jokes" placeholder="Search words, tags, notes" className="pl-10" value={f.q} onChange={(e) => f.set({ q: e.target.value })} />
       </div>
-      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0">
+      <ChipRow className="-mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
         <Dropdown align="start" items={topicItems} trigger={<span><MenuButton label={topic ? topicName(topic) : 'Topic'} on={Boolean(topic)} /></span>} />
         {topic && topic.subtopics.length > 0 && (
           <Dropdown align="start" items={subItems} trigger={<span><MenuButton label={sub ? sub.name : 'Subtopic'} on={Boolean(sub)} /></span>} />
@@ -93,7 +95,7 @@ export function JokeFilters({ f }: { f: Filters }) {
             <X size={14} /> Clear
           </button>
         )}
-      </div>
+      </ChipRow>
       <TopicManager open={managing === 'topics'} onClose={() => setManaging(null)} />
       <TypeManager open={managing === 'types'} onClose={() => setManaging(null)} />
     </div>

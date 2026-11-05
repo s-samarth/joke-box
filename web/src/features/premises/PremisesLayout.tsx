@@ -1,18 +1,22 @@
 /**
- * Premises, a tab of their own: a searchable list on the left and the open premise beside it, like
- * Jokes. Built to stay usable with hundreds of premises: search the take and notes, narrow to a
- * topic, sort by size. On a phone the list gives way to the premise you open.
+ * Premises, a tab of their own: a searchable list with the open premise beside it, like Jokes (see
+ * SplitView). Built to stay usable with hundreds of premises: search the take and notes, narrow to a
+ * topic, sort by size. On a phone the list gives way to the premise you open; on an iPad the list
+ * has the whole width until you open one.
  */
 import { Lightbulb, Plus, Search, X } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { Fragment, useRef, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
 import { useTopics } from '../../api/library'
 import { Button } from '../../components/ui/Button'
+import { ChipRow } from '../../components/ui/ChipRow'
 import { Input } from '../../components/ui/Field'
 import { Dropdown, type MenuItem } from '../../components/ui/Menu'
 import { EmptyState, PageHead, Spinner } from '../../components/ui/pieces'
+import { SplitView, WIDE_LIST } from '../../components/ui/SplitView'
 import { topicName } from '../../lib/jokeMeta'
 import { NO_PREMISE, premiseSize } from '../../lib/premises'
+import { count } from '../../lib/topics'
 import { MenuButton } from '../jokes/JokeFilters'
 import { TopicManager } from '../jokes/TopicManager'
 import { useNewTopic } from '../jokes/useNewTopic'
@@ -51,39 +55,40 @@ export function PremisesLayout() {
   // Sorted by topic, a small heading starts each topic's run.
   const headingAt = (i: number) => f.sort === 'topic' && (i === 0 || f.visible[i - 1].topic_id !== f.visible[i].topic_id)
 
-  return (
-    <div className="lg:-mx-10 lg:flex lg:h-[calc(100dvh-env(safe-area-inset-top))]">
-      <section className={`lg:flex lg:w-[26rem] lg:shrink-0 lg:flex-col lg:border-r lg:border-rule lg:px-6 ${premiseId ? 'hidden lg:flex' : ''}`}>
-        <PageHead title="Premises">
-          <Button variant="tape" small icon={<Plus size={15} />} onClick={() => setCreating(true)}>New</Button>
-        </PageHead>
-        <div className="relative">
-          <Search size={18} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-faint" />
-          <Input type="search" aria-label="Search premises" placeholder="Search takes and notes" className="pl-10" value={f.q} onChange={(e) => f.set({ q: e.target.value })} />
-        </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <Dropdown align="start" items={topicItems} trigger={<span><MenuButton label={topic ? topicName(topic) : 'Topic'} on={Boolean(topic)} /></span>} />
-          <Dropdown align="start" items={sortItems} trigger={<span><MenuButton label={PREMISE_SORTS[f.sort]} on={false} /></span>} />
-          {f.active && <button type="button" onClick={() => f.set({ q: null, topic: null })} className="inline-flex h-9 items-center gap-1 px-2 text-sm text-dim hover:text-paper"><X size={14} /> Clear</button>}
-        </div>
-        <p className="mt-4 mb-1 text-sm text-faint">
-          {f.active ? `${f.visible.length} of ${f.total} premises` : `${f.total} premises`}
-          {f.loose > 0 && <> · <Link to={`/jokes?premise=${NO_PREMISE}`} className="text-tape hover:underline">{f.loose} {f.loose === 1 ? 'joke' : 'jokes'} on none yet</Link></>}
-        </p>
-        <div className="lg:-mx-6 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:px-3">
-          {f.isPending ? (
-            <div className="py-10"><Spinner /></div>
-          ) : f.visible.length === 0 ? (
-            <EmptyState title={f.active ? 'Nothing matches' : 'No premises yet'}
-              action={!f.active && <button type="button" onClick={() => setCreating(true)} className="text-tape hover:underline">Write your first premise</button>}>
-              {f.active ? 'Try another word or clear the filters.' : 'Your take on a topic, with the jokes that rest on it.'}
-            </EmptyState>
-          ) : (
-            <ul className="pb-10">
-              {f.visible.map((p, i) => (
-                <li key={p.id}>
-                  {headingAt(i) && <h3 className="px-3 pt-4 pb-1 text-xs text-faint">{topicName(topics.find((t) => t.id === p.topic_id))}</h3>}
-                  <Link to={`/premises/${p.id}${search}`} aria-current={p.id === premiseId ? 'page' : undefined}
+  const list = (
+    <>
+      <PageHead title="Premises">
+        <Button variant="tape" small icon={<Plus size={15} />} onClick={() => setCreating(true)}>New</Button>
+      </PageHead>
+      <div className="relative">
+        <Search size={18} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-faint" />
+        <Input type="search" aria-label="Search premises" placeholder="Search takes and notes" className="pl-10" value={f.q} onChange={(e) => f.set({ q: e.target.value })} />
+      </div>
+      <ChipRow className="mt-3 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
+        <Dropdown align="start" items={topicItems} trigger={<span><MenuButton label={topic ? topicName(topic) : 'Topic'} on={Boolean(topic)} /></span>} />
+        <Dropdown align="start" items={sortItems} trigger={<span><MenuButton label={PREMISE_SORTS[f.sort]} on={false} /></span>} />
+        {f.active && <button type="button" onClick={() => f.set({ q: null, topic: null })} className="inline-flex h-9 shrink-0 items-center gap-1 px-2 text-sm text-dim hover:text-paper"><X size={14} /> Clear</button>}
+      </ChipRow>
+      <p className="mt-4 mb-1 text-sm text-faint">
+        {f.active ? `${f.visible.length} of ${count(f.total, 'premise', 'premises')}` : count(f.total, 'premise', 'premises')}
+        {f.loose > 0 && <> · <Link to={`/jokes?premise=${NO_PREMISE}`} className="text-tape hover:underline">{f.loose} {f.loose === 1 ? 'joke' : 'jokes'} on none yet</Link></>}
+      </p>
+      <div className="lg:-mx-6 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:px-3">
+        {f.isPending ? (
+          <div className="py-10"><Spinner /></div>
+        ) : f.visible.length === 0 ? (
+          <EmptyState title={f.active ? 'Nothing matches' : 'No premises yet'}
+            action={!f.active && <button type="button" onClick={() => setCreating(true)} className="text-tape hover:underline">Write your first premise</button>}>
+            {f.active ? 'Try another word or clear the filters.' : 'Your take on a topic, with the jokes that rest on it.'}
+          </EmptyState>
+        ) : (
+          <ul className={`pb-10 ${premiseId ? '' : WIDE_LIST}`}>
+            {f.visible.map((p, i) => (
+              <Fragment key={p.id}>
+                {headingAt(i) && <li className="col-span-full px-3 pt-4 pb-1 text-xs text-faint">{topicName(topics.find((t) => t.id === p.topic_id))}</li>}
+                <li>
+                  {/* Opening the first premise reshapes the screen, so that one fades; moving between premises doesn't. */}
+                  <Link to={`/premises/${p.id}${search}`} viewTransition={!premiseId} aria-current={p.id === premiseId ? 'page' : undefined}
                     className={`flex items-start gap-3 rounded-lg px-3 py-3 ${p.id === premiseId ? 'bg-ink-3' : 'hover:bg-ink-2'}`}>
                     <Lightbulb size={16} className={`mt-1 shrink-0 ${(f.counts.get(p.id) ?? 0) >= 3 ? 'text-tape' : 'text-faint'}`} aria-hidden />
                     <span className="min-w-0 flex-1 leading-snug">
@@ -94,22 +99,25 @@ export function PremisesLayout() {
                     </span>
                   </Link>
                 </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </section>
-      <section className={`min-w-0 flex-1 lg:overflow-y-auto lg:px-10 ${premiseId ? '' : 'hidden lg:block'}`}>
-        <Outlet />
-      </section>
+              </Fragment>
+            ))}
+          </ul>
+        )}
+      </div>
+    </>
+  )
+
+  return (
+    <>
+      <SplitView list={list} openId={premiseId} closeTo={`/premises${search}`} noun="premise"><Outlet /></SplitView>
       <NewPremiseDialog open={creating} onOpenChange={(open) => (created.current && !open ? (created.current = false) : setCreating(open))} topicId={f.topic}
         onCreated={(id) => { created.current = true; navigate(`/premises/${id}${search}`) }} />
       <TopicManager open={managing} onClose={() => setManaging(false)} onRemoved={(id) => f.topic === id && f.set({ topic: null })} />
-    </div>
+    </>
   )
 }
 
-/** With no premise open, desktop shows how to write a good one. */
+/** With no premise open, a wide screen shows how to write a good one. */
 export function NoPremiseSelected() {
   return (
     <div className="mx-auto max-w-2xl pt-10 pb-16">

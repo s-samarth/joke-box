@@ -179,11 +179,29 @@ body:has([role='dialog'][data-state='open']) .toasts {
   animation: spooky-flicker 7s linear infinite;
 }
 
+/* An item opened beside its list (see SplitView) settles in rather than snapping. */
+@keyframes pane-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+/* Layout changes (see lib/viewTransition) cross-fade, quick enough not to hold you up. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .light-pulse,
   .ghost-float,
   .spooky-flicker {
     animation: none;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }
 

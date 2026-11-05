@@ -62,15 +62,17 @@ through everything you've written at once.
 
 1. Open **Jokes**. Search, or filter by topic, type and status, and sort by newest, strongest,
    weakest or longest.
-2. Tap a joke. On desktop it opens beside the list; on a phone it opens as its own page.
+2. Tap a joke. On an iPad or desktop it opens beside the list (the list narrows to make room);
+   on a phone it opens as its own page. To read it with the whole screen, tap the expand button at
+   its top right; tap × to go back to the list.
 3. Edit the words in place. Add tag lines (drag the grip to reorder them), move the strength ticks, change type or topic. Each
    change saves on its own; the cloud icon shows "Saving…" and then "All changes saved".
 4. For a deeper pass, scroll to Rewrites and choose **Start a rewrite**. The full-screen **Rewrite** page pins the
    original at the top and runs a timer. Write freely and tap **Save version** to keep a snapshot.
    Earlier versions and earlier sessions sit on the right.
 5. Tap the **Checklists** icon to tick through your review questions as you go.
-6. To see how jokes lead into each other, look at the **joke map** (beside the list on desktop, or
-   the map button on Jokes). Tap a joke to read it there, walk along its chain with **Comes
+6. To see how jokes lead into each other, switch Jokes from **List** to **Map** (on a wide screen
+   it also sits beside the list). Tap a joke to read it there, walk along its chain with **Comes
    after** and **Followed by**, and **Open joke** to edit it.
 7. Switch to **Web** to see each premise in the middle of the jokes resting on it.
 

@@ -9,7 +9,7 @@ visit, so the app opens fast on a phone.
 
 ## The frame
 
-**Files:** [AppShell.tsx](../web/src/layout/AppShell.tsx), [BottomBar.tsx](../web/src/layout/BottomBar.tsx),
+**Files:** [AppShell.tsx](../web/src/layout/AppShell.tsx), [Rail.tsx](../web/src/layout/Rail.tsx), [useRail.ts](../web/src/layout/useRail.ts), [BottomBar.tsx](../web/src/layout/BottomBar.tsx),
 [nav.ts](../web/src/layout/nav.ts), [SyncLight.tsx](../web/src/layout/SyncLight.tsx),
 [UpdatePrompt.tsx](../web/src/layout/UpdatePrompt.tsx), [AccountMenu.tsx](../web/src/layout/AccountMenu.tsx).
 
@@ -18,6 +18,10 @@ visit, so the app opens fast on a phone.
   wordmark and **New joke** stay pinned at the top and the sync light and account at the bottom;
   only the list of screens scrolls when the window is too short (an iPad in landscape). The rail
   and the pages start below the iPad's status bar, where iPadOS blurs whatever sits under it.
+  Below 1280 px (an iPad in landscape) the rail is **compact**: icons only, named on hover, with
+  the JokeBox icon, a square **+**, the sync icon and your avatar. The toggle beside the sync light
+  (**Hide screen names** / **Show screen names**) switches it on this device; switching back to what
+  the width would pick returns it to automatic.
 - **Phone:** a slim header (wordmark, sync icon, avatar) and a bottom bar laid out as
   **Home · Jokes · + · Premises · More**.
   The **+** adds whatever the screen holds ([useAddAction.ts](../web/src/layout/useAddAction.ts)):
@@ -101,28 +105,38 @@ the jokes' created dates, so there's no separate log to fall out of step.
   when there were several; today is outlined in yellow; days to come are dimmed. Arrows move
   between months. Tap a day to list its jokes, each linking to the joke.
 
-## Jokes: `/jokes`, `/jokes/map` and `/jokes/:jokeId`
+## Jokes: `/jokes`, `/jokes/map`, `/jokes/web` and `/jokes/:jokeId`
 
 [JokesLayout.tsx](../web/src/features/jokes/JokesLayout.tsx), [JokeFilters.tsx](../web/src/features/jokes/JokeFilters.tsx),
 [useJokeFilters.ts](../web/src/features/jokes/useJokeFilters.ts), [JokePage.tsx](../web/src/features/jokes/JokePage.tsx),
 [JokeDetails.tsx](../web/src/features/jokes/JokeDetails.tsx), [DetailControls.tsx](../web/src/features/jokes/DetailControls.tsx),
 [TagLines.tsx](../web/src/features/jokes/TagLines.tsx), [JokeExtras.tsx](../web/src/features/jokes/JokeExtras.tsx),
 [useAutosaveJoke.ts](../web/src/features/jokes/useAutosaveJoke.ts), [TopicManager.tsx](../web/src/features/jokes/TopicManager.tsx),
-[TypeManager.tsx](../web/src/features/jokes/TypeManager.tsx). The map: [map/](../web/src/features/jokes/map/) ([mapLayout.ts](../web/src/features/jokes/map/mapLayout.ts),
+[TypeManager.tsx](../web/src/features/jokes/TypeManager.tsx), [ViewSwitch.tsx](../web/src/features/jokes/ViewSwitch.tsx),
+[SplitView.tsx](../web/src/components/ui/SplitView.tsx), [ChipRow.tsx](../web/src/components/ui/ChipRow.tsx). The map: [map/](../web/src/features/jokes/map/) ([mapLayout.ts](../web/src/features/jokes/map/mapLayout.ts),
 [JokeMap.tsx](../web/src/features/jokes/map/JokeMap.tsx), [MapCanvas.tsx](../web/src/features/jokes/map/MapCanvas.tsx), [MapPeek.tsx](../web/src/features/jokes/map/MapPeek.tsx)).
 
-- **List:** a search box ("Search words, tags, notes") and menus: Topic, then Subtopic once a topic with subtopics is picked, Type,
+- **List, Map, Web:** a switch in the Jokes header shows the same jokes, with the same filters,
+  as a list, the joke map (`/jokes/map`) or the premise web (`/jokes/web`). Map and Web take the
+  whole screen under the header and filters, on every device. Beside an open joke the switch is
+  three icons.
+- **List:** a search box ("Search words, tags, notes") and menus in one row that scrolls sideways: Topic, then Subtopic once a topic with subtopics is picked, Premise, Type,
   Status, and Sort (Newest, Oldest, Recently edited, Strongest, Weakest, Longest). Each row shows the
   setup, the start of the punchline, strength ticks (or a faint "Unrated"), type dots, the topic, the date it was added (or
   last edited, under Recently edited) and the runtime. Sorted by a date, the list is grouped into
   months under pinned headings, with the time scrubber down its side ([JokeList.tsx](../web/src/features/jokes/JokeList.tsx)).
   A joke brought in with an older date (an import) counts as last edited then, not on the day it
   arrived. The ⋯ menu has **Export as CSV** (with Created At and Edited At).
-- **Layout:** like a mail app. On desktop the selected joke opens in a pane beside the list; on a
-  phone it opens as its own page with a back link.
-- **The joke map:** with no joke open, the desktop pane shows the jokes the list is showing (same
-  filters) as a map. The map button in the Jokes header opens it as its own page, `/jokes/map`,
-  which is how a phone gets to it.
+- **Layout** ([SplitView.tsx](../web/src/components/ui/SplitView.tsx)), like Mail on an iPad:
+  - **Phone and iPad upright:** the list, or the open joke as its own page with a back link. With
+    the list to itself from 768 px, the rows go two across.
+  - **iPad landscape and small laptops (1024–1279 px):** the list fills the screen, two across,
+    until you open a joke; then it narrows to a column and the joke sits beside it.
+  - **1280 px and wider:** the list is a column; with no joke open, the map or web you used last
+    sits beside it, with a button to open it full size.
+  - An open joke has two buttons at its top right: **Read the joke full width** (hides the list
+    until you bring it back) and **Close the joke** (back to the list, filters kept).
+- **The joke map:** the jokes the list is showing (same filters), as a map.
   - **Chains** are drawn left to right as boxes, with an arrow from each joke to the joke that
     follows it. Branches stack, with the joke before them level with their middle. Chains come in
     the order their jokes appear in the list.
@@ -176,10 +190,12 @@ the jokes' created dates, so there's no separate log to fall out of step.
 [NewPremiseDialog.tsx](../web/src/features/premises/NewPremiseDialog.tsx), [AddJokesDialog.tsx](../web/src/features/premises/AddJokesDialog.tsx),
 [PremiseField.tsx](../web/src/features/premises/PremiseField.tsx).
 
-The ideas under your jokes ("X is Y, because Z"). Laid out like Jokes: a list on the left and the
-open premise beside it on desktop; on a phone the list gives way to the premise you open.
+The ideas under your jokes ("X is Y, because Z"). Laid out like Jokes (see its **Layout**): on an
+iPad the list fills the screen, two across, until you open a premise, which then sits beside it
+with the same **full width** and **close** buttons; from 1280 px, with none open, the guide to
+writing a premise sits beside the list; on a phone the list gives way to the premise you open.
 
-- **List:** a search box ("Search takes and notes"), a Topic menu and a sort (By topic, Newest,
+- **List:** a search box ("Search takes and notes"), then a Topic menu and a sort in one row (By topic, Newest,
   Most jokes, Fewest jokes). The Topic menu is the one Jokes has: **New topic** at the top,
   **Manage topics…** at the bottom, both working on the shared topic list. The Topic pickers in
   **New premise** and on a premise end with **New topic…**. Sorted by topic, a small heading starts each topic's run. Each row

@@ -47,7 +47,7 @@ own data. Today that is one comedian, but the system works for more than one.
    order when you're back, keeps the time you wrote it, and nothing is dropped: a save the server
    refuses waits in Couldn't sync with what you wrote.
 4. **Phone first, laptop comfortable.** Every screen is designed at 390 px wide, with large tap
-   targets and safe-area padding. Desktop adds a side rail and two-pane layouts.
+   targets and safe-area padding. Desktop adds a side rail (icons only on an iPad in landscape) and list-and-detail layouts that give the list the whole screen until something is open.
 5. **Stage-ready.** Rehearse shows the whole set as one scrolling script in big type, with the
    clock and the open-mic light pinned on top, and it keeps the screen awake. Printing gives
    clean paper.
@@ -63,7 +63,7 @@ own data. Today that is one comedian, but the system works for more than one.
 | **Home** | The daily joke nudge, quick capture, record a voice note, log an observation, start a brainstorm, a search button, study shortcuts, topic folders, next set, last show | `/` |
 | **Search** | One search across everything: jokes, premises, observations, brainstorms (typed words; not handwriting), rewrites, voice notes, sets, shows, Craft, analyses and the watchlist. Works offline, on what the phone already holds | `/search` |
 | **Daily joke** | One new joke a day: today's box, streaks, a calendar of ticks; the nudge on Home goes from green to yellow, red and spooky | `/daily` |
-| **Jokes** | Searchable list with topic, type, status and sort filters; each joke edited in place; CSV export. Beside the list (or at `/jokes/map` on a phone): the Map of joke chains and the Web of premises with their jokes | `/jokes`, `/jokes/:id`, `/jokes/map` |
+| **Jokes** | Searchable list with topic, type, status and sort filters; each joke edited in place; CSV export. A List / Map / Web switch shows the same jokes as the Map of joke chains or the Web of premises with their jokes, full screen (and beside the list on a wide screen) | `/jokes`, `/jokes/:id`, `/jokes/map` |
 | **Premises** | The ideas under your jokes ("X is Y, because Z"): each one's take and notes, and every joke resting on it in chain order | `/premises`, `/premises/:id` |
 | **New joke** | The + button: a full sheet with every field, prefilled from where you are. Closing it keeps what you typed for next time. On Premises, Shows and Observations the + makes one of those instead | sheet |
 | **Rewrite** | Full-screen timed rewrite of one joke; every save keeps a version | `/jokes/:id/rewrite` |

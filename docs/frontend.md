@@ -200,6 +200,19 @@ On phones the lists keep a little room on the right so the scrubber never covers
 [nav.ts](../web/src/layout/nav.ts) is the single list of screens. The desktop rail renders `NAV`;
 the phone bar renders `BAR_LEFT`, the + button, `BAR_RIGHT` and More (`MORE_GROUPS`).
 
+## Adaptive layout
+
+- **Breakpoints:** `md` 768 px (lists go two across), `lg` 1024 px (the rail and side-by-side
+  panes), `xl` 1280 px (the full rail, and the map or guide beside the list). Tailwind classes
+  carry it all except the rail, whose compact state is JS ([useRail.ts](../web/src/layout/useRail.ts))
+  because a per-device choice in `localStorage` can override the width.
+- **`SplitView`** ([SplitView.tsx](../web/src/components/ui/SplitView.tsx)) owns the list and
+  detail columns for Jokes and Premises, the full-width and close buttons, and the settle-in
+  animation. Lists pass `WIDE_LIST` to go two across only while nothing is open.
+- **View transitions:** links that reshape the screen pass React Router's `viewTransition`; state
+  changes go through `withTransition` ([viewTransition.ts](../web/src/lib/viewTransition.ts)).
+  Moving between items in an open split doesn't fade, so it stays instant.
+
 ## Voice notes pipeline
 
 ```mermaid
