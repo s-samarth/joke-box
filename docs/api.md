@@ -86,10 +86,12 @@ still accept the old `bit_id` and `bit_ids` for good. Responses use only the new
 }
 ```
 
-The answer includes `version`, which goes up by one on every save. With `base_version`, a save
-made from an older version that would change the joke answers **409** ("This joke was changed on
-another device after you edited it.") rather than overwriting; resending the same edit is fine.
-Without it, nothing is checked.
+The answer includes `version`, which goes up by one on every save that changes the joke; a save
+that changes nothing keeps it, so it never puts another device's waiting edit in a clash. With
+`base_version`, a save made from an older version that would change the joke answers **409**
+("This joke was changed on another device after you edited it.") rather than overwriting;
+resending the same edit is fine. Without it, nothing is checked. Sets, sessions, Craft notes,
+observations and premises follow the same rules.
 
 `follows_id` links a joke to the one before it. Many jokes can follow one, so chains branch into
 trees. Following itself or a joke that comes after it, or someone else's joke, answers **422**.

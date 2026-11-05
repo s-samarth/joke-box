@@ -196,7 +196,8 @@ through everything you've written at once.
 6. If the server refuses a save, it isn't lost: a strip says "1 change couldn't sync" and opens
    a list with what you wrote, and Retry, Copy and Discard. If the joke, set, Craft note,
    observation or premise was changed on another device meanwhile, your edit waits there with **Keep mine** instead of overwriting the
-   other.
+   other. Only a real change on the other device counts: opening something there, or pressing
+   Save without changing it, never makes your edit wait.
 7. A brainstorm session changed on another device meanwhile keeps both: the other device's
    version stays, and yours is saved beside it as "<title> (copy, edited on two devices)". The
    open session says so, with **Open the copy**, and the rest of what you write there goes to

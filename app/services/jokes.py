@@ -10,6 +10,7 @@ from app.models import Joke, JokeType, Premise, Status, Subtopic, Topic, User, j
 from app.models.base import written_at
 from app.schemas.library import JokeIn, JokeOut, status_name
 from app.services import chains, type_colors
+from app.services.clashes import next_version
 
 
 def to_out(joke: Joke) -> JokeOut:
@@ -134,7 +135,7 @@ def type_names(names: list[str]) -> set[str]:
 
 
 def same_content(joke: Joke, data: JokeIn) -> bool:
-    """Would this save leave the joke as it is? Then a stale version is harmless (a retry)."""
+    """Would this save leave the joke as it is? Then it isn't a new version, nor a clash."""
     now = to_out(joke)
     return (
         all(getattr(now, k) == v for k, v in plain_fields(data).items())
@@ -143,19 +144,11 @@ def same_content(joke: Joke, data: JokeIn) -> bool:
     )
 
 
-def check_version(existing: Joke, data: JokeIn) -> None:
-    """Refuse an edit made from an older version that would overwrite someone else's change."""
-    if data.base_version is None or data.base_version == existing.version:
-        return
-    if not same_content(existing, data):
-        raise HTTPException(409, CONFLICT)
-
-
 def save(db: Session, user: User, joke_id: uuid.UUID, data: JokeIn, existing: Joke | None) -> Joke:
     """Create or update in one transaction."""
-    if existing is not None:
-        check_version(existing, data)
-        existing.version += 1
+    if existing is not None:  # refused (409) if edited from an older version: see clashes.py
+        unchanged = lambda: same_content(existing, data)  # noqa: E731
+        existing.version = next_version(existing.version, data.base_version, unchanged, CONFLICT)
     joke = existing or Joke(id=joke_id, user_id=user.id)
     apply(db, user, joke, data)
     db.add(joke)  # after apply, so lookups inside it don't flush a half-filled joke
