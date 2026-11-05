@@ -194,10 +194,15 @@ through everything you've written at once.
    refresh and the icon returns to "All changes saved". Things written offline keep the time
    you wrote them, so a joke written at 11:50 pm still counts for that day.
 6. If the server refuses a save, it isn't lost: a strip says "1 change couldn't sync" and opens
-   a list with what you wrote, and Retry, Copy and Discard. If the joke was changed on another
-   device meanwhile, your edit waits there with **Keep mine** instead of overwriting the other.
-7. Venue wifi that wants you to sign in counts as no signal until you do.
-8. If your sign-in runs out, waiting saves stay. The app asks you to sign in, says how many
+   a list with what you wrote, and Retry, Copy and Discard. If the joke or set was changed on
+   another device meanwhile, your edit waits there with **Keep mine** instead of overwriting the
+   other.
+7. A brainstorm session changed on another device meanwhile keeps both: the other device's
+   version stays, and yours is saved beside it as "<title> (copy, edited on two devices)". The
+   open session says so, with **Open the copy**, and the rest of what you write there goes to
+   the copy. Handwriting can't be rewritten from memory, so neither version is ever dropped.
+8. Venue wifi that wants you to sign in counts as no signal until you do.
+9. If your sign-in runs out, waiting saves stay. The app asks you to sign in, says how many
    changes are waiting, and they sync once you're back. Signing out with changes waiting asks
    first, since it deletes them.
 9. Recording a set: the screen stays on. If the phone takes the mic or the app is closed, what

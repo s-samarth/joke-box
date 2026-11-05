@@ -73,6 +73,14 @@ under fixed keys (`setMutationDefaults`), each spreading the shared `QUEUED` opt
   autosaves never clashes with itself. If the joke moved on elsewhere and the save would change
   it, the server answers 409 and the edit goes to Couldn't sync, where **Keep mine** resends it
   without the check. Resending the very same edit is never a clash.
+- **Sets and brainstorm sessions too:** both send `base_version` the same way, with the chain of
+  own versions in [ownVersions.ts](../web/src/api/ownVersions.ts) (one per kind; the joke one
+  keeps its old cache key). A set's clash goes to Couldn't sync with Keep mine, like a joke's. A
+  session's never throws a version away ([sessionClash.ts](../web/src/api/sessionClash.ts)): the
+  refused edit is saved as a new session titled "… (copy, edited on two devices)", and the move is
+  remembered per session and opened version, so later autosaves, a retried save and the session
+  reopened from this device's copy all go to that copy. The editor shows a notice with **Open the
+  copy**. A session started here is checked from its second save (`version` 0 until then).
 - **On restart, saved changes replay:** the persister keeps every queued save that hasn't
   finished, including one that was mid-request when the app closed. The saved copy never expires
   (`maxAge: Infinity`; lists still drop a week after last use), and `CACHE_BUSTER` and every

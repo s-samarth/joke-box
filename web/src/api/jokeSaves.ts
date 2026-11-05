@@ -5,6 +5,7 @@
 import { api } from './client'
 import { keys, queryClient, refreshWhenSynced } from './queryClient'
 import { OLD_SAVE_KEYS } from './legacy'
+import { ownVersions } from './ownVersions'
 import { QUEUED } from './sync'
 import type { Joke, JokeInput, Setlist } from './types'
 
@@ -17,29 +18,11 @@ export type SaveJokeVars = { id: string; input: JokeInput; keepMine?: boolean }
 
 export const saveJokeKey = ['joke', 'save']
 
-/*
- * Which versions this device's own saves made, per joke: saves edited from any version between
- * `from` and `to` are this device's own chain of edits, so they go out based on `to`. Kept in the
- * cache (saved on the phone with the waiting saves), so it holds across a relaunch.
- */
-type Own = Record<string, { from: number; to: number }>
-const ownKey = ['joke-own-versions']
-queryClient.setQueryDefaults(ownKey, { gcTime: Infinity })
+/** This device's own chain of saves per joke (see ownVersions.ts). The key predates the module. */
+const own = ownVersions('joke-own-versions')
 
 /** The version to send as the base of an edit made from version `from`. */
-export function baseFor(id: string, from: number | undefined): number | undefined {
-  const own = queryClient.getQueryData<Own>(ownKey)?.[id]
-  const base = own && from !== undefined && from >= own.from && from <= own.to ? own.to : from
-  return base || undefined // 0: a joke not created yet when the edit began
-}
-
-function recordOwn(id: string, from: number | undefined, base: number | undefined, version: number) {
-  queryClient.setQueryData<Own>(ownKey, (all = {}) => {
-    const own = all[id]
-    const chained = own && base !== undefined && base === own.to
-    return { ...all, [id]: { from: chained ? own.from : (from ?? 0), to: version } }
-  })
-}
+export const baseFor = (id: string, from: number | undefined) => own.baseFor(id, from)
 
 /** A set times each joke by the joke's own runtime, as the server does: change one and every set follows. */
 export const followRuntime = (sets: Setlist[], id: string, seconds: number): Setlist[] =>
@@ -60,7 +43,7 @@ queryClient.setMutationDefaults(saveJokeKey, {
     const { version: from, ...fields } = input
     const base = keepMine ? undefined : baseFor(id, from)
     const saved = await api<Joke>(`/api/jokes/${id}`, 'PUT', { ...fields, base_version: base })
-    recordOwn(id, from, base, saved.version)
+    own.record(id, from, base, saved.version)
     await queryClient.cancelQueries({ queryKey: keys.jokes }) // an older list mustn't land after this
     queryClient.setQueryData<Joke[]>(keys.jokes, (old = []) => old.map((b) => (b.id === id ? { ...b, version: saved.version } : b)))
     return saved

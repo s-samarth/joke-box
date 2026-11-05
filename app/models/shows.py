@@ -69,6 +69,8 @@ class Setlist(Trashable, OwnedMixin, Base):
         cascade="all, delete-orphan", order_by="SetlistItem.position"
     )
     tags: Mapped[list[SetTag]] = relationship(secondary=setlist_tag_links, order_by=SetTag.position)
+    # Goes up by one on every save; a save edited from an older version is a conflict.
+    version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
 
 
 class SetlistItem(IdMixin, Base):

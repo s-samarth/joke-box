@@ -80,7 +80,7 @@ erDiagram
 | `brainstorm_versions` | `brainstorm_id` (cascade), `title`, `content`, `saved_at` | One row appended per save |
 | `observation_topics` | `name`, `position` | Separate from joke topics, in the order you drag them into |
 | `observations` | `text`, `topic_id` (set null) | Deleting the topic keeps the observation |
-| `writing_sessions` | `title`, `content`, `ink` JSON (strokes: colour, size, page, `[x, y, pressure]` points; deferred, so it's loaded only when read), `ink_strokes` (how many, kept on every save so lists never load the ink), `ink_pages` (1–20), `timer_seconds`, `joke_ids` JSON, `observation_ids` JSON, `technique_id → craft_notes` (set null) | A free **Brainstorm** session. Links are id lists; deleted targets just drop out of view. Deleting the technique keeps the session |
+| `writing_sessions` | `title`, `content`, `ink` JSON (strokes: colour, size, page, `[x, y, pressure]` points; deferred, so it's loaded only when read), `ink_strokes` (how many, kept on every save so lists never load the ink), `ink_pages` (1–20), `timer_seconds`, `joke_ids` JSON, `observation_ids` JSON, `technique_id → craft_notes` (set null), `version` (up by one per save) | A free **Brainstorm** session. `version` catches edits made on two devices: the losing edit is kept as a copy. Links are id lists; deleted targets just drop out of view. Deleting the technique keeps the session |
 | `voice_notes` | `label`, `hashtags` JSON, `duration_seconds`, `content_type`, `size_bytes`, `audio_path` | `audio_path` stays empty until the upload lands. The audio itself lives in Blob storage |
 
 ### Performing
@@ -88,7 +88,7 @@ erDiagram
 | Table | Columns | Rules |
 |---|---|---|
 | `venues` | `name` | Created by name when a set or show uses one; "Unidentified Venue" is the default |
-| `setlists` | `name`, `show_date` (no longer shown or set by the app), `target_seconds` (default 900), `venue_id` (set null), `rating` (1–5 or null) | Saved whole: `PUT` replaces the items and tags in one transaction |
+| `setlists` | `name`, `show_date` (no longer shown or set by the app), `target_seconds` (default 900), `venue_id` (set null), `rating` (1–5 or null), `version` (up by one per save) | Saved whole: `PUT` replaces the items and tags in one transaction. `version` catches edits made on two devices |
 | `set_tags` | `name` (unique per user, any case), `position` | Your labels for sets (In progress, Weak, Opener set...). Everyone got eight to start, once; deleting them all sticks |
 | `setlist_tag_links` | `setlist_id`, `tag_id` (both cascade) | Many-to-many. Deleting a tag takes it off its sets |
 | `setlist_items` | `setlist_id` (cascade), `joke_id` (cascade), `position`, `duration_seconds`, `optional` | A set refers to its jokes: their words, strength and runtime are always read from the joke (`duration_seconds` here is only a fallback). Opener and closer are the first and last positions, not stored. An optional joke is one to cut if time is short; it doesn't count towards the slot |
@@ -166,6 +166,7 @@ All of these run in one transaction ([services/topics.py](../app/services/topics
 | `0027` | `performance_jokes.note`: a comment on how a joke went |
 | `0028` | `jokes.strength` can be null: unrated. New jokes start unrated; existing ratings stay |
 | `0029` | `board_spots` dropped, with the joke board |
+| `0030` | `version` on each set and brainstorm session, to catch edits made on two devices, as jokes have had since `0013` |
 
 Merged migrations are shared history. CI fails a PR that edits, deletes or renames one; fix
 forward with a new revision. CI also runs upgrade → downgrade → upgrade on Postgres 16, so every

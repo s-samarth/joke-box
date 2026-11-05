@@ -61,3 +61,5 @@ class WritingSession(Trashable, OwnedMixin, Base):
     technique_id: Mapped[uuid.UUID | None] = mapped_column(
         Uuid, ForeignKey("craft_notes.id", ondelete="SET NULL")
     )
+    # Goes up by one on every save; a save edited from an older version is kept as a copy.
+    version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")

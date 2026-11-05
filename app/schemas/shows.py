@@ -32,6 +32,8 @@ class SetlistIn(BaseModel):
     rating: int | None = Field(default=None, ge=1, le=5)
     tag_ids: list[uuid.UUID] = Field(default_factory=list)
     items: list[SetlistItemIn] = Field(default_factory=list)
+    # The version this edit started from. Omitted (a new set, an older app), nothing is checked.
+    base_version: int | None = Field(default=None, le=INT_MAX)
 
 
 class SetlistItemOut(BaseModel):
@@ -52,6 +54,7 @@ class SetlistOut(BaseModel):
     rating: int | None
     tag_ids: list[uuid.UUID]
     items: list[SetlistItemOut]
+    version: int
     created_at: datetime
     updated_at: datetime
 
