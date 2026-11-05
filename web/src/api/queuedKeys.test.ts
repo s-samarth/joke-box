@@ -13,6 +13,7 @@ import './trash'
 import './voice'
 import './board'
 import './premises'
+import './observationSaves'
 
 /** Every key ever shipped for a queued save. Add new ones; never remove or rename one. */
 const SHIPPED = [

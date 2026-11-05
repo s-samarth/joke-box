@@ -1,6 +1,7 @@
 /** Hooks for observations and their own topics (kept apart from joke topics). */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
+import './observationSaves'
 import { deleteObservationKey, keys, saveObservationKey, type SaveObservationVars } from './queryClient'
 import type { Named, Observation } from './types'
 

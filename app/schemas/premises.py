@@ -5,11 +5,15 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.schemas.limits import INT_MAX
+
 
 class PremiseIn(BaseModel):
     topic_id: uuid.UUID
     take: str = Field(min_length=1, max_length=2000)
     notes: str = Field(default="", max_length=20_000)
+    # The version this edit started from. Omitted (a new one, an older app), nothing is checked.
+    base_version: int | None = Field(default=None, le=INT_MAX)
 
     @field_validator("take")
     @classmethod
@@ -27,5 +31,6 @@ class PremiseOut(BaseModel):
     topic_id: uuid.UUID
     take: str
     notes: str
+    version: int
     created_at: datetime
     updated_at: datetime

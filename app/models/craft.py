@@ -71,6 +71,8 @@ class CraftNote(Trashable, OwnedMixin, Base):
     analysis_id: Mapped[uuid.UUID | None] = mapped_column(
         Uuid, ForeignKey("analyses.id", ondelete="SET NULL"), index=True
     )
+    # Goes up by one on every save; a save edited from an older version is a conflict.
+    version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
 
     kind: Mapped[NoteKind] = relationship(lazy="joined")
 

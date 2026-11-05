@@ -5,6 +5,7 @@
  */
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { api } from './client'
+import { ownVersions, sendChecked } from './ownVersions'
 import { keys, queryClient, refreshWhenSynced } from './queryClient'
 import { QUEUED } from './sync'
 import type { Joke } from './types'
@@ -14,28 +15,36 @@ export interface PremiseInput {
   topic_id: string
   take: string
   notes: string
+  /** The version this edit started from, sent as the base of the save. Missing: a new one. */
+  version?: number
 }
 
 export interface Premise extends PremiseInput {
   id: string
+  /** Up by one per save on the server; catches edits made on two devices. */
+  version: number
   created_at: string
   updated_at: string
 }
 
-export type SavePremiseVars = { id: string; input: PremiseInput }
+/** `keepMine`: a clash being retried from Couldn't sync, to go over the other device's version. */
+export type SavePremiseVars = { id: string; input: PremiseInput; keepMine?: boolean }
 
 const saveKey = ['premise', 'save']
 const deleteKey = ['premise', 'delete']
 
+/** Edits on two devices are checked as for jokes (see ownVersions.ts). */
+const ownPremises = ownVersions('premise-own-versions')
+
 queryClient.setMutationDefaults(saveKey, {
   ...QUEUED,
-  mutationFn: ({ id, input }: SavePremiseVars) => api<Premise>(`/api/premises/${id}`, 'PUT', input),
+  mutationFn: ({ id, input, keepMine }: SavePremiseVars) => sendChecked<Premise>(ownPremises, `/api/premises/${id}`, id, input, keepMine),
   onMutate: async ({ id, input }: SavePremiseVars) => {
     await queryClient.cancelQueries({ queryKey: keys.premises })
     const now = new Date().toISOString()
     queryClient.setQueryData<Premise[]>(keys.premises, (old = []) => {
       const existing = old.find((p) => p.id === id)
-      const next: Premise = { ...input, id, created_at: existing?.created_at ?? now, updated_at: now }
+      const next: Premise = { ...input, id, version: input.version ?? existing?.version ?? 0, created_at: existing?.created_at ?? now, updated_at: now }
       return existing ? old.map((p) => (p.id === id ? next : p)) : [...old, next]
     })
   },

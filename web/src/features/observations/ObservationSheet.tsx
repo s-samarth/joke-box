@@ -25,7 +25,7 @@ export function ObservationSheet({ observation, onClose }: { observation: Observ
   }
   const submit = () => {
     if (!text.trim()) return
-    save.mutate({ id: observation.id, input: { text: text.trim(), topic_id: topicId } }, { onError: (e) => toast(`Not saved: ${e.message}`) })
+    save.mutate({ id: observation.id, input: { text: text.trim(), topic_id: topicId, version: observation.version } }, { onError: (e) => toast(`Not saved: ${e.message}`) })
     onClose()
   }
 

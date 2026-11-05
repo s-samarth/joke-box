@@ -7,6 +7,7 @@
  * Per thing, the versions this device's own chain of saves covers, from `from` to `to`. Kept in
  * the cache (saved on the phone with the waiting saves), so it holds across a relaunch.
  */
+import { api } from './client'
 import { queryClient } from './queryClient'
 
 type Own = Record<string, { from: number; to: number }>
@@ -40,4 +41,18 @@ export function ownVersions(name: string): OwnVersions {
       })
     },
   }
+}
+
+/**
+ * Save with the check: `version` in the input is the one the edit started from, sent as
+ * `base_version` unless `keepMine` (Keep mine in Couldn't sync, to go over the other version).
+ */
+export async function sendChecked<T extends { version: number }>(
+  own: OwnVersions, path: string, id: string, input: { version?: number }, keepMine?: boolean,
+): Promise<T> {
+  const { version: from, ...fields } = input
+  const base = keepMine ? undefined : own.baseFor(id, from)
+  const saved = await api<T>(path, 'PUT', { ...fields, base_version: base })
+  own.record(id, from, base, saved.version)
+  return saved
 }
