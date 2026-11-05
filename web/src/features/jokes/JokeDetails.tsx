@@ -12,9 +12,10 @@ import { FollowedBy, FollowsField } from './ChainFields'
 import { CleanPicker, HashtagField, StrengthPicker, TypeToggles } from './DetailControls'
 import { RuntimeField } from './RuntimeField'
 import { TopicManager } from './TopicManager'
+import { NEW_TOPIC, useNewTopic } from './useNewTopic'
 import { TypeManager } from './TypeManager'
 
-const NEW = '__new__'
+const NEW = NEW_TOPIC
 
 /** A label and its control. `edit` adds a small button that opens the manager for the whole list. */
 function Row({ label, edit, children }: { label: string; edit?: { label: string; open: () => void }; children: ReactNode }) {
@@ -35,6 +36,7 @@ export function JokeDetails({ jokeId, draft, update }: { jokeId?: string; draft:
   const { data: statuses = [] } = useStatuses()
   const { data: jokes = [] } = useJokes()
   const actions = useTopicActions()
+  const newTopic = useNewTopic()
   const { prompt, toast } = useFeedback()
   const [managing, setManaging] = useState<'topics' | 'types' | null>(null)
   const topic = topics.find((t) => t.id === draft.topic_id)
@@ -59,8 +61,8 @@ export function JokeDetails({ jokeId, draft, update }: { jokeId?: string; draft:
 
   const pickTopic = async (id: string) => {
     if (id !== NEW) return update({ topic_id: id, subtopic_id: null })
-    const name = await prompt({ title: 'New topic', label: 'Topic name', confirmLabel: 'Add topic' })
-    if (name) actions.create.mutate(name, { onSuccess: (t) => update({ topic_id: t.id, subtopic_id: null }), onError: (e) => toast(e.message) })
+    const made = await newTopic()
+    if (made) update({ topic_id: made.id, subtopic_id: null })
   }
   const pickSub = async (id: string) => {
     if (id !== NEW) return update({ subtopic_id: id || null })

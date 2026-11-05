@@ -18,6 +18,7 @@ import { jokesOn, premiseSize } from '../../lib/premises'
 import { formatDateTime } from '../../lib/time'
 import { useCapture } from '../capture/captureContext'
 import { toInput } from '../jokes/useAutosaveJoke'
+import { NEW_TOPIC, useNewTopic } from '../jokes/useNewTopic'
 import { AddJokesDialog } from './AddJokesDialog'
 import { PremiseGuide } from './PremiseGuide'
 import { usePremiseDraft } from './usePremiseDraft'
@@ -33,6 +34,12 @@ function Editor({ premise }: { premise: Premise }) {
   const navigate = useNavigate()
   const { search } = useLocation()
   const [adding, setAdding] = useState(false)
+  const newTopic = useNewTopic()
+  const pickTopic = async (id: string) => {
+    if (id !== NEW_TOPIC) return update({ topic_id: id })
+    const made = await newTopic()
+    if (made) update({ topic_id: made.id })
+  }
   const jokes = jokesOn(premise.id, all)
   const runtime = jokes.reduce((s, j) => s + j.duration_seconds, 0)
 
@@ -58,8 +65,9 @@ function Editor({ premise }: { premise: Premise }) {
           <Textarea placeholder="Because… and anything else worth keeping" value={draft.notes} onChange={(e) => update({ notes: e.target.value })} />
         </Field>
         <Field label="Topic">
-          <Select value={draft.topic_id} onChange={(e) => update({ topic_id: e.target.value })} className="block sm:max-w-xs">
+          <Select value={draft.topic_id} onChange={(e) => pickTopic(e.target.value)} className="block sm:max-w-xs">
             {topics.map((t) => <option key={t.id} value={t.id}>{topicName(t)}</option>)}
+            <option value={NEW_TOPIC}>New topic…</option>
           </Select>
         </Field>
         <PremiseGuide open={jokes.length === 0 && !premise.notes.trim()} />

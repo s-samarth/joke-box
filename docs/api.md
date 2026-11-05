@@ -46,7 +46,7 @@ still accept the old `bit_id` and `bit_ids` for good. Responses use only the new
 | POST | `/api/topics` | `{name}` → 201, at the end. 409 on a duplicate name |
 | PUT | `/api/topics/order` | `{ids}` → 204. Your topics in this order; Thoughts stays first. Unknown ids are skipped and ones left out keep their order after the rest |
 | PATCH | `/api/topics/{id}` | `{name}`. The system topic can't be renamed |
-| DELETE | `/api/topics/{id}` | Moves its jokes and show links to Thoughts first. 400 for the system topic |
+| DELETE | `/api/topics/{id}` | Moves its jokes, premises and show links to Thoughts first. 400 for the system topic |
 | POST | `/api/topics/{id}/subtopics` | `{name}` → 201, at the end |
 | PUT | `/api/topics/{id}/subtopics/order` | `{ids}` → 204. Same rules as topics |
 | PATCH | `/api/subtopics/{id}` | `{name}` |

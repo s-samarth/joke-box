@@ -84,6 +84,9 @@ through everything you've written at once.
    jokes in reading order, chains kept together.
 4. Search the takes and notes, narrow to a topic, or sort by Most jokes to see which ideas carry
    the most material and which are still waiting for a joke.
+5. Need a topic that doesn't exist yet? **New topic** at the top of the Topic menu (on Premises or
+   Jokes) adds it, or pick **New topic…** in a premise's Topic picker. Jokes and premises share
+   the list, so it shows up in both.
 
 ## 5. Brainstorm against the clock
 

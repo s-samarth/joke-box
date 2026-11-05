@@ -95,7 +95,7 @@ Every source file stays under 200 lines; a screen is a folder of small component
 5. **The router** loads rows with `get_owned` / `find_owned`, which filter by `user_id`. Another
    user's row is a 404, never a 403, so ids can't be probed.
 6. **The service layer** does multi-row work in one transaction (for example, deleting a topic moves
-   its jokes to Thoughts and re-points show links, then commits once).
+   its jokes and premises to Thoughts and re-points show links, then commits once).
 7. **The response** goes out as a Pydantic schema. On the client, TanStack Query updates the cache
    and invalidates the related keys.
 
