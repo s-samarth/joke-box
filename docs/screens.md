@@ -156,8 +156,12 @@ the jokes' created dates, so there's no separate log to fall out of step.
   back to Jokes with no filters in the link (the nav, a joke opened from Home) and the last ones
   return. They're kept per tab or app window and lapse after an hour away; Clear forgets them.
   **New joke** opened while the list is filtered to a topic (and subtopic) starts filed there.
-- **Topic and type managers** are sheets for renaming and deleting across every joke. Deleting a
-  topic moves its jokes to Thoughts. Renaming a type onto an existing one merges the two.
+- **New topic** leads the Topic menu, so you can add a topic without scrolling past the others or
+  writing a joke first; the list then filters to it. **Manage topics…** stays at the bottom.
+- **Topic and type managers** are sheets for renaming and deleting across every joke. Jokes and
+  premises share one topic list. Deleting a topic moves its jokes, premises and logged shows to
+  Thoughts, and the confirmation counts all three. The number beside a topic counts its jokes and
+  premises. Renaming a type onto an existing one merges the two.
 
 <img src="screenshots/desktop-joke.webp" alt="A joke open beside the list">
 <p>
@@ -176,7 +180,9 @@ The ideas under your jokes ("X is Y, because Z"). Laid out like Jokes: a list on
 open premise beside it on desktop; on a phone the list gives way to the premise you open.
 
 - **List:** a search box ("Search takes and notes"), a Topic menu and a sort (By topic, Newest,
-  Most jokes, Fewest jokes). Sorted by topic, a small heading starts each topic's run. Each row
+  Most jokes, Fewest jokes). The Topic menu is the one Jokes has: **New topic** at the top,
+  **Manage topics…** at the bottom, both working on the shared topic list. The Topic pickers in
+  **New premise** and on a premise end with **New topic…**. Sorted by topic, a small heading starts each topic's run. Each row
   shows the take and how many jokes rest on it.
 - **A premise:** the take and its notes (why it's true) are edited in place and save on their own.
   A short guide ([PremiseGuide.tsx](../web/src/features/premises/PremiseGuide.tsx)) opens while the

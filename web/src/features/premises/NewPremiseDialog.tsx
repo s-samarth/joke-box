@@ -8,6 +8,7 @@ import { Field, Select, Textarea } from '../../components/ui/Field'
 import { Modal } from '../../components/ui/Modal'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { topicName } from '../../lib/jokeMeta'
+import { NEW_TOPIC, useNewTopic } from '../jokes/useNewTopic'
 import { PremiseGuide } from './PremiseGuide'
 
 interface Props {
@@ -26,6 +27,12 @@ export function NewPremiseDialog({ open, onOpenChange, topicId, onCreated }: Pro
   const [take, setTake] = useState('')
   const [notes, setNotes] = useState('')
   const chosen = topic || topicId || topics.find((t) => t.is_system)?.id || ''
+  const newTopic = useNewTopic()
+  const pickTopic = async (id: string) => {
+    if (id !== NEW_TOPIC) return setTopic(id)
+    const made = await newTopic()
+    if (made) setTopic(made.id)
+  }
 
   const close = () => {
     onOpenChange(false)
@@ -46,8 +53,9 @@ export function NewPremiseDialog({ open, onOpenChange, topicId, onCreated }: Pro
       footer={<Button variant="tape" disabled={!take.trim()} onClick={create}>Add premise</Button>}>
       <div className="space-y-4">
         <Field label="Topic">
-          <Select value={chosen} onChange={(e) => setTopic(e.target.value)}>
+          <Select value={chosen} onChange={(e) => pickTopic(e.target.value)}>
             {topics.map((t) => <option key={t.id} value={t.id}>{topicName(t)}</option>)}
+            <option value={NEW_TOPIC}>New topic…</option>
           </Select>
         </Field>
         <Field label="Your take">

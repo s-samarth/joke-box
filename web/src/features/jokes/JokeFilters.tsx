@@ -2,7 +2,7 @@
  * Search plus menus for topic, premise, type, status and sort. Each menu shows what's chosen. Once you pick a
  * topic that has subtopics, a Subtopic menu appears beside it, so the topic list stays topics only.
  */
-import { ChevronDown, Search, X } from 'lucide-react'
+import { ChevronDown, Plus, Search, X } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { useStatuses, useTopics, useTypes } from '../../api/library'
 import { usePremises } from '../../api/premises'
@@ -12,6 +12,7 @@ import { UNDEFINED_TYPE, topicName } from '../../lib/jokeMeta'
 import { NO_PREMISE, ON_A_PREMISE } from '../../lib/premises'
 import { TopicManager } from './TopicManager'
 import { TypeManager } from './TypeManager'
+import { useNewTopic } from './useNewTopic'
 import { SORTS, type SortKey, type useJokeFilters } from './useJokeFilters'
 
 type Filters = ReturnType<typeof useJokeFilters>
@@ -31,10 +32,14 @@ export function JokeFilters({ f }: { f: Filters }) {
   const { data: statuses = [] } = useStatuses()
   const { data: premises = [] } = usePremises()
   const [managing, setManaging] = useState<'topics' | 'types' | null>(null)
+  const newTopic = useNewTopic()
   const topic = topics.find((t) => t.id === f.topic)
   const sub = topic?.subtopics.find((s) => s.id === f.sub)
 
+  // New topic leads the menu, so it's there without scrolling past every topic on a phone.
   const topicItems: (MenuItem | 'divider')[] = [
+    { label: 'New topic', icon: <Plus size={16} className="text-tape" />, onSelect: () => void newTopic().then((t) => t && f.set({ topic: t.id, sub: null })) },
+    'divider',
     { label: 'All topics', onSelect: () => f.set({ topic: null, sub: null }), checked: !f.topic },
     ...topics.map((t) => ({ label: topicName(t), onSelect: () => f.set({ topic: t.id, sub: null }), checked: f.topic === t.id })),
     'divider',

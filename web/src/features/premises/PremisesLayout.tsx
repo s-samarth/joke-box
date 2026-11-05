@@ -4,7 +4,7 @@
  * topic, sort by size. On a phone the list gives way to the premise you open.
  */
 import { Lightbulb, Plus, Search, X } from 'lucide-react'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
 import { useTopics } from '../../api/library'
 import { Button } from '../../components/ui/Button'
@@ -14,6 +14,8 @@ import { EmptyState, PageHead, Spinner } from '../../components/ui/pieces'
 import { topicName } from '../../lib/jokeMeta'
 import { NO_PREMISE, premiseSize } from '../../lib/premises'
 import { MenuButton } from '../jokes/JokeFilters'
+import { TopicManager } from '../jokes/TopicManager'
+import { useNewTopic } from '../jokes/useNewTopic'
 import { NewPremiseDialog } from './NewPremiseDialog'
 import { PremiseGuide } from './PremiseGuide'
 import { PREMISE_SORTS, usePremiseFilters, type PremiseSort } from './usePremiseFilters'
@@ -34,9 +36,16 @@ export function PremisesLayout() {
   kept.delete('new')
   const search = kept.size ? `?${kept}` : ''
   const topic = topics.find((t) => t.id === f.topic)
-  const topicItems: MenuItem[] = [
+  const newTopic = useNewTopic()
+  const [managing, setManaging] = useState(false)
+  // The same topics as Jokes, so the same way to add and manage them.
+  const topicItems: (MenuItem | 'divider')[] = [
+    { label: 'New topic', icon: <Plus size={16} className="text-tape" />, onSelect: () => void newTopic().then((t) => t && f.set({ topic: t.id })) },
+    'divider',
     { label: 'All topics', onSelect: () => f.set({ topic: null }), checked: !f.topic },
     ...topics.map((t) => ({ label: topicName(t), onSelect: () => f.set({ topic: t.id }), checked: f.topic === t.id })),
+    'divider',
+    { label: 'Manage topics…', onSelect: () => setManaging(true) },
   ]
   const sortItems: MenuItem[] = (Object.keys(PREMISE_SORTS) as PremiseSort[]).map((k) => ({ label: PREMISE_SORTS[k], onSelect: () => f.set({ sort: k === 'topic' ? null : k }), checked: f.sort === k }))
   // Sorted by topic, a small heading starts each topic's run.
@@ -95,6 +104,7 @@ export function PremisesLayout() {
       </section>
       <NewPremiseDialog open={creating} onOpenChange={(open) => (created.current && !open ? (created.current = false) : setCreating(open))} topicId={f.topic}
         onCreated={(id) => { created.current = true; navigate(`/premises/${id}${search}`) }} />
+      <TopicManager open={managing} onClose={() => setManaging(false)} onRemoved={(id) => f.topic === id && f.set({ topic: null })} />
     </div>
   )
 }
