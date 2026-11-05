@@ -13,7 +13,8 @@ const named = <K extends string>(load: () => Promise<Record<K, React.ComponentTy
 // Screens beyond Home load on first visit, so the app opens fast on a phone.
 const JokesLayout = named(() => import('./features/jokes/JokesLayout'), 'JokesLayout')
 const NoJokeSelected = named(() => import('./features/jokes/JokesLayout'), 'NoJokeSelected')
-const JokeMapScreen = named(() => import('./features/jokes/JokesLayout'), 'JokeMapScreen')
+const JokeMapRoute = named(() => import('./features/jokes/JokesLayout'), 'JokeMapRoute')
+const JokeWebRoute = named(() => import('./features/jokes/JokesLayout'), 'JokeWebRoute')
 const JokePage = named(() => import('./features/jokes/JokePage'), 'JokePage')
 const PremisesLayout = named(() => import('./features/premises/PremisesLayout'), 'PremisesLayout')
 const NoPremiseSelected = named(() => import('./features/premises/PremisesLayout'), 'NoPremiseSelected')
@@ -56,7 +57,8 @@ export function App() {
           <Route index element={<TodayPage />} />
           <Route path="jokes" element={<JokesLayout />}>
             <Route index element={<NoJokeSelected />} />
-            <Route path="map" element={<JokeMapScreen />} />
+            <Route path="map" element={<JokeMapRoute />} />
+            <Route path="web" element={<JokeWebRoute />} />
             <Route path=":jokeId" element={<JokePage />} />
           </Route>
           <Route path="premises" element={<PremisesLayout />}>

@@ -59,8 +59,17 @@ decoration.
 
 - **Phone first.** Every screen is designed at 390 px. The content column is at most about 672 px
   on reading screens, wider on Shows and in the set builder.
-- **Desktop:** a 240 px rail on the left, with the content centred. Jokes use a two-pane
-  list-and-detail layout.
+- **Desktop:** a 240 px rail on the left, with the content centred. Below 1280 px (an iPad in
+  landscape, a small laptop) the rail is 64 px of icons, so the work keeps the width; its toggle
+  switches either way. Jokes and Premises use `SplitView`: on an iPad the list fills the screen (two
+  across) until you open something, then narrows to a column beside it; from 1280 px the list is
+  a column with the map or the premise guide beside it. Map and Web take the whole screen, never a
+  third of it.
+- **Filter menus** sit in one row (`ChipRow`) that scrolls sideways and fades at the edge with more,
+  instead of stacking into rows.
+- **Motion:** layout changes (opening the first item, closing, Map ↔ List, the rail toggle)
+  cross-fade in 180 ms with view transitions; an item opened beside the list settles in. Both are
+  off under reduced motion.
 - **Phone:** a header plus a bottom bar with a raised round **+** in the middle. Safe areas are
   respected (`.pt-safe`, `.pb-safe`) and pinch-zoom is allowed.
 - **Tap targets** are at least 44 px. Buttons are 44 px tall on phones and 40 px on desktop.

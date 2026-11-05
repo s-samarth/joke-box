@@ -1,74 +1,66 @@
 /**
- * The joke map and the premise web, as a screen. On desktop it fills the space beside the list
- * when no joke is open; /jokes/map opens it on its own, which is how a phone gets to it. Both show
- * whatever the list is showing, since the filters live in the URL.
+ * The joke map and the premise web. /jokes/map and /jokes/web give one the whole screen under the
+ * Jokes header (see ViewSwitch). On a wide screen with no joke open, the one you used last also
+ * sits beside the list, with a way to open it full size. Both show whatever the list is showing,
+ * since the filters live in the URL.
  *
- * Map draws chains left to right; Web puts each premise in the middle of its jokes. The choice is
- * remembered on this device (a device that last used the old Board opens on the Map).
+ * Map draws chains left to right; Web puts each premise in the middle of its jokes.
  */
-import { ArrowLeft } from 'lucide-react'
-import { useState } from 'react'
+import { Maximize2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { useJokes } from '../../../api/library'
 import { EmptyState, Spinner } from '../../../components/ui/pieces'
 import { useJokeFilters } from '../useJokeFilters'
 import { JokeMap } from './JokeMap'
 import { JokeWeb } from './JokeWeb'
+import { saveView, savedView, type JokeView } from './savedView'
 
-type View = 'map' | 'web'
-const VIEWS: Record<View, { tab: string; title: string }> = {
+const TITLES: Record<JokeView, { tab: string; title: string }> = {
   map: { tab: 'Map', title: 'Joke map' },
   web: { tab: 'Web', title: 'Premise web' },
 }
-const VIEW_KEY = 'jokebox.jokeView'
 
-function savedView(): View {
-  try {
-    const saved = localStorage.getItem(VIEW_KEY)
-    return saved === 'web' ? saved : 'map'
-  } catch {
-    return 'map'
-  }
-}
-
-export function JokeMapPage({ own = false }: { own?: boolean }) {
+/** The map or the web itself, for the jokes the filters leave. */
+export function JokeMapView({ view }: { view: JokeView }) {
   const f = useJokeFilters()
   const { data: all = [] } = useJokes()
-  const [view, setView] = useState<View>(savedView)
-  const choose = (v: View) => {
-    setView(v)
-    try {
-      localStorage.setItem(VIEW_KEY, v)
-    } catch {
-      // Private mode: it just won't be remembered.
-    }
+  useEffect(() => saveView(view), [view])
+  if (f.isPending) return <div className="py-16"><Spinner /></div>
+  if (f.visible.length === 0) {
+    return <EmptyState title="Nothing here">{f.active ? 'No jokes match these filters. Clear them to see everything.' : 'Write a joke and it shows up here.'}</EmptyState>
   }
+  return view === 'map'
+    ? <JokeMap shown={f.visible} all={all} query={f.query} />
+    : <JokeWeb shown={f.visible} all={all} query={f.query} everything={!f.active} />
+}
 
+/** /jokes/map and /jokes/web: the whole screen, under the Jokes header and filters. */
+export const JokeMapScreen = ({ view }: { view: JokeView }) => <div className="pt-2 pb-16"><JokeMapView view={view} /></div>
+
+/** Beside the list on a wide screen, with nothing open. */
+export function JokeMapAside() {
+  const { query } = useJokeFilters()
+  const [view, setView] = useState<JokeView>(savedView)
+  const full = `Open the ${TITLES[view].title.toLowerCase()} full size`
   return (
-    <div className="pt-2 pb-16 lg:pt-10">
-      {own && (
-        <Link to={`/jokes${f.query ? `?${f.query}` : ''}`} className="inline-flex h-12 items-center gap-1.5 text-dim hover:text-paper lg:hidden">
-          <ArrowLeft size={18} /> Jokes
-        </Link>
-      )}
+    <div className="pt-10 pb-16">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="headline text-4xl">{VIEWS[view].title}</h2>
-        <div role="tablist" aria-label="Map or web" className="flex rounded-lg bg-ink-3 p-0.5 text-sm">
-          {(Object.keys(VIEWS) as View[]).map((v) => (
-            <button key={v} type="button" role="tab" aria-selected={view === v} onClick={() => choose(v)}
-              className={`h-9 rounded-md px-4 ${view === v ? 'bg-ink-4 text-paper' : 'text-dim hover:text-paper'}`}>{VIEWS[v].tab}</button>
-          ))}
+        <h2 className="headline text-4xl">{TITLES[view].title}</h2>
+        <div className="flex items-center gap-1">
+          <div role="tablist" aria-label="Map or web" className="flex rounded-lg bg-ink-3 p-0.5 text-sm">
+            {(Object.keys(TITLES) as JokeView[]).map((v) => (
+              <button key={v} type="button" role="tab" aria-selected={view === v} onClick={() => setView(v)}
+                className={`h-8 rounded-md px-3 ${view === v ? 'bg-ink-4 text-paper' : 'text-dim hover:text-paper'}`}>{TITLES[v].tab}</button>
+            ))}
+          </div>
+          <Link to={`/jokes/${view}${query ? `?${query}` : ''}`} viewTransition aria-label={full} title={full}
+            className="inline-flex size-9 items-center justify-center rounded-lg text-dim transition-colors hover:bg-ink-3 hover:text-paper">
+            <Maximize2 size={17} />
+          </Link>
         </div>
       </div>
-      {f.isPending ? (
-        <div className="py-16"><Spinner /></div>
-      ) : f.visible.length === 0 ? (
-        <EmptyState title="Nothing here">{f.active ? 'No jokes match these filters. Clear them to see everything.' : 'Write a joke and it shows up here.'}</EmptyState>
-      ) : view === 'map' ? (
-        <JokeMap shown={f.visible} all={all} query={f.query} />
-      ) : (
-        <JokeWeb shown={f.visible} all={all} query={f.query} everything={!f.active} />
-      )}
+      <JokeMapView view={view} />
     </div>
   )
 }
