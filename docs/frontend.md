@@ -72,7 +72,9 @@ under fixed keys (`setMutationDefaults`), each spreading the shared `QUEUED` opt
   own versions in [jokeSaves.ts](../web/src/api/jokeSaves.ts), kept with the cache), so a run of
   autosaves never clashes with itself. If the joke moved on elsewhere and the save would change
   it, the server answers 409 and the edit goes to Couldn't sync, where **Keep mine** resends it
-  without the check. Resending the very same edit is never a clash.
+  without the check. Resending the very same edit is never a clash, and a save that changes
+  nothing (Save with no edit, a word typed and deleted) doesn't move the version on, so it can't
+  make another device's waiting edit clash.
 - **Sets, Craft notes, observations and premises go the same way** (`sendChecked` in
   ownVersions.ts), each with Couldn't sync and Keep mine. Observation saves live in
   [observationSaves.ts](../web/src/api/observationSaves.ts), not queryClient.ts, which

@@ -102,7 +102,8 @@ def save_setlist(
     venue = venue_named(db, user, body.venue_name) if body.venue_name else None
     found = find_owned(db, Setlist, setlist_id, user)
     if found is not None:
-        check_set(found, body, lambda: setlist_out(found, hidden, joke_runtimes(db, user)))
+        # Times follow the jokes and don't count as a change, so no runtimes are looked up.
+        check_set(found, body, lambda: setlist_out(found, hidden, {}))
     setlist = found or Setlist(id=setlist_id, user_id=user.id)
     setlist.name = body.name
     setlist.show_date = body.show_date
