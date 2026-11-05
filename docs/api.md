@@ -133,7 +133,7 @@ A joke points at its premise with `premise_id`; a premise doesn't list its jokes
 | GET | `/api/sessions/summaries` | Brainstorm sessions without their ink (`ink_strokes` counts it), newest first. What the app lists |
 | GET | `/api/sessions/{id}` | One session with its ink, **gzip-packed** (see below). 404 if it isn't yours, is in the Trash, or doesn't exist yet |
 | GET | `/api/sessions` | Every session with all its ink. Kept for older app versions only: all the ink at once outgrows the 4.5 MB response limit |
-| PUT | `/api/sessions/{id}` | `{title, content, ink[], ink_pages, timer_seconds, joke_ids[], observation_ids[], technique_id?}`, plain or gzip-packed. The technique must be your own craft note. Answers with the summary (no ink) |
+| PUT | `/api/sessions/{id}` | `{title, content, ink[], ink_pages, timer_seconds, joke_ids[], observation_ids[], technique_id?, base_version?}`, plain or gzip-packed. The technique must be your own craft note. Answers with the summary (no ink), which includes `version`. With `base_version`, an edit made from an older version that would change the session answers **409**, as for jokes; the app then keeps its edit as a new session |
 | DELETE | `/api/sessions/{id}` | |
 
 `ink` holds at most 10,000 strokes, each `{color, size, page, points: [[x, y, pressure], …]}`, with
@@ -167,7 +167,7 @@ On a deployment without a Blob store, these answer **503**.
 | POST | `/api/venues` | `{name}`. Returns the existing venue if the name is already used |
 | DELETE | `/api/venues/{id}?move_to=` | 409 if shows or sets use it and `move_to` is missing; with `move_to` (another of your venues), they move there first, then the venue is deleted |
 | GET | `/api/setlists` | Most recently edited first, with `items` and `venue_name`. Each item's `duration_seconds` is its joke's current runtime |
-| PUT | `/api/setlists/{id}` | `{name, show_date?, target_seconds, venue_name?, rating?, tag_ids[], items: [{joke_id, duration_seconds, optional}]}`. `rating` is 1–5 or null. The items and tags are replaced as a whole, items in the order sent. An item's `duration_seconds` is stored but not shown: sets always time a joke by the joke's own runtime. Jokes in the Trash keep their places |
+| PUT | `/api/setlists/{id}` | `{name, show_date?, target_seconds, venue_name?, rating?, tag_ids[], items: [{joke_id, duration_seconds, optional}], base_version?}`. `rating` is 1–5 or null. The answer includes `version`; with `base_version`, an edit made from an older version that would change the set answers **409**, as for jokes. The items and tags are replaced as a whole, items in the order sent. An item's `duration_seconds` is stored but not shown: sets always time a joke by the joke's own runtime. Jokes in the Trash keep their places |
 | DELETE | `/api/setlists/{id}` | To the Trash, with its jokes in order |
 | GET | `/api/set-tags` | Your set tags, in order |
 | POST | `/api/set-tags` | `{name}`. Goes last. 409 if the name is taken |

@@ -76,13 +76,13 @@ export const clearUnsynced = () => update(() => [])
 
 /**
  * Send it again through the same queued save. If it fails again, it comes back to the list. For a
- * clash (409) this replaces the other device's version ("Keep mine"): the joke save then skips
- * the version check.
+ * clash (409) this replaces the other device's version ("Keep mine"): the joke or set save then
+ * skips the version check.
  */
 export async function retryUnsynced(client: QueryClient, item: Unsynced) {
   await discardUnsynced(item.id)
   const key = renamedKey(item.key)
-  const keepMine = item.status === 409 && key[0] === 'joke' && typeof item.variables === 'object'
+  const keepMine = item.status === 409 && (key[0] === 'joke' || key[0] === 'setlist') && typeof item.variables === 'object'
   const variables = keepMine ? { ...(item.variables as object), keepMine: true } : item.variables
   new MutationObserver<unknown, Error, unknown>(client, { mutationKey: key }).mutate(variables).catch(() => {})
 }

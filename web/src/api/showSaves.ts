@@ -4,13 +4,15 @@
  * so a save made offline survives a reload; main.tsx imports this file before saves replay.
  */
 import { api } from './client'
+import { ownVersions } from './ownVersions'
 import { keys, queryClient, refreshWhenSynced } from './queryClient'
 import { QUEUED } from './sync'
 import type { Brainstorm, PerformanceLog, Setlist } from './types'
 import type { BrainstormInput, LogInput, SetlistInput } from './shows'
 
 export type SaveLogVars = { id: string; input: LogInput }
-export type SaveSetlistVars = { id: string; input: SetlistInput }
+/** `keepMine`: a clash being retried from Couldn't sync, to go over the other device's version. */
+export type SaveSetlistVars = { id: string; input: SetlistInput; keepMine?: boolean }
 export type SaveBrainstormVars = { id: string; input: BrainstormInput }
 
 export const saveLogKey = ['log', 'save']
@@ -54,12 +56,28 @@ queryClient.setMutationDefaults(deleteLogKey, {
   onSettled: () => refreshWhenSynced(keys.logs, keys.venues, keys.craftNotes),
 })
 
+/*
+ * A set edited on two devices goes the way of a joke (see jokeSaves.ts): the save sends the
+ * version the editor opened, this device's own saves never clash with each other, and an edit
+ * made from a version that moved on elsewhere is refused (409) and goes to Couldn't sync, where
+ * Keep mine (`keepMine`) sends it again without the check.
+ */
+const ownSets = ownVersions('set-own-versions')
+
 queryClient.setMutationDefaults(saveSetlistKey, {
   ...QUEUED,
-  mutationFn: ({ id, input }: SaveSetlistVars) => api<Setlist>(`/api/setlists/${id}`, 'PUT', input),
+  mutationFn: async ({ id, input, keepMine }: SaveSetlistVars) => {
+    const { version: from, ...fields } = input
+    const base = keepMine ? undefined : ownSets.baseFor(id, from)
+    const saved = await api<Setlist>(`/api/setlists/${id}`, 'PUT', { ...fields, base_version: base })
+    ownSets.record(id, from, base, saved.version)
+    return saved
+  },
   onMutate: ({ id, input }: SaveSetlistVars) => {
     const items = input.items.map((item, position) => ({ ...item, position }))
-    return upsert<Setlist>(keys.setlists, { ...input, items, id, created_at: createdAt<Setlist>(keys.setlists, id), updated_at: now() })
+    const known = queryClient.getQueryData<Setlist[]>(keys.setlists)?.find((s) => s.id === id)
+    const version = input.version ?? known?.version ?? 0
+    return upsert<Setlist>(keys.setlists, { ...input, items, id, version, created_at: createdAt<Setlist>(keys.setlists, id), updated_at: now() })
   },
   onSettled: () => refreshWhenSynced(keys.setlists, keys.venues),
 })

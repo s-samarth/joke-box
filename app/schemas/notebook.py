@@ -49,7 +49,9 @@ class Stroke(BaseModel):
     points: list[tuple[float, float, float]] = Field(max_length=5000)
 
 
-class WritingSessionIn(BaseModel):
+class WritingSessionFields(BaseModel):
+    """What a session holds, as the app sends it and gets it back."""
+
     title: str = Field(default="", max_length=200)
     content: str = ""
     ink: list[Stroke] = Field(default_factory=list, max_length=10000)
@@ -68,10 +70,16 @@ class WritingSessionIn(BaseModel):
         return self
 
 
-class WritingSessionOut(WritingSessionIn):
+class WritingSessionIn(WritingSessionFields):
+    # The version this edit started from. Omitted (a new session, an older app), not checked.
+    base_version: int | None = Field(default=None, le=INT_MAX)
+
+
+class WritingSessionOut(WritingSessionFields):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
+    version: int
     created_at: datetime
     updated_at: datetime
 
@@ -93,5 +101,6 @@ class WritingSessionSummary(BaseModel):
     joke_ids: list[uuid.UUID]
     observation_ids: list[uuid.UUID]
     technique_id: uuid.UUID | None
+    version: int
     created_at: datetime
     updated_at: datetime

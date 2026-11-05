@@ -108,6 +108,8 @@ export interface Setlist {
   rating: number | null
   tag_ids: string[]
   items: SetlistItem[]
+  /** Up by one per save on the server; catches edits made on two devices. */
+  version: number
   created_at: string
   updated_at: string
 }
@@ -146,6 +148,8 @@ export interface WritingSessionInput {
   observation_ids: string[]
   /** The craft technique this session runs, if any. */
   technique_id: string | null
+  /** The version the editor opened, sent as the base of the save. 0 or missing: not saved yet. */
+  version?: number
 }
 
 export interface WritingSession extends WritingSessionInput {

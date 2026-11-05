@@ -10,6 +10,7 @@ from app.auth.deps import CurrentUser, DbSession, find_owned, get_owned
 from app.models import CraftNote, WritingSession
 from app.packed import packed_json
 from app.schemas.notebook import WritingSessionIn, WritingSessionOut, WritingSessionSummary
+from app.services.clashes import check_session
 from app.services.trash import move_to_trash
 
 router = APIRouter(prefix="/api", tags=["sessions"])
@@ -54,7 +55,8 @@ def get_session(session_id: uuid.UUID, user: CurrentUser, db: DbSession) -> Resp
 
 
 # The answer to a save leaves out the ink: echoing a big session back could outgrow the limit
-# and fail a save that had in fact gone through. The save doesn't read the old ink either.
+# and fail a save that had in fact gone through. The save doesn't read the old ink either, except
+# to check one edited from an older version (made offline while another device saved it).
 @router.put("/sessions/{session_id}", response_model=WritingSessionSummary)
 def put_session(
     session_id: uuid.UUID, body: WritingSessionIn, user: CurrentUser, db: DbSession
@@ -62,11 +64,13 @@ def put_session(
     """Create or update. The client picks the id, so autosaves and offline retries are safe."""
     if body.technique_id is not None:
         get_owned(db, CraftNote, body.technique_id, user, in_trash=True)  # only your own techniques
+    data = body.model_dump(mode="json")
     session = find_owned(db, WritingSession, session_id, user)
     if session is None:
         session = WritingSession(id=session_id, user_id=user.id)
         db.add(session)
-    data = body.model_dump(mode="json")
+    else:
+        check_session(session, body, data)
     session.title = data["title"]
     session.content = data["content"]
     session.ink = data["ink"]

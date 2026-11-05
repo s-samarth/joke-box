@@ -56,6 +56,8 @@ export interface SetlistInput {
   rating: number | null
   tag_ids: string[]
   items: { joke_id: string; duration_seconds: number; optional: boolean }[]
+  /** The version this edit started from, sent as the base of the save. Missing: a new set. */
+  version?: number
 }
 
 export function useSetlistActions() {

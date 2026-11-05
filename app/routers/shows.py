@@ -16,6 +16,7 @@ from app.schemas.shows import (
     SetlistItemOut,
     SetlistOut,
 )
+from app.services.clashes import check_set
 from app.services.show_jokes import jokes_out, set_jokes, wanted, your_jokes
 from app.services.trash import move_to_trash, trashed_joke_ids
 
@@ -67,6 +68,7 @@ def setlist_out(s: Setlist, hidden: set[uuid.UUID], runtimes: dict[uuid.UUID, in
         rating=s.rating,
         tag_ids=[t.id for t in s.tags],
         items=[item_out(i, runtimes) for i in s.items if i.joke_id not in hidden],
+        version=s.version,
         created_at=s.created_at,
         updated_at=s.updated_at,
     )
@@ -98,7 +100,10 @@ def save_setlist(
     sent = [i for i in body.items if i.joke_id not in hidden]
     check_all_owned(db, Joke, {i.joke_id for i in sent}, user)
     venue = venue_named(db, user, body.venue_name) if body.venue_name else None
-    setlist = find_owned(db, Setlist, setlist_id, user) or Setlist(id=setlist_id, user_id=user.id)
+    found = find_owned(db, Setlist, setlist_id, user)
+    if found is not None:
+        check_set(found, body, lambda: setlist_out(found, hidden, joke_runtimes(db, user)))
+    setlist = found or Setlist(id=setlist_id, user_id=user.id)
     setlist.name = body.name
     setlist.show_date = body.show_date
     setlist.target_seconds = body.target_seconds
