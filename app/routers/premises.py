@@ -8,6 +8,7 @@ from sqlalchemy import select
 from app.auth.deps import CurrentUser, DbSession, find_owned
 from app.models import Premise, Topic
 from app.schemas.premises import PremiseIn, PremiseOut
+from app.services.clashes import PREMISE_CLASH, check_fields
 from app.services.ordering import next_position
 from app.services.trash import move_to_trash
 
@@ -37,6 +38,9 @@ def put_premise(
         position = next_position(db, Premise.position, Premise.user_id == user.id)
         premise = Premise(id=premise_id, user_id=user.id, position=position)
         db.add(premise)
+    else:
+        fields = {"topic_id": body.topic_id, "take": body.take, "notes": body.notes}
+        check_fields(premise, body.base_version, fields, PREMISE_CLASH)
     premise.topic_id, premise.take, premise.notes = body.topic_id, body.take, body.notes
     db.commit()
     db.refresh(premise)

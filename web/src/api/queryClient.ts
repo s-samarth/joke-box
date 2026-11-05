@@ -9,10 +9,10 @@ import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persi
 import { MutationCache, type QueryKey, QueryClient } from '@tanstack/react-query'
 import { del, get, set } from 'idb-keyval'
 import { handedOver } from '../lib/oneTab'
-import { ApiError, api } from './client'
+import { ApiError } from './client'
 import { QUEUED } from './sync'
 import { keepUnsynced } from './unsynced'
-import type { Observation, ObservationInput, SessionSummary, WritingSession, WritingSessionInput } from './types'
+import type { ObservationInput, SessionSummary, WritingSession, WritingSessionInput } from './types'
 
 const WEEK = 1000 * 60 * 60 * 24 * 7
 
@@ -112,35 +112,13 @@ export const persistMaxAge = Infinity
 export const CACHE_BUSTER = 'v1'
 
 /* Observations get the same offline treatment: jot one down on the bus, it syncs later. */
-export type SaveObservationVars = { id: string; input: ObservationInput }
+/** `keepMine`: a clash being retried from Couldn't sync, to go over the other device's version. */
+export type SaveObservationVars = { id: string; input: ObservationInput; keepMine?: boolean }
 
 export const saveObservationKey = ['observation', 'save']
 export const deleteObservationKey = ['observation', 'delete']
 
-queryClient.setMutationDefaults(saveObservationKey, {
-  ...QUEUED,
-  mutationFn: ({ id, input }: SaveObservationVars) => api<Observation>(`/api/observations/${id}`, 'PUT', input),
-  onMutate: async ({ id, input }: SaveObservationVars) => {
-    await queryClient.cancelQueries({ queryKey: keys.observations })
-    const now = new Date().toISOString()
-    queryClient.setQueryData<Observation[]>(keys.observations, (old = []) => {
-      const existing = old.find((o) => o.id === id)
-      const next: Observation = { ...input, id, created_at: existing?.created_at ?? now, updated_at: now }
-      return existing ? old.map((o) => (o.id === id ? next : o)) : [next, ...old]
-    })
-  },
-  onSettled: () => refreshWhenSynced(keys.observations),
-})
-
-queryClient.setMutationDefaults(deleteObservationKey, {
-  ...QUEUED,
-  mutationFn: (id: string) => api<void>(`/api/observations/${id}`, 'DELETE'),
-  onMutate: async (id: string) => {
-    await queryClient.cancelQueries({ queryKey: keys.observations })
-    queryClient.setQueryData<Observation[]>(keys.observations, (old = []) => old.filter((o) => o.id !== id))
-  },
-  onSettled: () => refreshWhenSynced(keys.observations),
-})
+// Their save and delete defaults are in observationSaves.ts (they need ownVersions.ts, which needs this file).
 
 /* Brainstorm sessions autosave the same way (their saves are in sessionSaves.ts). Each session's
  * ink is its own query, kept on the device indefinitely so a session opens offline. */

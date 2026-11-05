@@ -80,12 +80,16 @@ export interface CraftNoteInput {
   analysis_id: string | null
   /** Sent when creating, so something written offline keeps the time it was written. */
   created_at?: string
+  /** The version this edit started from, sent as the base of the save. Missing: a new one. */
+  version?: number
 }
 
 export interface CraftNote extends CraftNoteInput {
   id: string
   /** From the note's kind: how screens show it. */
   behaviour: Behaviour
+  /** Up by one per save on the server; catches edits made on two devices. */
+  version: number
   created_at: string
   updated_at: string
 }

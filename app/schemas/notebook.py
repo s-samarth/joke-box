@@ -15,6 +15,8 @@ class ObservationIn(BaseModel):
     topic_id: uuid.UUID | None = None
     # Kept only when the observation is created: an import can keep the original date.
     created_at: datetime | None = None
+    # The version this edit started from. Omitted (a new one, an older app), nothing is checked.
+    base_version: int | None = Field(default=None, le=INT_MAX)
 
     @field_validator("text")
     @classmethod
@@ -31,6 +33,7 @@ class ObservationOut(BaseModel):
     id: uuid.UUID
     text: str
     topic_id: uuid.UUID | None
+    version: int
     created_at: datetime
     updated_at: datetime
 

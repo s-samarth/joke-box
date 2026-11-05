@@ -66,7 +66,7 @@ app/                    FastAPI application
   services/             logic that spans tables (joke save, topic delete, audio store)
   connector/            the MCP server Claude reads JokeBox through (see api.md)
   seed/                 demo data, Bit Vault importer
-alembic/versions/       migrations 0001-0030 (append-only)
+alembic/versions/       migrations 0001-0031 (append-only)
 tests/                  pytest, against SQLite locally and Postgres in CI
 scripts/                vercel_build.py, export_firestore.py, make_icons.py
 web/                    the React app (Vite)
@@ -233,6 +233,6 @@ one-off copy for a move to another region ([move-region.md](move-region.md)).
 | Joke types exist only while used | Matches how comics think ("a type is what my jokes are"); a rename onto an existing name merges them |
 | Type colours kept by name in their own table | A type that is pruned and used again keeps its colour, and a new type can be coloured before its joke saves |
 | A joke names one joke it follows (`jokes.follows_id`) | Each joke has one line back to the start of its chain while many can follow it, so chains branch into trees without a separate links table; adding a joke to a set walks that line and brings the earlier jokes |
-| Edits on two devices: a version check per joke, set and session, not merging | One comic, a phone and an iPad: clashes are rare, so the losing edit is shown, not merged. A joke or set waits in Couldn't sync with Keep mine; a brainstorm session is kept as a copy, since handwriting can't be redone. Rejected: last save wins (silently lost a set's change or a session's pages, as before `0030`), merging strokes from both devices (pages drawn over each other) and Keep mine for sessions (throws away handwriting) |
+| Edits on two devices: a version check on everything you write (jokes, sets, sessions, Craft notes, observations, premises), not merging | One comic, a phone and an iPad: clashes are rare, so the losing edit is shown, not merged. Most wait in Couldn't sync with Keep mine; a brainstorm session is kept as a copy, since handwriting can't be redone. Rejected: last save wins (silently lost a set's change or a session's pages, as before `0030` and `0031`), merging strokes from both devices (pages drawn over each other) and Keep mine for sessions (throws away handwriting) |
 | Handwriting stored as strokes, not images | Small, sharp at any size, and editable; costs a canvas renderer |
 | One allowlisted Google sign-in | No password handling at all; adding a user means editing an environment variable |

@@ -72,6 +72,8 @@ class Premise(Trashable, OwnedMixin, Base):
     notes: Mapped[str] = mapped_column(Text, default="")
     position: Mapped[int] = mapped_column(Integer, default=0)
     trashed_joke_ids: Mapped[list[str] | None] = mapped_column(JSON)
+    # Goes up by one on every save; a save edited from an older version is a conflict.
+    version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
 
 
 joke_type_links = Table(

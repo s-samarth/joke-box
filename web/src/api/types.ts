@@ -119,11 +119,15 @@ export interface ObservationInput {
   topic_id: string | null
   /** Sent when creating, so something written offline keeps the time it was written. */
   created_at?: string
+  /** The version this edit started from, sent as the base of the save. Missing: a new one. */
+  version?: number
 }
 
 /** Something you noticed: not a joke yet. Its topics are separate from joke topics. */
 export interface Observation extends ObservationInput {
   id: string
+  /** Up by one per save on the server; catches edits made on two devices. */
+  version: number
   created_at: string
   updated_at: string
 }

@@ -77,7 +77,9 @@ class AreaOrderIn(BaseModel):
     ids: list[uuid.UUID] = Field(max_length=200)
 
 
-class CraftNoteIn(BaseModel):
+class CraftNoteFields(BaseModel):
+    """What a note holds, as the app sends it and gets it back."""
+
     title: str = Field(max_length=200)
     body: str = ""
     kind_id: uuid.UUID
@@ -88,8 +90,6 @@ class CraftNoteIn(BaseModel):
     position: int = Field(default=0, ge=0, le=INT_MAX)
     performance_log_id: uuid.UUID | None = None
     analysis_id: uuid.UUID | None = None
-    # Honoured only when the note is created, so an import can keep the date it was written.
-    created_at: datetime | None = None
 
     _title = field_validator("title")(not_blank)
     _url = field_validator("url")(web_link)
@@ -100,10 +100,18 @@ class CraftNoteIn(BaseModel):
         return [v.strip() for v in values if v.strip()]
 
 
-class CraftNoteOut(CraftNoteIn):
+class CraftNoteIn(CraftNoteFields):
+    # Honoured only when the note is created, so an import can keep the date it was written.
+    created_at: datetime | None = None
+    # The version this edit started from. Omitted (a new one, an older app), nothing is checked.
+    base_version: int | None = Field(default=None, le=INT_MAX)
+
+
+class CraftNoteOut(CraftNoteFields):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
+    version: int
     # From the note's kind, so screens know how to show it without looking the kind up.
     behaviour: Behaviour
     created_at: datetime

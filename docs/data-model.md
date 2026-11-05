@@ -58,7 +58,7 @@ erDiagram
 | `users` | `google_sub` (unique), `email` (unique, lowercase), `display_name`, `avatar_url`, `plan` (default "Pro"), `last_login_at` | Created on first sign-in |
 | `topics` | `name`, `position`, `is_system` | One `is_system` topic per user, named `Random` and shown as **Thoughts**. It can't be deleted; deleting another topic moves its jokes there. `position` is the order you drag them into (new ones go last) |
 | `subtopics` | `topic_id → topics` (cascade), `name`, `position` | Unique per topic, in the order you drag them into. Deleting one clears it from its jokes |
-| `premises` | `topic_id → topics` (cascade), `take`, `notes`, `position` | The idea under a group of jokes: your take and the reasoning behind it. Filed under a topic, but a joke from any topic can rest on it. Upserted by client id, like jokes |
+| `premises` | `topic_id → topics` (cascade), `take`, `notes`, `position`, `version` (up by one per save) | The idea under a group of jokes: your take and the reasoning behind it. Filed under a topic, but a joke from any topic can rest on it. Upserted by client id, like jokes |
 | `joke_types` | `name` | Pruned whenever no joke uses it. Renaming onto an existing name merges the two |
 | `type_colors` | `name` (unique per user, any case), `color` (`#rrggbb`) | The colour of a type's dot. Kept by name in its own table, so a type that's pruned and used again keeps its colour |
 | `joke_type_links` | `joke_id`, `type_id` (both cascade) | Many-to-many |
@@ -79,7 +79,7 @@ erDiagram
 | `brainstorms` | `joke_id → jokes` (cascade), `title`, `content`, `timer_seconds` | A **Rewrite** session on one joke |
 | `brainstorm_versions` | `brainstorm_id` (cascade), `title`, `content`, `saved_at` | One row appended per save |
 | `observation_topics` | `name`, `position` | Separate from joke topics, in the order you drag them into |
-| `observations` | `text`, `topic_id` (set null) | Deleting the topic keeps the observation |
+| `observations` | `text`, `topic_id` (set null), `version` (up by one per save) | Deleting the topic keeps the observation. `version` catches edits made on two devices |
 | `writing_sessions` | `title`, `content`, `ink` JSON (strokes: colour, size, page, `[x, y, pressure]` points; deferred, so it's loaded only when read), `ink_strokes` (how many, kept on every save so lists never load the ink), `ink_pages` (1–20), `timer_seconds`, `joke_ids` JSON, `observation_ids` JSON, `technique_id → craft_notes` (set null), `version` (up by one per save) | A free **Brainstorm** session. `version` catches edits made on two devices: the losing edit is kept as a copy. Links are id lists; deleted targets just drop out of view. Deleting the technique keeps the session |
 | `voice_notes` | `label`, `hashtags` JSON, `duration_seconds`, `content_type`, `size_bytes`, `audio_path` | `audio_path` stays empty until the upload lands. The audio itself lives in Blob storage |
 
@@ -103,7 +103,7 @@ erDiagram
 | `watch_items` | `title`, `comedian`, `category`, `description`, `url`, `position`, `contrast`, `logic_density`, `has_a_point` (0–10, nullable), `watched` | Routines you add to study |
 | `craft_areas` | `name` (unique per user, any case), `description`, `color` (one of 12 presets, or any `#rrggbb`; colours can repeat), `screens` JSON (any of rewrite / sets / stage), `position` | Folders for craft notes. Everyone gets seven to start (at sign-in, or the first time areas are listed) and can add, rename, recolour, reorder and delete them. Deleting one moves its notes to another area; the last one can't be deleted |
 | `craft_kinds` | `name` (unique per user, any case), `behaviour` (checklist / technique / reference / path), `position` | Kinds of craft note. Everyone gets Checklist, Technique, Reference and Path to start and can add, rename and delete them. The behaviour is the only fixed part: it's how the app uses the kind's notes. Deleting one moves its notes to another kind; the last can't go |
-| `craft_notes` | `title`, `body`, `kind_id → craft_kinds`, `area_id → craft_areas`, `hashtags` JSON, `source`, `url`, `position`, `performance_log_id → performance_logs` (set null), `analysis_id → analyses` (set null) | The API sends each note's `behaviour` with it, from its kind. The two links say which show or analysis a lesson came from; deleting either keeps the note. An area's `screens` decide which notes Rewrite, the set builder and Stage show. The body is plain text with light formatting (`#` headings, `-` lists, `- [ ]` tick boxes, `**bold**`, `| a | b |` tables, `> ` callouts, `---` dividers, `[named](https://…)` links, and a lone line of short steps joined by `→` drawn as a flow) |
+| `craft_notes` | `title`, `body`, `kind_id → craft_kinds`, `area_id → craft_areas`, `hashtags` JSON, `source`, `url`, `position`, `performance_log_id → performance_logs` (set null), `analysis_id → analyses` (set null), `version` (up by one per save) | `version` catches edits made on two devices. The API sends each note's `behaviour` with it, from its kind. The two links say which show or analysis a lesson came from; deleting either keeps the note. An area's `screens` decide which notes Rewrite, the set builder and Stage show. The body is plain text with light formatting (`#` headings, `-` lists, `- [ ]` tick boxes, `**bold**`, `| a | b |` tables, `> ` callouts, `---` dividers, `[named](https://…)` links, and a lone line of short steps joined by `→` drawn as a flow) |
 | `analyses` | `title`, `url`, `body`, `watch_item_id` (set null) | Deleting the routine keeps the analysis. One named like a watchlist category is that category's guide. The body uses the craft note format |
 
 ## What happens on delete
@@ -167,6 +167,7 @@ All of these run in one transaction ([services/topics.py](../app/services/topics
 | `0028` | `jokes.strength` can be null: unrated. New jokes start unrated; existing ratings stay |
 | `0029` | `board_spots` dropped, with the joke board |
 | `0030` | `version` on each set and brainstorm session, to catch edits made on two devices, as jokes have had since `0013` |
+| `0031` | `version` on each Craft note, observation and premise, for the same check |
 
 Merged migrations are shared history. CI fails a PR that edits, deletes or renames one; fix
 forward with a new revision. CI also runs upgrade → downgrade → upgrade on Postgres 16, so every

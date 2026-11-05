@@ -9,6 +9,7 @@ from app.auth.deps import CurrentUser, DbSession, find_owned, get_owned
 from app.models import Analysis, CraftArea, CraftNote, NoteKind, PerformanceLog
 from app.models.base import written_at
 from app.schemas.craft import CraftNoteIn, CraftNoteOut
+from app.services.clashes import NOTE_CLASH, check_fields
 from app.services.trash import move_to_trash
 
 router = APIRouter(prefix="/api/craft-notes", tags=["craft"])
@@ -31,13 +32,16 @@ def put_craft_note(
         get_owned(db, PerformanceLog, body.performance_log_id, user, in_trash=True)
     if body.analysis_id is not None:
         get_owned(db, Analysis, body.analysis_id, user, in_trash=True)
+    fields = body.model_dump(exclude={"created_at", "base_version"})
     note = find_owned(db, CraftNote, note_id, user)
     if note is None:
         note = CraftNote(id=note_id, user_id=user.id)
         if body.created_at:
             note.created_at = written_at(body.created_at)
         db.add(note)
-    for field, value in body.model_dump(exclude={"created_at"}).items():
+    else:
+        check_fields(note, body.base_version, fields, NOTE_CLASH)
+    for field, value in fields.items():
         setattr(note, field, value)
     db.commit()
     db.refresh(note)

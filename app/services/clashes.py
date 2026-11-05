@@ -7,12 +7,15 @@ from typing import Any
 
 from fastapi import HTTPException
 
-from app.models import Setlist, WritingSession
+from app.models import CraftNote, Observation, Premise, Setlist, WritingSession
 from app.schemas.notebook import WritingSessionIn
 from app.schemas.shows import SetlistIn, SetlistOut
 
 SET_CLASH = "This set was changed on another device after you edited it."
 SESSION_CLASH = "This session was changed on another device after you edited it."
+NOTE_CLASH = "This note was changed on another device after you edited it."
+OBSERVATION_CLASH = "This observation was changed on another device after you edited it."
+PREMISE_CLASH = "This premise was changed on another device after you edited it."
 
 
 def refuse_stale(current: int, base: int | None, unchanged: Callable[[], bool], why: str) -> None:
@@ -57,3 +60,13 @@ def check_session(session: WritingSession, body: WritingSessionIn, data: dict[st
     unchanged = lambda: same_session(session, data)  # noqa: E731
     refuse_stale(session.version, body.base_version, unchanged, SESSION_CLASH)
     session.version += 1
+
+
+def check_fields(
+    thing: CraftNote | Observation | Premise, base: int | None, fields: dict[str, Any], why: str
+) -> None:
+    """For things saved field by field: refuse an edit made from an older version that would
+    change any of `fields`; else count this save as a new version."""
+    unchanged = lambda: all(getattr(thing, k) == v for k, v in fields.items())  # noqa: E731
+    refuse_stale(thing.version, base, unchanged, why)
+    thing.version += 1

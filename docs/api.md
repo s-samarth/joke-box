@@ -104,7 +104,7 @@ The response (`JokeOut`) adds `id`, `created_at` and `updated_at`, and returns `
 | Method | Path | Body / notes |
 |---|---|---|
 | GET | `/api/premises` | Every premise, in your order: `{id, topic_id, take, notes, created_at, updated_at}` |
-| PUT | `/api/premises/{id}` | `{topic_id, take, notes}`. Create or update by client id. `take` is required (up to 2,000 characters), `notes` up to 20,000. 422 for a topic that isn't yours |
+| PUT | `/api/premises/{id}` | `{topic_id, take, notes, base_version?}`. Create or update by client id. `take` is required (up to 2,000 characters), `notes` up to 20,000. 422 for a topic that isn't yours. The answer includes `version`; with `base_version`, an edit made from an older version that would change it answers **409**, as for jokes. |
 | DELETE | `/api/premises/{id}` | To the Trash. Its jokes stay, on no premise, and come back to it when it's put back (unless one moved to another premise meanwhile) |
 
 A joke points at its premise with `premise_id`; a premise doesn't list its jokes.
@@ -123,7 +123,7 @@ A joke points at its premise with `premise_id`; a premise doesn't list its jokes
 | Method | Path | Body / notes |
 |---|---|---|
 | GET | `/api/observations` | Newest first |
-| PUT | `/api/observations/{id}` | `{text, topic_id?, created_at?}`. The text must not be blank. `created_at` is kept only on create (imports) |
+| PUT | `/api/observations/{id}` | `{text, topic_id?, created_at?, base_version?}`. The text must not be blank. `created_at` is kept only on create (imports). The answer includes `version`; with `base_version`, an edit made from an older version that would change it answers **409**, as for jokes. |
 | DELETE | `/api/observations/{id}` | |
 | GET | `/api/observation-topics` | `[{id, name}]`, in your order |
 | POST | `/api/observation-topics` | `{name}` → 201, at the end |
@@ -197,7 +197,7 @@ Every `joke_id` and `topic_id` must belong to you (otherwise 404).
 | PATCH | `/api/craft-kinds/{id}` | Same body; changing the behaviour changes how its notes behave |
 | DELETE | `/api/craft-kinds/{id}?move_to=<id>` | Its notes move to `move_to` (or your first other kind). 400 for your last kind |
 | GET | `/api/craft-notes` | In order of `position`. Each note carries its kind's `behaviour` |
-| PUT | `/api/craft-notes/{id}` | `{title, body, kind_id, area_id, hashtags, source, url, position, performance_log_id?, analysis_id?, created_at?}`. The kind, area, show and analysis must be yours. `created_at` is kept only when the note is created |
+| PUT | `/api/craft-notes/{id}` | `{title, body, kind_id, area_id, hashtags, source, url, position, performance_log_id?, analysis_id?, created_at?, base_version?}`. The kind, area, show and analysis must be yours. `created_at` is kept only when the note is created. The answer includes `version`; with `base_version`, an edit made from an older version that would change it answers **409**, as for jokes. |
 | DELETE | `/api/craft-notes/{id}` | |
 | GET | `/api/analyses` | |
 | PUT | `/api/analyses/{id}` | `{title, url, body, watch_item_id?}`. The URL must be http(s) or empty |

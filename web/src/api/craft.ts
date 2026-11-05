@@ -4,11 +4,16 @@
  */
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { api } from './client'
+import { ownVersions, sendChecked } from './ownVersions'
 import { keys, queryClient, refreshWhenSynced } from './queryClient'
 import { QUEUED } from './sync'
 import type { CraftArea, CraftAreaInput, CraftNote, CraftNoteInput, NoteKind, NoteKindInput } from './types'
 
-export type SaveCraftVars = { id: string; input: CraftNoteInput }
+/** `keepMine`: a clash being retried from Couldn't sync, to go over the other device's version. */
+export type SaveCraftVars = { id: string; input: CraftNoteInput; keepMine?: boolean }
+
+/** Edits on two devices are checked as for jokes (see ownVersions.ts). */
+const ownNotes = ownVersions('craft-own-versions')
 
 const saveKey = ['craft', 'save']
 const deleteKey = ['craft', 'delete']
@@ -17,7 +22,7 @@ const byPosition = (a: CraftNote, b: CraftNote) => a.position - b.position || a.
 
 queryClient.setMutationDefaults(saveKey, {
   ...QUEUED,
-  mutationFn: ({ id, input }: SaveCraftVars) => api<CraftNote>(`/api/craft-notes/${id}`, 'PUT', input),
+  mutationFn: ({ id, input, keepMine }: SaveCraftVars) => sendChecked<CraftNote>(ownNotes, `/api/craft-notes/${id}`, id, input, keepMine),
   onMutate: async ({ id, input }: SaveCraftVars) => {
     await queryClient.cancelQueries({ queryKey: keys.craftNotes })
     const now = new Date().toISOString()
@@ -26,7 +31,7 @@ queryClient.setMutationDefaults(saveKey, {
       // The behaviour comes from the kind, so look it up for the optimistic copy.
       const kind = queryClient.getQueryData<NoteKind[]>(keys.craftKinds)?.find((k) => k.id === input.kind_id)
       const behaviour = kind?.behaviour ?? existing?.behaviour ?? 'reference'
-      const next: CraftNote = { ...input, id, behaviour, created_at: existing?.created_at ?? now, updated_at: now }
+      const next: CraftNote = { ...input, id, behaviour, version: input.version ?? existing?.version ?? 0, created_at: existing?.created_at ?? now, updated_at: now }
       return (existing ? old.map((n) => (n.id === id ? next : n)) : [...old, next]).sort(byPosition)
     })
   },
@@ -47,10 +52,10 @@ export const useCraftNotes = () => useQuery({ queryKey: keys.craftNotes, queryFn
 export const useSaveCraftNote = () => useMutation<CraftNote, Error, SaveCraftVars>({ mutationKey: saveKey })
 export const useDeleteCraftNote = () => useMutation<void, Error, string>({ mutationKey: deleteKey })
 
-/** The editable part of a saved note, for saving it again with one change. */
+/** The editable part of a saved note, for saving it again with one change, from its version. */
 export const craftInput = (n: CraftNote): CraftNoteInput => ({
   title: n.title, body: n.body, kind_id: n.kind_id, area_id: n.area_id, hashtags: n.hashtags, source: n.source, url: n.url, position: n.position,
-  performance_log_id: n.performance_log_id, analysis_id: n.analysis_id,
+  performance_log_id: n.performance_log_id, analysis_id: n.analysis_id, version: n.version,
 })
 
 /* Areas change online only: renaming or deleting one touches many notes, so it should land now. */

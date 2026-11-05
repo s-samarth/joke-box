@@ -66,7 +66,7 @@ describe('note body', () => {
 })
 
 const note = (patch: Partial<CraftNote>): CraftNote => ({
-  id: 'x', title: 'Fake', body: '', behaviour: 'reference', kind_id: 'k', area_id: 'w', hashtags: [], source: '', url: '', position: 1, performance_log_id: null, analysis_id: null, created_at: '', updated_at: '', ...patch,
+  id: 'x', title: 'Fake', body: '', behaviour: 'reference', kind_id: 'k', area_id: 'w', hashtags: [], source: '', url: '', position: 1, performance_log_id: null, analysis_id: null, version: 1, created_at: '', updated_at: '', ...patch,
 })
 
 const area = (id: string, screens: CraftArea['screens'] = []): CraftArea => ({ id, name: `Fake ${id}`, description: '', color: 'sky', screens, position: 0 })

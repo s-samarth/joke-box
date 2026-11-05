@@ -10,6 +10,7 @@ from app.models import Observation, ObservationTopic
 from app.models.base import written_at
 from app.schemas.library import NamedOut, NameIn, OrderIn
 from app.schemas.notebook import ObservationIn, ObservationOut
+from app.services.clashes import OBSERVATION_CLASH, check_fields
 from app.services.ordering import next_position, set_order
 from app.services.topics import commit_or_conflict
 from app.services.trash import move_to_trash
@@ -42,6 +43,9 @@ def put_observation(
         if body.created_at:
             observation.created_at = written_at(body.created_at)
         db.add(observation)
+    else:
+        fields = {"text": body.text, "topic_id": body.topic_id}
+        check_fields(observation, body.base_version, fields, OBSERVATION_CLASH)
     observation.text = body.text
     observation.topic_id = body.topic_id
     db.commit()

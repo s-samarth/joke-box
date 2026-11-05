@@ -6,7 +6,7 @@ import { mostSolidTopic, nextStep, targetMinutes } from './path'
 
 const note = (patch: Partial<CraftNote>): CraftNote => ({
   id: 'x', title: 'Fake', body: '', behaviour: 'path', kind_id: 'k', area_id: 'p', hashtags: [], source: '', url: '', position: 1,
-  performance_log_id: null, analysis_id: null, created_at: '', updated_at: '', ...patch,
+  performance_log_id: null, analysis_id: null, version: 1, created_at: '', updated_at: '', ...patch,
 })
 
 describe('path', () => {
