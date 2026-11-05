@@ -9,7 +9,7 @@ export interface ImportJoke {
   id: string
   setup: string
   punchline?: string
-  /** A joke topic by name. Missing or null files it under Thoughts. */
+  /** A joke topic by name. Missing, null or "Random" files it under Random. */
   topic?: string | null
   /** Joke types by name, made if new (e.g. "To review" to flag imported jokes). */
   types?: string[]

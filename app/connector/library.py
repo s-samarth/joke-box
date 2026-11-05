@@ -56,7 +56,7 @@ def overview(db: Session, user: User) -> dict[str, Any]:
         "jokes": len(jokes),
         "topics": [
             {
-                "name": "Thoughts" if t.is_system else t.name,
+                "name": t.name,
                 "jokes": per_topic.get(t.id, 0),
                 "subtopics": [{"name": s.name, "jokes": per_sub.get(s.id, 0)} for s in t.subtopics],
             }

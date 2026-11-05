@@ -118,4 +118,4 @@ The copy matters as much as the colours. These rules keep the text accurate and 
    rewrites and its places in sets go too."
 8. **Dates and times are always in India time** (`Asia/Kolkata`) and the `en-IN` format:
    "24 Oct 2025", "8:54 pm". Durations are `m:ss` ("4:15") or "29m 30s" in totals.
-9. **The default topic is "Thoughts"** everywhere in the UI, even though it's stored as `Random`.
+9. **The default topic is "Random"** everywhere in the UI, the same name it's stored under. (It was shown as "Thoughts" until November 2026.)

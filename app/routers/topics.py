@@ -48,7 +48,7 @@ def create_topic(body: NameIn, user: CurrentUser, db: DbSession) -> Topic:
 
 @router.put("/topics/order", status_code=204)
 def reorder_topics(body: OrderIn, user: CurrentUser, db: DbSession) -> None:
-    """Thoughts stays first whatever the order."""
+    """Random stays first whatever the order."""
     set_order(list(db.scalars(select(Topic).where(Topic.user_id == user.id))), body.ids)
     db.commit()
 
@@ -57,7 +57,7 @@ def reorder_topics(body: OrderIn, user: CurrentUser, db: DbSession) -> None:
 def rename_topic(topic_id: uuid.UUID, body: NameIn, user: CurrentUser, db: DbSession) -> Topic:
     topic = get_owned(db, Topic, topic_id, user)
     if topic.is_system:
-        raise HTTPException(400, "Thoughts can't be renamed")
+        raise HTTPException(400, "Random can't be renamed")
     topic.name = body.name
     svc.commit_or_conflict(db, "A topic with that name already exists")
     return topic

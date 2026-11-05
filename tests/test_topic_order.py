@@ -13,7 +13,7 @@ def names(client: TestClient, url: str) -> list[str]:
     return [t["name"] for t in client.get(url).json()]
 
 
-def test_topics_keep_your_order_with_thoughts_first(alice: TestClient) -> None:
+def test_topics_keep_your_order_with_random_first(alice: TestClient) -> None:
     b = add(alice, "/api/topics", "Fake B")
     a = add(alice, "/api/topics", "Fake A")
     c = add(alice, "/api/topics", "Fake C")

@@ -1,7 +1,7 @@
 /**
  * Daily joke: write at least one new joke a day. The nudge up top, a box to write today's, your
  * streaks, and a calendar ticking off every day you added a joke. Saved jokes land in Jokes
- * (under Thoughts) like any other, and the tick appears straight away.
+ * (under Random) like any other, and the tick appears straight away.
  */
 import { useState } from 'react'
 import { Link } from 'react-router'

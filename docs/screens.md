@@ -72,7 +72,7 @@ in IST and the headline **"Got something?"** with a search button beside it (it 
 | Section | File | Notes |
 |---|---|---|
 | Daily joke nudge | `daily/DailyBanner.tsx` | Days since your last new joke: today written, a small green line with your streak; 1 or 2 days, yellow **Write a joke today**; 3 to 7, red **N days without a joke**; over a week, a dark, spooky card (a drifting ghost, a cobweb, a flickering line; still under reduced motion). Waits for the jokes to load so it never flashes the wrong state. Links to Daily joke |
-| Quick capture | `QuickCapture.tsx` | Setup and punchline in one box. Enter saves to Thoughts; Shift+Enter adds a new line |
+| Quick capture | `QuickCapture.tsx` | Setup and punchline in one box. Enter saves to Random; Shift+Enter adds a new line |
 | Voice notes | `TodayVoice.tsx` | The same recorder as the Voice screen, plus "All N" |
 | Observations | `TodayObservations.tsx` | The observation box and the last few logged |
 | Brainstorm | `TodayBrainstorm.tsx` | Start a session, or pick up the last one |
@@ -94,7 +94,7 @@ that day (IST), however it got there, imports included with their original dates
 the jokes' created dates, so there's no separate log to fall out of step.
 
 - **The nudge** (the same one as Home); its button focuses the box below.
-- **Today's joke:** the quick capture box. Saving puts the joke in Thoughts and ticks today at once.
+- **Today's joke:** the quick capture box. Saving puts the joke in Random and ticks today at once.
 - **Streaks:** current (ending today, or yesterday while today is still open), longest, and days
   this month.
 - **Calendar:** a month at a time, Monday first. Days with a new joke get a green tick and a count
@@ -160,7 +160,7 @@ the jokes' created dates, so there's no separate log to fall out of step.
   writing a joke first; the list then filters to it. **Manage topics…** stays at the bottom.
 - **Topic and type managers** are sheets for renaming and deleting across every joke. Jokes and
   premises share one topic list. Deleting a topic moves its jokes, premises and logged shows to
-  Thoughts, and the confirmation counts all three. The number beside a topic counts its jokes and
+  Random, and the confirmation counts all three. The number beside a topic counts its jokes and
   premises. Renaming a type onto an existing one merges the two.
 
 <img src="screenshots/desktop-joke.webp" alt="A joke open beside the list">

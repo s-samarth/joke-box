@@ -36,7 +36,7 @@ def test_search_finds_words_anywhere_and_filters(dev: TestClient, db: Session) -
     assert found["total"] == 3  # unrated jokes count unless a min_strength is asked for
     strong = library.search_jokes(db, me, query="mirror", min_strength=4)
     assert [j["setup"] for j in strong["jokes"]] == ["Fake lift mirror"]
-    assert strong["jokes"][0]["topic"] == "Thoughts"
+    assert strong["jokes"][0]["topic"] == "Random"
 
 
 def test_other_users_and_the_trash_stay_hidden(dev: TestClient, db: Session) -> None:
@@ -99,7 +99,7 @@ def test_a_set_in_running_order(dev: TestClient, db: Session) -> None:
     opened = performing.get_set(db, me, set_id)
     assert [i["role"] for i in opened["running_order"]] == ["opener", None, "closer"]
     assert opened["runtime_seconds"] == 105  # the optional joke doesn't count
-    assert opened["topics"] == {"Thoughts": 2, "Fake doctors": 1}
+    assert opened["topics"] == {"Random": 2, "Fake doctors": 1}
     assert performing.list_sets(db, me)["sets"][0]["jokes"] == 3
 
 

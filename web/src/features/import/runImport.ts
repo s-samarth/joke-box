@@ -53,12 +53,13 @@ export async function runImport(plan: ImportPlan, ctx: Context): Promise<Progres
     ctx.onProgress({ ...progress })
   }
 
-  const thoughts = ctx.topics.find((t) => t.is_system)?.id ?? ''
-  const jokeTopics = await ensureTopics(topicNames(plan.jokes), byName(ctx.topics.filter((t) => !t.is_system)), '/api/topics')
+  const random = ctx.topics.find((t) => t.is_system)?.id ?? ''
+  // The protected topic is stored as Random, so a bundle naming "Random" files there.
+  const jokeTopics = await ensureTopics(topicNames(plan.jokes), byName(ctx.topics), '/api/topics')
   const obsTopics = await ensureTopics(topicNames(plan.observations), byName(ctx.observationTopics), '/api/observation-topics')
 
   for (const j of plan.jokes) {
-    const topicId = (j.topic && jokeTopics.get(j.topic.trim().toLowerCase())) || thoughts
+    const topicId = (j.topic && jokeTopics.get(j.topic.trim().toLowerCase())) || random
     await step(`Joke "${j.setup.slice(0, 40)}"`, () =>
       api(`/api/jokes/${j.id}`, 'PUT', {
         ...blankJoke(topicId),

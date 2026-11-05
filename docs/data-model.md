@@ -56,7 +56,7 @@ erDiagram
 | Table | Columns | Rules |
 |---|---|---|
 | `users` | `google_sub` (unique), `email` (unique, lowercase), `display_name`, `avatar_url`, `plan` (default "Pro"), `last_login_at` | Created on first sign-in |
-| `topics` | `name`, `position`, `is_system` | One `is_system` topic per user, named `Random` and shown as **Thoughts**. It can't be deleted; deleting another topic moves its jokes there. `position` is the order you drag them into (new ones go last) |
+| `topics` | `name`, `position`, `is_system` | One `is_system` topic per user, named and shown as **Random**. It can't be deleted; deleting another topic moves its jokes there. `position` is the order you drag them into (new ones go last) |
 | `subtopics` | `topic_id → topics` (cascade), `name`, `position` | Unique per topic, in the order you drag them into. Deleting one clears it from its jokes |
 | `premises` | `topic_id → topics` (cascade), `take`, `notes`, `position`, `version` (up by one per save that changes it) | The idea under a group of jokes: your take and the reasoning behind it. Filed under a topic, but a joke from any topic can rest on it. Upserted by client id, like jokes |
 | `joke_types` | `name` | Pruned whenever no joke uses it. Renaming onto an existing name merges the two |
@@ -93,7 +93,7 @@ erDiagram
 | `setlist_tag_links` | `setlist_id`, `tag_id` (both cascade) | Many-to-many. Deleting a tag takes it off its sets |
 | `setlist_items` | `setlist_id` (cascade), `joke_id` (cascade), `position`, `duration_seconds`, `optional` | A set refers to its jokes: their words, strength and runtime are always read from the joke (`duration_seconds` here is only a fallback). Opener and closer are the first and last positions, not stored. An optional joke is one to cut if time is short; it doesn't count towards the slot |
 | `performance_logs` | `venue_id` (set null), `performed_at` (timestamptz), `duration_seconds`, `audience_size`, `rating` 1–5, `notes`, `laughs` JSON (five counts, for laughs scored 1–5 points; null if not counted) | LPM is worked out in the browser from `laughs` and the time on stage |
-| `performance_log_topics` | `log_id`, `topic_id` (both cascade) | "Topics you did". Deleting a topic re-points its links to Thoughts |
+| `performance_log_topics` | `log_id`, `topic_id` (both cascade) | "Topics you did". Deleting a topic re-points its links to Random |
 | `performance_jokes` | `log_id` (cascade), `joke_id` (cascade), `position`, `result` (`bombed` / `ok` / `killed`, or null if not rated), `note` (a comment, empty if none); unique (`log_id`, `joke_id`) | The jokes done at a show, in running order. Owned through the show. A joke in the Trash keeps its place but isn't listed; a show in the Trash doesn't count towards a joke's record (worked out in the browser for the joke page, and in the connector's `get_jokes`) |
 
 ### Study
@@ -122,7 +122,7 @@ sound.
 |---|---|
 | A joke | To the Trash with its live rewrites (same `deleted_at`, so they come back together). Its set places stay but are hidden; saving a set keeps them where they were. Links to it from shows' lessons and brainstorms stay. Erased: its rewrites, versions and set places go (cascade) |
 | A rewrite, observation, brainstorm, show, analysis, routine or craft note | To the Trash. Links to it (a lesson's show or analysis, an analysis's routine, a brainstorm's technique) stay while it's there and clear when it's erased |
-| A topic | Its jokes and premises move to Thoughts, the jokes with no subtopic; its show links move to Thoughts; its subtopics go |
+| A topic | Its jokes and premises move to Random, the jokes with no subtopic; its show links move to Random; its subtopics go |
 | A premise | To the Trash. Its jokes (live or in the Trash) stay, on no premise, and `trashed_joke_ids` remembers them: put back, it takes back those still on no premise (one moved to another premise meanwhile stays there). A joke saved later (offline) still pointing at it is saved with no premise. Erased: nothing else changes |
 | A subtopic | Its jokes keep their topic and lose the subtopic |
 | A type | Removed from every joke; a joke left with none shows as "Undefined" |

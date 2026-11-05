@@ -39,7 +39,7 @@ function useReorder<T>(queryKey: QueryKey, url: (vars: T) => string, apply: (old
   })
 }
 
-/** Joke topics. Thoughts stays first, so it isn't among the ids. */
+/** Joke topics. Random stays first, so it isn't among the ids. */
 export const useReorderTopics = () =>
   useReorder<string[]>(keys.topics, () => '/api/topics/order', (old, ids) => {
     const topics = old as Topic[]

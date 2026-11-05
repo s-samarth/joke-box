@@ -1,6 +1,6 @@
 /**
  * Add, arrange, rename and delete topics and subtopics, shared by jokes and premises. Deleting a
- * topic moves its jokes, premises and logged shows to Thoughts, which always stays first.
+ * topic moves its jokes, premises and logged shows to Random, which always stays first.
  */
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { useJokes, useTopicActions, useTopics } from '../../api/library'
@@ -83,7 +83,7 @@ export function TopicManager({ open, onClose, onRemoved }: Props) {
   const [pinned, movable] = [topics.filter((t) => t.is_system), topics.filter((t) => !t.is_system)]
 
   return (
-    <Modal open={open} onOpenChange={(o) => !o && onClose()} title="Topics" description="Jokes and premises share these topics. Drag the grips to change the order. Thoughts is where new jokes land, so it stays first and can't be renamed or deleted."
+    <Modal open={open} onOpenChange={(o) => !o && onClose()} title="Topics" description="Jokes and premises share these topics. Drag the grips to change the order. Random is where new jokes land, so it stays first and can't be renamed or deleted."
       footer={<Button variant="tape" icon={<Plus size={18} />} onClick={() => void newTopic()}>Add topic</Button>}>
       <div className="divide-y divide-rule">
         {pinned.map((t) => (
