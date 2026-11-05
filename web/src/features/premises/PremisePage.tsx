@@ -1,52 +1,40 @@
 /**
- * One premise: the take and its reasoning, edited in place, then the jokes resting on it in
- * reading order (chains kept together). Write a new joke on it, or add ones you've written,
- * from any topic.
+ * One premise: the take and its reasoning, edited in place, then the jokes resting on it as a
+ * list or its web (see PremiseJokes). Write a new joke on it, or add ones you've written, from
+ * any topic.
  */
-import { ArrowLeft, ListPlus, Plus, Trash2, X } from 'lucide-react'
-import { useState } from 'react'
+import { ArrowLeft, Trash2 } from 'lucide-react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
-import { useJokes, useSaveJoke, useTopics } from '../../api/library'
+import { useJokes, useTopics } from '../../api/library'
 import { useDeletePremise, usePremises, type Premise } from '../../api/premises'
-import { Button, IconButton } from '../../components/ui/Button'
+import { Button } from '../../components/ui/Button'
 import { Field, GrowingText, Select, Textarea } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
-import { EmptyState, Spinner, StrengthTicks } from '../../components/ui/pieces'
-import { long } from '../../lib/duration'
+import { EmptyState, Spinner } from '../../components/ui/pieces'
 import { topicName } from '../../lib/jokeMeta'
-import { jokesOn, premiseSize } from '../../lib/premises'
+import { jokesOn } from '../../lib/premises'
 import { formatDateTime } from '../../lib/time'
-import { useCapture } from '../capture/captureContext'
-import { toInput } from '../jokes/useAutosaveJoke'
 import { NEW_TOPIC, useNewTopic } from '../jokes/useNewTopic'
-import { AddJokesDialog } from './AddJokesDialog'
 import { PremiseGuide } from './PremiseGuide'
+import { PremiseJokes } from './PremiseJokes'
 import { usePremiseDraft } from './usePremiseDraft'
 
 function Editor({ premise }: { premise: Premise }) {
   const { draft, update } = usePremiseDraft(premise)
   const { data: topics = [] } = useTopics()
   const { data: all = [] } = useJokes()
-  const saveJoke = useSaveJoke()
   const remove = useDeletePremise()
-  const { openCapture } = useCapture()
   const { confirm, toast } = useFeedback()
   const navigate = useNavigate()
   const { search } = useLocation()
-  const [adding, setAdding] = useState(false)
   const newTopic = useNewTopic()
   const pickTopic = async (id: string) => {
     if (id !== NEW_TOPIC) return update({ topic_id: id })
     const made = await newTopic()
     if (made) update({ topic_id: made.id })
   }
-  const jokes = jokesOn(premise.id, all)
-  const runtime = jokes.reduce((s, j) => s + j.duration_seconds, 0)
+  const hasJokes = jokesOn(premise.id, all).length > 0
 
-  const detach = (id: string) => {
-    const joke = all.find((j) => j.id === id)
-    if (joke) saveJoke.mutate({ id, input: { ...toInput(joke), premise_id: null } })
-  }
   const onDelete = async () => {
     const ok = await confirm({ title: 'Delete this premise?', message: 'It goes to the Trash for 30 days. Its jokes stay where they are, just not on a premise, until you put it back.', confirmLabel: 'Delete premise', danger: true })
     if (!ok) return
@@ -70,46 +58,15 @@ function Editor({ premise }: { premise: Premise }) {
             <option value={NEW_TOPIC}>New topic…</option>
           </Select>
         </Field>
-        <PremiseGuide open={jokes.length === 0 && !premise.notes.trim()} />
+        <PremiseGuide open={!hasJokes && !premise.notes.trim()} />
       </div>
 
-      <section className="mt-10">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="headline text-2xl">Jokes on it</h2>
-          <p className="text-sm text-dim">
-            {premiseSize(jokes.length)}{runtime > 0 && `, ${long(runtime)}`}
-            {jokes.length > 0 && <> · <Link to={`/jokes?premise=${premise.id}`} className="text-tape hover:underline">Open in Jokes</Link></>}
-          </p>
-        </div>
-        {jokes.length === 0 ? (
-          <p className="mt-3 text-[15px] text-dim">One premise feeds many setups. Ask "if this is true, what else is true?" and write each answer as a joke.</p>
-        ) : (
-          <ol className="mt-3 divide-y divide-rule border-y border-rule">
-            {jokes.map((j) => (
-              <li key={j.id} className="flex items-start gap-2 py-3">
-                <Link to={`/jokes/${j.id}`} className="min-w-0 flex-1 leading-snug hover:text-tape">
-                  <span className="line-clamp-2">{j.setup}</span>
-                  <span className="mt-1 flex items-center gap-3 text-xs text-faint">
-                    <StrengthTicks strength={j.strength} />
-                    {j.topic_id !== draft.topic_id && topicName(topics.find((t) => t.id === j.topic_id))}
-                  </span>
-                </Link>
-                <IconButton label="Take it off this premise" onClick={() => detach(j.id)}><X size={16} /></IconButton>
-              </li>
-            ))}
-          </ol>
-        )}
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Button variant="tape" small icon={<Plus size={15} />} onClick={() => openCapture({ topicId: draft.topic_id, premiseId: premise.id })}>Write a joke on it</Button>
-          <Button variant="quiet" small icon={<ListPlus size={15} />} onClick={() => setAdding(true)}>Add jokes you’ve written</Button>
-        </div>
-      </section>
+      <PremiseJokes premise={premise} topicId={draft.topic_id} all={all} topics={topics} />
 
       <footer className="mt-12 flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-5 text-sm text-faint">
         <span>Written {formatDateTime(premise.created_at)}.</span>
         <Button variant="danger" small icon={<Trash2 size={15} />} onClick={onDelete}>Delete premise</Button>
       </footer>
-      <AddJokesDialog premise={premise} open={adding} onOpenChange={setAdding} />
     </article>
   )
 }

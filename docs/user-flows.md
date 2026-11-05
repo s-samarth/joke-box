@@ -83,7 +83,8 @@ through everything you've written at once.
 2. Tap **Write a joke on it** for a new joke already resting on it, or **Add jokes you’ve written** to pick ones
    you've written, from any topic.
 3. On a joke's page, the **Premise** row sets or changes its premise. The premise page lists its
-   jokes in reading order, chains kept together.
+   jokes in reading order, chains kept together; switch **Jokes on it** to **Web** to see them
+   drawn around the premise, and tap one to read it.
 4. Search the takes and notes, narrow to a topic, or sort by Most jokes to see which ideas carry
    the most material and which are still waiting for a joke.
 5. Need a topic that doesn't exist yet? **New topic** at the top of the Topic menu (on Premises or
