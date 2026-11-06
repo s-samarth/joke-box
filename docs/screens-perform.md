@@ -174,7 +174,8 @@ cards from every area.
 
 A note opens formatted: headings, lists (numbered items get a badge, indented items sit quietly under
 their parent), **bold**, callouts, dividers, a line of steps joined by arrows drawn as a flow, tables
-(cards on a phone, so nothing scrolls sideways), and tick boxes you can tick straight away (the
+(cards on a phone, so nothing scrolls sideways; wider up, a table with more columns than fit scrolls
+sideways instead of cutting off its last ones), and tick boxes you can tick straight away (the
 tick is saved into the note). Its area chip at the top moves it to another area.
 
 **Edit in place:** tap any part of the note (a paragraph, a list, a callout, a heading) and only that
