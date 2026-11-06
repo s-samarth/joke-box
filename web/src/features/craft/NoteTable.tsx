@@ -2,6 +2,8 @@
  * A table from a note. On a wide screen it's a real table; on a phone each row becomes a small
  * card, its first cell as the title and the other cells under their column names, so nothing
  * has to scroll sideways. Both are rendered and CSS picks one (`sm:` is 640px and up).
+ * A table with more columns than the page is wide scrolls sideways rather than cutting off its
+ * last columns.
  */
 import type { ReactNode } from 'react'
 
@@ -17,7 +19,7 @@ export function NoteTable({ head, rows, cell }: Props) {
   const pad = (r: string[]) => Array.from({ length: width }, (_, i) => r[i] ?? '')
   return (
     <div>
-      <div className="hidden overflow-hidden rounded-xl ring-1 ring-rule sm:block">
+      <div className="hidden overflow-x-auto rounded-xl ring-1 ring-rule sm:block">
         <table className="w-full border-collapse text-left text-sm">
           {head.length > 0 && (
             <thead className="bg-ink-3 text-paper">
