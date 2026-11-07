@@ -32,7 +32,8 @@ export function LinkSearch({ items, placeholder, onPick }: { items: Linkable[]; 
       <Search size={17} className="pointer-events-none absolute top-[22px] left-3 -translate-y-1/2 text-faint" />
       <input type="search" value={query} placeholder={placeholder} aria-label={placeholder} aria-controls={listId} aria-expanded={open}
         onChange={(e) => setQuery(e.target.value)} onFocus={() => setOpen(true)} onBlur={() => setOpen(false)}
-        onKeyDown={(e) => { if (e.key === 'Enter' && found[0]) { e.preventDefault(); pick(found[0].id) } if (e.key === 'Escape') setQuery('') }}
+        // Enter links the first match and never submits a form the box sits in (New joke).
+        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); if (found[0]) pick(found[0].id) } if (e.key === 'Escape') setQuery('') }}
         className="h-11 w-full rounded-xl bg-ink-2 pr-3 pl-10 text-[15px] text-paper ring-1 ring-rule outline-none placeholder:text-faint focus:ring-2 focus:ring-paper/40" />
       {open && (
         <ul id={listId} role="listbox" aria-label="Matches" className="mt-1.5 overflow-hidden rounded-xl bg-ink-2 ring-1 ring-rule">

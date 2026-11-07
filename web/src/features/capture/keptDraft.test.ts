@@ -40,9 +40,14 @@ describe('the kept New joke draft', () => {
   })
 
   it('is left alone by a sheet opened for something else', () => {
-    const fromObservation = { ...blankJoke(), setup: 'A made-up observation' }
-    expect(startDraft(fromObservation, false, typed)).toMatchObject({ draft: fromObservation, restored: false, owns: false })
-    expect(startDraft(fromObservation, false, null)).toMatchObject({ restored: false, owns: true })
+    const fromObservation = blankJoke('t1')
+    expect(startDraft(fromObservation, false, typed, ['o1'])).toMatchObject({ draft: fromObservation, observationIds: ['o1'], restored: false, owns: false })
+    expect(startDraft(fromObservation, false, null, ['o1'])).toMatchObject({ observationIds: ['o1'], restored: false, owns: true })
+  })
+
+  it('brings back the observations a kept joke was linked to', () => {
+    expect(startDraft(blankJoke(), true, { ...typed, observationIds: ['o1'] }).observationIds).toEqual(['o1'])
+    expect(startDraft(blankJoke(), true, typed).observationIds).toEqual([])
   })
 
   it('treats blocked or broken storage as nothing kept', () => {

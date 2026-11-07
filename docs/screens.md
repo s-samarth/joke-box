@@ -159,7 +159,7 @@ the jokes' created dates, so there's no separate log to fall out of step.
   subtopic, with Edit topics), Premise, Follows (the joke this one comes after in a chain),
   Followed by (with a button to write the next one), Status, Runs for (type it, or step it five
   seconds at a time with − and +), Clean rating, Language (Hinglish, Hindi or English) and
-  Hashtags, followed by a Notes box, then **Observations**: the ones it came from, and a search to link more (see [Observations on a premise or joke](#observations-on-a-premise-or-joke)). Then **Rewrites** (earlier sessions and **Start a rewrite**),
+  Hashtags, followed by a Notes box. Then **Rewrites** (earlier sessions and **Start a rewrite**),
   **In sets** (with Add to a set), the show record once the joke has been logged at a show
   ("Done at 3 shows: 2 killed, 1 ok. Last done 12 Oct", [JokeShowRecord.tsx](../web/src/features/jokes/JokeShowRecord.tsx)),
   and **Delete joke**, which asks first and sends it to the Trash.
@@ -220,8 +220,10 @@ writing a premise sits beside the list; on a phone the list gives way to the pre
 [ObservationsOn.tsx](../web/src/features/observations/ObservationsOn.tsx), [LinkSearch.tsx](../web/src/features/observations/LinkSearch.tsx),
 [LinkedRows.tsx](../web/src/features/observations/LinkedRows.tsx).
 
-A premise (below **Jokes on it**) and a joke (below Notes) have an **Observations** section: the
-observations it came from, each opening its own page, with × to unlink. Under them, **Search
+A joke (right under its words and tag lines) and a premise (right under "Why it's true") have
+**From observations**, high up so it's in view without scrolling: the observations it came from,
+each opening its own page, with × to unlink. The New joke and New premise sheets have the same
+box under the words, so you can link while you write; the picks are linked when you save. Under them, **Search
 observations to link**: type and the three best matches show (every word has to appear; focused
 and empty, it suggests three, same topic first). Tap one to link it; the box clears for the next,
 so you can link as many as you like. Enter links the first match. It's the same box everywhere
@@ -305,9 +307,10 @@ open beside it on an iPad in landscape or a laptop, or as its own page on a phon
   sideways; each choice counts within the other filters. Then how many there are. Each row: the words (three lines), then its topic, kind,
   what came from it ("1 joke · 1 premise" or "Not used yet") and the date.
 - **An observation:** the words, edited in place and saved on their own; **Topic** and
-  **Kind (optional)**, each ending in New topic… / New kind…; **Write a joke from it** (New joke
-  with it as the setup, on its topic) and **Write a premise from it** (New premise with it as "why
-  it's true"); either new one is linked back. Then **Jokes from it** and **Premises from it**: what's
+  **Kind (optional)**, each ending in New topic… / New kind…; **Write a joke from it** and **Write a premise from it**
+  open New joke or New premise on its topic with the setup (or take) empty and this observation
+  already under **From observations**, so you write your own words with it in view; either new
+  one is linked back when saved. Then **Jokes from it** and **Premises from it**: what's
   linked, each opening its page, × to unlink, and a search to link ones you've written (the three
   best matches, same topic first). **Delete observation** asks first; what came from it stays.
 - **Kinds:** **Manage kinds…** ends the Kind menu: drag to reorder, rename, or delete one (its

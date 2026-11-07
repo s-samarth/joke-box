@@ -1,7 +1,7 @@
 /**
- * One premise: the take and its reasoning, edited in place, then the jokes resting on it as a
- * list or its web (see PremiseJokes). Write a new joke on it, or add ones you've written, from
- * any topic. Below, the observations it came from (see ObservationsOn): search to link more.
+ * One premise: the take and its reasoning, edited in place, and the observations it came from
+ * (see ObservationsOn: search to link more). Then the jokes resting on it as a list or its web
+ * (see PremiseJokes): write a new joke on it, or add ones you've written, from any topic.
  */
 import { ArrowLeft, Trash2 } from 'lucide-react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
@@ -53,6 +53,7 @@ function Editor({ premise }: { premise: Premise }) {
         <Field label="Why it's true">
           <Textarea placeholder="Because… and anything else worth keeping" value={draft.notes} onChange={(e) => update({ notes: e.target.value })} />
         </Field>
+        <ObservationsOn kind="premises" id={premise.id} topicId={draft.topic_id} />
         <Field label="Topic">
           <Select value={draft.topic_id} onChange={(e) => pickTopic(e.target.value)} className="block sm:max-w-xs">
             {topics.map((t) => <option key={t.id} value={t.id}>{topicName(t)}</option>)}
@@ -63,7 +64,6 @@ function Editor({ premise }: { premise: Premise }) {
       </div>
 
       <PremiseJokes premise={premise} topicId={draft.topic_id} all={all} topics={topics} />
-      <ObservationsOn kind="premises" id={premise.id} topicId={draft.topic_id} />
 
       <footer className="mt-12 flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-5 text-sm text-faint">
         <span>Written {formatDateTime(premise.created_at)}.</span>

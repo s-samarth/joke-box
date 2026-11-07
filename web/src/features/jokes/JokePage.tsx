@@ -1,6 +1,6 @@
 /**
- * One joke, one page. The words are edited in place (no form popup), details sit below, then
- * the observations it came from (see ObservationsOn), its rewrites and sets. Every change saves
+ * One joke, one page. The words are edited in place (no form popup), then the observations it
+ * came from (see ObservationsOn), its details, its rewrites and sets. Every change saves
  * on its own, offline included.
  */
 import { ArrowLeft, Trash2 } from 'lucide-react'
@@ -47,12 +47,12 @@ function Editor({ joke }: { joke: Joke }) {
         {!draft.setup.trim() && <p className="mt-2 text-sm text-light">A joke needs a setup to be saved.</p>}
       </div>
       <div className="mt-6"><TagLines lines={draft.tag_lines} onChange={(tag_lines) => update({ tag_lines })} /></div>
+      <div className="mt-8"><ObservationsOn kind="jokes" id={joke.id} topicId={draft.topic_id} /></div>
       <div className="mt-10"><JokeDetails jokeId={joke.id} draft={draft} update={update} /></div>
       <div className="mt-8">
         <label htmlFor="joke-notes" className="text-sm text-dim">Notes</label>
         <Textarea id="joke-notes" className="mt-2" placeholder="Where it kills, where it dies, what to try next" value={draft.comments} onChange={(e) => update({ comments: e.target.value })} />
       </div>
-      <ObservationsOn kind="jokes" id={joke.id} topicId={draft.topic_id} />
       <div className="mt-12"><JokeExtras joke={joke} /></div>
       <JokeShowRecord jokeId={joke.id} />
       <footer className="mt-12 flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-5 text-sm text-faint">
