@@ -24,9 +24,20 @@ def test_an_observation_has_a_topic_and_a_kind(alice: TestClient) -> None:
     assert (saved["topic_id"], saved["kind_id"]) == (topic, sets)
 
 
-def test_a_new_one_starts_not_sorted(alice: TestClient) -> None:
+def random_id(client: TestClient) -> str:
+    return str(next(t["id"] for t in client.get("/api/topics").json() if t["is_system"]))
+
+
+def test_a_new_one_without_a_topic_goes_to_random(alice: TestClient) -> None:
     saved = put_obs(alice, str(uuid.uuid4()), kind_id=None).json()
-    assert (saved["topic_id"], saved["kind_id"]) == (None, None)
+    assert (saved["topic_id"], saved["kind_id"]) == (random_id(alice), None)
+
+
+def test_a_topic_cant_be_taken_away(alice: TestClient) -> None:
+    obs_id, topic = str(uuid.uuid4()), joke_topic(alice, "Buses")
+    put_obs(alice, obs_id, kind_id=None, topic_id=topic)
+    cleared = put_obs(alice, obs_id, kind_id=None, topic_id=None).json()
+    assert cleared["topic_id"] == random_id(alice)
 
 
 def test_a_save_without_the_topic_keeps_it(alice: TestClient) -> None:
@@ -43,10 +54,10 @@ def test_an_old_app_save_means_the_kind_and_keeps_the_topic(alice: TestClient) -
     assert (old["text"], old["kind_id"], old["topic_id"]) == ("Edited on an old phone", sets, topic)
 
 
-def test_an_old_app_save_of_a_new_one_is_not_sorted(alice: TestClient) -> None:
+def test_an_old_app_save_of_a_new_one_goes_to_random(alice: TestClient) -> None:
     sets = kind(alice, "Set ideas")
     saved = put_obs(alice, str(uuid.uuid4()), topic_id=sets).json()
-    assert (saved["kind_id"], saved["topic_id"]) == (sets, None)
+    assert (saved["kind_id"], saved["topic_id"]) == (sets, random_id(alice))
 
 
 def test_a_kind_cant_be_used_as_a_topic_or_the_other_way(alice: TestClient) -> None:
@@ -59,9 +70,8 @@ def test_deleting_a_topic_moves_its_observations_to_random(alice: TestClient) ->
     topic = joke_topic(alice, "Buses")
     obs = put_obs(alice, str(uuid.uuid4()), kind_id=None, topic_id=topic).json()
     assert alice.delete(f"/api/topics/{topic}").status_code == 204
-    random = next(t["id"] for t in alice.get("/api/topics").json() if t["name"] == "Random")
     kept = alice.get("/api/observations").json()[0]
-    assert (kept["id"], kept["topic_id"]) == (obs["id"], random)
+    assert (kept["id"], kept["topic_id"]) == (obs["id"], random_id(alice))
 
 
 def test_filing_it_under_a_topic_is_checked_for_two_devices(alice: TestClient) -> None:

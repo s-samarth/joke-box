@@ -1,4 +1,4 @@
-/** Log something you noticed: the words, and a topic and kind if you want them (both optional). */
+/** Log something you noticed: the words, its topic (Random unless you pick one) and a kind if it has one. */
 import { useState } from 'react'
 import { newId } from '../../api/client'
 import { useTopics } from '../../api/library'
@@ -7,7 +7,7 @@ import { Button } from '../../components/ui/Button'
 import { Field, Select, Textarea } from '../../components/ui/Field'
 import { Modal } from '../../components/ui/Modal'
 import { useFeedback } from '../../components/ui/feedbackContext'
-import { topicName } from '../../lib/jokeMeta'
+import { randomTopicId, topicName } from '../../lib/jokeMeta'
 import { NEW_TOPIC, useNewTopic } from '../jokes/useNewTopic'
 import { PLAIN } from './observationMeta'
 import { useNewKind } from './useNewKind'
@@ -28,11 +28,12 @@ export function NewObservationDialog({ onClose, topicId = null, kindId = null, o
   const newKind = useNewKind()
   const { toast } = useFeedback()
   const [text, setText] = useState('')
-  const [topic, setTopic] = useState<string | null>(topicId)
+  const [picked, setTopic] = useState<string | null>(topicId)
+  const topic = picked ?? randomTopicId(topics) ?? null
   const [kind, setKind] = useState<string | null>(kindId)
 
   const pickTopic = async (value: string) => {
-    if (value !== NEW_TOPIC) return setTopic(value || null)
+    if (value !== NEW_TOPIC) return setTopic(value)
     const made = await newTopic()
     if (made) setTopic(made.id)
   }
@@ -57,9 +58,8 @@ export function NewObservationDialog({ onClose, topicId = null, kindId = null, o
           <Textarea autoFocus placeholder="Not a joke yet, just what you saw" value={text} onChange={(e) => setText(e.target.value)} />
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Topic (optional)">
+          <Field label="Topic">
             <Select value={topic ?? ''} onChange={(e) => void pickTopic(e.target.value)}>
-              <option value="">No topic</option>
               {topics.map((t) => <option key={t.id} value={t.id}>{topicName(t)}</option>)}
               <option value={NEW_TOPIC}>New topic…</option>
             </Select>

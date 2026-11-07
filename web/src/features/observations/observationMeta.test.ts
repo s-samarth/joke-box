@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Observation, Topic } from '../../api/types'
-import { kindLabel, matchesFilters, NOT_SORTED, PLAIN, PLAIN_KIND, topicLabel } from './observationMeta'
+import { kindLabel, matchesFilters, PLAIN, PLAIN_KIND, topicLabel } from './observationMeta'
 
 const obs = (topic_id: string | null, kind_id: string | null) =>
   ({ id: 'o', text: 'Fake thing noticed', topic_id, kind_id, version: 1, created_at: '', updated_at: '' }) as Observation
@@ -9,9 +9,9 @@ describe('observation filters', () => {
   it('lets everything through with no filter', () => {
     expect(matchesFilters(obs(null, null), null, null)).toBe(true)
   })
-  it('finds the ones not sorted yet, and the plain ones', () => {
-    expect(matchesFilters(obs(null, 'k'), NOT_SORTED, null)).toBe(true)
-    expect(matchesFilters(obs('t', null), NOT_SORTED, null)).toBe(false)
+  it('finds the ones under a topic, and the plain ones', () => {
+    expect(matchesFilters(obs('t', 'k'), 't', null)).toBe(true)
+    expect(matchesFilters(obs('u', null), 't', null)).toBe(false)
     expect(matchesFilters(obs('t', null), null, PLAIN_KIND)).toBe(true)
     expect(matchesFilters(obs('t', 'k'), null, PLAIN_KIND)).toBe(false)
   })

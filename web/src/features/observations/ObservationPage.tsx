@@ -13,7 +13,7 @@ import { Button } from '../../components/ui/Button'
 import { Field, GrowingText, Select } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { EmptyState, Spinner } from '../../components/ui/pieces'
-import { topicName } from '../../lib/jokeMeta'
+import { randomTopicId, topicName } from '../../lib/jokeMeta'
 import { formatDateTime } from '../../lib/time'
 import { useCapture } from '../capture/captureContext'
 import { NEW_TOPIC, useNewTopic } from '../jokes/useNewTopic'
@@ -39,7 +39,7 @@ function Editor({ observation }: { observation: Observation }) {
   const linkTo = (kind: 'jokes' | 'premises', targetId: string) => link.mutate({ id: observation.id, kind, targetId, on: true })
 
   const pickTopic = async (value: string) => {
-    if (value !== NEW_TOPIC) return update({ topic_id: value || null })
+    if (value !== NEW_TOPIC) return update({ topic_id: value })
     const made = await newTopic()
     if (made) update({ topic_id: made.id })
   }
@@ -62,9 +62,8 @@ function Editor({ observation }: { observation: Observation }) {
       {!draft.text.trim() && <p className="mt-2 text-sm text-light">An observation needs some words to be saved.</p>}
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <Field label="Topic (optional)">
-          <Select value={draft.topic_id ?? ''} onChange={(e) => void pickTopic(e.target.value)}>
-            <option value="">No topic</option>
+        <Field label="Topic">
+          <Select value={draft.topic_id ?? randomTopicId(topics) ?? ''} onChange={(e) => void pickTopic(e.target.value)}>
             {topics.map((t) => <option key={t.id} value={t.id}>{topicName(t)}</option>)}
             <option value={NEW_TOPIC}>New topic…</option>
           </Select>

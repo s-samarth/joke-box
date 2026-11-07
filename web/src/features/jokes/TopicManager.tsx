@@ -1,10 +1,12 @@
 /**
- * Add, arrange, rename and delete topics and subtopics, shared by jokes and premises. Deleting a
- * topic moves its jokes, premises and logged shows to Random, which always stays first.
+ * Add, arrange, rename and delete topics and subtopics, shared by jokes, premises and observations.
+ * Deleting a topic moves its jokes, premises, observations and logged shows to Random, which
+ * always stays first.
  */
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { useJokes, useTopicActions, useTopics } from '../../api/library'
 import { useReorderSubtopics, useReorderTopics } from '../../api/ordering'
+import { useObservations } from '../../api/notebook'
 import { usePremises } from '../../api/premises'
 import { useLogs } from '../../api/shows'
 import type { Subtopic, Topic } from '../../api/types'
@@ -28,6 +30,7 @@ export function TopicManager({ open, onClose, onRemoved }: Props) {
   const { data: jokes = [] } = useJokes()
   const { data: premises = [] } = usePremises()
   const { data: logs = [] } = useLogs()
+  const { data: observations = [] } = useObservations()
   const newTopic = useNewTopic()
   const a = useTopicActions()
   const reorder = useReorderTopics()
@@ -36,15 +39,16 @@ export function TopicManager({ open, onClose, onRemoved }: Props) {
   const fail = (e: Error) => toast(e.message)
   const count = (id: string) => jokes.filter((b) => b.topic_id === id || b.subtopic_id === id).length
   const premisesIn = (id: string) => premises.filter((p) => p.topic_id === id).length
-  // A topic's number counts its premises too; subtopics only hold jokes.
-  const filed = (id: string) => count(id) + premisesIn(id)
+  const observationsIn = (id: string) => observations.filter((o) => o.topic_id === id).length
+  // A topic's number counts its premises and observations too; subtopics only hold jokes.
+  const filed = (id: string) => count(id) + premisesIn(id) + observationsIn(id)
 
   const renameTopic = async (t: Topic) => {
     const name = await prompt({ title: 'Rename topic', initial: t.name, confirmLabel: 'Rename' })
     if (name && name !== t.name) a.rename.mutate({ id: t.id, name }, { onError: fail })
   }
   const deleteTopic = async (t: Topic) => {
-    if (await confirm({ title: `Delete ${t.name}?`, message: topicMoveMessage({ jokes: count(t.id), premises: premisesIn(t.id), shows: logs.filter((l) => l.topic_ids.includes(t.id)).length }), confirmLabel: 'Delete topic', danger: true })) a.remove.mutate(t.id, { onSuccess: () => onRemoved?.(t.id), onError: fail })
+    if (await confirm({ title: `Delete ${t.name}?`, message: topicMoveMessage({ jokes: count(t.id), premises: premisesIn(t.id), observations: observationsIn(t.id), shows: logs.filter((l) => l.topic_ids.includes(t.id)).length }), confirmLabel: 'Delete topic', danger: true })) a.remove.mutate(t.id, { onSuccess: () => onRemoved?.(t.id), onError: fail })
   }
   const addSub = async (t: Topic) => {
     const name = await prompt({ title: `New subtopic in ${topicName(t)}`, label: 'Subtopic name', confirmLabel: 'Add subtopic' })
@@ -61,7 +65,7 @@ export function TopicManager({ open, onClose, onRemoved }: Props) {
   const topicRow = (t: Topic) => (
     <div className="flex items-center gap-1">
       <span className="min-w-0 flex-1 truncate font-medium">{topicName(t)}</span>
-      <span className="mr-2 text-sm text-faint tabular" title={`${plural(count(t.id), 'joke', 'jokes')}, ${plural(premisesIn(t.id), 'premise', 'premises')}`}>{filed(t.id)}</span>
+      <span className="mr-2 text-sm text-faint tabular" title={`${plural(count(t.id), 'joke', 'jokes')}, ${plural(premisesIn(t.id), 'premise', 'premises')}, ${plural(observationsIn(t.id), 'observation', 'observations')}`}>{filed(t.id)}</span>
       <IconButton label={`Add subtopic to ${topicName(t)}`} onClick={() => addSub(t)}><Plus size={17} /></IconButton>
       {!t.is_system && <IconButton label={`Rename ${t.name}`} onClick={() => renameTopic(t)}><Pencil size={16} /></IconButton>}
       {!t.is_system && <IconButton label={`Delete ${t.name}`} onClick={() => deleteTopic(t)} className="hover:text-light"><Trash2 size={16} /></IconButton>}
@@ -83,7 +87,7 @@ export function TopicManager({ open, onClose, onRemoved }: Props) {
   const [pinned, movable] = [topics.filter((t) => t.is_system), topics.filter((t) => !t.is_system)]
 
   return (
-    <Modal open={open} onOpenChange={(o) => !o && onClose()} title="Topics" description="Jokes and premises share these topics. Drag the grips to change the order. Random is where new jokes land, so it stays first and can't be renamed or deleted."
+    <Modal open={open} onOpenChange={(o) => !o && onClose()} title="Topics" description="Jokes, premises and observations share these topics. Drag the grips to change the order. Random is where new jokes land, so it stays first and can't be renamed or deleted."
       footer={<Button variant="tape" icon={<Plus size={18} />} onClick={() => void newTopic()}>Add topic</Button>}>
       <div className="divide-y divide-rule">
         {pinned.map((t) => (

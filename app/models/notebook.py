@@ -28,7 +28,7 @@ class ObservationTopic(OwnedMixin, Base):
 
 
 class Observation(Trashable, OwnedMixin, Base):
-    """One thing you noticed, with an optional topic and kind.
+    """One thing you noticed, under a topic (Random unless filed elsewhere) and an optional kind.
 
     The columns keep the names they had before kinds: `topic_id` holds the kind and
     `joke_topic_id` the topic. Renaming them would break the deployment still serving while a new

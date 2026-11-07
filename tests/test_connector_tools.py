@@ -136,7 +136,7 @@ def test_notebook_and_study(dev: TestClient, db: Session) -> None:
     dev.put(f"/api/analyses/{uuid.uuid4()}", json={"title": "Fake analysis", "body": "Fake why"})
     me = account(db, "dev@example.com")
     [plain] = notebook.search_observations(db, me, "noticed")["observations"]
-    assert (plain["topic"], plain["kind"]) == (None, "Observation")
+    assert (plain["topic"], plain["kind"]) == ("Random", "Observation")
     [idea] = notebook.search_observations(db, me, topic="buses", kind="set ideas")["observations"]
     assert idea["text"] == "Fake bus idea"
     assert notebook.search_observations(db, me, kind="observation")["total"] == 1

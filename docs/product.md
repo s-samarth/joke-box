@@ -93,7 +93,7 @@ The vocabulary is a comic's, not a database's. Keep to it in the code and in the
 | **Premise** | The idea or opinion under a joke ("X is Y, because Z"), kept on the Premises screen with its notes. A joke can rest on one premise, and one premise can feed many jokes, from any topic. **Premise** is also one of the default types. |
 | **Tag line** | An extra punchline that follows the main punch. |
 | **Random** | The default topic for anything unfiled. The protected `Random` topic, which can't be renamed or deleted, and picks up the jokes of any deleted topic. |
-| **Topic / subtopic** | Folders for jokes. Observations have their own separate topics. |
+| **Topic / subtopic** | Folders for jokes. Premises and observations are filed under the same topics (one shared list; Random by default); subtopics are for jokes only. Observations also have kinds of their own. |
 | **Type** | The form of a joke: One-Liner, Story, Crowd Work, Roast, Observation, Premise, Act Out, or your own. A type exists only while some joke uses it; a joke with no type shows as "Undefined". |
 | **Strength** | 1–5: Weak, Needs work, Decent, Strong, Killer, drawn as five ticks; or **Unrated**, which is how every new joke starts, so a 3 always means you chose it. Sorting by strength puts unrated jokes last. |
 | **Status** | Incomplete, Work in Progress, Complete, Draft, Stage Ready, Need Tags, or your own. Every joke has one; new jokes start as Draft. |

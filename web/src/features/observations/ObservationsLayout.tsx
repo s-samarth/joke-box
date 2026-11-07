@@ -21,7 +21,7 @@ import { count } from '../../lib/topics'
 import { KindManager } from './KindManager'
 import { NewObservationDialog } from './NewObservationDialog'
 import { KindMenu, TopicMenu } from './ObservationMenus'
-import { kindLabel, matchesFilters, NOT_SORTED, PLAIN, PLAIN_KIND, topicLabel } from './observationMeta'
+import { kindLabel, matchesFilters, PLAIN, PLAIN_KIND, topicLabel } from './observationMeta'
 import { useUses } from './useUsed'
 
 const newest = (a: Observation, b: Observation) => b.created_at.localeCompare(a.created_at)
@@ -37,7 +37,9 @@ export function ObservationsLayout() {
   const navigate = useNavigate()
   const [managing, setManaging] = useState(false)
   const setParam = (name: string, value: string | null) => setParams((p) => { if (value) p.set(name, value); else p.delete(name); return p }, { replace: true })
-  const topic = params.get('topic')
+  // An old ?topic=none (Not sorted, now gone) or a deleted topic's id reads as all topics.
+  const topicParam = params.get('topic')
+  const topic = topicParam && topics.some((t) => t.id === topicParam) ? topicParam : null
   const kind = params.get('kind')
   const unused = params.get('unused') === '1'
   const query = params.get('q') ?? ''
@@ -51,8 +53,7 @@ export function ObservationsLayout() {
   // Each menu counts within the other filters, so the numbers match what picking would show.
   const topicCount = (v: string | null) => all.filter((o) => matchesFilters(o, v, kind) && open(o)).length
   const kindCount = (v: string | null) => all.filter((o) => matchesFilters(o, topic, v) && open(o)).length
-  const filedUnder = (value: string | null, none: string) => (value && value !== none ? value : null)
-  const about = (o: Observation) => [topicLabel(topics, o.topic_id) ?? 'No topic', o.kind_id && kindLabel(kinds, o.kind_id)].filter((x) => x && x !== PLAIN).join(' · ')
+  const about = (o: Observation) => [topicLabel(topics, o.topic_id), o.kind_id && kindLabel(kinds, o.kind_id)].filter((x) => x && x !== PLAIN).join(' · ')
 
   const list = (
     <>
@@ -101,7 +102,7 @@ export function ObservationsLayout() {
     <>
       <SplitView list={list} openId={observationId} closeTo={`/observations${search}`} noun="observation"><Outlet /></SplitView>
       {params.has('new') && (
-        <NewObservationDialog onClose={() => setParam('new', null)} topicId={filedUnder(topic, NOT_SORTED)} kindId={filedUnder(kind, PLAIN_KIND)}
+        <NewObservationDialog onClose={() => setParam('new', null)} topicId={topic} kindId={kind === PLAIN_KIND ? null : kind}
           onCreated={(id) => navigate(`/observations/${id}${search}`)} />
       )}
       {managing && <KindManager onClose={() => setManaging(false)} />}

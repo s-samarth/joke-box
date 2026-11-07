@@ -294,17 +294,17 @@ query is `?q=` in the URL. It's in the rail under Home, in More under **Find**, 
 [KindManager.tsx](../web/src/features/observations/KindManager.tsx),
 [ObservationBox.tsx](../web/src/features/observations/ObservationBox.tsx) (Home), [observationMeta.ts](../web/src/features/observations/observationMeta.ts).
 
-An observation has an optional **topic**, from the same list as jokes and premises (none:
-**Not sorted**), and an optional **kind**: what sort of note it is, like "Set ideas" or "Questions".
+An observation always has a **topic**, from the same list as jokes and premises (Random until
+you pick another), and an optional **kind**: what sort of note it is, like "Set ideas" or "Questions".
 Most need no kind and are plain observations. It works like Premises: the list, with the one you
 open beside it on an iPad in landscape or a laptop, or as its own page on a phone (see SplitView).
 
 - **The list:** **New** opens New observation (`?new=1`; the + button opens it too): the words,
-  **Topic (optional)** and **Kind (optional)**, then Save opens its page. Below are a search box
+  **Topic** (Random, or the one you're filtered to) and **Kind (optional)**, then Save opens its page. Below are a search box
   (`?q=`), and **Topic**, **Kind** and **Not used yet** (`?unused=1`) in a row that scrolls
   sideways; each choice counts within the other filters. Then how many there are. Each row: the words (three lines), then its topic, kind,
   what came from it ("1 joke · 1 premise" or "Not used yet") and the date.
-- **An observation:** the words, edited in place and saved on their own; **Topic (optional)** and
+- **An observation:** the words, edited in place and saved on their own; **Topic** and
   **Kind (optional)**, each ending in New topic… / New kind…; **Write a joke from it** (New joke
   with it as the setup, on its topic) and **Write a premise from it** (New premise with it as "why
   it's true"); either new one is linked back. Then **Jokes from it** and **Premises from it**: what's

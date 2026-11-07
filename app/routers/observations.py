@@ -10,6 +10,7 @@ from typing import Literal
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import select, update
 
+from app.auth.bootstrap import random_topic_for
 from app.auth.deps import CurrentUser, DbSession, find_owned, get_owned
 from app.models import Observation, ObservationTopic, Topic
 from app.models.base import written_at
@@ -59,7 +60,11 @@ def put_observation(
     kind_id, topic_id = saved_fields(body, observation)
     if kind_id is not None:
         get_owned(db, ObservationTopic, kind_id, user)
-    if topic_id is not None:
+    if topic_id is None:
+        # Every observation has a topic, like a joke: one saved without (or by an older app)
+        # goes to Random.
+        topic_id = random_topic_for(db, user).id
+    else:
         get_owned(db, Topic, topic_id, user)
     if observation is None:
         observation = Observation(id=observation_id, user_id=user.id)
