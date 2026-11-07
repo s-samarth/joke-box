@@ -51,23 +51,18 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 3. The nudge turns into a small green line with your streak, and today gets a tick on the calendar.
 4. On **Daily joke**, tap any day to see what you wrote, or page back through earlier months.
 
-## 3. Work an observation into a joke
+## 3. Work an observation into a joke or premise
 
-1. On **Observations**, pick a **Topic** to see what you've noticed about it, then open the ⋯ menu
-   on one and choose **Turn into a joke**.
-2. The New joke sheet opens with the observation as the setup, filed under its topic. The
-   observation itself stays.
-3. Write the punchline, file it, and save.
+1. On **Observations**, pick a **Topic** to see what you've noticed about it, and open one.
+2. Tap **Write a joke from it** (New joke opens with it as the setup, on its topic) or **Write a
+   premise from it** (New premise opens with it as "why it's true"). Save, and it shows under
+   **Jokes from it** or **Premises from it**.
+3. Already written the joke or premise? Type a few of its words in **Search jokes to link** (or
+   premises) and tap it among the three matches.
 
-To build a premise from one instead, choose **Write a premise** in its ⋯ menu: New premise opens
-on its topic with the observation as "why it's true". Add the take and save, and the premise opens.
-Whichever you make, it shows **Came from** with the observation, and the observation shows what
-came from it. **Not used yet** on Observations shows the ones nothing has come from.
-
-Or start from what you're writing: on a premise or a joke, tap **Observations** (beside "Why it's
-true" or Notes). Your observations on its topic open beside it on an iPad or laptop, or as a
-sheet on a phone. **Add to why it’s true** (or **Add to notes**) puts one into what you're
-writing; **New joke** starts a joke from it, on the same premise.
+From the other side, a joke or premise has an **Observations** section: type in **Search
+observations to link** and tap the one it came from; link as many as you like, × unlinks.
+**Not used yet** on Observations shows the ones nothing has come from.
 
 A voice note works the same way: its **Turn into a joke** button starts New joke from its label
 and hashtags. To find an old one first, **Search** (on Home, or in the rail or More) looks

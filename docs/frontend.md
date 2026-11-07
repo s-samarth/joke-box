@@ -208,11 +208,11 @@ the phone bar renders `BAR_LEFT`, the + button, `BAR_RIGHT` and More (`MORE_GROU
   because a per-device choice in `localStorage` can override the width.
 - **`SplitView`** ([SplitView.tsx](../web/src/components/ui/SplitView.tsx)) owns the list and
   detail columns for Jokes and Premises, the full-width and close buttons, and the settle-in
-  animation. Lists pass `WIDE_LIST` to go two across only while nothing is open. It also holds a
-  side panel slot ([splitSide.ts](../web/src/components/ui/splitSide.ts)): the open item's page
-  portals a panel into it from 1024 px (Observations), and the list steps aside while it's open.
-  Below that the page shows the same panel as a sheet. The page owns the panel because it owns the
-  draft the panel writes into.
+  animation. Lists pass `WIDE_LIST` to go two across only while nothing is open. Observations
+  uses it too.
+- **Linking by search:** [LinkSearch.tsx](../web/src/features/observations/LinkSearch.tsx) is the one
+  way to link observations with jokes and premises, from either side: type, see the three best
+  matches, tap to link. No lists to scroll.
 - **View transitions:** links that reshape the screen pass React Router's `viewTransition`; state
   changes go through `withTransition` ([viewTransition.ts](../web/src/lib/viewTransition.ts)).
   Moving between items in an open split doesn't fade, so it stays instant.

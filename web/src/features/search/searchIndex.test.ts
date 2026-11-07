@@ -26,7 +26,7 @@ describe('search everything', () => {
     const groups = searchAll(lists, 'parrot')
     expect(groups.map((g) => g.kind)).toEqual(['Jokes', 'Premises', 'Observations', 'Brainstorms', 'Rewrites', 'Voice notes', 'Sets', 'Shows', 'Craft', 'Analyses', 'Watchlist'])
     const to = Object.fromEntries(groups.map((g) => [g.kind, g.hits[0].to]))
-    expect(to).toMatchObject({ Jokes: '/jokes/j1', Rewrites: '/jokes/j1/rewrite', Brainstorms: '/brainstorm/s1', Observations: '/observations?q=parrot', 'Voice notes': '/voice?q=parrot' })
+    expect(to).toMatchObject({ Jokes: '/jokes/j1', Rewrites: '/jokes/j1/rewrite', Brainstorms: '/brainstorm/s1', Observations: '/observations/o1', 'Voice notes': '/voice?q=parrot' })
   })
 
   it('needs every word, in any order and case', () => {

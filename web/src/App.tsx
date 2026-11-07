@@ -27,7 +27,9 @@ const PrintView = named(() => import('./features/sets/PrintView'), 'PrintView')
 const ShowsPage = named(() => import('./features/shows/ShowsPage'), 'ShowsPage')
 const BrainstormPage = named(() => import('./features/brainstorm/BrainstormPage'), 'BrainstormPage')
 const SessionPage = named(() => import('./features/brainstorm/SessionPage'), 'SessionPage')
-const ObservationsPage = named(() => import('./features/observations/ObservationsPage'), 'ObservationsPage')
+const ObservationsLayout = named(() => import('./features/observations/ObservationsLayout'), 'ObservationsLayout')
+const NoObservationSelected = named(() => import('./features/observations/ObservationsLayout'), 'NoObservationSelected')
+const ObservationPage = named(() => import('./features/observations/ObservationPage'), 'ObservationPage')
 const VoicePage = named(() => import('./features/voice/VoicePage'), 'VoicePage')
 const WatchlistPage = named(() => import('./features/study/WatchlistPage'), 'WatchlistPage')
 const AnalysisPage = named(() => import('./features/study/AnalysisPage'), 'AnalysisPage')
@@ -69,7 +71,10 @@ export function App() {
           <Route path="sets/:setId" element={<SetBuilder />} />
           <Route path="shows" element={<ShowsPage />} />
           <Route path="daily" element={<DailyPage />} />
-          <Route path="observations" element={<ObservationsPage />} />
+          <Route path="observations" element={<ObservationsLayout />}>
+            <Route index element={<NoObservationSelected />} />
+            <Route path=":observationId" element={<ObservationPage />} />
+          </Route>
           <Route path="brainstorm" element={<BrainstormPage />} />
           <Route path="voice" element={<VoicePage />} />
           <Route path="watchlist" element={<WatchlistPage />} />
