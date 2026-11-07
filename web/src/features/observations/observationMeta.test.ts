@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Observation, Topic } from '../../api/types'
-import { kindLabel, matchesFilters, NOT_SORTED, PLAIN, PLAIN_KIND, topicLabel, withObservation } from './observationMeta'
+import { kindLabel, matchesFilters, NOT_SORTED, PLAIN, PLAIN_KIND, topicLabel } from './observationMeta'
 
 const obs = (topic_id: string | null, kind_id: string | null) =>
   ({ id: 'o', text: 'Fake thing noticed', topic_id, kind_id, version: 1, created_at: '', updated_at: '' }) as Observation
@@ -31,13 +31,5 @@ describe('observation labels', () => {
     const topics = [{ id: 't', name: 'Buses', is_system: false, subtopics: [] }] as unknown as Topic[]
     expect(topicLabel(topics, 't')).toBe('Buses')
     expect(topicLabel(topics, null)).toBeNull()
-  })
-})
-
-describe('adding an observation to notes', () => {
-  it('starts empty notes with it, and puts it a blank line after others', () => {
-    expect(withObservation('', 'Fake noticed')).toBe('Fake noticed')
-    expect(withObservation('  ', 'Fake noticed')).toBe('Fake noticed')
-    expect(withObservation('Because of fake reasons.\n', 'Fake noticed')).toBe('Because of fake reasons.\n\nFake noticed')
   })
 })

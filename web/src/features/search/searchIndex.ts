@@ -58,7 +58,7 @@ const KINDS: Kind<unknown>[] = [
     title: (j) => j.setup, body: (j) => [j.punchline, ...j.tag_lines, j.comments].join(' '), to: (j) => `/jokes/${j.id}`,
   }),
   kind<Premise>({ kind: 'Premises', items: (l) => l.premises, texts: (p) => [p.take, p.notes], title: (p) => p.take, body: (p) => p.notes, to: (p) => `/premises/${p.id}` }),
-  kind<Observation>({ kind: 'Observations', items: (l) => l.observations, texts: (o) => [o.text], title: (o) => o.text, to: (_o, query) => `/observations?q=${q(query)}` }),
+  kind<Observation>({ kind: 'Observations', items: (l) => l.observations, texts: (o) => [o.text], title: (o) => o.text, to: (o) => `/observations/${o.id}` }),
   kind<SessionSummary>({
     kind: 'Brainstorms', items: (l) => l.sessions, texts: (s) => [s.title, s.content], title: (s) => sessionName(s), body: (s) => s.content, to: (s) => `/brainstorm/${s.id}`,
   }),

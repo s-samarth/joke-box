@@ -24,6 +24,3 @@ export function matchesFilters(o: Observation, topic: string | null, kind: strin
   const kindOk = kind === null || (kind === PLAIN_KIND ? o.kind_id === null : o.kind_id === kind)
   return topicOk && kindOk
 }
-
-/** Notes with an observation added at the end, a blank line apart. */
-export const withObservation = (notes: string, text: string) => (notes.trim() ? `${notes.trimEnd()}\n\n${text}` : text)

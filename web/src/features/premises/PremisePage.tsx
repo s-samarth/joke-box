@@ -1,8 +1,7 @@
 /**
  * One premise: the take and its reasoning, edited in place, then the jokes resting on it as a
  * list or its web (see PremiseJokes). Write a new joke on it, or add ones you've written, from
- * any topic. Observations on its topic open beside it (see ObservationsSide), to add to the
- * reasoning or start a joke on it.
+ * any topic. Below, the observations it came from (see ObservationsOn): search to link more.
  */
 import { ArrowLeft, Trash2 } from 'lucide-react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
@@ -15,12 +14,8 @@ import { EmptyState, Spinner } from '../../components/ui/pieces'
 import { topicName } from '../../lib/jokeMeta'
 import { jokesOn } from '../../lib/premises'
 import { formatDateTime } from '../../lib/time'
-import { useCapture } from '../capture/captureContext'
 import { NEW_TOPIC, useNewTopic } from '../jokes/useNewTopic'
-import { useLinkObservation } from '../../api/notebook'
-import { CameFrom } from '../observations/ObservationLinks'
-import { withObservation } from '../observations/observationMeta'
-import { ObservationsButton, ObservationsSide } from '../observations/ObservationsSide'
+import { ObservationsOn } from '../observations/ObservationsOn'
 import { PremiseGuide } from './PremiseGuide'
 import { PremiseJokes } from './PremiseJokes'
 import { usePremiseDraft } from './usePremiseDraft'
@@ -31,9 +26,6 @@ function Editor({ premise }: { premise: Premise }) {
   const { data: all = [] } = useJokes()
   const remove = useDeletePremise()
   const { confirm, toast } = useFeedback()
-  const { openCapture } = useCapture()
-  const link = useLinkObservation()
-  const linkTo = (kind: 'premises' | 'jokes', obsId: string, targetId: string) => link.mutate({ id: obsId, kind, targetId, on: true })
   const navigate = useNavigate()
   const { search } = useLocation()
   const newTopic = useNewTopic()
@@ -58,13 +50,9 @@ function Editor({ premise }: { premise: Premise }) {
         value={draft.take} onChange={(e) => update({ take: e.target.value })} />
       {!draft.take.trim() && <p className="mt-2 text-sm text-light">A premise needs a take to be saved.</p>}
       <div className="mt-6 grid gap-4">
-        <div className="space-y-1.5">
-          <div className="-my-1 flex items-center justify-between gap-2">
-            <label htmlFor="premise-notes" className="text-sm text-dim">Why it's true</label>
-            <ObservationsButton topicId={draft.topic_id} />
-          </div>
-          <Textarea id="premise-notes" placeholder="Because… and anything else worth keeping" value={draft.notes} onChange={(e) => update({ notes: e.target.value })} />
-        </div>
+        <Field label="Why it's true">
+          <Textarea placeholder="Because… and anything else worth keeping" value={draft.notes} onChange={(e) => update({ notes: e.target.value })} />
+        </Field>
         <Field label="Topic">
           <Select value={draft.topic_id} onChange={(e) => pickTopic(e.target.value)} className="block sm:max-w-xs">
             {topics.map((t) => <option key={t.id} value={t.id}>{topicName(t)}</option>)}
@@ -73,12 +61,9 @@ function Editor({ premise }: { premise: Premise }) {
         </Field>
         <PremiseGuide open={!hasJokes && !premise.notes.trim()} />
       </div>
-      <CameFrom kind="premises" id={premise.id} />
 
       <PremiseJokes premise={premise} topicId={draft.topic_id} all={all} topics={topics} />
-      <ObservationsSide topicId={draft.topic_id} addedLabel="In why it’s true" isAdded={(o) => draft.notes.includes(o.text)} addLabel="Add to why it’s true"
-        onAdd={(o) => { update({ notes: withObservation(draft.notes, o.text) }); linkTo('premises', o.id, premise.id); toast('Added to why it’s true') }}
-        onWrite={(o) => openCapture({ setup: o.text, topicId: draft.topic_id, premiseId: premise.id, onCreated: (id) => linkTo('jokes', o.id, id) })} />
+      <ObservationsOn kind="premises" id={premise.id} topicId={draft.topic_id} />
 
       <footer className="mt-12 flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-5 text-sm text-faint">
         <span>Written {formatDateTime(premise.created_at)}.</span>

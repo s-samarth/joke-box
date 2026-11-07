@@ -159,7 +159,7 @@ the jokes' created dates, so there's no separate log to fall out of step.
   subtopic, with Edit topics), Premise, Follows (the joke this one comes after in a chain),
   Followed by (with a button to write the next one), Status, Runs for (type it, or step it five
   seconds at a time with − and +), Clean rating, Language (Hinglish, Hindi or English) and
-  Hashtags, followed by a Notes box; **Observations** beside the Notes box opens your observations on the joke's topic (see [Observations beside a premise or joke](#observations-beside-a-premise-or-joke)). Then **Rewrites** (earlier sessions and **Start a rewrite**),
+  Hashtags, followed by a Notes box, then **Observations**: the ones it came from, and a search to link more (see [Observations on a premise or joke](#observations-on-a-premise-or-joke)). Then **Rewrites** (earlier sessions and **Start a rewrite**),
   **In sets** (with Add to a set), the show record once the joke has been logged at a show
   ("Done at 3 shows: 2 killed, 1 ok. Last done 12 Oct", [JokeShowRecord.tsx](../web/src/features/jokes/JokeShowRecord.tsx)),
   and **Delete joke**, which asks first and sends it to the Trash.
@@ -213,34 +213,19 @@ writing a premise sits beside the list; on a phone the list gives way to the pre
   until you put it back.
 - **On a joke:** the Premise row on the joke page picks one, or starts a new one.
 - **+** on this screen opens **New premise** (`?new=1`).
-- **Observations** beside "Why it's true" opens your observations on the premise's topic.
+- **Observations:** the observations it came from (see below).
 
-### Observations beside a premise or joke
+### Observations on a premise or joke
 
-[ObservationsSide.tsx](../web/src/features/observations/ObservationsSide.tsx), [ObservationsPanel.tsx](../web/src/features/observations/ObservationsPanel.tsx),
-[splitSide.ts](../web/src/components/ui/splitSide.ts).
+[ObservationsOn.tsx](../web/src/features/observations/ObservationsOn.tsx), [LinkSearch.tsx](../web/src/features/observations/LinkSearch.tsx),
+[LinkedRows.tsx](../web/src/features/observations/LinkedRows.tsx).
 
-The **Observations** button (with how many there are on the topic) sits beside "Why it's true" on
-a premise and beside Notes on a joke. It opens your observations on the item's topic, newest
-first; **On [topic]** looks at another topic without changing the item. Each one offers:
-
-- **Add to why it’s true** / **Add to notes**: puts its words at the end of those notes, a blank
-  line apart. Once they're in, it says **In why it’s true** / **In notes** instead.
-- **New joke**: the New joke sheet with the observation as the setup, on the item's topic (and,
-  from a premise, on that premise).
-
-Either one links the observation to what it went into. The premise or joke then shows a **Came
-from** block ([ObservationLinks.tsx](../web/src/features/observations/ObservationLinks.tsx)) under
-its notes, quoting each observation: tap one to find it on Observations, or × to unlink it. With
-nothing linked, the block isn't there.
-
-Where it shows depends on the width:
-
-- **From 1024 px (iPad landscape, laptops):** a panel on the right, in place of the list, so the
-  item keeps a readable width. It stays open as you move to another item, following its topic,
-  until you close it. The full-width button hides while it's open.
-- **Below 1024 px (iPhone, iPad upright):** a sheet (half the screen on a phone, the item still
-  showing above it). Adding or starting a joke closes it.
+A premise (below **Jokes on it**) and a joke (below Notes) have an **Observations** section: the
+observations it came from, each opening its own page, with × to unlink. Under them, **Search
+observations to link**: type and the three best matches show (every word has to appear; focused
+and empty, it suggests three, same topic first). Tap one to link it; the box clears for the next,
+so you can link as many as you like. Enter links the first match. It's the same box everywhere
+something gets linked, as linking a page works in Notion.
 
 <img src="screenshots/desktop-premises.webp" alt="A premise with the jokes resting on it">
 
@@ -301,36 +286,39 @@ query is `?q=` in the URL. It's in the rail under Home, in More under **Find**, 
 
 <img src="screenshots/desktop-search.webp" alt="Search across everything">
 
-## Observations: `/observations`
+## Observations: `/observations` and `/observations/:observationId`
 
-[ObservationsPage.tsx](../web/src/features/observations/ObservationsPage.tsx), [ObservationBox.tsx](../web/src/features/observations/ObservationBox.tsx),
-[ObservationMenus.tsx](../web/src/features/observations/ObservationMenus.tsx), [ObservationList.tsx](../web/src/features/observations/ObservationList.tsx),
-[ObservationSheet.tsx](../web/src/features/observations/ObservationSheet.tsx), [ObservationSorter.tsx](../web/src/features/observations/ObservationSorter.tsx),
-[KindManager.tsx](../web/src/features/observations/KindManager.tsx), [observationMeta.ts](../web/src/features/observations/observationMeta.ts).
+[ObservationsLayout.tsx](../web/src/features/observations/ObservationsLayout.tsx), [ObservationPage.tsx](../web/src/features/observations/ObservationPage.tsx),
+[ObservationUses.tsx](../web/src/features/observations/ObservationUses.tsx), [NewObservationDialog.tsx](../web/src/features/observations/NewObservationDialog.tsx),
+[useObservationDraft.ts](../web/src/features/observations/useObservationDraft.ts), [ObservationMenus.tsx](../web/src/features/observations/ObservationMenus.tsx),
+[ObservationSorter.tsx](../web/src/features/observations/ObservationSorter.tsx), [KindManager.tsx](../web/src/features/observations/KindManager.tsx),
+[ObservationBox.tsx](../web/src/features/observations/ObservationBox.tsx) (Home), [observationMeta.ts](../web/src/features/observations/observationMeta.ts).
 
-An observation has a **topic**, from the same list as jokes and premises (none yet: **Not sorted**),
-and a **kind**: what sort of note it is, like "Set ideas" or "Questions". Most need no kind and are
-plain observations. Kinds are yours, made from the Kind menus.
+An observation has an optional **topic**, from the same list as jokes and premises (none:
+**Not sorted**), and an optional **kind**: what sort of note it is, like "Set ideas" or "Questions".
+Most need no kind and are plain observations. It works like Premises: the list, with the one you
+open beside it on an iPad in landscape or a laptop, or as its own page on a phone (see SplitView).
 
-- **The box:** "What did you notice?", then **Topic** and **Kind** menus and **Log it**. Both menus
-  end with New topic / New kind, and stay picked for the next one. On a phone a long topic name is
-  cut short so the row still fits.
-- **Filters:** a search box (every word has to appear; `?q=`), then **Topic** and **Kind** menus and
-  **Not used yet** (nothing has come from it, or what did is in the Trash; `?unused=1`) in a row
-  that scrolls sideways, as on Jokes. Each choice shows how many observations it holds within
-  the other filter. They're `?topic=` (an id, or `none`) and `?kind=` (an id, or `plain`) in the
-  URL, and new observations go under what's picked. **Manage kinds…** ends the Kind menu: drag to
-  reorder, rename, or delete one (its observations become plain).
-- **The list:** by month under pinned headings, **Newest first** or **Oldest first**
-  (`?order=old`), with the time scrubber down the right edge. Each row says its topic and kind
-  ("Driving · Set ideas · 3 Nov"), then what came from it, as links ("→ Premise: … · Joke: …").
-  The ⋯ menu offers **Write a premise** (New premise with the observation as "why it's true", on
-  its topic; the new premise opens), **Turn into a joke** (filed under its topic), Edit (words,
-  topic and kind) and Delete. Either way the new premise or joke is linked back to it.
-- **Sort N** (while some have no topic) goes through them one at a time, newest first, in a sheet:
-  the observation, its **Kind** chips, then every topic as a chip. Tapping a topic files it and
-  shows the next; **Skip** leaves it under Not sorted, **Back** returns. The list is fixed when it
-  opens, so nothing moves under your thumb. At the end it says how many were sorted and skipped.
+- **The list:** **New** opens New observation (`?new=1`; the + button opens it too): the words,
+  **Topic (optional)** and **Kind (optional)**, then Save opens its page. Below are a search box
+  (`?q=`), and **Topic**, **Kind** and **Not used yet** (`?unused=1`) in a row that scrolls
+  sideways; each choice counts within the other filters. Then how many there are and, while some
+  have no topic, **Sort N into topics**. Each row: the words (three lines), then its topic, kind,
+  what came from it ("1 joke · 1 premise" or "Not used yet") and the date.
+- **An observation:** the words, edited in place and saved on their own; **Topic (optional)** and
+  **Kind (optional)**, each ending in New topic… / New kind…; **Write a joke from it** (New joke
+  with it as the setup, on its topic) and **Write a premise from it** (New premise with it as "why
+  it's true"); either new one is linked back. Then **Jokes from it** and **Premises from it**: what's
+  linked, each opening its page, × to unlink, and a search to link ones you've written (the three
+  best matches, same topic first). **Delete observation** asks first; what came from it stays.
+- **Sort N into topics** goes through the ones with no topic, one at a time, newest first, in a
+  sheet: the observation, its **Kind** chips, then every topic as a chip. Tapping a topic files it
+  and shows the next; **Skip** leaves it under Not sorted, **Back** returns. At the end it says how
+  many were sorted and skipped.
+- **Kinds:** **Manage kinds…** ends the Kind menu: drag to reorder, rename, or delete one (its
+  observations become plain).
+- **Home** keeps a quick box (words, Topic and Kind menus, **Log it**) and the last three, each
+  opening its page.
 
 <img src="screenshots/desktop-observations.webp" alt="Observations">
 

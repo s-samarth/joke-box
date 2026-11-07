@@ -1,7 +1,7 @@
 /**
  * One joke, one page. The words are edited in place (no form popup), details sit below, then
- * its rewrites and sets. Every change saves on its own, offline included. Observations on its
- * topic open beside it (see ObservationsSide), to add to its notes or start another joke.
+ * the observations it came from (see ObservationsOn), its rewrites and sets. Every change saves
+ * on its own, offline included.
  */
 import { ArrowLeft, Trash2 } from 'lucide-react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
@@ -12,11 +12,7 @@ import { EmptyState, Spinner } from '../../components/ui/pieces'
 import { GrowingText, Textarea } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { formatDateTime } from '../../lib/time'
-import { useCapture } from '../capture/captureContext'
-import { useLinkObservation } from '../../api/notebook'
-import { CameFrom } from '../observations/ObservationLinks'
-import { withObservation } from '../observations/observationMeta'
-import { ObservationsButton, ObservationsSide } from '../observations/ObservationsSide'
+import { ObservationsOn } from '../observations/ObservationsOn'
 import { JokeDetails } from './JokeDetails'
 import { JokeExtras } from './JokeExtras'
 import { JokeShowRecord } from './JokeShowRecord'
@@ -27,9 +23,6 @@ function Editor({ joke }: { joke: Joke }) {
   const { draft, update, flush } = useAutosaveJoke(joke)
   const remove = useDeleteJoke()
   const { confirm, toast } = useFeedback()
-  const { openCapture } = useCapture()
-  const link = useLinkObservation()
-  const linkJoke = (obsId: string, jokeId: string) => link.mutate({ id: obsId, kind: 'jokes', targetId: jokeId, on: true })
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const back = `/jokes${params.toString() ? `?${params}` : ''}`
@@ -56,18 +49,12 @@ function Editor({ joke }: { joke: Joke }) {
       <div className="mt-6"><TagLines lines={draft.tag_lines} onChange={(tag_lines) => update({ tag_lines })} /></div>
       <div className="mt-10"><JokeDetails jokeId={joke.id} draft={draft} update={update} /></div>
       <div className="mt-8">
-        <div className="-my-1 flex items-center justify-between gap-2">
-          <label htmlFor="joke-notes" className="text-sm text-dim">Notes</label>
-          <ObservationsButton topicId={draft.topic_id} />
-        </div>
+        <label htmlFor="joke-notes" className="text-sm text-dim">Notes</label>
         <Textarea id="joke-notes" className="mt-2" placeholder="Where it kills, where it dies, what to try next" value={draft.comments} onChange={(e) => update({ comments: e.target.value })} />
-        <CameFrom kind="jokes" id={joke.id} />
       </div>
+      <ObservationsOn kind="jokes" id={joke.id} topicId={draft.topic_id} />
       <div className="mt-12"><JokeExtras joke={joke} /></div>
       <JokeShowRecord jokeId={joke.id} />
-      <ObservationsSide topicId={draft.topic_id} addedLabel="In notes" isAdded={(o) => draft.comments.includes(o.text)} addLabel="Add to notes"
-        onAdd={(o) => { update({ comments: withObservation(draft.comments, o.text) }); linkJoke(o.id, joke.id); toast('Added to notes') }}
-        onWrite={(o) => openCapture({ setup: o.text, topicId: draft.topic_id, onCreated: (id) => linkJoke(o.id, id) })} />
       <footer className="mt-12 flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-5 text-sm text-faint">
         <span>Written {formatDateTime(joke.created_at)}. Last changed {formatDateTime(joke.updated_at)}.</span>
         <Button variant="danger" small icon={<Trash2 size={15} />} onClick={onDelete}>Delete joke</Button>
