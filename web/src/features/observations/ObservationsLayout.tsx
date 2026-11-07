@@ -2,10 +2,9 @@
  * Observations, like Premises: a searchable list with the open observation beside it (see
  * SplitView); on a phone the list gives way to the one you open. Filter by topic and kind, or to
  * the ones nothing has come from yet; all of it lives in the URL (?topic=, ?kind=, ?unused=1,
- * ?q=). New opens a sheet (?new=1, so the + button can open it too). While some have no topic,
- * Sort goes through them one at a time.
+ * ?q=). New opens a sheet (?new=1, so the + button can open it too).
  */
-import { Eye, Inbox, Plus, Search } from 'lucide-react'
+import { Eye, Plus, Search } from 'lucide-react'
 import { useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
 import { useTopics } from '../../api/library'
@@ -22,7 +21,6 @@ import { count } from '../../lib/topics'
 import { KindManager } from './KindManager'
 import { NewObservationDialog } from './NewObservationDialog'
 import { KindMenu, TopicMenu } from './ObservationMenus'
-import { ObservationSorter } from './ObservationSorter'
 import { kindLabel, matchesFilters, NOT_SORTED, PLAIN, PLAIN_KIND, topicLabel } from './observationMeta'
 import { useUses } from './useUsed'
 
@@ -38,7 +36,6 @@ export function ObservationsLayout() {
   const [params, setParams] = useSearchParams()
   const navigate = useNavigate()
   const [managing, setManaging] = useState(false)
-  const [sorting, setSorting] = useState<string[] | null>(null)
   const setParam = (name: string, value: string | null) => setParams((p) => { if (value) p.set(name, value); else p.delete(name); return p }, { replace: true })
   const topic = params.get('topic')
   const kind = params.get('kind')
@@ -50,7 +47,6 @@ export function ObservationsLayout() {
   const all = [...(observations ?? [])].sort(newest)
   const open = (o: Observation) => !(unused && uses.used(o))
   const shown = all.filter((o) => matchesFilters(o, topic, kind) && open(o) && matchesWords(query, [o.text]))
-  const unsorted = all.filter((o) => o.topic_id === null)
   const active = Boolean(topic || kind || unused || query.trim())
   // Each menu counts within the other filters, so the numbers match what picking would show.
   const topicCount = (v: string | null) => all.filter((o) => matchesFilters(o, v, kind) && open(o)).length
@@ -72,14 +68,7 @@ export function ObservationsLayout() {
         <KindMenu value={kind} onChange={(v) => setParam('kind', v)} counts={kindCount} onManage={() => setManaging(true)} />
         <button type="button" aria-pressed={unused} onClick={() => setParam('unused', unused ? null : '1')} className={chip(unused)}>Not used yet</button>
       </ChipRow>
-      <p className="mt-4 mb-1 flex flex-wrap items-center gap-x-1 text-sm text-faint">
-        {active ? `${shown.length} of ${count(all.length, 'observation', 'observations')}` : count(all.length, 'observation', 'observations')}
-        {unsorted.length > 0 && (
-          <> · <button type="button" onClick={() => setSorting(unsorted.map((o) => o.id))} className="inline-flex items-center gap-1 text-tape hover:underline">
-            <Inbox size={14} /> Sort {unsorted.length} into topics
-          </button></>
-        )}
-      </p>
+      <p className="mt-4 mb-1 text-sm text-faint">{active ? `${shown.length} of ${count(all.length, 'observation', 'observations')}` : count(all.length, 'observation', 'observations')}</p>
       <div className="lg:-mx-6 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:px-3">
         {isPending && !observations ? (
           <div className="py-10"><Spinner /></div>
@@ -116,7 +105,6 @@ export function ObservationsLayout() {
           onCreated={(id) => navigate(`/observations/${id}${search}`)} />
       )}
       {managing && <KindManager onClose={() => setManaging(false)} />}
-      {sorting && <ObservationSorter ids={sorting} onClose={() => setSorting(null)} />}
     </>
   )
 }
