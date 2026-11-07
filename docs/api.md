@@ -81,6 +81,7 @@ still accept the old `bit_id` and `bit_ids` for good. Responses use only the new
   "comments": "",
   "premise_id": "optional: the premise it rests on (yours, any topic), or null",
   "follows_id": "optional: the joke this one continues from (yours), or null to unlink",
+  "voice_note_ids": "optional: the voice notes it came from (each once, up to 50); left out, kept as stored. Not checked, so a recording still uploading can be named",
   "created_at": "optional, kept only on create and capped at now (imports, and jokes written offline)",
   "base_version": "optional: the version this edit started from"
 }
@@ -265,13 +266,13 @@ Every tool reads; none writes. Each sees only the user's own rows, and the Trash
 |---|---|
 | `jokebox_overview` | Topics and subtopics with joke counts; how many premises, sets, shows and observations; Craft areas; statuses and types |
 | `search_jokes` | Jokes matching every word of the query (in the setup, punchline, tag lines, hashtags or notes; `#name` finds a hashtag), filtered by topic, subtopic, status, type, strength or premise; short versions, at most 25. `strength` is null for an unrated joke, and a `min_strength` above 1 leaves those out |
-| `get_jokes` | Up to 20 jokes in full: tag lines, notes, premise, what it follows and what follows it, the sets it's in, its rewrites, and `shows`: its record at logged shows (`shows_done`, `killed`, `ok`, `bombed`, `last_done`). `from_observations` lists the observations it came from |
+| `get_jokes` | Up to 20 jokes in full: tag lines, notes, premise, what it follows and what follows it, the sets it's in, its rewrites, and `shows`: its record at logged shows (`shows_done`, `killed`, `ok`, `bombed`, `last_done`). `from_observations` lists the observations it came from and `from_voice_notes` (`id`, `label`) the voice notes, Trash left out |
 | `list_premises`, `get_premise` | Premises with their joke counts; one premise with its notes, `from_observations` (`id`, `text` of each observation it came from) and jokes in chain order |
 | `list_sets`, `get_set` | Sets with runtime against target; one set in running order (first is the opener, last the closer) with each joke's topic, premise, strength and time |
 | `list_shows` | Logged shows with LPM, rating, topics, notes and `jokes` (each joke done, in running order: `id`, `setup`, `result` of killed / ok / bombed / null, `note`), and the LPM across every show that matches. `since` and `until` narrow by IST date; 25 a call, and `next_offset` says where the next page starts |
-| `search_observations` | Observations, newest first: `id`, `text`, `topic` (a joke topic, null until sorted), `kind` ("Observation" unless it has one, like "Set ideas") and `noted`. Narrow by words, `topic` and `kind`. `premise_ids` and `joke_ids` are what came from it (empty: not used yet; anything in the Trash is left out) |
+| `search_observations` | Observations, newest first: `id`, `text`, `topic` (a joke topic; Random unless filed elsewhere), `kind` ("Observation" unless it has one, like "Set ideas") and `noted`. Narrow by words, `topic` and `kind`. `premise_ids` and `joke_ids` are what came from it and `brainstorm_ids` the brainstorm sessions it's linked to (all empty: not used yet; anything in the Trash is left out) |
 | `search_brainstorms` | Brainstorms and Rewrites together, most recently changed first, by title and typed text, with how many handwritten pages each Brainstorm has (`handwritten_pages`) |
-| `search_voice_notes` | Voice notes, newest first, matching every word in the label or hashtags: `id`, `label`, `hashtags`, `seconds`, `recorded` (IST date) and `uploaded`. Never the audio |
+| `search_voice_notes` | Voice notes, newest first, matching every word in the label or hashtags: `id`, `label`, `hashtags`, `seconds`, `recorded` (IST date), `uploaded` and `joke_ids` (the jokes written from it). Never the audio |
 | `get_brainstorm` | Any result of `search_brainstorms` in full. A Brainstorm: a JSON block (`kind`, title, typed text, technique, linked jokes and observations, `handwritten_pages`, `pages_shown`, `more_from_page`), then "Page N" and a PNG of each handwritten page, drawn as the app shows it ([ink_image.py](../app/connector/ink_image.py)). Claude reads the handwriting from the images. Pages over a 2.5 MB budget continue with `from_page`. A Rewrite: one JSON block (`kind`, the joke's id and setup, title, typed text) |
 | `search_craft`, `get_craft_notes` | Craft notes (no query lists every title); up to 10 in full |
 | `search_analyses`, `get_analysis` | Analyses with the routine each is about; one in full |

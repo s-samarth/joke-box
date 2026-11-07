@@ -152,7 +152,8 @@ the jokes' created dates, so there's no separate log to fall out of step.
 - **The premise web** (the **Web** tab, [JokeWeb.tsx](../web/src/features/jokes/map/JokeWeb.tsx)):
   each premise in the middle of the jokes resting on it, whatever topic they're from. Jokes on no
   premise aren't drawn; a link lists them so you can sort them in. Tap a joke for the same panel
-  as the map.
+  as the map. The panel ends with where the joke came from (its observations, and voice notes
+  you can play), as does the reading panel in a set ([JokeOrigins.tsx](../web/src/features/jokes/JokeOrigins.tsx)).
 - **The joke page:** the setup and punchline (in tape yellow) are edited in place, followed by tag
   lines. Below them, a row of details: Strength (**Unrated**, then five bars; tap the lit bar again
   to clear it), Type (with Edit types), Filed under (topic and
@@ -227,7 +228,13 @@ box under the words, so you can link while you write; the picks are linked when 
 observations to link**: type and the three best matches show (every word has to appear; focused
 and empty, it suggests three, same topic first). Tap one to link it; the box clears for the next,
 so you can link as many as you like. Enter links the first match. It's the same box everywhere
-something gets linked, as linking a page works in Notion.
+something gets linked, as linking a page works in Notion. × shows **Undo** for a moment.
+
+A joke written from a voice note also has **From voice notes** under it (on its page and in the
+New joke sheet): each recording with a play button, × to unlink (with Undo)
+([VoiceNotesOn.tsx](../web/src/features/voice/VoiceNotesOn.tsx)). The links are part of the
+joke's own save, so they work offline like any edit, and a recording still waiting to upload
+plays from the phone.
 
 <img src="screenshots/desktop-premises.webp" alt="A premise with the jokes resting on it">
 
@@ -262,8 +269,9 @@ button still closes at once.
 [useTimer.ts](../web/src/features/jokes/useTimer.ts).
 
 A full screen with no app frame. The top bar holds close, the timer (start, pause, reset), a word
-count, **Checklists**, **+** for a new session and **Save version**. The original joke is pinned at the top, under
-it an optional session name and a free-writing area. On the right are **This session** (its saved
+count, **Checklists**, **+** for a new session and **Save version**. The original joke is pinned at the top,
+with **Where it came from** folded under it when it has any (its observations, and voice notes
+you can play), then an optional session name and a free-writing area. On the right are **This session** (its saved
 versions) and **Earlier sessions**. `?session=<id>` reopens a past session.
 
 **Checklists** opens the craft checklists from the areas set to show on Rewrite, in a sheet
@@ -305,14 +313,16 @@ open beside it on an iPad in landscape or a laptop, or as its own page on a phon
   **Topic** (Random, or the one you're filtered to) and **Kind (optional)**, then Save opens its page. Below are a search box
   (`?q=`), and **Topic**, **Kind** and **Not used yet** (`?unused=1`) in a row that scrolls
   sideways; each choice counts within the other filters. Then how many there are. Each row: the words (three lines), then its topic, kind,
-  what came from it ("1 joke · 1 premise" or "Not used yet") and the date.
+  what came from it ("1 joke · 1 premise · 1 brainstorm" or "Not used yet") and the date.
 - **An observation:** the words, edited in place and saved on their own; **Topic** and
   **Kind (optional)**, each ending in New topic… / New kind…; **Write a joke from it** and **Write a premise from it**
   open New joke or New premise on its topic with the setup (or take) empty and this observation
   already under **From observations**, so you write your own words with it in view; either new
-  one is linked back when saved. Then **Jokes from it** and **Premises from it**: what's
-  linked, each opening its page, × to unlink, and a search to link ones you've written (the three
-  best matches, same topic first). **Delete observation** asks first; what came from it stays.
+  one is linked back when saved. A new joke also starts on the premise this observation already
+  led to, when there's exactly one. Then **Jokes from it** and **Premises from it**: what's
+  linked, each opening its page, × to unlink (with **Undo**), and a search to link ones you've
+  written (the three best matches, same topic first). Then **Brainstorms with it**: the sessions
+  it's linked to, each opening the session (the session holds that link, so it's changed there). **Delete observation** asks first; what came from it stays.
 - **Kinds:** **Manage kinds…** ends the Kind menu: drag to reorder, rename, or delete one (its
   observations become plain).
 - **Home** keeps a quick box (words, Topic and Kind menus, **Log it**) and the last three, each
@@ -324,7 +334,7 @@ open beside it on an iPad in landscape or a laptop, or as its own page on a phon
 
 [BrainstormPage.tsx](../web/src/features/brainstorm/BrainstormPage.tsx), [SessionPage.tsx](../web/src/features/brainstorm/SessionPage.tsx),
 [InkCanvas.tsx](../web/src/features/brainstorm/InkCanvas.tsx), [InkToolbar.tsx](../web/src/features/brainstorm/InkToolbar.tsx),
-[ink.ts](../web/src/features/brainstorm/ink.ts), [LinkPicker.tsx](../web/src/features/brainstorm/LinkPicker.tsx),
+[ink.ts](../web/src/features/brainstorm/ink.ts),
 [SessionLinks.tsx](../web/src/features/brainstorm/SessionLinks.tsx), [useSessionAutosave.ts](../web/src/features/brainstorm/useSessionAutosave.ts).
 
 - **List:** sessions newest first, each with its date, time spent and a summary (words,
@@ -332,9 +342,11 @@ open beside it on an iPad in landscape or a laptop, or as its own page on a phon
   (`?q=`); handwriting can't be searched. **Start with a technique** lists your Craft techniques;
   tapping one opens a new session running it.
 - **Session (full screen):** the timer, and a **Type / Handwrite** toggle (both are kept). Below
-  them, the title, **Link jokes or observations** (shown as small cards you can open or unlink),
-  **Turn into a joke** (opens New joke with the session's first typed paragraph, and links the joke
-  to the session as it's saved), and the page itself.
+  them, the title, what's linked (small cards for jokes and observations, each opening its page,
+  × to unlink with **Undo**), **Link a joke or observation** (the same three-match search box as
+  everywhere, over both), **Turn into a joke** (opens New joke with the session's first typed
+  paragraph and the session's observations linked, and links the joke to the session as it's
+  saved), and the page itself.
 - **Technique** ([TechniquePanel.tsx](../web/src/features/brainstorm/TechniquePanel.tsx)): a
   session can run one of your Craft techniques. Its prompts (the list under a "Prompts" heading in
   the note) show one at a time with **Next prompt** and **Any prompt**, and **How it works** folds
@@ -401,8 +413,9 @@ open beside it on an iPad in landscape or a laptop, or as its own page on a phon
   hashtags, while the recording uploads in the background. **Done** files the note and
   **Delete** throws it away.
 - **Library:** a search box over labels and hashtags, hashtag chips with their counts, and one row
-  per note (play, label, length, date, hashtags, **Turn into a joke**, edit, delete; Turn into a
-  joke opens New joke with the label and hashtags), grouped by month under pinned
+  per note (play, label, length, date, hashtags, **Turn into a joke**, edit, delete, and **Jokes
+  from it** once there are some; Turn into a joke opens New joke with the hashtags and the
+  recording playable under the words, the setup left to you), grouped by month under pinned
   headings, **Newest first** or **Oldest first** (`?order=old`), with the time scrubber down the
   right edge.
 - **Storage bar:** how much of the 1 GB of free Blob storage the recordings use.
