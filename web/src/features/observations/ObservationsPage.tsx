@@ -1,8 +1,8 @@
 /**
- * Every observation, filtered by topic and kind and searched by words. All three live in the URL
- * (?topic=, ?kind=, ?q=), so the back button and a shared link land on the same view; new
- * observations go under the topic and kind you're looking at. While some aren't under a topic
- * yet, Sort goes through them one at a time.
+ * Every observation, filtered by topic and kind, narrowed to the ones not used yet, and searched
+ * by words. All of it lives in the URL (?topic=, ?kind=, ?unused=1, ?q=), so the back button and
+ * a shared link land on the same view; new observations go under the topic and kind you're
+ * looking at. While some aren't under a topic yet, Sort goes through them one at a time.
  */
 import { Inbox, Search } from 'lucide-react'
 import { useState } from 'react'
@@ -21,6 +21,7 @@ import { ObservationBox } from './ObservationBox'
 import { ObservationList } from './ObservationList'
 import { KindMenu, TopicMenu } from './ObservationMenus'
 import { ObservationSorter } from './ObservationSorter'
+import { useUsed } from './useUsed'
 import { matchesFilters, NOT_SORTED, PLAIN_KIND } from './observationMeta'
 
 const newest = (a: Observation, b: Observation) => b.created_at.localeCompare(a.created_at)
@@ -35,12 +36,16 @@ export function ObservationsPage() {
   const order: Order = params.get('order') === 'old' ? 'old' : 'new'
   const all = observations ?? []
   const query = params.get('q') ?? ''
-  const filtered = all.filter((o) => matchesFilters(o, topic, kind))
+  const used = useUsed()
+  const unused = params.get('unused') === '1'
+  // Not used yet: nothing that came from it is still around.
+  const open = (o: Observation) => !(unused && used(o))
+  const filtered = all.filter((o) => matchesFilters(o, topic, kind) && open(o))
   const shown = filtered.filter((o) => matchesWords(query, [o.text]))
   const unsorted = all.filter((o) => o.topic_id === null)
   // Each menu counts within the other's choice, so the numbers match what picking would show.
-  const topicCount = (value: string | null) => all.filter((o) => matchesFilters(o, value, kind)).length
-  const kindCount = (value: string | null) => all.filter((o) => matchesFilters(o, topic, value)).length
+  const topicCount = (value: string | null) => all.filter((o) => matchesFilters(o, value, kind) && open(o)).length
+  const kindCount = (value: string | null) => all.filter((o) => matchesFilters(o, topic, value) && open(o)).length
   // Each control changes only its own part of the URL, keeping the others.
   const setParam = (name: string, value: string | null) => setParams((p) => { if (value) p.set(name, value); else p.delete(name); return p }, { replace: true })
   const filedUnder = (value: string | null, none: string) => (value && value !== none ? value : null)
@@ -67,6 +72,10 @@ export function ObservationsPage() {
           <ChipRow className="-mx-4 px-4 sm:mx-0 sm:px-0">
             <TopicMenu value={topic} onChange={(v) => setParam('topic', v)} counts={topicCount} />
             <KindMenu value={kind} onChange={(v) => setParam('kind', v)} counts={kindCount} onManage={() => setManaging(true)} />
+            <button type="button" aria-pressed={unused} onClick={() => setParam('unused', unused ? null : '1')}
+              className={`inline-flex h-9 shrink-0 items-center rounded-lg px-3 text-sm transition ${unused ? 'bg-paper font-medium text-ink' : 'bg-ink-3 text-dim hover:text-paper'}`}>
+              Not used yet
+            </button>
           </ChipRow>
         </div>
       )}

@@ -5,8 +5,9 @@ kinds already use.
 """
 
 import uuid
+from typing import Literal
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from sqlalchemy import select, update
 
 from app.auth.deps import CurrentUser, DbSession, find_owned, get_owned
@@ -74,6 +75,53 @@ def put_observation(
     db.commit()
     db.refresh(observation)
     return observation
+
+
+LinkKind = Literal["premises", "jokes"]
+LINK_PATH = "/observations/{observation_id}/links/{kind}/{target_id}"
+MAX_LINKS = 200
+
+
+def set_link(
+    db: DbSession, user: CurrentUser, ids: tuple[uuid.UUID, LinkKind, uuid.UUID], on: bool
+) -> None:
+    """Add or drop one link. Links aren't part of the observation's words, so they don't move its
+    version: linking on one device never makes an edit on another look stale."""
+    observation_id, kind, target_id = ids
+    observation = get_owned(db, Observation, observation_id, user)
+    column = "premise_ids" if kind == "premises" else "joke_ids"
+    links: list[str] = list(getattr(observation, column) or [])
+    target = str(target_id)
+    if on == (target in links):
+        return  # already as asked: a retried offline save changes nothing
+    if on and len(links) >= MAX_LINKS:
+        raise HTTPException(422, "That observation has as many links as it can hold")
+    setattr(observation, column, [*links, target] if on else [i for i in links if i != target])
+    db.commit()
+
+
+@router.put(LINK_PATH, status_code=204)
+def link_observation(
+    observation_id: uuid.UUID,
+    kind: LinkKind,
+    target_id: uuid.UUID,
+    user: CurrentUser,
+    db: DbSession,
+) -> None:
+    """Note that a premise or joke came from this observation."""
+    set_link(db, user, (observation_id, kind, target_id), on=True)
+
+
+@router.delete(LINK_PATH, status_code=204)
+def unlink_observation(
+    observation_id: uuid.UUID,
+    kind: LinkKind,
+    target_id: uuid.UUID,
+    user: CurrentUser,
+    db: DbSession,
+) -> None:
+    """Forget that a premise or joke came from this observation."""
+    set_link(db, user, (observation_id, kind, target_id), on=False)
 
 
 @router.delete("/observations/{observation_id}", status_code=204)

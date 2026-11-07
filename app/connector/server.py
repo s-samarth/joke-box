@@ -71,8 +71,9 @@ def search_jokes(
 @server.tool(annotations=READ)
 def get_jokes(ids: list[str]) -> dict[str, Any]:
     """Up to 20 jokes in full: setup, punchline, tag lines, notes, premise, the joke each one
-    follows and the jokes that follow it, the sets it's in, how many rewrites it has, and its
-    record at logged shows (shows done, how many killed, ok or bombed, the date last done)."""
+    follows and the jokes that follow it, the sets it's in, how many rewrites it has, its
+    record at logged shows (shows done, how many killed, ok or bombed, the date last done), and
+    the observations it came from."""
     with reading() as (db, user):
         return library.get_jokes(db, user, ids)
 
@@ -87,8 +88,8 @@ def list_premises(query: str = "", topic: str = "") -> dict[str, Any]:
 
 @server.tool(annotations=READ)
 def get_premise(premise_id: str) -> dict[str, Any]:
-    """One premise: the take, the full notes (why it's true), and every joke on it in chain
-    order, so a joke that follows another comes right after it."""
+    """One premise: the take, the full notes (why it's true), the observations it came from, and
+    every joke on it in chain order, so a joke that follows another comes right after it."""
     with reading() as (db, user):
         return library.get_premise(db, user, premise_id)
 
@@ -134,7 +135,8 @@ def search_observations(
 ) -> dict[str, Any]:
     """Observations: things the comic noticed that aren't jokes yet, newest first. `topic` is a
     joke topic (the same list as jokes and premises; null when not sorted yet). `kind` says what
-    sort of note it is, like "Set ideas" or "Questions"; most are plain "Observation"."""
+    sort of note it is, like "Set ideas" or "Questions"; most are plain "Observation".
+    `premise_ids` and `joke_ids` are what came from it: empty means it hasn't been used yet."""
     with reading() as (db, user):
         return notebook.search_observations(db, user, query, topic, limit, kind)
 

@@ -117,6 +117,9 @@ export type SaveObservationVars = { id: string; input: ObservationInput; keepMin
 
 export const saveObservationKey = ['observation', 'save']
 export const deleteObservationKey = ['observation', 'delete']
+/** Note (or forget) that a premise or joke came from an observation. */
+export type LinkObservationVars = { id: string; kind: 'premises' | 'jokes'; targetId: string; on: boolean }
+export const linkObservationKey = ['observation', 'link']
 
 // Their save and delete defaults are in observationSaves.ts (they need ownVersions.ts, which needs this file).
 

@@ -63,7 +63,8 @@ const subject = (key: readonly unknown[], variables: unknown) => {
  * refused at every autosave was kept once per try, each with all its handwriting.
  */
 export function keepUnsynced(key: readonly unknown[], variables: unknown, error: Error) {
-  if (key[1] === 'delete' && error instanceof ApiError && error.status === 404) return
+  // A delete of something gone, or a link on an observation since deleted, has nothing left to do.
+  if ((key[1] === 'delete' || key[1] === 'link') && error instanceof ApiError && error.status === 404) return
   const status = error instanceof ApiError ? error.status : undefined
   const entry: Unsynced = { id: crypto.randomUUID(), key: key.map(String), variables, reason: error.message, status, at: new Date().toISOString() }
   const same = subject(key, variables)
@@ -109,6 +110,7 @@ export function summary(saved: string[], variables: unknown): { title: string; t
   if (key[0] === 'board' && key[1] === 'tidy') return { title: 'Tidy up the board', text: '' }
   const kind = KINDS[key[0]] ?? 'Change'
   if (key[1] === 'delete') return { title: `Delete ${kind.toLowerCase()}`, text: '' }
+  if (key[1] === 'link') return { title: `${kind}: what came from it`, text: '' }
   const input = (variables as { input?: Record<string, unknown> } | null)?.input ?? {}
   const text = WORDS.map((w) => input[w]).filter((v): v is string => typeof v === 'string' && v.trim() !== '').join('\n')
   return { title: kind, text }

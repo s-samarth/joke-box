@@ -46,7 +46,9 @@ def claude(db: Session) -> Iterator[tuple[TestClient, str]]:
     page = {"color": "#ece6da", "size": 2.4, "page": 0, "points": [[10, 20, 0.5], [60, 80, 0.7]]}
     session = {"title": "Fake", "content": "Fake page", "ink": [page]}
     browser.put(f"/api/sessions/{uuid.uuid4()}", json=session)
-    browser.put(f"/api/observations/{uuid.uuid4()}", json={"text": "Fake noticed"})
+    noticed = str(uuid.uuid4())
+    browser.put(f"/api/observations/{noticed}", json={"text": "Fake noticed"})
+    browser.put(f"/api/observations/{noticed}/links/premises/{premise}")
     browser.put(f"/api/craft-notes/{uuid.uuid4()}", json=note_in(browser) | {"title": "Fake"})
     browser.put(f"/api/analyses/{uuid.uuid4()}", json={"title": "Fake", "body": "Fake why"})
     with TestClient(app) as client:
@@ -103,7 +105,8 @@ def test_library_tools(claude: tuple[TestClient, str]) -> None:
     [premise] = items(premises, "premises")
     assert set(premise) == {"id", "take", "topic", "jokes", "notes"}
     opened = result(claude, "get_premise", premise_id=premise["id"])
-    assert set(opened) == {"id", "take", "notes", "topic", "jokes"}
+    assert set(opened) == {"id", "take", "notes", "topic", "from_observations", "jokes"}
+    assert set(items(opened, "from_observations")[0]) == {"id", "text"}
     assert set(items(opened, "jokes")[0]) == BRIEF | {"follows_id"}
 
 
@@ -139,7 +142,8 @@ def test_performing_tools(claude: tuple[TestClient, str]) -> None:
 
 def test_notebook_and_study_tools(claude: tuple[TestClient, str]) -> None:
     observations = result(claude, "search_observations")
-    assert set(items(observations, "observations")[0]) == {"id", "text", "topic", "kind", "noted"}
+    fields = {"id", "text", "topic", "kind", "noted", "premise_ids", "joke_ids"}
+    assert set(items(observations, "observations")[0]) == fields
     # Each voice note's fields are checked in test_connector_voice.py.
     assert set(result(claude, "search_voice_notes")) == {"total", "voice_notes"}
 

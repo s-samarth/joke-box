@@ -3,10 +3,11 @@
  * years. Each one can be edited, deleted, or turned into a joke: that opens the New joke sheet
  * with the observation as the setup, and the observation stays.
  */
-import { MoreHorizontal, Pencil, Sparkles, Trash2 } from 'lucide-react'
+import { Lightbulb, MoreHorizontal, Pencil, Sparkles, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router'
 import { useTopics } from '../../api/library'
-import { useDeleteObservation, useObservationKinds } from '../../api/notebook'
+import { useDeleteObservation, useLinkObservation, useObservationKinds } from '../../api/notebook'
 import type { Observation } from '../../api/types'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { Dropdown } from '../../components/ui/Menu'
@@ -17,6 +18,8 @@ import { byDate, groupByMonth, type Order } from '../../lib/months'
 import { formatDate } from '../../lib/time'
 import { useCapture } from '../capture/captureContext'
 import { kindLabel, PLAIN, topicLabel } from './observationMeta'
+import { NewPremiseDialog } from '../premises/NewPremiseDialog'
+import { MadeInto } from './ObservationLinks'
 import { ObservationSheet } from './ObservationSheet'
 
 const created = (o: Observation) => o.created_at
@@ -30,6 +33,10 @@ export function ObservationList({ observations, order }: { observations: Observa
   const { openCapture } = useCapture()
   const { confirm, toast } = useFeedback()
   const [editing, setEditing] = useState<Observation | null>(null)
+  const [premiseFrom, setPremiseFrom] = useState<Observation | null>(null)
+  const link = useLinkObservation()
+  const navigate = useNavigate()
+  const linkTo = (o: Observation, kind: 'premises' | 'jokes', targetId: string) => link.mutate({ id: o.id, kind, targetId, on: true })
   // "Driving · Set ideas · 3 Nov": a plain observation doesn't say it's one.
   const filed = (o: Observation) => [topicLabel(topics, o.topic_id), o.kind_id && kindLabel(kinds, o.kind_id)].filter((x) => x && x !== PLAIN)
 
@@ -48,10 +55,12 @@ export function ObservationList({ observations, order }: { observations: Observa
               {filed(o).length > 0 && <span className="text-dim">{filed(o).join(' · ')} · </span>}
               {formatDate(o.created_at)}
             </p>
+            <MadeInto observation={o} />
           </div>
           <Dropdown
             items={[
-              { label: 'Turn into a joke', icon: <Sparkles size={16} />, onSelect: () => openCapture({ setup: o.text, topicId: o.topic_id ?? undefined }) },
+              { label: 'Write a premise', icon: <Lightbulb size={16} />, onSelect: () => setPremiseFrom(o) },
+              { label: 'Turn into a joke', icon: <Sparkles size={16} />, onSelect: () => openCapture({ setup: o.text, topicId: o.topic_id ?? undefined, onCreated: (id) => linkTo(o, 'jokes', id) }) },
               { label: 'Edit', icon: <Pencil size={16} />, onSelect: () => setEditing(o) },
               'divider',
               { label: 'Delete', icon: <Trash2 size={16} />, danger: true, onSelect: () => void onDelete(o) },
@@ -80,6 +89,10 @@ export function ObservationList({ observations, order }: { observations: Observa
         </>
       ) : list(observations)}
       {editing && <ObservationSheet observation={editing} onClose={() => setEditing(null)} />}
+      {premiseFrom && (
+        <NewPremiseDialog open onOpenChange={(o) => !o && setPremiseFrom(null)} topicId={premiseFrom.topic_id} initialNotes={premiseFrom.text}
+          onCreated={(id) => { linkTo(premiseFrom, 'premises', id); setPremiseFrom(null); navigate(`/premises/${id}`) }} />
+      )}
     </>
   )
 }

@@ -15,6 +15,7 @@ from app.connector.jokes import (
     topic_name,
     user_jokes,
 )
+from app.connector.notebook import observations_behind
 from app.connector.show_record import EMPTY, records
 from app.connector.text import clip, matches, page, same_name
 from app.models import (
@@ -113,9 +114,11 @@ def get_jokes(db: Session, user: User, ids: list[str]) -> dict[str, Any]:
     sets, rewrites = sets_by_joke(db, user), rewrite_counts(db, user)
     wanted = [parse_id(i) for i in ids[:20]]
     done = records(db, user, (i for i in wanted if i in jokes))
+    behind = observations_behind(db, user)
     return {
         "jokes": [
-            detail(jokes[i], names, jokes, sets, rewrites) | {"shows": done.get(i, EMPTY)}
+            detail(jokes[i], names, jokes, sets, rewrites)
+            | {"shows": done.get(i, EMPTY), "from_observations": behind.get(str(i), [])}
             for i in wanted
             if i in jokes
         ],
@@ -161,7 +164,8 @@ def list_premises(db: Session, user: User, query: str = "", topic: str = "") -> 
 
 
 def get_premise(db: Session, user: User, premise_id: str) -> dict[str, Any]:
-    """A premise with its full notes and every joke on it, in chain order."""
+    """A premise with its full notes, the observations it came from, and every joke on it, in
+    chain order."""
     premise = db.scalar(
         select(Premise).where(Premise.id == parse_id(premise_id), Premise.user_id == user.id)
     )
@@ -174,6 +178,7 @@ def get_premise(db: Session, user: User, premise_id: str) -> dict[str, Any]:
         "take": premise.take,
         "notes": clip(premise.notes, 8000),
         "topic": topic_name(names, premise.topic_id),
+        "from_observations": observations_behind(db, user).get(str(premise.id), []),
         "jokes": [
             {**brief(j, names), "follows_id": str(j.follows_id) if j.follows_id else None}
             for j in chain_order(on_it)

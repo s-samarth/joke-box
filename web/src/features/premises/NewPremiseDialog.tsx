@@ -16,16 +16,18 @@ interface Props {
   onOpenChange: (open: boolean) => void
   /** The topic it starts filed under. */
   topicId?: string | null
+  /** What "Why it's true" starts with: the observation it's written from. */
+  initialNotes?: string
   onCreated: (id: string) => void
 }
 
-export function NewPremiseDialog({ open, onOpenChange, topicId, onCreated }: Props) {
+export function NewPremiseDialog({ open, onOpenChange, topicId, initialNotes = '', onCreated }: Props) {
   const { data: topics = [] } = useTopics()
   const save = useSavePremise()
   const { toast } = useFeedback()
   const [topic, setTopic] = useState('')
   const [take, setTake] = useState('')
-  const [notes, setNotes] = useState('')
+  const [notes, setNotes] = useState(initialNotes)
   const chosen = topic || topicId || topics.find((t) => t.is_system)?.id || ''
   const newTopic = useNewTopic()
   const pickTopic = async (id: string) => {
@@ -49,7 +51,7 @@ export function NewPremiseDialog({ open, onOpenChange, topicId, onCreated }: Pro
   }
 
   return (
-    <Modal open={open} onOpenChange={(o) => (o ? onOpenChange(true) : close())} dirty={Boolean(take.trim() || notes.trim())} title="New premise" wide
+    <Modal open={open} onOpenChange={(o) => (o ? onOpenChange(true) : close())} dirty={Boolean(take.trim() || notes.trim() !== initialNotes.trim())} title="New premise" wide
       footer={<Button variant="tape" disabled={!take.trim()} onClick={create}>Add premise</Button>}>
       <div className="space-y-4">
         <Field label="Topic">

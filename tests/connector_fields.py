@@ -28,6 +28,7 @@ DETAIL = BRIEF | {
     "in_sets",
     "rewrites",
     "shows",
+    "from_observations",
 }
 SET = {
     "id",

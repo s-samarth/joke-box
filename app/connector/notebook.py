@@ -11,8 +11,10 @@ from app.connector.text import by_id, clip, ist_date, matches, page, same_name
 from app.models import (
     Brainstorm,
     CraftNote,
+    Joke,
     Observation,
     ObservationTopic,
+    Premise,
     Topic,
     User,
     WritingSession,
@@ -22,11 +24,33 @@ from app.models import (
 PLAIN = "Observation"
 
 
+def live_links(db: Session, user: User) -> tuple[set[str], set[str]]:
+    """The ids of your premises and jokes that aren't in the Trash, as links store them."""
+    premises = db.scalars(select(Premise.id).where(Premise.user_id == user.id))
+    jokes = db.scalars(select(Joke.id).where(Joke.user_id == user.id))
+    return {str(i) for i in premises}, {str(i) for i in jokes}
+
+
+def observations_behind(db: Session, user: User) -> dict[str, list[dict[str, str]]]:
+    """For each premise and joke id, the observations it came from (newest first)."""
+    behind: dict[str, list[dict[str, str]]] = {}
+    rows = db.scalars(
+        select(Observation)
+        .where(Observation.user_id == user.id)
+        .order_by(Observation.created_at.desc())
+    )
+    for o in rows:
+        for target in [*(o.premise_ids or []), *(o.joke_ids or [])]:
+            behind.setdefault(target, []).append({"id": str(o.id), "text": clip(o.text, 800)})
+    return behind
+
+
 def search_observations(
     db: Session, user: User, query: str = "", topic: str = "", limit: int = 25, kind: str = ""
 ) -> dict[str, Any]:
     """Things you noticed, newest first. `topic` is a joke topic; `kind` is what sort of note it
-    is, and a plain observation's kind is "Observation"."""
+    is, and a plain observation's kind is "Observation". `premise_ids` and `joke_ids` are what
+    came from it (none: not used yet)."""
     kinds = by_id(
         db.execute(
             select(ObservationTopic.id, ObservationTopic.name).where(
@@ -53,6 +77,7 @@ def search_observations(
         if matches(query, o.text) and same_name(topic, topic_of(o)) and same_name(kind, kind_of(o))
     ]
     shown, total = page(found, limit)
+    premises, jokes = live_links(db, user)
     return {
         "total": total,
         "observations": [
@@ -62,6 +87,8 @@ def search_observations(
                 "topic": topic_of(o),
                 "kind": kind_of(o),
                 "noted": ist_date(o.created_at),
+                "premise_ids": [i for i in o.premise_ids or [] if i in premises],
+                "joke_ids": [i for i in o.joke_ids or [] if i in jokes],
             }
             for o in shown
         ],
