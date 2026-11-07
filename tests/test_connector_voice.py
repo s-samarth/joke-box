@@ -8,7 +8,7 @@ from app.models import User
 from tests.conftest import signed_in
 from tests.test_voice_notes import new_note
 
-FIELDS = {"id", "label", "hashtags", "seconds", "recorded", "uploaded"}
+FIELDS = {"id", "label", "hashtags", "seconds", "recorded", "uploaded", "joke_ids"}
 
 
 def user(db: Session, email: str) -> User:

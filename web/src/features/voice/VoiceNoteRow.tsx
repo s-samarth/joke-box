@@ -1,6 +1,11 @@
-/** One voice note: play it, see its label and hashtags, edit them, turn it into a joke, or delete it. */
+/**
+ * One voice note: play it, see its label and hashtags, edit them, turn it into a joke (linked to
+ * this recording, words left to you), see the jokes written from it, or delete it.
+ */
 import { CloudOff, Pencil, Sparkles, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { Link } from 'react-router'
+import { useJokes } from '../../api/library'
 import { IconButton } from '../../components/ui/Button'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { clock } from '../../lib/duration'
@@ -31,6 +36,8 @@ export function VoiceNoteRow({ note, suggestions, onEdit, onDelete, onTag }: Pro
   const [editing, setEditing] = useState(false)
   const { confirm } = useFeedback()
   const { openCapture } = useCapture()
+  const { data: jokes = [] } = useJokes()
+  const fromIt = jokes.filter((j) => (j.voice_note_ids ?? []).includes(note.id))
   const status = note.problem ?? STATUS[note.state]
   const remove = async () => {
     const message = !note.local ? 'It goes to the Trash for 30 days.' : 'It hasn’t uploaded yet, so the recording is deleted for good, not kept in the Trash.'
@@ -49,7 +56,7 @@ export function VoiceNoteRow({ note, suggestions, onEdit, onDelete, onTag }: Pro
             {status && <span className={`inline-flex items-center gap-1 ${note.state === 'failed' ? 'text-light' : 'text-amber'}`}><CloudOff size={13} />{status}</span>}
           </p>
         </div>
-        <IconButton label="Turn into a joke" onClick={() => openCapture({ setup: note.label, hashtags: note.hashtags })}><Sparkles size={16} /></IconButton>
+        <IconButton label="Turn into a joke" onClick={() => openCapture({ voiceNoteIds: [note.id], hashtags: note.hashtags })}><Sparkles size={16} /></IconButton>
         <IconButton label="Edit label and hashtags" onClick={() => setEditing((e) => !e)}><Pencil size={16} /></IconButton>
         <IconButton label="Delete voice note" onClick={remove} className="hover:text-light"><Trash2 size={16} /></IconButton>
       </div>
@@ -58,6 +65,12 @@ export function VoiceNoteRow({ note, suggestions, onEdit, onDelete, onTag }: Pro
           onChange={(e) => player.seek(Number(e.target.value))} className="mt-2 w-full accent-tape" />
       )}
       {player.problem && <p role="alert" className="mt-1 text-sm text-light">{player.problem}</p>}
+      {fromIt.length > 0 && (
+        <p className="mt-1.5 pl-14 text-sm text-dim">
+          {fromIt.length === 1 ? 'Joke from it: ' : 'Jokes from it: '}
+          {fromIt.map((j, i) => <span key={j.id}>{i > 0 && ' · '}<Link to={`/jokes/${j.id}`} className="text-tape hover:underline">{j.setup.length > 50 ? `${j.setup.slice(0, 50)}…` : j.setup}</Link></span>)}
+        </p>
+      )}
       {editing ? (
         <div className="mt-3 pl-14"><NoteEditor note={note} suggestions={suggestions} onChange={onEdit} /></div>
       ) : note.hashtags.length > 0 && (

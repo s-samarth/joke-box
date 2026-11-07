@@ -32,6 +32,7 @@ def to_out(joke: Joke) -> JokeOut:
         language=joke.language,
         comments=joke.comments,
         follows_id=joke.follows_id,
+        voice_note_ids=list(joke.voice_note_ids or []),
         version=joke.version,
         created_at=joke.created_at,
         updated_at=joke.updated_at,
@@ -90,13 +91,16 @@ def check_premise(db: Session, user: User, data: JokeIn) -> None:
 
 def plain_fields(data: JokeIn) -> dict[str, object]:
     """The fields copied as they are. An app too old to know about chains or premises leaves
-    follows_id or premise_id out, and then the link is kept rather than cleared. A save without
-    strength keeps the rating too: only an explicit null makes a joke unrated."""
+    follows_id, premise_id or voice_note_ids out, and then the link is kept rather than cleared.
+    A save without strength keeps the rating too: only an explicit null makes a joke unrated."""
     skip = {"types", "status", "created_at", "base_version"}
-    for link in ("follows_id", "premise_id", "strength"):
+    for link in ("follows_id", "premise_id", "strength", "voice_note_ids"):
         if link not in data.model_fields_set:
             skip.add(link)
-    return data.model_dump(exclude=skip)
+    fields = data.model_dump(exclude=skip)
+    if "voice_note_ids" in fields:  # stored as text in a JSON list, like an observation's links
+        fields["voice_note_ids"] = [str(i) for i in data.voice_note_ids]
+    return fields
 
 
 def apply(db: Session, user: User, joke: Joke, data: JokeIn) -> None:

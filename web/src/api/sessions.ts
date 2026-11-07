@@ -61,6 +61,10 @@ export async function keepOnDevice(client: QueryClient, list: SessionSummary[]) 
   }
 }
 
+/** The session list just to read (what an observation was brainstormed in), without keeping each session on the device as the Brainstorm screen does. */
+export const useSessionSummaries = () =>
+  useQuery({ queryKey: keys.sessionList, queryFn: () => api<SessionSummary[]>('/api/sessions/summaries') })
+
 export function useSessionList() {
   const client = useQueryClient()
   const list = useQuery({ queryKey: keys.sessionList, queryFn: () => api<SessionSummary[]>('/api/sessions/summaries') })

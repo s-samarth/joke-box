@@ -73,7 +73,7 @@ def get_jokes(ids: list[str]) -> dict[str, Any]:
     """Up to 20 jokes in full: setup, punchline, tag lines, notes, premise, the joke each one
     follows and the jokes that follow it, the sets it's in, how many rewrites it has, its
     record at logged shows (shows done, how many killed, ok or bombed, the date last done), and
-    the observations it came from."""
+    the observations and voice notes it came from."""
     with reading() as (db, user):
         return library.get_jokes(db, user, ids)
 
@@ -136,7 +136,8 @@ def search_observations(
     """Observations: things the comic noticed that aren't jokes yet, newest first. `topic` is a
     joke topic (the same list as jokes and premises; Random unless filed elsewhere). `kind` says
     what sort of note it is, like "Set ideas" or "Questions"; most are plain "Observation".
-    `premise_ids` and `joke_ids` are what came from it: empty means it hasn't been used yet."""
+    `premise_ids` and `joke_ids` are what came from it and `brainstorm_ids` the brainstorm
+    sessions it was used in: all empty means it hasn't been used yet."""
     with reading() as (db, user):
         return notebook.search_observations(db, user, query, topic, limit, kind)
 
@@ -144,8 +145,8 @@ def search_observations(
 @server.tool(annotations=READ)
 def search_voice_notes(query: str = "", limit: int = 25) -> dict[str, Any]:
     """Voice notes: ideas the comic recorded out loud, newest first, by label and hashtags.
-    Only what each is called and tagged, how long it runs and when it was recorded: the
-    recordings themselves can't be heard here."""
+    Only what each is called and tagged, how long it runs, when it was recorded and `joke_ids`
+    (the jokes written from it): the recordings themselves can't be heard here."""
     with reading() as (db, user):
         return voice.search_voice_notes(db, user, query, limit)
 

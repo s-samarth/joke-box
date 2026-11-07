@@ -1,6 +1,7 @@
 /**
- * One joke, one page. The words are edited in place (no form popup), then the observations it
- * came from (see ObservationsOn), its details, its rewrites and sets. Every change saves
+ * One joke, one page. The words are edited in place (no form popup), then where it came from
+ * (observations, see ObservationsOn; voice notes, see VoiceNotesOn), its details, its rewrites
+ * and sets. Every change saves
  * on its own, offline included.
  */
 import { ArrowLeft, Trash2 } from 'lucide-react'
@@ -13,6 +14,7 @@ import { GrowingText, Textarea } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { formatDateTime } from '../../lib/time'
 import { ObservationsOn } from '../observations/ObservationsOn'
+import { VoiceNotesOn } from '../voice/VoiceNotesOn'
 import { JokeDetails } from './JokeDetails'
 import { JokeExtras } from './JokeExtras'
 import { JokeShowRecord } from './JokeShowRecord'
@@ -47,7 +49,10 @@ function Editor({ joke }: { joke: Joke }) {
         {!draft.setup.trim() && <p className="mt-2 text-sm text-light">A joke needs a setup to be saved.</p>}
       </div>
       <div className="mt-6"><TagLines lines={draft.tag_lines} onChange={(tag_lines) => update({ tag_lines })} /></div>
-      <div className="mt-8"><ObservationsOn kind="jokes" id={joke.id} topicId={draft.topic_id} /></div>
+      <div className="mt-8 space-y-6">
+        <ObservationsOn kind="jokes" id={joke.id} topicId={draft.topic_id} />
+        <VoiceNotesOn ids={draft.voice_note_ids ?? []} onChange={(voice_note_ids) => update({ voice_note_ids })} />
+      </div>
       <div className="mt-10"><JokeDetails jokeId={joke.id} draft={draft} update={update} /></div>
       <div className="mt-8">
         <label htmlFor="joke-notes" className="text-sm text-dim">Notes</label>
