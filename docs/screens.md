@@ -159,7 +159,7 @@ the jokes' created dates, so there's no separate log to fall out of step.
   subtopic, with Edit topics), Premise, Follows (the joke this one comes after in a chain),
   Followed by (with a button to write the next one), Status, Runs for (type it, or step it five
   seconds at a time with − and +), Clean rating, Language (Hinglish, Hindi or English) and
-  Hashtags, followed by a Notes box. Then **Rewrites** (earlier sessions and **Start a rewrite**),
+  Hashtags, followed by a Notes box; **Observations** beside the Notes box opens your observations on the joke's topic (see [Observations beside a premise or joke](#observations-beside-a-premise-or-joke)). Then **Rewrites** (earlier sessions and **Start a rewrite**),
   **In sets** (with Add to a set), the show record once the joke has been logged at a show
   ("Done at 3 shows: 2 killed, 1 ok. Last done 12 Oct", [JokeShowRecord.tsx](../web/src/features/jokes/JokeShowRecord.tsx)),
   and **Delete joke**, which asks first and sends it to the Trash.
@@ -213,6 +213,29 @@ writing a premise sits beside the list; on a phone the list gives way to the pre
   until you put it back.
 - **On a joke:** the Premise row on the joke page picks one, or starts a new one.
 - **+** on this screen opens **New premise** (`?new=1`).
+- **Observations** beside "Why it's true" opens your observations on the premise's topic.
+
+### Observations beside a premise or joke
+
+[ObservationsSide.tsx](../web/src/features/observations/ObservationsSide.tsx), [ObservationsPanel.tsx](../web/src/features/observations/ObservationsPanel.tsx),
+[splitSide.ts](../web/src/components/ui/splitSide.ts).
+
+The **Observations** button (with how many there are on the topic) sits beside "Why it's true" on
+a premise and beside Notes on a joke. It opens your observations on the item's topic, newest
+first; **On [topic]** looks at another topic without changing the item. Each one offers:
+
+- **Add to why it’s true** / **Add to notes**: puts its words at the end of those notes, a blank
+  line apart. Once they're in, it says **In why it’s true** / **In notes** instead.
+- **New joke**: the New joke sheet with the observation as the setup, on the item's topic (and,
+  from a premise, on that premise).
+
+Where it shows depends on the width:
+
+- **From 1024 px (iPad landscape, laptops):** a panel on the right, in place of the list, so the
+  item keeps a readable width. It stays open as you move to another item, following its topic,
+  until you close it. The full-width button hides while it's open.
+- **Below 1024 px (iPhone, iPad upright):** a sheet (half the screen on a phone, the item still
+  showing above it). Adding or starting a joke closes it.
 
 <img src="screenshots/desktop-premises.webp" alt="A premise with the jokes resting on it">
 

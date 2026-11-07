@@ -59,6 +59,11 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
    observation itself stays.
 3. Write the punchline, file it, and save.
 
+Or start from what you're writing: on a premise or a joke, tap **Observations** (beside "Why it's
+true" or Notes). Your observations on its topic open beside it on an iPad or laptop, or as a
+sheet on a phone. **Add to why it’s true** (or **Add to notes**) puts one into what you're
+writing; **New joke** starts a joke from it, on the same premise.
+
 A voice note works the same way: its **Turn into a joke** button starts New joke from its label
 and hashtags. To find an old one first, **Search** (on Home, or in the rail or More) looks
 through everything you've written at once.
