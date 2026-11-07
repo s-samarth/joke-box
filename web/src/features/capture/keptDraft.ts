@@ -15,6 +15,8 @@ const KEY = 'jokebox.newJokeDraft'
 export interface KeptDraft {
   draft: JokeInput
   brainstorm: string
+  /** The observations it came from, linked once it's saved. Missing in drafts kept before links. */
+  observationIds?: string[]
 }
 
 export function keptDraft(): KeptDraft | null {
@@ -47,6 +49,7 @@ export const hasText = ({ draft, brainstorm }: KeptDraft): boolean =>
   [draft.setup, draft.punchline, draft.comments, brainstorm, ...draft.tag_lines].some((t) => t.trim().length > 0)
 
 export interface Start extends KeptDraft {
+  observationIds: string[]
   /** Picked up a kept draft. */
   restored: boolean
   /** This sheet writes to the slot. */
@@ -57,7 +60,7 @@ export interface Start extends KeptDraft {
  * How a New joke sheet starts. Opened plainly (the + button) with a draft waiting, it picks the
  * draft up. Otherwise it starts from what it was opened with, and owns the slot only if it's free.
  */
-export function startDraft(fresh: JokeInput, plain: boolean, kept: KeptDraft | null): Start {
-  if (plain && kept) return { ...kept, restored: true, owns: true }
-  return { draft: fresh, brainstorm: '', restored: false, owns: kept === null }
+export function startDraft(fresh: JokeInput, plain: boolean, kept: KeptDraft | null, observationIds: string[] = []): Start {
+  if (plain && kept) return { ...kept, observationIds: kept.observationIds ?? [], restored: true, owns: true }
+  return { draft: fresh, brainstorm: '', observationIds, restored: false, owns: kept === null }
 }

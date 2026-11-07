@@ -7,7 +7,7 @@ import { ArrowLeft, Lightbulb, Sparkles, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { useTopics } from '../../api/library'
-import { useDeleteObservation, useLinkObservation, useObservationKinds, useObservations } from '../../api/notebook'
+import { useDeleteObservation, useObservationKinds, useObservations } from '../../api/notebook'
 import type { Observation } from '../../api/types'
 import { Button } from '../../components/ui/Button'
 import { Field, GrowingText, Select } from '../../components/ui/Field'
@@ -28,7 +28,6 @@ function Editor({ observation }: { observation: Observation }) {
   const { data: topics = [] } = useTopics()
   const { data: kinds = [] } = useObservationKinds()
   const remove = useDeleteObservation()
-  const link = useLinkObservation()
   const { openCapture } = useCapture()
   const { confirm, toast } = useFeedback()
   const navigate = useNavigate()
@@ -36,7 +35,6 @@ function Editor({ observation }: { observation: Observation }) {
   const newTopic = useNewTopic()
   const newKind = useNewKind()
   const [writingPremise, setWritingPremise] = useState(false)
-  const linkTo = (kind: 'jokes' | 'premises', targetId: string) => link.mutate({ id: observation.id, kind, targetId, on: true })
 
   const pickTopic = async (value: string) => {
     if (value !== NEW_TOPIC) return update({ topic_id: value })
@@ -79,7 +77,7 @@ function Editor({ observation }: { observation: Observation }) {
 
       <div className="mt-6 flex flex-wrap gap-2">
         <Button variant="tape" small icon={<Sparkles size={15} />}
-          onClick={() => openCapture({ setup: draft.text, topicId: draft.topic_id ?? undefined, onCreated: (id) => linkTo('jokes', id) })}>Write a joke from it</Button>
+          onClick={() => openCapture({ topicId: draft.topic_id ?? undefined, observationIds: [observation.id] })}>Write a joke from it</Button>
         <Button variant="plain" small icon={<Lightbulb size={15} />} onClick={() => setWritingPremise(true)}>Write a premise from it</Button>
       </div>
 
@@ -90,8 +88,8 @@ function Editor({ observation }: { observation: Observation }) {
         <Button variant="danger" small icon={<Trash2 size={15} />} onClick={onDelete}>Delete observation</Button>
       </footer>
       {writingPremise && (
-        <NewPremiseDialog open onOpenChange={(o) => !o && setWritingPremise(false)} topicId={draft.topic_id} initialNotes={draft.text}
-          onCreated={(id) => { linkTo('premises', id); setWritingPremise(false); toast('Premise written. It’s under Premises from it.') }} />
+        <NewPremiseDialog open onOpenChange={(o) => !o && setWritingPremise(false)} topicId={draft.topic_id} observationIds={[observation.id]}
+          onCreated={() => { setWritingPremise(false); toast('Premise written. It’s under Premises from it.') }} />
       )}
     </article>
   )

@@ -23,9 +23,10 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 **With details (+ button):**
 1. Tap **+** in the phone bar (or **New joke** on the desktop rail).
 2. The New joke sheet opens, filed under the topic you're looking at, if any.
-3. Fill in as much as you want: tag lines, strength, types, topic and subtopic (new ones can
-   be made on the spot), status, runtime, clean rating, language, hashtags, notes, and a
-   first brainstorm.
+3. Fill in as much as you want: tag lines, the observations it came from (**From observations**,
+   right under the words: type a few words, tap a match), strength, types, topic and subtopic
+   (new ones can be made on the spot), status, runtime, clean rating, language, hashtags, notes,
+   and a first brainstorm.
 4. **Save joke** closes the sheet; **Save and open** goes to the joke's own page.
 
 **Out loud (voice note):**
@@ -53,14 +54,14 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 ## 3. Work an observation into a joke or premise
 
 1. On **Observations**, pick a **Topic** to see what you've noticed about it, and open one.
-2. Tap **Write a joke from it** (New joke opens with it as the setup, on its topic) or **Write a
-   premise from it** (New premise opens with it as "why it's true"). Save, and it shows under
-   **Jokes from it** or **Premises from it**.
+2. Tap **Write a joke from it** or **Write a premise from it**. The sheet opens on its topic with
+   the words empty and the observation already linked under **From observations**, in view while
+   you write. Save, and it shows under **Jokes from it** or **Premises from it**.
 3. Already written the joke or premise? Type a few of its words in **Search jokes to link** (or
    premises) and tap it among the three matches.
 
-From the other side, a joke or premise has an **Observations** section: type in **Search
-observations to link** and tap the one it came from; link as many as you like, × unlinks.
+From the other side, New joke, New premise and every joke or premise page have **From
+observations** right under the words: type in **Search observations to link** and tap the one it came from; link as many as you like, × unlinks.
 **Not used yet** on Observations shows the ones nothing has come from.
 
 A voice note works the same way: its **Turn into a joke** button starts New joke from its label

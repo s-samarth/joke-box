@@ -1,7 +1,7 @@
 /**
- * The full "New joke" sheet: the words, every detail the joke's own page has (topic and
- * subtopic, with new ones made on the spot, type, status, strength, runtime, clean rating,
- * language, hashtags), notes, and a first brainstorm.
+ * The full "New joke" sheet: the words, the observations it came from (linked as it saves), every
+ * detail the joke's own page has (topic and subtopic, with new ones made on the spot, type,
+ * status, strength, runtime, clean rating, language, hashtags), notes, and a first brainstorm.
  *
  * Pattern: the form keeps a local draft in useState and hands `draft` + `update` to
  * JokeDetails, the same component the joke page uses with its autosaving draft. One set of
@@ -13,6 +13,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { api, newId } from '../../api/client'
 import { useTopics } from '../../api/library'
+import { useLinkObservation } from '../../api/notebook'
 import { keys } from '../../api/queryClient'
 import type { BrainstormInput } from '../../api/shows'
 import type { JokeInput } from '../../api/types'
@@ -22,6 +23,7 @@ import { Modal } from '../../components/ui/Modal'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { JokeDetails } from '../jokes/JokeDetails'
 import { TagLines } from '../jokes/TagLines'
+import { ObservationPicker } from '../observations/ObservationPicker'
 import { forgetDraft, hasText, keepDraft, keptDraft, startDraft } from './keptDraft'
 import { blankJoke, useCaptureJoke } from './newJoke'
 
@@ -31,6 +33,8 @@ export interface Prefill {
   /** Rests on this premise. */
   premiseId?: string | null
   setup?: string
+  /** Came from these observations: shown under the words and linked when it's saved. */
+  observationIds?: string[]
   /** Written as the next joke after this one. */
   followsId?: string
   hashtags?: string[]
@@ -43,11 +47,13 @@ export function NewJokeForm({ prefill, plain, onClose }: { prefill: Prefill; pla
   const { data: topics = [] } = useTopics()
   const randomId = topics.find((t) => t.is_system)?.id ?? ''
   const fresh = (): JokeInput => ({ ...blankJoke(prefill.topicId), subtopic_id: prefill.subtopicId ?? null, premise_id: prefill.premiseId ?? null, setup: prefill.setup ?? '', follows_id: prefill.followsId ?? null, hashtags: prefill.hashtags ?? [] })
-  const [start] = useState(() => startDraft(fresh(), plain, keptDraft()))
+  const [start] = useState(() => startDraft(fresh(), plain, keptDraft(), prefill.observationIds))
   const [draft, setDraft] = useState<JokeInput>(start.draft)
   const [brainstorm, setBrainstorm] = useState(start.brainstorm)
+  const [observationIds, setObservationIds] = useState(start.observationIds)
+  const link = useLinkObservation()
   const [restored, setRestored] = useState(start.restored)
-  const changed = restored || JSON.stringify([draft, brainstorm]) !== JSON.stringify([start.draft, start.brainstorm])
+  const changed = restored || JSON.stringify([draft, brainstorm, observationIds]) !== JSON.stringify([start.draft, start.brainstorm, start.observationIds])
   const capture = useCaptureJoke()
   const qc = useQueryClient()
   const { toast } = useFeedback()
@@ -59,9 +65,9 @@ export function NewJokeForm({ prefill, plain, onClose }: { prefill: Prefill; pla
   // Keep the text on this device as you type, so it outlives the sheet and the app.
   useEffect(() => {
     if (!start.owns || !changed) return
-    if (hasText({ draft, brainstorm })) keepDraft({ draft, brainstorm })
+    if (hasText({ draft, brainstorm })) keepDraft({ draft, brainstorm, observationIds })
     else forgetDraft()
-  }, [start.owns, changed, draft, brainstorm])
+  }, [start.owns, changed, draft, brainstorm, observationIds])
 
   const close = () => {
     if (start.owns && changed && hasText({ draft, brainstorm })) toast('Unsaved joke kept for next time', { label: 'Discard', onClick: forgetDraft })
@@ -71,6 +77,7 @@ export function NewJokeForm({ prefill, plain, onClose }: { prefill: Prefill; pla
     forgetDraft()
     setDraft(fresh())
     setBrainstorm('')
+    setObservationIds(prefill.observationIds ?? [])
     setRestored(false)
   }
 
@@ -90,6 +97,8 @@ export function NewJokeForm({ prefill, plain, onClose }: { prefill: Prefill; pla
       : undefined
     const id = capture({ ...input, tag_lines: input.tag_lines.filter((t) => t.trim()) }, { open, onSaved })
     if (!id) return
+    // Queued after the joke's save, so they reach the server in order (offline too).
+    for (const obsId of observationIds) link.mutate({ id: obsId, kind: 'jokes', targetId: id, on: true })
     prefill.onCreated?.(id)
     if (start.owns) forgetDraft()
     onClose()
@@ -119,6 +128,12 @@ export function NewJokeForm({ prefill, plain, onClose }: { prefill: Prefill; pla
             onChange={(e) => update({ punchline: e.target.value })} />
           <TagLines lines={draft.tag_lines} onChange={(tag_lines) => update({ tag_lines })} />
         </div>
+
+        <section aria-label="From observations">
+          <h3 className="mb-2 text-sm text-dim">From observations</h3>
+          <ObservationPicker linkedIds={observationIds} topicId={input.topic_id} onLink={(o) => setObservationIds((ids) => [...ids, o])}
+            onUnlink={(o) => setObservationIds((ids) => ids.filter((i) => i !== o))} />
+        </section>
 
         <JokeDetails draft={input} update={update} />
 
