@@ -23,11 +23,14 @@ export const useSaveJoke = () => useMutation<Joke, Error, SaveJokeVars>({ mutati
 
 export const useDeleteJoke = () => useMutation<void, Error, string>({ mutationKey: deleteJokeKey })
 
-/** Invalidate everything a topic/type change can touch. */
+/**
+ * Invalidate everything a topic/type change can touch. Jokes, premises and observations share one
+ * topic list, and deleting a topic moves all three to Random on the server, so all three refetch.
+ */
 function useRefreshLibrary() {
   const qc = useQueryClient()
   return () => {
-    for (const key of [keys.topics, keys.types, keys.jokes, keys.logs, keys.premises]) {
+    for (const key of [keys.topics, keys.types, keys.jokes, keys.logs, keys.premises, keys.observations]) {
       void qc.invalidateQueries({ queryKey: key })
     }
   }

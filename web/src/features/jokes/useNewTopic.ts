@@ -1,6 +1,6 @@
 /**
- * Ask for a name and add a topic. Jokes and premises share one topic list, so the Jokes and
- * Premises menus, the topic pickers and the topic manager all add topics through this.
+ * Ask for a name and add a topic. Jokes, premises and observations share one topic list, so every
+ * topic menu and picker, and the topic manager, add topics through this.
  */
 import { useTopicActions } from '../../api/library'
 import type { Topic } from '../../api/types'

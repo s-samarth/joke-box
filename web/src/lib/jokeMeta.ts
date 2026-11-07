@@ -31,5 +31,6 @@ export const statusOf = (status: string | null): string =>
 /** The protected default topic, where new and unfiled jokes land. Stored and shown as "Random". */
 export const RANDOM = 'Random'
 export const topicName = (topic?: Topic): string => (!topic ? '' : topic.is_system ? RANDOM : topic.name)
+export const randomTopicId = (topics: Topic[]): string | undefined => topics.find((t) => t.is_system)?.id
 
 export const displayTypes = (types: string[]): string[] => (types.length ? types : [UNDEFINED_TYPE])

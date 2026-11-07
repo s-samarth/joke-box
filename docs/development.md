@@ -61,6 +61,11 @@ CI runs the same checks, plus the migrations on Postgres 16 and a production bui
 - **Every query is scoped to the user.** Use `get_owned` / `find_owned` and filter by `user_id`.
   Add a test showing another user gets a 404.
 - **Reuse before you add.** Check `components/ui/` and `lib/` first.
+- **One topic list for jokes, premises and observations.** They all read `useTopics()` (one
+  `['topics']` cache) and add topics through `useNewTopic`, so a topic made anywhere shows up
+  everywhere. A topic change refetches all three (`useRefreshLibrary` in `api/library.ts`),
+  because deleting a topic moves all three to Random on the server; anything new filed under
+  topics joins that list, the server's `delete_topic` and the topic manager's counts.
 - **Write the copy** by the rules in [design-system.md](design-system.md#words-in-the-app).
 - **No real jokes** in seeds, fixtures, tests or screenshots. Use obviously made-up material, like
   the demo set.
