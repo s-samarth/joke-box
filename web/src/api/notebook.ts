@@ -1,4 +1,7 @@
-/** Hooks for observations and their own topics (kept apart from joke topics). */
+/**
+ * Hooks for observations and their kinds. An observation's topic comes from the joke topics
+ * (useTopics); its kind ("Set ideas", "Questions") is its own, served at /api/observation-topics.
+ */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
 import './observationSaves'
@@ -8,17 +11,17 @@ import type { Named, Observation } from './types'
 export const useObservations = () =>
   useQuery({ queryKey: keys.observations, queryFn: () => api<Observation[]>('/api/observations') })
 
-export const useObservationTopics = () =>
-  useQuery({ queryKey: keys.observationTopics, queryFn: () => api<Named[]>('/api/observation-topics') })
+export const useObservationKinds = () =>
+  useQuery({ queryKey: keys.observationKinds, queryFn: () => api<Named[]>('/api/observation-topics') })
 
 export const useSaveObservation = () => useMutation<Observation, Error, SaveObservationVars>({ mutationKey: saveObservationKey })
 
 export const useDeleteObservation = () => useMutation<void, Error, string>({ mutationKey: deleteObservationKey })
 
-export function useObservationTopicActions() {
+export function useObservationKindActions() {
   const qc = useQueryClient()
   const onSuccess = () => {
-    void qc.invalidateQueries({ queryKey: keys.observationTopics })
+    void qc.invalidateQueries({ queryKey: keys.observationKinds })
     void qc.invalidateQueries({ queryKey: keys.observations })
   }
   const create = useMutation({

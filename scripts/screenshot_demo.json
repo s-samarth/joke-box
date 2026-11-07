@@ -29,16 +29,16 @@
    300
   ]
  ],
- "observation_topics": ["Commute", "Family", "Office"],
+ "observation_kinds": ["Set ideas", "Questions"],
  "observations": [
-  ["Everyone on the train pretends the seat next to them is reserved for an invisible friend.", "Commute"],
-  ["Cab drivers ask 'which route?' as if I have a favourite.", "Commute"],
-  ["My mum forwards every message with 'see this', never 'see this, it's fake'.", "Family"],
-  ["Family group chats are 90% good-morning images.", "Family"],
-  ["Meetings that could have been an email become emails that should have been a meeting.", "Office"],
-  ["The office fridge has a sign, a rota and still a mystery yoghurt.", "Office"],
-  ["Why do printers sense fear?", null],
-  ["Lift small talk peaks at 'which floor?'.", "Office"]
+  ["Everyone on the train pretends the seat next to them is reserved for an invisible friend.", "Observational", null],
+  ["Cab drivers ask 'which route?' as if I have a favourite.", "Observational", null],
+  ["My mum forwards every message with 'see this', never 'see this, it's fake'.", "Technology", null],
+  ["Family group chats are 90% good-morning images.", "Technology", null],
+  ["Meetings that could have been an email become emails that should have been a meeting.", "Observational", "Set ideas"],
+  ["The office fridge has a sign, a rota and still a mystery yoghurt.", "Food", null],
+  ["Why do printers sense fear?", null, "Questions"],
+  ["Lift small talk peaks at 'which floor?'.", null, null]
  ],
  "voice_notes": [
   [

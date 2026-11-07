@@ -14,6 +14,8 @@ export interface MenuItem {
   danger?: boolean
   disabled?: boolean
   checked?: boolean
+  /** A quiet note at the end of the row, such as how many things it holds. */
+  count?: number
 }
 
 const panel = 'z-50 max-h-[70dvh] min-w-48 overflow-y-auto rounded-xl bg-ink-3 p-1.5 shadow-lift ring-1 ring-rule-strong'
@@ -30,7 +32,8 @@ function Items({ items, Item }: { items: (MenuItem | 'divider')[]; Item: typeof 
           <Item key={i.label} className={row(i.danger)} disabled={i.disabled} onSelect={i.onSelect}>
             {i.icon}
             <span className="flex-1">{i.label}</span>
-            {i.checked && <Check size={16} className="text-tape" />}
+            {i.count !== undefined && <span className="text-sm text-faint tabular">{i.count}</span>}
+            {i.checked ? <Check size={16} className="text-tape" /> : i.count !== undefined && <span className="w-4" />}
           </Item>
         ),
       )}

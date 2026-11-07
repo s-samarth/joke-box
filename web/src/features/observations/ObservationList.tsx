@@ -5,7 +5,8 @@
  */
 import { MoreHorizontal, Pencil, Sparkles, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { useDeleteObservation, useObservationTopics } from '../../api/notebook'
+import { useTopics } from '../../api/library'
+import { useDeleteObservation, useObservationKinds } from '../../api/notebook'
 import type { Observation } from '../../api/types'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { Dropdown } from '../../components/ui/Menu'
@@ -15,6 +16,7 @@ import { TimeRail } from '../../components/time/TimeRail'
 import { byDate, groupByMonth, type Order } from '../../lib/months'
 import { formatDate } from '../../lib/time'
 import { useCapture } from '../capture/captureContext'
+import { kindLabel, PLAIN, topicLabel } from './observationMeta'
 import { ObservationSheet } from './ObservationSheet'
 
 const created = (o: Observation) => o.created_at
@@ -22,12 +24,14 @@ const created = (o: Observation) => o.created_at
 /** With an `order`, the list is grouped by month with a time scrubber; without one (Home), it's a plain list. */
 export function ObservationList({ observations, order }: { observations: Observation[]; order?: Order }) {
   const groups = useMemo(() => (order ? groupByMonth([...observations].sort(byDate(created, order)), created) : []), [observations, order])
-  const { data: topics = [] } = useObservationTopics()
+  const { data: kinds = [] } = useObservationKinds()
+  const { data: topics = [] } = useTopics()
   const remove = useDeleteObservation()
   const { openCapture } = useCapture()
   const { confirm, toast } = useFeedback()
   const [editing, setEditing] = useState<Observation | null>(null)
-  const topicName = (id: string | null) => topics.find((t) => t.id === id)?.name
+  // "Driving · Set ideas · 3 Nov": a plain observation doesn't say it's one.
+  const filed = (o: Observation) => [topicLabel(topics, o.topic_id), o.kind_id && kindLabel(kinds, o.kind_id)].filter((x) => x && x !== PLAIN)
 
   const onDelete = async (o: Observation) => {
     if (!(await confirm({ title: 'Delete this observation?', message: 'It goes to the Trash for 30 days.', confirmLabel: 'Delete', danger: true }))) return
@@ -41,13 +45,13 @@ export function ObservationList({ observations, order }: { observations: Observa
           <div className="min-w-0 flex-1">
             <p className="leading-relaxed whitespace-pre-wrap">{o.text}</p>
             <p className="mt-1 text-sm text-faint">
-              {topicName(o.topic_id) && <span className="text-dim">{topicName(o.topic_id)}, </span>}
+              {filed(o).length > 0 && <span className="text-dim">{filed(o).join(' · ')} · </span>}
               {formatDate(o.created_at)}
             </p>
           </div>
           <Dropdown
             items={[
-              { label: 'Turn into a joke', icon: <Sparkles size={16} />, onSelect: () => openCapture({ setup: o.text }) },
+              { label: 'Turn into a joke', icon: <Sparkles size={16} />, onSelect: () => openCapture({ setup: o.text, topicId: o.topic_id ?? undefined }) },
               { label: 'Edit', icon: <Pencil size={16} />, onSelect: () => setEditing(o) },
               'divider',
               { label: 'Delete', icon: <Trash2 size={16} />, danger: true, onSelect: () => void onDelete(o) },

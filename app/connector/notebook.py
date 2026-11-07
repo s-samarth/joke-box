@@ -8,29 +8,49 @@ from sqlalchemy.orm import Session, undefer
 
 from app.connector.ink_image import pages_with_ink
 from app.connector.text import by_id, clip, ist_date, matches, page, same_name
-from app.models import Brainstorm, CraftNote, Observation, ObservationTopic, User, WritingSession
+from app.models import (
+    Brainstorm,
+    CraftNote,
+    Observation,
+    ObservationTopic,
+    Topic,
+    User,
+    WritingSession,
+)
+
+# The kind of an observation filed under no kind.
+PLAIN = "Observation"
 
 
 def search_observations(
-    db: Session, user: User, query: str = "", topic: str = "", limit: int = 25
+    db: Session, user: User, query: str = "", topic: str = "", limit: int = 25, kind: str = ""
 ) -> dict[str, Any]:
-    """Things you noticed, newest first."""
-    topics = by_id(
+    """Things you noticed, newest first. `topic` is a joke topic; `kind` is what sort of note it
+    is, and a plain observation's kind is "Observation"."""
+    kinds = by_id(
         db.execute(
             select(ObservationTopic.id, ObservationTopic.name).where(
                 ObservationTopic.user_id == user.id
             )
         )
     )
+    topics = by_id(db.execute(select(Topic.id, Topic.name).where(Topic.user_id == user.id)))
     rows = db.scalars(
         select(Observation)
         .where(Observation.user_id == user.id)
         .order_by(Observation.created_at.desc())
     )
+
+    def topic_of(o: Observation) -> str | None:
+        return topics.get(o.topic_id) if o.topic_id else None
+
+    def kind_of(o: Observation) -> str:
+        return kinds.get(o.kind_id, PLAIN) if o.kind_id else PLAIN
+
     found = [
         o
         for o in rows
-        if matches(query, o.text) and same_name(topic, topics.get(o.topic_id) if o.topic_id else "")
+        if matches(query, o.text) and same_name(topic, topic_of(o)) and same_name(kind, kind_of(o))
     ]
     shown, total = page(found, limit)
     return {
@@ -39,7 +59,8 @@ def search_observations(
             {
                 "id": str(o.id),
                 "text": clip(o.text, 800),
-                "topic": topics.get(o.topic_id) if o.topic_id else None,
+                "topic": topic_of(o),
+                "kind": kind_of(o),
                 "noted": ist_date(o.created_at),
             }
             for o in shown

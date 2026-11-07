@@ -11,7 +11,14 @@ from app.schemas.limits import INT_MAX
 
 
 class ObservationIn(BaseModel):
+    """An observation as the app sends it. A field left out keeps what's stored.
+
+    Apps from before kinds send `topic_id` meaning the kind, and no `kind_id`: the router reads
+    such a save the old way (see `legacy_save`), so a save queued offline months ago still lands.
+    """
+
     text: str
+    kind_id: uuid.UUID | None = None
     topic_id: uuid.UUID | None = None
     # Kept only when the observation is created: an import can keep the original date.
     created_at: datetime | None = None
@@ -32,6 +39,7 @@ class ObservationOut(BaseModel):
 
     id: uuid.UUID
     text: str
+    kind_id: uuid.UUID | None
     topic_id: uuid.UUID | None
     version: int
     created_at: datetime

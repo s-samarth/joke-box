@@ -169,7 +169,7 @@ server's own lists. It holds:
 
 - `README.txt`, with counts and how to read the rest.
 - One JSON file per list: jokes, premises, topics, types, statuses, sets, set tags,
-  venues, shows, observations and their topics, rewrites, Craft notes, areas and kinds, the
+  venues, shows, observations and their kinds, rewrites, Craft notes, areas and kinds, the
   watchlist, analyses, voice notes, and brainstorm sessions. Each is exactly as the API sends it
   ([api.md](api.md)).
 - `brainstorm-sessions/`: each session in full, handwriting included.

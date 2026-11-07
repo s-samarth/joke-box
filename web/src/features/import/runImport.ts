@@ -19,7 +19,7 @@ export interface Progress {
 
 interface Context {
   topics: Topic[]
-  observationTopics: Named[]
+  observationKinds: Named[]
   /** Audio files by name, from the bundle's audio/ folder. */
   audio: Map<string, File>
   /** Craft notes are numbered on from here, so they sort after the ones you have. */
@@ -56,7 +56,7 @@ export async function runImport(plan: ImportPlan, ctx: Context): Promise<Progres
   const random = ctx.topics.find((t) => t.is_system)?.id ?? ''
   // The protected topic is stored as Random, so a bundle naming "Random" files there.
   const jokeTopics = await ensureTopics(topicNames(plan.jokes), byName(ctx.topics), '/api/topics')
-  const obsTopics = await ensureTopics(topicNames(plan.observations), byName(ctx.observationTopics), '/api/observation-topics')
+  const obsTopics = await ensureTopics(topicNames(plan.observations), byName(ctx.observationKinds), '/api/observation-topics')
 
   for (const j of plan.jokes) {
     const topicId = (j.topic && jokeTopics.get(j.topic.trim().toLowerCase())) || random
@@ -73,9 +73,9 @@ export async function runImport(plan: ImportPlan, ctx: Context): Promise<Progres
     )
   }
   for (const o of plan.observations) {
-    const topicId = (o.topic && obsTopics.get(o.topic.trim().toLowerCase())) || null
+    const kindId = (o.topic && obsTopics.get(o.topic.trim().toLowerCase())) || null
     await step(`Observation "${o.text.slice(0, 40)}"`, () =>
-      api(`/api/observations/${o.id}`, 'PUT', { text: o.text, topic_id: topicId, created_at: o.created_at }),
+      api(`/api/observations/${o.id}`, 'PUT', { text: o.text, kind_id: kindId, created_at: o.created_at }),
     )
   }
   for (const n of plan.voiceNotes) {

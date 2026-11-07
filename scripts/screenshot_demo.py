@@ -95,13 +95,15 @@ def sets(jokes: list[Any]) -> None:
         }))  # fmt: skip
 
 
-def observations() -> list[str]:
-    topics = {n: ok(c.post("/api/observation-topics", json={"name": n}))["id"]
-              for n in DATA["observation_topics"]}  # fmt: skip
+def observations(topics: dict[str, Any]) -> list[str]:
+    """Some filed under a joke topic and a kind, some still to sort."""
+    kinds = {n: ok(c.post("/api/observation-topics", json={"name": n}))["id"]
+             for n in DATA["observation_kinds"]}  # fmt: skip
     ids = []
-    for n, (text, topic) in enumerate(DATA["observations"]):
+    for n, (text, topic, kind) in enumerate(DATA["observations"]):
         ids.append(new_id())
-        body = {"text": text, "topic_id": topics.get(topic), "created_at": ago(n * 3)}
+        body = {"text": text, "topic_id": topics[topic]["id"] if topic else None,
+                "kind_id": kinds.get(kind), "created_at": ago(n * 3)}  # fmt: skip
         ok(c.put(f"/api/observations/{ids[-1]}", json=body))
     return ids
 
@@ -185,7 +187,7 @@ def main() -> None:
     jokes = seed_jokes(topics)
     shows([t["id"] for t in topics.values() if not t["is_system"]])
     sets(jokes)
-    observation_ids = observations()
+    observation_ids = observations(topics)
     voice_notes(Path(sys.argv[1]))
     writing(jokes, observation_ids, craft()[0])
     study()

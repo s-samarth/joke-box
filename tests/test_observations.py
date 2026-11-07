@@ -1,4 +1,4 @@
-"""Observations: logged on their own, with topics kept apart from joke topics."""
+"""Observations: logged on their own, with kinds kept apart from joke topics."""
 
 import uuid
 from datetime import UTC, datetime
@@ -28,18 +28,18 @@ def test_text_is_required(alice: TestClient) -> None:
     assert put_obs(alice, text="   ").status_code == 422
 
 
-def test_observation_topics_are_separate_from_joke_topics(alice: TestClient) -> None:
+def test_kinds_are_separate_from_joke_topics(alice: TestClient) -> None:
     make_topic(alice, "Airports")
     assert "Airports" not in [t["name"] for t in alice.get("/api/topics").json()]
     assert alice.post("/api/observation-topics", json={"name": "airports"}).status_code == 409
 
 
-def test_deleting_a_topic_keeps_its_observations(alice: TestClient) -> None:
-    topic_id = make_topic(alice, "Metro")
-    obs = put_obs(alice, topic_id=topic_id).json()
-    assert alice.delete(f"/api/observation-topics/{topic_id}").status_code == 204
+def test_deleting_a_kind_keeps_its_observations(alice: TestClient) -> None:
+    kind_id = make_topic(alice, "Metro")
+    obs = put_obs(alice, kind_id=kind_id).json()
+    assert alice.delete(f"/api/observation-topics/{kind_id}").status_code == 204
     kept = alice.get("/api/observations").json()[0]
-    assert (kept["id"], kept["topic_id"]) == (obs["id"], None)
+    assert (kept["id"], kept["kind_id"]) == (obs["id"], None)
 
 
 def test_rename_topic(alice: TestClient) -> None:
@@ -56,11 +56,13 @@ def test_delete_is_idempotent(alice: TestClient) -> None:
 
 def test_other_users_cannot_see_or_touch_mine(alice: TestClient, bob: TestClient) -> None:
     topic_id = make_topic(alice, "Mine")
-    obs_id = put_obs(alice, topic_id=topic_id).json()["id"]
+    obs_id = put_obs(alice, kind_id=topic_id).json()["id"]
     assert bob.get("/api/observations").json() == []
     assert bob.get("/api/observation-topics").json() == []
     assert put_obs(bob, obs_id).status_code == 404
-    assert put_obs(bob, topic_id=topic_id).status_code == 404
+    assert put_obs(bob, kind_id=topic_id).status_code == 404
+    joke_topic = alice.post("/api/topics", json={"name": "Alice only"}).json()["id"]
+    assert put_obs(bob, kind_id=None, topic_id=joke_topic).status_code == 404
     assert bob.patch(f"/api/observation-topics/{topic_id}", json={"name": "x"}).status_code == 404
     assert bob.delete(f"/api/observation-topics/{topic_id}").status_code == 404
     bob.delete(f"/api/observations/{obs_id}")

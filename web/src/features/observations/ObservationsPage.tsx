@@ -1,83 +1,90 @@
 /**
- * Every observation, filtered by topic and searched by words. Both live in the URL (?topic=,
- * ?q=), so the back button and a shared link land on the same view; new observations go under
- * that topic.
+ * Every observation, filtered by topic and kind and searched by words. All three live in the URL
+ * (?topic=, ?kind=, ?q=), so the back button and a shared link land on the same view; new
+ * observations go under the topic and kind you're looking at. While some aren't under a topic
+ * yet, Sort goes through them one at a time.
  */
-import { Search, Settings2 } from 'lucide-react'
+import { Inbox, Search } from 'lucide-react'
 import { useState } from 'react'
 import { useSearchParams } from 'react-router'
-import { useObservations, useObservationTopics } from '../../api/notebook'
+import { useObservations } from '../../api/notebook'
+import type { Observation } from '../../api/types'
 import { Button } from '../../components/ui/Button'
+import { ChipRow } from '../../components/ui/ChipRow'
 import { Input } from '../../components/ui/Field'
 import { OrderToggle } from '../../components/time/MonthSection'
 import { EmptyState, PageHead, Spinner } from '../../components/ui/pieces'
 import type { Order } from '../../lib/months'
 import { matchesWords } from '../../lib/search'
+import { KindManager } from './KindManager'
 import { ObservationBox } from './ObservationBox'
 import { ObservationList } from './ObservationList'
-import { ObservationTopicManager } from './ObservationTopicManager'
+import { KindMenu, TopicMenu } from './ObservationMenus'
+import { ObservationSorter } from './ObservationSorter'
+import { matchesFilters, NOT_SORTED, PLAIN_KIND } from './observationMeta'
 
-const NONE = 'none'
-const tab = (on: boolean) =>
-  `inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-3 text-[15px] transition ${on ? 'bg-ink-3 text-paper' : 'text-dim hover:text-paper'}`
+const newest = (a: Observation, b: Observation) => b.created_at.localeCompare(a.created_at)
 
 export function ObservationsPage() {
   const { data: observations, isPending } = useObservations()
-  const { data: topics = [] } = useObservationTopics()
   const [params, setParams] = useSearchParams()
   const [managing, setManaging] = useState(false)
-  const filter = params.get('topic')
+  const [sorting, setSorting] = useState<string[] | null>(null)
+  const topic = params.get('topic')
+  const kind = params.get('kind')
   const order: Order = params.get('order') === 'old' ? 'old' : 'new'
   const all = observations ?? []
   const query = params.get('q') ?? ''
-  const underTopic = filter === null ? all : all.filter((o) => (filter === NONE ? o.topic_id === null : o.topic_id === filter))
-  const shown = underTopic.filter((o) => matchesWords(query, [o.text]))
-  const count = (id: string | null) => all.filter((o) => o.topic_id === id).length
-  // Each control changes only its own part of the URL (?topic=, ?order=), keeping the other.
+  const filtered = all.filter((o) => matchesFilters(o, topic, kind))
+  const shown = filtered.filter((o) => matchesWords(query, [o.text]))
+  const unsorted = all.filter((o) => o.topic_id === null)
+  // Each menu counts within the other's choice, so the numbers match what picking would show.
+  const topicCount = (value: string | null) => all.filter((o) => matchesFilters(o, value, kind)).length
+  const kindCount = (value: string | null) => all.filter((o) => matchesFilters(o, topic, value)).length
+  // Each control changes only its own part of the URL, keeping the others.
   const setParam = (name: string, value: string | null) => setParams((p) => { if (value) p.set(name, value); else p.delete(name); return p }, { replace: true })
-  const setFilter = (value: string | null) => setParam('topic', value)
+  const filedUnder = (value: string | null, none: string) => (value && value !== none ? value : null)
 
   return (
     <div className="mx-auto max-w-2xl">
       <PageHead title="Observations">
-        <Button variant="quiet" small icon={<Settings2 size={16} />} onClick={() => setManaging(true)}>Topics</Button>
+        {unsorted.length > 0 && (
+          <Button variant="quiet" small icon={<Inbox size={16} />} aria-label={`Sort ${unsorted.length} into topics`} onClick={() => setSorting([...unsorted].sort(newest).map((o) => o.id))}>
+            Sort {unsorted.length}
+          </Button>
+        )}
       </PageHead>
-      <p className="-mt-2 mb-5 text-dim">Things you noticed that aren't jokes yet. Turn one into a joke when the angle shows up.</p>
+      <p className="-mt-2 mb-5 text-dim">Things you noticed that aren't jokes yet, by topic. Write a premise or a joke when the angle shows up.</p>
 
-      <ObservationBox key={filter ?? 'all'} initialTopicId={filter && filter !== NONE ? filter : null} />
+      <ObservationBox key={`${topic}-${kind}`} initialTopicId={filedUnder(topic, NOT_SORTED)} initialKindId={filedUnder(kind, PLAIN_KIND)} />
 
       {all.length > 0 && (
-        <div className="relative mt-8">
-          <Search size={18} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-faint" />
-          <Input type="search" aria-label="Search observations" placeholder="Search observations" className="pl-10" value={query} onChange={(e) => setParam('q', e.target.value)} />
+        <div className="mt-8 space-y-3">
+          <div className="relative">
+            <Search size={18} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-faint" />
+            <Input type="search" aria-label="Search observations" placeholder="Search observations" className="pl-10" value={query} onChange={(e) => setParam('q', e.target.value)} />
+          </div>
+          <ChipRow className="-mx-4 px-4 sm:mx-0 sm:px-0">
+            <TopicMenu value={topic} onChange={(v) => setParam('topic', v)} counts={topicCount} />
+            <KindMenu value={kind} onChange={(v) => setParam('kind', v)} counts={kindCount} onManage={() => setManaging(true)} />
+          </ChipRow>
         </div>
       )}
-
-      <nav aria-label="Filter by topic" className="no-scrollbar mt-4 mb-3 flex gap-1 overflow-x-auto">
-        <button type="button" aria-pressed={filter === null} onClick={() => setFilter(null)} className={tab(filter === null)}>All <span className="text-faint tabular">{all.length}</span></button>
-        {topics.map((t) => (
-          <button key={t.id} type="button" aria-pressed={filter === t.id} onClick={() => setFilter(t.id)} className={tab(filter === t.id)}>
-            {t.name} <span className="text-faint tabular">{count(t.id)}</span>
-          </button>
-        ))}
-        {count(null) > 0 && topics.length > 0 && (
-          <button type="button" aria-pressed={filter === NONE} onClick={() => setFilter(NONE)} className={tab(filter === NONE)}>No topic <span className="text-faint tabular">{count(null)}</span></button>
-        )}
-      </nav>
 
       {isPending && !observations ? (
         <div className="py-10"><Spinner /></div>
       ) : shown.length === 0 ? (
-        <EmptyState title={query.trim() && underTopic.length ? 'Nothing matches' : all.length ? 'Nothing under this topic' : 'No observations yet'}>
-          {query.trim() && underTopic.length ? 'Try fewer words.' : all.length ? 'Log one above and it lands here.' : 'The next weird thing you see, log it above before it fades.'}
+        <EmptyState title={query.trim() && filtered.length ? 'Nothing matches' : all.length ? 'Nothing here yet' : 'No observations yet'}>
+          {query.trim() && filtered.length ? 'Try fewer words.' : all.length ? 'Log one above and it lands here.' : 'The next weird thing you see, log it above before it fades.'}
         </EmptyState>
       ) : (
         <>
-          <div className="mb-1 flex justify-end"><OrderToggle order={order} onChange={(o) => setParam('order', o === 'old' ? 'old' : null)} /></div>
+          <div className="mt-3 mb-1 flex justify-end"><OrderToggle order={order} onChange={(o) => setParam('order', o === 'old' ? 'old' : null)} /></div>
           <ObservationList observations={shown} order={order} />
         </>
       )}
-      {managing && <ObservationTopicManager onClose={() => setManaging(false)} />}
+      {managing && <KindManager onClose={() => setManaging(false)} />}
+      {sorting && <ObservationSorter ids={sorting} onClose={() => setSorting(null)} />}
     </div>
   )
 }

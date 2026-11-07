@@ -123,13 +123,23 @@ def test_shows_with_lpm(dev: TestClient, db: Session) -> None:
 
 
 def test_notebook_and_study(dev: TestClient, db: Session) -> None:
+    buses = dev.post("/api/topics", json={"name": "Buses"}).json()["id"]
+    sets = dev.post("/api/observation-topics", json={"name": "Set ideas"}).json()["id"]
     dev.put(f"/api/observations/{uuid.uuid4()}", json={"text": "Fake noticed thing"})
+    dev.put(
+        f"/api/observations/{uuid.uuid4()}",
+        json={"text": "Fake bus idea", "kind_id": sets, "topic_id": buses},
+    )
     dev.put(f"/api/sessions/{uuid.uuid4()}", json={"title": "Fake session", "content": "Fake page"})
     note_id = str(uuid.uuid4())
     dev.put(f"/api/craft-notes/{note_id}", json=note_in(dev) | {"title": "Fake rule"})
     dev.put(f"/api/analyses/{uuid.uuid4()}", json={"title": "Fake analysis", "body": "Fake why"})
     me = account(db, "dev@example.com")
-    assert notebook.search_observations(db, me, "noticed")["total"] == 1
+    [plain] = notebook.search_observations(db, me, "noticed")["observations"]
+    assert (plain["topic"], plain["kind"]) == (None, "Observation")
+    [idea] = notebook.search_observations(db, me, topic="buses", kind="set ideas")["observations"]
+    assert idea["text"] == "Fake bus idea"
+    assert notebook.search_observations(db, me, kind="observation")["total"] == 1
     assert notebook.search_brainstorms(db, me, "page")["results"][0]["kind"] == "brainstorm"
     titles = [n["title"] for n in study.search_craft(db, me)["notes"]]
     assert "Fake rule" in titles

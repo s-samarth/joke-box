@@ -116,6 +116,9 @@ export interface Setlist {
 
 export interface ObservationInput {
   text: string
+  /** What sort of note it is ("Set ideas"); null for a plain observation. */
+  kind_id: string | null
+  /** A joke topic, the same list jokes and premises use; null until it's sorted. */
   topic_id: string | null
   /** Sent when creating, so something written offline keeps the time it was written. */
   created_at?: string
@@ -123,7 +126,7 @@ export interface ObservationInput {
   version?: number
 }
 
-/** Something you noticed: not a joke yet. Its topics are separate from joke topics. */
+/** Something you noticed: not a joke yet. */
 export interface Observation extends ObservationInput {
   id: string
   /** Up by one per save on the server; catches edits made on two devices. */

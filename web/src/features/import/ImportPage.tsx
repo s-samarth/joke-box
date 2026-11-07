@@ -13,7 +13,7 @@ import { useState, type ChangeEvent } from 'react'
 import { Link } from 'react-router'
 import { useCraftNotes } from '../../api/craft'
 import { useJokes, useTopics } from '../../api/library'
-import { useObservations, useObservationTopics } from '../../api/notebook'
+import { useObservations, useObservationKinds } from '../../api/notebook'
 import { useVoiceNotes } from '../../api/voice'
 import { Button } from '../../components/ui/Button'
 import { PageHead } from '../../components/ui/pieces'
@@ -30,7 +30,7 @@ export function ImportPage() {
   const { data: notes = [] } = useVoiceNotes()
   const { data: craft = [] } = useCraftNotes()
   const { data: topics = [] } = useTopics()
-  const { data: observationTopics = [] } = useObservationTopics()
+  const { data: observationKinds = [] } = useObservationKinds()
   const [plan, setPlan] = useState<ImportPlan | null>(null)
   const [audio, setAudio] = useState(new Map<string, File>())
   const [error, setError] = useState('')
@@ -61,7 +61,7 @@ export function ImportPage() {
   async function start() {
     if (!plan) return
     setProgress({ done: 0, total: 0, failures: [] })
-    const result = await runImport(plan, { topics, observationTopics, audio, craftPosition: Math.max(0, ...craft.map((n) => n.position)), onProgress: setProgress })
+    const result = await runImport(plan, { topics, observationKinds, audio, craftPosition: Math.max(0, ...craft.map((n) => n.position)), onProgress: setProgress })
     setProgress(result)
     setFinished(true)
     void qc.invalidateQueries()

@@ -125,13 +125,13 @@ A joke points at its premise with `premise_id`; a premise doesn't list its jokes
 | Method | Path | Body / notes |
 |---|---|---|
 | GET | `/api/observations` | Newest first |
-| PUT | `/api/observations/{id}` | `{text, topic_id?, created_at?, base_version?}`. The text must not be blank. `created_at` is kept only on create (imports). The answer includes `version`; with `base_version`, an edit made from an older version that would change it answers **409**, as for jokes. |
+| PUT | `/api/observations/{id}` | `{text, kind_id?, topic_id?, created_at?, base_version?}`. `topic_id` is a joke topic (`/api/topics`), `kind_id` one of the kinds below; each must be your own, and one left out keeps what's stored. A save with no `kind_id` comes from an app made before kinds: its `topic_id` is read as the kind, and the topic stays. The text must not be blank. `created_at` is kept only on create (imports). The answer includes `version`; with `base_version`, an edit made from an older version that would change it answers **409**, as for jokes. |
 | DELETE | `/api/observations/{id}` | |
-| GET | `/api/observation-topics` | `[{id, name}]`, in your order |
+| GET | `/api/observation-topics` | The kinds of observation: `[{id, name}]`, in your order. The path is from when these were the observations' topics |
 | POST | `/api/observation-topics` | `{name}` → 201, at the end |
 | PUT | `/api/observation-topics/order` | `{ids}` → 204. Same rules as topics |
 | PATCH | `/api/observation-topics/{id}` | `{name}` |
-| DELETE | `/api/observation-topics/{id}` | Its observations keep existing, with no topic |
+| DELETE | `/api/observation-topics/{id}` | Its observations stay, as plain observations |
 | GET | `/api/sessions/summaries` | Brainstorm sessions without their ink (`ink_strokes` counts it), newest first. What the app lists |
 | GET | `/api/sessions/{id}` | One session with its ink, **gzip-packed** (see below). 404 if it isn't yours, is in the Trash, or doesn't exist yet |
 | GET | `/api/sessions` | Every session with all its ink. Kept for older app versions only: all the ink at once outgrows the 4.5 MB response limit |
@@ -267,7 +267,8 @@ Every tool reads; none writes. Each sees only the user's own rows, and the Trash
 | `list_premises`, `get_premise` | Premises with their joke counts; one premise with its notes and jokes in chain order |
 | `list_sets`, `get_set` | Sets with runtime against target; one set in running order (first is the opener, last the closer) with each joke's topic, premise, strength and time |
 | `list_shows` | Logged shows with LPM, rating, topics, notes and `jokes` (each joke done, in running order: `id`, `setup`, `result` of killed / ok / bombed / null, `note`), and the LPM across every show that matches. `since` and `until` narrow by IST date; 25 a call, and `next_offset` says where the next page starts |
-| `search_observations`, `search_brainstorms` | Observations; Brainstorms and Rewrites together, most recently changed first, by title and typed text, with how many handwritten pages each Brainstorm has (`handwritten_pages`) |
+| `search_observations` | Observations, newest first: `id`, `text`, `topic` (a joke topic, null until sorted), `kind` ("Observation" unless it has one, like "Set ideas") and `noted`. Narrow by words, `topic` and `kind` |
+| `search_brainstorms` | Brainstorms and Rewrites together, most recently changed first, by title and typed text, with how many handwritten pages each Brainstorm has (`handwritten_pages`) |
 | `search_voice_notes` | Voice notes, newest first, matching every word in the label or hashtags: `id`, `label`, `hashtags`, `seconds`, `recorded` (IST date) and `uploaded`. Never the audio |
 | `get_brainstorm` | Any result of `search_brainstorms` in full. A Brainstorm: a JSON block (`kind`, title, typed text, technique, linked jokes and observations, `handwritten_pages`, `pages_shown`, `more_from_page`), then "Page N" and a PNG of each handwritten page, drawn as the app shows it ([ink_image.py](../app/connector/ink_image.py)). Claude reads the handwriting from the images. Pages over a 2.5 MB budget continue with `from_page`. A Rewrite: one JSON block (`kind`, the joke's id and setup, title, typed text) |
 | `search_craft`, `get_craft_notes` | Craft notes (no query lists every title); up to 10 in full |
