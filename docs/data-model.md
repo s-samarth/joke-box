@@ -43,7 +43,8 @@ erDiagram
   performance_logs }o--o{ topics : performance_log_topics
   performance_logs ||--o{ performance_jokes : did
   jokes ||--o{ performance_jokes : "done at"
-  observation_topics |o--o{ observations : groups
+  observation_topics |o--o{ observations : "kind of"
+  topics |o--o{ observations : files
   watch_items |o--o{ analyses : "analysed in"
   users ||--o{ writing_sessions : owns
   users ||--o{ voice_notes : owns
@@ -78,8 +79,8 @@ erDiagram
 |---|---|---|
 | `brainstorms` | `joke_id → jokes` (cascade), `title`, `content`, `timer_seconds` | A **Rewrite** session on one joke |
 | `brainstorm_versions` | `brainstorm_id` (cascade), `title`, `content`, `saved_at` | One row appended per save |
-| `observation_topics` | `name`, `position` | Separate from joke topics, in the order you drag them into |
-| `observations` | `text`, `topic_id` (set null), `version` (up by one per save that changes it) | Deleting the topic keeps the observation. `version` catches edits made on two devices |
+| `observation_topics` | `name`, `position` | The **kinds** of observation ("Set ideas", "Questions"), in the order you drag them into. They were the observations' only topics before 0032, hence the table name |
+| `observations` | `text`, `topic_id → observation_topics` (the kind; set null), `joke_topic_id → topics` (the topic; set null), `version` (up by one per save that changes it) | The columns keep their names from before kinds; the model and API call them `kind_id` and `topic_id`. No kind is a plain observation; no topic is Not sorted. `version` catches edits made on two devices |
 | `writing_sessions` | `title`, `content`, `ink` JSON (strokes: colour, size, page, `[x, y, pressure]` points; deferred, so it's loaded only when read), `ink_strokes` (how many, kept on every save so lists never load the ink), `ink_pages` (1–20), `timer_seconds`, `joke_ids` JSON, `observation_ids` JSON, `technique_id → craft_notes` (set null), `version` (up by one per save that changes it) | A free **Brainstorm** session. `version` catches edits made on two devices: the losing edit is kept as a copy. Links are id lists; deleted targets just drop out of view. Deleting the technique keeps the session |
 | `voice_notes` | `label`, `hashtags` JSON, `duration_seconds`, `content_type`, `size_bytes`, `audio_path` | `audio_path` stays empty until the upload lands. The audio itself lives in Blob storage |
 
@@ -122,11 +123,11 @@ sound.
 |---|---|
 | A joke | To the Trash with its live rewrites (same `deleted_at`, so they come back together). Its set places stay but are hidden; saving a set keeps them where they were. Links to it from shows' lessons and brainstorms stay. Erased: its rewrites, versions and set places go (cascade) |
 | A rewrite, observation, brainstorm, show, analysis, routine or craft note | To the Trash. Links to it (a lesson's show or analysis, an analysis's routine, a brainstorm's technique) stay while it's there and clear when it's erased |
-| A topic | Its jokes and premises move to Random, the jokes with no subtopic; its show links move to Random; its subtopics go |
+| A topic | Its jokes, premises and observations move to Random, the jokes with no subtopic; its show links move to Random; its subtopics go |
 | A premise | To the Trash. Its jokes (live or in the Trash) stay, on no premise, and `trashed_joke_ids` remembers them: put back, it takes back those still on no premise (one moved to another premise meanwhile stays there). A joke saved later (offline) still pointing at it is saved with no premise. Erased: nothing else changes |
 | A subtopic | Its jokes keep their topic and lose the subtopic |
 | A type | Removed from every joke; a joke left with none shows as "Undefined" |
-| An observation topic | Its observations stay, with no topic |
+| An observation kind | Its observations stay, as plain observations |
 | A set | To the Trash with its items and tags, and comes back as it was. Erased: its items go; the jokes stay |
 | A watchlist routine | Analyses of it stay, unlinked |
 | A voice note | To the Trash; the audio file stays until it's erased. One whose recording hasn't uploaded yet is erased at once (the sound was only on the phone). Deleting twice is fine (a replayed delete) |
@@ -168,6 +169,7 @@ All of these run in one transaction ([services/topics.py](../app/services/topics
 | `0029` | `board_spots` dropped, with the joke board |
 | `0030` | `version` on each set and brainstorm session, to catch edits made on two devices, as jokes have had since `0013` |
 | `0031` | `version` on each Craft note, observation and premise, for the same check |
+| `0032` | `observations.joke_topic_id`: observations go under a joke topic; their old topics become kinds. Nothing renamed, so the live deployment keeps working during the build |
 
 Merged migrations are shared history. CI fails a PR that edits, deletes or renames one; fix
 forward with a new revision. CI also runs upgrade → downgrade → upgrade on Postgres 16, so every

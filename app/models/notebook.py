@@ -1,6 +1,7 @@
 """Observations (things you noticed, not yet jokes) and free brainstorm sessions.
 
-They have their own topics, kept apart from joke topics so the joke folders stay clean.
+An observation has a topic, from the same list as jokes and premises, and a kind: what sort of
+note it is (an idea for a set, a craft thought, a question). Plain observations have no kind.
 """
 
 import uuid
@@ -14,6 +15,9 @@ from app.models.trash import Trashable
 
 
 class ObservationTopic(OwnedMixin, Base):
+    """A kind of observation, like "Set ideas" or "Questions". The table keeps its first name,
+    from when these were the observations' only topics (see Observation)."""
+
     __tablename__ = "observation_topics"
     __table_args__ = (
         Index("uq_observation_topics_user_name", "user_id", text("lower(name)"), unique=True),
@@ -24,13 +28,22 @@ class ObservationTopic(OwnedMixin, Base):
 
 
 class Observation(Trashable, OwnedMixin, Base):
-    """One thing you noticed. Its topic is optional; deleting the topic keeps the observation."""
+    """One thing you noticed, with an optional topic and kind.
+
+    The columns keep the names they had before kinds: `topic_id` holds the kind and
+    `joke_topic_id` the topic. Renaming them would break the deployment still serving while a new
+    one migrates. Deleting a kind keeps its observations, with no kind; deleting a topic moves
+    them to Random, like its jokes.
+    """
 
     __tablename__ = "observations"
 
     text: Mapped[str] = mapped_column(Text)
+    kind_id: Mapped[uuid.UUID | None] = mapped_column(
+        "topic_id", Uuid, ForeignKey("observation_topics.id", ondelete="SET NULL"), index=True
+    )
     topic_id: Mapped[uuid.UUID | None] = mapped_column(
-        Uuid, ForeignKey("observation_topics.id", ondelete="SET NULL"), index=True
+        "joke_topic_id", Uuid, ForeignKey("topics.id", ondelete="SET NULL"), index=True
     )
     # Goes up by one on every save; a save edited from an older version is a conflict.
     version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")

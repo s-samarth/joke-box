@@ -51,5 +51,5 @@ export const useReorderSubtopics = () =>
     (old, { topicId, ids }) => (old as Topic[]).map((t) => (t.id === topicId ? { ...t, subtopics: inOrder(t.subtopics, ids) } : t)),
     ({ ids }) => ids)
 
-export const useReorderObservationTopics = () =>
-  useReorder<string[]>(keys.observationTopics, () => '/api/observation-topics/order', (old, ids) => inOrder(old as Named[], ids), (ids) => ids)
+export const useReorderObservationKinds = () =>
+  useReorder<string[]>(keys.observationKinds, () => '/api/observation-topics/order', (old, ids) => inOrder(old as Named[], ids), (ids) => ids)

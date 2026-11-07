@@ -21,7 +21,7 @@ export interface ImportJoke {
 export interface ImportObservation {
   id: string
   text: string
-  /** An observation topic by name, made if it doesn't exist yet. */
+  /** The observation's kind by name ("Set ideas"), made if it doesn't exist yet. */
   topic?: string | null
   created_at: string
 }

@@ -29,7 +29,7 @@ export const keys = {
   venues: ['venues'],
   logs: ['logs'],
   observations: ['observations'],
-  observationTopics: ['observation-topics'],
+  observationKinds: ['observation-topics'],
   /** The old list with every session's ink: only an older app's cached copy still uses it. */
   sessions: ['sessions'],
   sessionList: ['session-list'],

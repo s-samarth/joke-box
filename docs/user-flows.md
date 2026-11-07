@@ -35,9 +35,12 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 3. Offline, the recording waits on the phone and uploads when you're back online.
 
 **Noticed something (observation):**
-1. Type it into "What did you notice?" on Home or Observations, and pick a topic if you like. The
-   topic stays picked for the next one.
+1. Type it into "What did you notice?" on Home or Observations. Under it, **Topic** files it under
+   one of your joke topics and **Kind** marks a note that isn't a plain observation (an idea for a
+   set, a question). Both stay picked for the next one, and both can wait.
 2. Tap **Log it**.
+3. Later, **Sort** on Observations goes through the ones with no topic, one at a time: tap a topic
+   and the next one shows (set its kind first if it needs one). **Skip** leaves one for next time.
 
 ## 2a. Write a joke every day
 
@@ -50,8 +53,10 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 
 ## 3. Work an observation into a joke
 
-1. On **Observations**, open the ⋯ menu on an observation and choose **Turn into a joke**.
-2. The New joke sheet opens with the observation as the setup. The observation itself stays.
+1. On **Observations**, pick a **Topic** to see what you've noticed about it, then open the ⋯ menu
+   on one and choose **Turn into a joke**.
+2. The New joke sheet opens with the observation as the setup, filed under its topic. The
+   observation itself stays.
 3. Write the punchline, file it, and save.
 
 A voice note works the same way: its **Turn into a joke** button starts New joke from its label

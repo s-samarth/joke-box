@@ -276,15 +276,30 @@ query is `?q=` in the URL. It's in the rail under Home, in More under **Find**, 
 ## Observations: `/observations`
 
 [ObservationsPage.tsx](../web/src/features/observations/ObservationsPage.tsx), [ObservationBox.tsx](../web/src/features/observations/ObservationBox.tsx),
-[ObservationList.tsx](../web/src/features/observations/ObservationList.tsx), [ObservationSheet.tsx](../web/src/features/observations/ObservationSheet.tsx),
-[ObservationTopicManager.tsx](../web/src/features/observations/ObservationTopicManager.tsx).
+[ObservationMenus.tsx](../web/src/features/observations/ObservationMenus.tsx), [ObservationList.tsx](../web/src/features/observations/ObservationList.tsx),
+[ObservationSheet.tsx](../web/src/features/observations/ObservationSheet.tsx), [ObservationSorter.tsx](../web/src/features/observations/ObservationSorter.tsx),
+[KindManager.tsx](../web/src/features/observations/KindManager.tsx), [observationMeta.ts](../web/src/features/observations/observationMeta.ts).
 
-The page has a box with topic chips and **Log it**. Below it are a search box (every word has to
-appear; `?q=` in the URL, so Search links straight to the matches) and filter tabs (All, each topic with
-its count, No topic), then the list by month under pinned headings, **Newest first** or **Oldest first** (`?order=old`),
-with the time scrubber down the right edge. Each row's ⋯ menu offers Edit, **Turn into a joke** and
-Delete. A **Topics** button manages the observation topics, which are
-separate from joke topics: drag the grips to reorder them; deleting one keeps its observations. The filter is `?topic=` in the URL.
+An observation has a **topic**, from the same list as jokes and premises (none yet: **Not sorted**),
+and a **kind**: what sort of note it is, like "Set ideas" or "Questions". Most need no kind and are
+plain observations. Kinds are yours, made from the Kind menus.
+
+- **The box:** "What did you notice?", then **Topic** and **Kind** menus and **Log it**. Both menus
+  end with New topic / New kind, and stay picked for the next one. On a phone a long topic name is
+  cut short so the row still fits.
+- **Filters:** a search box (every word has to appear; `?q=`), then **Topic** and **Kind** menus in
+  a row that scrolls sideways, as on Jokes. Each choice shows how many observations it holds within
+  the other filter. They're `?topic=` (an id, or `none`) and `?kind=` (an id, or `plain`) in the
+  URL, and new observations go under what's picked. **Manage kinds…** ends the Kind menu: drag to
+  reorder, rename, or delete one (its observations become plain).
+- **The list:** by month under pinned headings, **Newest first** or **Oldest first**
+  (`?order=old`), with the time scrubber down the right edge. Each row says its topic and kind
+  ("Driving · Set ideas · 3 Nov"). The ⋯ menu offers Edit (words, topic and kind), **Turn into a
+  joke** (filed under its topic) and Delete.
+- **Sort N** (while some have no topic) goes through them one at a time, newest first, in a sheet:
+  the observation, its **Kind** chips, then every topic as a chip. Tapping a topic files it and
+  shows the next; **Skip** leaves it under Not sorted, **Back** returns. The list is fixed when it
+  opens, so nothing moves under your thumb. At the end it says how many were sorted and skipped.
 
 <img src="screenshots/desktop-observations.webp" alt="Observations">
 

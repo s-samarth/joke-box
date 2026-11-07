@@ -67,7 +67,7 @@ own data. Today that is one comedian, but the system works for more than one.
 | **Premises** | The ideas under your jokes ("X is Y, because Z"): each one's take and notes, and every joke resting on it in chain order | `/premises`, `/premises/:id` |
 | **New joke** | The + button: a full sheet with every field, prefilled from where you are. Closing it keeps what you typed for next time. On Premises, Shows and Observations the + makes one of those instead | sheet |
 | **Rewrite** | Full-screen timed rewrite of one joke; every save keeps a version | `/jokes/:id/rewrite` |
-| **Observations** | Things you noticed that aren't jokes yet, with their own topics and a search; turn one into a joke | `/observations` |
+| **Observations** | Things you noticed that aren't jokes yet, by joke topic and kind (set ideas, questions), with a search and a one-at-a-time sorter; turn one into a joke | `/observations` |
 | **Brainstorm** | Free writing sessions with a timer: type or handwrite (Apple Pencil), link jokes and observations, search the typed words, and turn a session into a joke | `/brainstorm`, `/brainstorm/:id` |
 | **Voice notes** | Record, see the level meter, name and tag it straight away, play back, search by label or hashtag, turn one into a joke | `/voice` |
 | **Sets** | Jokes as masking-tape strips: drag to order, time against the slot, opener and closer marked | `/sets`, `/sets/:id` |

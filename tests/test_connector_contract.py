@@ -139,7 +139,7 @@ def test_performing_tools(claude: tuple[TestClient, str]) -> None:
 
 def test_notebook_and_study_tools(claude: tuple[TestClient, str]) -> None:
     observations = result(claude, "search_observations")
-    assert set(items(observations, "observations")[0]) == {"id", "text", "topic", "noted"}
+    assert set(items(observations, "observations")[0]) == {"id", "text", "topic", "kind", "noted"}
     # Each voice note's fields are checked in test_connector_voice.py.
     assert set(result(claude, "search_voice_notes")) == {"total", "voice_notes"}
 
