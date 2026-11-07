@@ -13,7 +13,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { api, newId } from '../../api/client'
 import { useTopics } from '../../api/library'
-import { useLinkObservation } from '../../api/notebook'
+import { useLinkObservation, useObservations } from '../../api/notebook'
 import { keys } from '../../api/queryClient'
 import type { BrainstormInput } from '../../api/shows'
 import type { JokeInput } from '../../api/types'
@@ -52,6 +52,7 @@ export function NewJokeForm({ prefill, plain, onClose }: { prefill: Prefill; pla
   const [brainstorm, setBrainstorm] = useState(start.brainstorm)
   const [observationIds, setObservationIds] = useState(start.observationIds)
   const link = useLinkObservation()
+  const { data: observations = [] } = useObservations()
   const [restored, setRestored] = useState(start.restored)
   const changed = restored || JSON.stringify([draft, brainstorm, observationIds]) !== JSON.stringify([start.draft, start.brainstorm, start.observationIds])
   const capture = useCaptureJoke()
@@ -97,8 +98,9 @@ export function NewJokeForm({ prefill, plain, onClose }: { prefill: Prefill; pla
       : undefined
     const id = capture({ ...input, tag_lines: input.tag_lines.filter((t) => t.trim()) }, { open, onSaved })
     if (!id) return
-    // Queued after the joke's save, so they reach the server in order (offline too).
-    for (const obsId of observationIds) link.mutate({ id: obsId, kind: 'jokes', targetId: id, on: true })
+    // Queued after the joke's save, so they reach the server in order (offline too). One deleted
+    // since it was picked (a kept draft can be days old) is skipped, not sent to fail.
+    for (const obsId of observationIds.filter((o) => observations.some((x) => x.id === o))) link.mutate({ id: obsId, kind: 'jokes', targetId: id, on: true })
     prefill.onCreated?.(id)
     if (start.owns) forgetDraft()
     onClose()

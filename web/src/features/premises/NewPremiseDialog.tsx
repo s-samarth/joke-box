@@ -5,7 +5,7 @@
 import { useState } from 'react'
 import { newId } from '../../api/client'
 import { useTopics } from '../../api/library'
-import { useLinkObservation } from '../../api/notebook'
+import { useLinkObservation, useObservations } from '../../api/notebook'
 import { useSavePremise } from '../../api/premises'
 import { Button } from '../../components/ui/Button'
 import { Field, Select, Textarea } from '../../components/ui/Field'
@@ -37,6 +37,7 @@ export function NewPremiseDialog({ open, onOpenChange, topicId, observationIds =
   const [notes, setNotes] = useState('')
   const [linked, setLinked] = useState(observationIds)
   const link = useLinkObservation()
+  const { data: observations = [] } = useObservations()
   const chosen = topic || topicId || topics.find((t) => t.is_system)?.id || ''
   const newTopic = useNewTopic()
   const pickTopic = async (id: string) => {
@@ -57,7 +58,7 @@ export function NewPremiseDialog({ open, onOpenChange, topicId, observationIds =
     const id = newId()
     save.mutateAsync({ id, input: { topic_id: chosen, take: take.trim(), notes } }).catch((e: Error) => toast(`Not saved: ${e.message}`))
     // Queued after the premise's save, so they reach the server in order (offline too).
-    for (const obsId of linked) link.mutate({ id: obsId, kind: 'premises', targetId: id, on: true })
+    for (const obsId of linked.filter((o) => observations.some((x) => x.id === o))) link.mutate({ id: obsId, kind: 'premises', targetId: id, on: true })
     onCreated(id)
     close()
   }
