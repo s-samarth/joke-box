@@ -269,7 +269,9 @@ button still closes at once.
 [useTimer.ts](../web/src/features/jokes/useTimer.ts).
 
 A full screen with no app frame. The top bar holds close, the timer (start, pause, reset), a word
-count, **Checklists**, **+** for a new session and **Save version**. The original joke is pinned at the top,
+count, **Checklists**, **+** for a new session and **Save version**. On a phone the bar keeps
+close, the timer, reset and **Save**; Checklists, New session and History sit behind **⋯**, so
+nothing runs off the screen. The original joke is pinned at the top,
 with **Where it came from** folded under it when it has any (its observations, and voice notes
 you can play), then an optional session name and a free-writing area. On the right are **This session** (its saved
 versions) and **Earlier sessions**. `?session=<id>` reopens a past session.
