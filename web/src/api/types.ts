@@ -58,6 +58,11 @@ export interface JokeInput {
   comments: string
   /** The joke this one continues from. Many jokes can follow one, so chains branch. */
   follows_id: string | null
+  /**
+   * The voice notes it came from. Optional: a joke cached before these existed has none, and a
+   * save without the field keeps what the server has.
+   */
+  voice_note_ids?: string[]
   /** Sent when creating, so something written offline keeps the time it was written. */
   created_at?: string
   /** The version this edit was made from (toInput keeps it): the base of the clash check. */

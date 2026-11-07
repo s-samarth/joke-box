@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { useTopics } from '../../api/library'
 import { useDeleteObservation, useObservationKinds, useObservations } from '../../api/notebook'
+import { usePremises } from '../../api/premises'
 import type { Observation } from '../../api/types'
 import { Button } from '../../components/ui/Button'
 import { Field, GrowingText, Select } from '../../components/ui/Field'
@@ -35,6 +36,10 @@ function Editor({ observation }: { observation: Observation }) {
   const newTopic = useNewTopic()
   const newKind = useNewKind()
   const [writingPremise, setWritingPremise] = useState(false)
+  const { data: premises = [] } = usePremises()
+  // Came to one premise already? A joke written from it most likely rests there too.
+  const live = premises.filter((p) => (observation.premise_ids ?? []).includes(p.id))
+  const onlyPremise = live.length === 1 ? live[0].id : null
 
   const pickTopic = async (value: string) => {
     if (value !== NEW_TOPIC) return update({ topic_id: value })
@@ -77,7 +82,7 @@ function Editor({ observation }: { observation: Observation }) {
 
       <div className="mt-6 flex flex-wrap gap-2">
         <Button variant="tape" small icon={<Sparkles size={15} />}
-          onClick={() => openCapture({ topicId: draft.topic_id ?? undefined, observationIds: [observation.id] })}>Write a joke from it</Button>
+          onClick={() => openCapture({ topicId: draft.topic_id ?? undefined, premiseId: onlyPremise, observationIds: [observation.id] })}>Write a joke from it</Button>
         <Button variant="plain" small icon={<Lightbulb size={15} />} onClick={() => setWritingPremise(true)}>Write a premise from it</Button>
       </div>
 

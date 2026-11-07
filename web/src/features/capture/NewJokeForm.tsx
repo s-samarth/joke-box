@@ -24,6 +24,7 @@ import { useFeedback } from '../../components/ui/feedbackContext'
 import { JokeDetails } from '../jokes/JokeDetails'
 import { TagLines } from '../jokes/TagLines'
 import { ObservationPicker } from '../observations/ObservationPicker'
+import { VoiceNotesOn } from '../voice/VoiceNotesOn'
 import { forgetDraft, hasText, keepDraft, keptDraft, startDraft } from './keptDraft'
 import { blankJoke, useCaptureJoke } from './newJoke'
 
@@ -35,6 +36,8 @@ export interface Prefill {
   setup?: string
   /** Came from these observations: shown under the words and linked when it's saved. */
   observationIds?: string[]
+  /** Came from these voice notes: playable under the words, kept on the joke. */
+  voiceNoteIds?: string[]
   /** Written as the next joke after this one. */
   followsId?: string
   hashtags?: string[]
@@ -46,7 +49,7 @@ export interface Prefill {
 export function NewJokeForm({ prefill, plain, onClose }: { prefill: Prefill; plain: boolean; onClose: () => void }) {
   const { data: topics = [] } = useTopics()
   const randomId = topics.find((t) => t.is_system)?.id ?? ''
-  const fresh = (): JokeInput => ({ ...blankJoke(prefill.topicId), subtopic_id: prefill.subtopicId ?? null, premise_id: prefill.premiseId ?? null, setup: prefill.setup ?? '', follows_id: prefill.followsId ?? null, hashtags: prefill.hashtags ?? [] })
+  const fresh = (): JokeInput => ({ ...blankJoke(prefill.topicId), subtopic_id: prefill.subtopicId ?? null, premise_id: prefill.premiseId ?? null, setup: prefill.setup ?? '', follows_id: prefill.followsId ?? null, hashtags: prefill.hashtags ?? [], voice_note_ids: prefill.voiceNoteIds ?? [] })
   const [start] = useState(() => startDraft(fresh(), plain, keptDraft(), prefill.observationIds))
   const [draft, setDraft] = useState<JokeInput>(start.draft)
   const [brainstorm, setBrainstorm] = useState(start.brainstorm)
@@ -130,6 +133,8 @@ export function NewJokeForm({ prefill, plain, onClose }: { prefill: Prefill; pla
             onChange={(e) => update({ punchline: e.target.value })} />
           <TagLines lines={draft.tag_lines} onChange={(tag_lines) => update({ tag_lines })} />
         </div>
+
+        <VoiceNotesOn ids={draft.voice_note_ids ?? []} onChange={(voice_note_ids) => update({ voice_note_ids })} />
 
         <section aria-label="From observations">
           <h3 className="mb-2 text-sm text-dim">From observations</h3>

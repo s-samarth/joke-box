@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, undefer
 
 from app.connector.ink_image import pages_with_ink
+from app.connector.origins import brainstorms_using
 from app.connector.text import by_id, clip, ist_date, matches, page, same_name
 from app.models import (
     Brainstorm,
@@ -50,7 +51,7 @@ def search_observations(
 ) -> dict[str, Any]:
     """Things you noticed, newest first. `topic` is a joke topic; `kind` is what sort of note it
     is, and a plain observation's kind is "Observation". `premise_ids` and `joke_ids` are what
-    came from it (none: not used yet)."""
+    came from it, `brainstorm_ids` the sessions it was brainstormed in (all none: not used yet)."""
     kinds = by_id(
         db.execute(
             select(ObservationTopic.id, ObservationTopic.name).where(
@@ -78,6 +79,7 @@ def search_observations(
     ]
     shown, total = page(found, limit)
     premises, jokes = live_links(db, user)
+    sessions = brainstorms_using(db, user)
     return {
         "total": total,
         "observations": [
@@ -89,6 +91,7 @@ def search_observations(
                 "noted": ist_date(o.created_at),
                 "premise_ids": [i for i in o.premise_ids or [] if i in premises],
                 "joke_ids": [i for i in o.joke_ids or [] if i in jokes],
+                "brainstorm_ids": sessions.get(str(o.id), []),
             }
             for o in shown
         ],

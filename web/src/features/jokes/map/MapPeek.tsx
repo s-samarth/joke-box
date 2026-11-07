@@ -1,6 +1,7 @@
 /**
  * The joke you tapped on the map, read in full without leaving it: its words, strength and type,
- * and the jokes either side of it in its chain, which you can tap to walk along the chain.
+ * the jokes either side of it in its chain, which you can tap to walk along the chain, and
+ * where it came from (observations, voice notes).
  * A panel rather than a sheet, so the map stays usable behind it.
  */
 import { ArrowLeft, ArrowRight, ExternalLink, X } from 'lucide-react'
@@ -9,6 +10,8 @@ import type { Joke } from '../../../api/types'
 import { IconButton } from '../../../components/ui/Button'
 import { StrengthTicks, TypeLabel } from '../../../components/ui/pieces'
 import { displayTypes } from '../../../lib/jokeMeta'
+import { JokeOrigins } from '../JokeOrigins'
+import { useHasOrigins } from '../useHasOrigins'
 
 interface Props {
   joke: Joke
@@ -41,6 +44,7 @@ export function PeekOf({ id, all, query, onPick, onClose }: { id: string | null;
 }
 
 function MapPeek({ joke, before, beforeGone, after, query, onPick, onClose }: Props) {
+  const hasOrigins = useHasOrigins(joke)
   return (
     <aside aria-label="The joke"
       className="fixed inset-x-3 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] z-30 flex max-h-[48dvh] flex-col rounded-2xl bg-ink-2 shadow-lift ring-1 ring-rule-strong lg:inset-x-auto lg:right-6 lg:bottom-6 lg:max-h-[70dvh] lg:w-[23rem]">
@@ -75,6 +79,7 @@ function MapPeek({ joke, before, beforeGone, after, query, onPick, onClose }: Pr
           </section>
         )}
         {!before && !beforeGone && !after.length && <p className="text-sm text-dim">Not linked to another joke yet. Open it to pick the joke it follows.</p>}
+        {hasOrigins && <JokeOrigins joke={joke} />}
       </div>
     </aside>
   )

@@ -16,6 +16,7 @@ from app.connector.jokes import (
     user_jokes,
 )
 from app.connector.notebook import observations_behind
+from app.connector.origins import voice_notes_behind
 from app.connector.show_record import EMPTY, records
 from app.connector.text import clip, matches, page, same_name
 from app.models import (
@@ -114,11 +115,12 @@ def get_jokes(db: Session, user: User, ids: list[str]) -> dict[str, Any]:
     sets, rewrites = sets_by_joke(db, user), rewrite_counts(db, user)
     wanted = [parse_id(i) for i in ids[:20]]
     done = records(db, user, (i for i in wanted if i in jokes))
-    behind = observations_behind(db, user)
+    behind, voices = observations_behind(db, user), voice_notes_behind(db, user)
     return {
         "jokes": [
             detail(jokes[i], names, jokes, sets, rewrites)
             | {"shows": done.get(i, EMPTY), "from_observations": behind.get(str(i), [])}
+            | {"from_voice_notes": voices.get(str(i), [])}
             for i in wanted
             if i in jokes
         ],

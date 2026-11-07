@@ -29,6 +29,7 @@ DETAIL = BRIEF | {
     "rewrites",
     "shows",
     "from_observations",
+    "from_voice_notes",
 }
 SET = {
     "id",

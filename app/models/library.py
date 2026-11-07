@@ -153,6 +153,9 @@ class Joke(Trashable, OwnedMixin, Base):
     follows_id: Mapped[uuid.UUID | None] = mapped_column(
         Uuid, ForeignKey("jokes.id", ondelete="SET NULL"), index=True
     )
+    # The voice notes it came from (ids). Kept here, not on the recording, so a joke written
+    # from a recording still waiting to upload keeps the link. One deleted just isn't shown.
+    voice_note_ids: Mapped[list[str]] = mapped_column(JSON, default=list, server_default="[]")
     # Goes up by one on every save; a save edited from an older version is a conflict.
     version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
 

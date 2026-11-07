@@ -1,6 +1,7 @@
 /**
  * A joke, read in full without leaving the page you're on (used while building a set).
  * Read-only on purpose: "Edit joke" goes to the joke's own page, where every change saves.
+ * Ends with where it came from: its observations and voice notes (see JokeOrigins).
  */
 import { Check, PenLine, Plus } from 'lucide-react'
 import type { ReactNode } from 'react'
@@ -13,6 +14,8 @@ import { StrengthTicks, TypeLabel } from '../../components/ui/pieces'
 import { Modal } from '../../components/ui/Modal'
 import { CLEAN_LABELS, displayTypes, statusOf, strengthLabel, topicName } from '../../lib/jokeMeta'
 import { clock } from '../../lib/duration'
+import { JokeOrigins } from './JokeOrigins'
+import { useHasOrigins } from './useHasOrigins'
 
 interface Props {
   joke: Joke
@@ -30,6 +33,7 @@ export function JokePeek({ joke, onClose, onAdd, inSet }: Props) {
   const { data: premises = [] } = usePremises()
   const premise = premises.find((p) => p.id === joke.premise_id)
   const before = joke.follows_id ? jokes.find((b) => b.id === joke.follows_id) : undefined
+  const hasOrigins = useHasOrigins(joke)
   const rows: [string, ReactNode][] = [
     ['Strength', <span key="s" className="inline-flex items-center gap-2"><StrengthTicks strength={joke.strength} />{joke.strength != null && strengthLabel(joke.strength)}</span>],
     ['Runs for', <span key="d" className="tabular">{joke.duration_seconds ? clock(joke.duration_seconds) : 'Not timed'}</span>],
@@ -75,6 +79,7 @@ export function JokePeek({ joke, onClose, onAdd, inSet }: Props) {
           <p className="mt-1 leading-relaxed whitespace-pre-wrap text-paper/90">{joke.comments}</p>
         </div>
       )}
+      {hasOrigins && <div className="mt-5"><JokeOrigins joke={joke} /></div>}
     </Modal>
   )
 }

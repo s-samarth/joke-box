@@ -1,6 +1,7 @@
 /**
  * Rewrite: a quiet full-screen page for reworking one joke against the clock. The original stays
- * pinned at the top, the timer runs while you write, and every save keeps a version.
+ * pinned at the top, with where it came from (observations, voice notes) a tap below it; the
+ * timer runs while you write, and every save keeps a version.
  */
 import { History, ListChecks, Pause, Play, Plus, RotateCcw, X } from 'lucide-react'
 import { useState } from 'react'
@@ -16,7 +17,9 @@ import { useFeedback } from '../../components/ui/feedbackContext'
 import { Modal } from '../../components/ui/Modal'
 import { clock } from '../../lib/duration'
 import { CraftSheet } from '../craft/CraftSheet'
+import { JokeOrigins } from './JokeOrigins'
 import { RewriteHistory } from './RewriteHistory'
+import { useHasOrigins } from './useHasOrigins'
 import { useTimer } from './useTimer'
 import { announceSave } from '../../lib/announce'
 
@@ -31,6 +34,7 @@ function Workspace({ joke, sessions, startId }: { joke: Joke; sessions: Brainsto
   const actions = useBrainstormActions()
   const { toast, confirm } = useFeedback()
   const current = sessions.find((s) => s.id === id)
+  const hasOrigins = useHasOrigins(joke)
   const words = content.trim() ? content.trim().split(/\s+/).length : 0
 
   const open = (b?: Brainstorm) => {
@@ -78,6 +82,12 @@ function Workspace({ joke, sessions, startId }: { joke: Joke; sessions: Brainsto
             <p className="leading-snug">{joke.setup}</p>
             {joke.punchline && <p className="mt-1 leading-snug text-tape/80">{joke.punchline}</p>}
           </div>
+          {hasOrigins && (
+            <details className="mt-3 rounded-lg bg-ink-2 px-4 py-2 ring-1 ring-rule">
+              <summary className="cursor-pointer py-1 text-sm text-dim">Where it came from</summary>
+              <div className="pt-2 pb-2"><JokeOrigins joke={joke} /></div>
+            </details>
+          )}
           <GrowingText aria-label="Session title" placeholder="Name this session (optional)" className="headline mt-8 text-3xl" value={title} onChange={(e) => setTitle(e.target.value)} />
           <GrowingText aria-label="Rewrite" autoFocus placeholder="Write it again. Other punches, tags, an act-out, a new angle." className="mt-4 min-h-[50dvh] text-lg leading-relaxed" value={content} onChange={(e) => setContent(e.target.value)} />
           <p className="text-sm text-faint tabular sm:hidden">{words} words</p>

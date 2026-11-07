@@ -28,6 +28,7 @@ export const blankJoke = (topicId = ''): JokeInput => ({
   language: 'Hinglish',
   comments: '',
   follows_id: null,
+  voice_note_ids: [],
 })
 
 interface Options {

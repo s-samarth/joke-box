@@ -27,7 +27,7 @@ export function PenStyle({ color, size, onColor, onSize }: PenProps) {
         </button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
-        <DropdownMenu.Content align="start" sideOffset={6} className="z-50 w-64 rounded-xl bg-ink-3 p-3 shadow-lift ring-1 ring-rule-strong">
+        <DropdownMenu.Content align="start" sideOffset={6} collisionPadding={8} className="z-50 max-h-[var(--radix-dropdown-menu-content-available-height)] w-64 overflow-y-auto overscroll-contain rounded-xl bg-ink-3 p-3 shadow-lift ring-1 ring-rule-strong">
           <DropdownMenu.Label className="mb-2 text-xs uppercase tracking-wide text-faint">Colour</DropdownMenu.Label>
           <DropdownMenu.RadioGroup value={color} onValueChange={onColor} className="grid grid-cols-6 gap-1">
             {INK_COLORS.map((c) => (

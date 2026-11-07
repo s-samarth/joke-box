@@ -62,10 +62,12 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 
 From the other side, New joke, New premise and every joke or premise page have **From
 observations** right under the words: type in **Search observations to link** and tap the one it came from; link as many as you like, × unlinks.
-**Not used yet** on Observations shows the ones nothing has come from.
+Unlinking shows **Undo** for a moment, in case the tap was a slip. **Not used yet** on
+Observations shows the ones nothing has come from: no joke, premise or brainstorm session.
 
-A voice note works the same way: its **Turn into a joke** button starts New joke from its label
-and hashtags. To find an old one first, **Search** (on Home, or in the rail or More) looks
+A voice note works the same way: its **Turn into a joke** button opens New joke with its hashtags
+and the recording under the words, playable while you write (even before it has uploaded); the
+joke keeps it under **From voice notes**, and the note lists the jokes written from it. To find an old one first, **Search** (on Home, or in the rail or More) looks
 through everything you've written at once.
 
 ## 4. Rework a joke
@@ -113,9 +115,11 @@ through everything you've written at once.
    thicknesses, undo, and up to 8 pages, each two screens wide: drag the bar at the bottom of the
    screen (or pan with a finger) for the right half, or pinch out to see the whole page. The
    **Full screen** button at the end of the toolbar leaves just the tools and the page.
-4. Tap **Link jokes or observations** to attach whatever the session touches, or **Turn into a
-   joke** to start one from the session's first typed paragraph: it's linked to the session as
-   it's saved.
+4. Type in **Link a joke or observation** to attach whatever the session touches (the three best
+   matches of both; × unlinks, with Undo), or **Turn into a joke** to start one from the
+   session's first typed paragraph, with the session's observations already linked to it: the
+   joke is linked to the session as it's saved. The observations show the session under
+   **Brainstorms with it**.
 5. Leave whenever you like: the session saves itself.
 
 ## 6. Build a set for tonight

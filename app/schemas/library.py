@@ -8,6 +8,9 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.schemas.limits import INT_MAX, ShortName
 
+# A joke written from more recordings than this is not a real case; the cap keeps a save small.
+MAX_VOICE_LINKS = 50
+
 CleanRating = Literal["clean", "mild", "dirty"]
 
 
@@ -107,6 +110,8 @@ class JokeIn(BaseModel):
     comments: str = ""
     # The joke this one follows. Left out (an older app), the link stays as it is.
     follows_id: uuid.UUID | None = None
+    # The voice notes it came from. Left out (an older app), the links stay as they are.
+    voice_note_ids: list[uuid.UUID] = Field(default_factory=list, max_length=MAX_VOICE_LINKS)
     created_at: datetime | None = None
     # The version this edit started from. Omitted (a new joke, an import), nothing is checked.
     base_version: int | None = Field(default=None, le=INT_MAX)
@@ -122,6 +127,11 @@ class JokeIn(BaseModel):
     @classmethod
     def status_or_draft(cls, value: str | None) -> str:
         return status_name(value)
+
+    @field_validator("voice_note_ids")
+    @classmethod
+    def each_note_once(cls, ids: list[uuid.UUID]) -> list[uuid.UUID]:
+        return list(dict.fromkeys(ids))
 
     @field_validator("types", "hashtags", "tag_lines")
     @classmethod
@@ -146,6 +156,7 @@ class JokeOut(BaseModel):
     language: str | None
     comments: str
     follows_id: uuid.UUID | None
+    voice_note_ids: list[str]
     version: int
     created_at: datetime
     updated_at: datetime
