@@ -140,6 +140,7 @@ def test_notebook_and_study(dev: TestClient, db: Session) -> None:
     [idea] = notebook.search_observations(db, me, topic="buses", kind="set ideas")["observations"]
     assert idea["text"] == "Fake bus idea"
     assert notebook.search_observations(db, me, kind="observation")["total"] == 1
+    assert (idea["premise_ids"], idea["joke_ids"]) == ([], [])
     assert notebook.search_brainstorms(db, me, "page")["results"][0]["kind"] == "brainstorm"
     titles = [n["title"] for n in study.search_craft(db, me)["notes"]]
     assert "Fake rule" in titles
@@ -171,3 +172,18 @@ def test_craft_lists_every_title_without_a_query(dev: TestClient, db: Session) -
     listed = study.search_craft(db, me)
     assert listed["total"] == len(listed["notes"]) >= 30
     assert len(study.search_craft(db, me, query="fake")["notes"]) == 25  # searches stay short
+
+
+def test_observation_links_skip_what_is_in_the_trash(dev: TestClient, db: Session) -> None:
+    topic = dev.get("/api/topics").json()[0]["id"]
+    kept, binned, obs = str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4())
+    for premise in (kept, binned):
+        dev.put(f"/api/premises/{premise}", json={"take": "Fake take", "topic_id": topic})
+        dev.put(f"/api/observations/{obs}", json={"text": "Fake noticed"})
+        dev.put(f"/api/observations/{obs}/links/premises/{premise}")
+    dev.delete(f"/api/premises/{binned}")
+    me = account(db, "dev@example.com")
+    [found] = notebook.search_observations(db, me, "fake noticed")["observations"]
+    assert found["premise_ids"] == [kept]
+    origin = library.get_premise(db, me, kept)["from_observations"]
+    assert origin == [{"id": obs, "text": "Fake noticed"}]

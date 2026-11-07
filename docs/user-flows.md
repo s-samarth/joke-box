@@ -59,6 +59,11 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
    observation itself stays.
 3. Write the punchline, file it, and save.
 
+To build a premise from one instead, choose **Write a premise** in its ⋯ menu: New premise opens
+on its topic with the observation as "why it's true". Add the take and save, and the premise opens.
+Whichever you make, it shows **Came from** with the observation, and the observation shows what
+came from it. **Not used yet** on Observations shows the ones nothing has come from.
+
 Or start from what you're writing: on a premise or a joke, tap **Observations** (beside "Why it's
 true" or Notes). Your observations on its topic open beside it on an iPad or laptop, or as a
 sheet on a phone. **Add to why it’s true** (or **Add to notes**) puts one into what you're

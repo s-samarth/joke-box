@@ -41,6 +41,8 @@ class ObservationOut(BaseModel):
     text: str
     kind_id: uuid.UUID | None
     topic_id: uuid.UUID | None
+    premise_ids: list[uuid.UUID]
+    joke_ids: list[uuid.UUID]
     version: int
     created_at: datetime
     updated_at: datetime

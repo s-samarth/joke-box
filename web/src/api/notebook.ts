@@ -5,7 +5,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
 import './observationSaves'
-import { deleteObservationKey, keys, saveObservationKey, type SaveObservationVars } from './queryClient'
+import { deleteObservationKey, keys, linkObservationKey, saveObservationKey, type LinkObservationVars, type SaveObservationVars } from './queryClient'
 import type { Named, Observation } from './types'
 
 export const useObservations = () =>
@@ -17,6 +17,9 @@ export const useObservationKinds = () =>
 export const useSaveObservation = () => useMutation<Observation, Error, SaveObservationVars>({ mutationKey: saveObservationKey })
 
 export const useDeleteObservation = () => useMutation<void, Error, string>({ mutationKey: deleteObservationKey })
+
+/** Note or forget that a premise or joke came from an observation. Queued, so it works offline. */
+export const useLinkObservation = () => useMutation<void, Error, LinkObservationVars>({ mutationKey: linkObservationKey })
 
 export function useObservationKindActions() {
   const qc = useQueryClient()

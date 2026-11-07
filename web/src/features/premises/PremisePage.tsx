@@ -17,6 +17,8 @@ import { jokesOn } from '../../lib/premises'
 import { formatDateTime } from '../../lib/time'
 import { useCapture } from '../capture/captureContext'
 import { NEW_TOPIC, useNewTopic } from '../jokes/useNewTopic'
+import { useLinkObservation } from '../../api/notebook'
+import { CameFrom } from '../observations/ObservationLinks'
 import { withObservation } from '../observations/observationMeta'
 import { ObservationsButton, ObservationsSide } from '../observations/ObservationsSide'
 import { PremiseGuide } from './PremiseGuide'
@@ -30,6 +32,8 @@ function Editor({ premise }: { premise: Premise }) {
   const remove = useDeletePremise()
   const { confirm, toast } = useFeedback()
   const { openCapture } = useCapture()
+  const link = useLinkObservation()
+  const linkTo = (kind: 'premises' | 'jokes', obsId: string, targetId: string) => link.mutate({ id: obsId, kind, targetId, on: true })
   const navigate = useNavigate()
   const { search } = useLocation()
   const newTopic = useNewTopic()
@@ -69,11 +73,12 @@ function Editor({ premise }: { premise: Premise }) {
         </Field>
         <PremiseGuide open={!hasJokes && !premise.notes.trim()} />
       </div>
+      <CameFrom kind="premises" id={premise.id} />
 
       <PremiseJokes premise={premise} topicId={draft.topic_id} all={all} topics={topics} />
       <ObservationsSide topicId={draft.topic_id} addedLabel="In why it’s true" isAdded={(o) => draft.notes.includes(o.text)} addLabel="Add to why it’s true"
-        onAdd={(o) => { update({ notes: withObservation(draft.notes, o.text) }); toast('Added to why it’s true') }}
-        onWrite={(o) => openCapture({ setup: o.text, topicId: draft.topic_id, premiseId: premise.id })} />
+        onAdd={(o) => { update({ notes: withObservation(draft.notes, o.text) }); linkTo('premises', o.id, premise.id); toast('Added to why it’s true') }}
+        onWrite={(o) => openCapture({ setup: o.text, topicId: draft.topic_id, premiseId: premise.id, onCreated: (id) => linkTo('jokes', o.id, id) })} />
 
       <footer className="mt-12 flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-5 text-sm text-faint">
         <span>Written {formatDateTime(premise.created_at)}.</span>

@@ -129,6 +129,9 @@ export interface ObservationInput {
 /** Something you noticed: not a joke yet. */
 export interface Observation extends ObservationInput {
   id: string
+  /** What came from it, linked by the app (see useLinkObservation). Not sent with a save. */
+  premise_ids: string[]
+  joke_ids: string[]
   /** Up by one per save on the server; catches edits made on two devices. */
   version: number
   created_at: string

@@ -45,6 +45,10 @@ class Observation(Trashable, OwnedMixin, Base):
     topic_id: Mapped[uuid.UUID | None] = mapped_column(
         "joke_topic_id", Uuid, ForeignKey("topics.id", ondelete="SET NULL"), index=True
     )
+    # What came from it: premises and jokes it was added to or started. Id lists, like a
+    # brainstorm's links, so deleting one never waits on this; a deleted one drops out of view.
+    premise_ids: Mapped[list[str]] = mapped_column(JSON, default=list, server_default="[]")
+    joke_ids: Mapped[list[str]] = mapped_column(JSON, default=list, server_default="[]")
     # Goes up by one on every save; a save edited from an older version is a conflict.
     version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
 
