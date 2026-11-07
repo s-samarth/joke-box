@@ -3,7 +3,7 @@
  * pinned at the top, with where it came from (observations, voice notes) a tap below it; the
  * timer runs while you write, and every save keeps a version.
  */
-import { History, ListChecks, Pause, Play, Plus, RotateCcw, X } from 'lucide-react'
+import { History, ListChecks, MoreHorizontal, Pause, Play, Plus, RotateCcw, X } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { newId } from '../../api/client'
@@ -13,6 +13,7 @@ import type { Joke, Brainstorm } from '../../api/types'
 import { Button, IconButton } from '../../components/ui/Button'
 import { Spinner } from '../../components/ui/pieces'
 import { GrowingText } from '../../components/ui/Field'
+import { Dropdown } from '../../components/ui/Menu'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { Modal } from '../../components/ui/Modal'
 import { clock } from '../../lib/duration'
@@ -61,7 +62,7 @@ function Workspace({ joke, sessions, startId }: { joke: Joke; sessions: Brainsto
 
   return (
     <div className="pt-safe min-h-dvh">
-      <header className="sticky top-0 z-10 flex items-center gap-2 border-b border-rule bg-ink/95 px-3 py-2 backdrop-blur sm:px-6">
+      <header className="sticky top-0 z-10 flex items-center gap-1.5 sm:gap-2 border-b border-rule bg-ink/95 px-3 py-2 backdrop-blur sm:px-6">
         <Link to={`/jokes/${joke.id}`} aria-label="Close rewrite" className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-dim hover:bg-ink-3 hover:text-paper"><X size={20} /></Link>
         <button type="button" onClick={timer.running ? timer.pause : timer.start} className={`inline-flex h-10 items-center gap-2 rounded-lg px-3 ${timer.running ? 'bg-tape text-tape-ink' : 'bg-ink-3'}`} aria-label={timer.running ? 'Pause timer' : 'Start timer'}>
           {timer.running ? <Pause size={16} /> : <Play size={16} />}
@@ -70,9 +71,19 @@ function Workspace({ joke, sessions, startId }: { joke: Joke; sessions: Brainsto
         <IconButton label="Reset timer" onClick={timer.reset}><RotateCcw size={16} /></IconButton>
         <span className="hidden text-sm text-faint tabular sm:inline">{words} words</span>
         <div className="ml-auto flex items-center gap-1">
-          <IconButton label="Checklists" onClick={() => setChecking(true)}><ListChecks size={18} /></IconButton>
-          <IconButton label="New session" onClick={() => open()}><Plus size={18} /></IconButton>
-          <IconButton label="History" onClick={() => setHistoryOpen(true)} className="lg:hidden"><History size={18} /></IconButton>
+          {/* A phone has room for the timer and Save; the rest sit behind ⋯ there. */}
+          <div className="hidden items-center gap-1 sm:flex">
+            <IconButton label="Checklists" onClick={() => setChecking(true)}><ListChecks size={18} /></IconButton>
+            <IconButton label="New session" onClick={() => open()}><Plus size={18} /></IconButton>
+            <IconButton label="History" onClick={() => setHistoryOpen(true)} className="lg:hidden"><History size={18} /></IconButton>
+          </div>
+          <div className="sm:hidden">
+            <Dropdown trigger={<IconButton label="More"><MoreHorizontal size={18} /></IconButton>} items={[
+              { label: 'Checklists', icon: <ListChecks size={16} />, onSelect: () => setChecking(true) },
+              { label: 'New session', icon: <Plus size={16} />, onSelect: () => open() },
+              { label: 'History', icon: <History size={16} />, onSelect: () => setHistoryOpen(true) },
+            ]} />
+          </div>
           <Button variant="tape" onClick={save} disabled={actions.save.isPending && !actions.save.isPaused}>Save<span className="hidden sm:inline">&nbsp;version</span></Button>
         </div>
       </header>
