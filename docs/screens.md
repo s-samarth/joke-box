@@ -291,7 +291,7 @@ query is `?q=` in the URL. It's in the rail under Home, in More under **Find**, 
 [ObservationsLayout.tsx](../web/src/features/observations/ObservationsLayout.tsx), [ObservationPage.tsx](../web/src/features/observations/ObservationPage.tsx),
 [ObservationUses.tsx](../web/src/features/observations/ObservationUses.tsx), [NewObservationDialog.tsx](../web/src/features/observations/NewObservationDialog.tsx),
 [useObservationDraft.ts](../web/src/features/observations/useObservationDraft.ts), [ObservationMenus.tsx](../web/src/features/observations/ObservationMenus.tsx),
-[ObservationSorter.tsx](../web/src/features/observations/ObservationSorter.tsx), [KindManager.tsx](../web/src/features/observations/KindManager.tsx),
+[KindManager.tsx](../web/src/features/observations/KindManager.tsx),
 [ObservationBox.tsx](../web/src/features/observations/ObservationBox.tsx) (Home), [observationMeta.ts](../web/src/features/observations/observationMeta.ts).
 
 An observation has an optional **topic**, from the same list as jokes and premises (none:
@@ -302,8 +302,7 @@ open beside it on an iPad in landscape or a laptop, or as its own page on a phon
 - **The list:** **New** opens New observation (`?new=1`; the + button opens it too): the words,
   **Topic (optional)** and **Kind (optional)**, then Save opens its page. Below are a search box
   (`?q=`), and **Topic**, **Kind** and **Not used yet** (`?unused=1`) in a row that scrolls
-  sideways; each choice counts within the other filters. Then how many there are and, while some
-  have no topic, **Sort N into topics**. Each row: the words (three lines), then its topic, kind,
+  sideways; each choice counts within the other filters. Then how many there are. Each row: the words (three lines), then its topic, kind,
   what came from it ("1 joke · 1 premise" or "Not used yet") and the date.
 - **An observation:** the words, edited in place and saved on their own; **Topic (optional)** and
   **Kind (optional)**, each ending in New topic… / New kind…; **Write a joke from it** (New joke
@@ -311,10 +310,6 @@ open beside it on an iPad in landscape or a laptop, or as its own page on a phon
   it's true"); either new one is linked back. Then **Jokes from it** and **Premises from it**: what's
   linked, each opening its page, × to unlink, and a search to link ones you've written (the three
   best matches, same topic first). **Delete observation** asks first; what came from it stays.
-- **Sort N into topics** goes through the ones with no topic, one at a time, newest first, in a
-  sheet: the observation, its **Kind** chips, then every topic as a chip. Tapping a topic files it
-  and shows the next; **Skip** leaves it under Not sorted, **Back** returns. At the end it says how
-  many were sorted and skipped.
 - **Kinds:** **Manage kinds…** ends the Kind menu: drag to reorder, rename, or delete one (its
   observations become plain).
 - **Home** keeps a quick box (words, Topic and Kind menus, **Log it**) and the last three, each

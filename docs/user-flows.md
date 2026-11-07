@@ -38,9 +38,7 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 1. Type it into "What did you notice?" on Home or Observations. Under it, **Topic** files it under
    one of your joke topics and **Kind** marks a note that isn't a plain observation (an idea for a
    set, a question). Both stay picked for the next one, and both can wait.
-2. Tap **Log it**.
-3. Later, **Sort** on Observations goes through the ones with no topic, one at a time: tap a topic
-   and the next one shows (set its kind first if it needs one). **Skip** leaves one for next time.
+2. Tap **Log it**. To change its topic or kind later, open it on Observations.
 
 ## 2a. Write a joke every day
 
