@@ -1,36 +1,65 @@
 /**
- * A month of the habit: every day you added a joke gets a green tick (with a count when there were
- * several). Today is outlined in yellow; days to come are dimmed. Tap a day to see its jokes.
+ * A month of daily activity. Each day's box gets brighter the more you wrote, and a coloured dot
+ * for each kind written that day: green jokes, periwinkle premises, orchid observations. When the
+ * calendar is wide enough (desktop, iPad) each dot carries its count, wrapping onto a second line
+ * if they don't fit; on a phone tap a day for its counts. Joke days have a brighter date, since
+ * jokes alone keep the streak. Today is outlined in yellow; days to come are dimmed.
  */
-import { Check, ChevronLeft, ChevronRight } from 'lucide-react'
-import type { Joke } from '../../api/types'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { IconButton } from '../../components/ui/Button'
+import { formatDate } from '../../lib/time'
+import { countLabel, countsOf, dayOf, heat, KIND_META, KINDS, monthName, totalOf, type Activity, type MonthSummary } from './activity'
 import { monthWeeks, shiftMonth } from './dailyMath'
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-const monthName = (month: string) => new Date(`${month}-01T12:00:00Z`).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', month: 'long', year: 'numeric' })
+const HEAT = ['bg-ink-3/60', 'bg-paper/[0.07]', 'bg-paper/[0.12]', 'bg-paper/[0.18]', 'bg-paper/[0.26]']
 
 interface Props {
   month: string
   onMonth: (m: string) => void
-  days: Map<string, Joke[]>
+  activity: Activity
+  summary: MonthSummary
   today: string
   selected: string | null
   onSelect: (day: string) => void
 }
 
-export function MonthCalendar({ month, onMonth, days, today, selected, onSelect }: Props) {
+/** One day's box: the date top-left, the dots (and, when there's room, counts) along the bottom. */
+function Day({ day, activity, today, selected, onSelect }: { day: string; activity: Activity; today: string; selected: boolean; onSelect: (d: string) => void }) {
+  const counts = countsOf(dayOf(activity, day))
+  const total = totalOf(counts)
+  const future = day > today
+  const said = total ? KINDS.filter((k) => counts[k]).map((k) => countLabel(k, counts[k])).join(', ') : 'nothing written'
+  const label = `${formatDate(`${day}T12:00:00+05:30`)}: ${said}`
+  const ring = selected ? 'ring-2 ring-paper' : day === today ? 'ring-2 ring-tape' : 'hover:ring-1 hover:ring-paper/30'
+  return (
+    <button type="button" disabled={future} onClick={() => onSelect(day)} title={future ? undefined : label} aria-label={label} aria-pressed={selected}
+      className={`relative aspect-square rounded-lg text-sm transition ${future ? 'text-ink-4' : `${HEAT[heat(total)]} ${ring}`}`}>
+      <span className={`absolute top-1 left-1.5 text-[11px] tabular ${counts.jokes ? 'font-semibold text-paper' : future ? '' : 'text-dim'}`}>{Number(day.slice(8))}</span>
+      {total > 0 && (
+        <span className="absolute inset-x-0.5 bottom-1.5 flex flex-wrap items-center justify-center gap-x-[3px] gap-y-0.5 @lg:gap-x-1.5">
+          {KINDS.filter((k) => counts[k]).map((k) => (
+            <span key={k} className="inline-flex items-center gap-0.5">
+              <span className={`size-1.5 rounded-full @lg:size-[7px] ${KIND_META[k].dot}`} />
+              <span className={`hidden text-[10px] leading-none font-semibold tabular @lg:inline ${KIND_META[k].text}`}>{counts[k]}</span>
+            </span>
+          ))}
+        </span>
+      )}
+    </button>
+  )
+}
+
+export function MonthCalendar({ month, onMonth, activity, summary, today, selected, onSelect }: Props) {
   const weeks = monthWeeks(month)
-  const inMonth = weeks.flat().filter((d): d is string => Boolean(d))
-  const sofar = inMonth.filter((d) => d <= today)
-  const written = sofar.filter((d) => days.has(d)).length
+  const { sofar, active, jokeDays } = summary
 
   return (
-    <section className="rounded-2xl border border-rule bg-ink-2 p-4 sm:p-5">
+    <section className="@container rounded-2xl border border-rule bg-ink-2 p-4 sm:p-5">
       <div className="flex items-center justify-between gap-2">
         <div>
           <h2 className="text-lg font-semibold">{monthName(month)}</h2>
-          <p className="text-sm text-dim">{sofar.length ? `${written} of ${sofar.length} days with a new joke` : 'Still to come'}</p>
+          <p className="text-sm text-dim">{sofar ? `${active} of ${sofar} days active · jokes on ${jokeDays}` : 'Still to come'}</p>
         </div>
         <div className="flex gap-1">
           <IconButton label="Previous month" onClick={() => onMonth(shiftMonth(month, -1))}><ChevronLeft size={20} /></IconButton>
@@ -39,21 +68,9 @@ export function MonthCalendar({ month, onMonth, days, today, selected, onSelect 
       </div>
       <div className="mt-4 grid grid-cols-7 gap-1.5 text-center sm:gap-2">
         {WEEKDAYS.map((d) => <span key={d} className="text-xs text-faint">{d}</span>)}
-        {weeks.flat().map((d, i) => {
-          if (!d) return <span key={i} />
-          const count = days.get(d)?.length ?? 0
-          const future = d > today
-          const ring = d === selected ? 'ring-2 ring-paper' : d === today ? 'ring-2 ring-tape' : count ? 'ring-1 ring-ok/40' : ''
-          return (
-            <button key={d} type="button" disabled={future} onClick={() => onSelect(d)}
-              aria-label={`${d}: ${count ? `${count} new joke${count === 1 ? '' : 's'}` : 'no new jokes'}`} aria-pressed={d === selected}
-              className={`relative flex aspect-square flex-col items-center justify-center rounded-lg text-sm transition ${ring} ${count ? 'bg-ok/15 text-paper hover:bg-ok/25' : future ? 'text-ink-4' : 'bg-ink-3/60 text-dim hover:text-paper'}`}>
-              <span className="absolute top-1 left-1.5 text-[11px] tabular">{Number(d.slice(8))}</span>
-              {count > 0 && <Check size={20} strokeWidth={3} className="text-ok" />}
-              {count > 1 && <span className="absolute right-1.5 bottom-1 text-[10px] font-semibold text-ok">{count}</span>}
-            </button>
-          )
-        })}
+        {weeks.flat().map((d, i) => d
+          ? <Day key={d} day={d} activity={activity} today={today} selected={d === selected} onSelect={onSelect} />
+          : <span key={i} />)}
       </div>
     </section>
   )

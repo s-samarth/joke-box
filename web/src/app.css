@@ -24,6 +24,8 @@
   --color-ok: #74d3a8;
   /* Strength beside a joke in a set: periwinkle, the cool opposite of tape-yellow on the ink. */
   --color-sky: #9db4ff;
+  /* Observations on the Daily activity calendar, beside green jokes and sky premises. */
+  --color-orchid: #e7a3e0;
 
   --font-sans: "Archivo Variable", ui-sans-serif, system-ui, sans-serif;
   --font-marker: "Permanent Marker", "Archivo Variable", cursive;
