@@ -4,9 +4,10 @@
  * localStorage and never syncs. Without storage (a private window) it opens on Premises.
  */
 
+/** In the switch's order, left to right: raw material first, like Home's tabs. */
 export const IDEAS = [
-  { to: '/premises', label: 'Premises' },
   { to: '/observations', label: 'Observations' },
+  { to: '/premises', label: 'Premises' },
 ] as const
 
 export type IdeasScreen = (typeof IDEAS)[number]['to']
