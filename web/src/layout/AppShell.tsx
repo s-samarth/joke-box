@@ -1,7 +1,7 @@
 /**
  * The frame around every signed-in screen. Desktop and iPad: a rail down the left with every screen
  * (see Rail), compact on an iPad in landscape. Phone: a bottom bar (see BottomBar) with Home, Jokes,
- * a big + for adding, Premises and More.
+ * a big + for adding, Ideas (Premises and Observations) and More.
  */
 import { Suspense } from 'react'
 import { Outlet } from 'react-router'

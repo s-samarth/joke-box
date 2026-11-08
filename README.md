@@ -44,7 +44,7 @@ Plus:
 - **Installs as an app** on your phone's home screen.
 - **Import** jokes, observations, voice notes and craft notes from a prepared folder, skipping anything already there.
 - **Several tabs** if you want them: one tab at a time by default, so offline saves can't clash, with a switch in the account menu.
-- **Premises:** the ideas under your jokes, each with the jokes resting on it, and a web of them beside the jokes list. On a phone it has its own tab in the bottom bar.
+- **Premises:** the ideas under your jokes, each with the jokes resting on it, and a web of them beside the jokes list. On a phone it shares the **Ideas** tab with Observations, one tap apart.
 - **Backups:** a nightly encrypted copy of everything, and Download everything as one ZIP from the account menu ([backups.md](docs/backups.md)).
 - **Claude can read it:** a read-only connector lets Claude search your jokes, premises, sets, shows (with how particular jokes went, and your comments on them), notes, voice notes and brainstorms while you write together.
 - Topic folders on Home, a "needs work" list, and CSV export of your shows.

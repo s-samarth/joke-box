@@ -72,7 +72,9 @@ decoration.
 - **Motion:** layout changes (opening the first item, closing, Map ↔ List, the rail toggle)
   cross-fade in 180 ms with view transitions; an item opened beside the list settles in. Both are
   off under reduced motion.
-- **Phone:** a header plus a bottom bar with a raised round **+** in the middle. Safe areas are
+- **Phone:** a header plus a bottom bar with a raised round **+** in the middle. A tab that
+  holds two screens (Ideas) switches between them with a two-way segmented control at the top of
+  each, the current one filled paper. Safe areas are
   respected (`.pt-safe`, `.pb-safe`) and pinch-zoom is allowed.
 - **Tap targets** are at least 44 px. Buttons are 44 px tall on phones and 40 px on desktop.
 - **Sheets:** `Modal` is a bottom sheet with a grab bar on phones and a centred panel on desktop.

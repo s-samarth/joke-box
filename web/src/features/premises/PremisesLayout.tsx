@@ -23,6 +23,7 @@ import { useNewTopic } from '../jokes/useNewTopic'
 import { NewPremiseDialog } from './NewPremiseDialog'
 import { PremiseGuide } from './PremiseGuide'
 import { PREMISE_SORTS, usePremiseFilters, type PremiseSort } from './usePremiseFilters'
+import { IdeasSwitch } from '../../layout/IdeasSwitch'
 
 export function PremisesLayout() {
   const { premiseId } = useParams()
@@ -57,6 +58,7 @@ export function PremisesLayout() {
 
   const list = (
     <>
+      <IdeasSwitch />
       <PageHead title="Premises">
         <Button variant="tape" small icon={<Plus size={15} />} onClick={() => setCreating(true)}>New</Button>
       </PageHead>

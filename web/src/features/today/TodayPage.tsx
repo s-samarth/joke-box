@@ -1,4 +1,4 @@
-/** Today: the daily joke nudge, then capture, then voice notes, observations, brainstorming, craft (your path and a lesson box), study (watchlist, analysis, links), your topic folders, what's coming up, and how the last show went. */
+/** Today: the daily joke nudge, then capture, shortcuts to jokes, premises and observations, then observations, voice notes, brainstorming, craft (your path and a lesson box), study (watchlist, analysis, links), your topic folders, what's coming up, and how the last show went. */
 import { Play, Search } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
@@ -12,6 +12,7 @@ import { useHabit } from '../daily/useHabit'
 import { LightBar } from '../sets/LightBar'
 import { draftItems, optionalSeconds, totalSeconds } from '../sets/setlistMath'
 import { InstallHint } from './InstallHint'
+import { LibraryTiles } from './LibraryTiles'
 import { QuickCapture } from './QuickCapture'
 import { TodayBrainstorm } from './TodayBrainstorm'
 import { TodayCraft } from './TodayCraft'
@@ -48,8 +49,9 @@ export function TodayPage() {
         </Link>
       </div>
       <QuickCapture />
-      <TodayVoice />
+      <LibraryTiles />
       <TodayObservations />
+      <TodayVoice />
       <TodayBrainstorm />
       <TodayCraft />
       <TodayStudy />
