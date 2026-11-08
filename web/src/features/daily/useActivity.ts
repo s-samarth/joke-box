@@ -1,7 +1,7 @@
 /**
  * The Daily activity page's data: the joke habit plus every day's premises and observations, from
- * the cached lists, so the calendar updates the moment you save anything. Home only needs the
- * habit, so it keeps using `useHabit` and doesn't load the other lists.
+ * the cached lists, so the calendar updates the moment you save anything. Used by ActivityPanel,
+ * on Daily activity and Home.
  */
 import { useMemo } from 'react'
 import { useJokes } from '../../api/library'

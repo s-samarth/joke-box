@@ -83,7 +83,8 @@ in IST and the headline **"Got something?"** with a search button beside it (it 
 | Daily joke nudge | `daily/DailyBanner.tsx` | Days since your last new joke: today written, a small green line with your streak; 1 or 2 days, yellow **Write a joke today**; 3 to 7, red **N days without a joke**; over a week, a dark, spooky card (a drifting ghost, a cobweb, a flickering line; still under reduced motion). Waits for the jokes to load so it never flashes the wrong state. Links to Daily activity |
 | Quick capture | `QuickCapture.tsx` | Setup and punchline in one box. Enter saves to Random; Shift+Enter adds a new line |
 | Your material | `LibraryTiles.tsx` | Three tiles, **Jokes**, **Premises** and **Observations**, each with its count and its Daily activity colour; a tap opens that list |
-| Observations | `TodayObservations.tsx` | The observation box and the last few logged |
+| Daily activity | `TodayActivity.tsx`, `daily/ActivityPanel.tsx` | The same streaks, month total, calendar and picked day as [Daily activity](#daily-activity-daily), plus **Open**. A tapped day shows its three counts only; the pieces themselves are listed on Daily activity |
+| Observations | `TodayObservations.tsx` | The observation box and **All N**; the observations themselves are under Ideas |
 | Voice notes | `TodayVoice.tsx` | The same recorder as the Voice screen, plus "All N" |
 | Brainstorm | `TodayBrainstorm.tsx` | Start a session, or pick up the last one |
 | Craft | `TodayCraft.tsx`, `craft/PathLadder.tsx` | **Path:** a small copy of the Craft staircase: the first Path note with tick boxes still open, how many are done, and the next step. When the step names minutes, it shows your most solid material on one topic (Strong and Killer jokes, by runtime) against that target. Below it, a box to save a lesson to one of your areas (chips in their colours) |
@@ -98,7 +99,8 @@ in IST and the headline **"Got something?"** with a search button beside it (it 
 
 [DailyPage.tsx](../web/src/features/daily/DailyPage.tsx), [activity.ts](../web/src/features/daily/activity.ts),
 [dailyMath.ts](../web/src/features/daily/dailyMath.ts), [MonthCalendar.tsx](../web/src/features/daily/MonthCalendar.tsx),
-[MonthMix.tsx](../web/src/features/daily/MonthMix.tsx), [DayDetail.tsx](../web/src/features/daily/DayDetail.tsx).
+[MonthMix.tsx](../web/src/features/daily/MonthMix.tsx), [DayDetail.tsx](../web/src/features/daily/DayDetail.tsx),
+[ActivityPanel.tsx](../web/src/features/daily/ActivityPanel.tsx) (stats to picked day, shared with Home).
 
 Everything you wrote, day by day: jokes, premises and observations. The streak is still the daily
 joke habit: only a new joke keeps it going. A day's activity is read from the created dates (IST)
