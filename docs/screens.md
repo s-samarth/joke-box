@@ -76,15 +76,14 @@ offline, it uses the cached profile, so the app still opens.
 
 The page is one column, at most 672 px wide. It opens with the daily joke nudge, then today's date
 in IST and the headline **"Got something?"** with a search button beside it (it opens
-[Search](#search-search)), followed by these sections from top to bottom:
+[Search](#search-search)), followed by these sections from top to bottom. On Home the nudge's button opens the Joke tab below instead of going to Daily activity:
 
 | Section | File | Notes |
 |---|---|---|
 | Daily joke nudge | `daily/DailyBanner.tsx` | Days since your last new joke: today written, a small green line with your streak; 1 or 2 days, yellow **Write a joke today**; 3 to 7, red **N days without a joke**; over a week, a dark, spooky card (a drifting ghost, a cobweb, a flickering line; still under reduced motion). Waits for the jokes to load so it never flashes the wrong state. Links to Daily activity |
-| Quick capture | `QuickCapture.tsx` | Setup and punchline in one box. Enter saves to Random; Shift+Enter adds a new line |
+| Write | `CaptureTabs.tsx` | Three tabs, **Observation** (picked when Home opens), **Premise** and **Joke**, each with its own box; drafts survive switching. Observation: `ObservationBox` (text, Topic, Kind, **Log it**). Premise: `premises/PremiseBox.tsx` (the take, "Because…", Topic, **Add premise**; the toast's **Open** goes to it). Joke: `QuickCapture.tsx` (setup and punchline; Enter saves to Random). The nudge's **Write it** switches to Joke and puts the cursor in the setup |
 | Your material | `LibraryTiles.tsx` | Three tiles, **Jokes**, **Premises** and **Observations**, each with its count and its Daily activity colour; a tap opens that list |
 | Daily activity | `TodayActivity.tsx`, `daily/ActivityPanel.tsx` | The same streaks, month total, calendar and picked day as [Daily activity](#daily-activity-daily), plus **Open**. A tapped day shows its three counts only; the pieces themselves are listed on Daily activity |
-| Observations | `TodayObservations.tsx` | The observation box and **All N**; the observations themselves are under Ideas |
 | Voice notes | `TodayVoice.tsx` | The same recorder as the Voice screen, plus "All N" |
 | Brainstorm | `TodayBrainstorm.tsx` | Start a session, or pick up the last one |
 | Craft | `TodayCraft.tsx`, `craft/PathLadder.tsx` | **Path:** a small copy of the Craft staircase: the first Path note with tick boxes still open, how many are done, and the next step. When the step names minutes, it shows your most solid material on one topic (Strong and Killer jokes, by runtime) against that target. Below it, a box to save a lesson to one of your areas (chips in their colours) |

@@ -60,7 +60,7 @@ own data. Today that is one comedian, but the system works for more than one.
 
 | Area | What it does | Screen |
 |---|---|---|
-| **Home** | The daily joke nudge, quick capture, record a voice note, log an observation, start a brainstorm, a search button, study shortcuts, topic folders, next set, last show | `/` |
+| **Home** | The daily joke nudge, one box with three tabs to write an observation, premise or joke, shortcuts to all three, the Daily activity calendar, record a voice note, start a brainstorm, a search button, study shortcuts, topic folders, next set, last show | `/` |
 | **Search** | One search across everything: jokes, premises, observations, brainstorms (typed words; not handwriting), rewrites, voice notes, sets, shows, Craft, analyses and the watchlist. Works offline, on what the phone already holds | `/search` |
 | **Daily activity** | One new joke a day (today's box, the joke streak; the nudge on Home goes from green to yellow, red and spooky), and a calendar of everything written each day: jokes, premises and observations in their own colours, with the month's total. The calendar also sits on Home | `/daily` |
 | **Jokes** | Searchable list with topic, type, status and sort filters; each joke edited in place; CSV export. A List / Map / Web switch shows the same jokes as the Map of joke chains or the Web of premises with their jokes, full screen (and beside the list on a wide screen) | `/jokes`, `/jokes/:id`, `/jokes/map` |

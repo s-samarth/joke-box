@@ -23,7 +23,7 @@ function Cobweb() {
   )
 }
 
-/** The call to action: a link to the Daily activity page, or (on that page) a button that focuses the box. */
+/** The call to action: a link to the Daily activity page, or (on Daily activity and Home) a button that opens the joke box. */
 function Write({ onWrite, className, children }: { onWrite?: () => void; className: string; children: React.ReactNode }) {
   const cls = `inline-flex h-10 shrink-0 items-center gap-2 rounded-lg px-4 text-sm font-semibold transition ${className}`
   return onWrite

@@ -15,7 +15,8 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 ## 2. Catch an idea in two seconds
 
 **Typed (Home):**
-1. The app opens on Home with the cursor-ready box "What's the setup?".
+1. On Home, under "Got something?", pick **Joke** (Observation is picked when Home opens; the
+   nudge's **Write it** picks Joke for you).
 2. Type the setup, and the punchline if you have one (Shift+Enter for a new line).
 3. Press **Enter**. The joke is saved to **Random** with sensible defaults (Draft status,
    unrated) and appears in Jokes at once. A toast offers to open it.
@@ -36,7 +37,7 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 3. Offline, the recording waits on the phone and uploads when you're back online.
 
 **Noticed something (observation):**
-1. Type it into "What did you notice?" on Home or Observations. Under it, **Topic** files it under
+1. Type it into "What did you notice?" on Home (the **Observation** tab, open when Home opens) or Observations. Under it, **Topic** files it under
    one of your joke topics and **Kind** marks a note that isn't a plain observation (an idea for a
    set, a question). Both stay picked for the next one. Leave Topic alone and it goes to Random;
    a topic made anywhere (Jokes, Premises, Observations) shows up in all three at once.
@@ -46,7 +47,7 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 
 1. Home opens with the daily joke nudge. Yellow means today is still open; red means it's been three
    days or more; dark and spooky means over a week.
-2. Tap **Write it** (or open **Daily activity**). Type a setup, and the punchline if you have it, and press
+2. Tap **Write it**: on Home it opens the Joke tab, on Daily activity it jumps to the box. Type a setup, and the punchline if you have it, and press
    Enter. It saves to Random.
 3. The nudge turns into a small green line with your streak, and today gets a green dot on the
    calendar. Premises and observations show there too, in their own colours, but only jokes keep
@@ -95,7 +96,9 @@ through everything you've written at once.
 ## 4a. Find the premise under your jokes
 
 1. Open **Premises** (in the rail, or the phone's **Ideas** tab) and tap **+** for **New
-   premise**. Write the take ("X is Y, because Z") and, in the notes, why it's true.
+   premise**. Write the take ("X is Y, because Z") and, in the notes, why it's true. Or, on Home,
+   pick the **Premise** tab: the take, "Because…" and a topic, then **Add premise** (the toast's
+   **Open** takes you to it, to link observations).
 2. Tap **Write a joke on it** for a new joke already resting on it, or **Add jokes you’ve written** to pick ones
    you've written, from any topic.
 3. On a joke's page, the **Premise** row sets or changes its premise. The premise page lists its
