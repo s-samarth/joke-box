@@ -1,5 +1,5 @@
 /**
- * Premises | Observations, at the top of both lists wherever the bottom bar's Ideas tab is the way
+ * Observations | Premises, at the top of both lists wherever the bottom bar's Ideas tab is the way
  * in (phones and an upright iPad). From 1024 px the rail lists both screens, so it hides.
  */
 import { Link, useLocation } from 'react-router'

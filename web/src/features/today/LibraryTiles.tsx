@@ -1,13 +1,15 @@
 /**
- * Three shortcuts under the joke box on Home: Jokes, Premises and Observations, each with how many
+ * Three shortcuts under the writing box on Home: Observations, Premises and Jokes (the same order
+ * as the tabs above them, raw material first), each with how many
  * you have, in the colours they wear on Daily activity. One tap into any of the three, on any screen size.
  */
 import { Link } from 'react-router'
 import { useJokes } from '../../api/library'
 import { useObservations } from '../../api/notebook'
 import { usePremises } from '../../api/premises'
-import { KIND_META, KINDS, type Kind } from '../daily/activity'
+import { KIND_META, type Kind } from '../daily/activity'
 
+const ORDER: Kind[] = ['observations', 'premises', 'jokes']
 const TO: Record<Kind, string> = { jokes: '/jokes', premises: '/premises', observations: '/observations' }
 const label = (k: Kind) => KIND_META[k].many[0].toUpperCase() + KIND_META[k].many.slice(1)
 
@@ -19,7 +21,7 @@ export function LibraryTiles() {
   }
   return (
     <nav aria-label="Your material" className="mt-6 grid grid-cols-3 gap-2">
-      {KINDS.map((k) => (
+      {ORDER.map((k) => (
         <Link key={k} to={TO[k]} className="min-w-0 rounded-xl bg-ink-2 px-2.5 py-2.5 min-[360px]:px-3 ring-1 ring-rule transition hover:bg-ink-3 active:bg-ink-3">
           <span className="block truncate text-xs text-dim min-[360px]:text-[13px]">{label(k)}</span>
           <span className="mt-1 flex items-center gap-2">
