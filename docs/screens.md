@@ -23,11 +23,16 @@ visit, so the app opens fast on a phone.
   (**Hide screen names** / **Show screen names**) switches it on this device; switching back to what
   the width would pick returns it to automatic.
 - **Phone:** a slim header (wordmark, sync icon, avatar) and a bottom bar laid out as
-  **Home · Jokes · + · Premises · More**.
+  **Home · Jokes · + · Ideas · More**.
+  **Ideas** ([ideas.ts](../web/src/layout/ideas.ts)) opens Premises or Observations, whichever
+  you used last on this device (Premises the first time, or when storage is blocked), and stays lit on both. A
+  **Premises | Observations** switch with their counts ([IdeasSwitch.tsx](../web/src/layout/IdeasSwitch.tsx))
+  sits at the top of both lists wherever the bottom bar shows (phones and an upright iPad); from
+  1024 px the rail lists both screens, so the switch hides.
   The **+** adds whatever the screen holds ([useAddAction.ts](../web/src/layout/useAddAction.ts)):
   a premise on Premises, a show on Shows, a set on the list of Sets, an observation on
   Observations, and a New joke anywhere else (inside a set you're building too). **More** opens a bottom sheet that groups every other screen: **Find**
-  (Search), **Write** (Daily activity, Voice notes, Observations, Brainstorm), **Perform** (Sets, Shows), **Study**
+  (Search), **Write** (Daily activity, Voice notes, Brainstorm), **Perform** (Sets, Shows), **Study**
   (Craft, Watchlist, Analysis) and **Deleted** (Trash). While you're on one of those screens,
   the More tab shows as the current one.
 - One list in `nav.ts` feeds both the rail and the bar, so they can't drift apart.
@@ -71,14 +76,15 @@ offline, it uses the cached profile, so the app still opens.
 
 The page is one column, at most 672 px wide. It opens with the daily joke nudge, then today's date
 in IST and the headline **"Got something?"** with a search button beside it (it opens
-[Search](#search-search)), followed by these sections from top to bottom:
+[Search](#search-search)), followed by these sections from top to bottom. On Home the nudge's button opens the Joke tab below instead of going to Daily activity:
 
 | Section | File | Notes |
 |---|---|---|
 | Daily joke nudge | `daily/DailyBanner.tsx` | Days since your last new joke: today written, a small green line with your streak; 1 or 2 days, yellow **Write a joke today**; 3 to 7, red **N days without a joke**; over a week, a dark, spooky card (a drifting ghost, a cobweb, a flickering line; still under reduced motion). Waits for the jokes to load so it never flashes the wrong state. Links to Daily activity |
-| Quick capture | `QuickCapture.tsx` | Setup and punchline in one box. Enter saves to Random; Shift+Enter adds a new line |
+| Write | `CaptureTabs.tsx` | Three tabs, **Observation** (picked when Home opens), **Premise** and **Joke**, each with its own box; drafts survive switching. Observation: `ObservationBox` (text, Topic, Kind, **Log it**). Premise: `premises/PremiseBox.tsx` (the take, "Because…", Topic, **Add premise**; the toast's **Open** goes to it). Joke: `QuickCapture.tsx` (setup and punchline; Enter saves to Random). The nudge's **Write it** switches to Joke and puts the cursor in the setup |
+| Your material | `LibraryTiles.tsx` | Three tiles, **Jokes**, **Premises** and **Observations**, each with its count and its Daily activity colour; a tap opens that list |
+| Daily activity | `TodayActivity.tsx`, `daily/ActivityPanel.tsx` | The same streaks, month total, calendar and picked day as [Daily activity](#daily-activity-daily), plus **Open**. A tapped day shows its three counts only; the pieces themselves are listed on Daily activity |
 | Voice notes | `TodayVoice.tsx` | The same recorder as the Voice screen, plus "All N" |
-| Observations | `TodayObservations.tsx` | The observation box and the last few logged |
 | Brainstorm | `TodayBrainstorm.tsx` | Start a session, or pick up the last one |
 | Craft | `TodayCraft.tsx`, `craft/PathLadder.tsx` | **Path:** a small copy of the Craft staircase: the first Path note with tick boxes still open, how many are done, and the next step. When the step names minutes, it shows your most solid material on one topic (Strong and Killer jokes, by runtime) against that target. Below it, a box to save a lesson to one of your areas (chips in their colours) |
 | Study | `TodayStudy.tsx` | Craft notes, watchlist progress, analyses |
@@ -92,7 +98,8 @@ in IST and the headline **"Got something?"** with a search button beside it (it 
 
 [DailyPage.tsx](../web/src/features/daily/DailyPage.tsx), [activity.ts](../web/src/features/daily/activity.ts),
 [dailyMath.ts](../web/src/features/daily/dailyMath.ts), [MonthCalendar.tsx](../web/src/features/daily/MonthCalendar.tsx),
-[MonthMix.tsx](../web/src/features/daily/MonthMix.tsx), [DayDetail.tsx](../web/src/features/daily/DayDetail.tsx).
+[MonthMix.tsx](../web/src/features/daily/MonthMix.tsx), [DayDetail.tsx](../web/src/features/daily/DayDetail.tsx),
+[ActivityPanel.tsx](../web/src/features/daily/ActivityPanel.tsx) (stats to picked day, shared with Home).
 
 Everything you wrote, day by day: jokes, premises and observations. The streak is still the daily
 joke habit: only a new joke keeps it going. A day's activity is read from the created dates (IST)
@@ -209,6 +216,7 @@ iPad the list fills the screen, two across, until you open a premise, which then
 with the same **full width** and **close** buttons; from 1280 px, with none open, the guide to
 writing a premise sits beside the list; on a phone the list gives way to the premise you open.
 
+- **Ideas switch:** on a phone or an upright iPad, **Premises | Observations** at the top of the list (see The frame).
 - **List:** a search box ("Search takes and notes"), then a Topic menu and a sort in one row (By topic, Newest,
   Most jokes, Fewest jokes). The Topic menu is the one Jokes has: **New topic** at the top,
   **Manage topics…** at the bottom, both working on the shared topic list. The Topic pickers in
@@ -321,7 +329,7 @@ query is `?q=` in the URL. It's in the rail under Home, in More under **Find**, 
 An observation always has a **topic**, from the same list as jokes and premises (Random until
 you pick another), and an optional **kind**: what sort of note it is, like "Set ideas" or "Questions".
 Most need no kind and are plain observations. It works like Premises: the list, with the one you
-open beside it on an iPad in landscape or a laptop, or as its own page on a phone (see SplitView).
+open beside it on an iPad in landscape or a laptop, or as its own page on a phone (see SplitView). On a phone it's the other half of the **Ideas** tab, with the same **Premises | Observations** switch on top.
 
 - **The list:** **New** opens New observation (`?new=1`; the + button opens it too): the words,
   **Topic** (Random, or the one you're filtered to) and **Kind (optional)**, then Save opens its page. Below are a search box

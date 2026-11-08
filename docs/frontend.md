@@ -198,7 +198,10 @@ On phones the lists keep a little room on the right so the scrubber never covers
 
 ## Navigation config
 [nav.ts](../web/src/layout/nav.ts) is the single list of screens. The desktop rail renders `NAV`;
-the phone bar renders `BAR_LEFT`, the + button, `BAR_RIGHT` and More (`MORE_GROUPS`).
+the phone bar renders `BAR_LEFT`, the + button, the Ideas tab and More (`MORE_GROUPS`). The Ideas
+tab is not in `nav.ts`: it points at Premises or Observations, whichever you used last
+([ideas.ts](../web/src/layout/ideas.ts)), a per-device choice kept in `localStorage` (`jokebox.ideas`) like
+the brainstorm pen, so it never syncs.
 
 ## Adaptive layout
 

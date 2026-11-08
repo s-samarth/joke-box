@@ -1,12 +1,14 @@
 /**
- * The phone's bottom bar: Home, Jokes, a big + (it adds whatever the current screen holds), Premises, and More. More opens a sheet
- * with every other screen, so nothing is more than two taps away and the + stays in the middle.
+ * The phone's bottom bar: Home, Jokes, a big + (it adds whatever the current screen holds), Ideas, and More. Ideas opens
+ * Premises or Observations, whichever you used last, and a switch at the top of each flips between them. More opens a
+ * sheet with every other screen, so nothing is more than two taps away and the + stays in the middle.
  */
-import { LayoutGrid, Plus } from 'lucide-react'
-import { useState } from 'react'
-import { NavLink, useLocation } from 'react-router'
+import { LayoutGrid, Lightbulb, Plus } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Link, NavLink, useLocation } from 'react-router'
 import { Modal } from '../components/ui/Modal'
-import { BAR_LEFT, BAR_RIGHT, MORE_GROUPS, inMore, type NavItem } from './nav'
+import { ideasScreen, lastIdeas, rememberIdeas } from './ideas'
+import { BAR_LEFT, MORE_GROUPS, inMore, type NavItem } from './nav'
 import { useAddAction } from './useAddAction'
 
 const tab = (current: boolean) => `flex h-full flex-1 flex-col items-center justify-center gap-1 text-[11px] ${current ? 'text-paper' : 'text-faint'}`
@@ -16,6 +18,16 @@ function Tab({ to, label, icon: Icon, end }: NavItem) {
     <NavLink to={to} end={end} className={({ isActive }) => tab(isActive)}>
       <Icon size={22} /> {label}
     </NavLink>
+  )
+}
+
+/** Lit on Premises and Observations alike; a tap goes to the one you were on, or used last. */
+function IdeasTab({ pathname }: { pathname: string }) {
+  const here = ideasScreen(pathname)
+  return (
+    <Link to={here ?? lastIdeas()} aria-current={here ? 'page' : undefined} className={tab(Boolean(here))}>
+      <Lightbulb size={22} /> Ideas
+    </Link>
   )
 }
 
@@ -52,6 +64,7 @@ export function BottomBar() {
   const add = useAddAction()
   const { pathname } = useLocation()
   const [open, setOpen] = useState(false)
+  useEffect(() => rememberIdeas(pathname), [pathname])
   return (
     <nav aria-label="Main" className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-rule bg-ink/95 backdrop-blur lg:hidden">
       <div className="flex h-16 items-stretch">
@@ -61,7 +74,7 @@ export function BottomBar() {
             <Plus size={28} strokeWidth={2.4} />
           </button>
         </div>
-        {BAR_RIGHT.map((item) => <Tab key={item.to} {...item} />)}
+        <IdeasTab pathname={pathname} />
         <button type="button" onClick={() => setOpen(true)} aria-haspopup="dialog" aria-current={inMore(pathname) ? 'page' : undefined} className={tab(open || inMore(pathname))}>
           <LayoutGrid size={22} /> More
         </button>

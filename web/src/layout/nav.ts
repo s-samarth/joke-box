@@ -1,7 +1,8 @@
 /**
  * Every main screen, in one place, so the desktop rail and the phone bar can't drift apart.
- * Desktop lists them all in the rail. Phone: the bottom bar holds the everyday ones, and
- * everything else sits in the More sheet, grouped by what you're doing.
+ * Desktop lists them all in the rail. Phone: the bottom bar holds the everyday ones (its Ideas tab
+ * opens Premises or Observations, see ideas.ts), and everything else sits in the More sheet,
+ * grouped by what you're doing.
  */
 import type { LucideIcon } from 'lucide-react'
 import { AudioLines, Lightbulb, CalendarCheck, GraduationCap, Eye, Home, ListChecks, ListOrdered, Mic, NotebookPen, PenLine, Search, StickyNote, Trash2 } from 'lucide-react'
@@ -34,13 +35,12 @@ const trash: NavItem = { to: '/trash', label: 'Trash', icon: Trash2, hint: 'What
 /** The desktop rail, top to bottom. */
 export const NAV: NavItem[] = [home, search, jokes, premises, daily, observations, brainstorm, voice, sets, shows, craft, watchlist, analysis, trash]
 
-/** Phone bottom bar: two either side of the + button, the last slot being More. */
+/** Phone bottom bar: two either side of the + button. Right of it sit Ideas (see BottomBar) and More. */
 export const BAR_LEFT: NavItem[] = [home, jokes]
-export const BAR_RIGHT: NavItem[] = [premises]
 
 export const MORE_GROUPS: { title: string; items: NavItem[] }[] = [
   { title: 'Find', items: [search] },
-  { title: 'Write', items: [daily, voice, observations, brainstorm] },
+  { title: 'Write', items: [daily, voice, brainstorm] },
   { title: 'Perform', items: [sets, shows] },
   { title: 'Study', items: [craft, watchlist, analysis] },
   { title: 'Deleted', items: [trash] },

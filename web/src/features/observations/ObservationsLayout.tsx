@@ -23,6 +23,7 @@ import { NewObservationDialog } from './NewObservationDialog'
 import { KindMenu, TopicMenu } from './ObservationMenus'
 import { kindLabel, matchesFilters, PLAIN, PLAIN_KIND, topicLabel } from './observationMeta'
 import { useUses } from './useUsed'
+import { IdeasSwitch } from '../../layout/IdeasSwitch'
 
 const newest = (a: Observation, b: Observation) => b.created_at.localeCompare(a.created_at)
 const chip = (on: boolean) => `inline-flex h-9 shrink-0 items-center rounded-lg px-3 text-sm transition ${on ? 'bg-paper font-medium text-ink' : 'bg-ink-3 text-dim hover:text-paper'}`
@@ -57,6 +58,7 @@ export function ObservationsLayout() {
 
   const list = (
     <>
+      <IdeasSwitch />
       <PageHead title="Observations">
         <Button variant="tape" small icon={<Plus size={15} />} onClick={() => setParam('new', '1')}>New</Button>
       </PageHead>

@@ -1,7 +1,7 @@
 /**
  * The day you tapped on the calendar: its three counts up top (jokes, premises, observations),
- * then what you wrote, grouped by kind, each linking to its page. On a phone this is where the
- * counts live, since a day's box only has room for dots.
+ * then (with `lists`) what you wrote, grouped by kind, each linking to its page. On a phone this is
+ * where the counts live, since a day's box only has room for dots. Home shows the counts alone.
  */
 import { Link } from 'react-router'
 import { formatDate } from '../../lib/time'
@@ -24,7 +24,7 @@ function rows(day: DayActivity): Record<Kind, Row[]> {
 
 const label = (k: Kind) => KIND_META[k].many[0].toUpperCase() + KIND_META[k].many.slice(1)
 
-export function DayDetail({ date, today, day }: { date: string; today: string; day: DayActivity }) {
+export function DayDetail({ date, today, day, lists: showLists = true }: { date: string; today: string; day: DayActivity; lists?: boolean }) {
   const counts = countsOf(day)
   const total = totalOf(counts)
   const lists = rows(day)
@@ -51,7 +51,7 @@ export function DayDetail({ date, today, day }: { date: string; today: string; d
 
       {total === 0 && <p className="mt-4 text-dim">Nothing written {isToday ? 'yet today' : 'that day'}.</p>}
 
-      {KINDS.filter((k) => counts[k]).map((k) => (
+      {showLists && KINDS.filter((k) => counts[k]).map((k) => (
         <div key={k} className="mt-5">
           <h3 className="mb-1 flex items-center gap-2 text-sm font-semibold text-dim">
             <span className={`size-2 rounded-full ${KIND_META[k].dot}`} />{label(k)}

@@ -1,4 +1,4 @@
-/** Today: the daily joke nudge, then capture, then voice notes, observations, brainstorming, craft (your path and a lesson box), study (watchlist, analysis, links), your topic folders, what's coming up, and how the last show went. */
+/** Today: the daily joke nudge, then a box to write an observation, premise or joke (three tabs), shortcuts to jokes, premises and observations, daily activity (streaks, the month and its calendar), voice notes, brainstorming, craft (your path and a lesson box), study (watchlist, analysis, links), your topic folders, what's coming up, and how the last show went. */
 import { Play, Search } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
@@ -11,11 +11,12 @@ import { DailyBanner } from '../daily/DailyBanner'
 import { useHabit } from '../daily/useHabit'
 import { LightBar } from '../sets/LightBar'
 import { draftItems, optionalSeconds, totalSeconds } from '../sets/setlistMath'
+import { CaptureTabs, type CaptureTab } from './CaptureTabs'
 import { InstallHint } from './InstallHint'
-import { QuickCapture } from './QuickCapture'
+import { LibraryTiles } from './LibraryTiles'
+import { TodayActivity } from './TodayActivity'
 import { TodayBrainstorm } from './TodayBrainstorm'
 import { TodayCraft } from './TodayCraft'
-import { TodayObservations } from './TodayObservations'
 import { TodayStudy } from './TodayStudy'
 import { TodayVoice } from './TodayVoice'
 import { TopicFolders } from './TopicFolders'
@@ -32,11 +33,17 @@ export function TodayPage() {
   const byId = new Map(jokes.map((b) => [b.id, b]))
   const lastShow = logs[0]
   const daily = useHabit()
+  const [tab, setTab] = useState<CaptureTab>('observation')
+  // The nudge's Write it opens the joke box here instead of leaving Home.
+  const writeJoke = () => {
+    setTab('joke')
+    setTimeout(() => document.getElementById('quick-capture')?.focus())
+  }
 
   return (
     <div className="mx-auto max-w-2xl">
       {/* Waits for the jokes to load, so it never flashes "write a joke" at someone who already has. */}
-      {!daily.loading && <div className="pt-6 lg:pt-10"><DailyBanner habit={daily.habit} /></div>}
+      {!daily.loading && <div className="pt-6 lg:pt-10"><DailyBanner habit={daily.habit} onWrite={writeJoke} /></div>}
       <InstallHint />
       <div className="flex items-start justify-between gap-3 pt-6 pb-6 lg:pt-10">
         <div>
@@ -47,9 +54,10 @@ export function TodayPage() {
           <Search size={20} />
         </Link>
       </div>
-      <QuickCapture />
+      <CaptureTabs tab={tab} onTab={setTab} />
+      <LibraryTiles />
+      <TodayActivity />
       <TodayVoice />
-      <TodayObservations />
       <TodayBrainstorm />
       <TodayCraft />
       <TodayStudy />
