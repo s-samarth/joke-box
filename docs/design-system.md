@@ -23,7 +23,9 @@ block, so every token is also a utility class (`bg-ink-2`, `text-tape`, `ring-ru
 | `tape-ink` | `#2b2512` | Text on tape |
 | `amber` | `#ffb547` | The last minute of the slot; offline |
 | `light` | `#ff5a47` | Over time; destructive actions; errors |
-| `ok` | `#74d3a8` | Success |
+| `ok` | `#74d3a8` | Success; jokes on the Daily activity calendar |
+| `sky` | `#9db4ff` | Strength beside a joke in a set; premises on the Daily activity calendar |
+| `orchid` | `#e7a3e0` | Observations on the Daily activity calendar |
 
 Joke types get a small coloured dot, never a filled chip: One-Liner sky, Story violet,
 Crowd Work amber, Roast rose, Observation emerald, Premise pink, Act Out orange. Every other type

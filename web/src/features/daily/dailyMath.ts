@@ -1,9 +1,9 @@
 /**
  * The daily joke habit. A day counts when at least one joke was added to JokeBox that day (IST),
  * however it got there: quick capture, the new joke sheet, or an import that kept its old date.
- * No extra table: it's read straight from the jokes' created dates, so it can never drift.
+ * Premises and observations show on the calendar too, but only jokes keep the streak alive.
+ * No extra table: it's read straight from the created dates, so it can never drift.
  */
-import type { Joke } from '../../api/types'
 import { toIstInput } from '../../lib/time'
 
 /** How the habit is going, from the day of your last joke. */
@@ -24,10 +24,10 @@ const toTime = (date: string) => Date.parse(`${date}T00:00:00Z`)
 export const daysBetween = (a: string, b: string): number => Math.round((toTime(b) - toTime(a)) / DAY)
 export const shiftDay = (date: string, days: number): string => new Date(toTime(date) + days * DAY).toISOString().slice(0, 10)
 
-/** Jokes by the IST day they were added, oldest first within a day. */
-export function jokesByDay(jokes: Joke[]): Map<string, Joke[]> {
-  const days = new Map<string, Joke[]>()
-  for (const b of [...jokes].sort((x, y) => x.created_at.localeCompare(y.created_at))) {
+/** Anything with a created date (jokes, premises, observations) by the IST day it was added, oldest first within a day. */
+export function byDay<T extends { created_at: string }>(items: T[]): Map<string, T[]> {
+  const days = new Map<string, T[]>()
+  for (const b of [...items].sort((x, y) => x.created_at.localeCompare(y.created_at))) {
     const day = toIstInput(b.created_at).slice(0, 10)
     days.set(day, [...(days.get(day) ?? []), b])
   }

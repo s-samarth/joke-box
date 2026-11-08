@@ -19,7 +19,7 @@ export interface NavItem {
 const home: NavItem = { to: '/', label: 'Home', icon: Home, end: true }
 const jokes: NavItem = { to: '/jokes', label: 'Jokes', icon: StickyNote }
 const premises: NavItem = { to: '/premises', label: 'Premises', icon: Lightbulb, hint: 'The ideas under your jokes' }
-const daily: NavItem = { to: '/daily', label: 'Daily joke', icon: CalendarCheck, hint: 'One new joke a day, ticked off' }
+const daily: NavItem = { to: '/daily', label: 'Daily activity', icon: CalendarCheck, hint: 'Jokes, premises and observations, day by day' }
 const sets: NavItem = { to: '/sets', label: 'Sets', icon: ListOrdered, hint: 'Build a setlist and run it on stage' }
 const voice: NavItem = { to: '/voice', label: 'Voice notes', icon: AudioLines, hint: 'Record an idea out loud' }
 const observations: NavItem = { to: '/observations', label: 'Observations', icon: Eye, hint: "Things you noticed, before they're jokes" }

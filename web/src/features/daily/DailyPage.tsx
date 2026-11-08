@@ -1,29 +1,32 @@
 /**
- * Daily joke: write at least one new joke a day. The nudge up top, a box to write today's, your
- * streaks, and a calendar ticking off every day you added a joke. Saved jokes land in Jokes
- * (under Random) like any other, and the tick appears straight away.
+ * Daily activity: everything you wrote, day by day. The joke nudge and today's joke box stay on
+ * top (only jokes keep the streak), then the streaks, the month's total split by kind, and a
+ * calendar where every day shows how much you wrote and of which kind. Tap a day to see its counts
+ * and the pieces themselves.
  */
 import { useState } from 'react'
-import { Link } from 'react-router'
 import { PageHead } from '../../components/ui/pieces'
-import { formatDate } from '../../lib/time'
 import { QuickCapture } from '../today/QuickCapture'
+import { dayOf, monthSummary } from './activity'
 import { DailyBanner } from './DailyBanner'
+import { DayDetail } from './DayDetail'
 import { MonthCalendar } from './MonthCalendar'
-import { useHabit } from './useHabit'
+import { MonthMix } from './MonthMix'
+import { useActivity } from './useActivity'
 
 const focusBox = () => document.getElementById('quick-capture')?.focus()
+const days = (n: number) => `${n} day${n === 1 ? '' : 's'}`
 
 export function DailyPage() {
-  const { days, today, habit } = useHabit()
+  const { activity, today, habit } = useActivity()
   const [month, setMonth] = useState(today.slice(0, 7))
   const [selected, setSelected] = useState<string | null>(today)
-  const picked = selected ? days.get(selected) ?? [] : []
-  const thisMonth = [...days.keys()].filter((d) => d.startsWith(today.slice(0, 7))).length
+  const shown = monthSummary(activity, month, today)
+  const thisMonth = monthSummary(activity, today.slice(0, 7), today)
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <PageHead title="Daily joke" />
+      <PageHead title="Daily activity" />
       <DailyBanner habit={habit} onWrite={focusBox} />
 
       <div>
@@ -33,9 +36,9 @@ export function DailyPage() {
 
       <dl className="grid grid-cols-3 gap-4 border-y border-rule py-5">
         {[
-          ['Current streak', `${habit.current} day${habit.current === 1 ? '' : 's'}`],
-          ['Longest streak', `${habit.longest} day${habit.longest === 1 ? '' : 's'}`],
-          ['This month', `${thisMonth} day${thisMonth === 1 ? '' : 's'}`],
+          ['Joke streak', days(habit.current)],
+          ['Longest streak', days(habit.longest)],
+          ['Active days', `${thisMonth.active} / ${thisMonth.sofar}`],
         ].map(([label, value]) => (
           <div key={label} className="min-w-0">
             <dt className="text-sm text-dim">{label}</dt>
@@ -44,24 +47,9 @@ export function DailyPage() {
         ))}
       </dl>
 
-      <MonthCalendar month={month} onMonth={setMonth} days={days} today={today} selected={selected} onSelect={setSelected} />
-
-      {selected && (
-        <section>
-          <h2 className="mb-2 font-semibold">{selected === today ? 'Today' : formatDate(`${selected}T12:00:00+05:30`)}</h2>
-          {picked.length ? (
-            <ul className="divide-y divide-rule border-y border-rule">
-              {picked.map((b) => (
-                <li key={b.id}>
-                  <Link to={`/jokes/${b.id}`} className="block truncate py-3 hover:bg-ink-2/60">{b.setup}</Link>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-dim">No new jokes {selected === today ? 'yet today' : 'that day'}.</p>
-          )}
-        </section>
-      )}
+      <MonthMix month={month} today={today} summary={shown} />
+      <MonthCalendar month={month} onMonth={setMonth} activity={activity} summary={shown} today={today} selected={selected} onSelect={setSelected} />
+      {selected && <DayDetail date={selected} today={today} day={dayOf(activity, selected)} />}
     </div>
   )
 }

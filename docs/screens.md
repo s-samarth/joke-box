@@ -27,7 +27,7 @@ visit, so the app opens fast on a phone.
   The **+** adds whatever the screen holds ([useAddAction.ts](../web/src/layout/useAddAction.ts)):
   a premise on Premises, a show on Shows, a set on the list of Sets, an observation on
   Observations, and a New joke anywhere else (inside a set you're building too). **More** opens a bottom sheet that groups every other screen: **Find**
-  (Search), **Write** (Daily joke, Voice notes, Observations, Brainstorm), **Perform** (Sets, Shows), **Study**
+  (Search), **Write** (Daily activity, Voice notes, Observations, Brainstorm), **Perform** (Sets, Shows), **Study**
   (Craft, Watchlist, Analysis) and **Deleted** (Trash). While you're on one of those screens,
   the More tab shows as the current one.
 - One list in `nav.ts` feeds both the rail and the bar, so they can't drift apart.
@@ -75,7 +75,7 @@ in IST and the headline **"Got something?"** with a search button beside it (it 
 
 | Section | File | Notes |
 |---|---|---|
-| Daily joke nudge | `daily/DailyBanner.tsx` | Days since your last new joke: today written, a small green line with your streak; 1 or 2 days, yellow **Write a joke today**; 3 to 7, red **N days without a joke**; over a week, a dark, spooky card (a drifting ghost, a cobweb, a flickering line; still under reduced motion). Waits for the jokes to load so it never flashes the wrong state. Links to Daily joke |
+| Daily joke nudge | `daily/DailyBanner.tsx` | Days since your last new joke: today written, a small green line with your streak; 1 or 2 days, yellow **Write a joke today**; 3 to 7, red **N days without a joke**; over a week, a dark, spooky card (a drifting ghost, a cobweb, a flickering line; still under reduced motion). Waits for the jokes to load so it never flashes the wrong state. Links to Daily activity |
 | Quick capture | `QuickCapture.tsx` | Setup and punchline in one box. Enter saves to Random; Shift+Enter adds a new line |
 | Voice notes | `TodayVoice.tsx` | The same recorder as the Voice screen, plus "All N" |
 | Observations | `TodayObservations.tsx` | The observation box and the last few logged |
@@ -88,22 +88,34 @@ in IST and the headline **"Got something?"** with a search button beside it (it 
 
 <img src="screenshots/desktop-home.webp" alt="Home on desktop">
 
-## Daily joke: `/daily`
+## Daily activity: `/daily`
 
-[DailyPage.tsx](../web/src/features/daily/DailyPage.tsx), [dailyMath.ts](../web/src/features/daily/dailyMath.ts),
-[MonthCalendar.tsx](../web/src/features/daily/MonthCalendar.tsx).
+[DailyPage.tsx](../web/src/features/daily/DailyPage.tsx), [activity.ts](../web/src/features/daily/activity.ts),
+[dailyMath.ts](../web/src/features/daily/dailyMath.ts), [MonthCalendar.tsx](../web/src/features/daily/MonthCalendar.tsx),
+[MonthMix.tsx](../web/src/features/daily/MonthMix.tsx), [DayDetail.tsx](../web/src/features/daily/DayDetail.tsx).
 
-The habit of writing at least one new joke a day. A day counts when any joke was added to JokeBox
-that day (IST), however it got there, imports included with their original dates; it's read from
-the jokes' created dates, so there's no separate log to fall out of step.
+Everything you wrote, day by day: jokes, premises and observations. The streak is still the daily
+joke habit: only a new joke keeps it going. A day's activity is read from the created dates (IST)
+of the three lists already cached, imports included with their original dates, so there's no
+separate log to fall out of step. Items in the Trash don't count.
 
 - **The nudge** (the same one as Home); its button focuses the box below.
-- **Today's joke:** the quick capture box. Saving puts the joke in Random and ticks today at once.
-- **Streaks:** current (ending today, or yesterday while today is still open), longest, and days
-  this month.
-- **Calendar:** a month at a time, Monday first. Days with a new joke get a green tick and a count
-  when there were several; today is outlined in yellow; days to come are dimmed. Arrows move
-  between months. Tap a day to list its jokes, each linking to the joke.
+- **Today's joke:** the quick capture box. Saving puts the joke in Random and marks today at once.
+- **Stats:** joke streak (ending today, or yesterday while today is still open), longest joke
+  streak, and active days this month (days with anything written, out of the days so far).
+- **The month's total:** how many pieces, how many a day, and one bar split by kind. Its labels
+  are the colour key: green jokes (`ok`), periwinkle premises (`sky`), orchid observations
+  (`orchid`). It follows the month the calendar shows.
+- **Calendar:** a month at a time, Monday first. A day's box gets brighter the more you wrote
+  (1, 2 to 3, 4 to 6, 7 or more), with a dot for each kind written that day. Where the calendar
+  is at least 512 px wide (desktop, iPad) each dot carries its count, wrapping to a second line
+  if three double-digit counts don't fit; on a phone it's dots only. Joke days have a bright,
+  bold date. Today is outlined in yellow, the picked day in paper; days to come are dimmed.
+  Hovering a day shows "8 Nov 2026: 12 jokes, 6 premises, 7 observations"; screen readers hear
+  the same. Arrows move between months.
+- **The picked day** (today when the page opens): its three counts in a strip, then what you
+  wrote, grouped by kind, each linking to its joke, premise or observation. This is where a phone
+  shows the counts.
 
 ## Jokes: `/jokes`, `/jokes/map`, `/jokes/web` and `/jokes/:jokeId`
 
