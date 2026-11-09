@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { Premise } from '../../api/premises'
 import type { Joke, Observation } from '../../api/types'
-import { activityByDay, countLabel, countsOf, dayOf, heat, monthName, monthSummary, totalOf } from './activity'
+import { activityByDay, countLabel, countsOf, dayOf, heat, KINDS, monthName, monthSummary, totalOf } from './activity'
 
 const at = <T,>(created_at: string, id = created_at) => ({ id, created_at }) as T
 const joke = (iso: string, id?: string) => at<Joke>(iso, id)
@@ -38,6 +38,10 @@ describe('daily activity', () => {
 
   it('brightens a box in steps, and copes with double-digit days', () => {
     expect([0, 1, 2, 3, 4, 6, 7, 30].map(heat)).toEqual([0, 1, 2, 2, 3, 3, 4, 4])
+  })
+
+  it('lists observations first and jokes last, like the writing box', () => {
+    expect(KINDS).toEqual(['observations', 'premises', 'jokes'])
   })
 
   it('labels counts and months for people', () => {

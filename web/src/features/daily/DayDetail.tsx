@@ -1,5 +1,5 @@
 /**
- * The day you tapped on the calendar: its three counts up top (jokes, premises, observations),
+ * The day you tapped on the calendar: its three counts up top (observations, premises, jokes),
  * then (with `lists`) what you wrote, grouped by kind, each linking to its page. On a phone this is
  * where the counts live, since a day's box only has room for dots. Home shows the counts alone.
  */

@@ -1,5 +1,5 @@
 /**
- * Daily activity: what you wrote each day, split three ways (jokes, premises, observations), with
+ * Daily activity: what you wrote each day, split three ways (observations, premises, jokes), with
  * the colour each kind wears on the calendar. Read from the cached lists' created dates in IST,
  * the same way the joke streak is, so the calendar and the streak can never disagree.
  */
@@ -8,7 +8,8 @@ import type { Joke, Observation } from '../../api/types'
 import { byDay } from './dailyMath'
 
 export type Kind = 'jokes' | 'premises' | 'observations'
-export const KINDS: Kind[] = ['jokes', 'premises', 'observations']
+/** The order every screen shows them in: raw material first, finished jokes last. */
+export const KINDS: Kind[] = ['observations', 'premises', 'jokes']
 
 /** How each kind looks: jokes keep the streak's green; premises periwinkle; observations orchid. */
 export const KIND_META: Record<Kind, { one: string; many: string; dot: string; text: string }> = {
