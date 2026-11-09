@@ -101,7 +101,8 @@ in IST and the headline **"Got something?"** with a search button beside it (it 
 [MonthMix.tsx](../web/src/features/daily/MonthMix.tsx), [DayDetail.tsx](../web/src/features/daily/DayDetail.tsx),
 [ActivityPanel.tsx](../web/src/features/daily/ActivityPanel.tsx) (stats to picked day, shared with Home).
 
-Everything you wrote, day by day: jokes, premises and observations. The streak is still the daily
+Everything you wrote, day by day: observations, premises and jokes, in that order everywhere on
+this screen and on Home (raw material first, as in the writing box). The streak is still the daily
 joke habit: only a new joke keeps it going. A day's activity is read from the created dates (IST)
 of the three lists already cached, imports included with their original dates, so there's no
 separate log to fall out of step. Items in the Trash don't count.
@@ -111,14 +112,14 @@ separate log to fall out of step. Items in the Trash don't count.
 - **Stats:** joke streak (ending today, or yesterday while today is still open), longest joke
   streak, and active days this month (days with anything written, out of the days so far).
 - **The month's total:** how many pieces, how many a day, and one bar split by kind. Its labels
-  are the colour key: green jokes (`ok`), periwinkle premises (`sky`), orchid observations
-  (`orchid`). It follows the month the calendar shows.
+  are the colour key: orchid observations (`orchid`), periwinkle premises (`sky`), green jokes
+  (`ok`). It follows the month the calendar shows.
 - **Calendar:** a month at a time, Monday first. A day's box gets brighter the more you wrote
   (1, 2 to 3, 4 to 6, 7 or more), with a dot for each kind written that day. Where the calendar
   is at least 512 px wide (desktop, iPad) each dot carries its count, wrapping to a second line
   if three double-digit counts don't fit; on a phone it's dots only. Joke days have a bright,
   bold date. Today is outlined in yellow, the picked day in paper; days to come are dimmed.
-  Hovering a day shows "8 Nov 2026: 12 jokes, 6 premises, 7 observations"; screen readers hear
+  Hovering a day shows "8 Nov 2026: 7 observations, 6 premises, 12 jokes"; screen readers hear
   the same. Arrows move between months.
 - **The picked day** (today when the page opens): its three counts in a strip, then what you
   wrote, grouped by kind, each linking to its joke, premise or observation. This is where a phone

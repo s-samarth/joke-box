@@ -1,6 +1,6 @@
 /**
  * A month of daily activity. Each day's box gets brighter the more you wrote, and a coloured dot
- * for each kind written that day: green jokes, periwinkle premises, orchid observations. When the
+ * for each kind written that day: orchid observations, periwinkle premises, green jokes. When the
  * calendar is wide enough (desktop, iPad) each dot carries its count, wrapping onto a second line
  * if they don't fit; on a phone tap a day for its counts. Joke days have a brighter date, since
  * jokes alone keep the streak. Today is outlined in yellow; days to come are dimmed.
