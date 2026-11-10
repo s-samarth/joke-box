@@ -213,6 +213,11 @@ the brainstorm pen, so it never syncs.
   detail columns for Jokes and Premises, the full-width and close buttons, and the settle-in
   animation. Lists pass `WIDE_LIST` to go two across only while nothing is open. Observations
   uses it too.
+- **Page titles size to their column, not the screen.** `PageHead` is a container (`@container`):
+  below 22rem wide its title caps at 44 px, below 19.5rem at 38 px. With an item open between
+  1024 and 1279 px (iPad landscape), the list column is 22rem and its content 19rem, so screen
+  breakpoints alone gave "Observations" 56 px and pushed New into the open item. Phone and laptop
+  sizes are unchanged: there the caps match what the screen breakpoints already give.
 - **Linking by search:** [LinkSearch.tsx](../web/src/features/observations/LinkSearch.tsx) is the one
   way to link observations with jokes and premises, from either side: type, see the three best
   matches, tap to link. No lists to scroll.

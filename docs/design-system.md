@@ -44,7 +44,8 @@ decoration.
 - **Permanent Marker** appears only on tape strips: setlists, stage mode, print and the login
   page. It's the handwriting on the tape.
 - **Sizes:** 16 px body text, with inputs never below 16 px on phones (so iOS doesn't zoom in).
-  Headlines are 44–56 px on Home and about 48 px for page titles.
+  Headlines are 44–56 px on Home. Page titles are 38–56 px by the width of the column they sit
+  in, so a long one fits beside its button in a narrow list column (see frontend.md).
 - `.tabular` switches on tabular numbers, so timers and durations don't jitter.
 
 ## The tape strip
