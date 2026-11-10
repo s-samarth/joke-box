@@ -69,7 +69,7 @@ each with its setup in marker, the punchline, its runtime and "by m:ss" (the run
 
 [ShowsPage.tsx](../web/src/features/shows/ShowsPage.tsx), [ShowsToolbar.tsx](../web/src/features/shows/ShowsToolbar.tsx),
 [ShowFilters.tsx](../web/src/features/shows/ShowFilters.tsx), [ShowStats.tsx](../web/src/features/shows/ShowStats.tsx),
-[ShowsTable.tsx](../web/src/features/shows/ShowsTable.tsx), [ShowDetail.tsx](../web/src/features/shows/ShowDetail.tsx),
+[ShowsTable.tsx](../web/src/features/shows/ShowsTable.tsx), [ShowCards.tsx](../web/src/features/shows/ShowCards.tsx), [ShowDetail.tsx](../web/src/features/shows/ShowDetail.tsx),
 [LogShowSheet.tsx](../web/src/features/shows/LogShowSheet.tsx), [logMath.ts](../web/src/features/shows/logMath.ts),
 [logStats.ts](../web/src/features/shows/logStats.ts).
 
@@ -106,8 +106,14 @@ each with its setup in marker, the punchline, its runtime and "by m:ss" (the run
   - The charts are hand-drawn SVG and HTML (no chart library), with colours checked for colour-blind
     safety on the dark surface ([vizColors.ts](../web/src/features/shows/insights/vizColors.ts));
     every mark shows a readout on hover or keyboard focus.
-- **Table:** Date, Venue, On stage, Crowd, Rating, Topics and Remarks. Click a heading to sort and
-  click again to flip the order. On a phone the table scrolls sideways with the date pinned.
+- **Table** (tablet width up): Date, Venue, On stage, Crowd, Rating, Topics and Remarks. Click a
+  heading to sort and click again to flip the order. Where it's wider than the screen it scrolls
+  sideways with the date pinned.
+- **On a phone** the same shows are a list ([ShowCards.tsx](../web/src/features/shows/ShowCards.tsx)):
+  the date and stars, then the venue, time on stage and crowd, then topics and remarks on one line.
+  Tap one to open it. A **Sort** menu (Newest, Oldest, Best rated, Lowest rated, Longest on stage,
+  Biggest crowd, Venue A to Z) stands in for the headings. It was a table here too until the
+  rating turned out to sit off-screen, with nothing to say the table scrolled.
 - **Log a show** (a sheet, also opened by `?log=1`): venue, stars and length up top (separate minutes and seconds boxes, so a 10 minute spot is just "10"). Optional: the
   sets you did (none, one or more: their topics are ticked, time on stage is left to you,
   [setPick.ts](../web/src/features/shows/setPick.ts)), date and time, crowd and remarks.
@@ -129,7 +135,9 @@ each with its setup in marker, the punchline, its runtime and "by m:ss" (the run
 - ⋯ → **Venues** ([VenuesSheet.tsx](../web/src/features/shows/VenuesSheet.tsx)): every venue with how
   many shows and sets use it. Delete an unused one straight away; for one in use, pick the venue its
   shows and sets move to first, which is also how to merge duplicates.
-- ⋯ → **Export as CSV**.
+- ⋯ → **Export as CSV**. Text a spreadsheet would run as a formula (a remark starting with `-`, `=`,
+  `+` or `@`, which opened as `#NAME?`) gets an apostrophe in front, so it stays text
+  ([csv.ts](../web/src/lib/csv.ts)). The jokes export does the same.
 
 <img src="screenshots/desktop-shows.webp" alt="Shows">
 <img src="screenshots/desktop-log-show.webp" alt="Logging a show, with how one joke went and a comment">

@@ -1,8 +1,12 @@
 /** Build a CSV file in the browser and download it (works offline too). */
 
+/** A spreadsheet runs text that starts with one of these as a formula: "- so I said" opens as #NAME?. */
+const FORMULA_START = /^[=+\-@\t\r]/
+
 function cell(value: string | number): string {
-  const text = String(value)
-  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text
+  // An apostrophe in front tells the spreadsheet it's text. Numbers are left alone, minus sign and all.
+  const text = typeof value === 'string' && FORMULA_START.test(value) ? `'${value}` : String(value)
+  return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text
 }
 
 export function toCsv(headers: string[], rows: (string | number)[][]): string {

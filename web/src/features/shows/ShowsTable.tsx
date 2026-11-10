@@ -1,14 +1,15 @@
 /**
  * Every show as a table, like a Notion database. Click a column heading to sort by it (click again
- * to flip the order), click a row to open the show. On a phone the table scrolls sideways and the
- * date column stays pinned on the left.
+ * to flip the order), click a row to open the show. From tablet width up; a phone gets the same
+ * shows as a list (ShowCards), since the rating sat off-screen there. Where the table is still
+ * wider than the screen it scrolls sideways and the date column stays pinned on the left.
  */
 import { ArrowDown, ArrowUp } from 'lucide-react'
 import type { PerformanceLog } from '../../api/types'
 import { Stars } from '../../components/ui/pieces'
 import { clock } from '../../lib/duration'
 import { formatDate } from '../../lib/time'
-import type { Sort, SortKey } from './logMath'
+import { weekday, type Sort, type SortKey } from './logMath'
 
 interface Props {
   logs: PerformanceLog[]
@@ -18,7 +19,6 @@ interface Props {
   topicNames: (ids: string[]) => string
 }
 
-const weekday = new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'short' })
 const pinned = 'sticky left-0 z-10 bg-ink group-hover:bg-ink-2'
 
 function Heading({ k, label, sort, onSort, right, className = '' }: { k?: SortKey; label: string; sort: Sort; onSort: (k: SortKey) => void; right?: boolean; className?: string }) {
@@ -38,7 +38,7 @@ function Heading({ k, label, sort, onSort, right, className = '' }: { k?: SortKe
 export function ShowsTable({ logs, sort, onSort, onOpen, topicNames }: Props) {
   const head = { sort, onSort }
   return (
-    <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+    <div className="hidden overflow-x-auto sm:block">
       <table className="w-full min-w-[760px] text-left text-[15px]">
         <thead className="border-b border-rule-strong text-sm text-dim">
           <tr>

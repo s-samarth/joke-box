@@ -23,6 +23,7 @@ import { NO_FILTERS, PAGE_SIZE, applyFilters, sortLogs, type Sort, type SortKey 
 import { ShowDetail } from './ShowDetail'
 import { ShowFilters } from './ShowFilters'
 import { ShowStats } from './ShowStats'
+import { ShowCards } from './ShowCards'
 import { ShowsTable } from './ShowsTable'
 import { ShowsToolbar } from './ShowsToolbar'
 import { VenuesSheet } from './VenuesSheet'
@@ -86,6 +87,7 @@ export function ShowsPage() {
           <EmptyState title={logs.length ? 'No shows match' : 'No shows yet'}>{logs.length ? 'Try a longer period or clear a filter.' : 'After your next spot, log it here. It takes under a minute.'}</EmptyState>
         ) : (
           <>
+            <ShowCards logs={rows.slice(0, limit)} sort={sort} onSort={setSort} onOpen={setViewing} topicNames={topicNames} />
             <ShowsTable logs={rows.slice(0, limit)} sort={sort} onSort={sortBy} onOpen={setViewing} topicNames={topicNames} />
             {rows.length > limit && <Button className="mt-4 w-full" onClick={() => setLimit((n) => n + PAGE_SIZE)}>Show {Math.min(PAGE_SIZE, rows.length - limit)} more</Button>}
           </>

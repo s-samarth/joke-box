@@ -35,6 +35,12 @@ describe('csv', () => {
   it('quotes commas, quotes and newlines', () => {
     expect(toCsv(['a', 'b'], [['x, y', 'say "hi"\nok']])).toBe('a,b\n"x, y","say ""hi""\nok"')
   })
+
+  it('keeps text that looks like a formula as text, and leaves numbers alone', () => {
+    expect(toCsv(['a'], [['- so I said'], ['=SUM(A1)'], ['+1'], ['@home'], [-5], ['fine - really']])).toBe(
+      "a\n'- so I said\n'=SUM(A1)\n'+1\n'@home\n-5\nfine - really",
+    )
+  })
 })
 
 describe('months', () => {

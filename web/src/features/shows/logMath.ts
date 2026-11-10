@@ -46,6 +46,9 @@ export const NO_FILTERS: LogFilters = { period: 'all', venues: [], from: '', to:
 export const extraFilterCount = (f: LogFilters): number =>
   [f.from, f.to, f.rating, f.duration, f.audience].filter((v) => v !== '' && v !== null).length
 
+/** The day of the week a show was on, in India time: "Sun". */
+export const weekday = new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'short' })
+
 export type SortKey = 'date' | 'venue' | 'duration' | 'audience' | 'rating'
 
 export interface Sort {
