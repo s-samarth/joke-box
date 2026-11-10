@@ -80,7 +80,8 @@ through everything you've written at once.
 1. Open **Jokes**. Search, or filter by topic, type and status, and sort by newest, strongest,
    weakest or longest.
 2. Tap a joke. On an iPad or desktop it opens beside the list (the list narrows to make room);
-   on a phone it opens as its own page. To read it with the whole screen, tap the expand button at
+   on a phone it opens as its own page, at its top, and **← Jokes** (or Back) returns to the
+   place in the list you opened it from. To read it with the whole screen, tap the expand button at
    its top right; tap × to go back to the list.
 3. Edit the words in place. Under the punchline, **Add an alternate punch** keeps another ending
    for the same setup (add as many as you like); **Use** beside one makes it the punchline and

@@ -10,7 +10,7 @@
  * With an item open, the buttons at its top right read it full width (hiding the list) or close it.
  */
 import { Maximize2, Minimize2, X } from 'lucide-react'
-import { useState, type ReactNode } from 'react'
+import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { withTransition } from '../../lib/viewTransition'
 
@@ -34,6 +34,11 @@ interface Props {
 export function SplitView({ list, children, openId, closeTo, noun }: Props) {
   const [full, setFull] = useState(false)
   const open = Boolean(openId)
+  // The open item's column scrolls on its own (wide screens): a newly opened item starts at its top.
+  const pane = useRef<HTMLElement>(null)
+  useLayoutEffect(() => {
+    if (pane.current) pane.current.scrollTop = 0
+  }, [openId])
   const listWidth = !open
     ? 'lg:flex-1 xl:w-[26rem] xl:flex-none xl:border-r'
     : full ? 'hidden' : 'hidden lg:flex lg:w-[22rem] lg:shrink-0 lg:border-r xl:w-[26rem]'
@@ -42,7 +47,7 @@ export function SplitView({ list, children, openId, closeTo, noun }: Props) {
   return (
     <div className="lg:-mx-10 lg:flex lg:h-[calc(100dvh-env(safe-area-inset-top))]">
       <section className={`min-w-0 lg:flex-col lg:border-rule lg:px-6 ${open ? '' : 'lg:flex'} ${listWidth}`}>{list}</section>
-      <section className={`min-w-0 flex-1 lg:overflow-y-auto lg:px-6 xl:px-10 ${open ? '' : 'hidden xl:block'}`}>
+      <section ref={pane} className={`min-w-0 flex-1 lg:overflow-y-auto lg:px-6 xl:px-10 ${open ? '' : 'hidden xl:block'}`}>
         {open && (
           <div className="sticky top-0 z-10 hidden h-0 justify-end lg:flex">
             <div className="mt-2 flex gap-0.5 rounded-xl bg-ink/85 p-0.5 backdrop-blur">

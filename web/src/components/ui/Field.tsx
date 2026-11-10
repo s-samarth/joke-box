@@ -41,8 +41,22 @@ export function GrowingText({ className = '', value, ref: outer, ...rest }: Text
   useLayoutEffect(() => {
     const el = ref.current
     if (!el) return
-    el.style.height = 'auto'
-    el.style.height = `${el.scrollHeight}px`
+    const fit = () => {
+      el.style.height = 'auto'
+      el.style.height = `${el.scrollHeight}px`
+    }
+    fit()
+    // The text wraps differently when the box gets wider or narrower (a phone or iPad turned, a
+    // window resized, the list beside it opening), so it's measured again; height alone is ours.
+    if (typeof ResizeObserver === 'undefined') return
+    let width = el.clientWidth
+    const watch = new ResizeObserver(() => {
+      if (el.clientWidth === width) return
+      width = el.clientWidth
+      fit()
+    })
+    watch.observe(el)
+    return () => watch.disconnect()
   }, [value])
   return (
     <textarea

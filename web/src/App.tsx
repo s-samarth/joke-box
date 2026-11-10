@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router'
+import { useScrollMemory } from './layout/useScrollMemory'
 import { Spinner } from './components/ui/pieces'
 import { LoginPage } from './features/auth/LoginPage'
 import { RequireAuth } from './features/auth/RequireAuth'
@@ -52,6 +53,7 @@ function OldJokesAddress() {
 }
 
 export function App() {
+  useScrollMemory()
   return (
     <Suspense fallback={<div className="p-8"><Spinner /></div>}>
       <Routes>

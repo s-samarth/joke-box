@@ -167,6 +167,24 @@ A joke's save leaves out rows still empty (`toSend`): a tag line or alternate pu
 and not typed in yet. The server drops blank rows, and the copy it sent back used to replace the
 draft about three seconds later, taking the empty row (and the cursor) away mid-thought.
 
+## Scroll between screens
+The app is one page that never reloads, so the browser kept whatever scroll the last screen had:
+open a joke from far down the list on a phone and you landed far down the joke, and "← Jokes"
+dropped you somewhere else in the list. `useScrollMemory` (called once in `App`) puts the window
+where a phone app would, by the rules in [scrollMemory.ts](../web/src/lib/scrollMemory.ts):
+
+- A new screen opens at its top.
+- Back (the browser's, or a swipe) returns to where that screen was left.
+- A screen's own way back to its list (from `/jokes/123` to `/jokes`) returns to where the list
+  was left, if it has the same filters; a differently filtered list starts at its top.
+- A change to the query string alone (a filter, a sheet) leaves the scroll alone.
+
+It sets `history.scrollRestoration` to `manual`: the browser's own attempt runs before the
+screen is drawn. A screen still loading is scrolled once it's tall enough, unless you touch or
+scroll first. On wide screens the open item scrolls in its own column, which `SplitView` puts
+back to the top for each item opened. `GrowingText` measures itself again when its width
+changes, so turning a phone or iPad no longer cuts off the last line of a setup or punchline.
+
 ## URL as state
 The filters for Jokes (`?topic&sub&type&status&q&sort`) and Observations (`?topic`) live in the
 query string, so back, refresh and shared links keep your place. `/shows?log=1` opens the Log a
