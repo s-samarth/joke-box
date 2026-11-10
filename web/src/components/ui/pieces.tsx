@@ -73,8 +73,8 @@ export function Spinner({ label = 'Loading' }: { label?: string }) {
 /** A page heading in gig-poster type, with optional actions on the right. */
 export function PageHead({ title, children }: { title: string; children?: ReactNode }) {
   return (
-    <div className="flex items-end justify-between gap-3 pt-6 pb-5 lg:pt-10">
-      <h1 className="headline text-[38px] min-[360px]:text-[44px] sm:text-[56px]">{title}</h1>
+    <div className="@container flex items-end justify-between gap-2 pt-6 pb-5 lg:pt-10">
+      <h1 className="headline text-[38px] min-[360px]:text-[44px] sm:text-[56px] @max-[22rem]:text-[44px] @max-[19.5rem]:text-[38px]">{title}</h1>
       {children && <div className="flex shrink-0 items-center gap-1 pb-1">{children}</div>}
     </div>
   )
