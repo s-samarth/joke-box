@@ -177,6 +177,16 @@ through everything you've written at once.
 
 ## 9. Review how it's going
 
+**The writing** (nothing to log):
+1. Open **Daily activity** and scroll past the calendar to **Writing pulse**.
+2. Read the pace (the last 30 days against the 30 before) and how far ideas got: how many
+   observations led somewhere, how many premises have a joke, how many jokes have a punchline
+   and how many you've marked Stage Ready or Complete.
+3. Under **Sitting idle**, tap a row to open that pile: unused observations, premises with no
+   joke, old drafts. **Worth knowing** adds what stands out, such as a kind you haven't written
+   in weeks or the topic with the most unused observations.
+
+**The shows:**
 1. On **Shows**, pick a period (Lifetime, This month, This week) and a venue.
 2. Read the four totals: number of shows, time on stage, average rating and median crowd. The
    rating is weighted by stage time, so a 20-minute set counts more than a 3-minute one.

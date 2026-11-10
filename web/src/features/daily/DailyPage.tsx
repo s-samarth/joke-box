@@ -2,13 +2,15 @@
  * Daily activity: everything you wrote, day by day. The joke nudge and today's joke box stay on
  * top (only jokes keep the streak), then the streaks, the month's total split by kind, and a
  * calendar where every day shows how much you wrote and of which kind (see ActivityPanel, which
- * Home shows too). Tap a day to see its counts and the pieces themselves.
+ * Home shows too). Tap a day to see its counts and the pieces themselves. Under it, the writing
+ * pulse (WritingPulse): how it's going, read from what's saved.
  */
 import { PageHead } from '../../components/ui/pieces'
 import { QuickCapture } from '../today/QuickCapture'
 import { ActivityPanel } from './ActivityPanel'
 import { DailyBanner } from './DailyBanner'
 import { useHabit } from './useHabit'
+import { WritingPulse } from './WritingPulse'
 
 const focusBox = () => document.getElementById('quick-capture')?.focus()
 
@@ -25,6 +27,7 @@ export function DailyPage() {
       </div>
 
       <ActivityPanel lists />
+      <WritingPulse />
     </div>
   )
 }
