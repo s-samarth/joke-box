@@ -64,7 +64,7 @@ erDiagram
 | `type_colors` | `name` (unique per user, any case), `color` (`#rrggbb`) | The colour of a type's dot. Kept by name in its own table, so a type that's pruned and used again keeps its colour |
 | `joke_type_links` | `joke_id`, `type_id` (both cascade) | Many-to-many |
 | `statuses` | `name`, `position` | Six defaults made on first sign-in; new ones are created by name when a joke uses them. A joke saved with no status (or the retired "Status Unknown") gets Draft |
-| `jokes` | `topic_id` (required), `subtopic_id` (set null), `premise_id` (set null, any topic), `follows_id → jokes` (set null: the joke this one continues from; many can follow one, so chains branch), `status_id` (set null), `setup`, `punchline`, `strength` 1–5 or null (unrated; new jokes start that way), `duration_seconds`, `hashtags` JSON, `tag_lines` JSON, `clean_rating` (clean / mild / dirty / null), `language`, `comments`, `voice_note_ids` JSON (the voice notes it came from; kept on the joke because a recording made offline can reach the server after the joke, and one deleted just isn't shown), `version` (up by one per save that changes it) | Check constraints on strength and clean rating. The API sends types and status as names. `version` catches edits made on two devices |
+| `jokes` | `topic_id` (required), `subtopic_id` (set null), `premise_id` (set null, any topic), `follows_id → jokes` (set null: the joke this one continues from; many can follow one, so chains branch), `status_id` (set null), `setup`, `punchline`, `strength` 1–5 or null (unrated; new jokes start that way), `duration_seconds`, `hashtags` JSON, `tag_lines` JSON, `alt_punchlines` JSON (other punchlines for the same setup; a save that leaves the field out keeps them), `clean_rating` (clean / mild / dirty / null), `language`, `comments`, `voice_note_ids` JSON (the voice notes it came from; kept on the joke because a recording made offline can reach the server after the joke, and one deleted just isn't shown), `version` (up by one per save that changes it) | Check constraints on strength and clean rating. The API sends types and status as names. `version` catches edits made on two devices |
 
 ### Connector sign-in
 
@@ -173,6 +173,7 @@ All of these run in one transaction ([services/topics.py](../app/services/topics
 | `0033` | `observations.premise_ids` and `joke_ids`: the premises and jokes that came from an observation |
 | `0034` | Observations with no topic go to Random: every observation has a topic now, like a joke (data only; the column stays nullable for the deployment serving during the build) |
 | `0035` | `jokes.voice_note_ids`: the voice notes a joke came from |
+| `0036` | `jokes.alt_punchlines`: the other punchlines tried for a joke's setup |
 
 Merged migrations are shared history. CI fails a PR that edits, deletes or renames one; fix
 forward with a new revision. CI also runs upgrade → downgrade → upgrade on Postgres 16, so every

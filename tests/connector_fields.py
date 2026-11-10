@@ -18,6 +18,7 @@ BRIEF = {
 }
 DETAIL = BRIEF | {
     "tag_lines",
+    "alt_punchlines",
     "hashtags",
     "notes",
     "premise",

@@ -163,6 +163,10 @@ Joke pages, sets and brainstorm sessions keep a local draft and save after a sho
 unmount (`useAutosaveJoke`, `useAutosaveSet`, `useSessionAutosave`). A ref holds the newest
 values, so a delayed save writes what's on screen now.
 
+A joke's save leaves out rows still empty (`toSend`): a tag line or alternate punch just added
+and not typed in yet. The server drops blank rows, and the copy it sent back used to replace the
+draft about three seconds later, taking the empty row (and the cursor) away mid-thought.
+
 ## URL as state
 The filters for Jokes (`?topic&sub&type&status&q&sort`) and Observations (`?topic`) live in the
 query string, so back, refresh and shared links keep your place. `/shows?log=1` opens the Log a

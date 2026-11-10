@@ -24,6 +24,7 @@ export const blankJoke = (topicId = ''): JokeInput => ({
   duration_seconds: DEFAULT_RUNTIME,
   hashtags: [],
   tag_lines: [],
+  alt_punchlines: [],
   clean_rating: 'clean',
   language: 'Hinglish',
   comments: '',

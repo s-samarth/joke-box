@@ -76,6 +76,7 @@ still accept the old `bit_id` and `bit_ids` for good. Responses use only the new
   "duration_seconds": 30,
   "hashtags": ["#dating"],
   "tag_lines": ["an extra punch"],
+  "alt_punchlines": "optional: other punchlines for the same setup, in order (blank ones dropped); left out, kept as stored",
   "clean_rating": "clean | mild | dirty | null",
   "language": "Hinglish",
   "comments": "",
@@ -265,8 +266,8 @@ Every tool reads; none writes. Each sees only the user's own rows, and the Trash
 | Tool | Returns |
 |---|---|
 | `jokebox_overview` | Topics and subtopics with joke counts; how many premises, sets, shows and observations; Craft areas; statuses and types |
-| `search_jokes` | Jokes matching every word of the query (in the setup, punchline, tag lines, hashtags or notes; `#name` finds a hashtag), filtered by topic, subtopic, status, type, strength or premise; short versions, at most 25. `strength` is null for an unrated joke, and a `min_strength` above 1 leaves those out |
-| `get_jokes` | Up to 20 jokes in full: tag lines, notes, premise, what it follows and what follows it, the sets it's in, its rewrites, and `shows`: its record at logged shows (`shows_done`, `killed`, `ok`, `bombed`, `last_done`). `from_observations` lists the observations it came from and `from_voice_notes` (`id`, `label`) the voice notes, Trash left out |
+| `search_jokes` | Jokes matching every word of the query (in the setup, punchline, alternate punches, tag lines, hashtags or notes; `#name` finds a hashtag), filtered by topic, subtopic, status, type, strength or premise; short versions, at most 25. `strength` is null for an unrated joke, and a `min_strength` above 1 leaves those out |
+| `get_jokes` | Up to 20 jokes in full: tag lines, `alt_punchlines` (other punchlines kept for the same setup, not in use), notes, premise, what it follows and what follows it, the sets it's in, its rewrites, and `shows`: its record at logged shows (`shows_done`, `killed`, `ok`, `bombed`, `last_done`). `from_observations` lists the observations it came from and `from_voice_notes` (`id`, `label`) the voice notes, Trash left out |
 | `list_premises`, `get_premise` | Premises with their joke counts; one premise with its notes, `from_observations` (`id`, `text` of each observation it came from) and jokes in chain order |
 | `list_sets`, `get_set` | Sets with runtime against target; one set in running order (first is the opener, last the closer) with each joke's topic, premise, strength and time |
 | `list_shows` | Logged shows with LPM, rating, topics, notes and `jokes` (each joke done, in running order: `id`, `setup`, `result` of killed / ok / bombed / null, `note`), and the LPM across every show that matches. `since` and `until` narrow by IST date; 25 a call, and `next_offset` says where the next page starts |

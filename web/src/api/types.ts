@@ -53,6 +53,8 @@ export interface JokeInput {
   duration_seconds: number
   hashtags: string[]
   tag_lines: string[]
+  /** Other punchlines for the same setup. Optional like voice_note_ids: left out, they're kept. */
+  alt_punchlines?: string[]
   clean_rating: CleanRating | null
   language: string | null
   comments: string

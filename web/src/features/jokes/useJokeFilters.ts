@@ -29,7 +29,7 @@ export const sortDate = (sort: SortKey): ((b: Joke) => string) | null =>
 export function matchesSearch(joke: Joke, q: string): boolean {
   if (!q) return true
   const needle = q.toLowerCase()
-  return [joke.setup, joke.punchline, joke.comments, ...joke.hashtags, ...joke.tag_lines].some((t) => t.toLowerCase().includes(needle))
+  return [joke.setup, joke.punchline, joke.comments, ...joke.hashtags, ...joke.tag_lines, ...(joke.alt_punchlines ?? [])].some((t) => t.toLowerCase().includes(needle))
 }
 
 export function matchesPremise(joke: Joke, premise: string | null): boolean {

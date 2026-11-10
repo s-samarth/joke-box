@@ -22,6 +22,7 @@ import { GrowingText, Textarea } from '../../components/ui/Field'
 import { Modal } from '../../components/ui/Modal'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { JokeDetails } from '../jokes/JokeDetails'
+import { PunchAlternates } from '../jokes/PunchAlternates'
 import { TagLines } from '../jokes/TagLines'
 import { ObservationPicker } from '../observations/ObservationPicker'
 import { VoiceNotesOn } from '../voice/VoiceNotesOn'
@@ -99,7 +100,8 @@ export function NewJokeForm({ prefill, plain, onClose }: { prefill: Prefill; pla
           )
         }
       : undefined
-    const id = capture({ ...input, tag_lines: input.tag_lines.filter((t) => t.trim()) }, { open, onSaved })
+    const full = (lines: string[] = []) => lines.filter((t) => t.trim())
+    const id = capture({ ...input, tag_lines: full(input.tag_lines), alt_punchlines: full(input.alt_punchlines) }, { open, onSaved })
     if (!id) return
     // Queued after the joke's save, so they reach the server in order (offline too). One deleted
     // since it was picked (a kept draft can be days old) is skipped, not sent to fail.
@@ -131,6 +133,7 @@ export function NewJokeForm({ prefill, plain, onClose }: { prefill: Prefill; pla
           <div className="h-px bg-rule" />
           <GrowingText aria-label="Punchline" placeholder="The punchline" className="text-xl leading-snug text-tape placeholder:text-faint" value={draft.punchline}
             onChange={(e) => update({ punchline: e.target.value })} />
+          <PunchAlternates punchline={draft.punchline} alternates={draft.alt_punchlines ?? []} onChange={update} />
           <TagLines lines={draft.tag_lines} onChange={(tag_lines) => update({ tag_lines })} />
         </div>
 

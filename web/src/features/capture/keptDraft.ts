@@ -44,9 +44,9 @@ export function forgetDraft(): void {
   }
 }
 
-/** Has anything been typed: words, tag lines, notes or a brainstorm. */
+/** Has anything been typed: words, alternate punches, tag lines, notes or a brainstorm. */
 export const hasText = ({ draft, brainstorm }: KeptDraft): boolean =>
-  [draft.setup, draft.punchline, draft.comments, brainstorm, ...draft.tag_lines].some((t) => t.trim().length > 0)
+  [draft.setup, draft.punchline, draft.comments, brainstorm, ...draft.tag_lines, ...(draft.alt_punchlines ?? [])].some((t) => t.trim().length > 0)
 
 export interface Start extends KeptDraft {
   observationIds: string[]

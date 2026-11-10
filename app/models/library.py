@@ -146,6 +146,8 @@ class Joke(Trashable, OwnedMixin, Base):
     hashtags: Mapped[list[str]] = mapped_column(JSON, default=list)
     # Comedy tags: extra punchlines that follow the main punch.
     tag_lines: Mapped[list[str]] = mapped_column(JSON, default=list)
+    # Other punchlines tried for the same setup, kept beside the one in use.
+    alt_punchlines: Mapped[list[str]] = mapped_column(JSON, default=list, server_default="[]")
     clean_rating: Mapped[str | None] = mapped_column(String(10))
     language: Mapped[str | None] = mapped_column(String(40))
     comments: Mapped[str] = mapped_column(Text, default="")
