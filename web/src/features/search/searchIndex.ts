@@ -54,7 +54,7 @@ const q = (query: string) => encodeURIComponent(query.trim())
 
 const KINDS: Kind<unknown>[] = [
   kind<Joke>({
-    kind: 'Jokes', items: (l) => l.jokes, texts: (j) => [j.setup, j.punchline, j.comments, ...j.tag_lines], tags: (j) => j.hashtags,
+    kind: 'Jokes', items: (l) => l.jokes, texts: (j) => [j.setup, j.punchline, j.comments, ...j.tag_lines, ...(j.alt_punchlines ?? [])], tags: (j) => j.hashtags,
     title: (j) => j.setup, body: (j) => [j.punchline, ...j.tag_lines, j.comments].join(' '), to: (j) => `/jokes/${j.id}`,
   }),
   kind<Premise>({ kind: 'Premises', items: (l) => l.premises, texts: (p) => [p.take, p.notes], title: (p) => p.take, body: (p) => p.notes, to: (p) => `/premises/${p.id}` }),

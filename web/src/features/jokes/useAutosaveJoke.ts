@@ -15,6 +15,19 @@ export function toInput(b: Joke): JokeInput {
   return input
 }
 
+const filled = (lines: string[]) => lines.filter((l) => l.trim())
+
+/**
+ * The draft as it's sent: rows left empty (a tag line or alternate punch just added) stay on
+ * screen but aren't saved. The server drops them anyway, and the copy it then sent back used to
+ * take the empty row away while you were still thinking.
+ */
+export function toSend(draft: JokeInput): JokeInput {
+  const sent = { ...draft, tag_lines: filled(draft.tag_lines) }
+  if (draft.alt_punchlines) sent.alt_punchlines = filled(draft.alt_punchlines)
+  return sent
+}
+
 /** The same words and settings, whatever version each came from. */
 function sameFields(a: JokeInput, b: JokeInput): boolean {
   const keys = new Set([...Object.keys(a), ...Object.keys(b)])
@@ -50,7 +63,7 @@ export function useAutosaveJoke(joke: Joke) {
 
   const flush = () => {
     clearTimeout(timer.current)
-    if (pending.current && pending.current.setup.trim()) mutate.current({ id: joke.id, input: pending.current })
+    if (pending.current && pending.current.setup.trim()) mutate.current({ id: joke.id, input: toSend(pending.current) })
     pending.current = null
   }
 

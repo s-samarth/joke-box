@@ -28,6 +28,7 @@ def to_out(joke: Joke) -> JokeOut:
         duration_seconds=joke.duration_seconds,
         hashtags=list(joke.hashtags or []),
         tag_lines=list(joke.tag_lines or []),
+        alt_punchlines=list(joke.alt_punchlines or []),
         clean_rating=joke.clean_rating,  # type: ignore[arg-type]
         language=joke.language,
         comments=joke.comments,
@@ -92,9 +93,10 @@ def check_premise(db: Session, user: User, data: JokeIn) -> None:
 def plain_fields(data: JokeIn) -> dict[str, object]:
     """The fields copied as they are. An app too old to know about chains or premises leaves
     follows_id, premise_id or voice_note_ids out, and then the link is kept rather than cleared.
-    A save without strength keeps the rating too: only an explicit null makes a joke unrated."""
+    The same goes for alt_punchlines: an older app never wipes them. A save without strength
+    keeps the rating too: only an explicit null makes a joke unrated."""
     skip = {"types", "status", "created_at", "base_version"}
-    for link in ("follows_id", "premise_id", "strength", "voice_note_ids"):
+    for link in ("follows_id", "premise_id", "strength", "voice_note_ids", "alt_punchlines"):
         if link not in data.model_fields_set:
             skip.add(link)
     fields = data.model_dump(exclude=skip)

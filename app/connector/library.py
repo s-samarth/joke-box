@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.connector.jokes import (
     brief,
     detail,
+    lines,
     load_names,
     rewrite_counts,
     sets_by_joke,
@@ -91,7 +92,7 @@ def search_jokes(
     found = [
         j
         for j in user_jokes(db, user)
-        if matches(query, j.setup, j.punchline, j.comments, *(j.tag_lines or []), *hashtags(j))
+        if matches(query, j.setup, j.punchline, j.comments, *lines(j), *hashtags(j))
         and same_name(topic, topic_name(names, j.topic_id))
         and same_name(subtopic, names.subtopics.get(j.subtopic_id) if j.subtopic_id else "")
         and same_name(status, j.status.name if j.status else "")

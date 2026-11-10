@@ -24,7 +24,7 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 **With details (+ button):**
 1. Tap **+** in the phone bar (or **New joke** on the desktop rail).
 2. The New joke sheet opens, filed under the topic you're looking at, if any.
-3. Fill in as much as you want: tag lines, the observations it came from (**From observations**,
+3. Fill in as much as you want: alternate punches, tag lines, the observations it came from (**From observations**,
    right under the words: type a few words, tap a match), strength, types, topic and subtopic
    (new ones can be made on the spot), status, runtime, clean rating, language, hashtags, notes,
    and a first brainstorm.
@@ -82,7 +82,10 @@ through everything you've written at once.
 2. Tap a joke. On an iPad or desktop it opens beside the list (the list narrows to make room);
    on a phone it opens as its own page. To read it with the whole screen, tap the expand button at
    its top right; tap × to go back to the list.
-3. Edit the words in place. Add tag lines (drag the grip to reorder them), move the strength ticks, change type or topic. Each
+3. Edit the words in place. Under the punchline, **Add an alternate punch** keeps another ending
+   for the same setup (add as many as you like); **Use** beside one makes it the punchline and
+   moves the old punchline down in its place, so trying an ending never loses the one you had.
+   Add tag lines (drag the grip to reorder them), move the strength ticks, change type or topic. Each
    change saves on its own; the cloud icon shows "Saving…" and then "All changes saved".
 4. For a deeper pass, scroll to Rewrites and choose **Start a rewrite**. The full-screen **Rewrite** page pins the
    original at the top and runs a timer. Write freely and tap **Save version** to keep a snapshot.

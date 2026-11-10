@@ -130,7 +130,7 @@ separate log to fall out of step. Items in the Trash don't count.
 [JokesLayout.tsx](../web/src/features/jokes/JokesLayout.tsx), [JokeFilters.tsx](../web/src/features/jokes/JokeFilters.tsx),
 [useJokeFilters.ts](../web/src/features/jokes/useJokeFilters.ts), [JokePage.tsx](../web/src/features/jokes/JokePage.tsx),
 [JokeDetails.tsx](../web/src/features/jokes/JokeDetails.tsx), [DetailControls.tsx](../web/src/features/jokes/DetailControls.tsx),
-[TagLines.tsx](../web/src/features/jokes/TagLines.tsx), [JokeExtras.tsx](../web/src/features/jokes/JokeExtras.tsx),
+[PunchAlternates.tsx](../web/src/features/jokes/PunchAlternates.tsx), [TagLines.tsx](../web/src/features/jokes/TagLines.tsx), [JokeExtras.tsx](../web/src/features/jokes/JokeExtras.tsx),
 [useAutosaveJoke.ts](../web/src/features/jokes/useAutosaveJoke.ts), [TopicManager.tsx](../web/src/features/jokes/TopicManager.tsx),
 [TypeManager.tsx](../web/src/features/jokes/TypeManager.tsx), [ViewSwitch.tsx](../web/src/features/jokes/ViewSwitch.tsx),
 [SplitView.tsx](../web/src/components/ui/SplitView.tsx), [ChipRow.tsx](../web/src/components/ui/ChipRow.tsx). The map: [map/](../web/src/features/jokes/map/) ([mapLayout.ts](../web/src/features/jokes/map/mapLayout.ts),
@@ -174,8 +174,13 @@ separate log to fall out of step. Items in the Trash don't count.
   premise aren't drawn; a link lists them so you can sort them in. Tap a joke for the same panel
   as the map. The panel ends with where the joke came from (its observations, and voice notes
   you can play), as does the reading panel in a set ([JokeOrigins.tsx](../web/src/features/jokes/JokeOrigins.tsx)).
-- **The joke page:** the setup and punchline (in tape yellow) are edited in place, followed by tag
-  lines. Below them, a row of details: Strength (**Unrated**, then five bars; tap the lit bar again
+- **The joke page:** the setup and punchline (in tape yellow) are edited in place, followed by
+  alternate punches and then tag lines. **Alternate punches** ([PunchAlternates.tsx](../web/src/features/jokes/PunchAlternates.tsx))
+  are other endings for the same setup, as many as you like, set off by a rule on the left: **Add
+  an alternate punch** adds a row and puts the cursor in it, **Use** makes that row the punchline
+  and puts the old punchline in its row (so Use again swaps back), × removes one. A row left
+  empty stays on screen but isn't saved. They show only here and in New joke, never on stage, in
+  print or in a peek, and search finds them. Below the words, a row of details: Strength (**Unrated**, then five bars; tap the lit bar again
   to clear it), Type (with Edit types), Filed under (topic and
   subtopic, with Edit topics), Premise, Follows (the joke this one comes after in a chain),
   Followed by (with a button to write the next one), Status, Runs for (type it, or step it five
@@ -266,6 +271,7 @@ plays from the phone.
 
 The sheet is opened by **+** (on screens other than Premises, Shows and Observations), by **New
 joke**, or by "Turn into a joke" on an observation, a voice note or a brainstorm session. It
+has the same alternate punches and tag lines under the punchline, and
 renders the same `JokeDetails` controls as the joke page, but owns its own draft: one set of
 controls with two owners of the state, so the two screens can't drift apart. Its buttons are
 **Save and open** and **Save joke**. A new joke starts as Draft, 15 seconds, Clean and in
@@ -308,7 +314,7 @@ tick through it; the ticks count up and don't change the note, so the next rewri
 [SearchPage.tsx](../web/src/features/search/SearchPage.tsx), [searchIndex.ts](../web/src/features/search/searchIndex.ts),
 [search.ts](../web/src/lib/search.ts).
 
-One box over everything: jokes (setup, punchline, tag lines, notes, hashtags), premises,
+One box over everything: jokes (setup, punchline, alternate punches, tag lines, notes, hashtags), premises,
 observations, brainstorms (title and typed words; handwriting can't be searched), rewrites, voice
 notes (label and hashtags), sets, shows (venue and notes), Craft notes, analyses and the watchlist.
 Every word has to appear, in any order; `#name` and `name` both find a hashtag. It runs in the

@@ -1,7 +1,7 @@
 /** An open joke editor takes a newer copy of the joke only while nothing's been typed. */
 import { describe, expect, it } from 'vitest'
 import type { JokeInput } from '../../api/types'
-import { followNewer } from './useAutosaveJoke'
+import { followNewer, toSend } from './useAutosaveJoke'
 
 const input = (setup: string, version = 1) => ({ setup, punchline: 'A made-up punchline', version }) as unknown as JokeInput
 
@@ -23,5 +23,18 @@ describe('an open joke editor', () => {
     const typed = input('Typed made-up setup')
     const answered = input('Typed made-up setup', 2)
     expect(followNewer(typed, input('Typed made-up setup', 1), answered, false)).toBe(answered)
+  })
+})
+
+describe('what an edit sends', () => {
+  const draft = (extra: Partial<JokeInput>) => ({ ...input('A made-up setup'), tag_lines: [], ...extra }) as JokeInput
+
+  it('leaves out rows still empty, and keeps the rest in order', () => {
+    const sent = toSend(draft({ tag_lines: ['one', ' ', 'two'], alt_punchlines: ['', 'Made-up other ending'] }))
+    expect([sent.tag_lines, sent.alt_punchlines]).toEqual([['one', 'two'], ['Made-up other ending']])
+  })
+
+  it('sends no alternates for a joke cached before they existed, so the server keeps its own', () => {
+    expect('alt_punchlines' in toSend(draft({}))).toBe(false)
   })
 })

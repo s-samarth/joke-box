@@ -17,7 +17,7 @@ What they need, in order of how often it comes up:
 
 1. **Catch an idea before it's gone:** typed, spoken, or written by hand, in a couple of seconds,
    with or without a signal.
-2. **Work an idea into a joke:** setup, punchline, tag lines, rewrites against a clock.
+2. **Work an idea into a joke:** setup, punchline, alternate punches, tag lines, rewrites against a clock.
 3. **Build and run a set:** pick the jokes, order them, fit them to the slot, rehearse, perform.
 4. **Learn from each show:** log it on the way home, see the trend over weeks.
 5. **Study the craft:** what you've learned about doing stand-up (checklists, writing techniques,
@@ -91,6 +91,7 @@ The vocabulary is a comic's, not a database's. Keep to it in the code and in the
 | **Joke** (or **joke**) | The unit of material: a setup, a punchline, and its details. The UI says "joke"; the code and API say `joke`. |
 | **Setup / punchline** | The two parts of a joke: the plain words that make the audience assume something, and the line that breaks it. The UI calls the punchline "the punch" in passing. |
 | **Premise** | The idea or opinion under a joke ("X is Y, because Z"), kept on the Premises screen with its notes. A joke can rest on one premise, and one premise can feed many jokes, from any topic. **Premise** is also one of the default types. |
+| **Alternate punch** | Another ending for the same setup, kept under the punchline in use. A joke can have as many as you like. **Use** swaps one in as the punchline and keeps the one it replaced as an alternate, so nothing is lost. Never shown on stage or in print. |
 | **Tag line** | An extra punchline that follows the main punch. |
 | **Random** | The default topic for anything unfiled. The protected `Random` topic, which can't be renamed or deleted, and picks up the jokes of any deleted topic. |
 | **Topic / subtopic** | Folders for jokes. Premises and observations are filed under the same topics (one shared list; Random by default); subtopics are for jokes only. Observations also have kinds of their own. |

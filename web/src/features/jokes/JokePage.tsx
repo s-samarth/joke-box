@@ -1,5 +1,6 @@
 /**
- * One joke, one page. The words are edited in place (no form popup), then where it came from
+ * One joke, one page. The words are edited in place (no form popup): setup, punchline, alternate
+ * punches (PunchAlternates) and tag lines. Then where it came from
  * (observations, see ObservationsOn; voice notes, see VoiceNotesOn), its details, its rewrites
  * and sets. Every change saves
  * on its own, offline included.
@@ -18,6 +19,7 @@ import { VoiceNotesOn } from '../voice/VoiceNotesOn'
 import { JokeDetails } from './JokeDetails'
 import { JokeExtras } from './JokeExtras'
 import { JokeShowRecord } from './JokeShowRecord'
+import { PunchAlternates } from './PunchAlternates'
 import { TagLines } from './TagLines'
 import { useAutosaveJoke } from './useAutosaveJoke'
 
@@ -48,6 +50,7 @@ function Editor({ joke }: { joke: Joke }) {
           onChange={(e) => update({ punchline: e.target.value })} />
         {!draft.setup.trim() && <p className="mt-2 text-sm text-light">A joke needs a setup to be saved.</p>}
       </div>
+      <div className="mt-4"><PunchAlternates punchline={draft.punchline} alternates={draft.alt_punchlines ?? []} onChange={update} /></div>
       <div className="mt-6"><TagLines lines={draft.tag_lines} onChange={(tag_lines) => update({ tag_lines })} /></div>
       <div className="mt-8 space-y-6">
         <ObservationsOn kind="jokes" id={joke.id} topicId={draft.topic_id} />

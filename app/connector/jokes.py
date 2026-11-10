@@ -48,6 +48,11 @@ def user_jokes(db: Session, user: User) -> list[Joke]:
     return list(db.scalars(query))
 
 
+def lines(joke: Joke) -> list[str]:
+    """A joke's lines besides the setup and the punchline in use: tag lines and other punches."""
+    return [*(joke.tag_lines or []), *(joke.alt_punchlines or [])]
+
+
 def brief(joke: Joke, names: Names) -> dict[str, Any]:
     """A joke in a list: enough to recognise it and decide whether to open it."""
     return {
@@ -97,6 +102,7 @@ def detail(
         "setup": joke.setup,
         "punchline": joke.punchline,
         "tag_lines": list(joke.tag_lines or []),
+        "alt_punchlines": list(joke.alt_punchlines or []),
         "hashtags": list(joke.hashtags or []),
         "notes": clip(joke.comments, 4000),
         "premise": names.premises.get(joke.premise_id) if joke.premise_id else None,

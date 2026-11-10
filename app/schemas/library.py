@@ -105,6 +105,8 @@ class JokeIn(BaseModel):
     duration_seconds: int = Field(default=0, ge=0, le=INT_MAX)
     hashtags: list[str] = Field(default_factory=list)
     tag_lines: list[str] = Field(default_factory=list)
+    # Other punchlines for the same setup. Left out (an older app), they stay as they are.
+    alt_punchlines: list[str] = Field(default_factory=list)
     clean_rating: CleanRating | None = None
     language: str | None = Field(default=None, max_length=40)
     comments: str = ""
@@ -133,7 +135,7 @@ class JokeIn(BaseModel):
     def each_note_once(cls, ids: list[uuid.UUID]) -> list[uuid.UUID]:
         return list(dict.fromkeys(ids))
 
-    @field_validator("types", "hashtags", "tag_lines")
+    @field_validator("types", "hashtags", "tag_lines", "alt_punchlines")
     @classmethod
     def drop_blank_items(cls, values: list[str]) -> list[str]:
         return [v.strip() for v in values if v.strip()]
@@ -152,6 +154,7 @@ class JokeOut(BaseModel):
     duration_seconds: int
     hashtags: list[str]
     tag_lines: list[str]
+    alt_punchlines: list[str]
     clean_rating: CleanRating | None
     language: str | None
     comments: str
