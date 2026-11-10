@@ -1,4 +1,5 @@
-"""The MCP server: the tools Claude sees. Each one reads, never writes.
+"""The tools Claude sees for the library and the stage: jokes, premises, the writing pulse, sets
+and shows. Each one reads, never writes. The notebook and study tools are in server_notebook.py.
 
 The work lives in the area modules; these wrappers give each tool its name, its description
 (the docstring, which Claude reads to decide when to call it) and its database session.
@@ -6,26 +7,9 @@ The work lives in the area modules; these wrappers give each tool its name, its 
 
 from typing import Any
 
-from mcp.server.mcpserver import Image, MCPServer
-from mcp.types import TextContent, ToolAnnotations
-
-from app.connector import brainstorm, library, notebook, performing, study, voice
+from app.connector import library, performing, pulse
+from app.connector.base import READ, server
 from app.connector.identity import reading
-
-INSTRUCTIONS = """JokeBox is a stand-up comic's library: jokes (setup, punchline, tags) filed by \
-topic, premises (a take with a reason) that jokes rest on, sets in running order, logged shows, \
-observations, voice notes, brainstorms, Craft notes on how comedy works, and analyses of other \
-comics.
-Start with jokebox_overview if you don't know what's there. Search first, then open the few \
-items you need. Quote Craft notes by title when you apply them. Handwritten brainstorms come as \
-images of their pages from get_brainstorm: read the handwriting from them. Everything here is \
-read-only: the comic writes and edits in JokeBox themselves."""
-
-# No subscriptions: the tool list never changes while running, and a listen request is a
-# stream that a stateless JSON server never answers, so each one held a function open until
-# Vercel's 300-second timeout and Claude opened another.
-server = MCPServer("JokeBox", instructions=INSTRUCTIONS, subscriptions=False)
-READ = ToolAnnotations(read_only_hint=True, open_world_hint=False)
 
 
 @server.tool(annotations=READ)
@@ -34,6 +18,19 @@ def jokebox_overview() -> dict[str, Any]:
     and observations there are, the Craft areas, and the statuses and types in use."""
     with reading() as (db, user):
         return library.overview(db, user)
+
+
+@server.tool(annotations=READ)
+def writing_pulse() -> dict[str, Any]:
+    """How the writing is going, worked out from what's saved (nothing is logged for it), the
+    same as the Writing pulse on the comic's Daily activity screen. `written`: observations,
+    premises and jokes written in the last 30 days and in the 30 before. `how_far_ideas_got`: of
+    what was written in the last 90 days, how many observations led to a joke, premise or
+    brainstorm, premises got a joke, and jokes got a punchline or were marked Stage Ready or
+    Complete. `sitting_idle`: counts over everything, whatever its age. `worth_knowing`: up to
+    three plain sentences. Days are India's; `too_little_yet` means under five pieces in all."""
+    with reading() as (db, user):
+        return pulse.writing_pulse(db, user)
 
 
 @server.tool(annotations=READ)
@@ -129,72 +126,5 @@ def list_shows(
         )
 
 
-@server.tool(annotations=READ)
-def search_observations(
-    query: str = "", topic: str = "", kind: str = "", limit: int = 25
-) -> dict[str, Any]:
-    """Observations: things the comic noticed that aren't jokes yet, newest first. `topic` is a
-    joke topic (the same list as jokes and premises; Random unless filed elsewhere). `kind` says
-    what sort of note it is, like "Set ideas" or "Questions"; most are plain "Observation".
-    `premise_ids` and `joke_ids` are what came from it and `brainstorm_ids` the brainstorm
-    sessions it was used in: all empty means it hasn't been used yet."""
-    with reading() as (db, user):
-        return notebook.search_observations(db, user, query, topic, limit, kind)
-
-
-@server.tool(annotations=READ)
-def search_voice_notes(query: str = "", limit: int = 25) -> dict[str, Any]:
-    """Voice notes: ideas the comic recorded out loud, newest first, by label and hashtags.
-    Only what each is called and tagged, how long it runs, when it was recorded and `joke_ids`
-    (the jokes written from it): the recordings themselves can't be heard here."""
-    with reading() as (db, user):
-        return voice.search_voice_notes(db, user, query, limit)
-
-
-@server.tool(annotations=READ)
-def search_brainstorms(query: str = "", limit: int = 25) -> dict[str, Any]:
-    """Brainstorm sessions (free writing, maybe running a Craft technique) and Rewrites
-    (reworking one joke), searched by title and typed text. Handwriting can't be searched: a
-    brainstorm's handwritten_pages says how many pages it has; read them with get_brainstorm."""
-    with reading() as (db, user):
-        return notebook.search_brainstorms(db, user, query, limit)
-
-
-@server.tool(annotations=READ)
-def get_brainstorm(brainstorm_id: str, from_page: int = 1) -> list[TextContent | Image]:
-    """One result of search_brainstorms in full, by its id. A Brainstorm session: title, typed
-    text, technique, linked jokes and observations, then each handwritten page as an image,
-    labelled "Page N". Read the handwriting from the images: the app's dark page in the comic's
-    own ink colours, up to two screens wide. If more_from_page is set, call again with
-    from_page for the rest. A Rewrite (kind "rewrite"): the joke it reworks and the typed text."""
-    with reading() as (db, user):
-        return brainstorm.get_brainstorm(db, user, brainstorm_id, from_page)
-
-
-@server.tool(annotations=READ)
-def search_craft(query: str = "", area: str = "", kind: str = "") -> dict[str, Any]:
-    """Craft notes: the comic's own notes on how comedy works (premises, setups, techniques,
-    stage craft). With no query, lists every title. Open notes with get_craft_notes."""
-    with reading() as (db, user):
-        return study.search_craft(db, user, query, area, kind)
-
-
-@server.tool(annotations=READ)
-def get_craft_notes(ids: list[str]) -> dict[str, Any]:
-    """Up to 10 Craft notes in full."""
-    with reading() as (db, user):
-        return study.get_craft_notes(db, user, ids)
-
-
-@server.tool(annotations=READ)
-def search_analyses(query: str = "", limit: int = 25) -> dict[str, Any]:
-    """The comic's analyses of other comics' sets and jokes, with the routine each is about."""
-    with reading() as (db, user):
-        return study.search_analyses(db, user, query, limit)
-
-
-@server.tool(annotations=READ)
-def get_analysis(analysis_id: str) -> dict[str, Any]:
-    """One analysis in full."""
-    with reading() as (db, user):
-        return study.get_analysis(db, user, analysis_id)
+# The rest of the tools register themselves on the same server when this loads.
+from app.connector import server_notebook  # noqa: E402, F401

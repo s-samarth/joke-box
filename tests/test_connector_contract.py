@@ -21,7 +21,7 @@ from app.models import User
 from app.seed import reseed
 from tests.conftest import random_topic_id, signed_in
 from tests.connector_auth import connect, content, items, result, rpc
-from tests.connector_fields import BRIEF, DETAIL, SET
+from tests.connector_fields import BRIEF, DETAIL, PULSE, SET, TOOLS
 from tests.test_craft import note_in
 
 
@@ -58,24 +58,7 @@ def claude(db: Session) -> Iterator[tuple[TestClient, str]]:
 def test_every_tool_is_covered_here(claude: tuple[TestClient, str]) -> None:
     client, token = claude
     tools = {t["name"] for t in rpc(client, token, "tools/list").json()["result"]["tools"]}
-    assert tools == {
-        "jokebox_overview",
-        "search_jokes",
-        "get_jokes",
-        "list_premises",
-        "get_premise",
-        "list_sets",
-        "get_set",
-        "list_shows",
-        "search_observations",
-        "search_voice_notes",
-        "search_brainstorms",
-        "get_brainstorm",
-        "search_craft",
-        "get_craft_notes",
-        "search_analyses",
-        "get_analysis",
-    }
+    assert tools == TOOLS
 
 
 def test_library_tools(claude: tuple[TestClient, str]) -> None:
@@ -108,6 +91,14 @@ def test_library_tools(claude: tuple[TestClient, str]) -> None:
     assert set(opened) == {"id", "take", "notes", "topic", "from_observations", "jokes"}
     assert set(items(opened, "from_observations")[0]) == {"id", "text"}
     assert set(items(opened, "jokes")[0]) == BRIEF | {"follows_id"}
+
+
+def test_pulse_tool(claude: tuple[TestClient, str]) -> None:
+    out = result(claude, "writing_pulse")
+    assert set(out) == PULSE
+    assert set(items(out, "written")[0]) == {"kind", "last_30_days", "the_30_days_before"}
+    assert set(items(out, "how_far_ideas_got")[0]) == {"step", "done", "of"}
+    # Nothing here sits idle; a sitting_idle row's fields are checked in test_connector_pulse.py.
 
 
 def test_performing_tools(claude: tuple[TestClient, str]) -> None:

@@ -2,6 +2,7 @@
  * The pulse's plain sentences, each from a simple rule over what's saved (no AI, no guessing):
  * a kind you haven't written in weeks, the topic with the biggest pile of observations nothing
  * has come from, and when you tend to write. At most three, most useful first.
+ * The same rules as app/connector/pulse_notes.py, which Claude reads: change them together.
  */
 import { toIstInput } from '../../lib/time'
 import { KIND_META, KINDS } from './activity'

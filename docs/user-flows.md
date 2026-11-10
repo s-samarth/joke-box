@@ -185,6 +185,8 @@ through everything you've written at once.
 3. Under **Sitting idle**, tap a row to open that pile: unused observations, premises with no
    joke, old drafts. **Worth knowing** adds what stands out, such as a kind you haven't written
    in weeks or the topic with the most unused observations.
+4. Or ask Claude how the writing is going: with the connector on, it reads the same pulse and
+   can open the idle observations, premises and drafts it counts.
 
 **The shows:**
 1. On **Shows**, pick a period (Lifetime, This month, This week) and a venue.
