@@ -62,7 +62,7 @@ own data. Today that is one comedian, but the system works for more than one.
 |---|---|---|
 | **Home** | The daily joke nudge, one box with three tabs to write an observation, premise or joke, shortcuts to all three, the Daily activity calendar, record a voice note, start a brainstorm, a search button, study shortcuts, topic folders, next set, last show | `/` |
 | **Search** | One search across everything: jokes, premises, observations, brainstorms (typed words; not handwriting), rewrites, voice notes, sets, shows, Craft, analyses and the watchlist. Works offline, on what the phone already holds | `/search` |
-| **Daily activity** | One new joke a day (today's box, the joke streak; the nudge on Home goes from green to yellow, red and spooky), and a calendar of everything written each day: jokes, premises and observations in their own colours, with the month's total. The calendar also sits on Home | `/daily` |
+| **Daily activity** | One new joke a day (today's box, the joke streak; the nudge on Home goes from green to yellow, red and spooky), and a calendar of everything written each day: jokes, premises and observations in their own colours, with the month's total. The calendar also sits on Home. Under it, the **writing pulse**: your pace against the month before, how far ideas got on the way to a finished joke, what's sitting idle, and a few plain sentences, all worked out from what's saved | `/daily` |
 | **Jokes** | Searchable list with topic, type, status and sort filters; each joke edited in place; CSV export. A List / Map / Web switch shows the same jokes as the Map of joke chains or the Web of premises with their jokes, full screen (and beside the list on a wide screen) | `/jokes`, `/jokes/:id`, `/jokes/map` |
 | **Premises** | The ideas under your jokes ("X is Y, because Z"): each one's take and notes, and every joke resting on it in chain order | `/premises`, `/premises/:id` |
 | **New joke** | The + button: a full sheet with every field, prefilled from where you are. Closing it keeps what you typed for next time. On Premises, Shows and Observations the + makes one of those instead | sheet |
@@ -119,4 +119,3 @@ These aren't built yet; the schema leaves room for them:
 - **Strength from stage results:** shows now record how each joke went; strength could follow
   that record instead of being set by hand.
 - **Trend charts:** rating, crowd and stage time across weeks.
-- **Linking voice notes to jokes**, the way brainstorm sessions already link.

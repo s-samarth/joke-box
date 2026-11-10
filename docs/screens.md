@@ -99,7 +99,8 @@ in IST and the headline **"Got something?"** with a search button beside it (it 
 [DailyPage.tsx](../web/src/features/daily/DailyPage.tsx), [activity.ts](../web/src/features/daily/activity.ts),
 [dailyMath.ts](../web/src/features/daily/dailyMath.ts), [MonthCalendar.tsx](../web/src/features/daily/MonthCalendar.tsx),
 [MonthMix.tsx](../web/src/features/daily/MonthMix.tsx), [DayDetail.tsx](../web/src/features/daily/DayDetail.tsx),
-[ActivityPanel.tsx](../web/src/features/daily/ActivityPanel.tsx) (stats to picked day, shared with Home).
+[ActivityPanel.tsx](../web/src/features/daily/ActivityPanel.tsx) (stats to picked day, shared with Home),
+[WritingPulse.tsx](../web/src/features/daily/WritingPulse.tsx), [pulse.ts](../web/src/features/daily/pulse.ts), [pulseNotes.ts](../web/src/features/daily/pulseNotes.ts).
 
 Everything you wrote, day by day: observations, premises and jokes, in that order everywhere on
 this screen and on Home (raw material first, as in the writing box). The streak is still the daily
@@ -107,6 +108,20 @@ joke habit: only a new joke keeps it going. A day's activity is read from the cr
 of the three lists already cached, imports included with their original dates, so there's no
 separate log to fall out of step. Items in the Trash don't count.
 
+- **Writing pulse** (at the foot of this page only, not on Home): how the writing is going, worked
+  out from what's saved, so there is nothing to log. Four parts:
+  - **Written in the last 30 days:** observations, premises and jokes, each against the 30 days
+    before (rolling, so a month that has just begun isn't set against a full one).
+  - **How far ideas got**, of what you wrote in the last 90 days: observations that led somewhere
+    (a joke, premise or brainstorm, the same test as **Not used yet**), premises with a joke on
+    them, jokes with a punchline, and jokes marked Stage Ready or Complete.
+  - **Sitting idle** (all of it, not just recent): observations nothing has come from, premises
+    with no joke, jokes without a punchline, and Drafts not touched in 30 days. A row opens the
+    list that shows them where a filter exists; a row at zero isn't shown.
+  - **Worth knowing:** up to three sentences from simple rules, no AI: a kind with nothing new in
+    21 days, the topic with the biggest pile of unused observations (at least 5, 3 unused), and
+    the weekday and part of the day you write most (from 10 pieces in 90 days).
+  With fewer than 5 pieces in all it says to write a few more.
 - **The nudge** (the same one as Home); its button focuses the box below.
 - **Today's joke:** the quick capture box. Saving puts the joke in Random and marks today at once.
 - **Stats:** joke streak (ending today, or yesterday while today is still open), longest joke
