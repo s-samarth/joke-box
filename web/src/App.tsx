@@ -41,6 +41,7 @@ const DailyPage = named(() => import('./features/daily/DailyPage'), 'DailyPage')
 const TrashPage = named(() => import('./features/trash/TrashPage'), 'TrashPage')
 const ImportPage = named(() => import('./features/import/ImportPage'), 'ImportPage')
 const SearchPage = named(() => import('./features/search/SearchPage'), 'SearchPage')
+const NotFoundPage = named(() => import('./layout/NotFoundPage'), 'NotFoundPage')
 
 const full = (el: React.ReactNode) => <RequireAuth>{el}</RequireAuth>
 
@@ -87,6 +88,8 @@ export function App() {
           <Route path="trash" element={<TrashPage />} />
           <Route path="import" element={<ImportPage />} />
           <Route path="search" element={<SearchPage />} />
+          {/* Any other address: say so, with the way back, instead of quietly showing Home. */}
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
         {/* Full-screen modes without the app frame. */}
         {/* A session can turn into a joke, so it has the New joke sheet too. */}
@@ -99,7 +102,6 @@ export function App() {
         <Route path="/studio/*" element={<Navigate to="/jokes" replace />} />
         <Route path="/setlist/*" element={<Navigate to="/sets" replace />} />
         <Route path="/performance" element={<Navigate to="/shows" replace />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>
   )

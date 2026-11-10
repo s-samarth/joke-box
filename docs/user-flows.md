@@ -177,7 +177,8 @@ through everything you've written at once.
 2. Read the four totals: number of shows, time on stage, average rating and median crowd. The
    rating is weighted by stage time, so a 20-minute set counts more than a 3-minute one.
 3. **More filters** adds a date range, stars, set length and crowd size bands.
-4. Sort the table by any column, and tap a row to read, edit or delete the show.
+4. Sort the table by any column, and tap a row to read, edit or delete the show. On a phone the
+   shows are a list, with a **Sort** menu in place of the headings.
 5. Use ⋯ → **Export as CSV** for a spreadsheet. Jokes have the same export.
 6. Switch to **Timeline** for the mic diary (every day you went up), shows per month by rating and
    your rating over your last 10 shows.

@@ -282,6 +282,11 @@ flowchart LR
 
 ## When the app crashes
 
+- **An address that isn't a page** ([NotFoundPage.tsx](../web/src/layout/NotFoundPage.tsx)): not a
+  crash, but the same rule, say what happened. Any unknown URL shows "Nothing at this address"
+  inside the app frame, with **Go to Home** and **Search**. It used to redirect to Home, which
+  looked as if an old or mistyped link had worked. Addresses from the first version (`/bits`,
+  `/studio`, `/setlist`, `/performance`) still redirect to their new pages.
 - **An error screen, not a blank one** ([CrashScreen.tsx](../web/src/layout/CrashScreen.tsx)): an
   error boundary around the whole app. If a component throws while rendering, it shows "Something
   broke" with **Reload**, **Reload a fresh copy**, and the error under "What went wrong" with
