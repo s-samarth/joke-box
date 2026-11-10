@@ -122,6 +122,9 @@ separate log to fall out of step. Items in the Trash don't count.
     21 days, the topic with the biggest pile of unused observations (at least 5, 3 unused), and
     the weekday and part of the day you write most (from 10 pieces in 90 days).
   With fewer than 5 pieces in all it says to write a few more.
+  Claude reads the same numbers and sentences through the connector's `writing_pulse` tool
+  ([pulse.py](../app/connector/pulse.py)). The screen works them out in the browser so it works
+  offline, so the rules exist twice: change both together.
 - **The nudge** (the same one as Home); its button focuses the box below.
 - **Today's joke:** the quick capture box. Saving puts the joke in Random and marks today at once.
 - **Stats:** joke streak (ending today, or yesterday while today is still open), longest joke

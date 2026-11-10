@@ -32,9 +32,10 @@ from starlette.routing import Route
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 from app.config import get_settings
+from app.connector import server as tools  # noqa: F401  (registers every tool)
+from app.connector.base import server
 from app.connector.consent import router as consent_router
 from app.connector.oauth import SCOPE, Provider
-from app.connector.server import server
 
 PATH = "/mcp"
 LOCAL_ORIGIN = "http://localhost:8000"

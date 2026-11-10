@@ -3,6 +3,9 @@
  * links, punchlines, statuses), so there is nothing to log. Four parts, shown by WritingPulse:
  * the pace (the last 30 days against the 30 before), how far ideas get (of what was written in
  * the last 90 days), what's sitting idle, and a few plain sentences worth knowing.
+ *
+ * Claude reads the same pulse through the connector (app/connector/pulse.py), which works it out
+ * again on the server: change a rule here and there together.
  */
 import type { Premise } from '../../api/premises'
 import type { Joke, Observation } from '../../api/types'
