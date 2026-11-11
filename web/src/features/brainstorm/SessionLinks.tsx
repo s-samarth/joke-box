@@ -53,10 +53,13 @@ export function SessionLinks({ jokeIds, observationIds, onChange, idea }: Props)
   }
   // One box for both, so ids say which list they belong to.
   const items = [
-    ...observations.filter((o) => !observationIds.includes(o.id)).map((o) => ({ id: `o:${o.id}`, text: o.text, sub: `Observation · ${topic(o.topic_id)}` })),
-    ...jokes.filter((j) => !jokeIds.includes(j.id)).map((j) => ({ id: `j:${j.id}`, text: j.setup, sub: `Joke · ${topic(j.topic_id)}` })),
+    ...observations.map((o) => ({ id: `o:${o.id}`, text: o.text, sub: `Observation · ${topic(o.topic_id)}`, linked: observationIds.includes(o.id) })),
+    ...jokes.map((j) => ({ id: `j:${j.id}`, text: j.setup, sub: `Joke · ${topic(j.topic_id)}`, linked: jokeIds.includes(j.id) })),
   ]
   const pick = (id: string) => (id.startsWith('j:') ? onChange([...jokeIds, id.slice(2)], observationIds) : onChange(jokeIds, [...observationIds, id.slice(2)]))
+  const unpick = (id: string) => (id.startsWith('j:')
+    ? unlink([jokeIds.filter((x) => x !== id.slice(2)), observationIds], 'Joke')
+    : unlink([jokeIds, observationIds.filter((x) => x !== id.slice(2))], 'Observation'))
 
   return (
     <div className="space-y-2">
@@ -67,7 +70,7 @@ export function SessionLinks({ jokeIds, observationIds, onChange, idea }: Props)
         </div>
       )}
       <div className="flex flex-wrap items-start gap-2">
-        <div className="min-w-0 flex-1 basis-64"><LinkSearch placeholder="Link a joke or observation" items={items} onPick={pick} /></div>
+        <div className="min-w-0 flex-1 basis-64"><LinkSearch placeholder="Link a joke or observation" items={items} onPick={pick} onUnpick={unpick} /></div>
         <button type="button" onClick={() => openCapture({ setup: idea, observationIds: notes.map((o) => o.id), onCreated: (id) => onChange([...jokeIds, id], observationIds) })}
           className="inline-flex h-11 items-center gap-2 rounded-xl px-3 text-sm text-tape ring-1 ring-rule ring-inset hover:bg-ink-3">
           <Sparkles size={16} /> Turn into a joke

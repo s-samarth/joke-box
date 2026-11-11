@@ -52,16 +52,16 @@ export function ObservationUses({ observation }: { observation: Observation }) {
         <LinkedRows rows={jokes.filter((j) => jokeIds.includes(j.id)).map((j) => ({ id: j.id, to: `/jokes/${j.id}`, text: j.setup, sub: topic(j.topic_id) }))}
           empty="No jokes linked yet." unlinkLabel="Unlink this joke" onUnlink={(id) => unlink('jokes', id)} />
         <div className="mt-3">
-          <LinkSearch placeholder="Search jokes to link" onPick={(id) => set('jokes', id, true)}
-            items={near(jokes.filter((j) => !jokeIds.includes(j.id))).map((j) => ({ id: j.id, text: j.setup, sub: topic(j.topic_id) }))} />
+          <LinkSearch placeholder="Search jokes to link" onPick={(id) => set('jokes', id, true)} onUnpick={(id) => unlink('jokes', id)}
+            items={near(jokes).map((j) => ({ id: j.id, text: j.setup, sub: topic(j.topic_id), linked: jokeIds.includes(j.id) }))} />
         </div>
       </Section>
       <Section title="Premises from it">
         <LinkedRows rows={premises.filter((p) => premiseIds.includes(p.id)).map((p) => ({ id: p.id, to: `/premises/${p.id}`, text: p.take, sub: topic(p.topic_id) }))}
           empty="No premises linked yet." unlinkLabel="Unlink this premise" onUnlink={(id) => unlink('premises', id)} />
         <div className="mt-3">
-          <LinkSearch placeholder="Search premises to link" onPick={(id) => set('premises', id, true)}
-            items={near(premises.filter((p) => !premiseIds.includes(p.id))).map((p) => ({ id: p.id, text: p.take, sub: topic(p.topic_id) }))} />
+          <LinkSearch placeholder="Search premises to link" onPick={(id) => set('premises', id, true)} onUnpick={(id) => unlink('premises', id)}
+            items={near(premises).map((p) => ({ id: p.id, text: p.take, sub: topic(p.topic_id), linked: premiseIds.includes(p.id) }))} />
         </div>
       </Section>
       <Section title="Brainstorms with it">
