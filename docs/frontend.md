@@ -242,7 +242,13 @@ the brainstorm pen, so it never syncs.
   sizes are unchanged: there the caps match what the screen breakpoints already give.
 - **Linking by search:** [LinkSearch.tsx](../web/src/features/observations/LinkSearch.tsx) is the one
   way to link observations with jokes and premises, from either side: type, see the three best
-  matches, tap to link. No lists to scroll.
+  matches, tap to link. No lists to scroll. What's already linked still shows in the matches,
+  dimmed with a tick, and a tap unlinks it, so the box both links and unlinks (as a relation
+  picker does in Notion). Brainstorm sessions use the same box.
+  *Failure we hit:* the list used to close when the box lost focus. On an iPhone, touching a
+  match blurs the box before the tap lands (cancelling `pointerdown` doesn't stop that on touch),
+  so the list vanished under the finger and nothing linked; on a computer it worked. The list now
+  closes on a tap outside it, Escape, or tabbing away, never on blur alone.
 - **View transitions:** links that reshape the screen pass React Router's `viewTransition`; state
   changes go through `withTransition` ([viewTransition.ts](../web/src/lib/viewTransition.ts)).
   Moving between items in an open split doesn't fade, so it stays instant.

@@ -271,7 +271,8 @@ each opening its own page, with × to unlink. The New joke and New premise sheet
 box under the words, so you can link while you write; the picks are linked when you save. Under them, **Search
 observations to link**: type and the three best matches show (every word has to appear; focused
 and empty, it suggests three, same topic first). Tap one to link it; the box clears for the next,
-so you can link as many as you like. Enter links the first match. It's the same box everywhere
+so you can link as many as you like. Enter links the first match. Ones already linked still show,
+dimmed with a tick and "Linked · tap to unlink"; tapping one unlinks it. A tap outside closes the list. It's the same box everywhere
 something gets linked, as linking a page works in Notion. × shows **Undo** for a moment.
 
 A joke written from a voice note also has **From voice notes** under it (on its page and in the

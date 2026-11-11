@@ -66,7 +66,7 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
    premises) and tap it among the three matches.
 
 From the other side, New joke, New premise and every joke or premise page have **From
-observations** right under the words: type in **Search observations to link** and tap the one it came from; link as many as you like, × unlinks.
+observations** right under the words: type in **Search observations to link** and tap the one it came from; link as many as you like, × unlinks (or tap a linked one, shown dimmed in the search, to unlink it).
 Unlinking shows **Undo** for a moment, in case the tap was a slip. **Not used yet** on
 Observations shows the ones nothing has come from: no joke, premise or brainstorm session.
 

@@ -28,7 +28,7 @@ export function ObservationPicker({ linkedIds, topicId, onLink, onUnlink, openab
   const about = (o: Observation) => [topicLabel(topics, o.topic_id), o.kind_id ? kindLabel(kinds, o.kind_id) : null].filter((x) => x && x !== PLAIN).join(' · ')
   const newestFirst = [...observations].sort((a, b) => b.created_at.localeCompare(a.created_at))
   const linked = newestFirst.filter((o) => linkedIds.includes(o.id))
-  const candidates = [...newestFirst.filter((o) => o.topic_id === topicId), ...newestFirst.filter((o) => o.topic_id !== topicId)].filter((o) => !linkedIds.includes(o.id))
+  const candidates = [...newestFirst.filter((o) => o.topic_id === topicId), ...newestFirst.filter((o) => o.topic_id !== topicId)]
 
   return (
     <div className="space-y-2">
@@ -36,8 +36,8 @@ export function ObservationPicker({ linkedIds, topicId, onLink, onUnlink, openab
         <LinkedRows rows={linked.map((o) => ({ id: o.id, to: openable ? `/observations/${o.id}` : undefined, text: o.text, sub: about(o) || undefined }))}
           empty="" unlinkLabel="Unlink this observation" onUnlink={onUnlink} />
       )}
-      <LinkSearch placeholder={linked.length ? 'Link another observation' : 'Search observations to link'} onPick={onLink}
-        items={candidates.map((o) => ({ id: o.id, text: o.text, sub: about(o) || undefined }))} />
+      <LinkSearch placeholder={linked.length ? 'Link another observation' : 'Search observations to link'} onPick={onLink} onUnpick={onUnlink}
+        items={candidates.map((o) => ({ id: o.id, text: o.text, sub: about(o) || undefined, linked: linkedIds.includes(o.id) }))} />
     </div>
   )
 }
