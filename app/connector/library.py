@@ -159,9 +159,11 @@ def list_premises(db: Session, user: User, query: str = "", topic: str = "") -> 
             "topic": topic_name(names, p.topic_id),
             "jokes": counts.get(p.id, 0),
             "notes": clip(p.notes, 240),
+            "extra_notes": clip(p.extra_notes, 240),
         }
         for p in rows
-        if matches(query, p.take, p.notes) and same_name(topic, topic_name(names, p.topic_id))
+        if matches(query, p.take, p.notes, p.extra_notes)
+        and same_name(topic, topic_name(names, p.topic_id))
     ]
     return {"total": len(found), "premises": found}
 
@@ -180,6 +182,7 @@ def get_premise(db: Session, user: User, premise_id: str) -> dict[str, Any]:
         "id": str(premise.id),
         "take": premise.take,
         "notes": clip(premise.notes, 8000),
+        "extra_notes": clip(premise.extra_notes, 8000),
         "topic": topic_name(names, premise.topic_id),
         "from_observations": observations_behind(db, user).get(str(premise.id), []),
         "jokes": [

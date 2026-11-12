@@ -1,6 +1,6 @@
 /**
  * One premise: the take and its reasoning, edited in place, and the observations it came from
- * (see ObservationsOn: search to link more). Then the jokes resting on it as a list or its web
+ * (see ObservationsOn: search to link more). Then Notes, for anything else, and the jokes resting on it as a list or its web
  * (see PremiseJokes): write a new joke on it, or add ones you've written, from any topic.
  */
 import { ArrowLeft, Trash2 } from 'lucide-react'
@@ -10,6 +10,7 @@ import { useDeletePremise, usePremises, type Premise } from '../../api/premises'
 import { Button } from '../../components/ui/Button'
 import { Field, GrowingText, Select, Textarea } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
+import { NotesBox } from '../../components/ui/NotesBox'
 import { EmptyState, Spinner } from '../../components/ui/pieces'
 import { topicName } from '../../lib/jokeMeta'
 import { jokesOn } from '../../lib/premises'
@@ -51,7 +52,7 @@ function Editor({ premise }: { premise: Premise }) {
       {!draft.take.trim() && <p className="mt-2 text-sm text-light">A premise needs a take to be saved.</p>}
       <div className="mt-6 grid gap-4">
         <Field label="Why it's true">
-          <Textarea placeholder="Because… and anything else worth keeping" value={draft.notes} onChange={(e) => update({ notes: e.target.value })} />
+          <Textarea placeholder="Because…" value={draft.notes} onChange={(e) => update({ notes: e.target.value })} />
         </Field>
         <ObservationsOn kind="premises" id={premise.id} topicId={draft.topic_id} />
         <Field label="Topic">
@@ -62,6 +63,8 @@ function Editor({ premise }: { premise: Premise }) {
         </Field>
         <PremiseGuide open={!hasJokes && !premise.notes.trim()} />
       </div>
+
+      <NotesBox value={draft.extra_notes ?? ''} onChange={(extra_notes) => update({ extra_notes })} />
 
       <PremiseJokes premise={premise} topicId={draft.topic_id} all={all} topics={topics} />
 

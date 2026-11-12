@@ -1,6 +1,6 @@
 /**
  * One observation, as its own page: the words, edited in place; its topic and kind, both
- * optional; then what came from it (see ObservationUses), with a joke or premise a tap away to
+ * optional; Notes, for anything more about it; then what came from it (see ObservationUses), with a joke or premise a tap away to
  * write from it. Every change saves on its own.
  */
 import { ArrowLeft, Lightbulb, Sparkles, Trash2 } from 'lucide-react'
@@ -13,6 +13,7 @@ import type { Observation } from '../../api/types'
 import { Button } from '../../components/ui/Button'
 import { Field, GrowingText, Select } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
+import { NotesBox } from '../../components/ui/NotesBox'
 import { EmptyState, Spinner } from '../../components/ui/pieces'
 import { randomTopicId, topicName } from '../../lib/jokeMeta'
 import { formatDateTime } from '../../lib/time'
@@ -85,6 +86,8 @@ function Editor({ observation }: { observation: Observation }) {
           onClick={() => openCapture({ topicId: draft.topic_id ?? undefined, premiseId: onlyPremise, observationIds: [observation.id] })}>Write a joke from it</Button>
         <Button variant="plain" small icon={<Lightbulb size={15} />} onClick={() => setWritingPremise(true)}>Write a premise from it</Button>
       </div>
+
+      <NotesBox value={draft.extra_notes ?? ''} onChange={(extra_notes) => update({ extra_notes })} />
 
       <ObservationUses observation={observation} />
 

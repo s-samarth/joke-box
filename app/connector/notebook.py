@@ -75,7 +75,9 @@ def search_observations(
     found = [
         o
         for o in rows
-        if matches(query, o.text) and same_name(topic, topic_of(o)) and same_name(kind, kind_of(o))
+        if matches(query, o.text, o.extra_notes)
+        and same_name(topic, topic_of(o))
+        and same_name(kind, kind_of(o))
     ]
     shown, total = page(found, limit)
     premises, jokes = live_links(db, user)
@@ -86,6 +88,7 @@ def search_observations(
             {
                 "id": str(o.id),
                 "text": clip(o.text, 800),
+                "extra_notes": clip(o.extra_notes, 2000),
                 "topic": topic_of(o),
                 "kind": kind_of(o),
                 "noted": ist_date(o.created_at),

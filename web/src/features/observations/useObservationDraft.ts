@@ -8,7 +8,7 @@ const DELAY = 700
 
 export function useObservationDraft(observation: Observation) {
   const [draft, setDraft] = useState<ObservationInput>(() => ({
-    text: observation.text, topic_id: observation.topic_id, kind_id: observation.kind_id, version: observation.version,
+    text: observation.text, extra_notes: observation.extra_notes ?? '', topic_id: observation.topic_id, kind_id: observation.kind_id, version: observation.version,
   }))
   const save = useSaveObservation()
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)

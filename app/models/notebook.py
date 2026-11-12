@@ -39,6 +39,8 @@ class Observation(Trashable, OwnedMixin, Base):
     __tablename__ = "observations"
 
     text: Mapped[str] = mapped_column(Text)
+    # Notes: anything more about it, kept apart from what was noticed.
+    extra_notes: Mapped[str] = mapped_column(Text, default="", server_default="")
     kind_id: Mapped[uuid.UUID | None] = mapped_column(
         "topic_id", Uuid, ForeignKey("observation_topics.id", ondelete="SET NULL"), index=True
     )

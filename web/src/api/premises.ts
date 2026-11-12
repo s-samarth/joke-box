@@ -15,6 +15,8 @@ export interface PremiseInput {
   topic_id: string
   take: string
   notes: string
+  /** Notes: anything else about it, in a box of its own. Left out of a save, it stays as stored. */
+  extra_notes?: string
   /** The version this edit started from, sent as the base of the save. Missing: a new one. */
   version?: number
 }
@@ -44,7 +46,7 @@ queryClient.setMutationDefaults(saveKey, {
     const now = new Date().toISOString()
     queryClient.setQueryData<Premise[]>(keys.premises, (old = []) => {
       const existing = old.find((p) => p.id === id)
-      const next: Premise = { ...input, id, version: input.version ?? existing?.version ?? 0, created_at: existing?.created_at ?? now, updated_at: now }
+      const next: Premise = { extra_notes: existing?.extra_notes ?? '', ...input, id, version: input.version ?? existing?.version ?? 0, created_at: existing?.created_at ?? now, updated_at: now }
       return existing ? old.map((p) => (p.id === id ? next : p)) : [...old, next]
     })
   },

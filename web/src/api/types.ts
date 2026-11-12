@@ -123,6 +123,8 @@ export interface Setlist {
 
 export interface ObservationInput {
   text: string
+  /** Notes: anything more about it. Left out of a save, it stays as stored; older copies lack it. */
+  extra_notes?: string
   /** What sort of note it is ("Set ideas"); null for a plain observation. */
   kind_id: string | null
   /** A joke topic, the same list jokes and premises use; null until it's sorted. */

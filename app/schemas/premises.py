@@ -12,6 +12,8 @@ class PremiseIn(BaseModel):
     topic_id: uuid.UUID
     take: str = Field(min_length=1, max_length=2000)
     notes: str = Field(default="", max_length=20_000)
+    # Left out (an app from before Notes), what's stored stays.
+    extra_notes: str | None = Field(default=None, max_length=20_000)
     # The version this edit started from. Omitted (a new one, an older app), nothing is checked.
     base_version: int | None = Field(default=None, le=INT_MAX)
 
@@ -31,6 +33,7 @@ class PremiseOut(BaseModel):
     topic_id: uuid.UUID
     take: str
     notes: str
+    extra_notes: str
     version: int
     created_at: datetime
     updated_at: datetime

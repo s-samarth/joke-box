@@ -36,12 +36,16 @@ def put_premise(
     premise = find_owned(db, Premise, premise_id, user)
     if premise is None:
         position = next_position(db, Premise.position, Premise.user_id == user.id)
-        premise = Premise(id=premise_id, user_id=user.id, position=position)
+        premise = Premise(id=premise_id, user_id=user.id, position=position, extra_notes="")
         db.add(premise)
     else:
         fields = {"topic_id": body.topic_id, "take": body.take, "notes": body.notes}
+        if body.extra_notes is not None:
+            fields["extra_notes"] = body.extra_notes
         check_fields(premise, body.base_version, fields, PREMISE_CLASH)
     premise.topic_id, premise.take, premise.notes = body.topic_id, body.take, body.notes
+    if body.extra_notes is not None:  # left out by an older app: what's stored stays
+        premise.extra_notes = body.extra_notes
     db.commit()
     db.refresh(premise)
     return premise

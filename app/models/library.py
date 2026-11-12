@@ -70,6 +70,8 @@ class Premise(Trashable, OwnedMixin, Base):
     take: Mapped[str] = mapped_column(Text)
     # The reasoning behind the take: why it's true, and anything else worth keeping.
     notes: Mapped[str] = mapped_column(Text, default="")
+    # Notes: anything else about it, in a box of its own under the reasoning.
+    extra_notes: Mapped[str] = mapped_column(Text, default="", server_default="")
     position: Mapped[int] = mapped_column(Integer, default=0)
     trashed_joke_ids: Mapped[list[str] | None] = mapped_column(JSON)
     # Goes up by one on every save; a save edited from an older version is a conflict.

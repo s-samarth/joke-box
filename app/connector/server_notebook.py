@@ -18,6 +18,7 @@ def search_observations(
     """Observations: things the comic noticed that aren't jokes yet, newest first. `topic` is a
     joke topic (the same list as jokes and premises; Random unless filed elsewhere). `kind` says
     what sort of note it is, like "Set ideas" or "Questions"; most are plain "Observation".
+    `extra_notes` is anything the comic added under it (often empty). Words match either.
     `premise_ids` and `joke_ids` are what came from it and `brainstorm_ids` the brainstorm
     sessions it was used in: all empty means it hasn't been used yet."""
     with reading() as (db, user):
