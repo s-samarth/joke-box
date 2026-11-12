@@ -67,14 +67,18 @@ def put_observation(
     else:
         get_owned(db, Topic, topic_id, user)
     if observation is None:
-        observation = Observation(id=observation_id, user_id=user.id)
+        observation = Observation(id=observation_id, user_id=user.id, extra_notes="")
         if body.created_at:
             observation.created_at = written_at(body.created_at)
         db.add(observation)
     else:
         fields = {"text": body.text, "kind_id": kind_id, "topic_id": topic_id}
+        if body.extra_notes is not None:
+            fields["extra_notes"] = body.extra_notes
         check_fields(observation, body.base_version, fields, OBSERVATION_CLASH)
     observation.text = body.text
+    if body.extra_notes is not None:  # left out by an older app: what's stored stays
+        observation.extra_notes = body.extra_notes
     observation.kind_id = kind_id
     observation.topic_id = topic_id
     db.commit()

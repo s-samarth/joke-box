@@ -78,15 +78,18 @@ def get_jokes(ids: list[str]) -> dict[str, Any]:
 @server.tool(annotations=READ)
 def list_premises(query: str = "", topic: str = "") -> dict[str, Any]:
     """Premises: each one's take, topic and how many jokes rest on it. A joke from any topic
-    can rest on any premise. Narrow by words in the take or notes, or by topic name."""
+    can rest on any premise. `notes` say why the take is true and `extra_notes` hold anything
+    else the comic kept on it (both shortened here). Narrow by words in the take or either
+    notes, or by topic name."""
     with reading() as (db, user):
         return library.list_premises(db, user, query, topic)
 
 
 @server.tool(annotations=READ)
 def get_premise(premise_id: str) -> dict[str, Any]:
-    """One premise: the take, the full notes (why it's true), the observations it came from, and
-    every joke on it in chain order, so a joke that follows another comes right after it."""
+    """One premise: the take, the full notes (why it's true) and extra_notes (anything else kept
+    on it), the observations it came from, and every joke on it in chain order, so a joke that
+    follows another comes right after it."""
     with reading() as (db, user):
         return library.get_premise(db, user, premise_id)
 

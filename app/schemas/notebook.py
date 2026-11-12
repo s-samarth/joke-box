@@ -18,6 +18,8 @@ class ObservationIn(BaseModel):
     """
 
     text: str
+    # Left out (an app from before Notes), what's stored stays.
+    extra_notes: str | None = Field(default=None, max_length=20_000)
     kind_id: uuid.UUID | None = None
     topic_id: uuid.UUID | None = None
     # Kept only when the observation is created: an import can keep the original date.
@@ -39,6 +41,7 @@ class ObservationOut(BaseModel):
 
     id: uuid.UUID
     text: str
+    extra_notes: str
     kind_id: uuid.UUID | None
     topic_id: uuid.UUID | None
     premise_ids: list[uuid.UUID]

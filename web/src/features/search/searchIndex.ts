@@ -57,8 +57,8 @@ const KINDS: Kind<unknown>[] = [
     kind: 'Jokes', items: (l) => l.jokes, texts: (j) => [j.setup, j.punchline, j.comments, ...j.tag_lines, ...(j.alt_punchlines ?? [])], tags: (j) => j.hashtags,
     title: (j) => j.setup, body: (j) => [j.punchline, ...j.tag_lines, j.comments].join(' '), to: (j) => `/jokes/${j.id}`,
   }),
-  kind<Premise>({ kind: 'Premises', items: (l) => l.premises, texts: (p) => [p.take, p.notes], title: (p) => p.take, body: (p) => p.notes, to: (p) => `/premises/${p.id}` }),
-  kind<Observation>({ kind: 'Observations', items: (l) => l.observations, texts: (o) => [o.text], title: (o) => o.text, to: (o) => `/observations/${o.id}` }),
+  kind<Premise>({ kind: 'Premises', items: (l) => l.premises, texts: (p) => [p.take, p.notes, p.extra_notes], title: (p) => p.take, body: (p) => [p.notes, p.extra_notes].filter(Boolean).join(' '), to: (p) => `/premises/${p.id}` }),
+  kind<Observation>({ kind: 'Observations', items: (l) => l.observations, texts: (o) => [o.text, o.extra_notes], title: (o) => o.text, body: (o) => o.extra_notes ?? '', to: (o) => `/observations/${o.id}` }),
   kind<SessionSummary>({
     kind: 'Brainstorms', items: (l) => l.sessions, texts: (s) => [s.title, s.content], title: (s) => sessionName(s), body: (s) => s.content, to: (s) => `/brainstorm/${s.id}`,
   }),

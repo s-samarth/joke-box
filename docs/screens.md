@@ -248,7 +248,9 @@ writing a premise sits beside the list; on a phone the list gives way to the pre
   shows the take and how many jokes rest on it.
 - **A premise:** the take and its notes (why it's true) are edited in place and save on their own.
   A short guide ([PremiseGuide.tsx](../web/src/features/premises/PremiseGuide.tsx)) opens while the
-  premise has no notes and no jokes. Below, **Jokes on it**: every joke resting on it in reading
+  premise has no notes and no jokes. Below, **Notes**: an empty box for anything else about it,
+  growing as you write and saving on its own ([NotesBox.tsx](../web/src/components/ui/NotesBox.tsx)).
+  Then **Jokes on it**: every joke resting on it in reading
   order, chains kept together, with **Write a joke on it** and **Add jokes you’ve written** (from
   any topic). Once it has a joke, a **List / Web** switch shows the same jokes as this premise's
   web: the drawing the premise web on Jokes uses, for this premise alone, fitted to the width
@@ -367,7 +369,7 @@ open beside it on an iPad in landscape or a laptop, or as its own page on a phon
   open New joke or New premise on its topic with the setup (or take) empty and this observation
   already under **From observations**, so you write your own words with it in view; either new
   one is linked back when saved. A new joke also starts on the premise this observation already
-  led to, when there's exactly one. Then **Jokes from it** and **Premises from it**: what's
+  led to, when there's exactly one. Then **Notes** (the same box as on a premise), and **Jokes from it** and **Premises from it**: what's
   linked, each opening its page, × to unlink (with **Undo**), and a search to link ones you've
   written (the three best matches, same topic first). Then **Brainstorms with it**: the sessions
   it's linked to, each opening the session (the session holds that link, so it's changed there). **Delete observation** asks first; what came from it stays.

@@ -86,9 +86,17 @@ def test_library_tools(claude: tuple[TestClient, str]) -> None:
 
     premises = result(claude, "list_premises")
     [premise] = items(premises, "premises")
-    assert set(premise) == {"id", "take", "topic", "jokes", "notes"}
+    assert set(premise) == {"id", "take", "topic", "jokes", "notes", "extra_notes"}
     opened = result(claude, "get_premise", premise_id=premise["id"])
-    assert set(opened) == {"id", "take", "notes", "topic", "from_observations", "jokes"}
+    assert set(opened) == {
+        "id",
+        "take",
+        "notes",
+        "extra_notes",
+        "topic",
+        "from_observations",
+        "jokes",
+    }
     assert set(items(opened, "from_observations")[0]) == {"id", "text"}
     assert set(items(opened, "jokes")[0]) == BRIEF | {"follows_id"}
 
@@ -133,7 +141,8 @@ def test_performing_tools(claude: tuple[TestClient, str]) -> None:
 
 def test_notebook_and_study_tools(claude: tuple[TestClient, str]) -> None:
     observations = result(claude, "search_observations")
-    fields = {"id", "text", "topic", "kind", "noted", "premise_ids", "joke_ids", "brainstorm_ids"}
+    fields = {"id", "text", "extra_notes", "topic", "kind", "noted"}
+    fields |= {"premise_ids", "joke_ids", "brainstorm_ids"}
     assert set(items(observations, "observations")[0]) == fields
     # Each voice note's fields are checked in test_connector_voice.py.
     assert set(result(claude, "search_voice_notes")) == {"total", "voice_notes"}
