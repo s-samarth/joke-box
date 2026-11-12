@@ -249,7 +249,7 @@ writing a premise sits beside the list; on a phone the list gives way to the pre
 - **A premise:** the take and its notes (why it's true) are edited in place and save on their own.
   A short guide ([PremiseGuide.tsx](../web/src/features/premises/PremiseGuide.tsx)) opens while the
   premise has no notes and no jokes. Below, **Notes**: an empty box for anything else about it,
-  growing as you write and saving on its own ([NotesBox.tsx](../web/src/components/ui/NotesBox.tsx)).
+  growing as you write up to about half the screen (24rem at most), then scrolling inside, and saving on its own ([NotesBox.tsx](../web/src/components/ui/NotesBox.tsx)).
   Then **Jokes on it**: every joke resting on it in reading
   order, chains kept together, with **Write a joke on it** and **Add jokes you’ve written** (from
   any topic). Once it has a joke, a **List / Web** switch shows the same jokes as this premise's
