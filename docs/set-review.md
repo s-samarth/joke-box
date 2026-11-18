@@ -1,7 +1,7 @@
 # set-review: logging a show from its recording
 
 **The job:** after a set, find out what landed without counting laughs by hand, and get the show
-into JokeBox with its LPM and how each joke went.
+into JokeBox with its LPM and laugh timeline.
 
 set-review is the comic's review engine. It runs on their Mac (code in the private repo
 [s-samarth/set-review](https://github.com/s-samarth/set-review), with its own docs); JokeBox stores
@@ -20,14 +20,19 @@ only what it found. The recording never leaves the Mac.
    - transcribes it with the **Hinglish (code-mixed) Whisper model** (whisper.cpp, on the GPU);
    - hears **laughs and applause** with PANNs, a sound-event model, judged against the room's
      own level;
-   - **matches** what you said to the jokes in your JokeBox (read through the connector);
-   - drafts the **review**: LPM and tally, each joke's points and suggested killed / ok / bombed,
-     peaks, dead stretches, riffs that landed but match no joke, questions about unsure matches;
+   - cuts the transcript into **bits at each laugh**, each quoted as you said it with the laugh
+     it ended on. It never names your jokes: on stage you riff and rewrite, so a bit is what you
+     said, not the written joke it resembles;
+   - drafts the **review**: LPM and tally, the bits with their points, peaks, dead stretches;
    - draws the **laugh map** (`laugh-map.html`), opened in the session's side panel.
-4. Plain comments become notes on the show. A message tagged **"Correction:"** fixes the draft and
+4. If you want, the AI compares the full transcript (`get_transcript`) with your jokes and set
+   lists in JokeBox and says what material you seem to have used and where you went off script.
+   That's commentary: it never relabels bits as jokes.
+5. Plain comments become notes on the show. A message tagged **"Correction:"** fixes the draft and
    retunes the engine, kept only if it agrees with all corrections so far better; every version
    can be rolled back.
-5. "Log this show" with a rating: the engine calls the connector's **`log_show`**.
+6. "Log this show" with a rating: the engine calls the connector's **`log_show`**, with no jokes
+   tagged. Add the jokes you did on the show in JokeBox yourself if you want them there.
 
 ## The laugh scale
 
@@ -53,11 +58,13 @@ far back and the phone's position is in set-review's `docs/scale.md`.
 | Where | What |
 |---|---|
 | `performance_logs` | The show as usual, plus `title`; `laughs` is the engine's tally |
-| `performance_jokes.suggested_result` | The engine's killed / ok / bombed beside your `result` |
-| `show_reviews` | The laugh timeline: `{start, end, kind, points, joke_id}` from stage start, and `engine_version` |
+| `performance_jokes` | Empty from set-review 0.3.0 on: the jokes you add yourself. Shows logged earlier have the engine's matched jokes, with its killed / ok / bombed in `suggested_result` |
+| `show_reviews` | The laugh timeline: `{start, end, kind, points}` from stage start (earlier shows also have a `joke_id` per laugh), and `engine_version` |
 
-The show page draws the timeline as **Laughs through the set** and notes "Engine heard: …" where the
-engine's result differs from yours ([screens-perform.md](screens-perform.md)). See
+The show page draws the timeline as **Laughs through the set**; on shows logged before 0.3.0 it
+also notes "Engine heard: …" where the engine's result differs from yours
+([screens-perform.md](screens-perform.md)). `log_show` still accepts jokes and `joke_id`s, but
+set-review no longer sends them. See
 [data-model.md](data-model.md) and the `log_show` row in [api.md](api.md).
 
 ## The two MCP servers
