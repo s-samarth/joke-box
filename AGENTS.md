@@ -27,6 +27,22 @@ cd web && npx tsc -b && npx oxlint --deny-warnings src && npx vitest run
 - No real jokes or material in seeds, fixtures, tests or screenshots: use made-up material.
 - Ask before adding a dependency, and commit the lockfile with it.
 
+## The live site (jokebox.samarthsaraswat.com)
+
+It runs on Vercel's free Hobby plan, and the comic uses it every day.
+
+- **Never poll it.** No curl loops, watch scripts or repeated requests to check a deploy or an
+  endpoint. On 19 Nov 2026 a loop of about 200 requests in 10 minutes tripped Vercel's bot
+  checkpoint (`403`, `x-vercel-mitigated: challenge`) for the whole IP: the comic's own browser
+  showed "Can't reach JokeBox" until it passed the check. To see a deploy, look once: one request,
+  one page load, or the Vercel dashboard.
+- **Spend the monthly allowance carefully.** On Hobby, a limit that runs out stops that feature
+  for up to 30 days. Active CPU (4 hours a month; every API and connector call) and Blob simple
+  operations (10,000; voice notes) run closest. Bulk edits through the API: fetch a list once,
+  then write only what changed.
+- **Never try to get past the checkpoint.** If it appears, ask the comic to open the site in a
+  normal tab, or wait for it to lift. See [the runbook](docs/development.md#operations-runbook).
+
 ## The Claude connector (`app/connector/`)
 
 Claude reads JokeBox through an MCP server at `/mcp`: 17 read-only tools over jokes, premises,

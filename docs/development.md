@@ -168,6 +168,8 @@ registered fixed domain).
 | Roll back | Vercel → Deployments → choose the previous production deployment → **Promote**. Migrations don't roll back automatically, so keep them backwards-compatible |
 | Rotate the session secret | Change `SESSION_SECRET` and redeploy. Everyone is signed out |
 | Logs | Vercel → Project → Logs (runtime) or the deployment's build log |
+| "Can't reach JokeBox", and requests answer `403` with `x-vercel-mitigated: challenge` | Vercel's bot checkpoint has flagged your IP, usually after scripted traffic (a polling loop). Open the site in a normal browser tab so the checkpoint can verify it, or wait for it to lift. Nothing is wrong with the app. Don't poll the live site (see AGENTS.md) |
+| Usage near the Hobby limits | Vercel → Usage, last 30 days. A limit that runs out stops that feature for up to 30 days. Active CPU (4 h) and Blob simple operations (10K) run closest |
 | Voice storage filling up | The Voice notes page shows how much of the 1 GB is used. Upgrade the Blob plan or delete old notes |
 | Load demo data into an account | `DATABASE_URL=<url> uv run python -m app.seed someone@example.com` (this replaces their data; a database on another machine also needs `--replace-remote-account`) |
 
