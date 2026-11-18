@@ -11,7 +11,8 @@ visit, so the app opens fast on a phone.
 
 **Files:** [AppShell.tsx](../web/src/layout/AppShell.tsx), [Rail.tsx](../web/src/layout/Rail.tsx), [useRail.ts](../web/src/layout/useRail.ts), [BottomBar.tsx](../web/src/layout/BottomBar.tsx),
 [nav.ts](../web/src/layout/nav.ts), [SyncLight.tsx](../web/src/layout/SyncLight.tsx),
-[UpdatePrompt.tsx](../web/src/layout/UpdatePrompt.tsx), [AccountMenu.tsx](../web/src/layout/AccountMenu.tsx).
+[UpdatePrompt.tsx](../web/src/layout/UpdatePrompt.tsx), [AccountMenu.tsx](../web/src/layout/AccountMenu.tsx),
+[Refresh.tsx](../web/src/layout/Refresh.tsx).
 
 - **Desktop (≥1024 px):** a fixed left rail. It holds the wordmark, a yellow **New joke** button,
   every screen in `NAV` order, the sync light with its label, and your avatar and email. The
@@ -22,6 +23,13 @@ visit, so the app opens fast on a phone.
   the JokeBox icon, a square **+**, the sync icon and your avatar. The toggle beside the sync light
   (**Hide screen names** / **Show screen names**) switches it on this device; switching back to what
   the width would pick returns it to automatic.
+- **Pull to refresh** (everywhere): at the very top of any screen, pull down with a finger (phone,
+  iPad) or keep swiping down with two fingers on a laptop's trackpad. A round arrow comes down from
+  the top, turns yellow once letting go will refresh, then spins while the lists reload, as in iOS
+  Mail. There's no button on screen; the arrow shows only while you pull. A pull doesn't start
+  while you're typing, drawing, in a dialog or menu, or inside a box that has scrolled, and a
+  trackpad flick that scrolls up and hits the top never counts. Offline, it says so and keeps
+  what's on the device.
 - **Phone:** a slim header (wordmark, sync icon, avatar) and a bottom bar laid out as
   **Home · Jokes · + · Ideas · More**.
   **Ideas** ([ideas.ts](../web/src/layout/ideas.ts)) opens Premises or Observations, whichever

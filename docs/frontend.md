@@ -16,6 +16,18 @@ another app and back doesn't reload everything. Your own saves refresh what they
 coming back. Each refetch is a server call, and Vercel's Hobby plan caps the month's CPU, so this
 was raised from 30 seconds in November 2026. The Trash always refetches when opened.
 
+**Refreshing on demand:** pull down at the top of a screen, by touch
+([usePullToRefresh.ts](../web/src/layout/usePullToRefresh.ts)) or with a trackpad swipe
+([useWheelPull.ts](../web/src/layout/useWheelPull.ts)); see [refresh.ts](../web/src/api/refresh.ts)
+and [Refresh.tsx](../web/src/layout/Refresh.tsx). A trackpad swipe must start with the page
+already at the top and run about four times as far as a finger, so a flick that scrolls up to the
+top (or its momentum) never refreshes; it refreshes once the wheel events stop. It first
+sends any waiting saves (up to 8 seconds, so a stuck one can't hold it up), then invalidates every
+query: lists on screen refetch at once, the rest when next opened. Offline it fetches nothing and
+says so. The gesture's rules (where a pull may start, how far is enough) are in
+[pull.ts](../web/src/lib/pull.ts); its listeners are passive, and a touch something else already
+cancelled (the brainstorm canvas, a dragged card) is ignored.
+
 ## Client-generated ids and upserts
 New rows get their UUID in the browser (`crypto.randomUUID()`) and are saved with
 `PUT /api/<resource>/<id>`, which creates or updates. A save retried after a dropped connection
