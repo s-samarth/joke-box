@@ -2,6 +2,7 @@
 
 import uuid
 from datetime import date, datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     JSON,
@@ -25,6 +26,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base, IdMixin, OwnedMixin, UTCDateTime
 from app.models.library import Topic
 from app.models.trash import Trashable
+
+if TYPE_CHECKING:
+    from app.models.reviews import ShowReview
 
 
 class Venue(OwnedMixin, Base):
@@ -106,6 +110,8 @@ class PerformanceLog(Trashable, OwnedMixin, Base):
         Uuid, ForeignKey("venues.id", ondelete="SET NULL")
     )
     performed_at: Mapped[datetime] = mapped_column(UTCDateTime())
+    # A name for the night, e.g. "Kafe Kalaa, couples night". Empty when not given.
+    title: Mapped[str] = mapped_column(String(200), default="", server_default="")
     duration_seconds: Mapped[int] = mapped_column(Integer, default=0)
     audience_size: Mapped[int] = mapped_column(Integer, default=0)
     rating: Mapped[int] = mapped_column(Integer, default=3)
@@ -117,6 +123,8 @@ class PerformanceLog(Trashable, OwnedMixin, Base):
     jokes: Mapped[list["PerformanceJoke"]] = relationship(
         cascade="all, delete-orphan", order_by="PerformanceJoke.position"
     )
+    # What the set-review engine heard in the recording, if the show was logged from one.
+    review: Mapped["ShowReview | None"] = relationship(cascade="all, delete-orphan")
 
 
 # How a joke went at a show. None: done, not rated.
@@ -130,6 +138,9 @@ class PerformanceJoke(IdMixin, Base):
     __table_args__ = (
         UniqueConstraint("log_id", "joke_id"),
         CheckConstraint("result IN ('bombed', 'ok', 'killed')", name="result_kind"),
+        CheckConstraint(
+            "suggested_result IN ('bombed', 'ok', 'killed')", name="suggested_result_kind"
+        ),
     )
 
     log_id: Mapped[uuid.UUID] = mapped_column(
@@ -140,5 +151,8 @@ class PerformanceJoke(IdMixin, Base):
     )
     position: Mapped[int] = mapped_column(Integer)
     result: Mapped[str | None] = mapped_column(String(10))
+    # What the set-review engine suggested from the laughs, kept beside the comic's own result:
+    # the gap between the two is what the engine is tuned on. None when there was no review.
+    suggested_result: Mapped[str | None] = mapped_column(String(10))
     # A comment on how this joke went on the night.
     note: Mapped[str] = mapped_column(Text, default="", server_default="")

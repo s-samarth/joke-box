@@ -9,6 +9,7 @@ from mcp.server.mcpserver.exceptions import ToolError
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.auth.deps import invited
+from app.connector.oauth import SHOWS_SCOPE
 from app.db import SessionLocal
 from app.models import User
 
@@ -40,4 +41,23 @@ def reading() -> Iterator[tuple[Session, User]]:
         except (ValueError, PermissionError) as exc:
             raise ToolError(str(exc)) from exc
         finally:
+            db.rollback()
+
+
+@contextmanager
+def logging_shows() -> Iterator[tuple[Session, User]]:
+    """A session that may save a show, for a caller allowed to log shows (the set-review
+    engine). Any other connection, Claude's included, gets a tool error saying so."""
+    token = get_access_token()
+    if token is None or SHOWS_SCOPE not in token.scopes:
+        raise ToolError(
+            "Only the set-review engine can log shows: this connection can read JokeBox but "
+            "wasn't given permission to log shows."
+        )
+    with sessions() as db:
+        try:
+            yield db, caller(db)
+        except (ValueError, PermissionError) as exc:
+            raise ToolError(str(exc)) from exc
+        finally:  # a save commits itself; anything left over (a failed one) is dropped
             db.rollback()

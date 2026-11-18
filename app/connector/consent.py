@@ -17,6 +17,7 @@ from app.auth.deps import DbSession
 from app.config import get_settings
 from app.connector.consent_link import CONSENT_PATH, Pending, read_pending
 from app.connector.consent_page import EXPIRED, page
+from app.connector.oauth import SHOWS_SCOPE
 from app.connector.tokens import load_client, store
 from app.models import User
 
@@ -53,7 +54,8 @@ def show_consent(
         return sign_in_first(request)
     client = load_client(pending.client_id)
     name = (client.client_name if client else None) or "An app"
-    return HTMLResponse(page(name, user.email, token, form_token(str(user.id), token)))
+    logs = SHOWS_SCOPE in pending.scopes
+    return HTMLResponse(page(name, user.email, token, form_token(str(user.id), token), logs))
 
 
 def answer(pending: Pending, **params: str | None) -> RedirectResponse:

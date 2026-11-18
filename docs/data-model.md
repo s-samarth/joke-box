@@ -93,9 +93,10 @@ erDiagram
 | `set_tags` | `name` (unique per user, any case), `position` | Your labels for sets (In progress, Weak, Opener set...). Everyone got eight to start, once; deleting them all sticks |
 | `setlist_tag_links` | `setlist_id`, `tag_id` (both cascade) | Many-to-many. Deleting a tag takes it off its sets |
 | `setlist_items` | `setlist_id` (cascade), `joke_id` (cascade), `position`, `duration_seconds`, `optional` | A set refers to its jokes: their words, strength and runtime are always read from the joke (`duration_seconds` here is only a fallback). Opener and closer are the first and last positions, not stored. An optional joke is one to cut if time is short; it doesn't count towards the slot |
-| `performance_logs` | `venue_id` (set null), `performed_at` (timestamptz), `duration_seconds`, `audience_size`, `rating` 1–5, `notes`, `laughs` JSON (five counts, for laughs scored 1–5 points; null if not counted) | LPM is worked out in the browser from `laughs` and the time on stage |
+| `performance_logs` | `venue_id` (set null), `performed_at` (timestamptz), `title` (empty if none), `duration_seconds`, `audience_size`, `rating` 1–5, `notes`, `laughs` JSON (five counts, for laughs scored 1–5 points; null if not counted) | LPM is worked out in the browser from `laughs` and the time on stage |
 | `performance_log_topics` | `log_id`, `topic_id` (both cascade) | "Topics you did". Deleting a topic re-points its links to Random |
-| `performance_jokes` | `log_id` (cascade), `joke_id` (cascade), `position`, `result` (`bombed` / `ok` / `killed`, or null if not rated), `note` (a comment, empty if none); unique (`log_id`, `joke_id`) | The jokes done at a show, in running order. Owned through the show. A joke in the Trash keeps its place but isn't listed; a show in the Trash doesn't count towards a joke's record (worked out in the browser for the joke page, and in the connector's `get_jokes`) |
+| `performance_jokes` | `log_id` (cascade), `joke_id` (cascade), `position`, `result` (`bombed` / `ok` / `killed`, or null if not rated), `suggested_result` (set-review's guess from the laughs, null on shows logged by hand), `note` (a comment, empty if none); unique (`log_id`, `joke_id`) | The jokes done at a show, in running order. Owned through the show. A joke in the Trash keeps its place but isn't listed; a show in the Trash doesn't count towards a joke's record (worked out in the browser for the joke page, and in the connector's `get_jokes`) |
+| `show_reviews` | `log_id` (cascade, unique), `engine_version`, `events` JSON (`[{start, end, kind, points, joke_id}]`, seconds from stage start), `created_at` | What set-review heard in a show's recording, owned through the show (and in the Trash with it). Written only by the connector's `log_show`; the recording itself is never stored |
 
 ### Study
 
@@ -175,6 +176,7 @@ All of these run in one transaction ([services/topics.py](../app/services/topics
 | `0035` | `jokes.voice_note_ids`: the voice notes a joke came from |
 | `0036` | `jokes.alt_punchlines`: the other punchlines tried for a joke's setup |
 | `0037` | `premises.extra_notes` and `observations.extra_notes`: the Notes box on each, empty to start |
+| `0038` | `performance_logs.title`, `performance_jokes.suggested_result`, and `show_reviews`: shows logged from a recording by set-review |
 
 Merged migrations are shared history. CI fails a PR that edits, deletes or renames one; fix
 forward with a new revision. CI also runs upgrade → downgrade → upgrade on Postgres 16, so every

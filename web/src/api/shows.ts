@@ -69,6 +69,7 @@ export function useSetlistActions() {
 export interface LogInput {
   venue_name: string
   performed_at: string
+  title: string
   duration_seconds: number
   audience_size: number
   rating: number

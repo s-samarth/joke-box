@@ -15,6 +15,7 @@ from app.models.library import (
     joke_type_links,
 )
 from app.models.notebook import Observation, ObservationTopic, WritingSession
+from app.models.reviews import ShowReview
 from app.models.shows import (
     PerformanceJoke,
     PerformanceLog,
@@ -51,6 +52,7 @@ __all__ = [
     "Setlist",
     "SetlistItem",
     "SetTag",
+    "ShowReview",
     "Status",
     "Subtopic",
     "Topic",

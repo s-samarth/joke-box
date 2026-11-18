@@ -1,4 +1,5 @@
-"""Setlists and performance logs (venues have their own router; `venue_named` lives here)."""
+"""Setlists and performance logs (venues have their own router; saving a show is in
+services/show_logs.py, shared with the connector)."""
 
 import uuid
 
@@ -7,7 +8,8 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.auth.deps import CurrentUser, DbSession, find_owned
-from app.models import Joke, PerformanceLog, Setlist, SetlistItem, SetTag, Topic, User, Venue
+from app.models import Joke, PerformanceLog, Setlist, SetlistItem, SetTag, Topic, User
+from app.schemas.reviews import ReviewOut
 from app.schemas.shows import (
     LogIn,
     LogOut,
@@ -17,23 +19,11 @@ from app.schemas.shows import (
     SetlistOut,
 )
 from app.services.clashes import check_set
-from app.services.show_jokes import jokes_out, set_jokes, wanted, your_jokes
+from app.services.show_jokes import jokes_out
+from app.services.show_logs import save_show, venue_named
 from app.services.trash import move_to_trash, trashed_joke_ids
 
 router = APIRouter(prefix="/api", tags=["shows"])
-
-
-def venue_named(db: Session, user: User, name: str) -> Venue:
-    """Find a venue case-insensitively, creating it inline if new."""
-    name = name.strip()
-    venue = db.scalar(
-        select(Venue).where(Venue.user_id == user.id, func.lower(Venue.name) == name.lower())
-    )
-    if venue is None:
-        venue = Venue(user_id=user.id, name=name)
-        db.add(venue)
-        db.flush()
-    return venue
 
 
 def check_all_owned(
@@ -138,6 +128,7 @@ def log_out(log: PerformanceLog, hidden: set[uuid.UUID]) -> LogOut:
         id=log.id,
         venue_name=log.venue.name if log.venue else "Unidentified Venue",
         performed_at=log.performed_at,
+        title=log.title,
         duration_seconds=log.duration_seconds,
         audience_size=log.audience_size,
         rating=log.rating,
@@ -145,6 +136,7 @@ def log_out(log: PerformanceLog, hidden: set[uuid.UUID]) -> LogOut:
         notes=log.notes,
         laughs=log.laughs,
         jokes=jokes_out(log, hidden),
+        review=ReviewOut.model_validate(log.review, from_attributes=True) if log.review else None,
         created_at=log.created_at,
     )
 
@@ -165,27 +157,9 @@ def list_logs(user: CurrentUser, db: DbSession) -> list[LogOut]:
 
 @router.put("/logs/{log_id}", response_model=LogOut)
 def save_log(log_id: uuid.UUID, body: LogIn, user: CurrentUser, db: DbSession) -> LogOut:
-    topic_ids = set(body.topic_ids)
-    check_all_owned(db, Topic, topic_ids, user)
-    hidden = trashed_joke_ids(db, user)
-    jokes = wanted(body.jokes or [], hidden, your_jokes(db, user, body.jokes or []))
-    venue = venue_named(db, user, body.venue_name)
-    topics = list(db.scalars(select(Topic).where(Topic.id.in_(topic_ids)))) if topic_ids else []
-    log = find_owned(db, PerformanceLog, log_id, user) or PerformanceLog(id=log_id, user_id=user.id)
-    log.venue = venue
-    log.performed_at = body.performed_at
-    log.duration_seconds = body.duration_seconds
-    log.audience_size = body.audience_size
-    log.rating = body.rating
-    log.notes = body.notes
-    log.laughs = body.laughs
-    log.topics = topics
-    if body.jokes is not None:  # left out by app versions from before: the jokes stay
-        set_jokes(log, jokes, hidden)
-    db.add(log)
-    db.commit()
-    db.refresh(log)
-    return log_out(log, hidden)
+    check_all_owned(db, Topic, set(body.topic_ids), user)
+    log = save_show(db, user, log_id, body)
+    return log_out(log, trashed_joke_ids(db, user))
 
 
 @router.delete("/logs/{log_id}", status_code=204)

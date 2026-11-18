@@ -36,6 +36,9 @@ from app.connector.tokens import (
 )
 
 SCOPE = "read"
+# Logging shows. Only the set-review engine asks for it; Claude's own connector reads only.
+SHOWS_SCOPE = "shows"
+SCOPES = [SCOPE, SHOWS_SCOPE]
 # Claude's sign-in callbacks (claude.com is where it may move). Loopback addresses are allowed
 # too, for apps on your own computer such as Claude Code; PKCE keeps those safe.
 CLAUDE_CALLBACKS = {

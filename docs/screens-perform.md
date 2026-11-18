@@ -123,12 +123,16 @@ each with its setup in marker, the punchline, its runtime and "by m:ss" (the run
   comment, or ✕ to take it off. Enter adds the top match
   ([ShowJokesField.tsx](../web/src/features/shows/ShowJokesField.tsx),
   [showJokes.ts](../web/src/features/shows/showJokes.ts)). Editing a show edits its jokes too.
+  **Title** is optional, a name for the night; lists show it before the venue.
   **Count laughs for LPM** folds out five counters, one per laugh score from 1 (a few giggles) to 5
   (laughs and applause), with the LPM worked out as you count ([lpm.ts](../web/src/features/shows/lpm.ts),
   [LaughTally.tsx](../web/src/features/shows/LaughTally.tsx)). **What did you learn?** saves a craft
   note linked to the show, in the first area that shows on Stage.
-- **A show's detail** shows its LPM, how particular jokes went with their comments (each opens the joke),
-  what you learned there, and **Add a lesson**.
+- **A show's detail** shows its title (or the venue), LPM, a **Laughs through the set** strip for a show
+  logged from a recording (one bar per laugh, as tall as its points; applause full height; hover for the
+  time and joke, [LaughTimeline.tsx](../web/src/features/shows/LaughTimeline.tsx)), how particular jokes
+  went with their comments (each opens the joke; "Engine heard: …" when set-review suggested something
+  else), what you learned there, and **Add a lesson**.
 - **A joke's page** says how it has gone at the shows it was logged at: "Done at 3 shows: 2 killed,
   1 bombed. Last done 4 Nov 2026." Worked out in the browser from the shows, so it works offline;
   a show in the Trash doesn't count ([JokeShowRecord.tsx](../web/src/features/jokes/JokeShowRecord.tsx)).

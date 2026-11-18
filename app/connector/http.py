@@ -35,7 +35,7 @@ from app.config import get_settings
 from app.connector import server as tools  # noqa: F401  (registers every tool)
 from app.connector.base import server
 from app.connector.consent import router as consent_router
-from app.connector.oauth import SCOPE, Provider
+from app.connector.oauth import SCOPE, SCOPES, Provider
 
 PATH = "/mcp"
 LOCAL_ORIGIN = "http://localhost:8000"
@@ -108,7 +108,7 @@ def install(app: FastAPI) -> None:
     )
     issuer, resource = urls.issuer_url, AnyHttpUrl(str(urls.resource_server_url))
     registration = ClientRegistrationOptions(
-        enabled=True, valid_scopes=[SCOPE], default_scopes=[SCOPE]
+        enabled=True, valid_scopes=SCOPES, default_scopes=[SCOPE]
     )
     app.router.routes.extend(
         create_auth_routes(
@@ -118,6 +118,6 @@ def install(app: FastAPI) -> None:
             revocation_options=RevocationOptions(enabled=True),
         )
     )
-    app.router.routes.extend(create_protected_resource_routes(resource, [issuer], [SCOPE]))
+    app.router.routes.extend(create_protected_resource_routes(resource, [issuer], SCOPES))
     app.router.routes.append(Route(PATH, endpoint=protected(resource, provider)))
     app.include_router(consent_router)

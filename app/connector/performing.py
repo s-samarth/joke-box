@@ -115,6 +115,7 @@ def list_shows(
         select(PerformanceLog)
         .where(PerformanceLog.user_id == user.id)
         .options(selectinload(PerformanceLog.venue), selectinload(PerformanceLog.topics))
+        .options(selectinload(PerformanceLog.review))
         .order_by(PerformanceLog.performed_at.desc())
     )
     names = load_names(db, user)
@@ -137,6 +138,7 @@ def list_shows(
         "shows": [
             {
                 "date": ist_date(log.performed_at),
+                "title": log.title,
                 "venue": log.venue.name if log.venue else "Unidentified Venue",
                 "minutes": round(log.duration_seconds / 60, 1),
                 "audience": log.audience_size,
@@ -145,6 +147,7 @@ def list_shows(
                 "laughs_by_points": log.laughs,
                 "topics": [topic_name(names, t.id) for t in log.topics],
                 "jokes": done.get(log.id, []),
+                "reviewed_by": log.review.engine_version if log.review else None,
                 "notes": clip(log.notes, 600),
             }
             for log in shown

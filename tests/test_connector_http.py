@@ -35,7 +35,9 @@ def test_handshake_and_tool_list(mcp: TestClient) -> None:
     assert response.json()["result"]["serverInfo"]["name"] == "JokeBox"
     tools = rpc(mcp, token, "tools/list").json()["result"]["tools"]
     assert "search_jokes" in {t["name"] for t in tools}
-    assert all(t["annotations"]["readOnlyHint"] for t in tools)
+    # Every tool reads, except log_show, which only the set-review engine may call.
+    writes = {t["name"] for t in tools if not t["annotations"]["readOnlyHint"]}
+    assert writes == {"log_show"}
 
 
 def test_each_token_reads_only_its_own_jokebox(mcp: TestClient) -> None:
