@@ -14,7 +14,8 @@ import { craftInput, useCraftKinds, useDeleteCraftNote, useSaveCraftNote } from 
 import type { CraftArea, CraftNote } from '../../api/types'
 import { Dropdown, type MenuItem } from '../../components/ui/Menu'
 import { useFeedback } from '../../components/ui/feedbackContext'
-import { listItems, prompts } from './bodyFormat'
+import { listItems, prompts, type ListItem } from './bodyFormat'
+import { pathTracks } from './path'
 import { areaColor, kindName, plainText } from './craftMeta'
 import { KIND_ICONS } from './kindIcons'
 
@@ -44,13 +45,26 @@ function Face({ note }: { note: CraftNote }) {
     )
   }
   if (note.behaviour === 'path') {
-    const boxes = listItems(note.body).filter((i) => i.checked !== null)
-    if (!boxes.length) return <p className="mt-2.5 line-clamp-3 text-sm text-dim">{plainText(note.body)}</p>
-    const done = boxes.filter((i) => i.checked).length
+    const tracks = pathTracks(note.body)
+    if (!tracks.length) return <p className="mt-2.5 line-clamp-3 text-sm text-dim">{plainText(note.body)}</p>
+    const bar = (boxes: ListItem[]) => <div className="flex flex-1 gap-1" aria-hidden>{boxes.map((b) => <span key={b.line} className={`h-1.5 flex-1 rounded-full ${b.checked ? 'bg-ok' : 'bg-ink-4'}`} />)}</div>
+    if (tracks.length > 1)
+      return (
+        <div className="mt-3 space-y-1.5">
+          {tracks.map((t) => (
+            <div key={t.boxes[0].line} className="flex items-center gap-2 text-xs">
+              <span className="w-20 shrink-0 truncate text-dim">{t.name}</span>
+              {bar(t.boxes)}
+              <span className="w-10 shrink-0 text-right text-faint tabular">{t.done}/{t.boxes.length}</span>
+            </div>
+          ))}
+        </div>
+      )
+    const [only] = tracks
     return (
       <div className="mt-3">
-        <div className="flex gap-1" aria-hidden>{boxes.map((b) => <span key={b.line} className={`h-1.5 flex-1 rounded-full ${b.checked ? 'bg-ok' : 'bg-ink-4'}`} />)}</div>
-        <p className="mt-1.5 text-xs text-faint tabular">{done} of {boxes.length} done</p>
+        <div className="flex">{bar(only.boxes)}</div>
+        <p className="mt-1.5 text-xs text-faint tabular">{only.done} of {only.boxes.length} done</p>
       </div>
     )
   }
