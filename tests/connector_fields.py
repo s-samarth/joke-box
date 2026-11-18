@@ -62,6 +62,7 @@ TOOLS = {
     "list_sets",
     "get_set",
     "list_shows",
+    "log_show",
     "search_observations",
     "search_voice_notes",
     "search_brainstorms",

@@ -12,10 +12,15 @@ Start with jokebox_overview if you don't know what's there. Search first, then o
 items you need. Quote Craft notes by title when you apply them. Handwritten brainstorms come as \
 images of their pages from get_brainstorm: read the handwriting from them. writing_pulse says how \
 the writing itself is going: the pace, how far ideas get, and what's sitting idle. Everything \
-here is read-only: the comic writes and edits in JokeBox themselves."""
+here is read-only, except log_show, which only the comic's set-review engine can call: \
+the comic writes and edits in JokeBox themselves."""
 
 # No subscriptions: the tool list never changes while running, and a listen request is a
 # stream that a stateless JSON server never answers, so each one held a function open until
 # Vercel's 300-second timeout and Claude opened another.
 server = MCPServer("JokeBox", instructions=INSTRUCTIONS, subscriptions=False)
 READ = ToolAnnotations(read_only_hint=True, open_world_hint=False)
+# Logging a show: it writes, but only that show, and logging the same show again replaces it.
+LOG = ToolAnnotations(
+    read_only_hint=False, destructive_hint=False, idempotent_hint=True, open_world_hint=False
+)

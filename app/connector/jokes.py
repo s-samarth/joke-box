@@ -113,3 +113,24 @@ def detail(
         "in_sets": sets.get(joke.id, []),
         "rewrites": rewrites.get(joke.id, 0),
     }
+
+
+def hashtags(joke: Joke) -> list[str]:
+    """A joke's hashtags, each with its #, whichever way it was saved."""
+    return ["#" + h.strip().lstrip("#") for h in joke.hashtags or [] if h.strip().lstrip("#")]
+
+
+def chain_order(jokes: list[Joke]) -> list[Joke]:
+    """Jokes as their chains run: each start, then the jokes that follow it, oldest first."""
+    ids = {j.id for j in jokes}
+    by_age = sorted(jokes, key=lambda j: j.created_at)
+    ordered: list[Joke] = []
+
+    def walk(joke: Joke) -> None:
+        ordered.append(joke)
+        for nxt in (j for j in by_age if j.follows_id == joke.id):
+            walk(nxt)
+
+    for root in (j for j in by_age if j.follows_id not in ids):
+        walk(root)
+    return ordered

@@ -17,7 +17,7 @@ def put_log(client: TestClient, log_id: str, **fields: Any) -> Any:
 
 def done(joke_id: str, result: str | None = None, note: str = "") -> dict[str, Any]:
     """A joke as a show lists it."""
-    return {"joke_id": joke_id, "result": result, "note": note}
+    return {"joke_id": joke_id, "result": result, "suggested_result": None, "note": note}
 
 
 def test_a_joke_can_carry_a_comment(alice: TestClient) -> None:

@@ -48,7 +48,7 @@ export function ShowCards({ logs, sort, onSort, onOpen, topicNames }: Props) {
                   <Stars rating={l.rating} size={15} />
                 </span>
                 <span className="mt-1 flex items-baseline justify-between gap-3 text-[15px]">
-                  <span className="min-w-0 truncate">{l.venue_name}</span>
+                  <span className="min-w-0 truncate">{l.title ? `${l.title} · ${l.venue_name}` : l.venue_name}</span>
                   <span className="tabular shrink-0 text-dim">{clock(l.duration_seconds)}{l.audience_size ? ` · ${l.audience_size} people` : ''}</span>
                 </span>
                 {more && <span className="mt-1 block truncate text-sm text-dim">{more}</span>}

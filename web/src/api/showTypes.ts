@@ -7,6 +7,8 @@ export type ShowResult = 'bombed' | 'ok' | 'killed'
 export interface LogJoke {
   joke_id: string
   result: ShowResult | null
+  /** What the set-review engine suggested from the laughs; null or missing on shows logged by hand. */
+  suggested_result?: ShowResult | null
   /** A comment on how it went. Left out by app versions older than comments. */
   note?: string
 }
@@ -15,6 +17,8 @@ export interface PerformanceLog {
   id: string
   venue_name: string
   performed_at: string
+  /** A name for the night; empty when none was given. Missing on a show cached before titles. */
+  title?: string
   duration_seconds: number
   audience_size: number
   rating: number
@@ -24,5 +28,21 @@ export interface PerformanceLog {
   laughs: number[] | null
   /** The jokes done, in running order. Missing on a show cached by an app version from before. */
   jokes?: LogJoke[]
+  /** The laugh timeline from the set-review engine, if the show was logged from a recording. */
+  review?: ShowReview | null
   created_at: string
+}
+
+/** One laugh or applause break the set-review engine heard, in seconds into the recording. */
+export interface ReviewEvent {
+  start: number
+  end: number
+  kind: 'laugh' | 'applause'
+  points: number
+  joke_id: string | null
+}
+
+export interface ShowReview {
+  engine_version: string
+  events: ReviewEvent[]
 }

@@ -13,12 +13,14 @@ CALLBACK = "https://claude.ai/api/mcp/auth_callback"
 ACCEPT = {"Accept": "application/json, text/event-stream"}
 
 
-def register(client: TestClient, redirect: str = CALLBACK) -> Any:
-    body = {
+def register(client: TestClient, redirect: str = CALLBACK, scope: str | None = None) -> Any:
+    body: dict[str, Any] = {
         "redirect_uris": [redirect],
         "client_name": "Claude",
         "token_endpoint_auth_method": "none",
     }
+    if scope:  # left out, as Claude does, a client gets the default: read
+        body["scope"] = scope
     return client.post("/register", json=body)
 
 
@@ -27,7 +29,13 @@ def challenge_for(verifier: str) -> str:
     return base64.urlsafe_b64encode(digest).rstrip(b"=").decode()
 
 
-def authorize(client: TestClient, client_id: str, verifier: str, state: str = "fake-state") -> str:
+def authorize(
+    client: TestClient,
+    client_id: str,
+    verifier: str,
+    state: str = "fake-state",
+    scope: str = "read",
+) -> str:
     """The consent page address /authorize sends the browser to."""
     params = {
         "response_type": "code",
@@ -36,7 +44,7 @@ def authorize(client: TestClient, client_id: str, verifier: str, state: str = "f
         "code_challenge": challenge_for(verifier),
         "code_challenge_method": "S256",
         "state": state,
-        "scope": "read",
+        "scope": scope,
     }
     response = client.get("/authorize", params=params, follow_redirects=False)
     assert response.status_code in (302, 307), response.text
@@ -75,11 +83,11 @@ def swap_code(client: TestClient, client_id: str, code: str, verifier: str) -> A
     return client.post("/token", data=form)
 
 
-def connect(browser: TestClient) -> dict[str, Any]:
+def connect(browser: TestClient, scope: str = "read") -> dict[str, Any]:
     """The whole flow for the user signed in on `browser`: their tokens and the client id."""
-    client_id = register(browser).json()["client_id"]
+    client_id = register(browser, scope=scope).json()["client_id"]
     verifier = secrets.token_urlsafe(48)
-    code = allow(browser, authorize(browser, client_id, verifier))["code"][0]
+    code = allow(browser, authorize(browser, client_id, verifier, scope=scope))["code"][0]
     return {"client_id": client_id, **swap_code(browser, client_id, code, verifier).json()}
 
 

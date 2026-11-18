@@ -12,6 +12,7 @@ import { useFeedback } from '../../components/ui/feedbackContext'
 import { Modal } from '../../components/ui/Modal'
 import { long } from '../../lib/duration'
 import { formatDateTime } from '../../lib/time'
+import { LaughTimeline } from './LaughTimeline'
 import { formatLpm, lpm } from './lpm'
 
 const RESULT_LABEL = { killed: 'Killed', ok: 'OK', bombed: 'Bombed', none: 'Not rated' }
@@ -41,7 +42,7 @@ export function ShowDetail({ log, topics, onClose, onEdit }: { log: PerformanceL
   ]
 
   return (
-    <Modal open onOpenChange={(o) => !o && onClose()} title={log.venue_name} description={formatDateTime(log.performed_at)}
+    <Modal open onOpenChange={(o) => !o && onClose()} title={log.title || log.venue_name} description={log.title ? `${log.venue_name}, ${formatDateTime(log.performed_at)}` : formatDateTime(log.performed_at)}
       footer={<><Button variant="danger" className="mr-auto" onClick={onDelete}>Delete</Button><Button variant="tape" onClick={onEdit}>Edit</Button></>}>
       <dl className="divide-y divide-rule border-y border-rule">
         {rows.map(([k, v]) => (
@@ -51,6 +52,7 @@ export function ShowDetail({ log, topics, onClose, onEdit }: { log: PerformanceL
           </div>
         ))}
       </dl>
+      {log.review && log.review.events.length > 0 && <LaughTimeline review={log.review} seconds={log.duration_seconds} setupOf={setupOf} />}
       {done.length > 0 && (
         <div className="mt-5">
           <h3 className="text-sm text-dim">How particular jokes went</h3>
@@ -61,6 +63,7 @@ export function ShowDetail({ log, topics, onClose, onEdit }: { log: PerformanceL
                   <Link to={`/jokes/${d.joke_id}`} className="min-w-0 truncate hover:text-tape">{setupOf.get(d.joke_id)}</Link>
                   <span className={`shrink-0 text-sm ${RESULT_STYLE[d.result ?? 'none']}`}>{RESULT_LABEL[d.result ?? 'none']}</span>
                 </div>
+                {d.suggested_result && d.suggested_result !== d.result && <p className="text-xs text-faint">Engine heard: {RESULT_LABEL[d.suggested_result]}</p>}
                 {d.note && <p className="text-sm text-dim">{d.note}</p>}
               </li>
             ))}

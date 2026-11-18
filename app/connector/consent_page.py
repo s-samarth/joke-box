@@ -29,17 +29,24 @@ def shell(title: str, body: str) -> str:
     )
 
 
-def page(app_name: str, email: str, request_token: str, check: str) -> str:
+def page(app_name: str, email: str, request_token: str, check: str, logs: bool = False) -> str:
     name = escape(app_name)
+    verb = "read your JokeBox and log shows" if logs else "read your JokeBox"
+    can = (
+        "It can also log shows you review with it, with their laughs. It can't change or delete "
+        "anything else."
+        if logs
+        else "It can't change or delete anything."
+    )
     return shell(
         f"Connect {app_name} to JokeBox",
-        f"""<h1>Let {name} read your JokeBox?</h1>
+        f"""<h1>Let {name} {verb}?</h1>
 <p>Signed in as <strong>{escape(email)}</strong>.</p>
 <p>{name} will be able to read:</p>
 <ul><li>your jokes, premises, sets and shows</li>
 <li>your observations, Brainstorms and Rewrites</li>
 <li>your Craft notes and analyses</li></ul>
-<p>It can't change or delete anything. What it reads goes into your chats with it.</p>
+<p>{can} What it reads goes into your chats with it.</p>
 <form method="post">
 <input type="hidden" name="request" value="{escape(request_token)}">
 <input type="hidden" name="check" value="{escape(check)}">

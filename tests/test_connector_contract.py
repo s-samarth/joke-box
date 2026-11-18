@@ -77,7 +77,9 @@ def test_library_tools(claude: tuple[TestClient, str]) -> None:
     assert set(items(overview, "topics")[0]) == {"name", "jokes", "subtopics"}
 
     found = result(claude, "search_jokes")
-    assert set(found) == {"total", "jokes"}
+    assert set(found) == {"total", "next_offset", "jokes"}
+    rest = result(claude, "search_jokes", offset=found["total"] - 1)
+    assert len(rest["jokes"]) == 1 and rest["next_offset"] is None
     assert set(items(found, "jokes")[0]) == BRIEF
     ids = [j["id"] for j in found["jokes"]]
     full = result(claude, "get_jokes", ids=ids[:3])
@@ -127,6 +129,7 @@ def test_performing_tools(claude: tuple[TestClient, str]) -> None:
     }
     assert set(items(shows, "shows")[0]) == {
         "date",
+        "title",
         "venue",
         "minutes",
         "audience",
@@ -135,6 +138,7 @@ def test_performing_tools(claude: tuple[TestClient, str]) -> None:
         "laughs_by_points",
         "topics",
         "jokes",
+        "reviewed_by",
         "notes",
     }
 

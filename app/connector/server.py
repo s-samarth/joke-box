@@ -1,5 +1,6 @@
 """The tools Claude sees for the library and the stage: jokes, premises, the writing pulse, sets
-and shows. Each one reads, never writes. The notebook and study tools are in server_notebook.py.
+and shows. Each one reads, never writes, except log_show, which only the set-review engine may
+call (it needs the `shows` scope). The notebook and study tools are in server_notebook.py.
 
 The work lives in the area modules; these wrappers give each tool its name, its description
 (the docstring, which Claude reads to decide when to call it) and its database session.
@@ -8,8 +9,10 @@ The work lives in the area modules; these wrappers give each tool its name, its 
 from typing import Any
 
 from app.connector import library, performing, pulse
-from app.connector.base import READ, server
-from app.connector.identity import reading
+from app.connector.base import LOG, READ, server
+from app.connector.identity import logging_shows, reading
+from app.connector.log_show import log_show as save_logged_show
+from app.connector.log_show import when
 
 
 @server.tool(annotations=READ)
@@ -43,13 +46,14 @@ def search_jokes(
     min_strength: int = 1,
     premise_id: str = "",
     limit: int = 25,
+    offset: int = 0,
 ) -> dict[str, Any]:
     """Find jokes. Every word of `query` must appear in the setup, punchline, tag lines,
     hashtags or notes; a word starting with # finds that hashtag. Filters are exact names
     (topic, subtopic, status, type), a strength from 1 to 5 and up, or a premise id. Strength is
     1 (Weak) to 5 (Killer), or null when the comic hasn't rated the joke yet; a min_strength
     above 1 leaves unrated jokes out. Returns short versions (at most 25) and the total; open
-    them with get_jokes."""
+    them with get_jokes. When next_offset is set, call again with that offset for the rest."""
     with reading() as (db, user):
         return library.search_jokes(
             db,
@@ -62,6 +66,7 @@ def search_jokes(
             premise_id,
             limit,
             subtopic=subtopic,
+            offset=offset,
         )
 
 
@@ -122,11 +127,53 @@ def list_shows(
     for the rest. LPM scores each laugh 1-5 and divides the points by minutes: 12+ is great,
     9+ decent, 6+ poor, below 6 rough. Each show lists the jokes done in running order, each
     with how it went (killed, ok, bombed, or null if not rated) and the comic's note on it;
-    most shows list none."""
+    most shows list none. A show logged from a recording names the engine version in
+    `reviewed_by`, and each joke also carries `suggested_result` (the engine's guess, beside
+    the comic's `result`) and `laugh_points` (the points of the laughs credited to it); both
+    are null on shows logged by hand."""
     with reading() as (db, user):
         return performing.list_shows(
             db, user, query, limit, since=since, until=until, offset=offset
         )
+
+
+@server.tool(annotations=LOG)
+def log_show(
+    performed_at: str,
+    venue: str,
+    duration_seconds: int,
+    rating: int,
+    laughs: list[int],
+    jokes: list[dict[str, Any]],
+    engine_version: str,
+    events: list[dict[str, Any]],
+    title: str = "",
+    audience_size: int = 0,
+    notes: str = "",
+    show_id: str = "",
+) -> dict[str, Any]:
+    """Log a show the comic reviewed with the set-review engine. Only that engine may call this;
+    other connections get an error. `performed_at` is an ISO date and time (IST if no zone).
+    `laughs` is five counts: laughs scored 1, 2, 3, 4 and 5 points. `jokes` in running order,
+    each {joke_id, result, suggested_result, note}: result is the comic's (killed, ok, bombed or
+    null) and suggested_result the engine's. `events` is the laugh timeline, each {start, end}
+    in seconds, kind (laugh or applause), points 1-5 and the joke_id it's credited to or null.
+    Topics come from the jokes. Pass `show_id` to replace a show logged before."""
+    show = {
+        "performed_at": when(performed_at),
+        "venue_name": venue,
+        "title": title,
+        "duration_seconds": duration_seconds,
+        "audience_size": audience_size,
+        "rating": rating,
+        "notes": notes,
+        "laughs": laughs,
+        "jokes": jokes,
+        "engine_version": engine_version,
+        "events": events,
+    }
+    with logging_shows() as (db, user):
+        return save_logged_show(db, user, show_id, show)
 
 
 # The rest of the tools register themselves on the same server when this loads.

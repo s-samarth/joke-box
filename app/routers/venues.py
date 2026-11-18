@@ -7,9 +7,9 @@ from sqlalchemy import func, select, update
 
 from app.auth.deps import CurrentUser, DbSession, get_owned
 from app.models import PerformanceLog, Setlist, Venue
-from app.routers.shows import venue_named
 from app.schemas.library import NameIn
 from app.schemas.shows import VenueOut
+from app.services.show_logs import venue_named
 
 router = APIRouter(prefix="/api/venues", tags=["venues"])
 

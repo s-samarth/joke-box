@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.schemas.legacy import JOKE_ID
 from app.schemas.limits import INT_MAX
+from app.schemas.reviews import ReviewOut
 
 
 class VenueOut(BaseModel):
@@ -66,6 +67,8 @@ Result = Literal["bombed", "ok", "killed"] | None
 class LogJokeIn(BaseModel):
     joke_id: uuid.UUID
     result: Result = None
+    # The set-review engine's guess. Left out (as by the app), what's stored stays.
+    suggested_result: Result = None
     # None keeps the comment there is: a save from an app older than comments sends none.
     note: str | None = Field(default=None, max_length=2000)
 
@@ -73,12 +76,15 @@ class LogJokeIn(BaseModel):
 class LogJokeOut(BaseModel):
     joke_id: uuid.UUID
     result: Result
+    suggested_result: Result = None
     note: str
 
 
 class LogIn(BaseModel):
     venue_name: str = Field(default="Unidentified Venue", min_length=1, max_length=160)
     performed_at: datetime
+    # Left out (as by app versions from before titles), the title stays as it is.
+    title: str | None = Field(default=None, max_length=200)
     duration_seconds: int = Field(default=0, ge=0, le=INT_MAX)
     audience_size: int = Field(default=0, ge=0, le=INT_MAX)
     rating: int = Field(default=3, ge=1, le=5)
@@ -102,6 +108,7 @@ class LogOut(BaseModel):
     id: uuid.UUID
     venue_name: str
     performed_at: datetime
+    title: str = ""
     duration_seconds: int
     audience_size: int
     rating: int
@@ -109,6 +116,8 @@ class LogOut(BaseModel):
     notes: str
     laughs: list[int] | None
     jokes: list[LogJokeOut]
+    # The laugh timeline from the set-review engine, if the show was logged from a recording.
+    review: ReviewOut | None = None
     created_at: datetime
 
 

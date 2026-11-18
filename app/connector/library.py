@@ -8,7 +8,9 @@ from sqlalchemy.orm import Session
 
 from app.connector.jokes import (
     brief,
+    chain_order,
     detail,
+    hashtags,
     lines,
     load_names,
     rewrite_counts,
@@ -86,8 +88,9 @@ def search_jokes(
     premise_id: str = "",
     limit: int = 25,
     subtopic: str = "",
+    offset: int = 0,
 ) -> dict[str, Any]:
-    """Jokes whose words match the query, narrowed by any of the filters."""
+    """Jokes whose words match the query, narrowed by any of the filters, a page at a time."""
     names = load_names(db, user)
     found = [
         j
@@ -100,13 +103,13 @@ def search_jokes(
         and (min_strength <= 1 or (j.strength or 0) >= min_strength)
         and (not premise_id or str(j.premise_id) == premise_id)
     ]
-    shown, total = page(found, limit)
-    return {"total": total, "jokes": [brief(j, names) for j in shown]}
-
-
-def hashtags(joke: Joke) -> list[str]:
-    """A joke's hashtags, each with its #, whichever way it was saved."""
-    return ["#" + h.strip().lstrip("#") for h in joke.hashtags or [] if h.strip().lstrip("#")]
+    shown, total = page(found, limit, offset=offset)
+    after = max(0, offset) + len(shown)
+    return {
+        "total": total,
+        "next_offset": after if after < total else None,
+        "jokes": [brief(j, names) for j in shown],
+    }
 
 
 def get_jokes(db: Session, user: User, ids: list[str]) -> dict[str, Any]:
@@ -127,22 +130,6 @@ def get_jokes(db: Session, user: User, ids: list[str]) -> dict[str, Any]:
         ],
         "not_found": [str(i) for i in wanted if i not in jokes],
     }
-
-
-def chain_order(jokes: list[Joke]) -> list[Joke]:
-    """Jokes as their chains run: each start, then the jokes that follow it, oldest first."""
-    ids = {j.id for j in jokes}
-    by_age = sorted(jokes, key=lambda j: j.created_at)
-    ordered: list[Joke] = []
-
-    def walk(joke: Joke) -> None:
-        ordered.append(joke)
-        for nxt in (j for j in by_age if j.follows_id == joke.id):
-            walk(nxt)
-
-    for root in (j for j in by_age if j.follows_id not in ids):
-        walk(root)
-    return ordered
 
 
 def list_premises(db: Session, user: User, query: str = "", topic: str = "") -> dict[str, Any]:

@@ -43,6 +43,7 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
   const saveLesson = useSaveCraftNote()
   const { toast } = useFeedback()
   const [venue, setVenue] = useState(log?.venue_name ?? '')
+  const [title, setTitle] = useState(log?.title ?? '')
   const [when, setWhen] = useState(() => toIstInput(log?.performed_at ?? new Date().toISOString()))
   const [rating, setRating] = useState(log?.rating ?? 0)
   const [duration, setDuration] = useState<StageTime>(log ? toStageTime(log.duration_seconds) : { min: '', sec: '' })
@@ -57,7 +58,7 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
   // One id for this sheet, made once: tapping Log show twice saves the same show twice, not two shows.
   const [id] = useState(() => log?.id ?? newId())
   // Ask before closing on anything typed.
-  const dirty = useChanged([venue, when, rating, duration, crowd, topicIds, done, notes, laughs, lesson, setIds])
+  const dirty = useChanged([venue, title, when, rating, duration, crowd, topicIds, done, notes, laughs, lesson, setIds])
   const recent = [...new Set([...logs.map((l) => l.venue_name), ...venues.map((v) => v.name)])].filter((v) => v !== UNKNOWN).slice(0, 6)
 
   // Ticking a set on or off swaps its topics in or out (topics you tapped yourself stay). Time on
@@ -81,7 +82,7 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
     // Both saves are queued and close the sheet at once, signal or not. The queue sends them in
     // order, so the show reaches the server before the lesson that points at it.
     const saving = save.mutateAsync(
-      { id, input: { venue_name: venueName, performed_at: performedAt, duration_seconds: seconds, audience_size: Number(crowd) || 0, rating, topic_ids: topicIds, notes: notes.trim(), laughs: counted(laughs) ? laughs : null, ...jokesDone } },
+      { id, input: { venue_name: venueName, title: title.trim(), performed_at: performedAt, duration_seconds: seconds, audience_size: Number(crowd) || 0, rating, topic_ids: topicIds, notes: notes.trim(), laughs: counted(laughs) ? laughs : null, ...jokesDone } },
     )
     saving.catch((e: Error) => toast(`Show not saved: ${e.message}`))
     if (lesson.trim()) saveLesson.mutate({ id: newId(), input: lessonFrom(lesson, craft, { area_id: areaFor(areas, 'stage'), kind_id: kindFor(kinds) }, { performance_log_id: id, source: `Show at ${venueName}, ${formatDate(performedAt)}`, created_at: new Date().toISOString() }) })
@@ -98,6 +99,7 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
           <datalist id="jb-venue-list">{venues.map((v) => <option key={v.id} value={v.name} />)}</datalist>
           {recent.length > 0 && <div className="flex flex-wrap gap-2">{recent.map((v) => <button key={v} type="button" className={chip(venue === v)} onClick={() => setVenue(v)}>{v}</button>)}</div>}
         </div>
+        <Field label="Title" hint="Optional: a name for the night"><Input placeholder="e.g. Couples night" maxLength={200} value={title} onChange={(e) => setTitle(e.target.value)} /></Field>
         <div className="space-y-1.5">
           <span className="text-sm text-dim">How did it go?</span>
           <div className="flex gap-1" role="radiogroup" aria-label="Rating">

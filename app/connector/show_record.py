@@ -18,8 +18,9 @@ from app.models import Joke, PerformanceJoke, PerformanceLog, User
 def jokes_done(
     db: Session, user: User, logs: Iterable[PerformanceLog]
 ) -> dict[uuid.UUID, list[dict[str, Any]]]:
-    """Each show's jokes in running order: id, the start of the setup, how it went and the
-    comment on it."""
+    """Each show's jokes in running order: id, the start of the setup, how it went, what the
+    set-review engine suggested, the laugh points the engine credited to it, and the comment."""
+    logs = list(logs)
     log_ids = [log.id for log in logs]
     rows = db.execute(
         select(
@@ -27,18 +28,39 @@ def jokes_done(
             PerformanceJoke.joke_id,
             Joke.setup,
             PerformanceJoke.result,
+            PerformanceJoke.suggested_result,
             PerformanceJoke.note,
         )
         .join(Joke, Joke.id == PerformanceJoke.joke_id)
         .where(PerformanceJoke.log_id.in_(log_ids), Joke.user_id == user.id)
         .order_by(PerformanceJoke.log_id, PerformanceJoke.position)
     )
+    points = {log.id: laugh_points(log) for log in logs}
     done: dict[uuid.UUID, list[dict[str, Any]]] = {}
-    for log_id, joke_id, setup, result, note in rows:
+    for log_id, joke_id, setup, result, suggested, note in rows:
+        heard = points[log_id]
         done.setdefault(log_id, []).append(
-            {"id": str(joke_id), "setup": clip(setup, 120), "result": result, "note": note}
+            {
+                "id": str(joke_id),
+                "setup": clip(setup, 120),
+                "result": result,
+                "suggested_result": suggested,
+                "laugh_points": None if heard is None else heard.get(str(joke_id), 0),
+                "note": note,
+            }
         )
     return done
+
+
+def laugh_points(log: PerformanceLog) -> dict[str, int] | None:
+    """Laugh points per joke from the engine's timeline, or None if the show has no review."""
+    if log.review is None:
+        return None
+    out: dict[str, int] = {}
+    for event in log.review.events:
+        if event.get("joke_id"):
+            out[event["joke_id"]] = out.get(event["joke_id"], 0) + int(event["points"])
+    return out
 
 
 def records(

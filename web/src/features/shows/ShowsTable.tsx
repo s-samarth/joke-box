@@ -58,7 +58,7 @@ export function ShowsTable({ logs, sort, onSort, onOpen, topicNames }: Props) {
                 <button type="button" className="text-left tabular">{formatDate(l.performed_at)}</button>
                 <span className="ml-2 text-sm text-faint">{weekday.format(new Date(l.performed_at))}</span>
               </td>
-              <td className="max-w-48 truncate px-3 py-2.5">{l.venue_name}</td>
+              <td className="max-w-48 truncate px-3 py-2.5" title={l.title || undefined}>{l.title ? `${l.title} · ${l.venue_name}` : l.venue_name}</td>
               <td className="tabular px-3 py-2.5 text-right">{clock(l.duration_seconds)}</td>
               <td className="tabular px-3 py-2.5 text-right">{l.audience_size || <span className="text-faint">–</span>}</td>
               <td className="px-3 py-2.5"><Stars rating={l.rating} /></td>
