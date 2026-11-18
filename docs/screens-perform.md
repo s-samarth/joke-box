@@ -168,7 +168,10 @@ bottom:
 
 - **Your path** as a staircase: one step per tick box in your first open Path note (your levels),
   done steps filled, the next outlined in tape. Below it the next step, and when it names minutes,
-  your most solid material on one topic against that target. Home shows a smaller copy.
+  your most solid material on one topic against that target. A Path note with tick boxes under
+  several headings is several tracks climbed side by side (material, stage and audience, say):
+  one staircase per heading, each with its own next step, side by side on wider screens and
+  stacked on a phone. Its card in the area shows one bar per track. Home shows a smaller copy.
 - **Write with a technique:** a sideways shelf of your techniques; tapping one opens a brainstorm
   running it.
 - **Areas** as folders in their own colours, like the topic folders on Home: the count on the tab,

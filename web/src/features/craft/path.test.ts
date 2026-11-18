@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { Joke, CraftNote, PerformanceLog } from '../../api/types'
 import { averageLpm, formatLpm, lpm } from '../shows/lpm'
 import { lessonFrom } from './craftMeta'
-import { mostSolidTopic, nextStep, targetMinutes } from './path'
+import { mostSolidTopic, nextStep, pathTracks, targetMinutes } from './path'
 
 const note = (patch: Partial<CraftNote>): CraftNote => ({
   id: 'x', title: 'Fake', body: '', behaviour: 'path', kind_id: 'k', area_id: 'p', hashtags: [], source: '', url: '', position: 1,
@@ -16,6 +16,19 @@ describe('path', () => {
     const step = nextStep([open, done, note({ behaviour: 'reference', body: '- [ ] not a path' })])
     expect(step && [step.note.id, step.done, step.total, step.next.text]).toEqual(['b', 1, 3, 'fake two, a solid 10 mins'])
     expect(nextStep([done])).toBeNull()
+  })
+
+  it('splits a path into tracks by the headings above its tick boxes', () => {
+    const body = '- [ ] fake loose box\n\n## Fake one\nA line about it.\n- [x] fake a\n- [ ] fake b, a solid 7 mins\n  - [ ] fake nested, not a step\n\n## **Fake two**\n- [ ] fake c\n\n## Fake notes\n- not a box'
+    const tracks = pathTracks(body)
+    expect(tracks.map((t) => [t.name, t.boxes.length, t.done, t.next?.text])).toEqual([
+      [null, 1, 0, 'fake loose box'],
+      ['Fake one', 2, 1, 'fake b, a solid 7 mins'],
+      ['Fake two', 1, 0, 'fake c'],
+    ])
+    const step = nextStep([note({ body })])
+    expect(step && [step.done, step.total, step.tracks.length]).toEqual([1, 4, 3])
+    expect(pathTracks('- [x] fake\n- [x] fake too')[0].next).toBeNull()
   })
 
   it('reads minutes from a step', () => {
