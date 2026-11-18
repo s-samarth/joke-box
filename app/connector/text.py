@@ -6,6 +6,8 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 LIMIT = 25
+# A long body (a Craft note, an analysis) comes in parts this long, so one call stays readable.
+PART = 20000
 # Listing titles alone is short, so a whole index fits in one call.
 TITLES_LIMIT = 300
 IST = ZoneInfo("Asia/Kolkata")
@@ -15,6 +17,15 @@ def clip(text: str | None, limit: int) -> str:
     """Text cut to `limit` characters, marked when something was left out."""
     text = (text or "").strip()
     return text if len(text) <= limit else text[: limit - 1].rstrip() + "…"
+
+
+def part(text: str | None, start: int = 0, size: int = PART) -> tuple[str, int | None]:
+    """Up to `size` characters of a long text from `start`, and where the next part starts
+    (None at the end). The parts join back into the whole text, with nothing cut or repeated."""
+    text = (text or "").strip()
+    start = max(0, start)
+    end = start + size
+    return text[start:end], end if end < len(text) else None
 
 
 def matches(query: str, *fields: str | None) -> bool:

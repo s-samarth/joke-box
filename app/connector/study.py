@@ -14,6 +14,7 @@ from app.connector.text import (
     ist_date,
     matches,
     page,
+    part,
     same_name,
 )
 from app.models import Analysis, CraftArea, CraftNote, User, WatchItem
@@ -60,8 +61,14 @@ def search_craft(
     }
 
 
-def get_craft_notes(db: Session, user: User, ids: list[str]) -> dict[str, Any]:
-    """Up to 10 Craft notes in full."""
+def long_body(text: str | None, from_char: int) -> dict[str, Any]:
+    """A body in parts: this part, the whole length, and where the next part starts (or None)."""
+    body, more = part(text, from_char)
+    return {"body": body, "body_length": len((text or "").strip()), "more_from_char": more}
+
+
+def get_craft_notes(db: Session, user: User, ids: list[str], from_char: int = 0) -> dict[str, Any]:
+    """Up to 10 Craft notes in full; a long body comes in parts, from `from_char` on."""
     areas = area_names(db, user)
     wanted = [parse_id(i) for i in ids[:10]]
     notes = {n.id: n for n in craft_notes(db, user) if n.id in wanted}
@@ -75,8 +82,8 @@ def get_craft_notes(db: Session, user: User, ids: list[str]) -> dict[str, Any]:
                 "hashtags": list(n.hashtags or []),
                 "source": n.source,
                 "url": n.url,
-                "body": clip(n.body, 20000),
             }
+            | long_body(n.body, from_char)
             for i in wanted
             if (n := notes.get(i))
         ],
@@ -112,7 +119,7 @@ def search_analyses(db: Session, user: User, query: str = "", limit: int = 25) -
     }
 
 
-def get_analysis(db: Session, user: User, analysis_id: str) -> dict[str, Any]:
+def get_analysis(db: Session, user: User, analysis_id: str, from_char: int = 0) -> dict[str, Any]:
     analysis = db.scalar(
         select(Analysis).where(Analysis.id == parse_id(analysis_id), Analysis.user_id == user.id)
     )
@@ -124,5 +131,4 @@ def get_analysis(db: Session, user: User, analysis_id: str) -> dict[str, Any]:
         "title": analysis.title,
         "url": analysis.url,
         "routine": routine and {"title": routine.title, "comedian": routine.comedian},
-        "body": clip(analysis.body, 20000),
-    }
+    } | long_body(analysis.body, from_char)

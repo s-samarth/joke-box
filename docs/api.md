@@ -277,8 +277,8 @@ Every tool reads, except `log_show`, which writes a show and needs the `shows` s
 | `search_brainstorms` | Brainstorms and Rewrites together, most recently changed first, by title and typed text, with how many handwritten pages each Brainstorm has (`handwritten_pages`) |
 | `search_voice_notes` | Voice notes, newest first, matching every word in the label or hashtags: `id`, `label`, `hashtags`, `seconds`, `recorded` (IST date), `uploaded` and `joke_ids` (the jokes written from it). Never the audio |
 | `get_brainstorm` | Any result of `search_brainstorms` in full. A Brainstorm: a JSON block (`kind`, title, typed text, technique, linked jokes and observations, `handwritten_pages`, `pages_shown`, `more_from_page`), then "Page N" and a PNG of each handwritten page, drawn as the app shows it ([ink_image.py](../app/connector/ink_image.py)). Claude reads the handwriting from the images. Pages over a 2.5 MB budget continue with `from_page`. A Rewrite: one JSON block (`kind`, the joke's id and setup, title, typed text) |
-| `search_craft`, `get_craft_notes` | Craft notes (no query lists every title); up to 10 in full |
-| `search_analyses`, `get_analysis` | Analyses with the routine each is about; one in full |
+| `search_craft`, `get_craft_notes` | Craft notes (no query lists every title); up to 10 in full. A body over 20,000 characters comes in parts: `body_length` is the whole note, and `more_from_char` (null at the end) is the `from_char` to call again with for the next part. The parts join back exactly |
+| `search_analyses`, `get_analysis` | Analyses with the routine each is about; one in full, in parts like a Craft note (`body_length`, `more_from_char`, `from_char`) |
 
 A missing item or a bad id comes back as a tool error Claude can read. To try it locally, run the
 app and add `http://localhost:8000/mcp` to an MCP client (for example
