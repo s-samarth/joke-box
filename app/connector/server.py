@@ -124,7 +124,9 @@ def list_shows(
     done and the comic's notes, plus the LPM across every show that matches. Narrow by words in
     the venue, topics or notes, and by date: `since` and `until` are dates like 2026-10-31 (IST,
     both included). At most 25 a call: when next_offset is set, call again with that offset
-    for the rest. LPM scores each laugh 1-5 and divides the points by minutes: 12+ is great,
+    for the rest. LPM scores each laugh 1-5 by how much of the room reacted (1 one or two
+    people, 2 some, 3 most, 4 it rolls on or gets some clapping, 5 an applause break) and
+    divides the points by minutes: 12+ is great,
     9+ decent, 6+ poor, below 6 rough. Each show lists the jokes done in running order, each
     with how it went (killed, ok, bombed, or null if not rated) and the comic's note on it;
     most shows list none. A show logged from a recording names the engine version in

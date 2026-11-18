@@ -175,6 +175,25 @@ through everything you've written at once.
    **What did you learn?**, write down the lesson: it goes to Craft, linked to this show.
 6. Save. The totals on **Shows** update straight away.
 
+## 8a. Log a show from a recording, in a chat
+
+With [set-review](set-review.md), the review engine on your Mac, the show logs itself from the
+recording and you only check it.
+
+1. Record the set as a voice memo, as always (starting early is fine: the engine finds when you
+   went on).
+2. In Claude Code on the Mac, attach the memo and say you performed it, with anything about the
+   night. If you haven't said how the room was, it asks once: how many people, how many sat near
+   and far, where the phone was.
+3. Read the draft: LPM and laugh tally, each joke with its laugh points and a suggested killed /
+   ok / bombed, peaks, dead stretches, riffs that landed, and questions about unsure matches. The
+   **laugh map** opens beside it: laughs along the set over the jokes, the biggest ones with what
+   you said just before.
+4. Talk about it (notes) and correct it: a message starting **"Correction:"** fixes the draft
+   and retunes the engine; anything else is a note.
+5. Say **"log this show"** with your rating. It appears on **Shows** with its title, the laugh
+   tally, each joke's result (the engine's beside it) and **Laughs through the set**.
+
 ## 9. Review how it's going
 
 **The writing** (nothing to log):
@@ -280,5 +299,6 @@ through everything you've written at once.
 3. In a chat, talk about an observation, a premise, a setup, a joke or a set. Claude looks up
    what it needs (your premises and their jokes, a set's running order, your shows, your voice
    notes' labels, your Craft notes) and quotes the notes it applies. It only reads: you write and edit in JokeBox.
+   (The one exception is set-review, which logs shows you reviewed with it: see 8a.)
 4. **Claude connector** in the account menu lists what's connected and when it was last used.
    **Disconnect** stops it at once; connect again any time.

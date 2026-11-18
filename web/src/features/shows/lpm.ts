@@ -1,17 +1,19 @@
 /**
- * LPM, laughs per minute: score every laugh from 1 (a few giggles) to 5 (laughs and applause),
- * add up the points, and divide by the minutes on stage. A show's tally is five counts, one per
+ * LPM, laughs per minute: score every laugh from 1 to 5 by how much of the room reacted (one or
+ * two people, some of the room, most of it, a laugh that rolls on or gets some clapping, an
+ * applause break), add up the points, and divide by the minutes on stage. The same scale as the
+ * set-review engine and the LPM rules note (docs/set-review.md). A show's tally is five counts, one per
  * score, so `laughs[0]` is how many 1-point laughs there were and `laughs[4]` the 5-pointers.
  */
 import type { PerformanceLog } from '../../api/types'
 
 /** The scores, best first, as the tally lists them. */
 export const LAUGH_SCORES = [
-  { points: 5, label: 'Laughs and applause' },
-  { points: 4, label: 'Laughs, some applause' },
-  { points: 3, label: 'Strong laughs' },
-  { points: 2, label: 'Some laughs' },
-  { points: 1, label: 'A few giggles' },
+  { points: 5, label: 'Applause break' },
+  { points: 4, label: 'Rolls on, or some applause' },
+  { points: 3, label: 'Most of the room' },
+  { points: 2, label: 'Some of the room' },
+  { points: 1, label: 'One or two people' },
 ] as const
 
 export const NO_LAUGHS = [0, 0, 0, 0, 0]
