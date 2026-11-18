@@ -2,7 +2,16 @@
 
 Instructions for coding agents (Claude Code reads this through `CLAUDE.md`). The full
 conventions are in [docs/development.md](docs/development.md); these are the ones most often
-missed.
+missed. [docs/README.md](docs/README.md) lists every doc.
+
+| Working on | Read first |
+|---|---|
+| Screens and flows | [docs/screens.md](docs/screens.md), [docs/screens-perform.md](docs/screens-perform.md), [docs/user-flows.md](docs/user-flows.md) |
+| Models, migrations | [docs/data-model.md](docs/data-model.md) |
+| API, the Claude connector | [docs/api.md](docs/api.md) |
+| Shows logged from recordings, the laugh scale | [docs/set-review.md](docs/set-review.md) |
+| The web app | [docs/frontend.md](docs/frontend.md), [docs/design-system.md](docs/design-system.md) |
+| Why it's built this way | [docs/architecture.md](docs/architecture.md) |
 
 ## Checks after every change
 
