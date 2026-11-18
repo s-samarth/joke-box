@@ -10,6 +10,7 @@ import { CaptureProvider } from '../features/capture/CaptureProvider'
 import { AccountMenu } from './AccountMenu'
 import { BottomBar } from './BottomBar'
 import { Rail } from './Rail'
+import { PullToRefresh } from './Refresh'
 import { SyncLight } from './SyncLight'
 import { UnsyncedBanner } from './UnsyncedBanner'
 import { UpdatePrompt } from './UpdatePrompt'
@@ -37,6 +38,7 @@ export function AppShell() {
           </Suspense>
         </main>
         <BottomBar />
+        <PullToRefresh />
         <UpdatePrompt />
       </div>
     </CaptureProvider>
