@@ -63,10 +63,12 @@ def search_craft(query: str = "", area: str = "", kind: str = "") -> dict[str, A
 
 
 @server.tool(annotations=READ)
-def get_craft_notes(ids: list[str]) -> dict[str, Any]:
-    """Up to 10 Craft notes in full."""
+def get_craft_notes(ids: list[str], from_char: int = 0) -> dict[str, Any]:
+    """Up to 10 Craft notes in full. A body longer than 20,000 characters comes in parts:
+    body_length is the whole note, and when more_from_char is set, call again with that note's
+    id and from_char=more_from_char for the next part. Read every part before relying on a note."""
     with reading() as (db, user):
-        return study.get_craft_notes(db, user, ids)
+        return study.get_craft_notes(db, user, ids, from_char)
 
 
 @server.tool(annotations=READ)
@@ -77,7 +79,8 @@ def search_analyses(query: str = "", limit: int = 25) -> dict[str, Any]:
 
 
 @server.tool(annotations=READ)
-def get_analysis(analysis_id: str) -> dict[str, Any]:
-    """One analysis in full."""
+def get_analysis(analysis_id: str, from_char: int = 0) -> dict[str, Any]:
+    """One analysis in full. A body longer than 20,000 characters comes in parts: when
+    more_from_char is set, call again with from_char=more_from_char for the next part."""
     with reading() as (db, user):
-        return study.get_analysis(db, user, analysis_id)
+        return study.get_analysis(db, user, analysis_id, from_char)

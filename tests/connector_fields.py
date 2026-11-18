@@ -4,6 +4,8 @@ The comedy-writer skill is written against these names: change one only on purpo
 with the tool table in docs/api.md.
 """
 
+# A Craft note's or an analysis's body, in parts when it's long.
+LONG = {"body", "body_length", "more_from_char"}
 BRIEF = {
     "id",
     "setup",

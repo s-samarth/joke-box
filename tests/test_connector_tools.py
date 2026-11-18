@@ -149,6 +149,26 @@ def test_notebook_and_study(dev: TestClient, db: Session) -> None:
     assert study.get_analysis(db, me, analysis["id"])["body"] == "Fake why"
 
 
+def test_a_long_note_reads_in_parts_that_join_back(dev: TestClient, db: Session) -> None:
+    body = "".join(f"Fake line {n}.\n" for n in range(4000))  # about 62,000 characters
+    note_id = str(uuid.uuid4())
+    dev.put(f"/api/craft-notes/{note_id}", json=note_in(dev) | {"title": "Fake", "body": body})
+    me = account(db, "dev@example.com")
+    parts, start = [], 0
+    while start is not None:
+        [note] = study.get_craft_notes(db, me, [note_id], start)["notes"]
+        assert note["body_length"] == len(body.strip())
+        parts.append(note["body"])
+        start = note["more_from_char"]
+    assert len(parts) == 4 and "".join(parts) == body.strip()
+    dev.put(f"/api/analyses/{uuid.uuid4()}", json={"title": "Fake", "body": body})
+    [found] = study.search_analyses(db, me)["analyses"]
+    first = study.get_analysis(db, me, found["id"])
+    assert len(first["body"]) == 20000 and first["more_from_char"] == 20000
+    short = study.get_craft_notes(db, me, [note_id], len(body))["notes"][0]
+    assert (short["body"], short["more_from_char"]) == ("", None)
+
+
 def test_the_overview_counts(dev: TestClient, db: Session) -> None:
     topic = new_topic(dev, "Fake topic")
     put_joke(dev, topic_id=topic)

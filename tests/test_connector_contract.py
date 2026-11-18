@@ -21,7 +21,7 @@ from app.models import User
 from app.seed import reseed
 from tests.conftest import random_topic_id, signed_in
 from tests.connector_auth import connect, content, items, result, rpc
-from tests.connector_fields import BRIEF, DETAIL, PULSE, SET, TOOLS
+from tests.connector_fields import BRIEF, DETAIL, LONG, PULSE, SET, TOOLS
 from tests.test_craft import note_in
 
 
@@ -196,9 +196,9 @@ def test_notebook_and_study_tools(claude: tuple[TestClient, str]) -> None:
     notes = items(result(claude, "search_craft"), "notes")
     assert set(notes[0]) == {"id", "title", "area", "kind", "hashtags", "preview"}
     full = items(result(claude, "get_craft_notes", ids=[notes[0]["id"]]), "notes")
-    assert set(full[0]) == {"id", "title", "area", "kind", "hashtags", "source", "url", "body"}
+    assert set(full[0]) == {"id", "title", "area", "kind", "hashtags", "source", "url"} | LONG
 
     analyses = items(result(claude, "search_analyses"), "analyses")
     assert set(analyses[0]) == {"id", "title", "routine", "preview", "updated"}
     analysis = result(claude, "get_analysis", analysis_id=analyses[0]["id"])
-    assert set(analysis) == {"id", "title", "url", "routine", "body"}
+    assert set(analysis) == {"id", "title", "url", "routine"} | LONG
