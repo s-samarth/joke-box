@@ -1,7 +1,10 @@
 name: Backup
 
-# Every night: the whole database and every voice recording, encrypted to your own key, kept as
-# a workflow artifact for 30 days (the run on the 1st of each month for 90). Before it's kept,
+# Every night: the whole database, encrypted to your own key, kept as a workflow artifact for 30
+# days. On the 1st of each month (and on any run started by hand) every voice recording goes in
+# too, and that backup is kept 90 days. Recordings are monthly because each one downloaded is a
+# Blob operation, and a nightly download of all of them would use up the Hobby plan's 10,000
+# operations a month, stopping playback in the app. Before it's kept,
 # the dump is restored into a throwaway Postgres and checked table by table, so every kept
 # backup is one that restores. Setup and restore: docs/backups.md.
 #
@@ -12,6 +15,11 @@ on:
   schedule:
     - cron: "37 21 * * *" # 21:37 UTC, 03:07 in Bangalore, when nobody is writing
   workflow_dispatch:
+    inputs:
+      recordings:
+        description: "Include every voice recording (a monthly backup)"
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -136,7 +144,25 @@ jobs:
           uv run --no-sync python scripts/backup_verify.py "$RUNNER_TEMP/db-url" "$SCRATCH_URL"
           rm -f "$RUNNER_TEMP/db-url"
 
+      # Recordings go in on the 1st of the month, or when a run started by hand asks for them.
+      - name: Choose what goes in, and how long to keep it
+        id: keep
+        env:
+          MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
+          ASKED: ${{ inputs.recordings }}
+        run: |
+          if [ "$(date -u +%d)" = "01" ] || { [ "$MANUAL" = "true" ] && [ "$ASKED" = "true" ]; }; then
+            echo "recordings=true" >> "$GITHUB_OUTPUT"
+            echo "days=90" >> "$GITHUB_OUTPUT"; echo "label=monthly-" >> "$GITHUB_OUTPUT"
+            echo "This backup includes every recording and is kept 90 days."
+          else
+            echo "recordings=false" >> "$GITHUB_OUTPUT"
+            echo "days=30" >> "$GITHUB_OUTPUT"; echo "label=" >> "$GITHUB_OUTPUT"
+            echo "Database only tonight; recordings go in on the 1st of the month."
+          fi
+
       - name: Download every recording from Blob
+        if: steps.keep.outputs.recordings == 'true'
         env:
           BLOB_READ_WRITE_TOKEN: ${{ secrets.BACKUP_BLOB_TOKEN }}
         run: |
@@ -157,17 +183,8 @@ jobs:
           rm -rf "$BACKUP_DIR"
           echo "Encrypted: $name, $(du -h "$RUNNER_TEMP/out/$name" | cut -f1)"
 
-      # Most nights' backups last 30 days. The one made on the 1st of each month lasts 90, the
-      # most GitHub keeps for a public repository, so damage noticed late still has a clean copy.
-      - name: Choose how long to keep it
-        id: keep
-        run: |
-          if [ "$(date -u +%d)" = "01" ]; then
-            echo "days=90" >> "$GITHUB_OUTPUT"; echo "label=monthly-" >> "$GITHUB_OUTPUT"
-          else
-            echo "days=30" >> "$GITHUB_OUTPUT"; echo "label=" >> "$GITHUB_OUTPUT"
-          fi
-
+      # Most nights' backups (database only) last 30 days. A backup with the recordings lasts 90,
+      # the most GitHub keeps for a public repository, so damage noticed late still has a clean copy.
       - name: Keep it
         uses: actions/upload-artifact@v4
         with:

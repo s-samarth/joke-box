@@ -5,8 +5,8 @@ So JokeBox keeps two copies of its own, for two different jobs:
 
 | | Nightly backup | Download everything |
 |---|---|---|
-| **What** | The whole database (every table, the Trash included) and every recording in Blob | Your material: every list as JSON, each brainstorm with its handwriting, each recording |
-| **When** | Every night at 21:37 UTC (03:07 in Bangalore), and whenever you run it | When you tap it |
+| **What** | The whole database (every table, the Trash included) every night; every recording in Blob on the 1st of each month | Your material: every list as JSON, each brainstorm with its handwriting, each recording |
+| **When** | Every night at 21:37 UTC (03:07 in Bangalore), and whenever you run it (a run by hand includes the recordings unless you untick them) | When you tap it |
 | **Where** | An encrypted file on GitHub, kept 30 days (the one from the 1st of each month, 90) | A ZIP on your device |
 | **For** | Bringing the app back after a disaster | Reading, keeping, or taking your material elsewhere |
 
@@ -21,11 +21,14 @@ machine:
    [scripts/backup_verify.py](../scripts/backup_verify.py) compares every table's row count with
    the live database. A missing table, or one that came back empty, stops the run. So every
    backup you keep is one that has already been restored once.
-3. [scripts/backup_audio.py](../scripts/backup_audio.py) downloads every object from the Blob
-   store, plus a manifest listing their names and sizes.
+3. **On the 1st of the month, or a run by hand:** [scripts/backup_audio.py](../scripts/backup_audio.py)
+   downloads every object from the Blob store, plus a manifest listing their names and sizes.
+   Other nights skip this step: each recording downloaded is one Blob operation, and doing all
+   of them nightly (about 450 in November 2026, and growing) would use up the Hobby plan's 10,000
+   operations a month, which stops voice notes playing in the app for up to 30 days.
 4. Both are packed into one `tar` file, which `age` encrypts.
-5. The encrypted file is uploaded as the run's artifact. It's kept for 30 days, or 90 if it was
-   made on the 1st of the month (`jokebox-backup-monthly-...`).
+5. The encrypted file is uploaded as the run's artifact. A database-only backup is kept for 30
+   days; one with the recordings is kept for 90 (`jokebox-backup-monthly-...`).
 
 **Mental model: dated photos, not a mirror.** Each night adds a new, separate backup and never
 touches the older ones. If something goes wrong on the 10th, the backups from the 1st to the 9th
@@ -116,8 +119,9 @@ You need `age` and a Postgres 18 client (`brew install age postgresql@18`).
    mkdir backup && tar -C backup -xf backup.tar
    ```
 
-   `backup/` now holds `jokebox.dump` (the database) and `blob/` (the recordings, with
-   `blob-manifest.json`).
+   `backup/` now holds `jokebox.dump` (the database), and in a monthly backup `blob/` (the
+   recordings, with `blob-manifest.json`). To get the recordings back, take them from the newest
+   monthly backup; recordings made after it aren't in any backup yet.
 
 2. **Restore the database into a new Neon branch first, never straight over production.** In
    Neon, create a branch from production (say `restore-2026-11-04`) and copy its direct URL.
@@ -149,8 +153,11 @@ sign-ins: connect Claude to JokeBox again.
   about the database's size. After the first run, check Neon's **Usage** page. If the dump
   size times 30 comes close to the limit (the app uses some of it too), make the backup weekly:
   set the cron in `backup.yml` to `37 21 * * 0`.
-- **Vercel Blob.** Each run lists the store (one call per 1,000 objects) and downloads every
-  recording once. That counts towards Blob's data transfer: about 25 MB a night now.
+- **Vercel Blob.** A monthly run lists the store (one call per 1,000 objects) and downloads every
+  recording once: one simple operation per recording, out of the Hobby plan's 10,000 a month
+  (the app's own playback uses the rest), and about 25 MB of data transfer. Nightly runs don't
+  touch Blob. Want recordings more often? Weekly costs about four times as much; check the Blob
+  usage page first.
 - **Postgres versions.** The database runs Postgres 18, and `pg_dump` 18 reads 18 and older. If
   Neon moves the project to 19, the run fails with "server version mismatch": change
   `postgresql-client-18`, the `/usr/lib/postgresql/18` paths and the `postgres:18` image in
