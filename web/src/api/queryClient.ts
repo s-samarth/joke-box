@@ -56,7 +56,11 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       gcTime: WEEK, // keep data long enough to be saved for offline use
-      staleTime: 30_000,
+      // A list counts as fresh for 5 minutes. Coming back to the app (or opening a screen) only
+      // refetches lists older than that, so switching apps for a moment doesn't reload every
+      // list. Each reload is a server call, and on Vercel's Hobby plan those share a monthly CPU
+      // limit. Your own saves still refresh what they touch at once (refreshWhenSynced).
+      staleTime: 5 * 60_000,
       retry: (count, error) => !(error instanceof ApiError && error.status < 500) && count < 2,
     },
     // Anything not queued (renaming a topic, deleting a venue...) needs the server there and then:

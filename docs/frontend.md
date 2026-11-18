@@ -9,6 +9,13 @@ in `useState`. Each resource has a hooks file (`api/library.ts`, `api/shows.ts`,
 `useJokes()`, `useSaveSetlist()` and so on. `useState` is only for UI: whether a sheet is open, or
 a draft being typed.
 
+**When lists refetch:** a list counts as fresh for 5 minutes (`staleTime`). Coming back to the app,
+opening a screen or reconnecting refetches only lists older than that, so a quick switch to
+another app and back doesn't reload everything. Your own saves refresh what they touch right away
+(`refreshWhenSynced`), and a change made on another device shows up within about 5 minutes of
+coming back. Each refetch is a server call, and Vercel's Hobby plan caps the month's CPU, so this
+was raised from 30 seconds in November 2026. The Trash always refetches when opened.
+
 ## Client-generated ids and upserts
 New rows get their UUID in the browser (`crypto.randomUUID()`) and are saved with
 `PUT /api/<resource>/<id>`, which creates or updates. A save retried after a dropped connection
