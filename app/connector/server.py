@@ -149,9 +149,10 @@ def log_show(
     jokes: list[dict[str, Any]],
     engine_version: str,
     events: list[dict[str, Any]],
-    title: str = "",
+    topics: list[str] | None = None,
     audience_size: int = 0,
     notes: str = "",
+    learned: str = "",
     show_id: str = "",
 ) -> dict[str, Any]:
     """Log a show the comic reviewed with the set-review engine. Only that engine may call this;
@@ -160,15 +161,19 @@ def log_show(
     each {joke_id, result, suggested_result, note}: result is the comic's (killed, ok, bombed or
     null) and suggested_result the engine's. `events` is the laugh timeline, each {start, end}
     in seconds, kind (laugh or applause), points 1-5 and the joke_id it's credited to or null.
-    Topics come from the jokes. Pass `show_id` to replace a show logged before."""
+    `topics` are the comic's topic names, as they gave them: one that matches none is refused
+    with the list of topics. The jokes' topics are added; with none at all, the show goes under
+    Random. `notes` are remarks on the night; `learned` is what the comic learned, saved as a
+    Craft note linked to the show. Pass `show_id` to replace a show logged before."""
     show = {
         "performed_at": when(performed_at),
         "venue_name": venue,
-        "title": title,
+        "topics": topics or [],
         "duration_seconds": duration_seconds,
         "audience_size": audience_size,
         "rating": rating,
         "notes": notes,
+        "learned": learned,
         "laughs": laughs,
         "jokes": jokes,
         "engine_version": engine_version,

@@ -61,7 +61,8 @@ directly, so a model change can break them, and Claude only finds out mid-conver
 - **The writing pulse is worked out twice:** in the browser for the Daily activity screen
   (`web/src/features/daily/pulse.ts`, `pulseNotes.ts`) and in `app/connector/pulse.py` for Claude.
   Change a rule in both, with the matching cases in `pulse.test.ts` and `tests/test_connector_pulse.py`.
-- **Tools only read, except `log_show`.** It writes shows only, and only for a sign-in with the
+- **Tools only read, except `log_show`.** It writes shows (and a show's own lesson note in Craft,
+  from `learned`), and only for a sign-in with the
   `shows` scope, which only set-review (the comic's review engine, `~/Codebases/set-review`) asks
   for. Each tool sees only the signed-in user's rows. Its fields are what set-review sends: change
   them together with `set_review/payload.py`.

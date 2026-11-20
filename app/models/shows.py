@@ -110,7 +110,8 @@ class PerformanceLog(Trashable, OwnedMixin, Base):
         Uuid, ForeignKey("venues.id", ondelete="SET NULL")
     )
     performed_at: Mapped[datetime] = mapped_column(UTCDateTime())
-    # A name for the night, e.g. "Kafe Kalaa, couples night". Empty when not given.
+    # No longer used (20 Nov 2026): topics say what a show was. Every save clears it; the
+    # column stays because migrations only add, and can be dropped once nothing deploys it.
     title: Mapped[str] = mapped_column(String(200), default="", server_default="")
     duration_seconds: Mapped[int] = mapped_column(Integer, default=0)
     audience_size: Mapped[int] = mapped_column(Integer, default=0)

@@ -128,7 +128,6 @@ def log_out(log: PerformanceLog, hidden: set[uuid.UUID]) -> LogOut:
         id=log.id,
         venue_name=log.venue.name if log.venue else "Unidentified Venue",
         performed_at=log.performed_at,
-        title=log.title,
         duration_seconds=log.duration_seconds,
         audience_size=log.audience_size,
         rating=log.rating,

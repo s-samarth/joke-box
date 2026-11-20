@@ -32,7 +32,6 @@ def show(jokes: list[str], **changes: Any) -> dict[str, Any]:
     return {
         "performed_at": "2026-11-18T21:30:00",
         "venue": "Fake Cafe",
-        "title": "Fake couples night",
         "duration_seconds": 600,
         "audience_size": 12,
         "rating": 4,
@@ -67,15 +66,16 @@ def test_the_engine_logs_a_show_with_its_laughs(engine: Engine) -> None:
     assert set(logged) == {
         "show_id",
         "date",
-        "title",
         "venue",
+        "topics",
+        "lesson",
         "lpm",
         "jokes_logged",
         "events_kept",
     }
     assert logged["date"] == "2026-11-18" and logged["lpm"] == 1.0
     saved = browser.get("/api/logs").json()[0]
-    assert saved["title"] == "Fake couples night" and saved["venue_name"] == "Fake Cafe"
+    assert saved["venue_name"] == "Fake Cafe" and "title" not in saved
     assert [(j["result"], j["suggested_result"]) for j in saved["jokes"]] == [
         ("killed", "ok"),
         (None, "bombed"),

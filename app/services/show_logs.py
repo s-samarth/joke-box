@@ -57,8 +57,7 @@ def save_show(
     log.notes = body.notes
     log.laughs = body.laughs
     log.topics = topics
-    if body.title is not None:  # left out by app versions from before titles: it stays
-        log.title = body.title.strip()
+    log.title = ""  # titles are gone: topics say what a show was (the column stays unused)
     if body.jokes is not None:  # left out by app versions from before: the jokes stay
         set_jokes(log, jokes, hidden)
     if review is not None:

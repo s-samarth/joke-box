@@ -129,7 +129,6 @@ def test_performing_tools(claude: tuple[TestClient, str]) -> None:
     }
     assert set(items(shows, "shows")[0]) == {
         "date",
-        "title",
         "venue",
         "minutes",
         "audience",

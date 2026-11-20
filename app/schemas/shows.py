@@ -83,8 +83,6 @@ class LogJokeOut(BaseModel):
 class LogIn(BaseModel):
     venue_name: str = Field(default="Unidentified Venue", min_length=1, max_length=160)
     performed_at: datetime
-    # Left out (as by app versions from before titles), the title stays as it is.
-    title: str | None = Field(default=None, max_length=200)
     duration_seconds: int = Field(default=0, ge=0, le=INT_MAX)
     audience_size: int = Field(default=0, ge=0, le=INT_MAX)
     rating: int = Field(default=3, ge=1, le=5)
@@ -108,7 +106,6 @@ class LogOut(BaseModel):
     id: uuid.UUID
     venue_name: str
     performed_at: datetime
-    title: str = ""
     duration_seconds: int
     audience_size: int
     rating: int

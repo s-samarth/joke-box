@@ -42,7 +42,7 @@ export function ShowDetail({ log, topics, onClose, onEdit }: { log: PerformanceL
   ]
 
   return (
-    <Modal open onOpenChange={(o) => !o && onClose()} title={log.title || log.venue_name} description={log.title ? `${log.venue_name}, ${formatDateTime(log.performed_at)}` : formatDateTime(log.performed_at)}
+    <Modal open onOpenChange={(o) => !o && onClose()} title={log.venue_name} description={formatDateTime(log.performed_at)}
       footer={<><Button variant="danger" className="mr-auto" onClick={onDelete}>Delete</Button><Button variant="tape" onClick={onEdit}>Edit</Button></>}>
       <dl className="divide-y divide-rule border-y border-rule">
         {rows.map(([k, v]) => (
