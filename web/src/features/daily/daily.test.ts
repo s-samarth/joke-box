@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Joke } from '../../api/types'
-import { daysBetween, habit, byDay, monthWeeks, moodFor, shiftMonth } from './dailyMath'
+import { daysBetween, habit, byDay, monthWeeks, moodFor, recentDays, shiftMonth } from './dailyMath'
 
 const TODAY = '2026-10-21'
 
@@ -44,5 +44,10 @@ describe('daily joke habit', () => {
     expect(habit(['2026-10-31', '2026-11-01'], '2026-11-01')).toMatchObject({ current: 2, mood: 'done' })
     expect(habit(['2026-12-30', '2026-12-31', '2027-01-01'], '2027-01-02')).toMatchObject({ gap: 1, current: 3, mood: 'due' })
     expect(habit(['2026-10-21'], '2026-11-05')).toMatchObject({ gap: 15, current: 0, mood: 'gone' })
+  })
+
+  it('lists the last days for the streak strip, across a month end', () => {
+    expect(recentDays('2026-11-02', 4)).toEqual(['2026-10-30', '2026-10-31', '2026-11-01', '2026-11-02'])
+    expect(recentDays(TODAY, 14)).toHaveLength(14)
   })
 })
