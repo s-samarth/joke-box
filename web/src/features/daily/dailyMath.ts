@@ -77,3 +77,8 @@ export function shiftMonth(month: string, by: number): string {
   const d = new Date(Date.UTC(y, m - 1 + by, 1))
   return d.toISOString().slice(0, 7)
 }
+
+/** The last `n` days ending `today`, oldest first: the streak cards' strip of squares. */
+export function recentDays(today: string, n: number): string[] {
+  return Array.from({ length: n }, (_, i) => shiftDay(today, i - n + 1))
+}

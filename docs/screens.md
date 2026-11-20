@@ -139,16 +139,20 @@ separate log to fall out of step. Items in the Trash don't count.
   offline, so the rules exist twice: change both together.
 - **The nudge** (the same one as Home); its button focuses the box below.
 - **Today's joke:** the quick capture box. Saving puts the joke in Random and marks today at once.
-- **Streak cards** ([StreakCards.tsx](../web/src/features/daily/StreakCards.tsx), on Home too): two
-  matching boxes side by side on every screen size. **Joke streak** (green): days in a row with a
-  new joke, ending today or yesterday while today is still open, then the longest ever, then this
-  month: "November: 15 of 21 days active" (days with anything written, out of the days so far).
-  **Stage streak** (gold, opens Shows): days in a row with a show, by the same rule, then the
-  longest ever, then this month: "November: 10 shows · 1h 32m · 8 mic days" (or "no shows yet").
-  Streaks run across months; only the bottom line is the month. On a phone the bottom lines are
-  shorter ("Nov: 15 / 21 days"). There's no nudge to go on stage, and no audience total (crowd
-  sizes are guesses, so a sum would mislead). Earlier the stats were a loose row of three numbers
-  with a gold "on stage" strip under them on Home, which read as a notification.
+- **Streak cards** ([StreakCards.tsx](../web/src/features/daily/StreakCards.tsx),
+  [StreakCard.tsx](../web/src/features/daily/StreakCard.tsx), on Home too): two matching boxes side
+  by side on every screen size. Each has its name and **Best** (the longest streak ever) on top,
+  the current streak big, the **last 14 days as squares** (filled on days that counted, today
+  outlined until it does, so the run and its gaps are visible), and this month along the bottom
+  as big figures. **Joke streak** (green): days in a row with a new joke, ending today or yesterday
+  while today is still open; the month is "15 / 21 days active" (days with anything written, out
+  of the days so far). **Stage streak** (gold, opens Shows): days in a row with a show, by the
+  same rule; the month is shows, time on stage and (from tablet width) mic days. Streaks run across
+  months; only the bottom is the month. There's no nudge to go on stage, and no audience total
+  (crowd sizes are guesses, so a sum would mislead). Chosen over a bar towards your best and a
+  grid of equal tiles, because the squares show the rhythm, not only a number. Earlier the stats
+  were a loose row of three numbers with a gold "on stage" strip on Home that read as a
+  notification.
 - **The month's total:** how many pieces, how many a day, and one bar split by kind. Its labels
   are the colour key: orchid observations (`orchid`), periwinkle premises (`sky`), green jokes
   (`ok`). It follows the month the calendar shows.

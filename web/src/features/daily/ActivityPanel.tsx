@@ -20,7 +20,7 @@ export function ActivityPanel({ lists }: { lists: boolean }) {
 
   return (
     <div className="space-y-6">
-      <StreakCards habit={habit} thisMonth={thisMonth} today={today} />
+      <StreakCards habit={habit} activity={activity} thisMonth={thisMonth} today={today} />
       <MonthMix month={month} today={today} summary={shown} />
       <MonthCalendar month={month} onMonth={setMonth} activity={activity} summary={shown} today={today} selected={selected} onSelect={setSelected} />
       {selected && <DayDetail date={selected} today={today} day={dayOf(activity, selected)} lists={lists} />}
