@@ -91,7 +91,7 @@ in IST and the headline **"Got something?"** with a search button beside it (it 
 | Daily joke nudge | `daily/DailyBanner.tsx` | Days since your last new joke: today written, a small green line with your streak; 1 or 2 days, yellow **Write a joke today**; 3 to 7, red **N days without a joke**; over a week, a dark, spooky card (a drifting ghost, a cobweb, a flickering line; still under reduced motion). Waits for the jokes to load so it never flashes the wrong state. Links to Daily activity |
 | Write | `CaptureTabs.tsx` | Three tabs, **Observation** (picked when Home opens), **Premise** and **Joke**, each with its own box; drafts survive switching. Observation: `ObservationBox` (text, Topic, Kind, **Log it**). Premise: `premises/PremiseBox.tsx` (the take, "Because…", Topic, **Add premise**; the toast's **Open** goes to it). Joke: `QuickCapture.tsx` (setup and punchline; Enter saves to Random). The nudge's **Write it** switches to Joke and puts the cursor in the setup |
 | Your material | `LibraryTiles.tsx` | Three tiles, **Observations**, **Premises** and **Jokes** (the tabs' order), each with its count and its Daily activity colour; a tap opens that list |
-| Daily activity | `TodayActivity.tsx`, `daily/ActivityPanel.tsx`, `MonthOnStage.tsx` | The same streaks, month total, calendar and picked day as [Daily activity](#daily-activity-daily), plus **Open**. Under the streaks, one gold line for this month on stage: "November on stage: 10 shows · 1h 32m · 8 mic days" (or "no shows yet"; hidden until you've logged a show), which opens Shows. No audience total: crowd sizes are guesses, so a sum of them would mislead. A tapped day shows its three counts only; the pieces themselves are listed on Daily activity |
+| Daily activity | `TodayActivity.tsx`, `daily/ActivityPanel.tsx` | The same streak cards, month total, calendar and picked day as [Daily activity](#daily-activity-daily), plus **Open**. A tapped day shows its three counts only; the pieces themselves are listed on Daily activity |
 | Voice notes | `TodayVoice.tsx` | The same recorder as the Voice screen, plus "All N" |
 | Brainstorm | `TodayBrainstorm.tsx` | Start a session, or pick up the last one |
 | Craft | `TodayCraft.tsx`, `craft/PathLadder.tsx` | **Path:** a small copy of the Craft staircase: the first Path note with tick boxes still open, how many are done, and the next step (one small staircase per heading when the note has tracks). When the step names minutes, it shows your most solid material on one topic (Strong and Killer jokes, by runtime) against that target. Below it, a box to save a lesson to one of your areas (chips in their colours) |
@@ -139,8 +139,16 @@ separate log to fall out of step. Items in the Trash don't count.
   offline, so the rules exist twice: change both together.
 - **The nudge** (the same one as Home); its button focuses the box below.
 - **Today's joke:** the quick capture box. Saving puts the joke in Random and marks today at once.
-- **Stats:** joke streak (ending today, or yesterday while today is still open), longest joke
-  streak, and active days this month (days with anything written, out of the days so far).
+- **Streak cards** ([StreakCards.tsx](../web/src/features/daily/StreakCards.tsx), on Home too): two
+  matching boxes side by side on every screen size. **Joke streak** (green): days in a row with a
+  new joke, ending today or yesterday while today is still open, then the longest ever, then this
+  month: "November: 15 of 21 days active" (days with anything written, out of the days so far).
+  **Stage streak** (gold, opens Shows): days in a row with a show, by the same rule, then the
+  longest ever, then this month: "November: 10 shows · 1h 32m · 8 mic days" (or "no shows yet").
+  Streaks run across months; only the bottom line is the month. On a phone the bottom lines are
+  shorter ("Nov: 15 / 21 days"). There's no nudge to go on stage, and no audience total (crowd
+  sizes are guesses, so a sum would mislead). Earlier the stats were a loose row of three numbers
+  with a gold "on stage" strip under them on Home, which read as a notification.
 - **The month's total:** how many pieces, how many a day, and one bar split by kind. Its labels
   are the colour key: orchid observations (`orchid`), periwinkle premises (`sky`), green jokes
   (`ok`). It follows the month the calendar shows.

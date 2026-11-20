@@ -3,6 +3,7 @@
  * day's gold is. Days are IST dates, the same as the mic diary (showsByDay in timelineMath).
  */
 import type { PerformanceLog } from '../../../api/types'
+import { habit } from '../../daily/dailyMath'
 
 export type ShowDays = Map<string, PerformanceLog[]>
 
@@ -53,4 +54,13 @@ export const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n ==
 export function monthLine({ shows, seconds, days }: MonthStats): string {
   if (!shows) return 'No shows'
   return `${plural(shows, 'show')} · ${stageTotal(seconds)} on stage · up on ${plural(days, 'day')}`
+}
+
+/**
+ * Days in a row with at least one show, by the joke streak's rules: it ends today, or yesterday
+ * while today is still open. `longest` is the best run ever.
+ */
+export function stageStreak(days: ShowDays, today: string): { current: number; longest: number } {
+  const { current, longest } = habit(days.keys(), today)
+  return { current, longest }
 }
