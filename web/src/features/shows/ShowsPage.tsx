@@ -1,7 +1,8 @@
 /**
- * Shows: pick a period and venue, read the totals, then every show in a sortable table, on a
- * timeline, or broken down into strengths and weak spots. One set of filters drives all of it, so
- * the numbers always match the rows.
+ * Shows: pick a period and venue, read the totals, then the show calendar and every show in a
+ * sortable table, on a timeline, or broken down into strengths and weak spots. One set of filters
+ * drives all of it, so the numbers always match the rows; the calendar has its own month arrows,
+ * so it takes every filter except the period.
  */
 import { Download, MapPin, MoreHorizontal, Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
@@ -16,6 +17,7 @@ import { topicName } from '../../lib/jokeMeta'
 import { downloadCsv } from '../../lib/csv'
 import { long } from '../../lib/duration'
 import { formatDateTime, todayIst } from '../../lib/time'
+import { ShowCalendarPanel } from './calendar/ShowCalendarPanel'
 import { InsightsView } from './insights/InsightsView'
 import { TimelineView } from './insights/TimelineView'
 import { LogShowSheet } from './LogShowSheet'
@@ -47,6 +49,7 @@ export function ShowsPage() {
 
   const filtered = useMemo(() => applyFilters(logs, filters, today), [logs, filters, today])
   const rows = useMemo(() => sortLogs(filtered, sort), [filtered, sort])
+  const calendarLogs = useMemo(() => applyFilters(logs, { ...filters, period: 'all' }, today), [logs, filters, today])
   const venues = useMemo(() => [...new Set(logs.map((l) => l.venue_name))].sort(), [logs])
   const topicNames = (ids: string[]) => ids.map((id) => topicName(topics.find((t) => t.id === id))).filter(Boolean).join(', ')
 
@@ -78,6 +81,7 @@ export function ShowsPage() {
 
       {view === 'timeline' && <div className="mt-8"><TimelineView logs={filtered} /></div>}
       {view === 'insights' && <div className="mt-8"><InsightsView logs={filtered} topics={topics} /></div>}
+      {view === 'list' && logs.length > 0 && <div className="mt-8"><ShowCalendarPanel logs={calendarLogs} /></div>}
       {view === 'list' && <section className="mt-10">
         <div className="mb-2 flex items-baseline justify-between gap-3">
           <h2 className="text-lg font-semibold">Every show</h2>

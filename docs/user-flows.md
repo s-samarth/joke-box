@@ -173,7 +173,8 @@ through everything you've written at once.
    joke's page then says how it has gone across your shows.
 5. If you recorded the set, tap **Count laughs for LPM** and count each laugh by its score. Under
    **What did you learn?**, write down the lesson: it goes to Craft, linked to this show.
-6. Save. The totals on **Shows** update straight away.
+6. Save. The totals on **Shows** update straight away, the day turns gold on the show calendar
+   (on Shows and Daily activity), and Home's "on stage" line counts it in the month.
 
 ## 8a. Log a show from a recording, in a chat
 

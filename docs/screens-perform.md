@@ -79,6 +79,19 @@ each with its setup in marker, the punchline, its runtime and "by m:ss" (the run
 - **Totals:** Shows, On stage, Avg rating (weighted by stage time) and Median crowd. They always
   follow the filters. Under them, the LPM across the shows you counted laughs for (all points over
   all minutes), with its band: beast (12+), decent (9–12), poor (6–9), rough (under 6).
+- **Show calendar** (top of the Shows tab, once you've logged a show;
+  [calendar/ShowCalendarPanel.tsx](../web/src/features/shows/calendar/ShowCalendarPanel.tsx),
+  [ShowCalendar.tsx](../web/src/features/shows/calendar/ShowCalendar.tsx),
+  [ShowDayList.tsx](../web/src/features/shows/calendar/ShowDayList.tsx),
+  [showMonth.ts](../web/src/features/shows/calendar/showMonth.ts)): a month laid out like the Daily
+  activity calendar, in stage gold. A day you went up is tinted gold, deeper the more minutes on
+  stage (up to 5, 10, 20, then more), with its minutes written on it and a dot per show (in the
+  corner when the calendar is wide, above the minutes on a phone). Over it: "10 shows · 1h 32m on
+  stage · up on 8 days". Arrows page through months; today is outlined in yellow. Tap a show day
+  for its shows (time, venue, length, stars), and a show to open it. It takes every filter except
+  the period, since its arrows pick the month (with **This week** most of the month would look like
+  days off). Days don't carry the rating: the mic diary on Timeline does. Daily activity shows the
+  same calendar, with every show.
 - **Views** ([ViewTabs.tsx](../web/src/features/shows/ViewTabs.tsx), kept in the URL as `?view=`):
   **Shows** (the table), **Timeline** and **Insights**. The toolbar and totals scope all three.
 - **Timeline** ([insights/TimelineView.tsx](../web/src/features/shows/insights/TimelineView.tsx),
