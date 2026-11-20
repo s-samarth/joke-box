@@ -76,7 +76,14 @@ each with its setup in marker, the punchline, its runtime and "by m:ss" (the run
 - **Toolbar:** Lifetime / This month / This week, a venue picker and **More filters** (date range,
   stars, set length band, crowd band). It wraps onto a second line on a narrow phone rather than
   scrolling sideways, so nothing hides off the edge.
-- **Totals:** Shows, On stage, Avg rating (weighted by stage time) and Median crowd. They always
+- **Stage tiles** (top of the page, above the tabs and filters, once you've logged a show;
+  [StageTiles.tsx](../web/src/features/shows/StageTiles.tsx)): **Streaks**, your stage streak (days
+  in a row with a show, alive until you miss a day, the joke streak's rule) and your best; then
+  **November so far**, shows, time on stage and mic days out of the days so far. They count every
+  show whatever the filters say, which is why they sit above them. On a phone: a row of two, then
+  a row of three.
+- **Totals for these filters:** Shows, On stage, Avg rating (weighted by stage time) and Median
+  crowd, as the same tiles ([StatTile.tsx](../web/src/features/shows/StatTile.tsx)). They always
   follow the filters. Under them, the LPM across the shows you counted laughs for (all points over
   all minutes), with its band: beast (12+), decent (9–12), poor (6–9), rough (under 6).
 - **Show calendar** (top of the Shows tab, once you've logged a show;
