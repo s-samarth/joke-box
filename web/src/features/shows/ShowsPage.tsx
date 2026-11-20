@@ -1,5 +1,6 @@
 /**
- * Shows: pick a period and venue, read the totals, then the show calendar and every show in a
+ * Shows: your stage streak and this month first (every show, above the filters), then pick a
+ * period and venue, read the totals, then the show calendar and every show in a
  * sortable table, on a timeline, or broken down into strengths and weak spots. One set of filters
  * drives all of it, so the numbers always match the rows; the calendar has its own month arrows,
  * so it takes every filter except the period.
@@ -25,6 +26,7 @@ import { NO_FILTERS, PAGE_SIZE, applyFilters, sortLogs, type Sort, type SortKey 
 import { ShowDetail } from './ShowDetail'
 import { ShowFilters } from './ShowFilters'
 import { ShowStats } from './ShowStats'
+import { StageTiles } from './StageTiles'
 import { ShowCards } from './ShowCards'
 import { ShowsTable } from './ShowsTable'
 import { ShowsToolbar } from './ShowsToolbar'
@@ -75,6 +77,7 @@ export function ShowsPage() {
         <Button variant="tape" icon={<Plus size={18} />} onClick={() => setEditing('new')}>Log a show</Button>
       </PageHead>
 
+      {logs.length > 0 && <div className="mb-6"><StageTiles logs={logs} /></div>}
       <div className="mb-4"><ViewTabs value={view} onChange={changeView} /></div>
       <div className="mb-5"><ShowsToolbar value={filters} onChange={changeFilters} venues={venues} onMore={() => setMoreOpen(true)} /></div>
       <ShowStats logs={filtered} />
