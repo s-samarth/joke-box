@@ -17,8 +17,6 @@ export interface PerformanceLog {
   id: string
   venue_name: string
   performed_at: string
-  /** A name for the night; empty when none was given. Missing on a show cached before titles. */
-  title?: string
   duration_seconds: number
   audience_size: number
   rating: number

@@ -191,7 +191,9 @@ recording and you only check it.
    you said just before.
 4. Talk about it (notes) and correct it: a message starting **"Correction:"** fixes the draft
    and retunes the engine; anything else is a note.
-5. Say **"log this show"** with your rating. It appears on **Shows** with its title, the laugh
+5. Say **"log this show"** with your rating and which topic it was (the AI asks if you
+   haven't said; none means Random). What you learned becomes the show's lesson in Craft. It
+   appears on **Shows** under its topic, with the laugh
    tally, each joke's result (the engine's beside it) and **Laughs through the set**.
 
 ## 9. Review how it's going

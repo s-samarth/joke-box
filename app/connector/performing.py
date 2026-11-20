@@ -138,7 +138,6 @@ def list_shows(
         "shows": [
             {
                 "date": ist_date(log.performed_at),
-                "title": log.title,
                 "venue": log.venue.name if log.venue else "Unidentified Venue",
                 "minutes": round(log.duration_seconds / 60, 1),
                 "audience": log.audience_size,
