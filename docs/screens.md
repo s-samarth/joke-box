@@ -91,7 +91,7 @@ in IST and the headline **"Got something?"** with a search button beside it (it 
 | Daily joke nudge | `daily/DailyBanner.tsx` | Days since your last new joke: today written, a small green line with your streak; 1 or 2 days, yellow **Write a joke today**; 3 to 7, red **N days without a joke**; over a week, a dark, spooky card (a drifting ghost, a cobweb, a flickering line; still under reduced motion). Waits for the jokes to load so it never flashes the wrong state. Links to Daily activity |
 | Write | `CaptureTabs.tsx` | Three tabs, **Observation** (picked when Home opens), **Premise** and **Joke**, each with its own box; drafts survive switching. Observation: `ObservationBox` (text, Topic, Kind, **Log it**). Premise: `premises/PremiseBox.tsx` (the take, "Because…", Topic, **Add premise**; the toast's **Open** goes to it). Joke: `QuickCapture.tsx` (setup and punchline; Enter saves to Random). The nudge's **Write it** switches to Joke and puts the cursor in the setup |
 | Your material | `LibraryTiles.tsx` | Three tiles, **Observations**, **Premises** and **Jokes** (the tabs' order), each with its count and its Daily activity colour; a tap opens that list |
-| Daily activity | `TodayActivity.tsx`, `daily/ActivityPanel.tsx` | The same streaks, month total, calendar and picked day as [Daily activity](#daily-activity-daily), plus **Open**. A tapped day shows its three counts only; the pieces themselves are listed on Daily activity |
+| Daily activity | `TodayActivity.tsx`, `daily/ActivityPanel.tsx`, `MonthOnStage.tsx` | The same streaks, month total, calendar and picked day as [Daily activity](#daily-activity-daily), plus **Open**. Under the streaks, one gold line for this month on stage: "November on stage: 10 shows · 1h 32m · 8 mic days" (or "no shows yet"; hidden until you've logged a show), which opens Shows. No audience total: crowd sizes are guesses, so a sum of them would mislead. A tapped day shows its three counts only; the pieces themselves are listed on Daily activity |
 | Voice notes | `TodayVoice.tsx` | The same recorder as the Voice screen, plus "All N" |
 | Brainstorm | `TodayBrainstorm.tsx` | Start a session, or pick up the last one |
 | Craft | `TodayCraft.tsx`, `craft/PathLadder.tsx` | **Path:** a small copy of the Craft staircase: the first Path note with tick boxes still open, how many are done, and the next step (one small staircase per heading when the note has tracks). When the step names minutes, it shows your most solid material on one topic (Strong and Killer jokes, by runtime) against that target. Below it, a box to save a lesson to one of your areas (chips in their colours) |
@@ -116,6 +116,10 @@ joke habit: only a new joke keeps it going. A day's activity is read from the cr
 of the three lists already cached, imports included with their original dates, so there's no
 separate log to fall out of step. Items in the Trash don't count.
 
+- **Show calendar** (under the day you picked, once you've logged a show): the Shows page's
+  calendar of shows and minutes on stage, with every show
+  ([ShowCalendarPanel.tsx](../web/src/features/shows/calendar/ShowCalendarPanel.tsx); see
+  [Shows](screens-perform.md#shows-shows)). Tap a show day to list its shows and open one.
 - **Writing pulse** (at the foot of this page only, not on Home): how the writing is going, worked
   out from what's saved, so there is nothing to log. Four parts:
   - **Written in the last 30 days:** observations, premises and jokes, each against the 30 days

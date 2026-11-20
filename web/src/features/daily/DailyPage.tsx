@@ -3,9 +3,12 @@
  * top (only jokes keep the streak), then the streaks, the month's total split by kind, and a
  * calendar where every day shows how much you wrote and of which kind (see ActivityPanel, which
  * Home shows too). Tap a day to see its counts and the pieces themselves. Under it, the writing
- * pulse (WritingPulse): how it's going, read from what's saved.
+ * pulse (WritingPulse): how it's going, read from what's saved. Between them, the show calendar
+ * (ShowCalendarPanel): how many shows and minutes on stage each day, once you've logged a show.
  */
+import { useLogs } from '../../api/shows'
 import { PageHead } from '../../components/ui/pieces'
+import { ShowCalendarPanel } from '../shows/calendar/ShowCalendarPanel'
 import { QuickCapture } from '../today/QuickCapture'
 import { ActivityPanel } from './ActivityPanel'
 import { DailyBanner } from './DailyBanner'
@@ -16,6 +19,7 @@ const focusBox = () => document.getElementById('quick-capture')?.focus()
 
 export function DailyPage() {
   const { habit } = useHabit()
+  const { data: logs = [] } = useLogs()
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <PageHead title="Daily activity" />
@@ -27,6 +31,7 @@ export function DailyPage() {
       </div>
 
       <ActivityPanel lists />
+      {logs.length > 0 && <ShowCalendarPanel logs={logs} />}
       <WritingPulse />
     </div>
   )
