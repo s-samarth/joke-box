@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { PerformanceLog } from '../../../api/types'
 import { showsByDay } from '../insights/timelineMath'
-import { dayMinutes, monthLine, monthStats, stageHeat, stageTotal } from './showMonth'
+import { dayMinutes, monthLine, monthStats, stageHeat, stageStreak, stageTotal } from './showMonth'
 
 const show = (performed_at: string, duration_seconds: number) => ({ id: performed_at, performed_at, duration_seconds }) as PerformanceLog
 
@@ -33,5 +33,15 @@ describe('show calendar', () => {
 
   it('deepens the gold with minutes on stage', () => {
     expect([300, 301, 600, 1200, 1201].map(stageHeat)).toEqual([1, 2, 2, 3, 4])
+  })
+
+  it('counts a stage streak in IST, alive until a day is missed', () => {
+    const run = showsByDay([
+      show('2026-11-10T14:00:00Z', 300), show('2026-11-11T14:00:00Z', 300), show('2026-11-11T19:00:00Z', 300), // 00:30 on the 12th in IST
+      show('2026-11-18T14:00:00Z', 300), show('2026-11-19T14:00:00Z', 300),
+    ])
+    expect(stageStreak(run, '2026-11-20')).toEqual({ current: 2, longest: 3 })
+    expect(stageStreak(run, '2026-11-21')).toEqual({ current: 0, longest: 3 })
+    expect(stageStreak(new Map(), '2026-11-21')).toEqual({ current: 0, longest: 0 })
   })
 })
