@@ -22,6 +22,8 @@ export interface PerformanceLog {
   rating: number
   topic_ids: string[]
   notes: string
+  /** What you learned there, a comment on the show like the remarks. Missing on a show cached by an app version from before. */
+  learned?: string
   /** Laugh tally for LPM: how many laughs scored 1 to 5 points. Null if not counted. */
   laughs: number[] | null
   /** The jokes done, in running order. Missing on a show cached by an app version from before. */

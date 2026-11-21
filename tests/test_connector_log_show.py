@@ -68,7 +68,7 @@ def test_the_engine_logs_a_show_with_its_laughs(engine: Engine) -> None:
         "date",
         "venue",
         "topics",
-        "lesson",
+        "learned",
         "lpm",
         "jokes_logged",
         "events_kept",

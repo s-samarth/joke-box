@@ -117,6 +117,9 @@ class PerformanceLog(Trashable, OwnedMixin, Base):
     audience_size: Mapped[int] = mapped_column(Integer, default=0)
     rating: Mapped[int] = mapped_column(Integer, default=3)
     notes: Mapped[str] = mapped_column(Text, default="")
+    # What you learned at the show: a comment on the show, like the remarks in `notes`. Craft is
+    # for general lessons, so show lessons stay here (moved out of Craft in 0039).
+    learned: Mapped[str] = mapped_column(Text, default="", server_default="")
     # Laugh tally for LPM: how many laughs scored 1, 2, 3, 4 and 5 points. None if not counted.
     laughs: Mapped[list[int] | None] = mapped_column(JSON)
     venue: Mapped[Venue | None] = relationship()

@@ -1,8 +1,6 @@
 /** One show, read back: with Edit and Delete, its LPM if counted, how particular jokes went
- * (with any comment), and what you learned there. */
-import { GraduationCap, Plus } from 'lucide-react'
+ * (with any comment), your remarks and what you learned there (both kept on the show). */
 import { Link } from 'react-router'
-import { useCraftNotes } from '../../api/craft'
 import { useJokes } from '../../api/library'
 import { useLogActions } from '../../api/shows'
 import type { PerformanceLog } from '../../api/types'
@@ -21,11 +19,9 @@ const RESULT_STYLE = { killed: 'text-tape', ok: 'text-paper', bombed: 'text-ligh
 export function ShowDetail({ log, topics, onClose, onEdit }: { log: PerformanceLog; topics: string; onClose: () => void; onEdit: () => void }) {
   const { remove } = useLogActions()
   const { confirm, toast } = useFeedback()
-  const { data: craft = [] } = useCraftNotes()
   const { data: jokes = [] } = useJokes()
   const setupOf = new Map(jokes.map((j) => [j.id, j.setup]))
   const done = (log.jokes ?? []).filter((d) => setupOf.has(d.joke_id))
-  const lessons = craft.filter((n) => n.performance_log_id === log.id)
   const score = lpm(log.laughs, log.duration_seconds)
   const onDelete = async () => {
     if (!(await confirm({ title: 'Delete this show?', message: `${log.venue_name}, ${formatDateTime(log.performed_at)}. It goes to the Trash for 30 days.`, confirmLabel: 'Delete show', danger: true }))) return
@@ -76,15 +72,12 @@ export function ShowDetail({ log, topics, onClose, onEdit }: { log: PerformanceL
           <p className="mt-1 leading-relaxed whitespace-pre-wrap text-paper/90">{log.notes}</p>
         </div>
       )}
-      <div className="mt-5">
-        <h3 className="text-sm text-dim">What you learned</h3>
-        <ul className="mt-1.5 space-y-1">
-          {lessons.map((n) => (
-            <li key={n.id}><Link to={`/craft/${n.id}`} className="inline-flex items-center gap-2 hover:text-tape"><GraduationCap size={15} className="text-tape" />{n.title}</Link></li>
-          ))}
-          <li><Link to={`/craft/new?show=${log.id}&screen=stage`} className="inline-flex items-center gap-2 text-sm text-dim hover:text-paper"><Plus size={15} />Add a lesson</Link></li>
-        </ul>
-      </div>
+      {log.learned && (
+        <div className="mt-5">
+          <h3 className="text-sm text-dim">What you learned</h3>
+          <p className="mt-1 leading-relaxed whitespace-pre-wrap text-paper/90">{log.learned}</p>
+        </div>
+      )}
     </Modal>
   )
 }

@@ -133,6 +133,7 @@ def log_out(log: PerformanceLog, hidden: set[uuid.UUID]) -> LogOut:
         rating=log.rating,
         topic_ids=[t.id for t in log.topics],
         notes=log.notes,
+        learned=log.learned,
         laughs=log.laughs,
         jokes=jokes_out(log, hidden),
         review=ReviewOut.model_validate(log.review, from_attributes=True) if log.review else None,

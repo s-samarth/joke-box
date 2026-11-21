@@ -138,6 +138,7 @@ def test_performing_tools(claude: tuple[TestClient, str]) -> None:
         "topics",
         "jokes",
         "reviewed_by",
+        "learned",
         "notes",
     }
 

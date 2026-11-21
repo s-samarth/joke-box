@@ -163,8 +163,9 @@ def log_show(
     in seconds, kind (laugh or applause), points 1-5 and the joke_id it's credited to or null.
     `topics` are the comic's topic names, as they gave them: one that matches none is refused
     with the list of topics. The jokes' topics are added; with none at all, the show goes under
-    Random. `notes` are remarks on the night; `learned` is what the comic learned, saved as a
-    Craft note linked to the show. Pass `show_id` to replace a show logged before."""
+    Random. `notes` are remarks on the night; `learned` is what the comic learned, saved on
+    the show beside them (empty keeps what's there). Pass `show_id` to replace a show logged
+    before."""
     show = {
         "performed_at": when(performed_at),
         "venue_name": venue,

@@ -52,7 +52,7 @@ under fixed keys (`setMutationDefaults`), each spreading the shared `QUEUED` opt
   IndexedDB (`saveNow` in [persist.ts](../web/src/api/persist.ts)), not after the throttle, which
   may still be waiting when the app is frozen.
 - **One at a time, in order:** every queued save shares `scope: { id: 'sync' }`, so they reach the
-  server in the order you made them. A show arrives before the lesson that points at it, and two
+  server in the order you made them. Two
   quick edits to one joke can't land the wrong way round.
 - **One waiting copy per brainstorm session:** a session autosaves its whole self (text and
   handwriting) at every pause, so offline each pause used to queue another full copy. Its save

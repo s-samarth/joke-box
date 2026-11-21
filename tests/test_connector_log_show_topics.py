@@ -1,6 +1,6 @@
-"""log_show's topics and lesson: the comic's topics by name (else the jokes', else Random), and
-what they learned saved as a Craft note linked to the show, updated when the show is logged
-again. Everything here is made up."""
+"""log_show's topics and what was learned: the comic's topics by name (else the jokes', else
+Random), and what they learned saved on the show itself (never in Craft), replaced when the show
+is logged again with something new. Everything here is made up."""
 
 from typing import Any
 
@@ -36,25 +36,22 @@ def test_with_no_topic_and_no_jokes_the_show_goes_under_random(engine: Engine) -
     assert out["structuredContent"]["topics"] == ["Random"]
 
 
-def test_what_was_learned_becomes_one_linked_craft_note(engine: Engine) -> None:  # noqa: F811
+def test_what_was_learned_is_saved_on_the_show_not_in_craft(engine: Engine) -> None:  # noqa: F811
     browser, client, token, jokes = engine
     learned = "Fake lesson: pause before the verdict\nMore about the fake lesson."
     first = call(client, token, "log_show", **show(jokes, learned=learned))["structuredContent"]
-    assert first["lesson"] == "Fake lesson: pause before the verdict"
+    assert first["learned"] == learned
     again = show(jokes, show_id=first["show_id"], learned="Fake lesson, rewritten")
-    assert call(client, token, "log_show", **again)["structuredContent"]["lesson"] == (
+    assert call(client, token, "log_show", **again)["structuredContent"]["learned"] == (
         "Fake lesson, rewritten"
     )
-    notes = browser.get("/api/craft-notes").json()
-    assert [(n["title"], n["performance_log_id"]) for n in notes] == [
-        ("Fake lesson, rewritten", first["show_id"])
-    ]
-    assert notes[0]["source"].startswith("Show at Fake Cafe, 2026-11-18")
+    assert [s["learned"] for s in browser.get("/api/logs").json()] == ["Fake lesson, rewritten"]
+    assert browser.get("/api/craft-notes").json() == []
 
 
-def test_logging_with_nothing_learned_keeps_the_lesson(engine: Engine) -> None:  # noqa: F811
+def test_logging_with_nothing_learned_keeps_what_was_learned(engine: Engine) -> None:  # noqa: F811
     browser, client, token, jokes = engine
     first = call(client, token, "log_show", **show(jokes, learned="Fake keep"))["structuredContent"]
     out = call(client, token, "log_show", **show(jokes, show_id=first["show_id"]))
-    assert out["structuredContent"]["lesson"] is None
-    assert [n["title"] for n in browser.get("/api/craft-notes").json()] == ["Fake keep"]
+    assert out["structuredContent"]["learned"] == "Fake keep"
+    assert browser.get("/api/logs").json()[0]["learned"] == "Fake keep"
