@@ -51,7 +51,8 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
    Enter. It saves to Random.
 3. The nudge turns into a small green line with your streak, and today gets a green dot on the
    calendar. Premises and observations show there too, in their own colours, but only jokes keep
-   the streak.
+   the streak. On day 7, 30, 60, 90 or 180, or a year, confetti and a toast mark the milestone
+   (a stage streak gets the same when you log a show).
 4. The same calendar sits on Home, under the joke box. Tap any day there to see how many jokes,
    premises and observations you wrote; on **Daily activity**, tapping a day also lists what they
    were. Arrows page back through earlier months.
