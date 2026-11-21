@@ -153,6 +153,14 @@ separate log to fall out of step. Items in the Trash don't count.
   grid of equal tiles, because the squares show the rhythm, not only a number. Earlier the stats
   were a loose row of three numbers with a gold "on stage" strip on Home that read as a
   notification.
+- **Milestones** ([milestones.ts](../web/src/features/daily/milestones.ts),
+  [MilestoneWatcher.tsx](../web/src/features/daily/MilestoneWatcher.tsx), on every screen): when
+  the joke or stage streak reaches 7, 30, 60, 90 or 180 days, a year, or each year after, about
+  three seconds of confetti in the app's colours (green and mixed for jokes, gold for the stage)
+  and a toast: "30-day stage streak. A month of mics!". It fires on the save that gets there, or
+  when you next open the app if it got there elsewhere (a show logged from set-review). Each
+  milestone celebrates once per streak per device; a new streak earns them again. Under reduced
+  motion it's the toast alone. Nothing on the page moves, and taps go through the confetti.
 - **The month's total:** how many pieces, how many a day, and one bar split by kind. Its labels
   are the colour key: orchid observations (`orchid`), periwinkle premises (`sky`), green jokes
   (`ok`). It follows the month the calendar shows.
