@@ -67,8 +67,8 @@ export function ShowsPage() {
   }
   const changeView = (v: View) => setParams((p) => { if (v === 'list') p.delete('view'); else p.set('view', v); return p }, { replace: true })
   const exportCsv = () =>
-    downloadCsv('jokebox-shows.csv', ['Date', 'Venue', 'Duration', 'Audience', 'Rating', 'Set Topics', 'Comments'],
-      rows.map((l) => [formatDateTime(l.performed_at), l.venue_name, long(l.duration_seconds), l.audience_size, l.rating, topicNames(l.topic_ids), l.notes]))
+    downloadCsv('jokebox-shows.csv', ['Date', 'Venue', 'Duration', 'Audience', 'Rating', 'Set Topics', 'Comments', 'What You Learned'],
+      rows.map((l) => [formatDateTime(l.performed_at), l.venue_name, long(l.duration_seconds), l.audience_size, l.rating, topicNames(l.topic_ids), l.notes, l.learned ?? '']))
 
   return (
     <div className="mx-auto max-w-5xl">

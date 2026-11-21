@@ -1,8 +1,7 @@
 """log_show: the connector's one write. The set-review engine logs a show the comic reviewed with
 it in a chat: the details they gave, the topics they did, the laugh tally and each joke's result,
-plus the laugh timeline it heard, and what they learned (a Craft note linked to the show, as the
-app's "What did you learn?" saves it). Saving goes through the same code as the app
-(services/show_logs.py)."""
+plus the laugh timeline it heard, and what they learned (saved on the show, as the app's "What
+did you learn?" saves it). Saving goes through the same code as the app (services/show_logs.py)."""
 
 import uuid
 from datetime import datetime
@@ -14,7 +13,6 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.connector.performing import lpm
-from app.connector.show_lesson import save_lesson
 from app.connector.text import ist_date
 from app.models import Joke, Topic, User
 from app.schemas.reviews import ReviewIn
@@ -83,7 +81,9 @@ def log_show(db: Session, user: User, raw_id: str, show: dict[str, Any]) -> dict
     named = topics_named(db, user, show.get("topics") or [])
     topic_ids = list(dict.fromkeys(named + topics_of(db, user, jokes))) or random_topic(db, user)
     try:
-        body = LogIn.model_validate({**show, "topic_ids": topic_ids})
+        # Nothing learned leaves what's there: logging the show again doesn't wipe it.
+        learned = (show.get("learned") or "").strip() or None
+        body = LogIn.model_validate({**show, "topic_ids": topic_ids, "learned": learned})
         review = ReviewIn.model_validate(
             {"engine_version": show.get("engine_version"), "events": show.get("events") or []}
         )
@@ -93,13 +93,12 @@ def log_show(db: Session, user: User, raw_id: str, show: dict[str, Any]) -> dict
         log = save_show(db, user, show_id(raw_id), body, review)
     except HTTPException as exc:
         raise ValueError(str(exc.detail)) from None
-    lesson = save_lesson(db, user, log, show.get("learned") or "")
     return {
         "show_id": str(log.id),
         "date": ist_date(log.performed_at),
         "venue": log.venue.name if log.venue else "Unidentified Venue",
         "topics": [t.name for t in log.topics],
-        "lesson": lesson.title if lesson else None,
+        "learned": log.learned,
         "lpm": lpm(log.laughs, log.duration_seconds),
         "jokes_logged": len(log.jokes),
         "events_kept": len(log.review.events) if log.review else 0,

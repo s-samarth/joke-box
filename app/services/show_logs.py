@@ -55,6 +55,8 @@ def save_show(
     log.audience_size = body.audience_size
     log.rating = body.rating
     log.notes = body.notes
+    if body.learned is not None:  # left out by app versions from before: it stays
+        log.learned = body.learned
     log.laughs = body.laughs
     log.topics = topics
     log.title = ""  # titles are gone: topics say what a show was (the column stays unused)

@@ -88,6 +88,8 @@ class LogIn(BaseModel):
     rating: int = Field(default=3, ge=1, le=5)
     topic_ids: list[uuid.UUID] = Field(default_factory=list)
     notes: str = ""
+    # What you learned there. Left out (as by app versions from before), it stays as it is.
+    learned: str | None = None
     laughs: list[int] | None = None
     # The jokes done, in running order. Left out (as by app versions from before), the show's
     # jokes stay as they are.
@@ -111,6 +113,7 @@ class LogOut(BaseModel):
     rating: int
     topic_ids: list[uuid.UUID]
     notes: str
+    learned: str
     laughs: list[int] | None
     jokes: list[LogJokeOut]
     # The laugh timeline from the set-review engine, if the show was logged from a recording.

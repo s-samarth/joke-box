@@ -173,7 +173,7 @@ through everything you've written at once.
    it from the top three matches, mark **Bombed**, **OK** or **Killed** and add a comment. Each
    joke's page then says how it has gone across your shows.
 5. If you recorded the set, tap **Count laughs for LPM** and count each laugh by its score. Under
-   **What did you learn?**, write down the lesson: it goes to Craft, linked to this show.
+   **What did you learn?**, write down the lesson: it stays on this show, beside the remarks.
 6. Save. The totals on **Shows** update straight away, the day turns gold on the show calendar
    (on Shows and Daily activity), and the Stage streak card (Home and Daily activity) counts it: the streak, and the month's
    shows and minutes.
@@ -195,7 +195,7 @@ recording and you only check it.
 4. Talk about it (notes) and correct it: a message starting **"Correction:"** fixes the draft
    and retunes the engine; anything else is a note.
 5. Say **"log this show"** with your rating and which topic it was (the AI asks if you
-   haven't said; none means Random). What you learned becomes the show's lesson in Craft. It
+   haven't said; none means Random). What you learned is saved on the show, beside the remarks. It
    appears on **Shows** under its topic, with the laugh
    tally, each joke's result (the engine's beside it) and **Laughs through the set**.
 
@@ -252,7 +252,7 @@ recording and you only check it.
 
 1. Everything you've already opened stays readable. Each list is kept on the device for a week
    after you last opened it.
-2. Saves keep working: jokes, observations, shows (with their lesson), sets, rewrites, voice
+2. Saves keep working: jokes, observations, shows (with what you learned), sets, rewrites, voice
    notes and craft notes. Sheets close as usual and say "Saved offline, will sync". The cloud
    icon turns amber and says "Offline, N waiting to sync", counting recordings still to upload.
 3. A weak signal counts too: a save that can't reach the server waits like an offline one, and

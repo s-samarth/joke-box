@@ -34,7 +34,7 @@ only what it found. The recording never leaves the Mac.
 6. "Log this show" with a rating. The AI asks which topic it was (your JokeBox topics), unless
    you've said; a new topic you make in JokeBox first, and with none the show goes under Random.
    Remarks on the night go in the notes, and what you learned goes in as the show's **What did
-   you learn?** lesson (a Craft note linked to the show). The engine calls the connector's
+   you learn?**, a comment on the show beside the remarks. The engine calls the connector's
    **`log_show`**, with no jokes tagged: add the jokes you did in JokeBox yourself if you want
    them there.
 
@@ -61,8 +61,7 @@ far back and the phone's position is in set-review's `docs/scale.md`.
 
 | Where | What |
 |---|---|
-| `performance_logs` | The show as usual, with the topics you named; `laughs` is the engine's tally |
-| `craft_notes` | What you learned, if you said: one note linked to the show (`performance_log_id`), its source ending "(set-review)" |
+| `performance_logs` | The show as usual, with the topics you named; `laughs` is the engine's tally; `notes` your remarks and `learned` what you learned (before 22 Nov 2026 that was a Craft note linked to the show) |
 | `performance_jokes` | Empty from set-review 0.3.0 on: the jokes you add yourself. Shows logged earlier have the engine's matched jokes, with its killed / ok / bombed in `suggested_result` |
 | `show_reviews` | The laugh timeline: `{start, end, kind, points}` from stage start (earlier shows also have a `joke_id` per laugh), and `engine_version` |
 

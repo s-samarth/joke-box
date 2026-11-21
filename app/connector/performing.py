@@ -122,7 +122,8 @@ def list_shows(
     found = [
         log
         for log in logs
-        if matches(query, log.notes, *where_and_what(log)) and on_dates(log, since, until)
+        if matches(query, log.notes, log.learned, *where_and_what(log))
+        and on_dates(log, since, until)
     ]
     counted = [log for log in found if lpm(log.laughs, log.duration_seconds) is not None]
     points = sum(sum(n * (i + 1) for i, n in enumerate(log.laughs or [])) for log in counted)
@@ -148,6 +149,7 @@ def list_shows(
                 "jokes": done.get(log.id, []),
                 "reviewed_by": log.review.engine_version if log.review else None,
                 "notes": clip(log.notes, 600),
+                "learned": clip(log.learned, 600),
             }
             for log in shown
         ],

@@ -2,13 +2,12 @@
  * Log a show, ideally on the way home. Venue, how it went and how long are up top; the rest is
  * optional. Picking the sets you did (none, one or several) ticks their topics. Folded away below:
  * how particular jokes went (search for one, mark it, comment on it) and counting the laughs for
- * LPM. What you learned becomes a craft note linked to the show.
+ * LPM. What you learned is kept on the show, like the remarks (Craft is for general lessons).
  */
 import { Star } from 'lucide-react'
 import { useState } from 'react'
 import { newId } from '../../api/client'
 import { announceSave } from '../../lib/announce'
-import { useCraftAreas, useCraftKinds, useCraftNotes, useSaveCraftNote } from '../../api/craft'
 import { useJokes, useTopics } from '../../api/library'
 import { useLogActions, useLogs, useSetlists, useVenues } from '../../api/shows'
 import type { LogJoke, PerformanceLog } from '../../api/types'
@@ -19,9 +18,8 @@ import { Modal } from '../../components/ui/Modal'
 import { topicName } from '../../lib/jokeMeta'
 import { StageTimeField } from './StageTimeField'
 import { type StageTime, stageSeconds, toStageTime } from './stageTime'
-import { formatDate, fromIstInput, toIstInput } from '../../lib/time'
+import { fromIstInput, toIstInput } from '../../lib/time'
 import { useChanged } from '../../lib/useChanged'
-import { areaFor, kindFor, lessonFrom } from '../craft/craftMeta'
 import { LaughTally } from './LaughTally'
 import { NO_LAUGHS, counted } from './lpm'
 import { setTopics, swapTopics } from './setPick'
@@ -37,10 +35,6 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
   const { data: sets = [] } = useSetlists()
   const { data: jokes = [] } = useJokes()
   const { save } = useLogActions()
-  const { data: craft = [] } = useCraftNotes()
-  const { data: areas = [] } = useCraftAreas()
-  const { data: kinds = [] } = useCraftKinds()
-  const saveLesson = useSaveCraftNote()
   const { toast } = useFeedback()
   const [venue, setVenue] = useState(log?.venue_name ?? '')
   const [when, setWhen] = useState(() => toIstInput(log?.performed_at ?? new Date().toISOString()))
@@ -52,7 +46,7 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
   const [done, setDone] = useState<LogJoke[]>(log?.jokes ?? [])
   const [notes, setNotes] = useState(log?.notes ?? '')
   const [laughs, setLaughs] = useState(log?.laughs ?? NO_LAUGHS)
-  const [lesson, setLesson] = useState('')
+  const [lesson, setLesson] = useState(log?.learned ?? '')
   const [error, setError] = useState('')
   // One id for this sheet, made once: tapping Log show twice saves the same show twice, not two shows.
   const [id] = useState(() => log?.id ?? newId())
@@ -72,19 +66,19 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
   // Only jokes that still exist. A show cached before shows had jokes, edited without adding any,
   // leaves them out of the save, so jokes recorded on another device stay as they are.
   const live = new Set(jokes.map((j) => j.id))
+  // Likewise a show cached before shows kept what was learned: left blank, it's left out of the save.
+  const learned = log && log.learned === undefined && !lesson.trim() ? {} : { learned: lesson.trim() }
   const jokesDone = log && !log.jokes && done.length === 0 ? {} : { jokes: done.filter((d) => live.has(d.joke_id)).map((d) => (d.note === undefined ? d : { ...d, note: d.note.trim() })) }
   const submit = () => {
     const seconds = stageSeconds(duration)
     if (!rating) return setError('Give it a rating from one to five stars.')
     const venueName = venue.trim() || UNKNOWN
     const performedAt = fromIstInput(when)
-    // Both saves are queued and close the sheet at once, signal or not. The queue sends them in
-    // order, so the show reaches the server before the lesson that points at it.
+    // The save is queued and the sheet closes at once, signal or not.
     const saving = save.mutateAsync(
-      { id, input: { venue_name: venueName, performed_at: performedAt, duration_seconds: seconds, audience_size: Number(crowd) || 0, rating, topic_ids: topicIds, notes: notes.trim(), laughs: counted(laughs) ? laughs : null, ...jokesDone } },
+      { id, input: { venue_name: venueName, performed_at: performedAt, duration_seconds: seconds, audience_size: Number(crowd) || 0, rating, topic_ids: topicIds, notes: notes.trim(), laughs: counted(laughs) ? laughs : null, ...learned, ...jokesDone } },
     )
     saving.catch((e: Error) => toast(`Show not saved: ${e.message}`))
-    if (lesson.trim()) saveLesson.mutate({ id: newId(), input: lessonFrom(lesson, craft, { area_id: areaFor(areas, 'stage'), kind_id: kindFor(kinds) }, { performance_log_id: id, source: `Show at ${venueName}, ${formatDate(performedAt)}`, created_at: new Date().toISOString() }) })
     announceSave(saving, toast, log ? 'Show updated' : 'Show logged')
     onClose()
   }
@@ -140,7 +134,7 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
         <ShowJokesField done={done} jokes={jokes} onChange={setDone} />
         <LaughTally laughs={laughs} seconds={stageSeconds(duration)} onChange={setLaughs} />
         <Field label="Remarks"><Textarea placeholder="What went right, what went wrong, what the crowd was like" value={notes} onChange={(e) => setNotes(e.target.value)} /></Field>
-        <Field label="What did you learn?" hint="Saved to Craft, linked to this show, in the area that shows on Stage">
+        <Field label="What did you learn?" hint="Kept with this show, like the remarks">
           <Textarea placeholder="e.g. Slow down before the punch" className="min-h-16" value={lesson} onChange={(e) => setLesson(e.target.value)} />
         </Field>
         {error && <p className="text-sm text-light" role="alert">{error}</p>}

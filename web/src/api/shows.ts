@@ -74,6 +74,8 @@ export interface LogInput {
   rating: number
   topic_ids: string[]
   notes: string
+  /** What you learned there. Left out, it stays as it is. */
+  learned?: string
   laughs: number[] | null
   /** The jokes done, in running order. Left out, the show's jokes stay as they are. */
   jokes?: LogJoke[]

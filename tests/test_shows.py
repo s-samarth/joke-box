@@ -78,6 +78,17 @@ def test_log_a_mic(alice: TestClient) -> None:
     assert len(alice.get("/api/venues").json()) == 1
 
 
+def test_what_was_learned_is_a_comment_on_the_show(alice: TestClient) -> None:
+    log_id = str(uuid.uuid4())
+    body = {"performed_at": NOW, "notes": "fake remark", "learned": "Fake: slow the tag down"}
+    assert alice.put(f"/api/logs/{log_id}", json=body).json()["learned"] == body["learned"]
+    # An app from before sends no `learned`: what was learned stays.
+    older = {"performed_at": NOW, "notes": "fake remark, edited"}
+    assert alice.put(f"/api/logs/{log_id}", json=older).json()["learned"] == body["learned"]
+    assert alice.put(f"/api/logs/{log_id}", json={**older, "learned": ""}).json()["learned"] == ""
+    assert alice.get("/api/craft-notes").json() == []  # never in Craft
+
+
 def test_times_come_back_as_the_same_instant_in_utc(alice: TestClient) -> None:
     """8:30 pm IST is 15:00 UTC, and it comes back tagged UTC on every database, SQLite included."""
     log_id = str(uuid.uuid4())

@@ -146,13 +146,15 @@ each with its setup in marker, the punchline, its runtime and "by m:ss" (the run
   **Count laughs for LPM** folds out five counters, one per laugh score, by how much of the room
   reacted: **One or two people**, **Some of the room**, **Most of the room**, **Rolls on, or some
   applause**, **Applause break** ([the scale](set-review.md#the-laugh-scale)), with the LPM worked out as you count ([lpm.ts](../web/src/features/shows/lpm.ts),
-  [LaughTally.tsx](../web/src/features/shows/LaughTally.tsx)). **What did you learn?** saves a craft
-  note linked to the show, in the first area that shows on Stage.
+  [LaughTally.tsx](../web/src/features/shows/LaughTally.tsx)). **What did you learn?** is a comment kept on the show, like the remarks, and comes back
+  when you edit it. It used to save a Craft note in the Stage area, which piled show-specific
+  notes into Craft; Craft keeps general lessons (migration `0039` moved the old ones onto their
+  shows).
 - **A show's detail** shows the venue, LPM, a **Laughs through the set** strip for a show
   logged from a recording (one bar per laugh, as tall as its points; applause full height; hover for the
   time and joke, [LaughTimeline.tsx](../web/src/features/shows/LaughTimeline.tsx)), how particular jokes
   went with their comments (each opens the joke; "Engine heard: …" when set-review suggested something
-  else), what you learned there, and **Add a lesson**.
+  else), your remarks, and what you learned there.
 - **A joke's page** says how it has gone at the shows it was logged at: "Done at 3 shows: 2 killed,
   1 bombed. Last done 4 Nov 2026." Worked out in the browser from the shows, so it works offline;
   a show in the Trash doesn't count ([JokeShowRecord.tsx](../web/src/features/jokes/JokeShowRecord.tsx)).
