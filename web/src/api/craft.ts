@@ -4,6 +4,7 @@
  */
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { api } from './client'
+import { useReorder } from './ordering'
 import { ownVersions, sendChecked } from './ownVersions'
 import { keys, queryClient, refreshWhenSynced } from './queryClient'
 import { QUEUED } from './sync'
@@ -19,6 +20,12 @@ const saveKey = ['craft', 'save']
 const deleteKey = ['craft', 'delete']
 
 const byPosition = (a: CraftNote, b: CraftNote) => a.position - b.position || a.created_at.localeCompare(b.created_at)
+
+/** The notes with the ids given numbered 0, 1, 2… in that order, the list sorted again by place. */
+export const placeInOrder = (notes: CraftNote[], ids: string[]): CraftNote[] => {
+  const at = new Map(ids.map((id, i) => [id, i]))
+  return notes.map((n) => ({ ...n, position: at.get(n.id) ?? n.position })).sort(byPosition)
+}
 
 queryClient.setMutationDefaults(saveKey, {
   ...QUEUED,
@@ -79,6 +86,11 @@ export const useReorderAreas = () =>
       ids.map((id) => old.find((a) => a.id === id)).filter((a): a is CraftArea => Boolean(a)).map((a, position) => ({ ...a, position }))),
     onSettled: refreshAreas,
   })
+
+/** An area's notes in the order you dragged them: one request per drop, and online only, like areas. */
+export const useReorderNotes = () =>
+  useReorder<{ areaId: string; ids: string[] }>(keys.craftNotes, ({ areaId }) => `/api/craft-areas/${areaId}/notes/order`,
+    (old, { ids }) => placeInOrder(old as CraftNote[], ids), ({ ids }) => ids)
 
 export const useDeleteArea = () =>
   useMutation({ mutationFn: ({ id, moveTo }: { id: string; moveTo: string }) => api<void>(`/api/craft-areas/${id}?move_to=${moveTo}`, 'DELETE'), onSettled: refreshAreas })

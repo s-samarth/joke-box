@@ -197,6 +197,7 @@ Every `joke_id` and `topic_id` must belong to you (otherwise 404).
 | POST | `/api/craft-areas` | `{name, description, color, screens[]}`; `color` is a preset name or `#rrggbb`. Goes last. 409 if the name is taken |
 | PATCH | `/api/craft-areas/{id}` | Same body; rename, recolour, change screens |
 | PUT | `/api/craft-areas/order` | `{ids[]}` in the order you want |
+| PUT | `/api/craft-areas/{id}/notes/order` | `{ids[]}`: the area's notes in the order you want, in one request. Ids not in the area are skipped; notes left out keep their order, after. Versions don't change, so a reorder never clashes with an edit. 404 for someone else's area |
 | DELETE | `/api/craft-areas/{id}?move_to=<id>` | Its notes move to `move_to` (or your first other area). 400 for your last area |
 | GET | `/api/craft-kinds` | In order. Makes the starting four if you have none |
 | POST | `/api/craft-kinds` | `{name, behaviour}`. Goes last. 409 if the name is taken |

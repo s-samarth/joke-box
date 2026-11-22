@@ -1,5 +1,5 @@
 /**
- * Saving the order you drag topics, subtopics and observation topics into.
+ * Saving the order you drag topics, subtopics, observation topics and Craft notes into.
  *
  * The list moves on screen straight away (an optimistic update) and the new order is sent to the
  * server. If that fails (offline, say) the list jumps back and you're told why. Like renaming,
@@ -19,7 +19,7 @@ export function inOrder<T extends { id: string }>(items: T[], ids: string[]): T[
 const REORDER = ['reorder']
 
 /** A mutation that reorders one cached list (`apply`) and saves the ids to `url`. */
-function useReorder<T>(queryKey: QueryKey, url: (vars: T) => string, apply: (old: unknown, vars: T) => unknown, ids: (vars: T) => string[]) {
+export function useReorder<T>(queryKey: QueryKey, url: (vars: T) => string, apply: (old: unknown, vars: T) => unknown, ids: (vars: T) => string[]) {
   return useMutation({
     mutationKey: REORDER,
     mutationFn: (vars: T) => api<void>(url(vars), 'PUT', { ids: ids(vars) }),

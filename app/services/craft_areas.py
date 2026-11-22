@@ -68,3 +68,23 @@ def reorder_areas(db: Session, user: User, ids: list[uuid.UUID]) -> None:
     for position, area_id in enumerate(i for i in ids if i in areas):
         areas[area_id].position = position
     db.commit()
+
+
+def reorder_notes(db: Session, user: User, area: CraftArea, ids: list[uuid.UUID]) -> None:
+    """Number the area's notes in the order given, in one go.
+
+    Ids that aren't among its notes (someone else's, in another area, in the Trash) are skipped;
+    notes the ids leave out (added on another device meanwhile) keep their order, after. The
+    notes' versions don't move: a note's place isn't an edit that can clash with another device.
+    """
+    notes = list(
+        db.scalars(
+            select(CraftNote).where(CraftNote.user_id == user.id, CraftNote.area_id == area.id)
+        )
+    )
+    by_id = {note.id: note for note in notes}
+    placed = [by_id[i] for i in dict.fromkeys(ids) if i in by_id]
+    rest = sorted((n for n in notes if n not in placed), key=lambda n: (n.position, n.created_at))
+    for position, note in enumerate(placed + rest):
+        note.position = position
+    db.commit()
