@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { areaColor, areaFor, blankNote, groupByArea, kindFor, matches, nextColor, notesFor, plainText } from './craftMeta'
+import { areaColor, areaFor, blankNote, groupByArea, kindFor, matches, nextColor, noteNumber, notesFor, plainText } from './craftMeta'
+import { placeInOrder } from '../../api/craft'
 import { groupItems, inlineRuns, listItems, parseBody, prompts, toggleTick } from './bodyFormat'
 import type { CraftArea, CraftNote, NoteKind } from '../../api/types'
 
@@ -110,5 +111,21 @@ describe('craft meta', () => {
     expect(matches(note({ title: 'Fake setup', hashtags: ['#webs'] }), 'setup webs')).toBe(true)
     expect(matches(note({ title: 'Fake' }), 'hecklers')).toBe(false)
     expect(blankNote([note({ position: 7 })], { area_id: 's', kind_id: 'k' })).toMatchObject({ position: 8, area_id: 's' })
+  })
+})
+
+describe('ordering notes in an area', () => {
+  const note = (id: string, position: number, area = 'a'): CraftNote =>
+    ({ id, position, area_id: area, created_at: `2026-01-0${position + 1}T00:00:00Z` }) as CraftNote
+
+  it('numbers the dragged ids in order and leaves other areas alone', () => {
+    const notes = [note('x', 0), note('y', 1), note('z', 2), note('other', 1, 'b')]
+    const placed = placeInOrder(notes, ['z', 'x', 'y'])
+    expect(placed.filter((n) => n.area_id === 'a').map((n) => n.id)).toEqual(['z', 'x', 'y'])
+    expect(placed.find((n) => n.id === 'other')?.position).toBe(1)
+  })
+
+  it('writes numbers like a contents page', () => {
+    expect([0, 8, 9, 99].map(noteNumber)).toEqual(['01', '09', '10', '100'])
   })
 })

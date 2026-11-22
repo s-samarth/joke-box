@@ -1,10 +1,11 @@
-/** One area, opened like a folder: its notes as cards, with New note and Edit area. */
-import { ArrowLeft, Pencil, Plus } from 'lucide-react'
+/** One area, opened like a folder: its notes as numbered cards, with Arrange, Edit area and New note. */
+import { ArrowLeft, ArrowUpDown, Pencil, Plus } from 'lucide-react'
 import { useState, type CSSProperties } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { useCraftAreas, useCraftNotes } from '../../api/craft'
 import { Button } from '../../components/ui/Button'
 import { EmptyState, Spinner } from '../../components/ui/pieces'
+import { ArrangeNotes } from './ArrangeNotes'
 import { AreaSheet } from './AreaSheet'
 import { areaColor } from './craftMeta'
 import { NoteGrid } from './NoteGrid'
@@ -13,7 +14,7 @@ export function AreaPage() {
   const { areaId } = useParams()
   const { data: notes = [], isPending } = useCraftNotes()
   const { data: areas = [], isPending: areasPending } = useCraftAreas()
-  const [editing, setEditing] = useState(false)
+  const [open, setOpen] = useState<'edit' | 'arrange' | null>(null)
   const navigate = useNavigate()
   if (isPending || areasPending) return <div className="py-16"><Spinner /></div>
   const area = areas.find((a) => a.id === areaId)
@@ -33,15 +34,17 @@ export function AreaPage() {
             {area.description && <p className="mt-2 text-dim">{area.description}</p>}
           </div>
           <div className="flex shrink-0 gap-1 sm:pb-1">
-            <Button variant="quiet" small icon={<Pencil size={15} />} onClick={() => setEditing(true)}>Edit area</Button>
+            {inArea.length > 1 && <Button variant="quiet" small icon={<ArrowUpDown size={15} />} onClick={() => setOpen('arrange')}>Arrange</Button>}
+            <Button variant="quiet" small icon={<Pencil size={15} />} onClick={() => setOpen('edit')}>Edit area</Button>
             {inArea.length > 0 && newNote}
           </div>
         </div>
       </div>
-      {inArea.length ? <NoteGrid notes={inArea} areas={areas} /> : (
+      {inArea.length ? <NoteGrid notes={inArea} areas={areas} numbered /> : (
         <EmptyState title="Nothing here yet" action={newNote}>Add a note, or move one in from another area with its ⋯ menu.</EmptyState>
       )}
-      {editing && <AreaSheet area={area} areas={areas} noteCount={inArea.length} onClose={() => setEditing(false)} onDeleted={(to) => navigate(`/craft/area/${to}`, { replace: true })} />}
+      {open === 'arrange' && <ArrangeNotes area={area} notes={inArea} onClose={() => setOpen(null)} />}
+      {open === 'edit' && <AreaSheet area={area} areas={areas} noteCount={inArea.length} onClose={() => setOpen(null)} onDeleted={(to) => navigate(`/craft/area/${to}`, { replace: true })} />}
     </div>
   )
 }

@@ -95,3 +95,6 @@ export const plainText = (body: string): string =>
     .filter((l) => !/^\s*(\|[\s:|-]*|-{3,}|\*{3,})\s*$/.test(l))
     .map((l) => l.replace(/^\s*(#+\s+|>\s?|[-*]\s+|\d+[.)]\s+)?(\[[ xX]\]\s+)?/, '').replace(/\s*\|\s*/g, ' · ').replace(/^ · | · $/g, '').replaceAll('**', '').trim())
     .filter(Boolean).join(' ')
+
+/** A note's number in its area, as on a contents page: 01, 02… 10. */
+export const noteNumber = (index: number): string => String(index + 1).padStart(2, '0')

@@ -51,6 +51,12 @@ def reorder_areas(body: AreaOrderIn, user: CurrentUser, db: DbSession) -> None:
     svc.reorder_areas(db, user, body.ids)
 
 
+@router.put("/{area_id}/notes/order", status_code=204)
+def reorder_notes(area_id: uuid.UUID, body: AreaOrderIn, user: CurrentUser, db: DbSession) -> None:
+    """The area's notes, in the order you dragged them."""
+    svc.reorder_notes(db, user, get_owned(db, CraftArea, area_id, user), body.ids)
+
+
 @router.delete("/{area_id}", status_code=204)
 def delete_area(
     area_id: uuid.UUID, user: CurrentUser, db: DbSession, move_to: uuid.UUID | None = None

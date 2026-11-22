@@ -175,7 +175,7 @@ each with its setup in marker, the punchline, its runtime and "by m:ss" (the run
 [CraftNotePage.tsx](../web/src/features/craft/CraftNotePage.tsx), [CraftNoteForm.tsx](../web/src/features/craft/CraftNoteForm.tsx),
 [NoteCard.tsx](../web/src/features/craft/NoteCard.tsx), [PathLadder.tsx](../web/src/features/craft/PathLadder.tsx),
 [TechniqueShelf.tsx](../web/src/features/craft/TechniqueShelf.tsx), [AreaFolders.tsx](../web/src/features/craft/AreaFolders.tsx),
-[AreaSheet.tsx](../web/src/features/craft/AreaSheet.tsx), [ArrangeAreas.tsx](../web/src/features/craft/ArrangeAreas.tsx),
+[AreaSheet.tsx](../web/src/features/craft/AreaSheet.tsx), [ArrangeAreas.tsx](../web/src/features/craft/ArrangeAreas.tsx), [ArrangeNotes.tsx](../web/src/features/craft/ArrangeNotes.tsx), [NoteGrid.tsx](../web/src/features/craft/NoteGrid.tsx),
 [NoteBody.tsx](../web/src/features/craft/NoteBody.tsx), [NoteList.tsx](../web/src/features/craft/NoteList.tsx), [NoteTable.tsx](../web/src/features/craft/NoteTable.tsx), [bodyFormat.ts](../web/src/features/craft/bodyFormat.ts),
 [craftMeta.ts](../web/src/features/craft/craftMeta.ts). Editing: [NoteEditor.tsx](../web/src/features/craft/NoteEditor.tsx),
 [FormatToolbar.tsx](../web/src/features/craft/FormatToolbar.tsx), [editText.ts](../web/src/features/craft/editText.ts),
@@ -197,17 +197,21 @@ bottom:
   running it.
 - **Areas** as folders in their own colours, like the topic folders on Home: the count on the tab,
   the first few notes, and how many of each kind. **New area** is the last folder; **Arrange**
-  reorders them and opens any one to edit. **Kinds** lists your kinds of note: add one, rename
+  lists them numbered: drag a row by its grip to reorder (it saves as you drop), or tap the
+  pencil to edit one. **Kinds** lists your kinds of note: add one, rename
   it, change what it works like (a note to read, a checklist, a writing technique, a path), or
   delete it and pick where its notes go.
 
 Areas are yours: name, a line about it, a colour (12 presets or any colour from the picker; they
 can repeat, and a new area starts on the next unused one), and which screens show its notes (Rewrite, the
 set builder, Stage). Deleting one asks where its notes should go. An area opens as a page of
-**note cards** in a masonry grid, each with a face for its kind: a checklist shows its first boxes,
+**note cards**, numbered 01, 02… in the area's colour like a contents page and laid out in rows
+(01 and 02 side by side), so the reading order is plain. **Arrange** (shown once there are two
+notes) lists them numbered: drag a grip to put them in reading order, saved as you drop in one
+request. Each card has a face for its kind: a checklist shows its first boxes,
 a technique a prompt and **Start**, a path its progress, a reference the start of the text. Each
 card's ⋯ menu moves it to another area or deletes it. Searching swaps the folders for matching
-cards from every area.
+cards from every area, packed as masonry and unnumbered, since they come from many areas.
 
 A note opens formatted: headings, lists (numbered items get a badge, indented items sit quietly under
 their parent), **bold**, callouts, dividers, a line of steps joined by arrows drawn as a flow, tables

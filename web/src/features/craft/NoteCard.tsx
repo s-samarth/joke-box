@@ -1,7 +1,7 @@
 /**
  * One craft note as a card whose face depends on how its kind behaves: a checklist shows its first boxes,
  * a technique a prompt and Start, a path its progress, a reference the start of the text.
- * The ⋯ menu moves it to another area or deletes it.
+ * The ⋯ menu moves it to another area or deletes it. Inside an area it carries its number there.
  *
  * Pattern: a stretched link (its ::after covers the card) makes the whole card one tap target,
  * while the menu and Start sit above it (relative z-10) and stay tappable on their own.
@@ -16,7 +16,7 @@ import { Dropdown, type MenuItem } from '../../components/ui/Menu'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { listItems, prompts, type ListItem } from './bodyFormat'
 import { pathTracks } from './path'
-import { areaColor, kindName, plainText } from './craftMeta'
+import { areaColor, kindName, noteNumber, plainText } from './craftMeta'
 import { KIND_ICONS } from './kindIcons'
 
 function Face({ note }: { note: CraftNote }) {
@@ -71,7 +71,7 @@ function Face({ note }: { note: CraftNote }) {
   return <p className="mt-2.5 line-clamp-4 text-sm leading-relaxed text-dim">{plainText(note.body)}</p>
 }
 
-export function NoteCard({ note, areas, showArea }: { note: CraftNote; areas: CraftArea[]; showArea?: boolean }) {
+export function NoteCard({ note, areas, showArea, index }: { note: CraftNote; areas: CraftArea[]; showArea?: boolean; index?: number }) {
   const save = useSaveCraftNote()
   const del = useDeleteCraftNote()
   const { confirm, toast } = useFeedback()
@@ -96,6 +96,7 @@ export function NoteCard({ note, areas, showArea }: { note: CraftNote; areas: Cr
       style={{ '--area': areaColor(area?.color ?? 'sky') } as CSSProperties}>
       <span aria-hidden className="absolute inset-x-0 top-0 h-[3px] bg-[var(--area)] opacity-80" />
       <div className="flex items-center gap-1.5 text-xs text-[var(--area)]">
+        {index !== undefined && <span className="mr-1 font-semibold tracking-wider tabular" aria-label={`Note ${index + 1}`}>{noteNumber(index)}</span>}
         <Icon size={14} aria-hidden />
         <span>{kindName(kinds, note.kind_id)}{showArea && area ? `, ${area.name}` : ''}</span>
         <span className="relative z-10 -my-1.5 -mr-2 ml-auto">
