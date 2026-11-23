@@ -15,8 +15,8 @@ import { CLEAN_LABELS, topicName } from '../../lib/jokeMeta'
 import { downloadCsv } from '../../lib/csv'
 import { long } from '../../lib/duration'
 import { formatDateTime, todayIst } from '../../lib/time'
-import { count } from '../../lib/topics'
 import { useCapture } from '../capture/captureContext'
+import { JokeCount } from './JokeCount'
 import { JokeFilters } from './JokeFilters'
 import { JokeList } from './JokeList'
 import { JokeMapAside, JokeMapScreen } from './map/JokeMapPage'
@@ -43,6 +43,7 @@ export function JokesLayout() {
   const { data: topics = [] } = useTopics()
   const { openCapture } = useCapture()
   const q = f.query ? `?${f.query}` : ''
+  const narrowed = f.active || f.hidingDiscarded
 
   const header = (
     <>
@@ -52,7 +53,7 @@ export function JokesLayout() {
           trigger={<IconButton label="More"><MoreHorizontal size={20} /></IconButton>} />
       </PageHead>
       <JokeFilters f={f} />
-      <p className="mt-4 mb-1 text-sm text-faint">{f.active ? `${f.visible.length} of ${count(f.total, 'joke', 'jokes')}` : count(f.total, 'joke', 'jokes')}</p>
+      <JokeCount f={f} />
     </>
   )
   // Map and Web take the whole screen under the same header, so the filters still apply.
@@ -68,9 +69,9 @@ export function JokesLayout() {
           {f.isPending ? (
             <div className="py-10"><Spinner /></div>
           ) : f.visible.length === 0 ? (
-            <EmptyState title={f.active ? 'Nothing matches' : 'No jokes yet'}
-              action={!f.active && <button type="button" onClick={() => openCapture({ topicId: f.topic ?? undefined, subtopicId: f.sub })} className="text-tape underline-offset-4 hover:underline">Capture your first joke</button>}>
-              {f.active ? 'Try another word or clear the filters.' : 'Tap + whenever a premise hits you.'}
+            <EmptyState title={narrowed ? 'Nothing matches' : 'No jokes yet'}
+              action={!narrowed && <button type="button" onClick={() => openCapture({ topicId: f.topic ?? undefined, subtopicId: f.sub })} className="text-tape underline-offset-4 hover:underline">Capture your first joke</button>}>
+              {f.active ? 'Try another word or clear the filters.' : f.hidingDiscarded ? 'Only discarded jokes are here: Show brings them back.' : 'Tap + whenever a premise hits you.'}
             </EmptyState>
           ) : (
             <JokeList jokes={f.visible} topics={topics} sort={f.sort} activeId={jokeId} query={f.query} wide={jokeId ? '' : WIDE_LIST} />

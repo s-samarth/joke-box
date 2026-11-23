@@ -1,6 +1,6 @@
 /**
- * Jokes list state lives in the URL (?topic=&sub=&premise=&type=&status=&q=&sort=), so back, refresh and
- * links keep your place. Filtering runs in the browser, so it works offline.
+ * Jokes list state lives in the URL (?topic=&sub=&premise=&type=&status=&q=&sort=&discarded=), so back,
+ * refresh and links keep your place. Discarded jokes are hidden until ?discarded=show (discarded.ts). Filtering runs in the browser, so it works offline.
  * Arrive with no filters in the URL and the ones you used last come back (rememberFilters.ts).
  */
 import { useEffect, useMemo } from 'react'
@@ -9,6 +9,7 @@ import { useJokes } from '../../api/library'
 import type { Joke } from '../../api/types'
 import { byStrength, UNDEFINED_TYPE } from '../../lib/jokeMeta'
 import { NO_PREMISE, ON_A_PREMISE } from '../../lib/premises'
+import { keepDiscarded } from './discarded'
 import { recall, remember } from './rememberFilters'
 
 export type SortKey = 'new' | 'old' | 'edited' | 'strong' | 'weak' | 'long'
@@ -65,9 +66,10 @@ export function useJokeFilters() {
     status: params.get('status'),
     q: params.get('q') ?? '',
     sort: (params.get('sort') as SortKey | null) ?? 'new',
+    showDiscarded: params.get('discarded') === 'show',
   }
 
-  const set = (changes: Partial<Record<'topic' | 'sub' | 'premise' | 'type' | 'status' | 'q' | 'sort', string | null>>) => {
+  const set = (changes: Partial<Record<'topic' | 'sub' | 'premise' | 'type' | 'status' | 'q' | 'sort' | 'discarded', string | null>>) => {
     const next = new URLSearchParams(params)
     for (const [key, value] of Object.entries(changes)) {
       if (value) next.set(key, value)
@@ -86,22 +88,22 @@ export function useJokeFilters() {
     if (saved) setParams(new URLSearchParams(saved), { replace: true })
   }, [query, setParams])
 
-  const visible = useMemo(
-    () =>
-      jokes
-        .filter(
-          (b) =>
-            (!f.topic || b.topic_id === f.topic) &&
-            (!f.sub || b.subtopic_id === f.sub) &&
-            matchesPremise(b, f.premise) &&
-            matchesType(b, f.type) &&
-            (!f.status || b.status === f.status) &&
-            matchesSearch(b, f.q),
-        )
-        .sort(SORTERS[f.sort] ?? SORTERS.new),
-    [jokes, f.topic, f.sub, f.premise, f.type, f.status, f.q, f.sort],
-  )
+  const { visible, discarded } = useMemo(() => {
+    const matching = jokes.filter(
+      (b) =>
+        (!f.topic || b.topic_id === f.topic) &&
+        (!f.sub || b.subtopic_id === f.sub) &&
+        matchesPremise(b, f.premise) &&
+        matchesType(b, f.type) &&
+        (!f.status || b.status === f.status) &&
+        matchesSearch(b, f.q),
+    )
+    const { kept, discarded } = keepDiscarded(matching, f.showDiscarded, Boolean(f.status))
+    return { visible: kept.sort(SORTERS[f.sort] ?? SORTERS.new), discarded }
+  }, [jokes, f.topic, f.sub, f.premise, f.type, f.status, f.q, f.sort, f.showDiscarded])
 
   const active = Boolean(f.topic || f.premise || f.type || f.status || f.q)
-  return { ...f, set, visible, total: jokes.length, isPending, active, query }
+  // Hidden discarded jokes narrow the list without being a filter you set, so Clear leaves them be.
+  const hidingDiscarded = discarded > 0 && !f.showDiscarded
+  return { ...f, set, visible, discarded, hidingDiscarded, total: jokes.length, isPending, active, query }
 }
