@@ -2,11 +2,12 @@
  * Observations, like Premises: a searchable list with the open observation beside it (see
  * SplitView); on a phone the list gives way to the one you open. Filter by topic and kind, or to
  * the ones nothing has come from yet; all of it lives in the URL (?topic=, ?kind=, ?unused=1,
- * ?q=). New opens a sheet (?new=1, so the + button can open it too).
+ * ?q=) and is remembered for a while like Jokes' (lib/useRememberedParams), so the tab bar brings
+ * you back to it. New opens a sheet (?new=1, so the + button can open it too).
  */
-import { Eye, Plus, Search } from 'lucide-react'
+import { Eye, Plus, Search, X } from 'lucide-react'
 import { useState } from 'react'
-import { Link, Outlet, useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
+import { Link, Outlet, useLocation, useNavigate, useParams } from 'react-router'
 import { useTopics } from '../../api/library'
 import { useObservationKinds, useObservations } from '../../api/notebook'
 import type { Observation } from '../../api/types'
@@ -17,6 +18,7 @@ import { EmptyState, PageHead, Spinner } from '../../components/ui/pieces'
 import { SplitView, WIDE_LIST } from '../../components/ui/SplitView'
 import { matchesWords } from '../../lib/search'
 import { formatDate } from '../../lib/time'
+import { useRememberedParams } from '../../lib/useRememberedParams'
 import { count } from '../../lib/topics'
 import { KindManager } from './KindManager'
 import { NewObservationDialog } from './NewObservationDialog'
@@ -34,10 +36,12 @@ export function ObservationsLayout() {
   const { data: topics = [] } = useTopics()
   const { data: kinds = [] } = useObservationKinds()
   const uses = useUses()
-  const [params, setParams] = useSearchParams()
+  // ?new=1 is the open New sheet, not a filter.
+  const { params, update } = useRememberedParams('observations-filters', ['new'])
   const navigate = useNavigate()
   const [managing, setManaging] = useState(false)
-  const setParam = (name: string, value: string | null) => setParams((p) => { if (value) p.set(name, value); else p.delete(name); return p }, { replace: true })
+  const setParam = (name: string, value: string | null) => update((p) => { if (value) p.set(name, value); else p.delete(name) })
+  const clear = () => update((p) => { for (const name of ['topic', 'kind', 'unused', 'q']) p.delete(name) })
   // An old ?topic=none (Not sorted, now gone) or a deleted topic's id reads as all topics.
   const topicParam = params.get('topic')
   const topic = topicParam && topics.some((t) => t.id === topicParam) ? topicParam : null
@@ -70,6 +74,7 @@ export function ObservationsLayout() {
         <TopicMenu value={topic} onChange={(v) => setParam('topic', v)} counts={topicCount} />
         <KindMenu value={kind} onChange={(v) => setParam('kind', v)} counts={kindCount} onManage={() => setManaging(true)} />
         <button type="button" aria-pressed={unused} onClick={() => setParam('unused', unused ? null : '1')} className={chip(unused)}>Not used yet</button>
+        {active && <button type="button" onClick={clear} className="inline-flex h-9 shrink-0 items-center gap-1 px-2 text-sm text-dim hover:text-paper"><X size={14} /> Clear</button>}
       </ChipRow>
       <p className="mt-4 mb-1 text-sm text-faint">{active ? `${shown.length} of ${count(all.length, 'observation', 'observations')}` : count(all.length, 'observation', 'observations')}</p>
       <div className="lg:-mx-6 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:px-3">

@@ -205,8 +205,16 @@ back to the top for each item opened. `GrowingText` measures itself again when i
 changes, so turning a phone or iPad no longer cuts off the last line of a setup or punchline.
 
 ## URL as state
-The filters for Jokes (`?topic&sub&type&status&q&sort`) and Observations (`?topic`) live in the
-query string, so back, refresh and shared links keep your place. `/shows?log=1` opens the Log a
+The filters for Jokes (`?topic&sub&premise&type&status&q&sort&discarded`), Premises (`?q&topic&sort`)
+and Observations (`?topic&kind&unused&q`) live in the query string, so back, refresh and shared
+links keep your place. The tab bar links to the bare list, so each list also remembers its filters
+for an hour in that browser tab ([useRememberedParams.ts](../web/src/lib/useRememberedParams.ts),
+over [sessionMemory.ts](../web/src/lib/sessionMemory.ts)) and puts them back when you arrive with
+none. A param that isn't a filter, like `?new=1` for an open sheet, is passed as `transient`: never
+remembered, kept as it is when the filters come back. Change filters through the hook's `update`,
+not `setSearchParams`: it remembers at once, so clearing every filter is forgotten instead of
+being undone by the restore. Until 24 Nov 2026 only Jokes did this, so switching tabs emptied
+Premises and Observations. `/shows?log=1` opens the Log a
 show sheet, which is how Home links to it, and `/shows?view=timeline|insights` picks the Shows view. Filtering, sorting and totals run in the browser, over the cached lists.
 
 ## Charts

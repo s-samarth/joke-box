@@ -249,9 +249,10 @@ separate log to fall out of step. Items in the Trash don't count.
 - **State:** the filters live in the URL (`?topic=&sub=&premise=&type=&status=&q=&sort=&discarded=`). Filtering runs in
   the browser, so it works offline. Edits go into a local draft and save about a moment after you
   stop typing, through the offline-safe joke save.
-- **Remembered filters** ([rememberFilters.ts](../web/src/features/jokes/rememberFilters.ts)): come
+- **Remembered filters** ([useRememberedParams.ts](../web/src/lib/useRememberedParams.ts)): come
   back to Jokes with no filters in the link (the nav, a joke opened from Home) and the last ones
   return. They're kept per tab or app window and lapse after an hour away; Clear forgets them.
+  Premises and Observations remember theirs the same way, each list on its own.
   **New joke** opened while the list is filtered to a topic (and subtopic) starts filed there.
 - **New topic** leads the Topic menu, so you can add a topic without scrolling past the others or
   writing a joke first; the list then filters to it. **Manage topics…** stays at the bottom.
@@ -284,7 +285,8 @@ writing a premise sits beside the list; on a phone the list gives way to the pre
   Most jokes, Fewest jokes). The Topic menu is the one Jokes has: **New topic** at the top,
   **Manage topics…** at the bottom, both working on the shared topic list. The Topic pickers in
   **New premise** and on a premise end with **New topic…**. Sorted by topic, a small heading starts each topic's run. Each row
-  shows the take and how many jokes rest on it.
+  shows the take and how many jokes rest on it. The search, topic and sort are remembered for an
+  hour like Jokes' filters, so the tab bar brings you back to them; **Clear** forgets them.
 - **A premise:** the take and its notes (why it's true) are edited in place and save on their own.
   A short guide ([PremiseGuide.tsx](../web/src/features/premises/PremiseGuide.tsx)) opens while the
   premise has no notes and no jokes: what a premise is, one premise and many setups, four checks
@@ -405,7 +407,9 @@ open beside it on an iPad in landscape or a laptop, or as its own page on a phon
 - **The list:** **New** opens New observation (`?new=1`; the + button opens it too): the words,
   **Topic** (Random, or the one you're filtered to) and **Kind (optional)**, then Save opens its page. Below are a search box
   (`?q=`), and **Topic**, **Kind** and **Not used yet** (`?unused=1`) in a row that scrolls
-  sideways; each choice counts within the other filters. Then how many there are. Each row: the words (three lines), then its topic, kind,
+  sideways; each choice counts within the other filters, and **Clear** ends the row while any is
+  set. They're remembered for an hour like Jokes' filters, so the tab bar brings you back to them
+  (an open New sheet isn't). Then how many there are. Each row: the words (three lines), then its topic, kind,
   what came from it ("1 joke · 1 premise · 1 brainstorm" or "Not used yet") and the date.
 - **An observation:** the words, edited in place and saved on their own; **Topic** and
   **Kind (optional)**, each ending in New topic… / New kind…; **Write a joke from it** and **Write a premise from it**
