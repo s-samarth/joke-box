@@ -1,12 +1,13 @@
 /**
  * The premises list's search, topic and sort, kept in the URL (?q=&topic=&sort=) like the jokes
- * list, so back and refresh keep your place. Searching covers the take and the notes.
+ * list, so back and refresh keep your place, and remembered for a while like Jokes' (so the tab
+ * bar brings you back to them). Searching covers the take and the notes.
  */
 import { useMemo } from 'react'
-import { useSearchParams } from 'react-router'
 import { useJokes, useTopics } from '../../api/library'
 import { usePremises, type Premise } from '../../api/premises'
 import { countByPremise } from '../../lib/premises'
+import { useRememberedParams } from '../../lib/useRememberedParams'
 
 export type PremiseSort = 'topic' | 'new' | 'most' | 'fewest'
 
@@ -18,7 +19,8 @@ export const PREMISE_SORTS: Record<PremiseSort, string> = {
 }
 
 export function usePremiseFilters() {
-  const [params, setParams] = useSearchParams()
+  // ?new=1 is the open New dialog, not a filter.
+  const { params, update } = useRememberedParams('premises-filters', ['new'])
   const { data: premises = [], isPending } = usePremises()
   const { data: jokes = [] } = useJokes()
   const { data: topics = [] } = useTopics()
@@ -27,14 +29,13 @@ export function usePremiseFilters() {
   const sort = (params.get('sort') as PremiseSort | null) ?? 'topic'
   const counts = useMemo(() => countByPremise(jokes), [jokes])
 
-  const set = (changes: Partial<Record<'q' | 'topic' | 'sort', string | null>>) => {
-    const next = new URLSearchParams(params)
-    for (const [key, value] of Object.entries(changes)) {
-      if (value) next.set(key, value)
-      else next.delete(key)
-    }
-    setParams(next, { replace: true })
-  }
+  const set = (changes: Partial<Record<'q' | 'topic' | 'sort', string | null>>) =>
+    update((next) => {
+      for (const [key, value] of Object.entries(changes)) {
+        if (value) next.set(key, value)
+        else next.delete(key)
+      }
+    })
 
   const visible = useMemo(() => {
     const needle = q.trim().toLowerCase()

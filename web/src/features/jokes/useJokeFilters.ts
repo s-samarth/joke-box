@@ -1,16 +1,15 @@
 /**
  * Jokes list state lives in the URL (?topic=&sub=&premise=&type=&status=&q=&sort=&discarded=), so back,
  * refresh and links keep your place. Discarded jokes are hidden until ?discarded=show (discarded.ts). Filtering runs in the browser, so it works offline.
- * Arrive with no filters in the URL and the ones you used last come back (rememberFilters.ts).
+ * Arrive with no filters in the URL and the ones you used last come back (lib/useRememberedParams).
  */
-import { useEffect, useMemo } from 'react'
-import { useSearchParams } from 'react-router'
+import { useMemo } from 'react'
 import { useJokes } from '../../api/library'
 import type { Joke } from '../../api/types'
 import { byStrength, UNDEFINED_TYPE } from '../../lib/jokeMeta'
 import { NO_PREMISE, ON_A_PREMISE } from '../../lib/premises'
+import { useRememberedParams } from '../../lib/useRememberedParams'
 import { keepDiscarded } from './discarded'
-import { recall, remember } from './rememberFilters'
 
 export type SortKey = 'new' | 'old' | 'edited' | 'strong' | 'weak' | 'long'
 
@@ -56,7 +55,7 @@ const SORTERS: Record<SortKey, (a: Joke, b: Joke) => number> = {
 }
 
 export function useJokeFilters() {
-  const [params, setParams] = useSearchParams()
+  const { params, update, filters: query } = useRememberedParams('jokes-filters')
   const { data: jokes = [], isPending } = useJokes()
   const f = {
     topic: params.get('topic'),
@@ -69,24 +68,13 @@ export function useJokeFilters() {
     showDiscarded: params.get('discarded') === 'show',
   }
 
-  const set = (changes: Partial<Record<'topic' | 'sub' | 'premise' | 'type' | 'status' | 'q' | 'sort' | 'discarded', string | null>>) => {
-    const next = new URLSearchParams(params)
-    for (const [key, value] of Object.entries(changes)) {
-      if (value) next.set(key, value)
-      else next.delete(key)
-    }
-    remember(next.toString())
-    setParams(next, { replace: true })
-  }
-
-  // A link without filters (the nav, a joke opened from Home or a chain) brings the last ones back;
-  // with filters, using them keeps them fresh for the hour.
-  const query = params.toString()
-  useEffect(() => {
-    if (query) return remember(query)
-    const saved = recall()
-    if (saved) setParams(new URLSearchParams(saved), { replace: true })
-  }, [query, setParams])
+  const set = (changes: Partial<Record<'topic' | 'sub' | 'premise' | 'type' | 'status' | 'q' | 'sort' | 'discarded', string | null>>) =>
+    update((next) => {
+      for (const [key, value] of Object.entries(changes)) {
+        if (value) next.set(key, value)
+        else next.delete(key)
+      }
+    })
 
   const { visible, discarded } = useMemo(() => {
     const matching = jokes.filter(
