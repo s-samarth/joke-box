@@ -17,12 +17,22 @@ export interface PremiseInput {
   notes: string
   /** Notes: anything else about it, in a box of its own. Left out of a save, it stays as stored. */
   extra_notes?: string
+  /** 1 (Weak) to 5 (Killer), or null: not rated yet. Left out of a save, it stays as stored. */
+  strength?: number | null
+  /** Where it stands, apart from its jokes' statuses. Left out of a save, it stays as stored. */
+  status?: PremiseStatus
   /** The version this edit started from, sent as the base of the save. Missing: a new one. */
   version?: number
 }
 
+/** A premise's own status: new ones are Drafts. Discarded ones hide from the list until asked for. */
+export const PREMISE_STATUSES = ['Draft', 'Testing', 'Stage Ready', 'Discarded'] as const
+export type PremiseStatus = (typeof PREMISE_STATUSES)[number]
+
 export interface Premise extends PremiseInput {
   id: string
+  strength: number | null
+  status: PremiseStatus
   /** Up by one per save on the server; catches edits made on two devices. */
   version: number
   created_at: string
@@ -46,7 +56,8 @@ queryClient.setMutationDefaults(saveKey, {
     const now = new Date().toISOString()
     queryClient.setQueryData<Premise[]>(keys.premises, (old = []) => {
       const existing = old.find((p) => p.id === id)
-      const next: Premise = { extra_notes: existing?.extra_notes ?? '', ...input, id, version: input.version ?? existing?.version ?? 0, created_at: existing?.created_at ?? now, updated_at: now }
+      // A save that leaves a field out keeps what's there (or the server's default, for a new one).
+      const next: Premise = { extra_notes: '', strength: null, status: 'Draft', ...existing, ...input, id, version: input.version ?? existing?.version ?? 0, created_at: existing?.created_at ?? now, updated_at: now }
       return existing ? old.map((p) => (p.id === id ? next : p)) : [...old, next]
     })
   },

@@ -7,7 +7,18 @@ note it is (an idea for a set, a craft thought, a question). Plain observations 
 import uuid
 from typing import Any
 
-from sqlalchemy import JSON, ForeignKey, Index, Integer, String, Text, Uuid, text
+from sqlalchemy import (
+    JSON,
+    CheckConstraint,
+    ForeignKey,
+    Index,
+    Integer,
+    SmallInteger,
+    String,
+    Text,
+    Uuid,
+    text,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, OwnedMixin
@@ -37,6 +48,7 @@ class Observation(Trashable, OwnedMixin, Base):
     """
 
     __tablename__ = "observations"
+    __table_args__ = (CheckConstraint("strength BETWEEN 1 AND 5", name="strength_range"),)
 
     text: Mapped[str] = mapped_column(Text)
     # Notes: anything more about it, kept apart from what was noticed.
@@ -51,6 +63,8 @@ class Observation(Trashable, OwnedMixin, Base):
     # brainstorm's links, so deleting one never waits on this; a deleted one drops out of view.
     premise_ids: Mapped[list[str]] = mapped_column(JSON, default=list, server_default="[]")
     joke_ids: Mapped[list[str]] = mapped_column(JSON, default=list, server_default="[]")
+    # 1 (Weak) to 5 (Killer), or None: not rated yet, as with jokes.
+    strength: Mapped[int | None] = mapped_column(SmallInteger, default=None)
     # Goes up by one on every save; a save edited from an older version is a conflict.
     version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
 

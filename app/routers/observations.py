@@ -5,7 +5,7 @@ kinds already use.
 """
 
 import uuid
-from typing import Literal
+from typing import Any, Literal
 
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import select, update
@@ -72,13 +72,17 @@ def put_observation(
             observation.created_at = written_at(body.created_at)
         db.add(observation)
     else:
-        fields = {"text": body.text, "kind_id": kind_id, "topic_id": topic_id}
+        fields: dict[str, Any] = {"text": body.text, "kind_id": kind_id, "topic_id": topic_id}
         if body.extra_notes is not None:
             fields["extra_notes"] = body.extra_notes
+        if "strength" in body.model_fields_set:
+            fields["strength"] = body.strength
         check_fields(observation, body.base_version, fields, OBSERVATION_CLASH)
     observation.text = body.text
     if body.extra_notes is not None:  # left out by an older app: what's stored stays
         observation.extra_notes = body.extra_notes
+    if "strength" in body.model_fields_set:  # left out by an older app: what's stored stays
+        observation.strength = body.strength
     observation.kind_id = kind_id
     observation.topic_id = topic_id
     db.commit()

@@ -12,7 +12,7 @@ const at = (ago: number, hour = 12) => new Date(Date.UTC(2026, 10, 11 - ago, hou
 let n = 0
 const joke = (ago: number, extra: Partial<Joke> = {}): Joke =>
   ({ id: `j${++n}`, setup: 'A made-up setup', punchline: 'A made-up punch', status: 'Draft', premise_id: null, created_at: at(ago), updated_at: at(ago), ...extra }) as Joke
-const premise = (ago: number, id = `p${++n}`): Premise => ({ id, take: 'A made-up take', notes: '', topic_id: 't1', version: 1, created_at: at(ago), updated_at: at(ago) })
+const premise = (ago: number, id = `p${++n}`): Premise => ({ id, take: 'A made-up take', notes: '', topic_id: 't1', strength: null, status: 'Draft', version: 1, created_at: at(ago), updated_at: at(ago) })
 const obs = (ago: number, extra: Partial<Observation> = {}): Observation =>
   ({ id: `o${++n}`, text: 'Made-up thing noticed', topic_id: 't1', kind_id: null, premise_ids: [], joke_ids: [], version: 1, created_at: at(ago), updated_at: at(ago), ...extra }) as Observation
 

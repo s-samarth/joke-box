@@ -22,6 +22,8 @@ class ObservationIn(BaseModel):
     extra_notes: str | None = Field(default=None, max_length=20_000)
     kind_id: uuid.UUID | None = None
     topic_id: uuid.UUID | None = None
+    # 1 to 5, or null for not rated. Left out (an app from before strength), what's stored stays.
+    strength: int | None = Field(default=None, ge=1, le=5)
     # Kept only when the observation is created: an import can keep the original date.
     created_at: datetime | None = None
     # The version this edit started from. Omitted (a new one, an older app), nothing is checked.
@@ -46,6 +48,7 @@ class ObservationOut(BaseModel):
     topic_id: uuid.UUID | None
     premise_ids: list[uuid.UUID]
     joke_ids: list[uuid.UUID]
+    strength: int | None
     version: int
     created_at: datetime
     updated_at: datetime

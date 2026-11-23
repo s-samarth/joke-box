@@ -81,20 +81,25 @@ def get_jokes(ids: list[str]) -> dict[str, Any]:
 
 
 @server.tool(annotations=READ)
-def list_premises(query: str = "", topic: str = "") -> dict[str, Any]:
+def list_premises(
+    query: str = "", topic: str = "", status: str = "", min_strength: int = 1
+) -> dict[str, Any]:
     """Premises: each one's take, topic and how many jokes rest on it. A joke from any topic
     can rest on any premise. `notes` say why the take is true and `extra_notes` hold anything
-    else the comic kept on it (both shortened here). Narrow by words in the take or either
-    notes, or by topic name."""
+    else the comic kept on it (both shortened here). `status` is Draft, Testing, Stage Ready or
+    Discarded: the premise's own, apart from its jokes' (a Discarded premise's jokes are as they
+    were). `strength` is 1 (Weak) to 5 (Killer), or null when not rated yet. Narrow by words in
+    the take or either notes, by topic name, by status, or by a strength from min_strength up
+    (which leaves out unrated ones)."""
     with reading() as (db, user):
-        return library.list_premises(db, user, query, topic)
+        return library.list_premises(db, user, query, topic, status, min_strength)
 
 
 @server.tool(annotations=READ)
 def get_premise(premise_id: str) -> dict[str, Any]:
-    """One premise: the take, the full notes (why it's true) and extra_notes (anything else kept
-    on it), the observations it came from, and every joke on it in chain order, so a joke that
-    follows another comes right after it."""
+    """One premise: the take, its status and strength (as in list_premises), the full notes (why
+    it's true) and extra_notes (anything else kept on it), the observations it came from, and
+    every joke on it in chain order, so a joke that follows another comes right after it."""
     with reading() as (db, user):
         return library.get_premise(db, user, premise_id)
 
