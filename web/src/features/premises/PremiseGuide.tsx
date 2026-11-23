@@ -1,13 +1,20 @@
 /**
- * How to write a premise: what it is, how one premise feeds many setups, and the three checks,
- * each with a made-up example. Folds away once you know it. Links to the Craft notes that go
+ * How to write a premise: what it is, how one premise feeds many setups, and the four checks
+ * (the four ways a premise fails, from the Craft note "What's a faulty premise?"), each with a
+ * made-up example. Folds away once you know it. Links to the Craft notes that go
  * deeper are found by title in your own Craft, so a renamed or missing note just loses its link.
  */
 import { Link } from 'react-router'
 import { useCraftNotes } from '../../api/craft'
 import type { ReactNode } from 'react'
 
-const NOTES = ['How a joke works', "What's a faulty premise?", 'Elements of a good setup']
+const NOTES = [
+  'Finding premises: how to spot and generate them',
+  'How a joke works',
+  "What's a faulty premise?",
+  'Heighten a premise into a bit',
+  'Elements of a good setup',
+]
 
 /** One premise and the setups it gives, each planting a different assumption. */
 const EXAMPLE = {
@@ -25,7 +32,7 @@ const CHECKS: { check: string; why: string; weak: string; strong: string }[] = [
   },
   {
     check: 'It says something new',
-    why: 'If the room agreed before you started, there’s nothing to see. Aim for “huh, never thought of it like that”.',
+    why: 'If the room agreed before you started, there’s nothing to see. Aim for “huh, never thought of it like that”. Work the reason out yourself: a borrowed reason gives you the take everyone has.',
     weak: 'Phones are addictive.',
     strong: 'Your phone is the only friend who’s always free, because it has nowhere else to be.',
   },
@@ -34,6 +41,12 @@ const CHECKS: { check: string; why: string; weak: string; strong: string }[] = [
     why: 'Exaggerate later, in the jokes. If they think “that’s not true”, they stop following you.',
     weak: 'Fridges get lonely when you travel.',
     strong: 'A fridge is a diary of your week, because what’s left in it is everything you gave up on.',
+  },
+  {
+    check: 'You know why it exists',
+    why: 'Before you mock a rule, sign or system, finish “this exists because ___”. If someone in the room knows the reason and you don’t, the joke turns on you. Aim at the real reason.',
+    weak: 'Planes dim the lights for landing, because airlines save power wherever they can.',
+    strong: 'Every landing is planned as a crash, because they dim the lights so your eyes can find the exits.',
   },
 ]
 
@@ -71,10 +84,11 @@ export function PremiseGuide({ open = false }: { open?: boolean }) {
           <p>Each setup plants a different assumption, and every punch reveals the same truth underneath. From the wedding premise:</p>
           <ul className="list-disc space-y-0.5 pl-5 text-paper">{EXAMPLE.setups.map((s) => <li key={s}>{s}</li>)}</ul>
           <p>
-            One setup makes a joke. Five or more make a bit. To find the next one, ask: <span className="text-paper">if this is true, what else is true?</span>
+            One setup makes a joke. Six to ten make a bit. To find the next one, ask: <span className="text-paper">if this is true, what else is true?</span>{' '}
+            To keep it believable, ask: <span className="text-paper">why is it true?</span>
           </p>
         </Part>
-        <Part title="Three checks">
+        <Part title="Four checks">
           {CHECKS.map((c) => (
             <div key={c.check}>
               <p><span className="text-paper">{c.check}.</span> {c.why}</p>
@@ -84,8 +98,9 @@ export function PremiseGuide({ open = false }: { open?: boolean }) {
         </Part>
         <Part title="Writing it here">
           <p>
-            Put the take in one plain sentence at the top. Put the because, and anything you’re still unsure of, in <span className="text-paper">Why it’s true</span>.
-            Then write jokes on it, or add ones you’ve written, from any topic.
+            Put the take in one plain sentence at the top and the because in <span className="text-paper">Why it’s true</span>. Anything
+            else (doubts, where it came from, lines you might use) goes in <span className="text-paper">Notes</span>. Then write jokes
+            on it, or add ones you’ve written, from any topic.
           </p>
         </Part>
         {links.length > 0 && (

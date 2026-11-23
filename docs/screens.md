@@ -280,7 +280,9 @@ writing a premise sits beside the list; on a phone the list gives way to the pre
   shows the take and how many jokes rest on it.
 - **A premise:** the take and its notes (why it's true) are edited in place and save on their own.
   A short guide ([PremiseGuide.tsx](../web/src/features/premises/PremiseGuide.tsx)) opens while the
-  premise has no notes and no jokes. Below, **Notes**: an empty box for anything else about it,
+  premise has no notes and no jokes: what a premise is, one premise and many setups, four checks
+  (the four failures in the Craft note "What's a faulty premise?") and links to the Craft notes on
+  premises, found by title. Below, **Notes**: an empty box for anything else about it,
   growing as you write up to about half the screen (24rem at most), then scrolling inside, and saving on its own ([NotesBox.tsx](../web/src/components/ui/NotesBox.tsx)).
   Then **Jokes on it**: every joke resting on it in reading
   order, chains kept together, with **Write a joke on it** and **Add jokes you’ve written** (from
@@ -291,7 +293,9 @@ writing a premise sits beside the list; on a phone the list gives way to the pre
   asks first and sends it to the Trash; its jokes stay where they are, just not on a premise,
   until you put it back.
 - **On a joke:** the Premise row on the joke page picks one, or starts a new one.
-- **+** on this screen opens **New premise** (`?new=1`).
+- **+** on this screen opens **New premise** (`?new=1`): Topic, Your take, Why it's true (the
+  because), From observations and Notes (anything else), the premise page's own fields, with the
+  guide folded at the bottom.
 - **Observations:** the observations it came from (see below).
 
 ### Observations on a premise or joke
