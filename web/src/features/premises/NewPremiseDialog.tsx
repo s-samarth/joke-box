@@ -1,6 +1,7 @@
 /**
- * Write a new premise: the topic it's filed under, the take, the reasoning behind it, and the
- * observations it came from (linked as it saves).
+ * Write a new premise: the topic it's filed under, the take, the reasoning behind it, the
+ * observations it came from (linked as it saves), and Notes for anything else, the same fields the
+ * premise page has.
  */
 import { useState } from 'react'
 import { newId } from '../../api/client'
@@ -35,6 +36,7 @@ export function NewPremiseDialog({ open, onOpenChange, topicId, observationIds =
   const [topic, setTopic] = useState('')
   const [take, setTake] = useState('')
   const [notes, setNotes] = useState('')
+  const [extra, setExtra] = useState('')
   const [linked, setLinked] = useState(observationIds)
   const link = useLinkObservation()
   const { data: observations = [] } = useObservations()
@@ -51,12 +53,13 @@ export function NewPremiseDialog({ open, onOpenChange, topicId, observationIds =
     setTopic('')
     setTake('')
     setNotes('')
+    setExtra('')
     setLinked(observationIds)
   }
   const create = () => {
     if (!take.trim() || !chosen) return
     const id = newId()
-    save.mutateAsync({ id, input: { topic_id: chosen, take: take.trim(), notes } }).catch((e: Error) => toast(`Not saved: ${e.message}`))
+    save.mutateAsync({ id, input: { topic_id: chosen, take: take.trim(), notes, extra_notes: extra } }).catch((e: Error) => toast(`Not saved: ${e.message}`))
     // Queued after the premise's save, so they reach the server in order (offline too).
     for (const obsId of linked.filter((o) => observations.some((x) => x.id === o))) link.mutate({ id: obsId, kind: 'premises', targetId: id, on: true })
     onCreated(id)
@@ -64,7 +67,7 @@ export function NewPremiseDialog({ open, onOpenChange, topicId, observationIds =
   }
 
   return (
-    <Modal open={open} onOpenChange={(o) => (o ? onOpenChange(true) : close())} dirty={Boolean(take.trim() || notes.trim() || linked.join() !== observationIds.join())} title="New premise" wide
+    <Modal open={open} onOpenChange={(o) => (o ? onOpenChange(true) : close())} dirty={Boolean(take.trim() || notes.trim() || extra.trim() || linked.join() !== observationIds.join())} title="New premise" wide
       footer={<Button variant="tape" disabled={!take.trim()} onClick={create}>Add premise</Button>}>
       <div className="space-y-4">
         <Field label="Topic">
@@ -76,13 +79,16 @@ export function NewPremiseDialog({ open, onOpenChange, topicId, observationIds =
         <Field label="Your take">
           <Textarea className="min-h-16" placeholder="X is Y" value={take} onChange={(e) => setTake(e.target.value)} />
         </Field>
-        <Field label="Why it's true" hint="The because, and anything else worth keeping. Optional.">
+        <Field label="Why it's true" hint="The because. Optional.">
           <Textarea placeholder="Because Z" value={notes} onChange={(e) => setNotes(e.target.value)} />
         </Field>
         <section aria-label="From observations">
           <h3 className="mb-2 text-sm text-dim">From observations</h3>
           <ObservationPicker linkedIds={linked} topicId={chosen} onLink={(o) => setLinked((ids) => [...ids, o])} onUnlink={(o) => setLinked((ids) => ids.filter((i) => i !== o))} />
         </section>
+        <Field label="Notes" hint="Doubts, where it came from, lines you might use. Optional.">
+          <Textarea placeholder="Anything else worth keeping" value={extra} onChange={(e) => setExtra(e.target.value)} />
+        </Field>
         <PremiseGuide />
       </div>
     </Modal>

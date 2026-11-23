@@ -101,7 +101,7 @@ through everything you've written at once.
 ## 4a. Find the premise under your jokes
 
 1. Open **Premises** (in the rail, or the phone's **Ideas** tab) and tap **+** for **New
-   premise**. Write the take ("X is Y, because Z") and, in the notes, why it's true. Or, on Home,
+   premise**. Write the take ("X is Y, because Z"), why it's true, and anything else in Notes. Or, on Home,
    pick the **Premise** tab: the take, "Because…" and a topic, then **Add premise** (the toast's
    **Open** takes you to it, to link observations).
 2. Tap **Write a joke on it** for a new joke already resting on it, or **Add jokes you’ve written** to pick ones
