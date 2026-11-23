@@ -1,5 +1,6 @@
 /**
- * One premise: the take and its reasoning, edited in place, and the observations it came from
+ * One premise: the take and its reasoning, edited in place, its strength and status (its own, apart
+ * from its jokes'), and the observations it came from
  * (see ObservationsOn: search to link more). Then Notes, for anything else, and the jokes resting on it as a list or its web
  * (see PremiseJokes): write a new joke on it, or add ones you've written, from any topic.
  */
@@ -11,6 +12,7 @@ import { Button } from '../../components/ui/Button'
 import { Field, GrowingText, Select, Textarea } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { NotesBox } from '../../components/ui/NotesBox'
+import { StrengthPicker } from '../../components/ui/StrengthPicker'
 import { EmptyState, Spinner } from '../../components/ui/pieces'
 import { topicName } from '../../lib/jokeMeta'
 import { jokesOn } from '../../lib/premises'
@@ -19,6 +21,7 @@ import { NEW_TOPIC, useNewTopic } from '../jokes/useNewTopic'
 import { ObservationsOn } from '../observations/ObservationsOn'
 import { PremiseGuide } from './PremiseGuide'
 import { PremiseJokes } from './PremiseJokes'
+import { PremiseStatusPicker } from './PremiseStatusPicker'
 import { usePremiseDraft } from './usePremiseDraft'
 
 function Editor({ premise }: { premise: Premise }) {
@@ -54,6 +57,9 @@ function Editor({ premise }: { premise: Premise }) {
         <Field label="Why it's true">
           <Textarea placeholder="Because…" value={draft.notes} onChange={(e) => update({ notes: e.target.value })} />
         </Field>
+        {/* Not a Field: a label around buttons would pass a click on its words to the first one. */}
+        <div className="space-y-1.5"><span className="text-sm text-dim">Strength</span><StrengthPicker value={draft.strength ?? null} onChange={(strength) => update({ strength })} /></div>
+        <div className="space-y-1.5"><span className="text-sm text-dim">Status</span><PremiseStatusPicker value={draft.status ?? 'Draft'} onChange={(status) => update({ status })} /></div>
         <ObservationsOn kind="premises" id={premise.id} topicId={draft.topic_id} />
         <Field label="Topic">
           <Select value={draft.topic_id} onChange={(e) => pickTopic(e.target.value)} className="block sm:max-w-xs">

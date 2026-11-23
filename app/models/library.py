@@ -63,6 +63,12 @@ class Premise(Trashable, OwnedMixin, Base):
     `trashed_joke_ids` remembers them, so putting the premise back puts them back on it."""
 
     __tablename__ = "premises"
+    __table_args__ = (
+        CheckConstraint("strength BETWEEN 1 AND 5", name="strength_range"),
+        CheckConstraint(
+            "status IN ('Draft', 'Testing', 'Stage Ready', 'Discarded')", name="status_values"
+        ),
+    )
 
     topic_id: Mapped[uuid.UUID] = mapped_column(
         Uuid, ForeignKey("topics.id", ondelete="CASCADE"), index=True
@@ -74,8 +80,16 @@ class Premise(Trashable, OwnedMixin, Base):
     extra_notes: Mapped[str] = mapped_column(Text, default="", server_default="")
     position: Mapped[int] = mapped_column(Integer, default=0)
     trashed_joke_ids: Mapped[list[str] | None] = mapped_column(JSON)
+    # 1 (Weak) to 5 (Killer), or None: not rated yet, as with jokes.
+    strength: Mapped[int | None] = mapped_column(SmallInteger, default=None)
+    # One of PREMISE_STATUSES, its own scale: a Discarded premise leaves its jokes as they are.
+    status: Mapped[str] = mapped_column(String(20), default="Draft", server_default="Draft")
     # Goes up by one on every save; a save edited from an older version is a conflict.
     version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
+
+
+# Where a premise stands, from new to done. Not the jokes' statuses, which the comic names.
+PREMISE_STATUSES = ("Draft", "Testing", "Stage Ready", "Discarded")
 
 
 joke_type_links = Table(

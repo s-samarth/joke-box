@@ -132,7 +132,14 @@ def get_jokes(db: Session, user: User, ids: list[str]) -> dict[str, Any]:
     }
 
 
-def list_premises(db: Session, user: User, query: str = "", topic: str = "") -> dict[str, Any]:
+def list_premises(
+    db: Session,
+    user: User,
+    query: str = "",
+    topic: str = "",
+    status: str = "",
+    min_strength: int = 1,
+) -> dict[str, Any]:
     names = load_names(db, user)
     counts: dict[uuid.UUID, int] = {}
     for premise_id in db.scalars(select(Joke.premise_id).where(Joke.user_id == user.id)):
@@ -145,12 +152,16 @@ def list_premises(db: Session, user: User, query: str = "", topic: str = "") -> 
             "take": p.take,
             "topic": topic_name(names, p.topic_id),
             "jokes": counts.get(p.id, 0),
+            "status": p.status,
+            "strength": p.strength,
             "notes": clip(p.notes, 240),
             "extra_notes": clip(p.extra_notes, 240),
         }
         for p in rows
         if matches(query, p.take, p.notes, p.extra_notes)
         and same_name(topic, topic_name(names, p.topic_id))
+        and same_name(status, p.status)
+        and (min_strength <= 1 or (p.strength or 0) >= min_strength)
     ]
     return {"total": len(found), "premises": found}
 
@@ -171,6 +182,8 @@ def get_premise(db: Session, user: User, premise_id: str) -> dict[str, Any]:
         "notes": clip(premise.notes, 8000),
         "extra_notes": clip(premise.extra_notes, 8000),
         "topic": topic_name(names, premise.topic_id),
+        "status": premise.status,
+        "strength": premise.strength,
         "from_observations": observations_behind(db, user).get(str(premise.id), []),
         "jokes": [
             {**brief(j, names), "follows_id": str(j.follows_id) if j.follows_id else None}

@@ -47,7 +47,13 @@ def observations_behind(db: Session, user: User) -> dict[str, list[dict[str, str
 
 
 def search_observations(
-    db: Session, user: User, query: str = "", topic: str = "", limit: int = 25, kind: str = ""
+    db: Session,
+    user: User,
+    query: str = "",
+    topic: str = "",
+    limit: int = 25,
+    kind: str = "",
+    min_strength: int = 1,
 ) -> dict[str, Any]:
     """Things you noticed, newest first. `topic` is a joke topic; `kind` is what sort of note it
     is, and a plain observation's kind is "Observation". `premise_ids` and `joke_ids` are what
@@ -78,6 +84,7 @@ def search_observations(
         if matches(query, o.text, o.extra_notes)
         and same_name(topic, topic_of(o))
         and same_name(kind, kind_of(o))
+        and (min_strength <= 1 or (o.strength or 0) >= min_strength)
     ]
     shown, total = page(found, limit)
     premises, jokes = live_links(db, user)
@@ -91,6 +98,7 @@ def search_observations(
                 "extra_notes": clip(o.extra_notes, 2000),
                 "topic": topic_of(o),
                 "kind": kind_of(o),
+                "strength": o.strength,
                 "noted": ist_date(o.created_at),
                 "premise_ids": [i for i in o.premise_ids or [] if i in premises],
                 "joke_ids": [i for i in o.joke_ids or [] if i in jokes],

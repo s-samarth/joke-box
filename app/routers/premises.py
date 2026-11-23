@@ -1,6 +1,7 @@
 """Premises: list, create-or-update by client id, delete (to the Trash)."""
 
 import uuid
+from typing import Any
 
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
@@ -13,6 +14,18 @@ from app.services.ordering import next_position
 from app.services.trash import move_to_trash
 
 router = APIRouter(prefix="/api/premises", tags=["premises"])
+
+
+def saved_fields(body: PremiseIn) -> dict[str, Any]:
+    """What a save writes. A field an older app leaves out (Notes, strength, status) stays."""
+    fields: dict[str, Any] = {"topic_id": body.topic_id, "take": body.take, "notes": body.notes}
+    if body.extra_notes is not None:
+        fields["extra_notes"] = body.extra_notes
+    if "strength" in body.model_fields_set:
+        fields["strength"] = body.strength
+    if body.status is not None:
+        fields["status"] = body.status
+    return fields
 
 
 @router.get("", response_model=list[PremiseOut])
@@ -34,18 +47,15 @@ def put_premise(
     if topic is None:
         raise HTTPException(422, "Unknown topic")
     premise = find_owned(db, Premise, premise_id, user)
+    fields = saved_fields(body)
     if premise is None:
         position = next_position(db, Premise.position, Premise.user_id == user.id)
         premise = Premise(id=premise_id, user_id=user.id, position=position, extra_notes="")
         db.add(premise)
     else:
-        fields = {"topic_id": body.topic_id, "take": body.take, "notes": body.notes}
-        if body.extra_notes is not None:
-            fields["extra_notes"] = body.extra_notes
         check_fields(premise, body.base_version, fields, PREMISE_CLASH)
-    premise.topic_id, premise.take, premise.notes = body.topic_id, body.take, body.notes
-    if body.extra_notes is not None:  # left out by an older app: what's stored stays
-        premise.extra_notes = body.extra_notes
+    for name, value in fields.items():
+        setattr(premise, name, value)
     db.commit()
     db.refresh(premise)
     return premise

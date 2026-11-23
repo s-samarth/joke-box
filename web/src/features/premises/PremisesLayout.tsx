@@ -1,13 +1,14 @@
 /**
  * Premises, a tab of their own: a searchable list with the open premise beside it, like Jokes (see
  * SplitView). Built to stay usable with hundreds of premises: search the take and notes, narrow to a
- * topic, sort by size. On a phone the list gives way to the premise you open; on an iPad the list
+ * topic or a status, sort by date, strength or size (see usePremiseFilters). On a phone the list gives way to the premise you open; on an iPad the list
  * has the whole width until you open one.
  */
-import { Lightbulb, Plus, Search, X } from 'lucide-react'
+import { Plus, Search, X } from 'lucide-react'
 import { Fragment, useRef, useState } from 'react'
-import { Link, Outlet, useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
+import { Outlet, useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
 import { useTopics } from '../../api/library'
+import { PREMISE_STATUSES } from '../../api/premises'
 import { Button } from '../../components/ui/Button'
 import { ChipRow } from '../../components/ui/ChipRow'
 import { Input } from '../../components/ui/Field'
@@ -15,13 +16,12 @@ import { Dropdown, type MenuItem } from '../../components/ui/Menu'
 import { EmptyState, PageHead, Spinner } from '../../components/ui/pieces'
 import { SplitView, WIDE_LIST } from '../../components/ui/SplitView'
 import { topicName } from '../../lib/jokeMeta'
-import { NO_PREMISE, premiseSize } from '../../lib/premises'
-import { count } from '../../lib/topics'
 import { MenuButton } from '../jokes/JokeFilters'
 import { TopicManager } from '../jokes/TopicManager'
 import { useNewTopic } from '../jokes/useNewTopic'
 import { NewPremiseDialog } from './NewPremiseDialog'
 import { PremiseGuide } from './PremiseGuide'
+import { PremiseCount, PremiseRow } from './PremiseListParts'
 import { PREMISE_SORTS, usePremiseFilters, type PremiseSort } from './usePremiseFilters'
 import { IdeasSwitch } from '../../layout/IdeasSwitch'
 
@@ -52,7 +52,11 @@ export function PremisesLayout() {
     'divider',
     { label: 'Manage topics…', onSelect: () => setManaging(true) },
   ]
-  const sortItems: MenuItem[] = (Object.keys(PREMISE_SORTS) as PremiseSort[]).map((k) => ({ label: PREMISE_SORTS[k], onSelect: () => f.set({ sort: k === 'topic' ? null : k }), checked: f.sort === k }))
+  const statusItems: MenuItem[] = [
+    { label: 'Any status', onSelect: () => f.set({ status: null }), checked: !f.status },
+    ...PREMISE_STATUSES.map((s) => ({ label: s, onSelect: () => f.set({ status: s }), checked: f.status === s })),
+  ]
+  const sortItems: MenuItem[] = (Object.keys(PREMISE_SORTS) as PremiseSort[]).map((k) => ({ label: PREMISE_SORTS[k], onSelect: () => f.set({ sort: k === 'new' ? null : k }), checked: f.sort === k }))
   // Sorted by topic, a small heading starts each topic's run.
   const headingAt = (i: number) => f.sort === 'topic' && (i === 0 || f.visible[i - 1].topic_id !== f.visible[i].topic_id)
 
@@ -68,20 +72,18 @@ export function PremisesLayout() {
       </div>
       <ChipRow className="mt-3 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
         <Dropdown align="start" items={topicItems} trigger={<span><MenuButton label={topic ? topicName(topic) : 'Topic'} on={Boolean(topic)} /></span>} />
+        <Dropdown align="start" items={statusItems} trigger={<span><MenuButton label={f.status ?? 'Status'} on={Boolean(f.status)} /></span>} />
         <Dropdown align="start" items={sortItems} trigger={<span><MenuButton label={PREMISE_SORTS[f.sort]} on={false} /></span>} />
-        {f.active && <button type="button" onClick={() => f.set({ q: null, topic: null })} className="inline-flex h-9 shrink-0 items-center gap-1 px-2 text-sm text-dim hover:text-paper"><X size={14} /> Clear</button>}
+        {f.active && <button type="button" onClick={() => f.set({ q: null, topic: null, status: null })} className="inline-flex h-9 shrink-0 items-center gap-1 px-2 text-sm text-dim hover:text-paper"><X size={14} /> Clear</button>}
       </ChipRow>
-      <p className="mt-4 mb-1 text-sm text-faint">
-        {f.active ? `${f.visible.length} of ${count(f.total, 'premise', 'premises')}` : count(f.total, 'premise', 'premises')}
-        {f.loose > 0 && <> · <Link to={`/jokes?premise=${NO_PREMISE}`} className="text-tape hover:underline">{f.loose} {f.loose === 1 ? 'joke' : 'jokes'} on none yet</Link></>}
-      </p>
+      <PremiseCount f={f} />
       <div className="lg:-mx-6 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:px-3">
         {f.isPending ? (
           <div className="py-10"><Spinner /></div>
         ) : f.visible.length === 0 ? (
-          <EmptyState title={f.active ? 'Nothing matches' : 'No premises yet'}
-            action={!f.active && <button type="button" onClick={() => setCreating(true)} className="text-tape hover:underline">Write your first premise</button>}>
-            {f.active ? 'Try another word or clear the filters.' : 'Your take on a topic, with the jokes that rest on it.'}
+          <EmptyState title={f.active || f.hidingDiscarded ? 'Nothing matches' : 'No premises yet'}
+            action={!f.active && !f.hidingDiscarded && <button type="button" onClick={() => setCreating(true)} className="text-tape hover:underline">Write your first premise</button>}>
+            {f.active ? 'Try another word or clear the filters.' : f.hidingDiscarded ? 'The ones here are discarded: Show brings them back.' : 'Your take on a topic, with the jokes that rest on it.'}
           </EmptyState>
         ) : (
           <ul className={`pb-10 ${premiseId ? '' : WIDE_LIST}`}>
@@ -89,17 +91,7 @@ export function PremisesLayout() {
               <Fragment key={p.id}>
                 {headingAt(i) && <li className="col-span-full px-3 pt-4 pb-1 text-xs text-faint">{topicName(topics.find((t) => t.id === p.topic_id))}</li>}
                 <li>
-                  {/* Opening the first premise reshapes the screen, so that one fades; moving between premises doesn't. */}
-                  <Link to={`/premises/${p.id}${search}`} viewTransition={!premiseId} aria-current={p.id === premiseId ? 'page' : undefined}
-                    className={`flex items-start gap-3 rounded-lg px-3 py-3 ${p.id === premiseId ? 'bg-ink-3' : 'hover:bg-ink-2'}`}>
-                    <Lightbulb size={16} className={`mt-1 shrink-0 ${(f.counts.get(p.id) ?? 0) >= 3 ? 'text-tape' : 'text-faint'}`} aria-hidden />
-                    <span className="min-w-0 flex-1 leading-snug">
-                      <span className="line-clamp-2">{p.take}</span>
-                      <span className="mt-0.5 block text-xs text-faint">
-                        {premiseSize(f.counts.get(p.id) ?? 0)}{f.sort !== 'topic' && ` · ${topicName(topics.find((t) => t.id === p.topic_id))}`}
-                      </span>
-                    </span>
-                  </Link>
+                  <PremiseRow premise={p} jokes={f.counts.get(p.id) ?? 0} topics={topics} showTopic={f.sort !== 'topic'} search={search} openId={premiseId} />
                 </li>
               </Fragment>
             ))}

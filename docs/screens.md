@@ -281,13 +281,21 @@ with the same **full width** and **close** buttons; from 1280 px, with none open
 writing a premise sits beside the list; on a phone the list gives way to the premise you open.
 
 - **Ideas switch:** on a phone or an upright iPad, **Observations | Premises** at the top of the list (see The frame).
-- **List:** a search box ("Search takes and notes"), then a Topic menu and a sort in one row (By topic, Newest,
-  Most jokes, Fewest jokes). The Topic menu is the one Jokes has: **New topic** at the top,
+- **List:** a search box ("Search takes and notes"), then a Topic menu, a Status menu and a sort in one row
+  (Newest, the default, then Oldest, By topic, Strongest, Weakest, Most jokes, Fewest jokes;
+  [premiseSort.ts](../web/src/features/premises/premiseSort.ts)). The Topic menu is the one Jokes has: **New topic** at the top,
   **Manage topics…** at the bottom, both working on the shared topic list. The Topic pickers in
   **New premise** and on a premise end with **New topic…**. Sorted by topic, a small heading starts each topic's run. Each row
-  shows the take and how many jokes rest on it. The search, topic and sort are remembered for an
+  shows the take, how many jokes rest on it, its strength ticks and its status (none for a Draft).
+  Discarded premises are hidden like discarded jokes: the count line says how many, with **Show**
+  and **Hide**, and picking a status in the Status menu shows what you picked. The search, topic, status and sort are remembered for an
   hour like Jokes' filters, so the tab bar brings you back to them; **Clear** forgets them.
 - **A premise:** the take and its notes (why it's true) are edited in place and save on their own.
+  Under them, **Strength** (Unrated, or Weak to Killer, the picker jokes use:
+  [StrengthPicker.tsx](../web/src/components/ui/StrengthPicker.tsx)) and **Status**: Draft (every
+  premise starts there), Testing, Stage Ready or Discarded
+  ([PremiseStatusPicker.tsx](../web/src/features/premises/PremiseStatusPicker.tsx)). The status is
+  the premise's own: discarding it leaves its jokes, and their statuses, as they are.
   A short guide ([PremiseGuide.tsx](../web/src/features/premises/PremiseGuide.tsx)) opens while the
   premise has no notes and no jokes: what a premise is, one premise and many setups, four checks
   (the four failures in the Craft note "What's a faulty premise?") and links to the Craft notes on
@@ -407,12 +415,12 @@ open beside it on an iPad in landscape or a laptop, or as its own page on a phon
 - **The list:** **New** opens New observation (`?new=1`; the + button opens it too): the words,
   **Topic** (Random, or the one you're filtered to) and **Kind (optional)**, then Save opens its page. Below are a search box
   (`?q=`), and **Topic**, **Kind** and **Not used yet** (`?unused=1`) in a row that scrolls
-  sideways; each choice counts within the other filters, and **Clear** ends the row while any is
-  set. They're remembered for an hour like Jokes' filters, so the tab bar brings you back to them
+  sideways, then a sort (Newest, the default, Oldest, Strongest, Weakest; `?sort=`); each choice
+  counts within the other filters, and **Clear** ends the row while any filter is set. They're remembered for an hour like Jokes' filters, so the tab bar brings you back to them
   (an open New sheet isn't). Then how many there are. Each row: the words (three lines), then its topic, kind,
-  what came from it ("1 joke · 1 premise · 1 brainstorm" or "Not used yet") and the date.
+  what came from it ("1 joke · 1 premise · 1 brainstorm" or "Not used yet"), the date and its strength ticks.
 - **An observation:** the words, edited in place and saved on their own; **Topic** and
-  **Kind (optional)**, each ending in New topic… / New kind…; **Write a joke from it** and **Write a premise from it**
+  **Kind (optional)**, each ending in New topic… / New kind…; **Strength**, Unrated until you rate it, as on a joke; **Write a joke from it** and **Write a premise from it**
   open New joke or New premise on its topic with the setup (or take) empty and this observation
   already under **From observations**, so you write your own words with it in view; either new
   one is linked back when saved. A new joke also starts on the premise this observation already

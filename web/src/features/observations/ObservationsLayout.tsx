@@ -1,8 +1,8 @@
 /**
  * Observations, like Premises: a searchable list with the open observation beside it (see
  * SplitView); on a phone the list gives way to the one you open. Filter by topic and kind, or to
- * the ones nothing has come from yet; all of it lives in the URL (?topic=, ?kind=, ?unused=1,
- * ?q=) and is remembered for a while like Jokes' (lib/useRememberedParams), so the tab bar brings
+ * the ones nothing has come from yet, and sort by date or strength; all of it lives in the URL
+ * (?topic=, ?kind=, ?unused=1, ?q=, ?sort=) and is remembered for a while like Jokes' (lib/useRememberedParams), so the tab bar brings
  * you back to it. New opens a sheet (?new=1, so the + button can open it too).
  */
 import { Eye, Plus, Search, X } from 'lucide-react'
@@ -14,7 +14,8 @@ import type { Observation } from '../../api/types'
 import { Button } from '../../components/ui/Button'
 import { ChipRow } from '../../components/ui/ChipRow'
 import { Input } from '../../components/ui/Field'
-import { EmptyState, PageHead, Spinner } from '../../components/ui/pieces'
+import { Dropdown, type MenuItem } from '../../components/ui/Menu'
+import { EmptyState, PageHead, Spinner, StrengthTicks } from '../../components/ui/pieces'
 import { SplitView, WIDE_LIST } from '../../components/ui/SplitView'
 import { matchesWords } from '../../lib/search'
 import { formatDate } from '../../lib/time'
@@ -23,11 +24,11 @@ import { count } from '../../lib/topics'
 import { KindManager } from './KindManager'
 import { NewObservationDialog } from './NewObservationDialog'
 import { KindMenu, TopicMenu } from './ObservationMenus'
-import { kindLabel, matchesFilters, PLAIN, PLAIN_KIND, topicLabel } from './observationMeta'
+import { MenuButton } from '../jokes/JokeFilters'
+import { kindLabel, matchesFilters, OBSERVATION_SORTS, observationSort, PLAIN, PLAIN_KIND, sortObservations, topicLabel, type ObservationSort } from './observationMeta'
 import { useUses } from './useUsed'
 import { IdeasSwitch } from '../../layout/IdeasSwitch'
 
-const newest = (a: Observation, b: Observation) => b.created_at.localeCompare(a.created_at)
 const chip = (on: boolean) => `inline-flex h-9 shrink-0 items-center rounded-lg px-3 text-sm transition ${on ? 'bg-paper font-medium text-ink' : 'bg-ink-3 text-dim hover:text-paper'}`
 
 export function ObservationsLayout() {
@@ -48,16 +49,18 @@ export function ObservationsLayout() {
   const kind = params.get('kind')
   const unused = params.get('unused') === '1'
   const query = params.get('q') ?? ''
+  const sort = observationSort(params.get('sort'))
   const kept = new URLSearchParams(useLocation().search)
   kept.delete('new')
   const search = kept.size ? `?${kept}` : ''
-  const all = [...(observations ?? [])].sort(newest)
+  const all = sortObservations(observations ?? [], sort)
   const open = (o: Observation) => !(unused && uses.used(o))
   const shown = all.filter((o) => matchesFilters(o, topic, kind) && open(o) && matchesWords(query, [o.text]))
   const active = Boolean(topic || kind || unused || query.trim())
   // Each menu counts within the other filters, so the numbers match what picking would show.
   const topicCount = (v: string | null) => all.filter((o) => matchesFilters(o, v, kind) && open(o)).length
   const kindCount = (v: string | null) => all.filter((o) => matchesFilters(o, topic, v) && open(o)).length
+  const sortItems: MenuItem[] = (Object.keys(OBSERVATION_SORTS) as ObservationSort[]).map((k) => ({ label: OBSERVATION_SORTS[k], onSelect: () => setParam('sort', k === 'new' ? null : k), checked: sort === k }))
   const about = (o: Observation) => [topicLabel(topics, o.topic_id), o.kind_id && kindLabel(kinds, o.kind_id)].filter((x) => x && x !== PLAIN).join(' · ')
 
   const list = (
@@ -74,6 +77,7 @@ export function ObservationsLayout() {
         <TopicMenu value={topic} onChange={(v) => setParam('topic', v)} counts={topicCount} />
         <KindMenu value={kind} onChange={(v) => setParam('kind', v)} counts={kindCount} onManage={() => setManaging(true)} />
         <button type="button" aria-pressed={unused} onClick={() => setParam('unused', unused ? null : '1')} className={chip(unused)}>Not used yet</button>
+        <Dropdown align="start" items={sortItems} trigger={<span><MenuButton label={OBSERVATION_SORTS[sort]} on={false} /></span>} />
         {active && <button type="button" onClick={clear} className="inline-flex h-9 shrink-0 items-center gap-1 px-2 text-sm text-dim hover:text-paper"><X size={14} /> Clear</button>}
       </ChipRow>
       <p className="mt-4 mb-1 text-sm text-faint">{active ? `${shown.length} of ${count(all.length, 'observation', 'observations')}` : count(all.length, 'observation', 'observations')}</p>
@@ -94,7 +98,10 @@ export function ObservationsLayout() {
                   <Eye size={16} className={`mt-1 shrink-0 ${uses.used(o) ? 'text-tape' : 'text-faint'}`} aria-hidden />
                   <span className="min-w-0 flex-1 leading-snug">
                     <span className="line-clamp-3">{o.text}</span>
-                    <span className="mt-1 block text-xs text-faint">{about(o)} · {uses.label(o)} · {formatDate(o.created_at)}</span>
+                    <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-faint">
+                      <span>{about(o)} · {uses.label(o)} · {formatDate(o.created_at)}</span>
+                      <StrengthTicks strength={o.strength} />
+                    </span>
                   </span>
                 </Link>
               </li>

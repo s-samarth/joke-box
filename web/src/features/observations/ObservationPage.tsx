@@ -1,6 +1,6 @@
 /**
  * One observation, as its own page: the words, edited in place; its topic and kind, both
- * optional; Notes, for anything more about it; then what came from it (see ObservationUses), with a joke or premise a tap away to
+ * optional; its strength (Unrated until you rate it); Notes, for anything more about it; then what came from it (see ObservationUses), with a joke or premise a tap away to
  * write from it. Every change saves on its own.
  */
 import { ArrowLeft, Lightbulb, Sparkles, Trash2 } from 'lucide-react'
@@ -14,6 +14,7 @@ import { Button } from '../../components/ui/Button'
 import { Field, GrowingText, Select } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { NotesBox } from '../../components/ui/NotesBox'
+import { StrengthPicker } from '../../components/ui/StrengthPicker'
 import { EmptyState, Spinner } from '../../components/ui/pieces'
 import { randomTopicId, topicName } from '../../lib/jokeMeta'
 import { formatDateTime } from '../../lib/time'
@@ -80,6 +81,7 @@ function Editor({ observation }: { observation: Observation }) {
           </Select>
         </Field>
       </div>
+      <div className="mt-4 space-y-1.5"><span className="text-sm text-dim">Strength</span><StrengthPicker value={draft.strength ?? null} onChange={(strength) => update({ strength })} /></div>
 
       <div className="mt-6 flex flex-wrap gap-2">
         <Button variant="tape" small icon={<Sparkles size={15} />}

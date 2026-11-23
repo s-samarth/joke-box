@@ -129,6 +129,8 @@ export interface ObservationInput {
   kind_id: string | null
   /** A joke topic, the same list jokes and premises use; null until it's sorted. */
   topic_id: string | null
+  /** 1 (Weak) to 5 (Killer), or null: not rated yet. Left out of a save, it stays as stored. */
+  strength?: number | null
   /** Sent when creating, so something written offline keeps the time it was written. */
   created_at?: string
   /** The version this edit started from, sent as the base of the save. Missing: a new one. */
@@ -141,6 +143,7 @@ export interface Observation extends ObservationInput {
   /** What came from it, linked by the app (see useLinkObservation). Not sent with a save. */
   premise_ids: string[]
   joke_ids: string[]
+  strength: number | null
   /** Up by one per save on the server; catches edits made on two devices. */
   version: number
   created_at: string
