@@ -28,7 +28,7 @@ export function JokeMapView({ view }: { view: JokeView }) {
   useEffect(() => saveView(view), [view])
   if (f.isPending) return <div className="py-16"><Spinner /></div>
   if (f.visible.length === 0) {
-    return <EmptyState title="Nothing here">{f.active ? 'No jokes match these filters. Clear them to see everything.' : 'Write a joke and it shows up here.'}</EmptyState>
+    return <EmptyState title="Nothing here">{f.active ? 'No jokes match these filters. Clear them to see everything.' : f.hidingDiscarded ? 'Only discarded jokes are here: Show brings them back.' : 'Write a joke and it shows up here.'}</EmptyState>
   }
   return view === 'map'
     ? <JokeMap shown={f.visible} all={all} query={f.query} />

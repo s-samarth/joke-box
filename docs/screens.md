@@ -197,6 +197,13 @@ separate log to fall out of step. Items in the Trash don't count.
   months under pinned headings, with the time scrubber down its side ([JokeList.tsx](../web/src/features/jokes/JokeList.tsx)).
   A joke brought in with an older date (an import) counts as last edited then, not on the day it
   arrived. The ⋯ menu has **Export as CSV** (with Created At and Edited At).
+- **Discarded jokes** ([discarded.ts](../web/src/features/jokes/discarded.ts)) are hidden from the
+  list, map and web by default, like completed tasks in Todoist. The count line under the filters
+  says so ("40 of 324 jokes · 6 discarded hidden **Show**"); **Show** brings them in ("6 discarded
+  shown **Hide**"), and the choice is remembered with the filters. A joke is discarded when its
+  status is called Discarded (any case). Picking a status in the Status menu, Discarded included,
+  shows exactly that status, so the switch steps aside. Clear leaves the switch as it is. Export as
+  CSV exports what's showing.
 - **Layout** ([SplitView.tsx](../web/src/components/ui/SplitView.tsx)), like Mail on an iPad:
   - **Phone and iPad upright:** the list, or the open joke as its own page with a back link. With
     the list to itself from 768 px, the rows go two across.
@@ -239,7 +246,7 @@ separate log to fall out of step. Items in the Trash don't count.
   **In sets** (with Add to a set), the show record once the joke has been logged at a show
   ("Done at 3 shows: 2 killed, 1 ok. Last done 12 Oct", [JokeShowRecord.tsx](../web/src/features/jokes/JokeShowRecord.tsx)),
   and **Delete joke**, which asks first and sends it to the Trash.
-- **State:** the filters live in the URL (`?topic=&sub=&type=&status=&q=&sort=`). Filtering runs in
+- **State:** the filters live in the URL (`?topic=&sub=&premise=&type=&status=&q=&sort=&discarded=`). Filtering runs in
   the browser, so it works offline. Edits go into a local draft and save about a moment after you
   stop typing, through the offline-safe joke save.
 - **Remembered filters** ([rememberFilters.ts](../web/src/features/jokes/rememberFilters.ts)): come
