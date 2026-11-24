@@ -270,7 +270,11 @@ checks `element.contains(event.target)` first.
 - **`SplitView`** ([SplitView.tsx](../web/src/components/ui/SplitView.tsx)) owns the list and
   detail columns for Jokes and Premises, the full-width and close buttons, and the settle-in
   animation. Lists pass `WIDE_LIST` to go two across only while nothing is open. Observations
-  uses it too.
+  uses it too. From 1280 px the list's width is set in JS (`useSplitWidth`): the open item's
+  pane needs 48rem (42rem of content, its padding, a scrollbar), and the list may grow into
+  whatever is left over, as a share of that spare room kept per device and list in
+  `localStorage` (`jokebox.split.<noun>`). Kept as a share, one choice fits a laptop and a
+  monitor. The pane's 48rem must grow if the open item's `max-w-2xl` ever does.
 - **Page titles size to their column, not the screen.** `PageHead` is a container (`@container`):
   below 22rem wide its title caps at 44 px, below 19.5rem at 38 px. With an item open between
   1024 and 1279 px (iPad landscape), the list column is 22rem and its content 19rem, so screen

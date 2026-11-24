@@ -192,7 +192,7 @@ separate log to fall out of step. Items in the Trash don't count.
   three icons.
 - **List:** a search box ("Search words, tags, notes") and menus in one row that scrolls sideways (a wheel over the row slides it; one over an open menu scrolls only the menu): Topic, then Subtopic once a topic is picked, Premise, Type,
   Status, and Sort (Newest, Oldest, Recently edited, Strongest, Weakest, Longest). Each row shows the
-  setup, the start of the punchline, strength ticks (or a faint "Unrated"), type dots, the topic, the date it was added (or
+  setup and the punchline (two lines each), strength ticks (or a faint "Unrated"), type dots, the topic, the date it was added (or
   last edited, under Recently edited) and the runtime. Sorted by a date, the list is grouped into
   months under pinned headings, with the time scrubber down its side ([JokeList.tsx](../web/src/features/jokes/JokeList.tsx)).
   A joke brought in with an older date (an import) counts as last edited then, not on the day it
@@ -210,7 +210,13 @@ separate log to fall out of step. Items in the Trash don't count.
   - **iPad landscape and small laptops (1024–1279 px):** the list fills the screen, two across,
     until you open a joke; then it narrows to a column and the joke sits beside it.
   - **1280 px and wider:** the list is a column; with no joke open, the map or web you used last
-    sits beside it, with a button to open it full size.
+    sits beside it, with a button to open it full size. The line between them drags
+    ([SplitDivider.tsx](../web/src/components/ui/SplitDivider.tsx)), like the divider in Apple Mail:
+    the list can take the empty margins beside the open joke, never the joke's own width
+    ([splitWidth.ts](../web/src/components/ui/splitWidth.ts)). It starts with half of them, so on a
+    big monitor the list starts wider. Double-click puts it back, and the arrow keys move it once
+    it has focus. Each device remembers its own width for each list. With under 2rem to spare (a
+    small laptop) there's no divider. Premises and Observations work the same way.
   - An open joke has two buttons at its top right: **Read the joke full width** (hides the list
     until you bring it back) and **Close the joke** (back to the list, filters kept).
 - **The joke map:** the jokes the list is showing (same filters), as a map.
