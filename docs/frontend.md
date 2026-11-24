@@ -252,6 +252,15 @@ tab is not in `nav.ts`: it points at Premises or Observations, whichever you use
 ([ideas.ts](../web/src/layout/ideas.ts)), a per-device choice kept in `localStorage` (`jokebox.ideas`) like
 the brainstorm pen, so it never syncs.
 
+## Menus drawn outside their row
+
+Dropdown menus (Radix) are portaled to the end of the page, but React still sends their events up
+through the component that opened them. A handler on a parent sees events from inside the menu.
+On 24 Nov 2026 this made the filter row ([ChipRow.tsx](../web/src/components/ui/ChipRow.tsx)),
+which turns a vertical wheel into a sideways scroll, slide left whenever you scrolled down a long
+Topic menu on Jokes, Premises or Observations. A handler that should only react to its own element
+checks `element.contains(event.target)` first.
+
 ## Adaptive layout
 
 - **Breakpoints:** `md` 768 px (lists go two across), `lg` 1024 px (the rail and side-by-side
