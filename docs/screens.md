@@ -182,7 +182,7 @@ separate log to fall out of step. Items in the Trash don't count.
 [JokeDetails.tsx](../web/src/features/jokes/JokeDetails.tsx), [DetailControls.tsx](../web/src/features/jokes/DetailControls.tsx),
 [PunchAlternates.tsx](../web/src/features/jokes/PunchAlternates.tsx), [TagLines.tsx](../web/src/features/jokes/TagLines.tsx), [JokeExtras.tsx](../web/src/features/jokes/JokeExtras.tsx),
 [useAutosaveJoke.ts](../web/src/features/jokes/useAutosaveJoke.ts), [TopicManager.tsx](../web/src/features/jokes/TopicManager.tsx),
-[TypeManager.tsx](../web/src/features/jokes/TypeManager.tsx), [ViewSwitch.tsx](../web/src/features/jokes/ViewSwitch.tsx),
+[TypeManager.tsx](../web/src/features/jokes/TypeManager.tsx), [StatusManager.tsx](../web/src/features/jokes/StatusManager.tsx), [ViewSwitch.tsx](../web/src/features/jokes/ViewSwitch.tsx),
 [SplitView.tsx](../web/src/components/ui/SplitView.tsx), [ChipRow.tsx](../web/src/components/ui/ChipRow.tsx). The map: [map/](../web/src/features/jokes/map/) ([mapLayout.ts](../web/src/features/jokes/map/mapLayout.ts),
 [JokeMap.tsx](../web/src/features/jokes/map/JokeMap.tsx), [MapCanvas.tsx](../web/src/features/jokes/map/MapCanvas.tsx), [MapPeek.tsx](../web/src/features/jokes/map/MapPeek.tsx)).
 
@@ -191,7 +191,7 @@ separate log to fall out of step. Items in the Trash don't count.
   whole screen under the header and filters, on every device. Beside an open joke the switch is
   three icons.
 - **List:** a search box ("Search words, tags, notes") and menus in one row that scrolls sideways (a wheel over the row slides it; one over an open menu scrolls only the menu): Topic, then Subtopic once a topic is picked, Premise, Type,
-  Status, and Sort (Newest, Oldest, Recently edited, Strongest, Weakest, Longest). Each row shows the
+  Status (with **Manage statuses…**), and Sort (Newest, Oldest, Recently edited, Strongest, Weakest, Longest). Each row shows the
   setup and the punchline (two lines each), strength ticks (or a faint "Unrated"), type dots, the topic, the date it was added (or
   last edited, under Recently edited) and the runtime. Sorted by a date, the list is grouped into
   months under pinned headings, with the time scrubber down its side ([JokeList.tsx](../web/src/features/jokes/JokeList.tsx)).
@@ -297,7 +297,7 @@ separate log to fall out of step. Items in the Trash don't count.
   came from, and below the words, a row of details: Strength (**Unrated**, then five bars; tap the lit bar again
   to clear it), Type (with Edit types), Filed under (topic and
   subtopic, with Edit topics; with no subtopic picked, the topic's **Subtopic unknown**), Premise (the premise sheet), Follows (the joke this one comes after in a chain, from the joke sheet),
-  Followed by (**Write the next joke**, or **Pick jokes that follow** from the joke sheet; a joke already following another says "Now follows: …" and moves here), Status, Runs for (type it, or step it five
+  Followed by (**Write the next joke**, or **Pick jokes that follow** from the joke sheet; a joke already following another says "Now follows: …" and moves here), Status (with Edit statuses: the **Statuses** sheet lists every status with its joke count, Draft first as the default that can't be renamed or deleted; drag the rest into order, rename one (onto a name you have, it asks to merge) or delete it, and its jokes go back to Draft; **Add status**), Runs for (type it, or step it five
   seconds at a time with − and +), Clean rating, Language (Hinglish, Hindi or English) and
   Hashtags, followed by a Notes box. Then **Rewrites** (earlier sessions and **Start a rewrite**),
   **In sets** (with Add to a set), the show record once the joke has been logged at a show

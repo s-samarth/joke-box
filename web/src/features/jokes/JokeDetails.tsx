@@ -16,6 +16,7 @@ import { RuntimeField } from './RuntimeField'
 import { SubtopicManager } from './SubtopicManager'
 import { TopicManager } from './TopicManager'
 import { NEW_TOPIC, useNewTopic } from './useNewTopic'
+import { StatusManager } from './StatusManager'
 import { TypeManager } from './TypeManager'
 
 const NEW = NEW_TOPIC
@@ -43,7 +44,7 @@ export function JokeDetails({ jokeId, draft, update }: { jokeId?: string; draft:
   const actions = useTopicActions()
   const newTopic = useNewTopic()
   const { prompt, toast } = useFeedback()
-  const [managing, setManaging] = useState<'topics' | 'subtopics' | 'types' | null>(null)
+  const [managing, setManaging] = useState<'topics' | 'subtopics' | 'types' | 'statuses' | null>(null)
   const topic = topics.find((t) => t.id === draft.topic_id)
   const status = statusOf(draft.status)
   const statusNames = statuses.map((s) => s.name)
@@ -59,6 +60,7 @@ export function JokeDetails({ jokeId, draft, update }: { jokeId?: string; draft:
   const typeRenamed = (from: string, to: string) =>
     update({ types: [...new Set(draft.types.map((t) => (same(t, from) ? to : t)))] })
   const typeRemoved = (name: string) => update({ types: draft.types.filter((t) => !same(t, name)) })
+  const statusRenamed = (from: string, to: string) => { if (same(status, from)) update({ status: to }) }
   const topicRemoved = (id: string) => {
     const random = topics.find((t) => t.is_system)
     if (draft.topic_id === id) update({ topic_id: random?.id ?? '', subtopic_id: unknownOf(random)?.id ?? null })
@@ -109,7 +111,7 @@ export function JokeDetails({ jokeId, draft, update }: { jokeId?: string; draft:
           <FollowedBy jokeId={jokeId} topicId={draft.topic_id} subtopicId={draft.subtopic_id ?? null} next={next} onWriteNext={() => openCapture({ topicId: draft.topic_id, subtopicId: draft.subtopic_id, premiseId: draft.premise_id, followsId: jokeId })} />
         </Row>
       )}
-      <Row label="Status">
+      <Row label="Status" edit={{ label: 'Edit statuses', open: () => setManaging('statuses') }}>
         <Select aria-label="Status" value={status} onChange={(e) => pickStatus(e.target.value)} className="sm:max-w-xs">
           {statusNames.map((s) => <option key={s} value={s}>{s}</option>)}
           <option value={NEW}>New status…</option>
@@ -126,6 +128,7 @@ export function JokeDetails({ jokeId, draft, update }: { jokeId?: string; draft:
       <Row label="Hashtags"><HashtagField value={draft.hashtags} onChange={(h) => update({ hashtags: h })} suggestions={hashtags} /></Row>
       <TopicManager open={managing === 'topics'} onClose={() => setManaging(null)} onRemoved={topicRemoved} />
       <SubtopicManager topicId={managing === 'subtopics' ? draft.topic_id : null} onClose={() => setManaging(null)} onRemoved={topicRemoved} />
+      <StatusManager open={managing === 'statuses'} onClose={() => setManaging(null)} onRenamed={statusRenamed} />
       <TypeManager open={managing === 'types'} onClose={() => setManaging(null)} onRenamed={typeRenamed} onRemoved={typeRemoved} />
     </div>
   )
