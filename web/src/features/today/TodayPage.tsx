@@ -1,4 +1,4 @@
-/** Today: the daily joke nudge, then a box to write an observation, premise or joke (three tabs), shortcuts to jokes, premises and observations, daily activity (streaks, the month and its calendar), voice notes, brainstorming, craft (your path and a lesson box), study (watchlist, analysis, links), your topic folders, what's coming up, and how the last show went. */
+/** Home brings voice and written capture together above the library and activity. */
 import { Play, Search } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
@@ -54,10 +54,10 @@ export function TodayPage() {
           <Search size={20} />
         </Link>
       </div>
+      <TodayVoice />
       <CaptureTabs tab={tab} onTab={setTab} />
       <LibraryTiles />
       <TodayActivity />
-      <TodayVoice />
       <TodayBrainstorm />
       <TodayCraft />
       <TodayStudy />
