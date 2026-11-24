@@ -1,8 +1,8 @@
 /**
  * Search plus menus for topic, premise, type, status and sort, in one row that scrolls sideways (see
  * ChipRow). Each menu shows what's chosen. Once you pick a topic that has subtopics, a Subtopic menu
- * appears beside it, so the topic list stays topics only. The Jokes list and the cluster's picker
- * (cluster/usePickerFilters.ts) both use it.
+ * appears beside it, so the topic list stays topics only. The Jokes list and every joke picker
+ * sheet (pickers/useJokePickFilters.ts) both use it.
  */
 import { ChevronDown, Plus, Search, X } from 'lucide-react'
 import { useState, type ReactNode } from 'react'

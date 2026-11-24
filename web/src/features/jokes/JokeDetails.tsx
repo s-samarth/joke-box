@@ -102,11 +102,11 @@ export function JokeDetails({ jokeId, draft, update }: { jokeId?: string; draft:
         </div>
       </Row>
       <Row label="Premise"><PremiseField value={draft.premise_id ?? null} topicId={draft.topic_id} onChange={(premise_id) => update({ premise_id })} /></Row>
-      <Row label="Follows"><FollowsField jokeId={jokeId} value={draft.follows_id ?? null} onChange={(follows_id) => update({ follows_id })} /></Row>
+      <Row label="Follows"><FollowsField jokeId={jokeId} topicId={draft.topic_id} subtopicId={draft.subtopic_id ?? null} value={draft.follows_id ?? null} onChange={(follows_id) => update({ follows_id })} /></Row>
       {jokeId && (
         <Row label="Followed by">
           {/* The next joke starts filed where this one is, already following it. */}
-          <FollowedBy next={next} onWriteNext={() => openCapture({ topicId: draft.topic_id, subtopicId: draft.subtopic_id, premiseId: draft.premise_id, followsId: jokeId })} />
+          <FollowedBy jokeId={jokeId} topicId={draft.topic_id} subtopicId={draft.subtopic_id ?? null} next={next} onWriteNext={() => openCapture({ topicId: draft.topic_id, subtopicId: draft.subtopic_id, premiseId: draft.premise_id, followsId: jokeId })} />
         </Row>
       )}
       <Row label="Status">

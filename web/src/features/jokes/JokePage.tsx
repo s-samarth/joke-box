@@ -56,7 +56,7 @@ function Editor({ joke }: { joke: Joke }) {
       <div className="mt-4"><PunchAlternates punchline={draft.punchline} alternates={draft.alt_punchlines ?? []} onChange={update} /></div>
       <div className="mt-6"><TagLines lines={draft.tag_lines} onChange={(tag_lines) => update({ tag_lines })} /></div>
       <div className="mt-8 space-y-6">
-        <ClusterSection jokeId={joke.id} value={draft.cluster_id ?? null} onChange={(cluster_id) => update({ cluster_id })} />
+        <ClusterSection jokeId={joke.id} topicId={draft.topic_id} subtopicId={draft.subtopic_id ?? null} value={draft.cluster_id ?? null} onChange={(cluster_id) => update({ cluster_id })} />
         <ObservationsOn kind="jokes" id={joke.id} topicId={draft.topic_id} />
         <VoiceNotesOn ids={draft.voice_note_ids ?? []} onChange={(voice_note_ids) => update({ voice_note_ids })} />
       </div>

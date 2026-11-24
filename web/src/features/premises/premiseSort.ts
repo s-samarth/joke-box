@@ -1,5 +1,5 @@
 /**
- * How the premises list can be put in order. Newest first unless you pick another, like Jokes;
+ * Which premises match a search, and how the premises list can be put in order. Newest first unless you pick another, like Jokes;
  * By topic keeps your topics' order, with each topic's newest first.
  */
 import type { Premise } from '../../api/premises'
@@ -35,4 +35,11 @@ export function sortPremises(premises: Premise[], sort: PremiseSort, count: (p: 
     fewest: (a, b) => count(a) - count(b) || newest(a, b),
   }
   return [...premises].sort(by[sort])
+}
+
+/** Whether a premise is on that topic and status (null for any) and has every word searched for in its take or notes. */
+export function premiseMatches(p: Premise, q: string, topic: string | null, status: string | null): boolean {
+  const needle = q.trim().toLowerCase()
+  return (!topic || p.topic_id === topic) && (!status || p.status === status) &&
+    (!needle || `${p.take}\n${p.notes}\n${p.extra_notes ?? ''}`.toLowerCase().includes(needle))
 }

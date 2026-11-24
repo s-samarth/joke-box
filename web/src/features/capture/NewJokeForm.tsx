@@ -142,7 +142,7 @@ export function NewJokeForm({ prefill, plain, onClose }: { prefill: Prefill; pla
 
         <VoiceNotesOn ids={draft.voice_note_ids ?? []} onChange={(voice_note_ids) => update({ voice_note_ids })} />
 
-        <ClusterSection value={draft.cluster_id ?? null} onChange={(cluster_id) => update({ cluster_id })} />
+        <ClusterSection topicId={input.topic_id} subtopicId={draft.subtopic_id ?? null} value={draft.cluster_id ?? null} onChange={(cluster_id) => update({ cluster_id })} />
 
         <section aria-label="From observations">
           <h3 className="mb-2 text-sm text-dim">From observations</h3>
