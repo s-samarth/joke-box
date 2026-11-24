@@ -1,5 +1,5 @@
 /**
- * Two matching cards at the top of daily activity (Home and Daily activity): writing in green,
+ * Two matching cards at the top of Activity (and Home): writing in green,
  * the stage in gold (see StreakCard). The joke card counts days with a new joke; the stage card
  * counts days with a show and opens Shows. Streaks run across months; only the bottom line is the
  * month. There's no stage nudge: the streak just says how it stands.

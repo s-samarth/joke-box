@@ -1,5 +1,5 @@
 /**
- * A month of shows, laid out like the Daily activity calendar but in stage gold. A day you went
+ * A month of shows, laid out like the Activity calendar but in stage gold. A day you went
  * up is tinted gold, deeper the longer you were on stage, with its minutes along the bottom and a
  * dot per show (in the corner when the calendar is wide, above the minutes on a phone). Tap a show day to list its shows. Today is outlined in yellow; days
  * to come are dimmed.

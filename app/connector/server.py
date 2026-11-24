@@ -27,12 +27,16 @@ def jokebox_overview() -> dict[str, Any]:
 @server.tool(annotations=READ)
 def writing_pulse() -> dict[str, Any]:
     """How the writing is going, worked out from what's saved (nothing is logged for it), the
-    same as the Writing pulse on the comic's Daily activity screen. `written`: observations,
-    premises and jokes written in the last 30 days and in the 30 before. `how_far_ideas_got`: of
-    what was written in the last 90 days, how many observations led to a joke, premise or
-    brainstorm, premises got a joke, and jokes got a punchline or were marked Stage Ready or
-    Complete. `sitting_idle`: counts over everything, whatever its age. `worth_knowing`: up to
-    three plain sentences. Days are India's; `too_little_yet` means under five pieces in all."""
+    same as the Writing pulse on the comic's Activity screen. `where_everything_stands`:
+    observations led somewhere or unused, premises by status, jokes by status in the comic's
+    order. `how_far_ideas_got`: of what was written in the last 90 days, how many observations
+    led to a joke, premise or brainstorm, premises got a joke, and jokes were marked Stage Ready;
+    `narrowest_step` names the step fewest got through (null until a step has 5 in it).
+    `month_on_month`: the last six months, each counted on what was written that month, with
+    `still_settling` for months too recent to judge. `when_you_write`: the last 90 days by
+    weekday and part of the day (null under 10 pieces). `sitting_idle`: counts over everything.
+    `worth_knowing`: up to two plain sentences. Days are India's; `too_little_yet` means under
+    five pieces in all."""
     with reading() as (db, user):
         return pulse.writing_pulse(db, user)
 

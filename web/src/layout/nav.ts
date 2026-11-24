@@ -20,7 +20,7 @@ export interface NavItem {
 const home: NavItem = { to: '/', label: 'Home', icon: Home, end: true }
 const jokes: NavItem = { to: '/jokes', label: 'Jokes', icon: StickyNote }
 const premises: NavItem = { to: '/premises', label: 'Premises', icon: Lightbulb, hint: 'The ideas under your jokes' }
-const daily: NavItem = { to: '/daily', label: 'Daily activity', icon: CalendarCheck, hint: 'Jokes, premises and observations, day by day' }
+const activity: NavItem = { to: '/activity', label: 'Activity', icon: CalendarCheck, hint: 'Streaks, your calendar, the writing pulse and highlights' }
 const sets: NavItem = { to: '/sets', label: 'Sets', icon: ListOrdered, hint: 'Build a setlist and run it on stage' }
 const voice: NavItem = { to: '/voice', label: 'Voice notes', icon: AudioLines, hint: 'Record an idea out loud' }
 const observations: NavItem = { to: '/observations', label: 'Observations', icon: Eye, hint: "Things you noticed, before they're jokes" }
@@ -33,14 +33,14 @@ const search: NavItem = { to: '/search', label: 'Search', icon: Search, hint: 'F
 const trash: NavItem = { to: '/trash', label: 'Trash', icon: Trash2, hint: 'What you deleted, kept for 30 days' }
 
 /** The desktop rail, top to bottom. */
-export const NAV: NavItem[] = [home, search, jokes, premises, daily, observations, brainstorm, voice, sets, shows, craft, watchlist, analysis, trash]
+export const NAV: NavItem[] = [home, search, jokes, premises, activity, observations, brainstorm, voice, sets, shows, craft, watchlist, analysis, trash]
 
 /** Phone bottom bar: two either side of the + button. Right of it sit Ideas (see BottomBar) and More. */
 export const BAR_LEFT: NavItem[] = [home, jokes]
 
 export const MORE_GROUPS: { title: string; items: NavItem[] }[] = [
   { title: 'Find', items: [search] },
-  { title: 'Write', items: [daily, voice, brainstorm] },
+  { title: 'Write', items: [activity, voice, brainstorm] },
   { title: 'Perform', items: [sets, shows] },
   { title: 'Study', items: [craft, watchlist, analysis] },
   { title: 'Deleted', items: [trash] },

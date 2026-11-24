@@ -97,8 +97,8 @@ each with its setup in marker, the punchline, its runtime and "by m:ss" (the run
   stage · up on 8 days". Arrows page through months; today is outlined in yellow. Tap a show day
   for its shows (time, venue, length, stars), and a show to open it. It takes every filter except
   the period, since its arrows pick the month (with **This week** most of the month would look like
-  days off). Days don't carry the rating: the mic diary on Timeline does. Daily activity shows the
-  same calendar, with every show.
+  days off). Days don't carry the rating: the mic diary on Timeline does. Activity puts the stage on its one calendar
+  instead: a gold dot per show and the month's stage time with its shows as tally marks.
 - **Views** ([ViewTabs.tsx](../web/src/features/shows/ViewTabs.tsx), kept in the URL as `?view=`):
   **Shows** (the table), **Timeline** and **Insights**. The toolbar and totals scope all three.
 - **Timeline** ([insights/TimelineView.tsx](../web/src/features/shows/insights/TimelineView.tsx),

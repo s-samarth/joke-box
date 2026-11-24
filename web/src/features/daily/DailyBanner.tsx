@@ -23,12 +23,12 @@ function Cobweb() {
   )
 }
 
-/** The call to action: a link to the Daily activity page, or (on Daily activity and Home) a button that opens the joke box. */
+/** The call to action: a link to the Activity page, or (on Activity and Home) a button that opens the joke box. */
 function Write({ onWrite, className, children }: { onWrite?: () => void; className: string; children: React.ReactNode }) {
   const cls = `inline-flex h-10 shrink-0 items-center gap-2 rounded-lg px-4 text-sm font-semibold transition ${className}`
   return onWrite
     ? <button type="button" onClick={onWrite} className={cls}>{children}</button>
-    : <Link to="/daily" className={cls}>{children}</Link>
+    : <Link to="/activity" className={cls}>{children}</Link>
 }
 
 export function DailyBanner({ habit, onWrite }: { habit: Habit; onWrite?: () => void }) {
@@ -44,7 +44,7 @@ export function DailyBanner({ habit, onWrite }: { habit: Habit; onWrite?: () => 
       </>
     )
     const cls = 'flex items-center gap-3 rounded-xl bg-ok/10 px-4 py-3 ring-1 ring-ok/30'
-    return onWrite ? <div className={cls}>{body}</div> : <Link to="/daily" className={`${cls} hover:bg-ok/15`}>{body}</Link>
+    return onWrite ? <div className={cls}>{body}</div> : <Link to="/activity" className={`${cls} hover:bg-ok/15`}>{body}</Link>
   }
 
   if (mood === 'due') {

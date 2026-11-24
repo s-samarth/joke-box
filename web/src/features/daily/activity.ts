@@ -1,5 +1,5 @@
 /**
- * Daily activity: what you wrote each day, split three ways (observations, premises, jokes), with
+ * Activity: what you wrote each day, split three ways (observations, premises, jokes), with
  * the colour each kind wears on the calendar. Read from the cached lists' created dates in IST,
  * the same way the joke streak is, so the calendar and the streak can never disagree.
  */

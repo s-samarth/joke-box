@@ -40,7 +40,7 @@ visit, so the app opens fast on a phone.
   The **+** adds whatever the screen holds ([useAddAction.ts](../web/src/layout/useAddAction.ts)):
   a premise on Premises, a show on Shows, a set on the list of Sets, an observation on
   Observations, and a New joke anywhere else (inside a set you're building too). **More** opens a bottom sheet that groups every other screen: **Find**
-  (Search), **Write** (Daily activity, Voice notes, Brainstorm), **Perform** (Sets, Shows), **Study**
+  (Search), **Write** (Activity, Voice notes, Brainstorm), **Perform** (Sets, Shows), **Study**
   (Craft, Watchlist, Analysis) and **Deleted** (Trash). While you're on one of those screens,
   the More tab shows as the current one.
 - One list in `nav.ts` feeds both the rail and the bar, so they can't drift apart.
@@ -84,14 +84,14 @@ offline, it uses the cached profile, so the app still opens.
 
 The page is one column, at most 672 px wide. It opens with the daily joke nudge, then today's date
 in IST and the headline **"Got something?"** with a search button beside it (it opens
-[Search](#search-search)), followed by these sections from top to bottom. On Home the nudge's button opens the Joke tab below instead of going to Daily activity:
+[Search](#search-search)), followed by these sections from top to bottom. On Home the nudge's button opens the Joke tab below:
 
 | Section | File | Notes |
 |---|---|---|
-| Daily joke nudge | `daily/DailyBanner.tsx` | Days since your last new joke: today written, a small green line with your streak; 1 or 2 days, yellow **Write a joke today**; 3 to 7, red **N days without a joke**; over a week, a dark, spooky card (a drifting ghost, a cobweb, a flickering line; still under reduced motion). Waits for the jokes to load so it never flashes the wrong state. Links to Daily activity |
+| Daily joke nudge | `daily/DailyBanner.tsx` | Days since your last new joke: today written, a small green line with your streak; 1 or 2 days, yellow **Write a joke today**; 3 to 7, red **N days without a joke**; over a week, a dark, spooky card (a drifting ghost, a cobweb, a flickering line; still under reduced motion). Waits for the jokes to load so it never flashes the wrong state. On Home its button opens the Joke tab |
 | Write | `CaptureTabs.tsx` | Three tabs, **Observation** (picked when Home opens), **Premise** and **Joke**, each with its own box; drafts survive switching. Observation: `ObservationBox` (text, Topic, Kind, **Log it**). Premise: `premises/PremiseBox.tsx` (the take, "Because…", Topic, **Add premise**; the toast's **Open** goes to it). Joke: `QuickCapture.tsx` (setup and punchline; Enter saves to Random). The nudge's **Write it** switches to Joke and puts the cursor in the setup |
-| Your material | `LibraryTiles.tsx` | Three tiles, **Observations**, **Premises** and **Jokes** (the tabs' order), each with its count and its Daily activity colour; a tap opens that list |
-| Daily activity | `TodayActivity.tsx`, `daily/ActivityPanel.tsx` | The same streak cards, month total, calendar and picked day as [Daily activity](#daily-activity-daily), plus **Open**. A tapped day shows its three counts only; the pieces themselves are listed on Daily activity |
+| Your material | `LibraryTiles.tsx` | Three tiles, **Observations**, **Premises** and **Jokes** (the tabs' order), each with its count and its Activity colour; a tap opens that list |
+| Activity | `TodayActivity.tsx`, `daily/ActivityPanel.tsx` | The same streak cards, calendar card and Today box as [Activity](#activity-activity), plus **Open**. The pulse, highlights and year review are on Activity only |
 | Voice notes | `TodayVoice.tsx` | The same recorder as the Voice screen, plus "All N" |
 | Brainstorm | `TodayBrainstorm.tsx` | Start a session, or pick up the last one |
 | Craft | `TodayCraft.tsx`, `craft/PathLadder.tsx` | **Path:** a small copy of the Craft staircase: the first Path note with tick boxes still open, how many are done, and the next step (one small staircase per heading when the note has tracks). When the step names minutes, it shows your most solid material on one topic (Strong and Killer jokes, by runtime) against that target. Below it, a box to save a lesson to one of your areas (chips in their colours) |
@@ -102,43 +102,80 @@ in IST and the headline **"Got something?"** with a search button beside it (it 
 
 <img src="screenshots/desktop-home.webp" alt="Home on desktop">
 
-## Daily activity: `/daily`
+## Activity: `/activity`
 
-[DailyPage.tsx](../web/src/features/daily/DailyPage.tsx), [activity.ts](../web/src/features/daily/activity.ts),
-[dailyMath.ts](../web/src/features/daily/dailyMath.ts), [MonthCalendar.tsx](../web/src/features/daily/MonthCalendar.tsx),
-[MonthMix.tsx](../web/src/features/daily/MonthMix.tsx), [DayDetail.tsx](../web/src/features/daily/DayDetail.tsx),
-[ActivityPanel.tsx](../web/src/features/daily/ActivityPanel.tsx) (stats to picked day, shared with Home),
-[WritingPulse.tsx](../web/src/features/daily/WritingPulse.tsx), [pulse.ts](../web/src/features/daily/pulse.ts), [pulseNotes.ts](../web/src/features/daily/pulseNotes.ts).
+[ActivityPage.tsx](../web/src/features/daily/ActivityPage.tsx), [activity.ts](../web/src/features/daily/activity.ts),
+[dailyMath.ts](../web/src/features/daily/dailyMath.ts), [ActivityPanel.tsx](../web/src/features/daily/ActivityPanel.tsx)
+(streaks to the picked day, shared with Home), [MonthCalendar.tsx](../web/src/features/daily/MonthCalendar.tsx),
+[MonthMix.tsx](../web/src/features/daily/MonthMix.tsx), [Tally.tsx](../web/src/features/daily/Tally.tsx),
+[DayDetail.tsx](../web/src/features/daily/DayDetail.tsx); the pulse: [WritingPulse.tsx](../web/src/features/daily/WritingPulse.tsx),
+[pulse.ts](../web/src/features/daily/pulse.ts), [pulseTrends.ts](../web/src/features/daily/pulseTrends.ts),
+[pulseNotes.ts](../web/src/features/daily/pulseNotes.ts), [pulseCards/](../web/src/features/daily/pulseCards/);
+[highlights/](../web/src/features/daily/highlights/); the year review: [year/](../web/src/features/daily/year/).
+`/daily`, its old address, still opens it.
 
-Everything you wrote, day by day: observations, premises and jokes, in that order everywhere on
-this screen and on Home (raw material first, as in the writing box). The streak is still the daily
-joke habit: only a new joke keeps it going. A day's activity is read from the created dates (IST)
-of the three lists already cached, imports included with their original dates, so there's no
-separate log to fall out of step. Items in the Trash don't count.
+How the writing and the stage are going. Nothing is written here (that's Home's job: no nudge, no
+joke box), and nothing is listed: counts only. Observations, premises and jokes keep that order
+everywhere (raw material first, as in the writing box), then the stage in gold. A day's writing is
+read from the created dates (IST) of the three lists already cached, imports included with their
+original dates; a day's stage time from the shows logged that day. Items in the Trash don't count.
+From the top:
 
-- **Show calendar** (under the day you picked, once you've logged a show): the Shows page's
-  calendar of shows and minutes on stage, with every show
-  ([ShowCalendarPanel.tsx](../web/src/features/shows/calendar/ShowCalendarPanel.tsx); see
-  [Shows](screens-perform.md#shows-shows)). Tap a show day to list its shows and open one.
-- **Writing pulse** (at the foot of this page only, not on Home): how the writing is going, worked
-  out from what's saved, so there is nothing to log. Four parts:
-  - **Written in the last 30 days:** observations, premises and jokes, each against the 30 days
-    before (rolling, so a month that has just begun isn't set against a full one).
+- **Streak cards** (below).
+- **Calendar card** (on Home too): the month and its arrows, "22 of 24 days active · jokes on 15",
+  and the month's **stage time** big in gold with its **shows as tally marks** (four strokes and a
+  fifth across, the way a comic keeps count) and the number. On a phone it sits under the month as
+  one line; from tablet width, on the right. Under them the month's writing: pieces written, a day's
+  average, one bar split by kind, and the key: observations, premises, jokes and **mic nights**.
+  Then the days: a box gets brighter the more you wrote, with a dot per kind written (orchid,
+  periwinkle, green) and **a gold dot per show** (up to three). Where the calendar is wide enough
+  (laptop, iPad) each dot carries its count and the gold ones the minutes on stage ("12m").
+  Joke days have a brighter date; today is outlined in yellow. The separate show calendar that used
+  to sit here is on Shows only.
+- **Today** (or the day you tapped; tap it again to go back): four counts, observations, premises,
+  jokes and minutes on stage (with the day's shows as tally marks). 2 by 2 on a phone, 4 across
+  from 480 px.
+- **Writing pulse:** how the writing is going, worked out from what's saved, so there is nothing to
+  log. With fewer than 5 pieces in all it says to write a few more. Otherwise:
+  - **The narrowest step**, said in one line on tape ("Your ideas stall at premise to joke"), with
+    the list that holds them; it waits until a step has 5 ideas in it. Under it, the sentences
+    worth knowing: a kind with nothing new in 21 days, and the topic with the biggest pile of
+    unused observations (at least 5, 3 unused).
+  - **Where everything stands:** a bar per kind split by status. Observations: led somewhere or
+    unused. Premises: Draft, Testing, Stage Ready, Discarded. Jokes: your statuses in your order
+    (Draft grey, Testing periwinkle, Stage Ready green, Discarded faded red, any other a shade of
+    paper).
   - **How far ideas got**, of what you wrote in the last 90 days: observations that led somewhere
     (a joke, premise or brainstorm, the same test as **Not used yet**), premises with a joke on
-    them, jokes with a punchline, and jokes marked Stage Ready or Complete.
-  - **Sitting idle** (all of it, not just recent): observations nothing has come from, premises
-    with no joke, jokes without a punchline, and Drafts not touched in 30 days. A row opens the
-    list that shows them where a filter exists; a row at zero isn't shown.
-  - **Worth knowing:** up to three sentences from simple rules, no AI: a kind with nothing new in
-    21 days, the topic with the biggest pile of unused observations (at least 5, 3 unused), and
-    the weekday and part of the day you write most (from 10 pieces in 90 days).
-  With fewer than 5 pieces in all it says to write a few more.
-  Claude reads the same numbers and sentences through the connector's `writing_pulse` tool
+    them, jokes marked Stage Ready. The narrowest is red.
+  - **Month on month**, the last six months: pieces written and each of those three shares, each
+    month counted on what was written that month. No status history is kept, so a month can only be
+    judged by where its writing stands now: months that ended under 30 days ago are faded as still
+    settling (for pieces written, only this month), and the arrow compares the last two settled.
+  - **When you write:** the last 90 days as a punch card, weekdays down, morning to night across,
+    the busiest in gold ("Mostly Tuesday nights"), from 10 pieces.
+  - **Sitting idle** (all of it, not just recent): unused observations, premises with no joke,
+    Drafts untouched for 30 days, as chips that open the list holding them.
+  Claude reads the same numbers through the connector's `writing_pulse` tool
   ([pulse.py](../app/connector/pulse.py)). The screen works them out in the browser so it works
   offline, so the rules exist twice: change both together.
-- **The nudge** (the same one as Home); its button focuses the box below.
-- **Today's joke:** the quick capture box. Saving puts the joke in Random and marks today at once.
+- **Highlights:** six **best months**, all-time (jokes, observations, premises, all writing, shows,
+  stage time), as tiles, 3 across on a phone and 6 on a wider screen (like Strava's best efforts).
+  A tile is also the switch for the chart under it: that measure over the last 12 months, the
+  record month lit, this month outlined, with its pace. Then **Big days** (like Garmin's records):
+  the biggest writing day, the most jokes in a day, the longest night on stage, the best room by
+  LPM and the longest joke streak, each beside a small calendar day; and the last 12 months as a
+  grid of days (like GitHub's), greener the more you wrote, the three biggest days gold. Side by
+  side from tablet width. Ties go to the earliest, so a record moves only when it's beaten.
+- **Year review** (like Spotify Wrapped): a card with "2026 so far" on tape, how far through the
+  year you are, and every past year with anything in it ("2025, wrapped"). This year stays "so
+  far" until 31 December is over. A year opens as full-screen cards on a phone (a tall card in the
+  middle on an iPad or laptop): the total and its split (against last year, and the pace to 31
+  December), the best month, the biggest day, the longest joke streak, the top topic, when you
+  write, the year on stage (gold: time, shows, nights, best room, busiest month, longest set) and
+  from notebook to stage. A card with nothing to say is left out. Tap the right to go on and the
+  left to go back (arrow keys on a keyboard); bars along the top show where you are; Escape or the
+  X closes.
 - **Streak cards** ([StreakCards.tsx](../web/src/features/daily/StreakCards.tsx),
   [StreakCard.tsx](../web/src/features/daily/StreakCard.tsx), on Home too): two matching boxes side
   by side on every screen size. Each has its name and **Best** (the longest streak ever) on top,
