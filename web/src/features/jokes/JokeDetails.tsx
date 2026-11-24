@@ -7,8 +7,8 @@ import { useFeedback } from '../../components/ui/feedbackContext'
 import { useCapture } from '../capture/captureContext'
 import { LANGUAGES, statusOf, topicName } from '../../lib/jokeMeta'
 import { followersOf } from '../../lib/chains'
+import { unknownOf } from '../../lib/topics'
 import { PremiseField } from '../premises/PremiseField'
-import { ClusterField } from './cluster/ClusterField'
 import { FollowedBy, FollowsField } from './ChainFields'
 import { StrengthPicker } from '../../components/ui/StrengthPicker'
 import { CleanPicker, HashtagField, TypeToggles } from './DetailControls'
@@ -60,14 +60,16 @@ export function JokeDetails({ jokeId, draft, update }: { jokeId?: string; draft:
     update({ types: [...new Set(draft.types.map((t) => (same(t, from) ? to : t)))] })
   const typeRemoved = (name: string) => update({ types: draft.types.filter((t) => !same(t, name)) })
   const topicRemoved = (id: string) => {
-    if (draft.topic_id === id) update({ topic_id: topics.find((t) => t.is_system)?.id ?? '', subtopic_id: null })
-    else if (draft.subtopic_id === id) update({ subtopic_id: null })
+    const random = topics.find((t) => t.is_system)
+    if (draft.topic_id === id) update({ topic_id: random?.id ?? '', subtopic_id: unknownOf(random)?.id ?? null })
+    else if (draft.subtopic_id === id) update({ subtopic_id: unknownOf(topic)?.id ?? null })
   }
 
   const pickTopic = async (id: string) => {
-    if (id !== NEW) return update({ topic_id: id, subtopic_id: null })
+    // A new topic, no subtopic picked yet: its Subtopic unknown.
+    if (id !== NEW) return update({ topic_id: id, subtopic_id: unknownOf(topics.find((t) => t.id === id))?.id ?? null })
     const made = await newTopic()
-    if (made) update({ topic_id: made.id, subtopic_id: null })
+    if (made) update({ topic_id: made.id, subtopic_id: unknownOf(made)?.id ?? null })
   }
   const pickSub = async (id: string) => {
     if (id === MANAGE) return setManaging('subtopics')
@@ -91,8 +93,8 @@ export function JokeDetails({ jokeId, draft, update }: { jokeId?: string; draft:
             {topics.map((t) => <option key={t.id} value={t.id}>{topicName(t)}</option>)}
             <option value={NEW}>New topic…</option>
           </Select>
-          <Select aria-label="Subtopic" value={draft.subtopic_id ?? ''} onChange={(e) => pickSub(e.target.value)}>
-            <option value="">No subtopic</option>
+          <Select aria-label="Subtopic" value={draft.subtopic_id ?? unknownOf(topic)?.id ?? ''} onChange={(e) => pickSub(e.target.value)}>
+            {!unknownOf(topic) && <option value="">No subtopic</option>}
             {topic?.subtopics.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             <option value={NEW}>New subtopic…</option>
             {Boolean(topic?.subtopics.length) && <option value={MANAGE}>Manage subtopics…</option>}
@@ -100,7 +102,6 @@ export function JokeDetails({ jokeId, draft, update }: { jokeId?: string; draft:
         </div>
       </Row>
       <Row label="Premise"><PremiseField value={draft.premise_id ?? null} topicId={draft.topic_id} onChange={(premise_id) => update({ premise_id })} /></Row>
-      <Row label="Cluster"><ClusterField jokeId={jokeId} value={draft.cluster_id ?? null} onChange={(cluster_id) => update({ cluster_id })} /></Row>
       <Row label="Follows"><FollowsField jokeId={jokeId} value={draft.follows_id ?? null} onChange={(follows_id) => update({ follows_id })} /></Row>
       {jokeId && (
         <Row label="Followed by">

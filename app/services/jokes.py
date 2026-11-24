@@ -19,7 +19,7 @@ from app.models import (
 )
 from app.models.base import written_at
 from app.schemas.library import JokeIn, JokeOut, status_name
-from app.services import chains, clusters, type_colors
+from app.services import chains, clusters, subtopics, type_colors
 from app.services.clashes import next_version
 
 
@@ -132,6 +132,7 @@ def plain_fields(data: JokeIn) -> dict[str, object]:
 def apply(db: Session, user: User, joke: Joke, data: JokeIn) -> None:
     """Copy editor fields onto the joke, creating any new type or status by name."""
     check_placement(db, user, data)
+    subtopics.fill(db, user, data)  # no subtopic picked: the topic's "Subtopic unknown"
     check_premise(db, user, data)
     check_cluster(db, user, data)
     fields = plain_fields(data)
@@ -177,6 +178,7 @@ def same_content(joke: Joke, data: JokeIn) -> bool:
 
 def save(db: Session, user: User, joke_id: uuid.UUID, data: JokeIn, existing: Joke | None) -> Joke:
     """Create or update in one transaction."""
+    subtopics.fill(db, user, data)  # first, so an older app's save without one isn't a change
     if existing is not None:  # refused (409) if edited from an older version: see clashes.py
         unchanged = lambda: same_content(existing, data)  # noqa: E731
         existing.version = next_version(existing.version, data.base_version, unchanged, CONFLICT)

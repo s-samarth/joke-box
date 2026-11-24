@@ -17,7 +17,7 @@ from app.models import (
     joke_type_links,
     performance_log_topics,
 )
-from app.services import type_colors
+from app.services import subtopics, type_colors
 
 
 def commit_or_conflict(db: Session, message: str) -> None:
@@ -30,15 +30,17 @@ def commit_or_conflict(db: Session, message: str) -> None:
 
 
 def delete_topic(db: Session, user: User, topic: Topic) -> None:
-    """Move the topic's jokes, premises, observations and log links to Random, clear the jokes'
-    subtopic, then delete it."""
+    """Move the topic's jokes (into Random's Subtopic unknown), premises, observations and log
+    links to Random, then delete it."""
     if topic.is_system:
         raise HTTPException(400, "Random can't be deleted")
     random_topic = random_topic_for(db, user)
     db.execute(
         update(Joke)
         .where(Joke.user_id == user.id, Joke.topic_id == topic.id)
-        .values(topic_id=random_topic.id, subtopic_id=None)
+        .values(
+            topic_id=random_topic.id, subtopic_id=subtopics.unknown_for(db, user, random_topic).id
+        )
     )
     db.execute(
         update(Premise)
@@ -63,11 +65,12 @@ def delete_topic(db: Session, user: User, topic: Topic) -> None:
 
 
 def delete_subtopic(db: Session, user: User, sub: Subtopic) -> None:
-    """Jokes keep their topic and lose the subtopic."""
+    """Jokes keep their topic and go to its Subtopic unknown, which itself can't be deleted."""
+    subtopics.protect(sub, "deleted")
     db.execute(
         update(Joke)
         .where(Joke.user_id == user.id, Joke.subtopic_id == sub.id)
-        .values(subtopic_id=None)
+        .values(subtopic_id=subtopics.unknown_for(db, user, sub.topic).id)
     )
     db.delete(sub)
     db.commit()

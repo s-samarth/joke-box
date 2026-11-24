@@ -284,10 +284,15 @@ separate log to fall out of step. Items in the Trash don't count.
   an alternate punch** adds a row and puts the cursor in it, **Use** makes that row the punchline
   and puts the old punchline in its row (so Use again swaps back), × removes one. A row left
   empty stays on screen but isn't saved. They show only here and in New joke, never on stage, in
-  print or in a peek, and search finds them. Below the words, a row of details: Strength (**Unrated**, then five bars; tap the lit bar again
+  print or in a peek, and search finds them. Under the tag lines, **Cluster** comes first, above
+  where the joke came from, since it's the first thing to know about a joke with versions
+  ([ClusterField.tsx](../web/src/features/jokes/cluster/ClusterField.tsx)): one line, "Version of:
+  …" with Lead and the number of versions, which opens the cluster, and × on the same line to
+  take it out (a long name is cut short so the × never drops below it); or **Add to a cluster**,
+  to start one from this joke or join one. New joke has it in the same place. Then where the joke
+  came from, and below the words, a row of details: Strength (**Unrated**, then five bars; tap the lit bar again
   to clear it), Type (with Edit types), Filed under (topic and
-  subtopic, with Edit topics), Premise, Cluster ("Version of: …", which opens it, or **Add to a
-  cluster** to start one from this joke or join one; × takes it out), Follows (the joke this one comes after in a chain),
+  subtopic, with Edit topics; with no subtopic picked, the topic's **Subtopic unknown**), Premise, Follows (the joke this one comes after in a chain),
   Followed by (with a button to write the next one), Status, Runs for (type it, or step it five
   seconds at a time with − and +), Clean rating, Language (Hinglish, Hindi or English) and
   Hashtags, followed by a Notes box. Then **Rewrites** (earlier sessions and **Start a rewrite**),
@@ -309,7 +314,13 @@ separate log to fall out of step. Items in the Trash don't count.
   alone ([SubtopicManager.tsx](../web/src/features/jokes/SubtopicManager.tsx)): rename, delete,
   drag into order, add, with each one's joke count. A joke's Subtopic picker ends with the same
   **Manage subtopics…**. Jokes hold a subtopic by its id, so a rename leaves them as they are;
-  deleting one leaves its jokes in the topic, on no subtopic.
+  deleting one moves its jokes to the topic's **Subtopic unknown**.
+- **Subtopic unknown:** every topic has one, Random included, made with the topic. A joke filed
+  under a topic with no subtopic picked goes there (New joke, a quick capture, moving a joke to
+  another topic), so "no subtopic" and "unknown" are never two buckets. It's protected like
+  Random: it sorts last in every subtopic list, and in Manage subtopics it sits apart below the
+  rest with a lock, its joke count and "where jokes with no subtopic go", with no rename, delete
+  or drag.
 - **Topic and type managers** are sheets for renaming and deleting across every joke. Jokes and
   premises share one topic list. Deleting a topic moves its jokes, premises and logged shows to
   Random, and the confirmation counts all three. The number beside a topic counts its jokes and

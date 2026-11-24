@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { topicMoveMessage } from './topics'
+import { topicMoveMessage, unknownOf } from './topics'
 
 describe('topicMoveMessage', () => {
   it('names jokes, premises and shows together', () => {
@@ -19,5 +19,14 @@ describe('topicMoveMessage', () => {
   })
   it('names observations, which move with the topic too', () => {
     expect(topicMoveMessage({ jokes: 0, premises: 0, observations: 1, shows: 0 })).toBe('Its 1 observation moves to Random.')
+  })
+})
+
+describe("a topic's default subtopic", () => {
+  it('is the protected one, whatever its place in the list', () => {
+    const topic = { id: 't', name: 'Fake', is_system: false, subtopics: [{ id: 'a', name: 'Fake sub' }, { id: 'u', name: 'Subtopic unknown', is_system: true }] }
+    expect(unknownOf(topic)?.id).toBe('u')
+    expect(unknownOf({ ...topic, subtopics: [{ id: 'a', name: 'Fake sub' }] })).toBeUndefined()
+    expect(unknownOf(undefined)).toBeUndefined()
   })
 })

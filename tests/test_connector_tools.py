@@ -176,7 +176,9 @@ def test_the_overview_counts(dev: TestClient, db: Session) -> None:
     me = account(db, "dev@example.com")
     seen = library.overview(db, me)
     assert seen["jokes"] == 1 and seen["premises"] == 1
-    assert {"name": "Fake topic", "jokes": 1, "subtopics": []} in seen["topics"]
+    # A joke filed with no subtopic lands in the topic's default.
+    unknown = [{"name": "Subtopic unknown", "jokes": 1}]
+    assert {"name": "Fake topic", "jokes": 1, "subtopics": unknown} in seen["topics"]
 
 
 def test_a_bad_id_is_a_clear_error(db: Session, dev: TestClient) -> None:

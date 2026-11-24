@@ -41,7 +41,8 @@ def test_subtopics_keep_your_order(alice: TestClient, bob: TestClient) -> None:
     first, second = add(alice, url, "Fake 1"), add(alice, url, "Fake 2")
     assert alice.put(f"{url}/order", json={"ids": [second, first]}).status_code == 204
     [found] = [t for t in alice.get("/api/topics").json() if t["id"] == topic]
-    assert [s["name"] for s in found["subtopics"]] == ["Fake 2", "Fake 1"]
+    # The default stays last, whatever the order.
+    assert [s["name"] for s in found["subtopics"]] == ["Fake 2", "Fake 1", "Subtopic unknown"]
     assert bob.put(f"{url}/order", json={"ids": [first, second]}).status_code == 404
 
 
