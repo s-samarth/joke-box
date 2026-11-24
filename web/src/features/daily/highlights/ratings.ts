@@ -15,13 +15,18 @@ export interface Ratings {
   atTop: number
   /** The IST day of the latest show at the top rating. */
   latest: string
+  /** The night with the most shows at your top rating (the latest, on a tie). */
+  night: { day: string; shows: number }
 }
 
 export function ratingsOf(logs: PerformanceLog[]): Ratings | null {
   if (!logs.length) return null
   const top = Math.max(...logs.map((l) => l.rating))
   const best = logs.filter((l) => l.rating === top).map((l) => toIstInput(l.performed_at).slice(0, 10)).sort()
-  return { well: logs.filter((l) => l.rating >= WELL).length, top, atTop: best.length, latest: best[best.length - 1] }
+  const per = new Map<string, number>()
+  for (const d of best) per.set(d, (per.get(d) ?? 0) + 1)
+  const [day, shows] = [...per].reduce((a, b) => (b[1] >= a[1] ? b : a))
+  return { night: { day, shows }, well: logs.filter((l) => l.rating >= WELL).length, top, atTop: best.length, latest: best[best.length - 1] }
 }
 
 /** "★★★★★" for a rating. */

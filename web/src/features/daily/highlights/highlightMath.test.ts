@@ -45,7 +45,7 @@ describe('highlights', () => {
     expect(days.writing).toEqual({ day: '2026-08-14', total: 3, kinds: ['observations', 'jokes'] })
     expect(days.jokes).toEqual({ day: '2026-08-14', jokes: 2 })
     expect(days.stage).toEqual({ day: '2026-10-03', shows: 2, seconds: 27 * 60 })
-    expect(days.rated).toEqual({ well: 0, top: 3, atTop: 3, latest: '2026-10-20' })
+    expect(days.rated).toEqual({ well: 0, top: 3, atTop: 3, latest: '2026-10-20', night: expect.objectContaining({ day: expect.any(String) }) })
     expect(days.streak).toEqual({ length: 3, from: '2026-08-14', to: '2026-08-16' })
   })
 

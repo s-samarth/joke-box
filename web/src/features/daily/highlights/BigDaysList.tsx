@@ -8,7 +8,7 @@ import { formatDate } from '../../../lib/time'
 import { plural, stageTotal } from '../../shows/calendar/showMonth'
 import { KIND_META } from '../activity'
 import type { BigDays } from './highlightMath'
-import { stars, WELL } from './ratings'
+import { stars } from './ratings'
 
 const date = (day: string) => formatDate(day.length === 10 ? `${day}T12:00:00+05:30` : day)
 const dayNumber = (day: string) => Number(date(day).split(' ')[0])
@@ -43,7 +43,7 @@ export function BigDaysList({ days }: { days: BigDays }) {
       {writing && <Row mark={<MiniDay day={writing.day} dots={writing.kinds.map((k) => KIND_META[k].dot)} />} big={plural(writing.total, 'piece')} what={`Your biggest writing day · ${date(writing.day)}`} />}
       {jokes && jokes.jokes > 1 && <Row mark={<MiniDay day={jokes.day} dots={[KIND_META.jokes.dot]} />} big={plural(jokes.jokes, 'joke')} what={`Most jokes in a day · ${date(jokes.day)}`} />}
       {stage && <Row mark={<MiniDay day={stage.day} dots={Array.from({ length: Math.min(stage.shows, 3) }, () => 'bg-tape')} />} big={`${plural(stage.shows, 'show')} · ${stageTotal(stage.seconds)}`} what={`Your longest night on stage · ${date(stage.day)}`} />}
-      {rated && <Row mark={<MiniDay day={rated.latest} dots={['bg-tape']} />} big={`${plural(rated.atTop, 'show')} at ${stars(rated.top)}`} what={`Your top rating · ${rated.well} rated ${WELL}★ and up · latest ${date(rated.latest)}`} />}
+      {rated && <Row mark={<MiniDay day={rated.night.day} dots={['bg-tape']} />} big={`${plural(rated.night.shows, 'show')} at ${stars(rated.top)}`} what={`Your best-rated night · ${date(rated.night.day)}`} />}
       {streak && streak.length > 1 && (
         <Row mark={<span className="headline flex size-10 shrink-0 items-center justify-center text-[24px] text-ok tabular" aria-hidden>{streak.length}</span>}
           big={`${streak.length}-day joke streak`} what={`Your longest · ${short(streak.from)} to ${short(streak.to)}`} />
