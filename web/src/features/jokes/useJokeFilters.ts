@@ -48,7 +48,20 @@ export function matchesType(joke: Joke, type: string | null): boolean {
   return joke.types.some((t) => t.toLowerCase() === type.toLowerCase())
 }
 
-const SORTERS: Record<SortKey, (a: Joke, b: Joke) => number> = {
+export type FilterKey = 'topic' | 'sub' | 'premise' | 'type' | 'status' | 'q' | 'sort' | 'discarded' | 'versions'
+
+type Narrowing = { topic: string | null; sub: string | null; premise: string | null; type: string | null; status: string | null; q: string }
+
+/** Does the joke pass every filter that's set? Discarded jokes are left to keepDiscarded. */
+export const matchesFilters = (b: Joke, f: Narrowing): boolean =>
+  (!f.topic || b.topic_id === f.topic) &&
+  (!f.sub || b.subtopic_id === f.sub) &&
+  matchesPremise(b, f.premise) &&
+  matchesType(b, f.type) &&
+  (!f.status || b.status === f.status) &&
+  matchesSearch(b, f.q)
+
+export const SORTERS: Record<SortKey, (a: Joke, b: Joke) => number> = {
   new: (a, b) => b.created_at.localeCompare(a.created_at),
   old: (a, b) => a.created_at.localeCompare(b.created_at),
   edited: (a, b) => b.updated_at.localeCompare(a.updated_at),
@@ -73,7 +86,7 @@ export function useJokeFilters() {
     flat: params.get('versions') === 'all',
   }
 
-  const set = (changes: Partial<Record<'topic' | 'sub' | 'premise' | 'type' | 'status' | 'q' | 'sort' | 'discarded' | 'versions', string | null>>) =>
+  const set = (changes: Partial<Record<FilterKey, string | null>>) =>
     update((next) => {
       for (const [key, value] of Object.entries(changes)) {
         if (value) next.set(key, value)
@@ -82,15 +95,7 @@ export function useJokeFilters() {
     })
 
   const { visible, discarded } = useMemo(() => {
-    const matching = jokes.filter(
-      (b) =>
-        (!f.topic || b.topic_id === f.topic) &&
-        (!f.sub || b.subtopic_id === f.sub) &&
-        matchesPremise(b, f.premise) &&
-        matchesType(b, f.type) &&
-        (!f.status || b.status === f.status) &&
-        matchesSearch(b, f.q),
-    )
+    const matching = jokes.filter((b) => matchesFilters(b, { topic: f.topic, sub: f.sub, premise: f.premise, type: f.type, status: f.status, q: f.q }))
     const { kept, discarded } = keepDiscarded(matching, f.showDiscarded, Boolean(f.status))
     return { visible: kept.sort(SORTERS[f.sort] ?? SORTERS.new), discarded }
   }, [jokes, f.topic, f.sub, f.premise, f.type, f.status, f.q, f.sort, f.showDiscarded])

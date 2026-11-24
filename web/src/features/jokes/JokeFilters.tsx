@@ -1,7 +1,8 @@
 /**
  * Search plus menus for topic, premise, type, status and sort, in one row that scrolls sideways (see
  * ChipRow). Each menu shows what's chosen. Once you pick a topic that has subtopics, a Subtopic menu
- * appears beside it, so the topic list stays topics only.
+ * appears beside it, so the topic list stays topics only. The Jokes list and the cluster's picker
+ * (cluster/usePickerFilters.ts) both use it.
  */
 import { ChevronDown, Plus, Search, X } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
@@ -17,9 +18,21 @@ import { TopicManager } from './TopicManager'
 import { useSubtopicActions } from './useSubtopicActions'
 import { TypeManager } from './TypeManager'
 import { useNewTopic } from './useNewTopic'
-import { SORTS, type SortKey, type useJokeFilters } from './useJokeFilters'
+import { SORTS, type FilterKey, type SortKey } from './useJokeFilters'
 
-type Filters = ReturnType<typeof useJokeFilters>
+/** What the row reads and changes: the Jokes list's filters (in the URL) or a picker's own. */
+export interface Filters {
+  topic: string | null
+  sub: string | null
+  premise: string | null
+  type: string | null
+  status: string | null
+  q: string
+  sort: SortKey
+  /** A filter is set, so Clear shows. */
+  active: boolean
+  set: (changes: Partial<Record<FilterKey, string | null>>) => void
+}
 
 export function MenuButton({ label, on, children }: { label: string; on: boolean; children?: ReactNode }) {
   return (
@@ -30,7 +43,8 @@ export function MenuButton({ label, on, children }: { label: string; on: boolean
   )
 }
 
-export function JokeFilters({ f }: { f: Filters }) {
+/** `edge`: the row's sideways scroll runs to the screen edge on a phone, past the page padding. */
+export function JokeFilters({ f, edge = '-mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0' }: { f: Filters; edge?: string }) {
   const { data: topics = [] } = useTopics()
   const { data: types = [] } = useTypes()
   const { data: statuses = [] } = useStatuses()
@@ -88,7 +102,7 @@ export function JokeFilters({ f }: { f: Filters }) {
         <Search size={18} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-faint" />
         <Input type="search" aria-label="Search jokes" placeholder="Search words, tags, notes" className="pl-10" value={f.q} onChange={(e) => f.set({ q: e.target.value })} />
       </div>
-      <ChipRow className="-mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
+      <ChipRow className={edge}>
         <Dropdown align="start" items={topicItems} trigger={<span><MenuButton label={topic ? topicName(topic) : 'Topic'} on={Boolean(topic)} /></span>} />
         {topic && (
           <Dropdown align="start" items={subItems} trigger={<span><MenuButton label={sub ? sub.name : 'Subtopic'} on={Boolean(sub)} /></span>} />

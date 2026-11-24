@@ -220,8 +220,18 @@ separate log to fall out of step. Items in the Trash don't count.
   deleting the lead says which version leads now
   ([useClusterActions.ts](../web/src/features/jokes/cluster/useClusterActions.ts)). Under the boxes,
   **Write a version** (New joke filed like the lead, on its premise and from its observations;
-  Follows starts blank), **Add jokes you've written** (a tick list, the lead's subtopic first; a
-  joke in another cluster moves) and "1 discarded hidden **Show**".
+  Follows starts blank), **Add jokes you've written** and "1 discarded hidden **Show**".
+- **Add versions** ([AddVersionsDialog.tsx](../web/src/features/jokes/cluster/AddVersionsDialog.tsx)),
+  a sheet (full height on a phone): the lead pinned at the top to compare against, then the Jokes
+  list's own search and filter row ([JokeFilters.tsx](../web/src/features/jokes/JokeFilters.tsx):
+  Topic, Subtopic, Premise, Type, Status, Sort), starting on the lead's topic and subtopic and
+  Recently edited ([usePickerFilters.ts](../web/src/features/jokes/cluster/usePickerFilters.ts);
+  kept in the sheet, so the list's filters behind it don't change). A count line with discarded
+  jokes hidden behind **Show** and **Clear filters**. Rows look like the list's
+  ([JokeRowBody.tsx](../web/src/features/jokes/JokeRowBody.tsx)): setup, punchline, strength,
+  status, subtopic, runtime; a tap ticks one (yellow edge and tick), and a joke in another cluster
+  says "In "…" · moves here". The bar at the bottom says how many are picked, with **Clear** and
+  **Add 2 versions**. Jokes already in this cluster aren't listed.
 - **The lead:** the version you'd do tonight. While only one version is active, it leads. When the
   lead is discarded, trashed or taken out, the strongest active version takes over (the most
   recently edited on a tie) and keeps the lead after the old one comes back. With every version
