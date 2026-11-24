@@ -81,6 +81,7 @@ class LogJokeOut(BaseModel):
 
 
 class LogIn(BaseModel):
+    base_version: int | None = Field(default=None, le=INT_MAX)
     venue_name: str = Field(default="Unidentified Venue", min_length=1, max_length=160)
     performed_at: datetime
     duration_seconds: int = Field(default=0, ge=0, le=INT_MAX)
@@ -105,6 +106,7 @@ class LogIn(BaseModel):
 
 
 class LogOut(BaseModel):
+    version: int
     id: uuid.UUID
     venue_name: str
     performed_at: datetime

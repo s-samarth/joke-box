@@ -59,7 +59,7 @@ export function NewPremiseDialog({ open, onOpenChange, topicId, observationIds =
   const create = () => {
     if (!take.trim() || !chosen) return
     const id = newId()
-    save.mutateAsync({ id, input: { topic_id: chosen, take: take.trim(), notes, extra_notes: extra } }).catch((e: Error) => toast(`Not saved: ${e.message}`))
+    save.mutateAsync({ id, input: { created_at: new Date().toISOString(), topic_id: chosen, take: take.trim(), notes, extra_notes: extra } }).catch((e: Error) => toast(`Not saved: ${e.message}`))
     // Queued after the premise's save, so they reach the server in order (offline too).
     for (const obsId of linked.filter((o) => observations.some((x) => x.id === o))) link.mutate({ id: obsId, kind: 'premises', targetId: id, on: true })
     onCreated(id)

@@ -71,12 +71,14 @@ def get_owned[T: OwnedMixin](
 
 
 def find_owned[T: OwnedMixin](
-    db: Session, model: type[T], row_id: uuid.UUID, user: User
+    db: Session, model: type[T], row_id: uuid.UUID, user: User, *, lock: bool = False
 ) -> T | None:
     """Like get_owned for upserts: None if new, 404 if the id belongs to another user, 410 if
     it's in the Trash (a save made on another device after it was deleted). 410, not 409, so
     the app offers Retry (after putting it back) rather than Keep mine."""
-    row = db.get(model, row_id, execution_options={INCLUDE_TRASHED: True})
+    row = db.get(
+        model, row_id, execution_options={INCLUDE_TRASHED: True}, with_for_update=lock or None
+    )
     if row is not None and row.user_id != user.id:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"{model.__name__} not found")
     if isinstance(row, Trashable) and row.deleted_at is not None:

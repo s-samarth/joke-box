@@ -22,7 +22,7 @@ queryClient.setMutationDefaults(saveObservationKey, {
     queryClient.setQueryData<Observation[]>(keys.observations, (old = []) => {
       const existing = old.find((o) => o.id === id)
       // A save doesn't carry the links, so they stay as they were (or start empty).
-      const next: Observation = { premise_ids: [], joke_ids: [], strength: null, ...existing, ...input, id, version: input.version ?? existing?.version ?? 0, created_at: existing?.created_at ?? now, updated_at: now }
+      const next: Observation = { premise_ids: [], joke_ids: [], strength: null, ...existing, ...input, id, version: input.version ?? existing?.version ?? 0, created_at: existing?.created_at ?? input.created_at ?? now, updated_at: now }
       return existing ? old.map((o) => (o.id === id ? next : o)) : [next, ...old]
     })
   },

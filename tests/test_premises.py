@@ -82,3 +82,13 @@ def test_other_peoples_premises_and_topics_are_off_limits(
     assert alice.delete(f"/api/premises/{theirs['id']}").status_code == 404
     assert put_premise(alice, new_topic(bob, "Fake bob")).status_code == 422
     assert alice.get("/api/premises").json() == []
+
+
+def test_offline_premise_keeps_capture_time_through_edits(alice: TestClient) -> None:
+    topic = alice.get("/api/topics").json()[0]["id"]
+    url = f"/api/premises/{uuid.uuid4()}"
+    body = {"topic_id": topic, "take": "Fake take", "created_at": "2025-02-01T23:59:59+05:30"}
+    first = alice.put(url, json=body).json()
+    assert first["created_at"].startswith("2025-02-01T18:29:59")
+    again = alice.put(url, json=body | {"take": "Fake edit", "created_at": "2025-02-02T12:00Z"})
+    assert again.json()["created_at"] == first["created_at"]

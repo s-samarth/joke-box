@@ -28,7 +28,18 @@ def as_json(about: dict[str, Any]) -> TextContent:
     return TextContent(type="text", text=json.dumps(about, ensure_ascii=False))
 
 
-def get_rewrite(db: Session, user: User, rewrite: Brainstorm) -> Blocks:
+def typed_part(content: str, start: int) -> dict[str, Any]:
+    """Offsets refer to the original text, including leading and trailing whitespace."""
+    start = max(0, start)
+    end = start + 6000
+    return {
+        "text": content[start:end],
+        "text_length": len(content),
+        "more_from_char": end if end < len(content) else None,
+    }
+
+
+def get_rewrite(db: Session, user: User, rewrite: Brainstorm, from_char: int) -> Blocks:
     """A Rewrite (one joke reworked) is typed only, so it's one JSON block."""
     joke = db.scalar(select(Joke.setup).where(Joke.id == rewrite.joke_id, Joke.user_id == user.id))
     about = {
@@ -37,13 +48,15 @@ def get_rewrite(db: Session, user: User, rewrite: Brainstorm) -> Blocks:
         "joke_id": str(rewrite.joke_id),
         "joke_setup": clip(joke, 240) if joke is not None else None,
         "title": rewrite.title,
-        "text": clip(rewrite.content, 6000),
+        **typed_part(rewrite.content, from_char),
         "updated": ist_date(rewrite.updated_at),
     }
     return [as_json(about)]
 
 
-def get_brainstorm(db: Session, user: User, brainstorm_id: str, from_page: int = 1) -> Blocks:
+def get_brainstorm(
+    db: Session, user: User, brainstorm_id: str, from_page: int = 1, from_char: int = 0
+) -> Blocks:
     """A Brainstorm session with its handwritten pages, or a Rewrite: search_brainstorms lists
     both, so either id opens here."""
     wanted = parse_id(brainstorm_id)
@@ -55,14 +68,14 @@ def get_brainstorm(db: Session, user: User, brainstorm_id: str, from_page: int =
             select(Brainstorm).where(Brainstorm.id == wanted, Brainstorm.user_id == user.id)
         )
         if rewrite is not None:
-            return get_rewrite(db, user, rewrite)
+            return get_rewrite(db, user, rewrite, from_char)
         raise ValueError(f"No brainstorm with id {brainstorm_id}")
     technique = session.technique_id and db.scalar(
         select(CraftNote.title).where(
             CraftNote.id == session.technique_id, CraftNote.user_id == user.id
         )
     )
-    ink = session.ink or []
+    ink = (session.ink or []) if from_char <= 0 else []
     pages = pages_with_ink(ink)
     shown: list[tuple[int, bytes]] = []
     used, more_from = 0, None
@@ -77,12 +90,12 @@ def get_brainstorm(db: Session, user: User, brainstorm_id: str, from_page: int =
         "kind": "brainstorm",
         "id": str(session.id),
         "title": session.title,
-        "text": clip(session.content, 6000),
+        **typed_part(session.content, from_char),
         "technique": technique or None,
         "linked_joke_ids": [str(i) for i in session.joke_ids or []],
         "linked_observation_ids": [str(i) for i in session.observation_ids or []],
         "updated": ist_date(session.updated_at),
-        "handwritten_pages": [p + 1 for p in pages],
+        "handwritten_pages": [p + 1 for p in pages] if from_char <= 0 else None,
         "pages_shown": [p + 1 for p, _ in shown],
         "more_from_page": more_from,
     }

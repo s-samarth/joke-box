@@ -75,3 +75,16 @@ describe('a joke edited on two devices', () => {
     expect(sent[0].base_version).toBeUndefined()
   })
 })
+
+it('refreshes only jokes after a wording edit and related lists after a structural edit', async () => {
+  queryClient.setQueryData(keys.jokes, [joke(5)])
+  const invalidate = vi.spyOn(queryClient, 'invalidateQueries')
+  try {
+    serve(5)
+    await save({ id: 'j1', input: { ...opened(5), setup: 'New fake wording' } })
+    expect(invalidate.mock.calls.map(([q]) => q?.queryKey)).toEqual([keys.jokes])
+    invalidate.mockClear()
+    await save({ id: 'j1', input: { ...opened(6), types: ['Fake type'] } })
+    expect(invalidate.mock.calls.map(([q]) => q?.queryKey)).toEqual([keys.jokes, keys.types, keys.statuses, keys.setlists])
+  } finally { invalidate.mockRestore() }
+})

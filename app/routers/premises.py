@@ -8,6 +8,7 @@ from sqlalchemy import select
 
 from app.auth.deps import CurrentUser, DbSession, find_owned
 from app.models import Premise, Topic
+from app.models.base import written_at
 from app.schemas.premises import PremiseIn, PremiseOut
 from app.services.clashes import PREMISE_CLASH, check_fields
 from app.services.ordering import next_position
@@ -51,6 +52,8 @@ def put_premise(
     if premise is None:
         position = next_position(db, Premise.position, Premise.user_id == user.id)
         premise = Premise(id=premise_id, user_id=user.id, position=position, extra_notes="")
+        if body.created_at:
+            premise.created_at = premise.updated_at = written_at(body.created_at)
         db.add(premise)
     else:
         check_fields(premise, body.base_version, fields, PREMISE_CLASH)

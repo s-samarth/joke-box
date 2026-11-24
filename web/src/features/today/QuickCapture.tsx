@@ -3,15 +3,16 @@
  * Both fields sit in one box so it reads as one joke, not a form.
  */
 import { CornerDownLeft } from 'lucide-react'
-import { useState, type KeyboardEvent } from 'react'
+import { useDraftText } from '../capture/useDraftText'
+import type { KeyboardEvent } from 'react'
 import { RANDOM } from '../../lib/jokeMeta'
 import { useCaptureJoke } from '../capture/newJoke'
 
 const field = 'block w-full resize-none bg-transparent px-4 text-xl leading-snug outline-none placeholder:text-faint'
 
 export function QuickCapture() {
-  const [setup, setSetup] = useState('')
-  const [punchline, setPunchline] = useState('')
+  const [setup, setSetup] = useDraftText('capture.setup')
+  const [punchline, setPunchline] = useDraftText('capture.punchline')
   const capture = useCaptureJoke()
   const save = () => {
     if (!capture({ setup, punchline })) return

@@ -4,9 +4,10 @@
  * timer runs while you write, and every save keeps a version.
  */
 import { History, ListChecks, MoreHorizontal, Pause, Play, Plus, RotateCcw, X } from 'lucide-react'
-import { useState } from 'react'
-import { Link, useParams, useSearchParams } from 'react-router'
-import { newId } from '../../api/client'
+import { useRef, useState } from 'react'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
+import { writeText } from '../capture/deviceDraft'
+import { openRewrite, rewriteKey, type RewriteText } from './rewriteDraft'
 import { useJokes } from '../../api/library'
 import { useBrainstormActions, useBrainstorms } from '../../api/shows'
 import type { Joke, Brainstorm } from '../../api/types'
@@ -26,9 +27,12 @@ import { announceSave } from '../../lib/announce'
 
 function Workspace({ joke, sessions, startId }: { joke: Joke; sessions: Brainstorm[]; startId: string | null }) {
   const start = sessions.find((s) => s.id === startId)
-  const [id, setId] = useState(() => start?.id ?? newId())
-  const [title, setTitle] = useState(start?.title ?? '')
-  const [content, setContent] = useState(start?.content ?? '')
+  const navigate = useNavigate()
+  const [key, setKey] = useState(() => rewriteKey(joke.id, start?.id))
+  const [draft, setDraft] = useState(() => openRewrite(key, start))
+  const { id, title, content } = draft
+  const activeId = useRef(id)
+  const [base, setBase] = useState({ title: start?.title ?? '', content: start?.content ?? '' })
   const [historyOpen, setHistoryOpen] = useState(false)
   const [checking, setChecking] = useState(false)
   const timer = useTimer(start?.timer_seconds ?? 0)
@@ -38,32 +42,56 @@ function Workspace({ joke, sessions, startId }: { joke: Joke; sessions: Brainsto
   const hasOrigins = useHasOrigins(joke)
   const words = content.trim() ? content.trim().split(/\s+/).length : 0
 
-  const open = (b?: Brainstorm) => {
-    setId(b?.id ?? newId())
-    setTitle(b?.title ?? '')
-    setContent(b?.content ?? '')
+  const dirty = title !== base.title || content !== base.content
+  const edit = (next: RewriteText) => {
+    const changed = actions.save.isPending || next.title !== base.title || next.content !== base.content
+    writeText(key, changed ? JSON.stringify(next) : '')
+    setDraft(next)
+  }
+  const discard = () => confirm({ title: 'Discard unsaved changes?', message: 'Your saved versions will stay in History.', confirmLabel: 'Discard changes', danger: true })
+  const close = async () => {
+    if (dirty && !writeText(key, JSON.stringify(draft)) && !(await discard())) return
+    navigate(`/jokes/${joke.id}`)
+  }
+  const open = async (b?: Brainstorm, deleted = false) => {
+    const next = rewriteKey(joke.id, b?.id)
+    if (!deleted && dirty && (next === key || !writeText(key, JSON.stringify(draft)))) {
+      if (!(await discard())) return
+      writeText(key, '')
+    }
+    if (deleted) writeText(key, '')
+    setKey(next)
+    const opened = openRewrite(next, b)
+    activeId.current = opened.id
+    setDraft(opened)
+    if (startId !== (b?.id ?? null)) navigate(`/jokes/${joke.id}/rewrite${b ? '?session=' + b.id : ''}`, { replace: true })
+    setBase({ title: b?.title ?? '', content: b?.content ?? '' })
     timer.load(b?.timer_seconds ?? 0)
     setHistoryOpen(false)
   }
   const save = () => {
     const saving = actions.save.mutateAsync({ id, input: { joke_id: joke.id, title, content, timer_seconds: timer.seconds } })
-    saving.then((b) => toast(`Version ${b.versions.length} saved`), (e: Error) => toast(`Not saved: ${e.message}`))
+    saving.then((b) => {
+      if (activeId.current === id) setBase({ title, content })
+      toast(`Version ${b.versions.length} saved`)
+    }, (e: Error) => toast(`Not saved: ${e.message}`))
     announceSave(saving, toast, null) // says so if it's waiting; the version number comes when it lands
   }
   const deleteSession = async (b: Brainstorm) => {
     if (!(await confirm({ title: 'Delete this session?', message: 'It goes to the Trash for 30 days, with all its versions.', confirmLabel: 'Delete session', danger: true }))) return
     actions.remove.mutate(b.id)
-    if (b.id === id) open()
+    writeText(rewriteKey(joke.id, b.id), '')
+    if (b.id === id) void open(undefined, true)
   }
   const history = (
     <RewriteHistory current={current} others={sessions.filter((s) => s.id !== id)} onOpenSession={open} onDeleteSession={deleteSession}
-      onLoadVersion={(v) => { setTitle(v.title); setContent(v.content); setHistoryOpen(false) }} onDeleteVersion={(v) => actions.removeVersion.mutate(v.id)} />
+      onLoadVersion={(v) => { edit({ id, title: v.title, content: v.content }); setHistoryOpen(false) }} onDeleteVersion={(v) => actions.removeVersion.mutate(v.id)} />
   )
 
   return (
     <div className="pt-safe min-h-dvh">
       <header className="sticky top-0 z-10 flex items-center gap-1.5 sm:gap-2 border-b border-rule bg-ink/95 px-3 py-2 backdrop-blur sm:px-6">
-        <Link to={`/jokes/${joke.id}`} aria-label="Close rewrite" className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-dim hover:bg-ink-3 hover:text-paper"><X size={20} /></Link>
+        <button type="button" onClick={() => void close()} aria-label="Close rewrite" className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-dim hover:bg-ink-3 hover:text-paper"><X size={20} /></button>
         <button type="button" onClick={timer.running ? timer.pause : timer.start} className={`inline-flex h-10 items-center gap-2 rounded-lg px-3 ${timer.running ? 'bg-tape text-tape-ink' : 'bg-ink-3'}`} aria-label={timer.running ? 'Pause timer' : 'Start timer'}>
           {timer.running ? <Pause size={16} /> : <Play size={16} />}
           <span className="headline text-xl tabular">{clock(timer.seconds)}</span>
@@ -99,8 +127,13 @@ function Workspace({ joke, sessions, startId }: { joke: Joke; sessions: Brainsto
               <div className="pt-2 pb-2"><JokeOrigins joke={joke} /></div>
             </details>
           )}
-          <GrowingText aria-label="Session title" placeholder="Name this session (optional)" className="headline mt-8 text-3xl" value={title} onChange={(e) => setTitle(e.target.value)} />
-          <GrowingText aria-label="Rewrite" autoFocus placeholder="Write it again. Other punches, tags, an act-out, a new angle." className="mt-4 min-h-[50dvh] text-lg leading-relaxed" value={content} onChange={(e) => setContent(e.target.value)} />
+          <GrowingText aria-label="Session title" placeholder="Name this session (optional)" className="headline mt-8 text-3xl" value={title} onChange={(e) => edit({ ...draft, title: e.target.value })} />
+          <GrowingText aria-label="Rewrite" autoFocus placeholder="Write it again. Other punches, tags, an act-out, a new angle." className="mt-4 min-h-[50dvh] text-lg leading-relaxed" value={content} onChange={(e) => edit({ ...draft, content: e.target.value })} />
+          {dirty && <button type="button" className="text-sm text-dim underline" onClick={async () => {
+            if (!(await discard())) return
+            writeText(key, '')
+            setDraft({ id, ...base })
+          }}>Discard draft</button>}
           <p className="text-sm text-faint tabular sm:hidden">{words} words</p>
         </main>
         <aside className="hidden w-72 shrink-0 py-8 lg:block">{history}</aside>
@@ -119,5 +152,9 @@ export function RewritePage() {
   const { data: brainstorms, isPending } = useBrainstorms()
   const joke = jokes?.find((b) => b.id === jokeId)
   if (!joke || (isPending && !brainstorms)) return <div className="p-8"><Spinner /></div>
-  return <Workspace joke={joke} sessions={(brainstorms ?? []).filter((b) => b.joke_id === joke.id)} startId={params.get('session')} />
+  const requested = params.get('session')
+  if (requested && !brainstorms?.some((b) => b.id === requested && b.joke_id === joke.id)) {
+    return <div className="p-8"><p>This rewrite is unavailable.</p><Link className="underline" to={`/jokes/${joke.id}`}>Back to joke</Link></div>
+  }
+  return <Workspace key={joke.id + ':' + (requested ?? 'new')} joke={joke} sessions={(brainstorms ?? []).filter((b) => b.joke_id === joke.id)} startId={requested} />
 }

@@ -54,14 +54,17 @@ def search_brainstorms(query: str = "", limit: int = 25) -> dict[str, Any]:
 
 
 @server.tool(annotations=READ)
-def get_brainstorm(brainstorm_id: str, from_page: int = 1) -> list[TextContent | Image]:
+def get_brainstorm(
+    brainstorm_id: str, from_page: int = 1, from_char: int = 0
+) -> list[TextContent | Image]:
     """One result of search_brainstorms in full, by its id. A Brainstorm session: title, typed
     text, technique, linked jokes and observations, then each handwritten page as an image,
     labelled "Page N". Read the handwriting from the images: the app's dark page in the comic's
     own ink colours, up to two screens wide. If more_from_page is set, call again with
-    from_page for the rest. A Rewrite (kind "rewrite"): the joke it reworks and the typed text."""
+    from_page for the rest. For either kind, follow more_from_char with from_char for the
+    remaining typed text. Text continuations omit ink. A Rewrite includes the joke it reworks."""
     with reading() as (db, user):
-        return brainstorm.get_brainstorm(db, user, brainstorm_id, from_page)
+        return brainstorm.get_brainstorm(db, user, brainstorm_id, from_page, from_char)
 
 
 @server.tool(annotations=READ)

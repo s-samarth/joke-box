@@ -81,7 +81,7 @@ export const clearUnsynced = () => update(() => [])
  * version check.
  */
 /** The saves that send a version, so a clash can be resent with Keep mine. */
-const CHECKED = new Set(['joke', 'setlist', 'craft', 'observation', 'premise', 'cluster'])
+const CHECKED = new Set(['joke', 'log', 'setlist', 'craft', 'observation', 'premise', 'cluster'])
 
 export async function retryUnsynced(client: QueryClient, item: Unsynced) {
   await discardUnsynced(item.id)
@@ -101,7 +101,7 @@ const KINDS: Record<string, string> = {
 const TRASH: Record<string, string> = { restore: 'Put back from the Trash', erase: 'Delete from the Trash', empty: 'Empty the Trash' }
 
 /** The fields worth showing (and copying) from a save, in reading order. */
-const WORDS = ['take', 'setup', 'punchline', 'text', 'title', 'name', 'label', 'venue_name', 'notes', 'body', 'content']
+const WORDS = ['take', 'setup', 'punchline', 'text', 'title', 'name', 'label', 'venue_name', 'notes', 'learned', 'body', 'content']
 
 /** What the item was, in words: "Joke", "Delete show", and the text you'd want to copy. */
 export function summary(saved: string[], variables: unknown): { title: string; text: string } {

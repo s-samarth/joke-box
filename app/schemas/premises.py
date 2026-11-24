@@ -14,6 +14,7 @@ OLD_NAMES = {"testing": "Work in Progress"}
 
 
 class PremiseIn(BaseModel):
+    created_at: datetime | None = None
     topic_id: uuid.UUID
     take: str = Field(min_length=1, max_length=2000)
     notes: str = Field(default="", max_length=20_000)

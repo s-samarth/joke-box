@@ -143,7 +143,7 @@ each with its setup in marker, the punchline, its runtime and "by m:ss" (the run
   comment, or ✕ to take it off. Enter adds the top match
   ([ShowJokesField.tsx](../web/src/features/shows/ShowJokesField.tsx),
   [showJokes.ts](../web/src/features/shows/showJokes.ts)). Editing a show edits its jokes too.
-  **Count laughs for LPM** folds out five counters, one per laugh score, by how much of the room
+  **Count laughs for LPM** starts at **Not counted**. Open it to record a tally or choose **I counted zero laughs**. **Mark as not counted** removes the tally. It has five counters, one per laugh score, by how much of the room
   reacted: **One or two people**, **Some of the room**, **Most of the room**, **Rolls on, or some
   applause**, **Applause break** ([the scale](set-review.md#the-laugh-scale)), with the LPM worked out as you count ([lpm.ts](../web/src/features/shows/lpm.ts),
   [LaughTally.tsx](../web/src/features/shows/LaughTally.tsx)). **What did you learn?** is a comment kept on the show, like the remarks, and comes back

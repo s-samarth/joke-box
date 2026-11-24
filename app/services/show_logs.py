@@ -2,6 +2,7 @@
 (the connector's log_show), which also brings the laugh timeline it heard in the recording."""
 
 import uuid
+from datetime import UTC
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -10,6 +11,7 @@ from app.auth.deps import find_owned
 from app.models import PerformanceLog, ShowReview, Topic, User, Venue
 from app.schemas.reviews import ReviewIn
 from app.schemas.shows import LogIn
+from app.services.clashes import next_version
 from app.services.show_jokes import set_jokes, wanted, your_jokes
 from app.services.trash import trashed_joke_ids
 
@@ -41,29 +43,56 @@ def set_review(log: PerformanceLog, review: ReviewIn, on_show: set[uuid.UUID]) -
 
 
 def save_show(
-    db: Session, user: User, log_id: uuid.UUID, body: LogIn, review: ReviewIn | None = None
+    db: Session,
+    user: User,
+    log_id: uuid.UUID,
+    body: LogIn,
+    review: ReviewIn | None = None,
+    existing: PerformanceLog | None = None,
 ) -> PerformanceLog:
     """Create or update a show. The caller has checked the topics are the user's own."""
     hidden = trashed_joke_ids(db, user)
     jokes = wanted(body.jokes or [], hidden, your_jokes(db, user, body.jokes or []))
     topic_ids = set(body.topic_ids)
     topics = list(db.scalars(select(Topic).where(Topic.id.in_(topic_ids)))) if topic_ids else []
-    log = find_owned(db, PerformanceLog, log_id, user) or PerformanceLog(id=log_id, user_id=user.id)
-    log.venue = venue_named(db, user, body.venue_name)
-    log.performed_at = body.performed_at
-    log.duration_seconds = body.duration_seconds
-    log.audience_size = body.audience_size
-    log.rating = body.rating
-    log.notes = body.notes
-    if body.learned is not None:  # left out by app versions from before: it stays
-        log.learned = body.learned
-    log.laughs = body.laughs
-    log.topics = topics
-    log.title = ""  # titles are gone: topics say what a show was (the column stays unused)
-    if body.jokes is not None:  # left out by app versions from before: the jokes stay
-        set_jokes(log, jokes, hidden)
-    if review is not None:
-        set_review(log, review, {row.joke_id for row in log.jokes if row.joke_id not in hidden})
+    existing = existing or find_owned(db, PerformanceLog, log_id, user, lock=True)
+    log = existing or PerformanceLog(id=log_id, user_id=user.id)
+    venue = venue_named(db, user, body.venue_name)
+    # Keep the histories of changes until the version check, including changes to child rows.
+    with db.no_autoflush:
+        if log.venue_id != venue.id:
+            log.venue = venue
+        log.performed_at = (
+            body.performed_at if body.performed_at.tzinfo else body.performed_at.replace(tzinfo=UTC)
+        )
+        log.duration_seconds = body.duration_seconds
+        log.audience_size = body.audience_size
+        log.rating = body.rating
+        log.notes = body.notes
+        if body.learned is not None:  # left out by app versions from before: it stays
+            log.learned = body.learned
+        log.laughs = body.laughs
+        log.topics = topics
+        log.title = ""  # titles are gone: topics say what a show was (the column stays unused)
+        if body.jokes is not None:  # left out by app versions from before: the jokes stay
+            set_jokes(log, jokes, hidden)
+        if review is not None:
+            set_review(log, review, {row.joke_id for row in log.jokes if row.joke_id not in hidden})
+        if existing is not None:
+
+            def unchanged() -> bool:
+                return (
+                    not db.is_modified(log)
+                    and (body.jokes is None or not any(db.is_modified(row) for row in log.jokes))
+                    and (review is None or log.review is None or not db.is_modified(log.review))
+                )
+
+            log.version = next_version(
+                log.version,
+                body.base_version,
+                unchanged,
+                "This show was changed on another device after you edited it.",
+            )
     db.add(log)
     db.commit()
     db.refresh(log)

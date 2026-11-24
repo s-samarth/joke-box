@@ -8,6 +8,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import './craft'
 import './observationSaves'
 import './premises'
+import './showSaves'
 import { queryClient } from './queryClient'
 import { listUnsynced, retryUnsynced } from './unsynced'
 
@@ -27,6 +28,7 @@ function serve(version: number) {
 }
 
 const KINDS = [
+  { key: ['log', 'save'], input: { venue_name: 'Fake Hall', performed_at: '2026-10-01T12:00:00Z', duration_seconds: 300, audience_size: 10, rating: 3, topic_ids: [], notes: '', laughs: null } },
   { key: ['craft', 'save'], input: { title: 'Fake note', body: 'Fake words', kind_id: 'k', area_id: 'a', hashtags: [], source: '', url: '', position: 0, performance_log_id: null, analysis_id: null } },
   { key: ['observation', 'save'], input: { text: 'Fake thing noticed', topic_id: null } },
   { key: ['premise', 'save'], input: { topic_id: 't1', take: 'A fake take', notes: '' } },

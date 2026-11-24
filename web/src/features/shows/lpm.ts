@@ -20,8 +20,8 @@ export const NO_LAUGHS = [0, 0, 0, 0, 0]
 
 export const laughPoints = (laughs: number[]): number => laughs.reduce((sum, n, i) => sum + n * (i + 1), 0)
 
-/** A tally with nothing in it counts as not counted. */
-export const counted = (laughs: number[] | null | undefined): laughs is number[] => Boolean(laughs?.some((n) => n > 0))
+/** A five-counter tally was counted, including an explicit zero. Missing tallies were uncounted. */
+export const counted = (laughs: number[] | null | undefined): laughs is number[] => laughs?.length === 5
 
 export function lpm(laughs: number[] | null | undefined, seconds: number): number | null {
   if (!counted(laughs) || seconds <= 0) return null

@@ -1,10 +1,11 @@
 """Notebook tools: observations, Brainstorm sessions and joke Rewrites."""
 
+import uuid
 from datetime import datetime
 from typing import Any
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session, undefer
+from sqlalchemy.orm import Session
 
 from app.connector.ink_image import pages_with_ink
 from app.connector.origins import brainstorms_using
@@ -119,23 +120,19 @@ def search_brainstorms(db: Session, user: User, query: str = "", limit: int = 25
     techniques = by_id(
         db.execute(select(CraftNote.id, CraftNote.title).where(CraftNote.user_id == user.id))
     )
-    sessions = db.scalars(
-        select(WritingSession)
-        .where(WritingSession.user_id == user.id)
-        .options(undefer(WritingSession.ink))  # deferred on the model; pages are counted here
-    )
+    sessions = db.scalars(select(WritingSession).where(WritingSession.user_id == user.id))
     rewrites = db.scalars(select(Brainstorm).where(Brainstorm.user_id == user.id))
     found: list[tuple[datetime, dict[str, Any]]] = [
         (
             s.updated_at,
             {
                 "kind": "brainstorm",
+                "handwritten_pages": 0,
                 "id": str(s.id),
                 "title": s.title,
                 "text": clip(s.content, 2000),
                 "technique": techniques.get(s.technique_id) if s.technique_id else None,
                 "linked_joke_ids": list(s.joke_ids or []),
-                "handwritten_pages": len(pages_with_ink(s.ink or [])),
                 "updated": ist_date(s.updated_at),
             },
         )
@@ -159,4 +156,12 @@ def search_brainstorms(db: Session, user: User, query: str = "", limit: int = 25
     ]
     found.sort(key=lambda pair: pair[0], reverse=True)
     shown, total = page([result for _, result in found], limit)
+    sessions_shown = {uuid.UUID(r["id"]): r for r in shown if r["kind"] == "brainstorm"}
+    if sessions_shown:
+        for session_id, ink in db.execute(
+            select(WritingSession.id, WritingSession.ink).where(
+                WritingSession.user_id == user.id, WritingSession.id.in_(sessions_shown)
+            )
+        ):
+            sessions_shown[session_id]["handwritten_pages"] = len(pages_with_ink(ink or []))
     return {"total": total, "results": shown}

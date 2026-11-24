@@ -126,6 +126,7 @@ def delete_setlist(setlist_id: uuid.UUID, user: CurrentUser, db: DbSession) -> N
 def log_out(log: PerformanceLog, hidden: set[uuid.UUID]) -> LogOut:
     return LogOut(
         id=log.id,
+        version=log.version,
         venue_name=log.venue.name if log.venue else "Unidentified Venue",
         performed_at=log.performed_at,
         duration_seconds=log.duration_seconds,
@@ -148,7 +149,7 @@ def list_logs(user: CurrentUser, db: DbSession) -> list[LogOut]:
         select(PerformanceLog)
         .where(PerformanceLog.user_id == user.id)
         .options(*(selectinload(r) for r in (PerformanceLog.venue, PerformanceLog.topics)))
-        .options(selectinload(PerformanceLog.jokes))
+        .options(selectinload(PerformanceLog.jokes), selectinload(PerformanceLog.review))
         .order_by(PerformanceLog.performed_at.desc())
     )
     hidden = trashed_joke_ids(db, user)

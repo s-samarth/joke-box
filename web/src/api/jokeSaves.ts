@@ -37,6 +37,13 @@ export const deleteJokeKey = ['joke', 'delete']
  * base on (see Own), so quick autosaves never clash with each other. If the joke has moved on
  * elsewhere, the server refuses with 409 and the edit goes to Couldn't sync, not over the other.
  */
+const wording = new Set(['setup', 'punchline', 'alt_punchlines', 'tag_lines', 'comments', 'version'])
+function wordingOnly(before: Joke | undefined, input: JokeInput) {
+  if (!before || input.version === undefined || before.version !== input.version) return false
+  return (Object.keys(input) as (keyof JokeInput)[]).every((key) =>
+    wording.has(key) || JSON.stringify(input[key]) === JSON.stringify(before[key]))
+}
+
 queryClient.setMutationDefaults(saveJokeKey, {
   ...QUEUED,
   mutationFn: async ({ id, input, keepMine }: SaveJokeVars) => {
@@ -48,18 +55,24 @@ queryClient.setMutationDefaults(saveJokeKey, {
     queryClient.setQueryData<Joke[]>(keys.jokes, (old = []) => old.map((b) => (b.id === id ? { ...b, version: saved.version } : b)))
     return saved
   },
-  onMutate: async ({ id, input }: SaveJokeVars) => {
+  onMutate: async ({ id, input, keepMine }: SaveJokeVars) => {
     // Optimistic update: show the change immediately, before the server answers.
     await queryClient.cancelQueries({ queryKey: keys.jokes })
-    queryClient.setQueryData<Setlist[]>(keys.setlists, (sets) => sets && followRuntime(sets, id, input.duration_seconds))
+    const before = queryClient.getQueryData<Joke[]>(keys.jokes)?.find((j) => j.id === id)
+    if (before?.duration_seconds !== input.duration_seconds) {
+      queryClient.setQueryData<Setlist[]>(keys.setlists, (sets) => sets && followRuntime(sets, id, input.duration_seconds))
+    }
     const now = new Date().toISOString()
     queryClient.setQueryData<Joke[]>(keys.jokes, (old = []) => {
       const existing = old.find((b) => b.id === id)
-      const next: Joke = { ...input, id, version: existing?.version ?? 0, created_at: existing?.created_at ?? now, updated_at: now }
+      const next: Joke = { ...input, id, version: existing?.version ?? 0, created_at: existing?.created_at ?? input.created_at ?? now, updated_at: now }
       return existing ? old.map((b) => (b.id === id ? next : b)) : [next, ...old]
     })
+    return { wordingOnly: !keepMine && wordingOnly(before, input) }
   },
-  onSettled: () => refreshWhenSynced(keys.jokes, keys.types, keys.statuses, keys.setlists),
+  onSettled: (_saved, error, _vars, context) => !error && context?.wordingOnly
+    ? refreshWhenSynced(keys.jokes)
+    : refreshWhenSynced(keys.jokes, keys.types, keys.statuses, keys.setlists),
 })
 
 queryClient.setMutationDefaults(deleteJokeKey, {
