@@ -11,7 +11,7 @@ from typing import Any
 
 from fastapi import HTTPException
 
-from app.models import CraftNote, Observation, Premise, Setlist, WritingSession
+from app.models import CraftNote, JokeCluster, Observation, Premise, Setlist, WritingSession
 from app.schemas.notebook import WritingSessionIn
 from app.schemas.shows import SetlistIn, SetlistOut
 
@@ -72,7 +72,10 @@ def check_session(session: WritingSession, body: WritingSessionIn, data: dict[st
 
 
 def check_fields(
-    thing: CraftNote | Observation | Premise, base: int | None, fields: dict[str, Any], why: str
+    thing: CraftNote | Observation | Premise | JokeCluster,
+    base: int | None,
+    fields: dict[str, Any],
+    why: str,
 ) -> None:
     """For things saved field by field: refuse an edit made from an older version that would
     change any of `fields`; else move its version on if this changes it."""

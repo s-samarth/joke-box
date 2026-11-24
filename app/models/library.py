@@ -174,6 +174,10 @@ class Joke(Trashable, OwnedMixin, Base):
     # The voice notes it came from (ids). Kept here, not on the recording, so a joke written
     # from a recording still waiting to upload keeps the link. One deleted just isn't shown.
     voice_note_ids: Mapped[list[str]] = mapped_column(JSON, default=list, server_default="[]")
+    # The cluster it's a version in. Dissolving the cluster keeps the joke.
+    cluster_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("clusters.id", ondelete="SET NULL"), index=True
+    )
     # Goes up by one on every save; a save edited from an older version is a conflict.
     version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
 

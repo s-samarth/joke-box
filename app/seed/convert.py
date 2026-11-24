@@ -7,7 +7,17 @@ from typing import Any
 from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
-from app.models import Brainstorm, Joke, PerformanceLog, Setlist, Subtopic, Topic, User, Venue
+from app.models import (
+    Brainstorm,
+    Joke,
+    JokeCluster,
+    PerformanceLog,
+    Setlist,
+    Subtopic,
+    Topic,
+    User,
+    Venue,
+)
 
 Json = dict[str, Any]
 TAGS_IN_PUNCHLINE = re.compile(r"\s*\btags?\s*:\s*", re.IGNORECASE)
@@ -37,6 +47,6 @@ def split_tags(punchline: str) -> tuple[str, list[str]]:
 
 def wipe(db: Session, user: User) -> None:
     """Remove every row the user owns, keeping the user."""
-    for model in (PerformanceLog, Setlist, Brainstorm, Joke, Venue, Subtopic, Topic):
+    for model in (PerformanceLog, Setlist, Brainstorm, Joke, JokeCluster, Venue, Subtopic, Topic):
         db.execute(delete(model).where(model.user_id == user.id))
     db.flush()

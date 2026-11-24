@@ -6,10 +6,20 @@ from fastapi import HTTPException
 from sqlalchemy import delete, exists, func, select
 from sqlalchemy.orm import Session
 
-from app.models import Joke, JokeType, Premise, Status, Subtopic, Topic, User, joke_type_links
+from app.models import (
+    Joke,
+    JokeCluster,
+    JokeType,
+    Premise,
+    Status,
+    Subtopic,
+    Topic,
+    User,
+    joke_type_links,
+)
 from app.models.base import written_at
 from app.schemas.library import JokeIn, JokeOut, status_name
-from app.services import chains, type_colors
+from app.services import chains, clusters, type_colors
 from app.services.clashes import next_version
 
 
@@ -34,6 +44,7 @@ def to_out(joke: Joke) -> JokeOut:
         comments=joke.comments,
         follows_id=joke.follows_id,
         voice_note_ids=list(joke.voice_note_ids or []),
+        cluster_id=joke.cluster_id,
         version=joke.version,
         created_at=joke.created_at,
         updated_at=joke.updated_at,
@@ -90,13 +101,26 @@ def check_premise(db: Session, user: User, data: JokeIn) -> None:
         raise HTTPException(422, "Unknown premise")
 
 
+def check_cluster(db: Session, user: User, data: JokeIn) -> None:
+    """One of the user's clusters. One dissolved since the edit was made (a save waiting
+    offline) is dropped rather than refused, so the joke is saved on its own."""
+    if data.cluster_id is None:
+        return
+    cluster = db.get(JokeCluster, data.cluster_id)
+    if cluster is None:
+        data.cluster_id = None
+    elif cluster.user_id != user.id:
+        raise HTTPException(422, "Unknown cluster")
+
+
 def plain_fields(data: JokeIn) -> dict[str, object]:
     """The fields copied as they are. An app too old to know about chains or premises leaves
     follows_id, premise_id or voice_note_ids out, and then the link is kept rather than cleared.
     The same goes for alt_punchlines: an older app never wipes them. A save without strength
     keeps the rating too: only an explicit null makes a joke unrated."""
     skip = {"types", "status", "created_at", "base_version"}
-    for link in ("follows_id", "premise_id", "strength", "voice_note_ids", "alt_punchlines"):
+    kept = ("follows_id", "premise_id", "strength", "voice_note_ids", "alt_punchlines")
+    for link in (*kept, "cluster_id"):
         if link not in data.model_fields_set:
             skip.add(link)
     fields = data.model_dump(exclude=skip)
@@ -109,6 +133,7 @@ def apply(db: Session, user: User, joke: Joke, data: JokeIn) -> None:
     """Copy editor fields onto the joke, creating any new type or status by name."""
     check_placement(db, user, data)
     check_premise(db, user, data)
+    check_cluster(db, user, data)
     fields = plain_fields(data)
     if "follows_id" in fields:
         chains.check_follows(db, user, joke.id, data.follows_id)
@@ -156,10 +181,13 @@ def save(db: Session, user: User, joke_id: uuid.UUID, data: JokeIn, existing: Jo
         unchanged = lambda: same_content(existing, data)  # noqa: E731
         existing.version = next_version(existing.version, data.base_version, unchanged, CONFLICT)
     joke = existing or Joke(id=joke_id, user_id=user.id)
+    was_in = joke.cluster_id
     apply(db, user, joke, data)
     db.add(joke)  # after apply, so lookups inside it don't flush a half-filled joke
     db.flush()
     prune_unused_types(db, user)
+    for cluster_id in {was_in, joke.cluster_id}:  # its status or strength can move the lead
+        clusters.settle(db, user, cluster_id)
     db.commit()
     db.refresh(joke)
     return joke
