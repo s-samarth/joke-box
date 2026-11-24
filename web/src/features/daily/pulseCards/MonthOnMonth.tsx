@@ -1,8 +1,8 @@
 /**
  * Month on month: pieces written and how many went on at each step (counts, not shares: one
  * observation that led somewhere isn't "100%"), for the last six months, each month counted on
- * what was written that month. Months still settling are faded, and the arrow compares
- * the last two that have settled, so a young month can't look like a slump.
+ * what was written that month. Months still settling are drawn lighter; the arrow
+ * compares this month with last month.
  */
 import { ArrowDown, ArrowUp } from 'lucide-react'
 import { KIND_META } from '../activity'
@@ -26,8 +26,9 @@ function Bars({ series, months }: { series: Series; months: MonthRow[] }) {
   const { values } = series
   const young = (m: MonthRow, i: number) => (series.settles ? m.settling : i === months.length - 1)
   const max = Math.max(1, ...values)
-  const settled = months.map((m, i) => ({ v: values[i], m, i })).filter((x) => !young(x.m, x.i))
-  const [before, last] = settled.slice(-2)
+  const at = (i: number) => (i >= 0 ? { v: values[i], m: months[i] } : undefined)
+  const last = at(months.length - 1)
+  const before = at(months.length - 2)
   const delta = before && last ? last.v - before.v : null
   return (
     <div className="border-t border-rule py-3">
@@ -45,7 +46,7 @@ function Bars({ series, months }: { series: Series; months: MonthRow[] }) {
           return (
             <div key={m.month} className="flex h-full flex-1 flex-col items-center justify-end">
               <span className={`mb-0.5 text-[11px] tabular ${young(m, i) ? 'text-faint' : 'text-dim'}`}>{v}</span>
-              <span className={`w-full rounded-[3px] ${series.bar} ${young(m, i) ? 'opacity-30' : 'opacity-80'}`} style={{ height: `${v ? Math.max(4, (v / max) * 70) : 0}%` }} />
+              <span className={`w-full rounded-[3px] ${series.bar} ${young(m, i) ? 'opacity-55' : ''}`} style={{ height: `${v ? Math.max(4, (v / max) * 70) : 0}%` }} />
             </div>
           )
         })}
@@ -68,7 +69,7 @@ export function MonthOnMonth({ months }: { months: MonthRow[] }) {
   return (
     <PulseCard title="Month on month, of what you wrote each month" className="@container">
       <div className="grid gap-x-5 @lg:grid-cols-2">{series.map((s) => <Bars key={s.label} series={s} months={months} />)}</div>
-      <p className="mt-1 text-xs text-faint">Faded months are still settling: ideas take a few weeks to go somewhere, and this month isn't over.</p>
+      <p className="mt-1 text-xs text-faint">Lighter months are still settling: ideas take a few weeks to go somewhere, and this month isn't over.</p>
     </PulseCard>
   )
 }
