@@ -166,15 +166,23 @@ From the top:
   this one, rolling). Then the last 12 months as a grid of days across the full width (like
   GitHub's), greener the more you wrote, the three biggest days gold. Under it **Big days** (like
   Garmin's records), two columns from tablet width:
-  the biggest writing day, the most jokes in a day, the longest night on stage, the best room by
-  LPM and the longest joke streak, each beside a small calendar day. Ties go to the earliest, so a record moves only when it's beaten.
+  the biggest writing day, the most jokes in a day, the longest night on stage, your top-rated
+  shows (how many got your highest rating, and how many you rated 4★ and up) and the longest joke streak, each beside a small calendar day. Ties go to the earliest, so a record moves only when it's beaten.
 - **Year review** (like Spotify Wrapped): a card with "2026 so far" on tape, how far through the
   year you are, and every past year with anything in it ("2025 wrapped"). This year stays "so
   far" until 31 December is over. A year opens as full-screen cards on a phone (a tall card in the
-  middle on an iPad or laptop): the total and its split (against last year, and the pace to 31
-  December), the best month, the biggest day, the longest joke streak, the top topic, when you
-  write, the year on stage (gold: time, shows, nights, best room, busiest month, longest set) and
-  from notebook to stage. A card with nothing to say is left out. Tap the right to go on and the
+  middle on an iPad or laptop), each year in its own look, taken in turn
+  ([themes.ts](../web/src/features/daily/year/themes.ts), [wrapped.css](../web/src/features/daily/year/wrapped.css)):
+  2026 a **spray-painted brick wall** (the year as a tag with drips, stickers), 2025 a **photocopied
+  gig flyer** (halftone paper, shaded block letters, a red stamp, tear-off tabs) and 2024 a
+  **comedy-club marquee** (a frame of bulbs, letterboards, a neon sign), then round again. Every
+  card fills to its edges with a chart or grid. The cards: the cover (the year, pieces written and
+  their split, the year month by month as stacked bars, the year's best bits as stickers or tabs),
+  the best month (with every month as bars), the biggest day (with its month as a calendar), the
+  longest joke streak (with the year as rows of days, joke days lit), the top topics, when you
+  write (a punch card), the year on stage (its shows as tally marks; well-rated shows, 4★ and up,
+  and shows at your top rating; the busiest month and longest set; no LPM) and from notebook to
+  stage. A card with nothing to say is left out. Tap the right to go on and the
   left to go back (arrow keys on a keyboard); bars along the top show where you are; Escape or the
   X closes.
 - **Streak cards** ([StreakCards.tsx](../web/src/features/daily/StreakCards.tsx),
