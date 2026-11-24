@@ -61,8 +61,9 @@ directly, so a model change can break them, and Claude only finds out mid-conver
 - **A cluster's lead is worked out twice:** on the server (`app/services/clusters.py`, which
   stores it) and in the browser (`web/src/features/jokes/cluster/lead.ts`, so the list is right
   offline). Change the rule in both, with `tests/test_clusters.py` and `lead.test.ts`.
-- **The writing pulse is worked out twice:** in the browser for the Daily activity screen
-  (`web/src/features/daily/pulse.ts`, `pulseNotes.ts`) and in `app/connector/pulse.py` for Claude.
+- **The writing pulse is worked out twice:** in the browser for the Activity screen
+  (`web/src/features/daily/pulse.ts`, `pulseTrends.ts`, `pulseNotes.ts`) and in `app/connector/`
+  for Claude (`pulse.py`, `pulse_rows.py`, `pulse_trends.py`, `pulse_notes.py`).
   Change a rule in both, with the matching cases in `pulse.test.ts` and `tests/test_connector_pulse.py`.
 - **Tools only read, except `log_show`.** It writes shows (with what was learned there, from
   `learned`, saved on the show), and only for a sign-in with the

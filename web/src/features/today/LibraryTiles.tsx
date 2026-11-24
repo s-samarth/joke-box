@@ -1,7 +1,7 @@
 /**
  * Three shortcuts under the writing box on Home: Observations, Premises and Jokes (the same order
  * as the tabs above them, raw material first), each with how many
- * you have, in the colours they wear on Daily activity. One tap into any of the three, on any screen size.
+ * you have, in the colours they wear on Activity. One tap into any of the three, on any screen size.
  */
 import { Link } from 'react-router'
 import { useJokes } from '../../api/library'

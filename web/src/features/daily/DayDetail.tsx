@@ -1,70 +1,55 @@
 /**
- * The day you tapped on the calendar: its three counts up top (observations, premises, jokes),
- * then (with `lists`) what you wrote, grouped by kind, each linking to its page. On a phone this is
- * where the counts live, since a day's box only has room for dots. Home shows the counts alone.
+ * The day you tapped on the calendar (today to begin with): four counts, observations, premises
+ * and jokes written, and minutes on stage with its shows as tally marks. Counts only: the pieces
+ * themselves live in their lists. On a phone this is where a day's numbers live, since a day's
+ * box only has room for dots.
  */
-import { Link } from 'react-router'
 import { formatDate } from '../../lib/time'
+import { plural, secondsOf, type ShowDays } from '../shows/calendar/showMonth'
 import { countsOf, KIND_META, KINDS, totalOf, type DayActivity, type Kind } from './activity'
-
-interface Row {
-  id: string
-  to: string
-  text: string
-}
-
-/** Each kind's items as links: a joke by its setup, a premise by its take, an observation by its text. */
-function rows(day: DayActivity): Record<Kind, Row[]> {
-  return {
-    jokes: day.jokes.map((j) => ({ id: j.id, to: `/jokes/${j.id}`, text: j.setup || j.punchline || 'Untitled joke' })),
-    premises: day.premises.map((p) => ({ id: p.id, to: `/premises/${p.id}`, text: p.take || 'Untitled premise' })),
-    observations: day.observations.map((o) => ({ id: o.id, to: `/observations/${o.id}`, text: o.text || 'Empty observation' })),
-  }
-}
+import { Tally } from './Tally'
 
 const label = (k: Kind) => KIND_META[k].many[0].toUpperCase() + KIND_META[k].many.slice(1)
 
-export function DayDetail({ date, today, day, lists: showLists = true }: { date: string; today: string; day: DayActivity; lists?: boolean }) {
+function Tile({ dot, name, children }: { dot: string; name: string; children: React.ReactNode }) {
+  return (
+    <div className="min-w-0">
+      <dt className="flex items-center gap-1.5 text-xs text-dim sm:text-sm">
+        <span className={`size-2 shrink-0 rounded-full ${dot}`} />
+        <span className="truncate">{name}</span>
+      </dt>
+      <dd className="mt-1">{children}</dd>
+    </div>
+  )
+}
+
+export function DayDetail({ date, today, day, stage }: { date: string; today: string; day: DayActivity; stage: ShowDays }) {
   const counts = countsOf(day)
   const total = totalOf(counts)
-  const lists = rows(day)
+  const shows = stage.get(date) ?? []
+  const minutes = Math.round(secondsOf(shows) / 60)
   const isToday = date === today
+  const said = [total ? `${total} written` : 'nothing written', ...(shows.length ? [plural(shows.length, 'show')] : [])].join(' · ')
 
   return (
     <section aria-label="The day you picked">
-      <h2 className="mb-3 font-semibold">
+      <h2 className="mb-2.5 font-semibold">
         {isToday ? 'Today' : formatDate(`${date}T12:00:00+05:30`)}
-        <span className="font-normal text-dim"> · {total ? `${total} written` : 'nothing written'}</span>
+        <span className="font-normal text-dim"> · {said}</span>
       </h2>
-
-      <dl className="grid grid-cols-3 gap-2 rounded-xl border border-rule bg-ink-2 p-3 sm:p-4">
+      <dl className="grid grid-cols-2 gap-x-3 gap-y-4 rounded-xl border border-rule bg-ink-2 p-3.5 min-[480px]:grid-cols-4 sm:p-4">
         {KINDS.map((k) => (
-          <div key={k} className="min-w-0">
-            <dt className="flex items-center gap-1.5 text-xs text-dim sm:text-sm">
-              <span className={`size-2 shrink-0 rounded-full ${KIND_META[k].dot}`} />
-              <span className="truncate">{label(k)}</span>
-            </dt>
-            <dd className={`headline mt-1 text-[28px] tabular ${counts[k] ? KIND_META[k].text : 'text-faint'}`}>{counts[k]}</dd>
-          </div>
+          <Tile key={k} dot={KIND_META[k].dot} name={label(k)}>
+            <span className={`headline text-[28px] tabular ${counts[k] ? KIND_META[k].text : 'text-faint'}`}>{counts[k]}</span>
+          </Tile>
         ))}
+        <Tile dot="bg-tape" name="On stage">
+          <span className={`headline text-[28px] tabular ${minutes ? 'text-tape' : 'text-faint'}`}>{minutes}<span className="text-base">m</span></span>
+          {shows.length > 0 && (
+            <span className="mt-1 flex items-center gap-1.5 text-xs text-dim"><Tally count={shows.length} height={12} />{plural(shows.length, 'show')}</span>
+          )}
+        </Tile>
       </dl>
-
-      {total === 0 && <p className="mt-4 text-dim">Nothing written {isToday ? 'yet today' : 'that day'}.</p>}
-
-      {showLists && KINDS.filter((k) => counts[k]).map((k) => (
-        <div key={k} className="mt-5">
-          <h3 className="mb-1 flex items-center gap-2 text-sm font-semibold text-dim">
-            <span className={`size-2 rounded-full ${KIND_META[k].dot}`} />{label(k)}
-          </h3>
-          <ul className="divide-y divide-rule border-y border-rule">
-            {lists[k].map((r) => (
-              <li key={r.id}>
-                <Link to={r.to} className="block truncate py-3 hover:bg-ink-2/60">{r.text}</Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
     </section>
   )
 }

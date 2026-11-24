@@ -47,15 +47,15 @@ The journeys JokeBox is built around, step by step. Screen names link to [screen
 
 1. Home opens with the daily joke nudge. Yellow means today is still open; red means it's been three
    days or more; dark and spooky means over a week.
-2. Tap **Write it**: on Home it opens the Joke tab, on Daily activity it jumps to the box. Type a setup, and the punchline if you have it, and press
+2. Tap **Write it**: it opens Home's Joke tab. Type a setup, and the punchline if you have it, and press
    Enter. It saves to Random.
 3. The nudge turns into a small green line with your streak, and today gets a green dot on the
    calendar. Premises and observations show there too, in their own colours, but only jokes keep
    the streak. On day 7, 30, 60, 90 or 180, or a year, confetti and a toast mark the milestone
    (a stage streak gets the same when you log a show).
-4. The same calendar sits on Home, under the joke box. Tap any day there to see how many jokes,
-   premises and observations you wrote; on **Daily activity**, tapping a day also lists what they
-   were. Arrows page back through earlier months.
+4. The same calendar sits on Home, under the joke box, and on **Activity**. Tap any day to see how
+   many observations, premises and jokes you wrote and your minutes on stage. Arrows page back
+   through earlier months.
 
 ## 3. Work an observation into a joke or premise
 
@@ -201,7 +201,7 @@ sets and show record, so the stage decides which one works.
 5. If you recorded the set, tap **Count laughs for LPM** and count each laugh by its score. Under
    **What did you learn?**, write down the lesson: it stays on this show, beside the remarks.
 6. Save. The totals on **Shows** update straight away, the day turns gold on the show calendar
-   (on Shows and Daily activity), and the Stage streak card (Home and Daily activity) counts it: the streak, and the month's
+   (on Shows, and as gold dots on Activity's calendar), and the Stage streak card (Home and Activity) counts it: the streak, and the month's
    shows and minutes.
 
 ## 8a. Log a show from a recording, in a chat
@@ -228,14 +228,18 @@ recording and you only check it.
 ## 9. Review how it's going
 
 **The writing** (nothing to log):
-1. Open **Daily activity** and scroll past the calendar to **Writing pulse**.
-2. Read the pace (the last 30 days against the 30 before) and how far ideas got: how many
-   observations led somewhere, how many premises have a joke, how many jokes have a punchline
-   and how many you've marked Stage Ready or Complete.
-3. Under **Sitting idle**, tap a row to open that pile: unused observations, premises with no
-   joke, old drafts. **Worth knowing** adds what stands out, such as a kind you haven't written
-   in weeks or the topic with the most unused observations.
-4. Or ask Claude how the writing is going: with the connector on, it reads the same pulse and
+1. Open **Activity** and scroll past the calendar to **Writing pulse**.
+2. The tape card names the step where ideas stall most ("Your ideas stall at premise to joke")
+   and opens that pile. Under it, what stands out: a kind you haven't written in weeks, or the
+   topic with the most unused observations.
+3. Read where everything stands (each kind by status), how far ideas got in the last 90 days,
+   and **Month on month** to see whether those shares are climbing. **When you write** shows the
+   days and hours you actually write.
+4. Under **Sitting idle**, tap a chip to open that pile: unused observations, premises with no
+   joke, old drafts.
+5. Further down, **Highlights** has your best months (tap one for every month of it) and big days,
+   and the year card opens the year so far as full-screen cards; a past year opens wrapped.
+6. Or ask Claude how the writing is going: with the connector on, it reads the same pulse and
    can open the idle observations, premises and drafts it counts.
 
 **The shows:**

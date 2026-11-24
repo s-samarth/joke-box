@@ -51,8 +51,11 @@ SET = {
 PULSE = {
     "as_of",
     "too_little_yet",
-    "written",
+    "where_everything_stands",
     "how_far_ideas_got",
+    "narrowest_step",
+    "month_on_month",
+    "when_you_write",
     "sitting_idle",
     "worth_knowing",
 }

@@ -130,8 +130,15 @@ def test_library_tools(claude: tuple[TestClient, str]) -> None:
 def test_pulse_tool(claude: tuple[TestClient, str]) -> None:
     out = result(claude, "writing_pulse")
     assert set(out) == PULSE
-    assert set(items(out, "written")[0]) == {"kind", "last_30_days", "the_30_days_before"}
+    assert set(out["where_everything_stands"]) == {"observations", "premises", "jokes"}
     assert set(items(out, "how_far_ideas_got")[0]) == {"step", "done", "of"}
+    month = items(out, "month_on_month")[0]
+    assert set(month) == {"month", "pieces_written", "steps", "still_settling"}
+    assert out["when_you_write"] is None or set(out["when_you_write"]) == {
+        "busiest",
+        "of_pieces",
+        "by_weekday",
+    }
     # Nothing here sits idle; a sitting_idle row's fields are checked in test_connector_pulse.py.
 
 

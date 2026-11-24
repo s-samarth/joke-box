@@ -1,29 +1,34 @@
 /**
- * Daily activity, the part both screens share: the joke and stage streak cards, the month's total split by kind, the
- * calendar, and the day you tapped (today to begin with). The Daily activity page lists what you
- * wrote that day; Home shows only the day's counts, so the rest of Home stays in reach.
+ * The top of Activity, shared with Home: the joke and stage streak cards, the calendar card (the
+ * month's stage time and shows, its writing by kind, and every day with its dots), and the day
+ * you tapped (today to begin with) as four counts.
  */
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { useLogs } from '../../api/shows'
+import { monthStats } from '../shows/calendar/showMonth'
+import { showsByDay } from '../shows/insights/timelineMath'
 import { dayOf, monthSummary } from './activity'
 import { DayDetail } from './DayDetail'
 import { MonthCalendar } from './MonthCalendar'
-import { MonthMix } from './MonthMix'
 import { StreakCards } from './StreakCards'
 import { useActivity } from './useActivity'
 
-export function ActivityPanel({ lists }: { lists: boolean }) {
+export function ActivityPanel() {
   const { activity, today, habit } = useActivity()
+  const { data: logs = [] } = useLogs()
+  const stage = useMemo(() => showsByDay(logs), [logs])
   const [month, setMonth] = useState(today.slice(0, 7))
   const [selected, setSelected] = useState<string | null>(today)
   const shown = monthSummary(activity, month, today)
   const thisMonth = monthSummary(activity, today.slice(0, 7), today)
+  const picked = selected ?? today
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <StreakCards habit={habit} activity={activity} thisMonth={thisMonth} today={today} />
-      <MonthMix month={month} today={today} summary={shown} />
-      <MonthCalendar month={month} onMonth={setMonth} activity={activity} summary={shown} today={today} selected={selected} onSelect={setSelected} />
-      {selected && <DayDetail date={selected} today={today} day={dayOf(activity, selected)} lists={lists} />}
+      <MonthCalendar month={month} onMonth={setMonth} activity={activity} summary={shown} stage={stage} stageMonth={monthStats(stage, month)}
+        today={today} selected={selected} onSelect={(d) => setSelected(d === selected && d !== today ? today : d)} />
+      <DayDetail date={picked} today={today} day={dayOf(activity, picked)} stage={stage} />
     </div>
   )
 }

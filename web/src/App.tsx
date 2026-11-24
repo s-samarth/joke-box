@@ -39,7 +39,7 @@ const AnalysisEditor = named(() => import('./features/study/AnalysisEditor'), 'A
 const CraftPage = named(() => import('./features/craft/CraftPage'), 'CraftPage')
 const AreaPage = named(() => import('./features/craft/AreaPage'), 'AreaPage')
 const CraftNotePage = named(() => import('./features/craft/CraftNotePage'), 'CraftNotePage')
-const DailyPage = named(() => import('./features/daily/DailyPage'), 'DailyPage')
+const ActivityPage = named(() => import('./features/daily/ActivityPage'), 'ActivityPage')
 const TrashPage = named(() => import('./features/trash/TrashPage'), 'TrashPage')
 const ImportPage = named(() => import('./features/import/ImportPage'), 'ImportPage')
 const SearchPage = named(() => import('./features/search/SearchPage'), 'SearchPage')
@@ -75,7 +75,8 @@ export function App() {
           <Route path="sets" element={<SetsPage />} />
           <Route path="sets/:setId" element={<SetBuilder />} />
           <Route path="shows" element={<ShowsPage />} />
-          <Route path="daily" element={<DailyPage />} />
+          <Route path="activity" element={<ActivityPage />} />
+          <Route path="daily" element={<Navigate to="/activity" replace />} />
           <Route path="observations" element={<ObservationsLayout />}>
             <Route index element={<NoObservationSelected />} />
             <Route path=":observationId" element={<ObservationPage />} />
