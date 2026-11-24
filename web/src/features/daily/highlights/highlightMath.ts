@@ -124,3 +124,9 @@ export function yearGrid(activity: Activity, today: string): { weeks: GridCell[]
   const top = weeks.flat().filter((c) => c.total > 0).sort((a, b) => b.total - a.total || a.day.localeCompare(b.day)).slice(0, 3)
   return { weeks, top: new Set(top.map((c) => c.day)) }
 }
+
+/** Every month added up: the all-time count for each measure. */
+export function lifetime(rows: MonthTotals[]): Record<Measure, number> {
+  const keys: Measure[] = ['jokes', 'observations', 'premises', 'all', 'shows', 'stage']
+  return Object.fromEntries(keys.map((k) => [k, rows.reduce((n, r) => n + r[k], 0)])) as Record<Measure, number>
+}

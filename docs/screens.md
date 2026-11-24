@@ -151,7 +151,7 @@ From the top:
     three steps, as counts (a share would call one observation that led somewhere "100%"), each
     month counted on what was written that month. No status history is kept, so a month can only be
     judged by where its writing stands now: months that ended under 30 days ago are faded as still
-    settling (for pieces written, only this month), and the arrow compares the last two settled.
+    settling (for pieces written, only this month), and the arrow compares this month with last month. Above the streak cards, six all-time counts sit in two rows of three.
   - **When you write:** the last 90 days as a punch card, weekdays down, morning to night across,
     the busiest in gold ("Mostly Tuesday nights"), from 10 pieces.
   - **Sitting idle** (all of it, not just recent): unused observations, premises with no joke,
