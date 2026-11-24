@@ -87,6 +87,7 @@ export interface BigDays {
   writing: { day: string; total: number; kinds: ('observations' | 'premises' | 'jokes')[] } | null
   jokes: { day: string; jokes: number } | null
   stage: { day: string; shows: number; seconds: number } | null
+  busiest: { day: string; shows: number } | null
   rated: Ratings | null
   streak: Run | null
 }
@@ -96,11 +97,13 @@ export function bigDays(activity: Activity, stage: ShowDays, logs: PerformanceLo
   const writing = topDay(past, (d) => totalOf(countsOf(d)))
   const jokes = topDay(past, (d) => d.jokes.length)
   const night = topDay(stage, secondsOf)
+  const busiest = topDay(stage, (v) => v.length)
   const counts = writing && countsOf(writing.value)
   return {
     writing: writing && counts ? { day: writing.day, total: writing.score, kinds: (['observations', 'premises', 'jokes'] as const).filter((k) => counts[k]) } : null,
     jokes: jokes && { day: jokes.day, jokes: jokes.score },
     stage: night && { day: night.day, shows: night.value.length, seconds: night.score },
+    busiest: busiest && { day: busiest.day, shows: busiest.score },
     rated: ratingsOf(logs.filter((l) => toIstInput(l.performed_at).slice(0, 10) <= today)),
     streak: longestRun(past.filter(([, d]) => d.jokes.length).map(([day]) => day)),
   }
