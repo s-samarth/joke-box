@@ -21,6 +21,7 @@ import { Button } from '../../components/ui/Button'
 import { GrowingText, Textarea } from '../../components/ui/Field'
 import { Modal } from '../../components/ui/Modal'
 import { useFeedback } from '../../components/ui/feedbackContext'
+import { ClusterSection } from '../jokes/cluster/ClusterField'
 import { JokeDetails } from '../jokes/JokeDetails'
 import { PunchAlternates } from '../jokes/PunchAlternates'
 import { TagLines } from '../jokes/TagLines'
@@ -140,6 +141,8 @@ export function NewJokeForm({ prefill, plain, onClose }: { prefill: Prefill; pla
         </div>
 
         <VoiceNotesOn ids={draft.voice_note_ids ?? []} onChange={(voice_note_ids) => update({ voice_note_ids })} />
+
+        <ClusterSection value={draft.cluster_id ?? null} onChange={(cluster_id) => update({ cluster_id })} />
 
         <section aria-label="From observations">
           <h3 className="mb-2 text-sm text-dim">From observations</h3>

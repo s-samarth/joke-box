@@ -8,6 +8,7 @@ from app.models.base import utcnow
 from app.services.craft_areas import ensure_craft_areas
 from app.services.craft_kinds import ensure_craft_kinds
 from app.services.set_tags import add_default_set_tags
+from app.services.subtopics import unknown_for
 
 DEFAULT_STATUSES = [
     "Incomplete",
@@ -60,6 +61,9 @@ def ensure_defaults(db: Session, user: User) -> None:
     ensure_craft_areas(db, user)
     ensure_craft_kinds(db, user)
     db.flush()
+    random_topic = db.scalar(select(Topic).where(Topic.user_id == user.id, Topic.is_system))
+    if random_topic is not None:  # Random has its Subtopic unknown like every topic
+        unknown_for(db, user, random_topic)
 
 
 def random_topic_for(db: Session, user: User) -> Topic:

@@ -121,7 +121,7 @@ Some jokes are the same joke said another way: the punch stays and the setup or 
 changes. A **cluster** keeps those versions together, each still a whole joke with its own status,
 sets and show record, so the stage decides which one works.
 
-1. Open one of the versions. In its details, **Cluster** → **Add to a cluster** → **New cluster
+1. Open one of the versions. Under its words, **Cluster** → **Add to a cluster** → **New cluster
    from this joke**. That joke leads, and the cluster opens beside the list.
 2. **Add jokes you've written** opens a picker with the lead pinned at the top and the Jokes
    list's filters already set to the lead's topic and subtopic. Search, or change the filters

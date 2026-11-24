@@ -43,6 +43,8 @@ class SubtopicOut(BaseModel):
 
     id: uuid.UUID
     name: str
+    # The topic's default, "Subtopic unknown": can't be renamed or deleted.
+    is_system: bool
 
 
 class TopicOut(BaseModel):

@@ -42,15 +42,15 @@ still accept the old `bit_id` and `bit_ids` for good. Responses use only the new
 
 | Method | Path | Body / notes |
 |---|---|---|
-| GET | `/api/topics` | Topics with their subtopics, in your order; Random (`is_system`) first |
-| POST | `/api/topics` | `{name}` → 201, at the end. 409 on a duplicate name |
+| GET | `/api/topics` | Topics with their subtopics (`{id, name, is_system}`), in your order; Random (`is_system`) first, and in each topic its **Subtopic unknown** (`is_system`) last |
+| POST | `/api/topics` | `{name}` → 201, at the end, with its Subtopic unknown. 409 on a duplicate name |
 | PUT | `/api/topics/order` | `{ids}` → 204. Your topics in this order; Random stays first. Unknown ids are skipped and ones left out keep their order after the rest |
 | PATCH | `/api/topics/{id}` | `{name}`. The system topic can't be renamed |
-| DELETE | `/api/topics/{id}` | Moves its jokes, premises and show links to Random first. 400 for the system topic |
+| DELETE | `/api/topics/{id}` | Moves its jokes (into Random's Subtopic unknown), premises and show links to Random first. 400 for the system topic |
 | POST | `/api/topics/{id}/subtopics` | `{name}` → 201, at the end |
 | PUT | `/api/topics/{id}/subtopics/order` | `{ids}` → 204. Same rules as topics |
-| PATCH | `/api/subtopics/{id}` | `{name}` |
-| DELETE | `/api/subtopics/{id}` | Its jokes lose the subtopic |
+| PATCH | `/api/subtopics/{id}` | `{name}`. 400 for a topic's Subtopic unknown |
+| DELETE | `/api/subtopics/{id}` | Its jokes move to the topic's Subtopic unknown. 400 for the Subtopic unknown itself |
 | GET | `/api/types` | `[{id, name, color}]`, colour as `#rrggbb` |
 | PUT | `/api/types/color` | `{name, color}`. Works before the type exists, so a new type is coloured before its joke saves |
 | PATCH | `/api/types/{id}` | `{name}`. Renaming onto an existing type merges the two |
@@ -69,7 +69,7 @@ still accept the old `bit_id` and `bit_ids` for good. Responses use only the new
   "setup": "required, non-empty",
   "punchline": "",
   "topic_id": "uuid (yours)",
-  "subtopic_id": "uuid in that topic, or null",
+  "subtopic_id": "uuid in that topic, or null for the topic's Subtopic unknown",
   "types": ["One-Liner"],
   "status": "Draft",
   "strength": "1 to 5, or null for unrated (new jokes); left out, the rating is kept",

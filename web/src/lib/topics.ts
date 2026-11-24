@@ -1,5 +1,12 @@
-/** Wording for what happens to a topic's things when it's deleted. */
+/** Wording for what happens to a topic's things when it's deleted, and each topic's default subtopic. */
+import type { Topic } from '../api/types'
 import { RANDOM } from './jokeMeta'
+
+/** Every topic has one: where a joke filed under the topic with no subtopic picked goes. */
+export const UNKNOWN_SUBTOPIC = 'Subtopic unknown'
+
+/** The topic's "Subtopic unknown" (the server makes and protects it). */
+export const unknownOf = (topic: Topic | undefined) => topic?.subtopics.find((s) => s.is_system)
 
 export interface TopicUse {
   jokes: number

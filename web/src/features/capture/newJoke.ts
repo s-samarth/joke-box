@@ -7,6 +7,7 @@ import { useFeedback } from '../../components/ui/feedbackContext'
 import { announceSave } from '../../lib/announce'
 import { DEFAULT_RUNTIME } from '../../lib/duration'
 import { DEFAULT_STATUS } from '../../lib/jokeMeta'
+import { unknownOf } from '../../lib/topics'
 
 /**
  * Everything a new joke starts with: Random (unless you pick a topic), Draft, 15 seconds,
@@ -58,6 +59,8 @@ export function useCaptureJoke() {
       setup: c.setup.trim(),
       punchline: (c.punchline ?? '').trim(),
       topic_id: topicId,
+      // No subtopic picked: the topic's Subtopic unknown, as the server would file it.
+      subtopic_id: c.subtopic_id ?? unknownOf(topics.find((t) => t.id === topicId))?.id ?? null,
       created_at: c.created_at ?? new Date().toISOString(), // kept even if it only syncs tomorrow
     }
     // mutateAsync, not mutate's callbacks: those are skipped once the calling sheet has closed,

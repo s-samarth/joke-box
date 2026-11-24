@@ -20,6 +20,7 @@ from app.models import (
 from app.schemas.library import JokeIn, status_name
 from app.seed.convert import Json, seconds, split_tags, when, wipe
 from app.services import jokes as joke_svc
+from app.services import subtopics
 
 
 class Loader:
@@ -179,4 +180,5 @@ class Loader:
         for raw in data.get("setlists", []):
             self.load_setlist(raw)
         self.db.flush()
+        subtopics.ensure_all(self.db, self.user)
         joke_svc.prune_unused_types(self.db, self.user)

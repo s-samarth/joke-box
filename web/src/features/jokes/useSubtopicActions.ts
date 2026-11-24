@@ -27,7 +27,7 @@ export function useSubtopicActions(onRemoved?: (id: string) => void) {
     if (name && name !== s.name) a.renameSubtopic.mutate({ id: s.id, name }, { onError: fail })
   }
   const remove = async (s: Subtopic, topic: Topic) => {
-    const ok = await confirm({ title: `Delete ${s.name}?`, message: `Its jokes stay in ${topicName(topic)}, just not in a subtopic.`, confirmLabel: 'Delete subtopic', danger: true })
+    const ok = await confirm({ title: `Delete ${s.name}?`, message: `Its jokes stay in ${topicName(topic)}, in Subtopic unknown.`, confirmLabel: 'Delete subtopic', danger: true })
     if (ok) a.removeSubtopic.mutate(s.id, { onSuccess: () => onRemoved?.(s.id), onError: fail })
   }
   const reorder = (t: Topic, ids: string[]) => reorderSubs.mutate({ topicId: t.id, ids }, { onError: fail })

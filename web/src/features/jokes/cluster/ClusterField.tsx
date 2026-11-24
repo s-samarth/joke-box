@@ -1,7 +1,9 @@
 /**
- * The Cluster row on a joke: which cluster it's a version in, opening it, or taking it out. A joke
- * on its own can start a new cluster (it leads it, and the cluster opens so you can add the other
- * versions) or join one you have, picked from a searchable list.
+ * Which cluster a joke is a version in, shown above where it came from (it's the first thing to
+ * know about a joke with versions): one line that opens the cluster, with × to take it out. A
+ * joke on its own can start a new cluster (it leads it, and the cluster opens so you can add the
+ * other versions) or join one you have, picked from a searchable list. `ClusterSection` gives it
+ * its heading, on the joke page and in New joke.
  */
 import { Layers, Plus, Search, X } from 'lucide-react'
 import { useState } from 'react'
@@ -56,13 +58,14 @@ export function ClusterField({ jokeId, value, onChange }: Props) {
     const versions = versionsOf(value, jokes)
     const leads = leadOf(clusters.find((c) => c.id === value), versions)?.id === jokeId
     return (
-      <div className="flex flex-wrap items-center gap-2">
-        <Link to={`/jokes/c/${value}${query}`} className={`${chip} min-w-0`}>
+      // One line: the name gives way (truncates) so the × never drops below it.
+      <div className="flex min-h-11 items-center rounded-lg bg-ink-3 pr-1">
+        <Link to={`/jokes/c/${value}${query}`} className="flex min-w-0 flex-1 items-center gap-2 py-2 pl-3 text-[15px] hover:text-tape">
           <Layers size={16} className="shrink-0 text-tape" aria-hidden />
           <span className="truncate">Version of: {named(value)}</span>
           <span className="shrink-0 text-faint">· {leads ? 'Lead · ' : ''}{versionCount(versions.length)}</span>
         </Link>
-        <button type="button" onClick={() => onChange(null)} aria-label="Take out of the cluster" className="inline-flex size-10 items-center justify-center rounded-lg text-faint hover:bg-ink-3 hover:text-paper"><X size={18} /></button>
+        <button type="button" onClick={() => onChange(null)} aria-label="Take out of the cluster" className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-faint hover:bg-ink-4 hover:text-paper"><X size={17} /></button>
       </div>
     )
   }
@@ -96,5 +99,15 @@ export function ClusterField({ jokeId, value, onChange }: Props) {
         </ul>
       </Modal>
     </>
+  )
+}
+
+/** The Cluster field under its heading, styled like "From observations" below it. */
+export function ClusterSection(props: Props) {
+  return (
+    <section aria-label="Cluster">
+      <h2 className="mb-2 text-sm text-dim">Cluster</h2>
+      <ClusterField {...props} />
+    </section>
   )
 }

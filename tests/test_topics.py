@@ -40,16 +40,25 @@ def test_delete_topic_moves_jokes_to_random(alice: TestClient) -> None:
     assert alice.delete(f"/api/topics/{topic['id']}").status_code == 204
     moved = alice.get(f"/api/jokes/{joke['id']}").json()
     assert moved["topic_id"] == random_topic_id(alice)
-    assert moved["subtopic_id"] is None
+    assert moved["subtopic_id"] == unknown_of(alice, random_topic_id(alice))
 
 
-def test_delete_subtopic_clears_it_from_jokes(alice: TestClient) -> None:
+def unknown_of(client: TestClient, topic_id: str) -> str:
+    [topic] = [t for t in client.get("/api/topics").json() if t["id"] == topic_id]
+    [default] = [s for s in topic["subtopics"] if s["is_system"]]
+    return str(default["id"])
+
+
+def test_delete_subtopic_moves_its_jokes_to_the_default(alice: TestClient) -> None:
     topic = make_topic(alice, "Food")
     sub = alice.post(f"/api/topics/{topic['id']}/subtopics", json={"name": "Cooking"}).json()
     joke = put_joke(alice, topic_id=topic["id"], subtopic_id=sub["id"]).json()
     alice.delete(f"/api/subtopics/{sub['id']}")
     after = alice.get(f"/api/jokes/{joke['id']}").json()
-    assert (after["topic_id"], after["subtopic_id"]) == (topic["id"], None)
+    assert (after["topic_id"], after["subtopic_id"]) == (
+        topic["id"],
+        unknown_of(alice, topic["id"]),
+    )
 
 
 def test_subtopic_must_belong_to_topic(alice: TestClient) -> None:

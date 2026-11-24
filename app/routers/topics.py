@@ -18,8 +18,8 @@ from app.schemas.library import (
     TypeColorIn,
     TypeOut,
 )
+from app.services import subtopics, type_colors
 from app.services import topics as svc
-from app.services import type_colors
 from app.services.jokes import get_or_create_status
 from app.services.ordering import next_position, set_order
 
@@ -43,6 +43,9 @@ def create_topic(body: NameIn, user: CurrentUser, db: DbSession) -> Topic:
     topic = Topic(user_id=user.id, name=body.name, position=position)
     db.add(topic)
     svc.commit_or_conflict(db, "A topic with that name already exists")
+    subtopics.unknown_for(db, user, topic)  # every topic starts with its default subtopic
+    db.commit()
+    db.refresh(topic)
     return topic
 
 
@@ -89,6 +92,7 @@ def reorder_subtopics(topic_id: uuid.UUID, body: OrderIn, user: CurrentUser, db:
 @router.patch("/subtopics/{sub_id}", response_model=SubtopicOut)
 def rename_subtopic(sub_id: uuid.UUID, body: NameIn, user: CurrentUser, db: DbSession) -> Subtopic:
     sub = get_owned(db, Subtopic, sub_id, user)
+    subtopics.protect(sub, "renamed")
     sub.name = body.name
     svc.commit_or_conflict(db, "That subtopic already exists")
     return sub

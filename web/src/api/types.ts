@@ -14,6 +14,8 @@ export interface Me {
 export interface Subtopic {
   id: string
   name: string
+  /** The topic's default, "Subtopic unknown": can't be renamed or deleted. Missing in an old cached copy. */
+  is_system?: boolean
 }
 
 export interface Topic {

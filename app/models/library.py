@@ -15,6 +15,7 @@ from sqlalchemy import (
     Table,
     Text,
     Uuid,
+    false,
     text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -37,7 +38,7 @@ class Topic(OwnedMixin, Base):
     subtopics: Mapped[list["Subtopic"]] = relationship(
         back_populates="topic",
         cascade="all, delete-orphan",
-        order_by="(Subtopic.position, Subtopic.name)",
+        order_by="(Subtopic.is_system, Subtopic.position, Subtopic.name)",
     )
 
 
@@ -52,6 +53,8 @@ class Subtopic(OwnedMixin, Base):
     )
     name: Mapped[str] = mapped_column(String(120))
     position: Mapped[int] = mapped_column(Integer, default=0)
+    # "Subtopic unknown": the topic's default, protected, always last (services/subtopics.py).
+    is_system: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
     topic: Mapped[Topic] = relationship(back_populates="subtopics")
 
 
