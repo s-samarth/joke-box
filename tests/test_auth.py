@@ -29,7 +29,7 @@ def test_first_login_creates_random_topic_and_statuses(alice: TestClient) -> Non
     topics = alice.get("/api/topics").json()
     assert [t["name"] for t in topics] == ["Random"]
     statuses = [s["name"] for s in alice.get("/api/statuses").json()]
-    assert statuses[:3] == ["Incomplete", "Work in Progress", "Complete"]
+    assert statuses[:4] == ["Draft", "Incomplete", "Work in Progress", "Complete"]
 
 
 def test_second_login_does_not_duplicate_defaults(alice: TestClient) -> None:

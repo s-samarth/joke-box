@@ -1,11 +1,12 @@
 /**
- * Saving the order you drag topics, subtopics, observation topics and Craft notes into.
+ * Saving the order you drag topics, subtopics, observation topics, joke statuses and Craft notes into.
  *
  * The list moves on screen straight away (an optimistic update) and the new order is sent to the
  * server. If that fails (offline, say) the list jumps back and you're told why. Like renaming,
  * this needs a connection, so it isn't queued.
  */
 import { useMutation, type QueryKey } from '@tanstack/react-query'
+import { isDefaultStatus } from '../lib/jokeMeta'
 import { api } from './client'
 import { keys, queryClient } from './queryClient'
 import type { Named, Topic } from './types'
@@ -50,6 +51,13 @@ export const useReorderSubtopics = () =>
   useReorder<{ topicId: string; ids: string[] }>(keys.topics, ({ topicId }) => `/api/topics/${topicId}/subtopics/order`,
     (old, { topicId, ids }) => (old as Topic[]).map((t) => (t.id === topicId ? { ...t, subtopics: inOrder(t.subtopics, ids) } : t)),
     ({ ids }) => ids)
+
+/** Joke statuses. Draft stays first, so it isn't among the ids. */
+export const useReorderStatuses = () =>
+  useReorder<string[]>(keys.statuses, () => '/api/statuses/order', (old, ids) => {
+    const statuses = old as Named[]
+    return [...statuses.filter((s) => isDefaultStatus(s.name)), ...inOrder(statuses.filter((s) => !isDefaultStatus(s.name)), ids)]
+  }, (ids) => ids)
 
 export const useReorderObservationKinds = () =>
   useReorder<string[]>(keys.observationKinds, () => '/api/observation-topics/order', (old, ids) => inOrder(old as Named[], ids), (ids) => ids)

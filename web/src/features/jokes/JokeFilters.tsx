@@ -13,6 +13,7 @@ import { Input } from '../../components/ui/Field'
 import { Dropdown, type MenuItem } from '../../components/ui/Menu'
 import { UNDEFINED_TYPE, topicName } from '../../lib/jokeMeta'
 import { NO_PREMISE, ON_A_PREMISE } from '../../lib/premises'
+import { StatusManager } from './StatusManager'
 import { SubtopicManager } from './SubtopicManager'
 import { TopicManager } from './TopicManager'
 import { useSubtopicActions } from './useSubtopicActions'
@@ -49,7 +50,7 @@ export function JokeFilters({ f, edge = '-mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:
   const { data: types = [] } = useTypes()
   const { data: statuses = [] } = useStatuses()
   const { data: premises = [] } = usePremises()
-  const [managing, setManaging] = useState<'topics' | 'subtopics' | 'types' | null>(null)
+  const [managing, setManaging] = useState<'topics' | 'subtopics' | 'types' | 'statuses' | null>(null)
   const subActions = useSubtopicActions()
   const newTopic = useNewTopic()
   const topic = topics.find((t) => t.id === f.topic)
@@ -90,9 +91,11 @@ export function JokeFilters({ f, edge = '-mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:
     'divider',
     { label: 'Manage types…', onSelect: () => setManaging('types') },
   ]
-  const statusItems: MenuItem[] = [
+  const statusItems: (MenuItem | 'divider')[] = [
     { label: 'Any status', onSelect: () => f.set({ status: null }), checked: !f.status },
     ...statuses.map((s) => ({ label: s.name, onSelect: () => f.set({ status: s.name }), checked: f.status === s.name })),
+    'divider',
+    { label: 'Manage statuses…', onSelect: () => setManaging('statuses') },
   ]
   const sortItems: MenuItem[] = (Object.keys(SORTS) as SortKey[]).map((k) => ({ label: SORTS[k], onSelect: () => f.set({ sort: k === 'new' ? null : k }), checked: f.sort === k }))
 
@@ -120,6 +123,8 @@ export function JokeFilters({ f, edge = '-mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:
       <TopicManager open={managing === 'topics'} onClose={() => setManaging(null)} />
       <SubtopicManager topicId={managing === 'subtopics' ? (topic?.id ?? null) : null} onClose={() => setManaging(null)} onRemoved={(id) => f.sub === id && f.set({ sub: null })} />
       <TypeManager open={managing === 'types'} onClose={() => setManaging(null)} />
+      {/* A filter on a status that's renamed or deleted follows it, so the list doesn't empty out. */}
+      <StatusManager open={managing === 'statuses'} onClose={() => setManaging(null)} onRenamed={(from, to) => f.status === from && f.set({ status: to })} />
     </div>
   )
 }

@@ -55,8 +55,11 @@ still accept the old `bit_id` and `bit_ids` for good. Responses use only the new
 | PUT | `/api/types/color` | `{name, color}`. Works before the type exists, so a new type is coloured before its joke saves |
 | PATCH | `/api/types/{id}` | `{name}`. Renaming onto an existing type merges the two |
 | DELETE | `/api/types/{id}` | Removed from every joke |
-| GET | `/api/statuses` | In order of `position` |
+| GET | `/api/statuses` | Draft first (made if the account has none), then in order of `position` |
 | POST | `/api/statuses` | `{name}`. Returns the existing status if the name is already used |
+| PUT | `/api/statuses/order` | `{ids}`. Draft stays first whatever the order |
+| PATCH | `/api/statuses/{id}` | `{name}`. Renaming onto an existing status merges the two. Draft answers 400. The jokes' `updated_at` is left alone |
+| DELETE | `/api/statuses/{id}` | Its jokes, the Trash's included, go to Draft. Draft answers 400 |
 | GET | `/api/jokes` | Every joke, newest first |
 | GET | `/api/jokes/{id}` | One joke |
 | PUT | `/api/jokes/{id}` | See below. Creates any new type or status by name, and prunes types no joke uses |

@@ -27,6 +27,8 @@ export const LANGUAGES = ['Hinglish', 'Hindi', 'English']
 export const DEFAULT_STATUS = 'Draft'
 export const statusOf = (status: string | null): string =>
   !status?.trim() || status.trim().toLowerCase() === 'status unknown' ? DEFAULT_STATUS : status
+/** Draft can't be renamed, deleted or moved off the top of the list. */
+export const isDefaultStatus = (name: string): boolean => name.trim().toLowerCase() === DEFAULT_STATUS.toLowerCase()
 
 /** The protected default topic, where new and unfiled jokes land. Stored and shown as "Random". */
 export const RANDOM = 'Random'

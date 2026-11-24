@@ -24,6 +24,7 @@ from app.routers import (
     sessions,
     set_tags,
     shows,
+    statuses,
     studio,
     system,
     topics,
@@ -91,6 +92,7 @@ def create_app() -> FastAPI:
         set_tags,
         connections,
         clusters,
+        statuses,
     )
     for module in routers:
         app.include_router(module.router)

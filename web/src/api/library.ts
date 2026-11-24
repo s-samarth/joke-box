@@ -30,7 +30,7 @@ export const useDeleteJoke = () => useMutation<void, Error, string>({ mutationKe
 function useRefreshLibrary() {
   const qc = useQueryClient()
   return () => {
-    for (const key of [keys.topics, keys.types, keys.jokes, keys.logs, keys.premises, keys.observations]) {
+    for (const key of [keys.topics, keys.types, keys.statuses, keys.jokes, keys.logs, keys.premises, keys.observations]) {
       void qc.invalidateQueries({ queryKey: key })
     }
   }
@@ -80,6 +80,22 @@ export function useTypeActions() {
     onSuccess,
   })
   return { rename, remove }
+}
+
+/** Add, rename (onto an existing name: merge) or delete a joke status. Its jokes go to Draft on delete. */
+export function useStatusActions() {
+  const onSuccess = useRefreshLibrary()
+  const create = useMutation({ mutationFn: (name: string) => api<Named>('/api/statuses', 'POST', { name }), onSuccess })
+  const rename = useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) =>
+      api<void>(`/api/statuses/${id}`, 'PATCH', { name }),
+    onSuccess,
+  })
+  const remove = useMutation({
+    mutationFn: (id: string) => api<void>(`/api/statuses/${id}`, 'DELETE'),
+    onSuccess,
+  })
+  return { create, rename, remove }
 }
 
 export function useReseed() {

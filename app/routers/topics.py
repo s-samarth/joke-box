@@ -1,4 +1,4 @@
-"""Topics, subtopics, types and statuses."""
+"""Topics, subtopics and types. Statuses have their own router (statuses.py)."""
 
 import uuid
 
@@ -7,9 +7,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.auth.deps import CurrentUser, DbSession, get_owned
-from app.models import JokeType, Status, Subtopic, Topic
+from app.models import JokeType, Subtopic, Topic
 from app.schemas.library import (
-    NamedOut,
     NameIn,
     OrderIn,
     ShortNameIn,
@@ -20,7 +19,6 @@ from app.schemas.library import (
 )
 from app.services import subtopics, type_colors
 from app.services import topics as svc
-from app.services.jokes import get_or_create_status
 from app.services.ordering import next_position, set_order
 
 router = APIRouter(prefix="/api", tags=["library"])
@@ -133,16 +131,3 @@ def delete_type(type_id: uuid.UUID, user: CurrentUser, db: DbSession) -> None:
     """Jokes keep their other types; a joke left with none shows as Undefined."""
     db.delete(get_owned(db, JokeType, type_id, user))
     db.commit()
-
-
-@router.get("/statuses", response_model=list[NamedOut])
-def list_statuses(user: CurrentUser, db: DbSession) -> list[Status]:
-    query = select(Status).where(Status.user_id == user.id).order_by(Status.position)
-    return list(db.scalars(query))
-
-
-@router.post("/statuses", response_model=NamedOut, status_code=201)
-def create_status(body: ShortNameIn, user: CurrentUser, db: DbSession) -> Status:
-    status = get_or_create_status(db, user, body.name)
-    db.commit()
-    return status
