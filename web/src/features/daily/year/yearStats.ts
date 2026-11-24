@@ -1,15 +1,15 @@
 /**
  * A year in numbers, for the year review (like Spotify Wrapped): what you wrote and when, your
  * best month and day, your longest streak and top topic, your year on stage, and how far the
- * year's ideas got. The current year is "so far" (1 January to today); the full wrap is for a
+ * year's ideas got. Shows are counted by how you rated them, not by laughs. The current year is "so far" (1 January to today); the full wrap is for a
  * year that's over. Days are IST dates.
  */
-import type { Observation, PerformanceLog } from '../../../api/types'
-import { lpm } from '../../shows/lpm'
+import type { Observation } from '../../../api/types'
 import { secondsOf, type ShowDays } from '../../shows/calendar/showMonth'
 import { countsOf, totalOf, type Activity, type Counts } from '../activity'
 import { daysBetween } from '../dailyMath'
 import { longestRun, type Run } from '../highlights/highlightMath'
+import { ratingsOf } from '../highlights/ratings'
 import { isStageReady } from '../pulse'
 import { partIndex, PARTS, WEEKDAYS } from '../pulseTrends'
 
@@ -17,6 +17,7 @@ export interface YearMonth {
   month: string
   total: number
   jokes: number
+  counts: Counts
   /** Days anything was written, and days in the month (so far, for this one). */
   daysWritten: number
   days: number
@@ -36,9 +37,14 @@ export interface YearStats {
   best: YearMonth | null
   biggest: { day: string; counts: Counts; total: number } | null
   streak: Run | null
-  topTopic: { name: string; count: number } | null
-  rhythm: { day: string; part: string; count: number } | null
-  stage: { seconds: number; shows: number; nights: number; room: { lpm: number; venue: string } | null; busiest: { month: string; shows: number } | null; longest: number } | null
+  /** What was written each day of the year, for the biggest day's month. */
+  dayTotals: Map<string, number>
+  /** Days with a new joke this year, for the streak's year grid. */
+  jokeDays: Set<string>
+  /** The topics most written on, most first (at most 6). */
+  topics: { name: string; count: number }[]
+  rhythm: { day: string; part: string; count: number; grid: number[][] } | null
+  stage: { seconds: number; shows: number; nights: number; well: number; top: number; atTop: number; busiest: { month: string; shows: number } | null; longest: number } | null
   through: { led: number; observations: number; built: number; premises: number; ready: number; jokes: number }
 }
 
@@ -74,7 +80,8 @@ export function yearStats(year: number, { activity, stage, used, built, topicNam
     const these = days.filter(([d]) => d.startsWith(month))
     const length = new Date(Date.UTC(year, m + 1, 0)).getUTCDate()
     const counted = month > to.slice(0, 7) ? 0 : month === to.slice(0, 7) ? Number(to.slice(8)) : length
-    return { month, total: these.reduce((s, [, a]) => s + totalOf(countsOf(a)), 0), jokes: these.reduce((s, [, a]) => s + a.jokes.length, 0), daysWritten: these.filter(([, a]) => totalOf(countsOf(a))).length, days: counted }
+    const c = these.reduce<Counts>((x, [, a]) => { const y = countsOf(a); return { observations: x.observations + y.observations, premises: x.premises + y.premises, jokes: x.jokes + y.jokes } }, ZERO)
+    return { month, total: totalOf(c), jokes: c.jokes, counts: c, daysWritten: these.filter(([, a]) => totalOf(countsOf(a))).length, days: counted }
   })
   const best = months.reduce<YearMonth | null>((b, m) => (m.total > (b?.total ?? 0) ? m : b), null)
   const biggest = days.reduce<YearStats['biggest']>((b, [day, a]) => { const c = countsOf(a); return totalOf(c) > (b?.total ?? 0) ? { day, counts: c, total: totalOf(c) } : b }, null)
@@ -82,18 +89,20 @@ export function yearStats(year: number, { activity, stage, used, built, topicNam
   const items = days.flatMap(([, a]) => [...a.jokes, ...a.premises, ...a.observations])
   const byTopic = new Map<string | null, number>()
   for (const i of items) byTopic.set(i.topic_id ?? null, (byTopic.get(i.topic_id ?? null) ?? 0) + 1)
-  const top = [...byTopic].sort((a, b) => b[1] - a[1])[0]
-  const grid = new Map<string, number>()
+  const topics = [...byTopic].sort((a, b) => b[1] - a[1]).slice(0, 6).map(([id, count]) => ({ name: topicName(id), count }))
+  const grid = WEEKDAYS.map(() => PARTS.map(() => 0))
   for (const i of items) {
     const local = new Date(new Date(i.created_at).getTime() + 5.5 * 3600_000)
-    const key = `${(local.getUTCDay() + 6) % 7}:${partIndex(local.getUTCHours())}`
-    grid.set(key, (grid.get(key) ?? 0) + 1)
+    grid[(local.getUTCDay() + 6) % 7][partIndex(local.getUTCHours())]++
   }
-  const busy = [...grid].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]
+  // The busiest cell; the first in the week (then the earliest in the day) wins a tie.
+  let busy: { d: number; p: number; n: number } | null = null
+  grid.forEach((row, d) => row.forEach((n, p) => { if (n > (busy?.n ?? 0)) busy = { d, p, n } }))
+  const when = busy as { d: number; p: number; n: number } | null
 
   const nights = [...stage].filter(([d]) => inYear(year)(d) && d <= to)
   const shows = nights.flatMap(([, s]) => s)
-  const rooms = shows.map((l) => ({ l, v: lpm(l.laughs, l.duration_seconds) })).filter((x): x is { l: PerformanceLog; v: number } => x.v !== null).sort((a, b) => b.v - a.v)
+  const rated = ratingsOf(shows)
   const perMonth = new Map<string, number>()
   for (const [d, s] of nights) perMonth.set(d.slice(0, 7), (perMonth.get(d.slice(0, 7)) ?? 0) + s.length)
   const busiest = [...perMonth].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]
@@ -108,9 +117,11 @@ export function yearStats(year: number, { activity, stage, used, built, topicNam
     lastYearTotal: last || null,
     months, best, biggest,
     streak: longestRun(days.filter(([, a]) => a.jokes.length).map(([d]) => d)),
-    topTopic: top ? { name: topicName(top[0]), count: top[1] } : null,
-    rhythm: busy ? { day: WEEKDAYS[Number(busy[0][0])], part: PARTS[Number(busy[0][2])], count: busy[1] } : null,
-    stage: shows.length ? { seconds: secondsOf(shows), shows: shows.length, nights: nights.length, room: rooms[0] ? { lpm: rooms[0].v, venue: rooms[0].l.venue_name } : null, busiest: busiest ? { month: busiest[0], shows: busiest[1] } : null, longest: Math.max(...shows.map((s) => s.duration_seconds)) } : null,
+    dayTotals: new Map(days.map(([d, a]) => [d, totalOf(countsOf(a))])),
+    jokeDays: new Set(days.filter(([, a]) => a.jokes.length).map(([d]) => d)),
+    topics,
+    rhythm: when ? { day: WEEKDAYS[when.d], part: PARTS[when.p], count: when.n, grid } : null,
+    stage: shows.length && rated ? { seconds: secondsOf(shows), shows: shows.length, nights: nights.length, well: rated.well, top: rated.top, atTop: rated.atTop, busiest: busiest ? { month: busiest[0], shows: busiest[1] } : null, longest: Math.max(...shows.map((s) => s.duration_seconds)) } : null,
     through: { led: all.o.filter(used).length, observations: all.o.length, built: all.p.filter((p) => built.has(p.id)).length, premises: all.p.length, ready: all.j.filter(isStageReady).length, jokes: all.j.length },
   }
 }

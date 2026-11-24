@@ -12,6 +12,7 @@ import { useUses } from '../../observations/useUsed'
 import { showsByDay } from '../../shows/insights/timelineMath'
 import { useActivity } from '../useActivity'
 import { storiesFor } from './storyCards'
+import { themeFor } from './themes'
 import { activeYears, yearStats } from './yearStats'
 import { YearStories } from './YearStories'
 
@@ -40,7 +41,7 @@ export function YearReview() {
           <span className="tape shrink-0 px-3 py-1.5 text-[17px] sm:px-3.5 sm:text-[19px]" style={{ '--tilt': '-2deg' } as React.CSSProperties}>{current} so far</span>
           <span className="min-w-0 flex-1">
             <span className="block text-[15px] font-semibold">How this year is going</span>
-            <span className="block text-[13px] text-dim">{storiesFor(now).length} cards · the full wrap opens on 1 January</span>
+            <span className="block text-[13px] text-dim">{storiesFor(now, themeFor(current)).length} cards · the full wrap opens on 1 January</span>
           </span>
           <ChevronRight size={20} className="shrink-0 text-tape" aria-hidden />
         </button>
@@ -55,7 +56,7 @@ export function YearReview() {
         </div>
       </div>
       {shown && open !== null && (
-        <YearStories title={shown.sofar ? `${open} so far` : `${open} wrapped`} stories={storiesFor(shown)} onClose={() => setOpen(null)} />
+        <YearStories title={shown.sofar ? `${open} so far` : `${open} wrapped`} stories={storiesFor(shown, themeFor(open))} theme={themeFor(open)} onClose={() => setOpen(null)} />
       )}
     </section>
   )

@@ -4,10 +4,11 @@
  * Days are IST dates. Ties go to the earliest, so a record only moves when it's beaten.
  */
 import type { PerformanceLog } from '../../../api/types'
-import { lpm } from '../../shows/lpm'
+import { toIstInput } from '../../../lib/time'
 import { secondsOf, type ShowDays } from '../../shows/calendar/showMonth'
 import { countsOf, totalOf, type Activity } from '../activity'
 import { daysBetween, shiftDay, shiftMonth } from '../dailyMath'
+import { ratingsOf, type Ratings } from './ratings'
 
 export type Measure = 'jokes' | 'observations' | 'premises' | 'all' | 'shows' | 'stage'
 
@@ -86,7 +87,7 @@ export interface BigDays {
   writing: { day: string; total: number; kinds: ('observations' | 'premises' | 'jokes')[] } | null
   jokes: { day: string; jokes: number } | null
   stage: { day: string; shows: number; seconds: number } | null
-  room: { day: string; lpm: number; venue: string } | null
+  rated: Ratings | null
   streak: Run | null
 }
 
@@ -95,14 +96,12 @@ export function bigDays(activity: Activity, stage: ShowDays, logs: PerformanceLo
   const writing = topDay(past, (d) => totalOf(countsOf(d)))
   const jokes = topDay(past, (d) => d.jokes.length)
   const night = topDay(stage, secondsOf)
-  const rooms = logs.map((l) => ({ l, v: lpm(l.laughs, l.duration_seconds) })).filter((x): x is { l: PerformanceLog; v: number } => x.v !== null)
-  const room = rooms.reduce<(typeof rooms)[number] | null>((b, x) => (!b || x.v > b.v ? x : b), null)
   const counts = writing && countsOf(writing.value)
   return {
     writing: writing && counts ? { day: writing.day, total: writing.score, kinds: (['observations', 'premises', 'jokes'] as const).filter((k) => counts[k]) } : null,
     jokes: jokes && { day: jokes.day, jokes: jokes.score },
     stage: night && { day: night.day, shows: night.value.length, seconds: night.score },
-    room: room && { day: room.l.performed_at, lpm: room.v, venue: room.l.venue_name },
+    rated: ratingsOf(logs.filter((l) => toIstInput(l.performed_at).slice(0, 10) <= today)),
     streak: longestRun(past.filter(([, d]) => d.jokes.length).map(([day]) => day)),
   }
 }

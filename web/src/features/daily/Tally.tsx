@@ -5,7 +5,7 @@
 const GROUP = 22
 const STROKE = 4
 
-export function Tally({ count, height = 16, max = 20, className = '' }: { count: number; height?: number; max?: number; className?: string }) {
+export function Tally({ count, height = 16, max = 20, className = '', color = 'text-tape', style }: { count: number; height?: number; max?: number; className?: string; color?: string; style?: React.CSSProperties }) {
   const n = Math.min(count, max)
   if (n <= 0) return null
   const lines: [number, number, number, number][] = []
@@ -17,7 +17,7 @@ export function Tally({ count, height = 16, max = 20, className = '' }: { count:
   }
   const width = Math.ceil(n / 5) * GROUP - (n % 5 === 0 ? 6 : GROUP - (n % 5) * STROKE)
   return (
-    <svg aria-hidden width={Math.max(width, 3)} height={height} className={`shrink-0 text-tape ${className}`} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+    <svg aria-hidden width={Math.max(width, 3)} height={height} viewBox={`0 0 ${Math.max(width, 3)} ${height}`} className={`shrink-0 ${color} ${className}`} style={style} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
       {lines.map(([x1, y1, x2, y2], i) => <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} />)}
     </svg>
   )

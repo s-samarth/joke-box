@@ -12,7 +12,7 @@ let n = 0
 const joke = (day: string) => ({ id: `j${++n}`, setup: 'Made-up setup', punchline: '', status: 'Draft', topic_id: 't', created_at: noon(day), updated_at: noon(day) }) as unknown as Joke
 const obs = (day: string) => ({ id: `o${++n}`, text: 'Made-up note', topic_id: 't', premise_ids: [], joke_ids: [], created_at: noon(day), updated_at: noon(day) }) as unknown as Observation
 const show = (day: string, minutes: number, laughs: number[] | null = null) =>
-  ({ id: `s${++n}`, venue_name: 'Made-up Mic', performed_at: `${day}T15:00:00Z`, duration_seconds: minutes * 60, laughs }) as unknown as PerformanceLog
+  ({ id: `s${++n}`, venue_name: 'Made-up Mic', performed_at: `${day}T15:00:00Z`, duration_seconds: minutes * 60, rating: 3, laughs }) as unknown as PerformanceLog
 
 const jokes = [joke('2026-08-14'), joke('2026-08-14'), joke('2026-08-15'), joke('2026-08-16'), joke('2026-10-02')]
 const observations = [obs('2026-08-14'), obs('2026-03-01'), obs('2026-03-02'), obs('2026-03-03')]
@@ -45,7 +45,7 @@ describe('highlights', () => {
     expect(days.writing).toEqual({ day: '2026-08-14', total: 3, kinds: ['observations', 'jokes'] })
     expect(days.jokes).toEqual({ day: '2026-08-14', jokes: 2 })
     expect(days.stage).toEqual({ day: '2026-10-03', shows: 2, seconds: 27 * 60 })
-    expect(days.room?.lpm).toBeCloseTo(13 / 8)
+    expect(days.rated).toEqual({ well: 0, top: 3, atTop: 3, latest: '2026-10-20' })
     expect(days.streak).toEqual({ length: 3, from: '2026-08-14', to: '2026-08-16' })
   })
 
