@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.connector import library, notebook, performing, study
+from app.connector import library, notebook, performing, search, study
 from app.models import User
 from tests.conftest import signed_in
 from tests.test_craft import note_in
@@ -32,9 +32,9 @@ def test_search_finds_words_anywhere_and_filters(dev: TestClient, db: Session) -
     put_joke(dev, setup="Fake gym", tag_lines=["fake mirror tag"], strength=2)
     put_joke(dev, setup="Fake unrated mirror")
     me = account(db, "dev@example.com")
-    found = library.search_jokes(db, me, query="MIRROR")
+    found = search.search_jokes(db, me, query="MIRROR")
     assert found["total"] == 3  # unrated jokes count unless a min_strength is asked for
-    strong = library.search_jokes(db, me, query="mirror", min_strength=4)
+    strong = search.search_jokes(db, me, query="mirror", min_strength=4)
     assert [j["setup"] for j in strong["jokes"]] == ["Fake lift mirror"]
     assert strong["jokes"][0]["topic"] == "Random"
 
@@ -45,7 +45,7 @@ def test_other_users_and_the_trash_stay_hidden(dev: TestClient, db: Session) -> 
     gone = put_joke(dev, setup="Fake binned joke").json()
     dev.delete(f"/api/jokes/{gone['id']}")
     me = account(db, "dev@example.com")
-    assert library.search_jokes(db, me)["total"] == 0
+    assert search.search_jokes(db, me)["total"] == 0
     looked_up = library.get_jokes(db, me, [theirs["id"], gone["id"]])
     assert looked_up["jokes"] == []
     assert sorted(looked_up["not_found"]) == sorted([theirs["id"], gone["id"]])

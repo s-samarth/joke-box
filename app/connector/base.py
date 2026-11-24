@@ -7,7 +7,9 @@ from mcp.types import ToolAnnotations
 INSTRUCTIONS = """JokeBox is a stand-up comic's library: jokes (setup, punchline, tags) filed by \
 topic, premises (a take with a reason) that jokes rest on, sets in running order, logged shows, \
 observations, voice notes, brainstorms, Craft notes on how comedy works, and analyses of other \
-comics.
+comics. A cluster keeps versions of one joke together (the same punch, said another way): each \
+version is a whole joke with its own status and show record, and one is the lead, the version \
+the comic would do tonight. Count a cluster as one piece of material, not one per version.
 Start with jokebox_overview if you don't know what's there. Search first, then open the few \
 items you need. Quote Craft notes by title when you apply them. Handwritten brainstorms come as \
 images of their pages from get_brainstorm: read the handwriting from them. writing_pulse says how \

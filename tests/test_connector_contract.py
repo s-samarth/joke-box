@@ -21,7 +21,7 @@ from app.models import User
 from app.seed import reseed
 from tests.conftest import random_topic_id, signed_in
 from tests.connector_auth import connect, content, items, result, rpc
-from tests.connector_fields import BRIEF, DETAIL, LONG, PULSE, SET, TOOLS
+from tests.connector_fields import BRIEF, CLUSTER, DETAIL, LONG, PULSE, SET, TOOLS
 from tests.test_craft import note_in
 
 
@@ -73,6 +73,7 @@ def test_library_tools(claude: tuple[TestClient, str]) -> None:
         "jokes",
         "topics",
         "premises",
+        "clusters",
         "sets",
         "shows_logged",
         "observations",
@@ -94,6 +95,16 @@ def test_library_tools(claude: tuple[TestClient, str]) -> None:
     clustered = next(j for j in items(full, "jokes") if j["cluster"])
     assert set(clustered["cluster"]) == {"id", "title", "notes", "versions"}
     assert set(items(clustered["cluster"], "versions")[0]) == {"id", "setup", "status", "lead"}
+    listed = result(claude, "list_clusters")
+    assert set(listed) == {"total", "next_offset", "clusters"}
+    assert set(items(listed, "clusters")[0]) == CLUSTER
+    assert set(items(listed, "clusters")[0]["lead"]) == {"id", "setup"}
+    assert set(items(listed, "clusters")[0]["shows"]) == {"shows_done", "killed", "ok"} | {
+        "bombed",
+        "last_done",
+    }
+    narrowed = result(claude, "search_jokes", cluster_id=clustered["cluster"]["id"])
+    assert set(items(narrowed, "jokes")[0]) == BRIEF
 
     premises = result(claude, "list_premises")
     [premise] = items(premises, "premises")

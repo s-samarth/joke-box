@@ -10,8 +10,6 @@ from app.connector.jokes import (
     brief,
     chain_order,
     detail,
-    hashtags,
-    lines,
     load_names,
     rewrite_counts,
     sets_by_joke,
@@ -21,11 +19,12 @@ from app.connector.jokes import (
 from app.connector.notebook import observations_behind
 from app.connector.origins import voice_notes_behind
 from app.connector.show_record import EMPTY, records
-from app.connector.text import clip, matches, page, same_name
+from app.connector.text import clip, matches, same_name
 from app.models import (
     CraftArea,
     CraftNote,
     Joke,
+    JokeCluster,
     JokeType,
     Observation,
     PerformanceLog,
@@ -68,47 +67,13 @@ def overview(db: Session, user: User) -> dict[str, Any]:
             for t in topics
         ],
         "premises": count(db, Premise, user),
+        "clusters": count(db, JokeCluster, user),
         "sets": count(db, Setlist, user),
         "shows_logged": count(db, PerformanceLog, user),
         "observations": count(db, Observation, user),
         "craft_areas": [{"name": a.name, "notes": notes_per_area.get(a.id, 0)} for a in areas],
         "statuses": list(db.scalars(select(Status.name).where(Status.user_id == user.id))),
         "types": sorted(db.scalars(select(JokeType.name).where(JokeType.user_id == user.id))),
-    }
-
-
-def search_jokes(
-    db: Session,
-    user: User,
-    query: str = "",
-    topic: str = "",
-    status: str = "",
-    joke_type: str = "",
-    min_strength: int = 1,
-    premise_id: str = "",
-    limit: int = 25,
-    subtopic: str = "",
-    offset: int = 0,
-) -> dict[str, Any]:
-    """Jokes whose words match the query, narrowed by any of the filters, a page at a time."""
-    names = load_names(db, user)
-    found = [
-        j
-        for j in user_jokes(db, user)
-        if matches(query, j.setup, j.punchline, j.comments, *lines(j), *hashtags(j))
-        and same_name(topic, topic_name(names, j.topic_id))
-        and same_name(subtopic, names.subtopics.get(j.subtopic_id) if j.subtopic_id else "")
-        and same_name(status, j.status.name if j.status else "")
-        and (not joke_type or any(same_name(joke_type, t.name) for t in j.types))
-        and (min_strength <= 1 or (j.strength or 0) >= min_strength)
-        and (not premise_id or str(j.premise_id) == premise_id)
-    ]
-    shown, total = page(found, limit, offset=offset)
-    after = max(0, offset) + len(shown)
-    return {
-        "total": total,
-        "next_offset": after if after < total else None,
-        "jokes": [brief(j, names) for j in shown],
     }
 
 
