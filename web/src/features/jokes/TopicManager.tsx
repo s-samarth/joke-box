@@ -5,11 +5,11 @@
  */
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { useJokes, useTopicActions, useTopics } from '../../api/library'
-import { useReorderSubtopics, useReorderTopics } from '../../api/ordering'
+import { useReorderTopics } from '../../api/ordering'
 import { useObservations } from '../../api/notebook'
 import { usePremises } from '../../api/premises'
 import { useLogs } from '../../api/shows'
-import type { Subtopic, Topic } from '../../api/types'
+import type { Topic } from '../../api/types'
 import { Button, IconButton } from '../../components/ui/Button'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { Modal } from '../../components/ui/Modal'
@@ -17,6 +17,7 @@ import { SortableList } from '../../components/ui/SortableList'
 import { topicName } from '../../lib/jokeMeta'
 import { count as plural, topicMoveMessage } from '../../lib/topics'
 import { useNewTopic } from './useNewTopic'
+import { useSubtopicActions } from './useSubtopicActions'
 
 interface Props {
   open: boolean
@@ -34,7 +35,7 @@ export function TopicManager({ open, onClose, onRemoved }: Props) {
   const newTopic = useNewTopic()
   const a = useTopicActions()
   const reorder = useReorderTopics()
-  const reorderSubs = useReorderSubtopics()
+  const sub = useSubtopicActions(onRemoved)
   const { prompt, confirm, toast } = useFeedback()
   const fail = (e: Error) => toast(e.message)
   const count = (id: string) => jokes.filter((b) => b.topic_id === id || b.subtopic_id === id).length
@@ -50,36 +51,24 @@ export function TopicManager({ open, onClose, onRemoved }: Props) {
   const deleteTopic = async (t: Topic) => {
     if (await confirm({ title: `Delete ${t.name}?`, message: topicMoveMessage({ jokes: count(t.id), premises: premisesIn(t.id), observations: observationsIn(t.id), shows: logs.filter((l) => l.topic_ids.includes(t.id)).length }), confirmLabel: 'Delete topic', danger: true })) a.remove.mutate(t.id, { onSuccess: () => onRemoved?.(t.id), onError: fail })
   }
-  const addSub = async (t: Topic) => {
-    const name = await prompt({ title: `New subtopic in ${topicName(t)}`, label: 'Subtopic name', confirmLabel: 'Add subtopic' })
-    if (name) a.addSubtopic.mutate({ topicId: t.id, name }, { onError: fail })
-  }
-  const renameSub = async (s: Subtopic) => {
-    const name = await prompt({ title: 'Rename subtopic', initial: s.name, confirmLabel: 'Rename' })
-    if (name && name !== s.name) a.renameSubtopic.mutate({ id: s.id, name }, { onError: fail })
-  }
-  const deleteSub = async (s: Subtopic) => {
-    if (await confirm({ title: `Delete ${s.name}?`, message: 'Its jokes stay in the topic.', confirmLabel: 'Delete subtopic', danger: true })) a.removeSubtopic.mutate(s.id, { onSuccess: () => onRemoved?.(s.id), onError: fail })
-  }
-
   const topicRow = (t: Topic) => (
     <div className="flex items-center gap-1">
       <span className="min-w-0 flex-1 truncate font-medium">{topicName(t)}</span>
       <span className="mr-2 text-sm text-faint tabular" title={`${plural(count(t.id), 'joke', 'jokes')}, ${plural(premisesIn(t.id), 'premise', 'premises')}, ${plural(observationsIn(t.id), 'observation', 'observations')}`}>{filed(t.id)}</span>
-      <IconButton label={`Add subtopic to ${topicName(t)}`} onClick={() => addSub(t)}><Plus size={17} /></IconButton>
+      <IconButton label={`Add subtopic to ${topicName(t)}`} onClick={() => void sub.add(t)}><Plus size={17} /></IconButton>
       {!t.is_system && <IconButton label={`Rename ${t.name}`} onClick={() => renameTopic(t)}><Pencil size={16} /></IconButton>}
       {!t.is_system && <IconButton label={`Delete ${t.name}`} onClick={() => deleteTopic(t)} className="hover:text-light"><Trash2 size={16} /></IconButton>}
     </div>
   )
   // Each topic's subtopics are their own list: they move with the topic and reorder within it.
   const subtopics = (t: Topic) => t.subtopics.length > 0 && (
-    <SortableList items={t.subtopics} label={(s) => s.name} onReorder={(ids) => reorderSubs.mutate({ topicId: t.id, ids }, { onError: fail })}>
+    <SortableList items={t.subtopics} label={(s) => s.name} onReorder={(ids) => sub.reorder(t, ids)}>
       {(s) => (
         <div className="flex items-center gap-1 text-dim">
           <span className="min-w-0 flex-1 truncate">{s.name}</span>
           <span className="mr-2 text-sm text-faint tabular">{count(s.id)}</span>
-          <IconButton label={`Rename ${s.name}`} onClick={() => renameSub(s)}><Pencil size={15} /></IconButton>
-          <IconButton label={`Delete ${s.name}`} onClick={() => deleteSub(s)} className="hover:text-light"><Trash2 size={15} /></IconButton>
+          <IconButton label={`Rename ${s.name}`} onClick={() => void sub.rename(s)}><Pencil size={15} /></IconButton>
+          <IconButton label={`Delete ${s.name}`} onClick={() => void sub.remove(s, t)} className="hover:text-light"><Trash2 size={15} /></IconButton>
         </div>
       )}
     </SortableList>

@@ -26,10 +26,13 @@ export function ChipRow({ children, className = '' }: { children: ReactNode; cla
     }
   }, [])
 
-  // A mouse wheel only scrolls up and down; turn that sideways while there's more to see.
+  // A mouse wheel only scrolls up and down; turn that sideways while there's more to see. Only for
+  // the row itself: an open menu is drawn elsewhere on the page, but React still passes its wheel
+  // events up here, so scrolling down a long Topic menu used to slide the row sideways too.
   const onWheel = (e: WheelEvent) => {
     const el = scroller.current
-    if (el && (more.start || more.end) && Math.abs(e.deltaY) > Math.abs(e.deltaX)) el.scrollLeft += e.deltaY
+    if (!el || !el.contains(e.target as Node)) return
+    if ((more.start || more.end) && Math.abs(e.deltaY) > Math.abs(e.deltaX)) el.scrollLeft += e.deltaY
   }
 
   const mask = more.start || more.end ? fade(more.start, more.end) : undefined

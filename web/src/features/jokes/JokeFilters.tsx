@@ -12,7 +12,9 @@ import { Input } from '../../components/ui/Field'
 import { Dropdown, type MenuItem } from '../../components/ui/Menu'
 import { UNDEFINED_TYPE, topicName } from '../../lib/jokeMeta'
 import { NO_PREMISE, ON_A_PREMISE } from '../../lib/premises'
+import { SubtopicManager } from './SubtopicManager'
 import { TopicManager } from './TopicManager'
+import { useSubtopicActions } from './useSubtopicActions'
 import { TypeManager } from './TypeManager'
 import { useNewTopic } from './useNewTopic'
 import { SORTS, type SortKey, type useJokeFilters } from './useJokeFilters'
@@ -33,7 +35,8 @@ export function JokeFilters({ f }: { f: Filters }) {
   const { data: types = [] } = useTypes()
   const { data: statuses = [] } = useStatuses()
   const { data: premises = [] } = usePremises()
-  const [managing, setManaging] = useState<'topics' | 'types' | null>(null)
+  const [managing, setManaging] = useState<'topics' | 'subtopics' | 'types' | null>(null)
+  const subActions = useSubtopicActions()
   const newTopic = useNewTopic()
   const topic = topics.find((t) => t.id === f.topic)
   const sub = topic?.subtopics.find((s) => s.id === f.sub)
@@ -47,9 +50,13 @@ export function JokeFilters({ f }: { f: Filters }) {
     'divider',
     { label: 'Manage topics…', onSelect: () => setManaging('topics') },
   ]
-  const subItems: MenuItem[] = [
+  // Like the Topic menu: New subtopic first, managing them last, so they're handled where they're used.
+  const subItems: (MenuItem | 'divider')[] = [
+    { label: 'New subtopic', icon: <Plus size={16} className="text-tape" />, onSelect: () => void (topic && subActions.add(topic).then((s) => s && f.set({ sub: s.id }))) },
+    'divider',
     { label: 'All subtopics', onSelect: () => f.set({ sub: null }), checked: !f.sub },
     ...(topic?.subtopics ?? []).map((s) => ({ label: s.name, onSelect: () => f.set({ sub: s.id }), checked: f.sub === s.id })),
+    ...(topic?.subtopics.length ? (['divider', { label: 'Manage subtopics…', onSelect: () => setManaging('subtopics') }] as const) : []),
   ]
   const premise = premises.find((p) => p.id === f.premise)
   const short = (take: string, most = 48) => (take.length > most ? `${take.slice(0, most - 1).trimEnd()}…` : take)
@@ -83,7 +90,7 @@ export function JokeFilters({ f }: { f: Filters }) {
       </div>
       <ChipRow className="-mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
         <Dropdown align="start" items={topicItems} trigger={<span><MenuButton label={topic ? topicName(topic) : 'Topic'} on={Boolean(topic)} /></span>} />
-        {topic && topic.subtopics.length > 0 && (
+        {topic && (
           <Dropdown align="start" items={subItems} trigger={<span><MenuButton label={sub ? sub.name : 'Subtopic'} on={Boolean(sub)} /></span>} />
         )}
         <Dropdown align="start" items={premiseItems} trigger={<span><MenuButton label={premiseLabel} on={Boolean(f.premise)} /></span>} />
@@ -97,6 +104,7 @@ export function JokeFilters({ f }: { f: Filters }) {
         )}
       </ChipRow>
       <TopicManager open={managing === 'topics'} onClose={() => setManaging(null)} />
+      <SubtopicManager topicId={managing === 'subtopics' ? (topic?.id ?? null) : null} onClose={() => setManaging(null)} onRemoved={(id) => f.sub === id && f.set({ sub: null })} />
       <TypeManager open={managing === 'types'} onClose={() => setManaging(null)} />
     </div>
   )

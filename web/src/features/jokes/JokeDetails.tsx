@@ -12,11 +12,14 @@ import { FollowedBy, FollowsField } from './ChainFields'
 import { StrengthPicker } from '../../components/ui/StrengthPicker'
 import { CleanPicker, HashtagField, TypeToggles } from './DetailControls'
 import { RuntimeField } from './RuntimeField'
+import { SubtopicManager } from './SubtopicManager'
 import { TopicManager } from './TopicManager'
 import { NEW_TOPIC, useNewTopic } from './useNewTopic'
 import { TypeManager } from './TypeManager'
 
 const NEW = NEW_TOPIC
+// The Subtopic picker's last choice opens the Subtopics sheet instead of picking one.
+const MANAGE = '__manage_subtopics__'
 
 /** A label and its control. `edit` adds a small button that opens the manager for the whole list. */
 function Row({ label, edit, children }: { label: string; edit?: { label: string; open: () => void }; children: ReactNode }) {
@@ -39,7 +42,7 @@ export function JokeDetails({ jokeId, draft, update }: { jokeId?: string; draft:
   const actions = useTopicActions()
   const newTopic = useNewTopic()
   const { prompt, toast } = useFeedback()
-  const [managing, setManaging] = useState<'topics' | 'types' | null>(null)
+  const [managing, setManaging] = useState<'topics' | 'subtopics' | 'types' | null>(null)
   const topic = topics.find((t) => t.id === draft.topic_id)
   const status = statusOf(draft.status)
   const statusNames = statuses.map((s) => s.name)
@@ -66,6 +69,7 @@ export function JokeDetails({ jokeId, draft, update }: { jokeId?: string; draft:
     if (made) update({ topic_id: made.id, subtopic_id: null })
   }
   const pickSub = async (id: string) => {
+    if (id === MANAGE) return setManaging('subtopics')
     if (id !== NEW) return update({ subtopic_id: id || null })
     const name = await prompt({ title: `New subtopic in ${topicName(topic)}`, label: 'Subtopic name', confirmLabel: 'Add subtopic' })
     if (name && topic) actions.addSubtopic.mutate({ topicId: topic.id, name }, { onSuccess: (s) => update({ subtopic_id: s.id }), onError: (e) => toast(e.message) })
@@ -90,6 +94,7 @@ export function JokeDetails({ jokeId, draft, update }: { jokeId?: string; draft:
             <option value="">No subtopic</option>
             {topic?.subtopics.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             <option value={NEW}>New subtopic…</option>
+            {Boolean(topic?.subtopics.length) && <option value={MANAGE}>Manage subtopics…</option>}
           </Select>
         </div>
       </Row>
@@ -117,6 +122,7 @@ export function JokeDetails({ jokeId, draft, update }: { jokeId?: string; draft:
       </Row>
       <Row label="Hashtags"><HashtagField value={draft.hashtags} onChange={(h) => update({ hashtags: h })} suggestions={hashtags} /></Row>
       <TopicManager open={managing === 'topics'} onClose={() => setManaging(null)} onRemoved={topicRemoved} />
+      <SubtopicManager topicId={managing === 'subtopics' ? draft.topic_id : null} onClose={() => setManaging(null)} onRemoved={topicRemoved} />
       <TypeManager open={managing === 'types'} onClose={() => setManaging(null)} onRenamed={typeRenamed} onRemoved={typeRemoved} />
     </div>
   )

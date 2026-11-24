@@ -190,7 +190,7 @@ separate log to fall out of step. Items in the Trash don't count.
   as a list, the joke map (`/jokes/map`) or the premise web (`/jokes/web`). Map and Web take the
   whole screen under the header and filters, on every device. Beside an open joke the switch is
   three icons.
-- **List:** a search box ("Search words, tags, notes") and menus in one row that scrolls sideways: Topic, then Subtopic once a topic with subtopics is picked, Premise, Type,
+- **List:** a search box ("Search words, tags, notes") and menus in one row that scrolls sideways (a wheel over the row slides it; one over an open menu scrolls only the menu): Topic, then Subtopic once a topic is picked, Premise, Type,
   Status, and Sort (Newest, Oldest, Recently edited, Strongest, Weakest, Longest). Each row shows the
   setup, the start of the punchline, strength ticks (or a faint "Unrated"), type dots, the topic, the date it was added (or
   last edited, under Recently edited) and the runtime. Sorted by a date, the list is grouped into
@@ -256,6 +256,12 @@ separate log to fall out of step. Items in the Trash don't count.
   **New joke** opened while the list is filtered to a topic (and subtopic) starts filed there.
 - **New topic** leads the Topic menu, so you can add a topic without scrolling past the others or
   writing a joke first; the list then filters to it. **Manage topics…** stays at the bottom.
+- **The Subtopic menu** works the same way for the picked topic: **New subtopic** first (the list
+  then filters to it), **Manage subtopics…** last. That opens a sheet for that topic's subtopics
+  alone ([SubtopicManager.tsx](../web/src/features/jokes/SubtopicManager.tsx)): rename, delete,
+  drag into order, add, with each one's joke count. A joke's Subtopic picker ends with the same
+  **Manage subtopics…**. Jokes hold a subtopic by its id, so a rename leaves them as they are;
+  deleting one leaves its jokes in the topic, on no subtopic.
 - **Topic and type managers** are sheets for renaming and deleting across every joke. Jokes and
   premises share one topic list. Deleting a topic moves its jokes, premises and logged shows to
   Random, and the confirmation counts all three. The number beside a topic counts its jokes and
