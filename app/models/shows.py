@@ -104,6 +104,7 @@ class PerformanceLog(Trashable, OwnedMixin, Base):
     """One open mic or show, logged afterwards."""
 
     __tablename__ = "performance_logs"
+    version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
     __table_args__ = (CheckConstraint("rating BETWEEN 1 AND 5", name="rating_range"),)
 
     venue_id: Mapped[uuid.UUID | None] = mapped_column(

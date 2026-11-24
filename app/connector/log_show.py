@@ -12,7 +12,7 @@ from pydantic import ValidationError
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.auth.deps import get_owned
+from app.auth.deps import find_owned
 from app.connector.performing import lpm
 from app.connector.text import ist_date
 from app.models import Joke, PerformanceLog, Topic, User
@@ -94,8 +94,11 @@ def log_show(db: Session, user: User, raw_id: str, show: dict[str, Any]) -> dict
         raise ValueError(problem(exc)) from None
     try:
         target = show_id(raw_id)
+        previous = None
         if raw_id:
-            previous = get_owned(db, PerformanceLog, target, user)
+            previous = find_owned(db, PerformanceLog, target, user, lock=True)
+            if previous is None:
+                raise ValueError("PerformanceLog not found")
             if not topic_ids:
                 body.topic_ids = [t.id for t in previous.topics]
             if not body.notes.strip():
@@ -106,7 +109,7 @@ def log_show(db: Session, user: User, raw_id: str, show: dict[str, Any]) -> dict
                 body.venue_name = previous.venue.name
         elif not topic_ids:
             body.topic_ids = random_topic(db, user)
-        log = save_show(db, user, target, body, review)
+        log = save_show(db, user, target, body, review, previous)
     except HTTPException as exc:
         raise ValueError(str(exc.detail)) from None
     return {

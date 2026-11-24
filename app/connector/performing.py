@@ -82,7 +82,7 @@ def get_set(db: Session, user: User, set_id: str) -> dict[str, Any]:
 
 def lpm(laughs: list[int] | None, seconds: int) -> float | None:
     """Laughs per minute, as the app works it out: points (1-5 per laugh) over minutes."""
-    if not laughs or not any(laughs) or seconds <= 0:
+    if not laughs or seconds <= 0:
         return None
     points = sum(n * (i + 1) for i, n in enumerate(laughs))
     return round(points / (seconds / 60), 1)

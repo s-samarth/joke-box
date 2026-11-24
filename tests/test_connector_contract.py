@@ -205,6 +205,8 @@ def test_notebook_and_study_tools(claude: tuple[TestClient, str]) -> None:
         "id",
         "title",
         "text",
+        "text_length",
+        "more_from_char",
         "technique",
         "linked_joke_ids",
         "linked_observation_ids",
@@ -223,6 +225,8 @@ def test_notebook_and_study_tools(claude: tuple[TestClient, str]) -> None:
         "joke_setup",
         "title",
         "text",
+        "text_length",
+        "more_from_char",
         "updated",
     }
 
