@@ -123,8 +123,10 @@ sets and show record, so the stage decides which one works.
 
 1. Open one of the versions. In its details, **Cluster** → **Add to a cluster** → **New cluster
    from this joke**. That joke leads, and the cluster opens beside the list.
-2. **Add jokes you've written** ticks the other versions, from any topic (the lead's subtopic
-   comes first). A joke in another cluster moves over.
+2. **Add jokes you've written** opens a picker with the lead pinned at the top and the Jokes
+   list's filters already set to the lead's topic and subtopic. Search, or change the filters
+   (Clear filters looks everywhere), and tap each version to tick it, then **Add N versions**. A
+   joke in another cluster moves over.
 3. Name what they share at the top (left empty, the lead's setup stands in), and keep notes.
 4. Compare the boxes side by side and edit the words in place. Tap **Make lead** on any version to
    make it the one you'd do tonight; the list then shows that version.

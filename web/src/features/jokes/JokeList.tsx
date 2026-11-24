@@ -16,6 +16,7 @@ import { clock } from '../../lib/duration'
 import { groupByMonth } from '../../lib/months'
 import { formatDate } from '../../lib/time'
 import { badge, type ListRow } from './cluster/stacks'
+import { JokeRowBody } from './JokeRowBody'
 import { sortDate, type SortKey } from './useJokeFilters'
 
 /** Phones: down the screen edge like the other lists. Desktop: down the right of the list column. */
@@ -41,17 +42,14 @@ function JokeRow({ row, topic, active, query, edited, opening, flat }: RowProps)
       {/* Opening the first joke reshapes the screen, so that one fades; moving between jokes doesn't. */}
       <Link to={`${to}${query ? `?${query}` : ''}`} viewTransition={opening} aria-current={active ? 'page' : undefined}
         className={`block border-l-2 py-3.5 pr-2 pl-3 transition-colors ${active ? 'border-tape bg-ink-2' : 'border-transparent hover:bg-ink-2/60'}`}>
-        <p className="line-clamp-2 leading-snug">{joke.setup}</p>
-        {joke.punchline && <p className="mt-1 line-clamp-2 text-[15px] text-dim">{joke.punchline}</p>}
-        {/* Wraps when crowded (two long types): one line that can't wrap ran off a phone's edge and let the page zoom out. */}
-        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-faint">
+        <JokeRowBody joke={joke}>
           {row.clusterId && <VersionsBadge row={row} flat={flat} />}
           <StrengthTicks strength={joke.strength} />
           {joke.types.slice(0, 2).map((t) => <span key={t} className="shrink-0 whitespace-nowrap"><TypeLabel name={t} /></span>)}
           <span className="truncate">{topicName(topic)}</span>
           <span className="ml-auto shrink-0 tabular">{edited ? `Edited ${formatDate(joke.updated_at)}` : formatDate(joke.created_at)}</span>
           {joke.duration_seconds > 0 && <span className="flex shrink-0 items-center gap-1 tabular"><Timer size={12} aria-label="Runs" />{clock(joke.duration_seconds)}</span>}
-        </div>
+        </JokeRowBody>
       </Link>
     </li>
   )

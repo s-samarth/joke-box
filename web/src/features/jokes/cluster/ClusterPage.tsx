@@ -72,7 +72,7 @@ export function ClusterPage() {
           </p>
         )}
       </div>
-      <AddVersionsDialog clusterId={clusterId} lead={lead} open={adding} onOpenChange={setAdding} />
+      {adding && <AddVersionsDialog clusterId={clusterId} lead={lead} onClose={() => setAdding(false)} />}
     </article>
   )
 }
