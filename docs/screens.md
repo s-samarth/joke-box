@@ -546,7 +546,7 @@ open beside it on an iPad in landscape or a laptop, or as its own page on a phon
   (`?q=`), and **Topic**, **Kind**, **Status** (`?status=`) and **Not used yet** (`?unused=1`) in a row that scrolls
   sideways, then a sort (Newest, the default, Oldest, Strongest, Weakest; `?sort=`); each choice
   counts within the other filters, and **Clear** ends the row while any filter is set. They're remembered for an hour like Jokes' filters, so the tab bar brings you back to them
-  (an open New sheet isn't). Then how many there are. Each row: the words (three lines), then its topic, kind,
+  (an open New sheet isn't). Then how many there are; discarded observations are hidden, as on Premises and Jokes, with "· 3 discarded hidden **Show**" on that line (`?discarded=show`; **Hide** puts them away), and picking a status shows exactly that status. Each row: the words (three lines), then its topic, kind,
   what came from it ("1 joke · 1 premise · 1 brainstorm" or "Not used yet"), the date, its strength ticks and its status (none for a Draft).
 - **An observation:** the words, edited in place and saved on their own; **Topic** and
   **Kind (optional)**, each ending in New topic… / New kind…; **Strength**, Unrated until you rate it, as on a joke; **Status**, the same four chips as a premise's (Draft to start); **Write a joke from it** and **Write a premise from it**

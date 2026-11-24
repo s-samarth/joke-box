@@ -2,8 +2,9 @@
  * Observations, like Premises: a searchable list with the open observation beside it (see
  * SplitView); on a phone the list gives way to the one you open. Filter by topic and kind, or to
  * status, or the ones nothing has come from yet, and sort by date or strength; all of it lives in the URL
- * (?topic=, ?kind=, ?status=, ?unused=1, ?q=, ?sort=) and is remembered for a while like Jokes' (lib/useRememberedParams), so the tab bar brings
- * you back to it. New opens a sheet (?new=1, so the + button can open it too).
+ * (?topic=, ?kind=, ?status=, ?unused=1, ?q=, ?sort=, ?discarded=show) and is remembered for a while like Jokes' (lib/useRememberedParams), so the tab bar brings
+ * you back to it. Discarded ones are hidden until Show on the count line, or until you pick a
+ * status, like premises and jokes. New opens a sheet (?new=1, so the + button can open it too).
  */
 import { Eye, Plus, Search, X } from 'lucide-react'
 import { useState } from 'react'
@@ -21,13 +22,14 @@ import { SplitView, WIDE_LIST } from '../../components/ui/SplitView'
 import { matchesWords } from '../../lib/search'
 import { formatDate } from '../../lib/time'
 import { useRememberedParams } from '../../lib/useRememberedParams'
-import { count } from '../../lib/topics'
 import { KindManager } from './KindManager'
 import { NewObservationDialog } from './NewObservationDialog'
 import { KindMenu, TopicMenu } from './ObservationMenus'
 import { MenuButton } from '../jokes/JokeFilters'
 import { kindLabel, matchesFilters, OBSERVATION_SORTS, observationSort, PLAIN, PLAIN_KIND, sortObservations, topicLabel, type ObservationSort } from './observationMeta'
 import { useUses } from './useUsed'
+import { ObservationCount } from './ObservationCount'
+import { isDiscarded, keepDiscarded } from '../jokes/discarded'
 import { PremiseStatusTag } from '../premises/PremiseStatusPicker'
 import { IdeasSwitch } from '../../layout/IdeasSwitch'
 
@@ -58,12 +60,16 @@ export function ObservationsLayout() {
   kept.delete('new')
   const search = kept.size ? `?${kept}` : ''
   const all = sortObservations(observations ?? [], sort)
+  const showDiscarded = params.get('discarded') === 'show'
   const open = (o: Observation) => !(unused && uses.used(o)) && (!status || premiseStatus(o.status) === status)
-  const shown = all.filter((o) => matchesFilters(o, topic, kind) && open(o) && matchesWords(query, [o.text]))
+  // Discarded ones stay out until Show, or until a status is picked, like premises and jokes.
+  const { kept: shown, discarded } = keepDiscarded(all.filter((o) => matchesFilters(o, topic, kind) && open(o) && matchesWords(query, [o.text])), showDiscarded, Boolean(status))
+  const hidingDiscarded = discarded > 0 && !showDiscarded
+  const counted = (o: Observation) => open(o) && (showDiscarded || Boolean(status) || !isDiscarded(o))
   const active = Boolean(topic || kind || unused || status || query.trim())
   // Each menu counts within the other filters, so the numbers match what picking would show.
-  const topicCount = (v: string | null) => all.filter((o) => matchesFilters(o, v, kind) && open(o)).length
-  const kindCount = (v: string | null) => all.filter((o) => matchesFilters(o, topic, v) && open(o)).length
+  const topicCount = (v: string | null) => all.filter((o) => matchesFilters(o, v, kind) && counted(o)).length
+  const kindCount = (v: string | null) => all.filter((o) => matchesFilters(o, topic, v) && counted(o)).length
   const statusItems: MenuItem[] = [
     { label: 'Any status', onSelect: () => setParam('status', null), checked: !status },
     ...PREMISE_STATUSES.map((s) => ({ label: s, onSelect: () => setParam('status', s), checked: status === s })),
@@ -89,14 +95,15 @@ export function ObservationsLayout() {
         <Dropdown align="start" items={sortItems} trigger={<span><MenuButton label={OBSERVATION_SORTS[sort]} on={false} /></span>} />
         {active && <button type="button" onClick={clear} className="inline-flex h-9 shrink-0 items-center gap-1 px-2 text-sm text-dim hover:text-paper"><X size={14} /> Clear</button>}
       </ChipRow>
-      <p className="mt-4 mb-1 text-sm text-faint">{active ? `${shown.length} of ${count(all.length, 'observation', 'observations')}` : count(all.length, 'observation', 'observations')}</p>
+      <ObservationCount shown={shown.length} total={all.length} narrowed={active || hidingDiscarded} discarded={discarded} showing={showDiscarded}
+        onToggle={() => setParam('discarded', showDiscarded ? null : 'show')} />
       <div className="lg:-mx-6 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:px-3">
         {isPending && !observations ? (
           <div className="py-10"><Spinner /></div>
         ) : shown.length === 0 ? (
-          <EmptyState title={active ? 'Nothing matches' : 'No observations yet'}
-            action={!active && <button type="button" onClick={() => setParam('new', '1')} className="text-tape hover:underline">Log your first one</button>}>
-            {active ? 'Try another word or change the filters.' : 'The next weird thing you see, log it before it fades.'}
+          <EmptyState title={active || hidingDiscarded ? 'Nothing matches' : 'No observations yet'}
+            action={!active && !hidingDiscarded && <button type="button" onClick={() => setParam('new', '1')} className="text-tape hover:underline">Log your first one</button>}>
+            {active ? 'Try another word or change the filters.' : hidingDiscarded ? 'The ones here are discarded: Show puts them back in the list.' : 'The next weird thing you see, log it before it fades.'}
           </EmptyState>
         ) : (
           <ul className={`pb-10 ${observationId ? '' : WIDE_LIST}`}>
