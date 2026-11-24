@@ -114,6 +114,8 @@ class JokeIn(BaseModel):
     follows_id: uuid.UUID | None = None
     # The voice notes it came from. Left out (an older app), the links stay as they are.
     voice_note_ids: list[uuid.UUID] = Field(default_factory=list, max_length=MAX_VOICE_LINKS)
+    # The cluster it's a version in. Left out (an older app), it stays where it is.
+    cluster_id: uuid.UUID | None = None
     created_at: datetime | None = None
     # The version this edit started from. Omitted (a new joke, an import), nothing is checked.
     base_version: int | None = Field(default=None, le=INT_MAX)
@@ -160,6 +162,7 @@ class JokeOut(BaseModel):
     comments: str
     follows_id: uuid.UUID | None
     voice_note_ids: list[str]
+    cluster_id: uuid.UUID | None
     version: int
     created_at: datetime
     updated_at: datetime

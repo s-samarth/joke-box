@@ -8,6 +8,7 @@ import { useCapture } from '../capture/captureContext'
 import { LANGUAGES, statusOf, topicName } from '../../lib/jokeMeta'
 import { followersOf } from '../../lib/chains'
 import { PremiseField } from '../premises/PremiseField'
+import { ClusterField } from './cluster/ClusterField'
 import { FollowedBy, FollowsField } from './ChainFields'
 import { StrengthPicker } from '../../components/ui/StrengthPicker'
 import { CleanPicker, HashtagField, TypeToggles } from './DetailControls'
@@ -99,6 +100,7 @@ export function JokeDetails({ jokeId, draft, update }: { jokeId?: string; draft:
         </div>
       </Row>
       <Row label="Premise"><PremiseField value={draft.premise_id ?? null} topicId={draft.topic_id} onChange={(premise_id) => update({ premise_id })} /></Row>
+      <Row label="Cluster"><ClusterField jokeId={jokeId} value={draft.cluster_id ?? null} onChange={(cluster_id) => update({ cluster_id })} /></Row>
       <Row label="Follows"><FollowsField jokeId={jokeId} value={draft.follows_id ?? null} onChange={(follows_id) => update({ follows_id })} /></Row>
       {jokeId && (
         <Row label="Followed by">

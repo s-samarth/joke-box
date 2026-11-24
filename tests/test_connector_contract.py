@@ -38,7 +38,13 @@ def claude(db: Session) -> Iterator[tuple[TestClient, str]]:
         f"/api/premises/{premise}",
         json={"topic_id": random_topic_id(browser), "take": "Fake take", "notes": "Fake because"},
     )
-    browser.put(f"/api/jokes/{jokes[0]['id']}", json={**jokes[0], "premise_id": premise})
+    cluster = str(uuid.uuid4())
+    browser.put(f"/api/clusters/{cluster}", json={"title": "Fake core"})
+    for joke in jokes[:2]:  # two versions of one joke, the first resting on the premise
+        on = premise if joke is jokes[0] else None
+        browser.put(
+            f"/api/jokes/{joke['id']}", json={**joke, "premise_id": on, "cluster_id": cluster}
+        )
     browser.put(
         f"/api/brainstorms/{uuid.uuid4()}",
         json={"joke_id": jokes[0]["id"], "content": "Fake rewrite"},
@@ -85,6 +91,9 @@ def test_library_tools(claude: tuple[TestClient, str]) -> None:
     full = result(claude, "get_jokes", ids=ids[:3])
     assert set(full) == {"jokes", "not_found"}
     assert all(set(j) == DETAIL for j in items(full, "jokes"))
+    clustered = next(j for j in items(full, "jokes") if j["cluster"])
+    assert set(clustered["cluster"]) == {"id", "title", "notes", "versions"}
+    assert set(items(clustered["cluster"], "versions")[0]) == {"id", "setup", "status", "lead"}
 
     premises = result(claude, "list_premises")
     [premise] = items(premises, "premises")

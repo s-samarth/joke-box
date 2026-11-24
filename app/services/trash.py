@@ -33,7 +33,7 @@ from app.models import (
 )
 from app.models.base import utcnow
 from app.models.trash import INCLUDE_TRASHED, Trashable
-from app.services import premise_links
+from app.services import clusters, premise_links
 from app.services.audio_store import AudioStore
 from app.services.jokes import prune_unused_types
 
@@ -104,6 +104,8 @@ def move_to_trash(db: Session, user: User, model: type[Trashable], row_id: uuid.
             rewrite.deleted_at = row.deleted_at
     if isinstance(row, Premise):
         premise_links.set_loose(db, user, row)
+    if isinstance(row, Joke):  # a lead in the Trash hands the lead on
+        clusters.settle(db, user, row.cluster_id)
     db.commit()
 
 
@@ -122,6 +124,8 @@ def restore(db: Session, user: User, model: type[Trashable], row_id: uuid.UUID) 
     if isinstance(row, Premise):
         premise_links.put_back(db, user, row)
     row.deleted_at = None
+    if isinstance(row, Joke):
+        clusters.settle(db, user, row.cluster_id)
     db.commit()
 
 
@@ -133,6 +137,7 @@ def erase(db: Session, user: User, row: Trashable) -> str | None:
     db.flush()
     if isinstance(row, Joke):
         prune_unused_types(db, user)
+        clusters.settle(db, user, row.cluster_id, left=row.id)  # its last version: the cluster goes
     return recording
 
 

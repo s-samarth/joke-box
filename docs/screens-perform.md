@@ -26,7 +26,7 @@ Sets, stage, print, shows and the study screens. The frame, capture and writing 
   it doesn't count towards the slot, and the total says "+N optional". Stage, Print and Home show
   optional jokes the same way.
 - **Your jokes:** a column on desktop and a sheet behind **Add jokes** on a phone. It has search,
-  a topic filter, a sort (Recently edited by default, or Newest or Strongest), and **Status and clean rating**: chips you tap once to show only those, again to hide them (so you can ask for Stage Ready or Interesting jokes, and leave out Dirty ones); jokes already in the set are dimmed. Tap a
+  a topic filter, a sort (Recently edited by default, or Newest or Strongest), and **Status and clean rating**: chips you tap once to show only those, again to hide them (so you can ask for Stage Ready or Interesting jokes, and leave out Dirty ones); jokes already in the set are dimmed, and a joke whose cluster already has another version in the set says so in amber (it can still be added). Tap a
   joke to read it in full (`JokePeek`). The search, topic, filters and sort are remembered for an hour in that
   browser tab ([sessionMemory.ts](../web/src/lib/sessionMemory.ts)), so you can leave and come back mid-build.
 - **Drag and drop** uses dnd-kit, with pointer, touch and keyboard sensors, so it works on phones.

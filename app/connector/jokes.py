@@ -8,16 +8,18 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from app.connector.text import by_id, clip
-from app.models import Brainstorm, Joke, Premise, Setlist, Subtopic, Topic, User
+from app.models import Brainstorm, Joke, JokeCluster, Premise, Setlist, Subtopic, Topic, User
 
 
 @dataclass
 class Names:
-    """Topic, subtopic and premise names by id, so a joke can say where it lives."""
+    """Topic, subtopic and premise names by id, so a joke can say where it lives, and the
+    clusters, so it can say which versions it has and whether it leads them."""
 
     topics: dict[uuid.UUID, str]
     subtopics: dict[uuid.UUID, str]
     premises: dict[uuid.UUID, str]
+    clusters: dict[uuid.UUID, JokeCluster]
 
 
 def load_names(db: Session, user: User) -> Names:
@@ -29,6 +31,9 @@ def load_names(db: Session, user: User) -> Names:
         premises=by_id(
             db.execute(select(Premise.id, Premise.take).where(Premise.user_id == user.id))
         ),
+        clusters={
+            c.id: c for c in db.scalars(select(JokeCluster).where(JokeCluster.user_id == user.id))
+        },
     )
 
 
@@ -66,6 +71,38 @@ def brief(joke: Joke, names: Names) -> dict[str, Any]:
         "strength": joke.strength,
         "seconds": joke.duration_seconds,
         "types": [t.name for t in joke.types],
+        "cluster_id": str(joke.cluster_id) if joke.cluster_id else None,
+        "lead": is_lead(joke, names),
+    }
+
+
+def is_lead(joke: Joke, names: Names) -> bool:
+    """The version of its cluster you'd do tonight (the server keeps the lead valid)."""
+    found = names.clusters.get(joke.cluster_id) if joke.cluster_id else None
+    return found is not None and found.lead_joke_id == joke.id
+
+
+def cluster_of(joke: Joke, names: Names, jokes: dict[uuid.UUID, Joke]) -> dict[str, Any] | None:
+    """The cluster a joke is a version in: its core idea and every live version, lead first."""
+    found = names.clusters.get(joke.cluster_id) if joke.cluster_id else None
+    if found is None:
+        return None
+    mine = [j for j in jokes.values() if j.cluster_id == found.id]
+    mine.sort(key=lambda j: (not is_lead(j, names), j.created_at))
+    each = [
+        {
+            "id": str(j.id),
+            "setup": clip(j.setup, 160),
+            "status": j.status.name if j.status else None,
+            "lead": is_lead(j, names),
+        }
+        for j in mine
+    ]
+    return {
+        "id": str(found.id),
+        "title": found.title,
+        "notes": clip(found.notes, 2000),
+        "versions": each,
     }
 
 
@@ -112,6 +149,7 @@ def detail(
         "followed_by": [{"id": str(j.id), "setup": clip(j.setup, 160)} for j in after],
         "in_sets": sets.get(joke.id, []),
         "rewrites": rewrites.get(joke.id, 0),
+        "cluster": cluster_of(joke, names, jokes),
     }
 
 

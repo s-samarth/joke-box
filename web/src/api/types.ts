@@ -65,6 +65,11 @@ export interface JokeInput {
    * save without the field keeps what the server has.
    */
   voice_note_ids?: string[]
+  /**
+   * The cluster it's a version in (see api/clusters.ts). Optional: a joke cached before clusters
+   * has none, and a save without the field keeps what the server has.
+   */
+  cluster_id?: string | null
   /** Sent when creating, so something written offline keeps the time it was written. */
   created_at?: string
   /** The version this edit was made from (toInput keeps it): the base of the clash check. */

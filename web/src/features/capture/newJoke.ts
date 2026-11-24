@@ -30,6 +30,7 @@ export const blankJoke = (topicId = ''): JokeInput => ({
   comments: '',
   follows_id: null,
   voice_note_ids: [],
+  cluster_id: null,
 })
 
 interface Options {

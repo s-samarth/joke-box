@@ -94,8 +94,10 @@ under fixed keys (`setMutationDefaults`), each spreading the shared `QUEUED` opt
   without the check. Resending the very same edit is never a clash, and a save that changes
   nothing (Save with no edit, a word typed and deleted) doesn't move the version on, so it can't
   make another device's waiting edit clash.
-- **Sets, Craft notes, observations and premises go the same way** (`sendChecked` in
-  ownVersions.ts), each with Couldn't sync and Keep mine. Observation saves live in
+- **Sets, Craft notes, observations, premises and clusters go the same way** (`sendChecked` in
+  ownVersions.ts), each with Couldn't sync and Keep mine. A cluster's save queues before the joke
+  saves that put versions in it ([clusters.ts](../web/src/api/clusters.ts)); dissolving one shows
+  as "Dissolve cluster" in Couldn't sync. Observation saves live in
   [observationSaves.ts](../web/src/api/observationSaves.ts), not queryClient.ts, which
   ownVersions.ts imports.
 - **Brainstorm sessions** send `base_version` the same way, with the chain of
@@ -205,7 +207,7 @@ back to the top for each item opened. `GrowingText` measures itself again when i
 changes, so turning a phone or iPad no longer cuts off the last line of a setup or punchline.
 
 ## URL as state
-The filters for Jokes (`?topic&sub&premise&type&status&q&sort&discarded`), Premises (`?q&topic&sort`)
+The filters for Jokes (`?topic&sub&premise&type&status&q&sort&discarded&versions`), Premises (`?q&topic&sort`)
 and Observations (`?topic&kind&unused&q`) live in the query string, so back, refresh and shared
 links keep your place. The tab bar links to the bare list, so each list also remembers its filters
 for an hour in that browser tab ([useRememberedParams.ts](../web/src/lib/useRememberedParams.ts),

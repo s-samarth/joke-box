@@ -17,6 +17,7 @@ const NoJokeSelected = named(() => import('./features/jokes/JokesLayout'), 'NoJo
 const JokeMapRoute = named(() => import('./features/jokes/JokesLayout'), 'JokeMapRoute')
 const JokeWebRoute = named(() => import('./features/jokes/JokesLayout'), 'JokeWebRoute')
 const JokePage = named(() => import('./features/jokes/JokePage'), 'JokePage')
+const ClusterPage = named(() => import('./features/jokes/cluster/ClusterPage'), 'ClusterPage')
 const PremisesLayout = named(() => import('./features/premises/PremisesLayout'), 'PremisesLayout')
 const NoPremiseSelected = named(() => import('./features/premises/PremisesLayout'), 'NoPremiseSelected')
 const PremisePage = named(() => import('./features/premises/PremisePage'), 'PremisePage')
@@ -65,6 +66,7 @@ export function App() {
             <Route path="map" element={<JokeMapRoute />} />
             <Route path="web" element={<JokeWebRoute />} />
             <Route path=":jokeId" element={<JokePage />} />
+            <Route path="c/:clusterId" element={<ClusterPage />} />
           </Route>
           <Route path="premises" element={<PremisesLayout />}>
             <Route index element={<NoPremiseSelected />} />

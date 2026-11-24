@@ -113,6 +113,18 @@ The response (`JokeOut`) adds `id`, `created_at` and `updated_at`, and returns `
 
 A joke points at its premise with `premise_id`; a premise doesn't list its jokes.
 
+### Clusters
+
+| Method | Path | Body / notes |
+|---|---|---|
+| GET | `/api/clusters` | Every cluster: `{id, title, notes, lead_joke_id, version, created_at, updated_at}` |
+| PUT | `/api/clusters/{id}` | `{title?, notes?, lead_joke_id?, base_version?}`. Create or update by client id; each field left out keeps what's stored (so picking a lead never undoes a title). The lead is put right on save: a discarded version can't lead while another can (see [data-model.md](data-model.md)). With `base_version`, an edit made from an older version that would change it answers **409** |
+| DELETE | `/api/clusters/{id}` | Dissolve: its jokes (the Trash too) go back to being on their own; nothing is deleted. Already gone is 204 |
+
+A joke joins, moves or leaves through its own save (`cluster_id` on `PUT /api/jokes/{id}`; left
+out, it stays where it is). Its status, strength, Trash and erasing all keep the lead right, and
+a cluster left with no jokes at all goes.
+
 ## Rewrites (Studio)
 
 | Method | Path | Body / notes |
@@ -268,8 +280,8 @@ Every tool reads, except `log_show`, which writes a show (with what was learned 
 |---|---|
 | `jokebox_overview` | Topics and subtopics with joke counts; how many premises, sets, shows and observations; Craft areas; statuses and types |
 | `writing_pulse` | How the writing is going, the same numbers as **Writing pulse** on Daily activity: `as_of` (today in India), `written` (per kind: `last_30_days`, `the_30_days_before`), `how_far_ideas_got` (of the last 90 days: `step`, `done`, `of`), `sitting_idle` (`what`, `count`; rows at zero left out), `worth_knowing` (up to three sentences) and `too_little_yet` (fewer than 5 pieces in all). No arguments |
-| `search_jokes` | Jokes matching every word of the query (in the setup, punchline, alternate punches, tag lines, hashtags or notes; `#name` finds a hashtag), filtered by topic, subtopic, status, type, strength or premise; short versions, at most 25 a call, with `next_offset` for the next page (null on the last). `strength` is null for an unrated joke, and a `min_strength` above 1 leaves those out |
-| `get_jokes` | Up to 20 jokes in full: tag lines, `alt_punchlines` (other punchlines kept for the same setup, not in use), notes, premise, what it follows and what follows it, the sets it's in, its rewrites, and `shows`: its record at logged shows (`shows_done`, `killed`, `ok`, `bombed`, `last_done`). `from_observations` lists the observations it came from and `from_voice_notes` (`id`, `label`) the voice notes, Trash left out |
+| `search_jokes` | Jokes matching every word of the query (in the setup, punchline, alternate punches, tag lines, hashtags or notes; `#name` finds a hashtag), filtered by topic, subtopic, status, type, strength or premise; short versions, at most 25 a call, with `next_offset` for the next page (null on the last). `strength` is null for an unrated joke, and a `min_strength` above 1 leaves those out. Every short version (here and in the premise, set and chain lists) has `cluster_id` (null when it's in no cluster) and `lead` (true for its cluster's lead) |
+| `get_jokes` | Up to 20 jokes in full, with `cluster` (null, or `id`, `title`, `notes` and `versions`: each live version's `id`, `setup`, `status` and `lead`, lead first): tag lines, `alt_punchlines` (other punchlines kept for the same setup, not in use), notes, premise, what it follows and what follows it, the sets it's in, its rewrites, and `shows`: its record at logged shows (`shows_done`, `killed`, `ok`, `bombed`, `last_done`). `from_observations` lists the observations it came from and `from_voice_notes` (`id`, `label`) the voice notes, Trash left out |
 | `list_premises`, `get_premise` | Premises with their joke counts, `status` and `strength`, narrowed by words, `topic`, `status` or `min_strength`; each with `notes` and `extra_notes` shortened; one premise with its full `notes` (why it's true) and `extra_notes` (the Notes box), `from_observations` (`id`, `text` of each observation it came from) and jokes in chain order |
 | `list_sets`, `get_set` | Sets with runtime against target; one set in running order (first is the opener, last the closer) with each joke's topic, premise, strength and time |
 | `list_shows` | Logged shows with the venue, LPM, rating, topics, notes, `learned` (what the comic learned there), `reviewed_by` (the set-review engine version, or null) and `jokes` (each joke done, in running order: `id`, `setup`, `result` of killed / ok / bombed / null, `suggested_result` and `laugh_points` from set-review or null, `note`), and the LPM across every show that matches. The search covers remarks and `learned` too. `since` and `until` narrow by IST date; 25 a call, and `next_offset` says where the next page starts |

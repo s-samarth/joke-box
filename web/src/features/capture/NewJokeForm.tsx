@@ -41,6 +41,8 @@ export interface Prefill {
   voiceNoteIds?: string[]
   /** Written as the next joke after this one. */
   followsId?: string
+  /** Written as a new version in this cluster. */
+  clusterId?: string
   hashtags?: string[]
   /** Runs with the new joke's id as it's saved (offline too): e.g. to link it to a brainstorm. */
   onCreated?: (jokeId: string) => void
@@ -50,7 +52,7 @@ export interface Prefill {
 export function NewJokeForm({ prefill, plain, onClose }: { prefill: Prefill; plain: boolean; onClose: () => void }) {
   const { data: topics = [] } = useTopics()
   const randomId = topics.find((t) => t.is_system)?.id ?? ''
-  const fresh = (): JokeInput => ({ ...blankJoke(prefill.topicId), subtopic_id: prefill.subtopicId ?? null, premise_id: prefill.premiseId ?? null, setup: prefill.setup ?? '', follows_id: prefill.followsId ?? null, hashtags: prefill.hashtags ?? [], voice_note_ids: prefill.voiceNoteIds ?? [] })
+  const fresh = (): JokeInput => ({ ...blankJoke(prefill.topicId), subtopic_id: prefill.subtopicId ?? null, premise_id: prefill.premiseId ?? null, setup: prefill.setup ?? '', follows_id: prefill.followsId ?? null, cluster_id: prefill.clusterId ?? null, hashtags: prefill.hashtags ?? [], voice_note_ids: prefill.voiceNoteIds ?? [] })
   const [start] = useState(() => startDraft(fresh(), plain, keptDraft(), prefill.observationIds))
   const [draft, setDraft] = useState<JokeInput>(start.draft)
   const [brainstorm, setBrainstorm] = useState(start.brainstorm)
