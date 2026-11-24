@@ -66,8 +66,9 @@ decoration.
   landscape, a small laptop) the rail is 64 px of icons, so the work keeps the width; its toggle
   switches either way. Jokes and Premises use `SplitView`: on an iPad the list fills the screen (two
   across) until you open something, then narrows to a column beside it; from 1280 px the list is
-  a column with the map or the premise guide beside it. Map and Web take the whole screen, never a
-  third of it.
+  a column with the map or the premise guide beside it, and a draggable divider lets the list take
+  the empty margins beside the open item (never its width). Map and Web take the whole screen,
+  never a third of it.
 - **Filter menus** sit in one row (`ChipRow`) that scrolls sideways and fades at the edge with more,
   instead of stacking into rows.
 - **Motion:** layout changes (opening the first item, closing, Map ↔ List, the rail toggle)

@@ -6,13 +6,18 @@
  * - iPad landscape and small laptops (1024–1279px): the list fills the screen until you open
  *   something, then narrows to a column beside it.
  * - 1280px and wider: the list stays a column, and with nothing open `aside` fills the space beside it.
+ *   The divider between them drags (SplitDivider): the list can take the open item's empty margins,
+ *   never its width (splitWidth.ts). It starts with half of them, and each device remembers its own.
  *
  * With an item open, the buttons at its top right read it full width (hiding the list) or close it.
  */
 import { Maximize2, Minimize2, X } from 'lucide-react'
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
+import { useMedia } from '../../layout/useRail'
 import { withTransition } from '../../lib/viewTransition'
+import { SplitDivider } from './SplitDivider'
+import { useSplitWidth } from './useSplitWidth'
 
 /** Lists inside a SplitView go two across when they have the screen to themselves. */
 export const WIDE_LIST = 'md:grid md:grid-cols-2 md:gap-x-8 xl:block'
@@ -39,14 +44,19 @@ export function SplitView({ list, children, openId, closeTo, noun }: Props) {
   useLayoutEffect(() => {
     if (pane.current) pane.current.scrollTop = 0
   }, [openId])
+  const wide = useMedia('(min-width: 1280px)')
+  const { container, width, divider } = useSplitWidth(noun)
+  const sized = wide && !full
   const listWidth = !open
-    ? 'lg:flex-1 xl:w-[26rem] xl:flex-none xl:border-r'
-    : full ? 'hidden' : 'hidden lg:flex lg:w-[22rem] lg:shrink-0 lg:border-r xl:w-[26rem]'
+    ? 'lg:flex-1 lg:border-r xl:w-[26rem] xl:flex-none xl:border-r-0'
+    : full ? 'hidden' : 'hidden lg:flex lg:w-[22rem] lg:shrink-0 lg:border-r xl:w-[26rem] xl:border-r-0'
   const wideLabel = full ? 'Show the list' : `Read the ${noun} full width`
 
   return (
-    <div className="lg:-mx-10 lg:flex lg:h-[calc(100dvh-env(safe-area-inset-top))]">
-      <section className={`min-w-0 lg:flex-col lg:border-rule lg:px-6 ${open ? '' : 'lg:flex'} ${listWidth}`}>{list}</section>
+    <div ref={container} className="lg:-mx-10 lg:flex lg:h-[calc(100dvh-env(safe-area-inset-top))]">
+      <section className={`min-w-0 lg:flex-col lg:border-rule lg:px-6 ${open ? '' : 'lg:flex'} ${listWidth}`} style={sized ? { width } : undefined}>{list}</section>
+      {/* With under 2rem to spare, dragging would do nothing: no divider then. */}
+      {sized && divider.bounds.max - divider.bounds.min >= 32 && <SplitDivider {...divider} />}
       <section ref={pane} className={`min-w-0 flex-1 lg:overflow-y-auto lg:px-6 xl:px-10 ${open ? '' : 'hidden xl:block'}`}>
         {open && (
           <div className="sticky top-0 z-10 hidden h-0 justify-end lg:flex">

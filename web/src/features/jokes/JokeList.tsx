@@ -26,7 +26,7 @@ function JokeRow({ joke, topic, active, query, edited, opening }: { joke: Joke; 
       <Link to={`/jokes/${joke.id}${query ? `?${query}` : ''}`} viewTransition={opening} aria-current={active ? 'page' : undefined}
         className={`block border-l-2 py-3.5 pr-2 pl-3 transition-colors ${active ? 'border-tape bg-ink-2' : 'border-transparent hover:bg-ink-2/60'}`}>
         <p className="line-clamp-2 leading-snug">{joke.setup}</p>
-        {joke.punchline && <p className="mt-1 line-clamp-1 text-[15px] text-dim">{joke.punchline}</p>}
+        {joke.punchline && <p className="mt-1 line-clamp-2 text-[15px] text-dim">{joke.punchline}</p>}
         <div className="mt-2 flex items-center gap-x-3 gap-y-1 text-[13px] text-faint">
           <StrengthTicks strength={joke.strength} />
           {joke.types.slice(0, 2).map((t) => <span key={t} className="shrink-0 whitespace-nowrap"><TypeLabel name={t} /></span>)}
