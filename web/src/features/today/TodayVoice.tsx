@@ -7,7 +7,7 @@ import { useVoiceLibrary } from '../voice/useVoiceLibrary'
 export function TodayVoice() {
   const { notes } = useVoiceLibrary()
   return (
-    <section className="mt-12">
+    <section className="mb-6">
       <SectionHead title="Voice notes">
         <Link to="/voice" className="text-sm text-dim hover:text-paper">{notes.length ? `All ${notes.length}` : 'Open'}</Link>
       </SectionHead>

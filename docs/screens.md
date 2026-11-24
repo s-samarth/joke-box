@@ -89,10 +89,10 @@ in IST and the headline **"Got something?"** with a search button beside it (it 
 | Section | File | Notes |
 |---|---|---|
 | Daily joke nudge | `daily/DailyBanner.tsx` | Days since your last new joke: today written, a small green line with your streak; 1 or 2 days, yellow **Write a joke today**; 3 to 7, red **N days without a joke**; over a week, a dark, spooky card (a drifting ghost, a cobweb, a flickering line; still under reduced motion). Waits for the jokes to load so it never flashes the wrong state. On Home its button opens the Joke tab |
+| Voice notes | `TodayVoice.tsx` | The same recorder as the Voice screen, plus "All N" |
 | Write | `CaptureTabs.tsx` | Three tabs, **Observation** (picked when Home opens), **Premise** and **Joke**, each with its own box; drafts survive switching. Observation: `ObservationBox` (text, Topic, Kind, **Log it**). Premise: `premises/PremiseBox.tsx` (the take, "Because…", Topic, **Add premise**; the toast's **Open** goes to it). Joke: `QuickCapture.tsx` (setup and punchline; Enter saves to Random). The nudge's **Write it** switches to Joke and puts the cursor in the setup |
 | Your material | `LibraryTiles.tsx` | Three tiles, **Observations**, **Premises** and **Jokes** (the tabs' order), each with its count and its Activity colour; a tap opens that list |
 | Activity | `TodayActivity.tsx`, `daily/ActivityPanel.tsx` | The same streak cards, calendar card and Today box as [Activity](#activity-activity), plus **Open**. The pulse, highlights and year review are on Activity only |
-| Voice notes | `TodayVoice.tsx` | The same recorder as the Voice screen, plus "All N" |
 | Brainstorm | `TodayBrainstorm.tsx` | Start a session, or pick up the last one |
 | Craft | `TodayCraft.tsx`, `craft/PathLadder.tsx` | **Path:** a small copy of the Craft staircase: the first Path note with tick boxes still open, how many are done, and the next step (one small staircase per heading when the note has tracks). When the step names minutes, it shows your most solid material on one topic (Strong and Killer jokes, by runtime) against that target. Below it, a box to save a lesson to one of your areas (chips in their colours) |
 | Study | `TodayStudy.tsx` | Craft notes, watchlist progress, analyses |
