@@ -17,6 +17,8 @@ BRIEF = {
     "strength",
     "seconds",
     "types",
+    "cluster_id",
+    "lead",
 }
 DETAIL = BRIEF | {
     "tag_lines",
@@ -30,6 +32,7 @@ DETAIL = BRIEF | {
     "followed_by",
     "in_sets",
     "rewrites",
+    "cluster",
     "shows",
     "from_observations",
     "from_voice_notes",
