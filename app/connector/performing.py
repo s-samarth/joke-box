@@ -138,6 +138,8 @@ def list_shows(
         "shows_with_laughs_counted": len(counted),
         "shows": [
             {
+                "show_id": str(log.id),
+                "performed_at": log.performed_at.isoformat(),
                 "date": ist_date(log.performed_at),
                 "venue": log.venue.name if log.venue else "Unidentified Venue",
                 "minutes": round(log.duration_seconds / 60, 1),
