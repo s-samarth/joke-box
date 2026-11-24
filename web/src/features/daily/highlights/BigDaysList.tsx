@@ -35,7 +35,7 @@ function Row({ mark, big, what }: { mark: ReactNode; big: string; what: string }
 }
 
 export function BigDaysList({ days }: { days: BigDays }) {
-  const { writing, jokes, stage, rated, streak } = days
+  const { writing, jokes, stage, busiest, rated, streak } = days
   if (!writing && !stage && !streak) return <p className="text-[15px] text-dim">Your biggest days show up here once you've written a few.</p>
   const short = (d: string) => date(d).split(' ').slice(0, 2).join(' ')
   return (
@@ -43,6 +43,7 @@ export function BigDaysList({ days }: { days: BigDays }) {
       {writing && <Row mark={<MiniDay day={writing.day} dots={writing.kinds.map((k) => KIND_META[k].dot)} />} big={plural(writing.total, 'piece')} what={`Your biggest writing day · ${date(writing.day)}`} />}
       {jokes && jokes.jokes > 1 && <Row mark={<MiniDay day={jokes.day} dots={[KIND_META.jokes.dot]} />} big={plural(jokes.jokes, 'joke')} what={`Most jokes in a day · ${date(jokes.day)}`} />}
       {stage && <Row mark={<MiniDay day={stage.day} dots={Array.from({ length: Math.min(stage.shows, 3) }, () => 'bg-tape')} />} big={`${plural(stage.shows, 'show')} · ${stageTotal(stage.seconds)}`} what={`Your longest night on stage · ${date(stage.day)}`} />}
+      {busiest && busiest.shows > 1 && <Row mark={<MiniDay day={busiest.day} dots={Array.from({ length: Math.min(busiest.shows, 3) }, () => 'bg-tape')} />} big={plural(busiest.shows, 'show')} what={`Most shows in a day · ${date(busiest.day)}`} />}
       {rated && <Row mark={<MiniDay day={rated.night.day} dots={['bg-tape']} />} big={`${plural(rated.night.shows, 'show')} at ${stars(rated.top)}`} what={`Your best-rated night · ${date(rated.night.day)}`} />}
       {streak && streak.length > 1 && (
         <Row mark={<span className="headline flex size-10 shrink-0 items-center justify-center text-[24px] text-ok tabular" aria-hidden>{streak.length}</span>}
