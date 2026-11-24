@@ -6,7 +6,7 @@ const joke = (id: string, cluster: string | null, more: Partial<Joke> = {}): Jok
   ({ id, setup: `Fake ${id}`, status: 'Testing', strength: null, cluster_id: cluster, created_at: '2026-01-01', updated_at: '2026-01-01', ...more }) as Joke
 
 const clusters = [{ id: 'c', title: '', notes: '', lead_joke_id: 'b', version: 1, created_at: '', updated_at: '' }]
-const opts = { clusters, showDiscarded: false, flat: false }
+const opts = { clusters, showDiscarded: false }
 
 describe('stacked rows', () => {
   const a = joke('a', 'c')
@@ -18,18 +18,18 @@ describe('stacked rows', () => {
   it('shows a cluster once, as its lead, where the lead sorts', () => {
     const rows = stackRows([a, solo, b], all, opts)
     expect(rows.map((r) => r.joke.id)).toEqual(['solo', 'b'])
-    expect(badge(rows[1], false)).toBe('2 versions')
+    expect(badge(rows[1])).toBe('2 versions')
   })
 
   it('shows the matching version when the lead is filtered out', () => {
     const [row] = stackRows([a], all, opts)
     expect(row.joke.id).toBe('a')
-    expect(badge(row, false)).toBe('1 of 2 versions')
+    expect(badge(row)).toBe('1 of 2 versions')
   })
 
   it('counts discarded versions only while they are shown', () => {
     const [row] = stackRows([a, b, gone], all, { ...opts, showDiscarded: true })
-    expect(badge(row, false)).toBe('3 versions')
+    expect(badge(row)).toBe('3 versions')
   })
 
   it('hides away entirely when every version is discarded and hidden', () => {
@@ -39,8 +39,8 @@ describe('stacked rows', () => {
     expect(row.discarded).toBe(true)
   })
 
-  it('lists every version when flat', () => {
-    const rows = stackRows([a, b], all, { ...opts, flat: true })
-    expect(rows.map((r) => badge(r, true))).toEqual(['1 of 2 versions', 'Lead of 2'])
+  it('uses the lead setup when the cluster is unnamed, even when only an alternate matches', () => {
+    const [row] = stackRows([a], all, opts)
+    expect(row.cluster).toEqual({ id: 'c', name: b.setup, lead: b })
   })
 })

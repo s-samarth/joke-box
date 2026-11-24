@@ -62,7 +62,7 @@ export function JokesLayout() {
       <PageHead title="Jokes">
         <ViewSwitch current={view} query={f.query} compact={Boolean(openId)} />
         <Dropdown items={[
-          { label: f.flat ? 'Stack versions' : 'Show every version', icon: <Layers size={16} />, onSelect: () => f.set({ versions: f.flat ? null : 'all' }) },
+          ...(view === 'list' ? [{ label: 'Show cluster names', icon: <Layers size={16} />, checked: f.showClusterNames, onSelect: () => f.set({ versions: f.showClusterNames ? 'lead' : null }) }] : []),
           { label: 'Export as CSV', icon: <Download size={16} />, onSelect: () => exportCsv(f.visible, allJokes, topics, clusters), disabled: !f.visible.length },
         ]}
           trigger={<IconButton label="More"><MoreHorizontal size={20} /></IconButton>} />
@@ -89,7 +89,7 @@ export function JokesLayout() {
               {f.active ? 'Try another word or clear the filters.' : f.hidingDiscarded ? 'Only discarded jokes are here: Show brings them back.' : 'Tap + whenever a premise hits you.'}
             </EmptyState>
           ) : (
-            <JokeList rows={f.rows} topics={topics} sort={f.sort} activeId={openId} flat={f.flat} query={f.query} wide={openId ? '' : WIDE_LIST} />
+            <JokeList rows={f.rows} topics={topics} sort={f.sort} activeId={openId} showClusterNames={f.showClusterNames} query={f.query} wide={openId ? '' : WIDE_LIST} />
           )}
         </div>
       </div>
