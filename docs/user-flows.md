@@ -133,13 +133,13 @@ sets and show record, so the stage decides which one works.
    cluster), then add it.
 3. Name what they share at the top (left empty, the lead's setup stands in), and keep notes.
 4. Compare the boxes side by side and edit the words in place. Tap **Make lead** on any version to
-   make it the one you'd do tonight; the list then shows that version.
+   make it the one you'd do tonight; that version represents the cluster in the list.
 5. **Write a version** opens New joke filed like the lead, on its premise and from its
    observations (Follows starts blank). ⋯ on a box duplicates, discards, takes out or deletes a
    version; ⋯ at the top dissolves the cluster, which deletes nothing. Each says what happened,
    with Undo.
-6. Back in the list the cluster is one row with "3 versions". Tap it to open the cluster again;
-   ⋯ → **Show every version** lists them one by one.
+6. Back in the list, tap the cluster name to open its versions. To read the lead joke in that same row,
+   uncheck **⋯ → Show cluster names**. Both views show the version count and keep standalone jokes in place.
 
 ## 5. Brainstorm against the clock
 

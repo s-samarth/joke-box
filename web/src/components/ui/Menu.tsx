@@ -52,7 +52,7 @@ function Items({ items, Item }: { items: (MenuItem | 'divider')[]; Item: typeof 
         i === 'divider' ? (
           <div key={`d${n}`} className="my-1 h-px bg-rule" />
         ) : (
-          <Item key={i.label} className={row(i.danger)} disabled={i.disabled} onSelect={i.onSelect}>
+          <Item key={i.label} role={i.checked === undefined ? 'menuitem' : 'menuitemcheckbox'} aria-checked={i.checked} className={row(i.danger)} disabled={i.disabled} onSelect={i.onSelect}>
             {i.icon}
             <span className="flex-1">{i.label}</span>
             {i.count !== undefined && <span className="text-sm text-faint tabular">{i.count}</span>}

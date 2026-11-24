@@ -1,62 +1,64 @@
-/**
- * The Jokes list, with each cluster as one row: a stack showing one version, like Google Photos
- * stacking similar shots. The row shows the lead when it matches the filters, otherwise the
- * version that sorts first among those that do, so you can see why the cluster is there. It sits
- * where that version sorts. `flat` lists every version on its own row instead.
- */
+/** Both Jokes list views use the same rows, counts, order and cluster links. */
 import type { Cluster } from '../../../api/clusters'
 import type { Joke } from '../../../api/types'
 import { isDiscarded } from '../discarded'
-import { allDiscarded, leadOf, versionsOf } from './lead'
+import { allDiscarded, leadOf } from './lead'
 
 export interface ListRow {
+  /** The lead when visible, otherwise the first matching version in the chosen sort. */
   joke: Joke
-  /** Set when the joke is a version in a cluster. */
-  clusterId?: string
+  cluster?: { id: string; name: string; lead: Joke }
   /** Versions in the cluster, leaving out discarded ones while they're hidden. */
   total: number
-  /** How many of them the filters left (always 1 when flat). */
   matching: number
-  /** Every version is discarded, so the cluster is too. */
   discarded: boolean
-  isLead: boolean
 }
 
 interface Options {
   clusters: Cluster[]
   showDiscarded: boolean
-  flat: boolean
 }
 
-/** `visible`: the filtered, sorted jokes. `all`: every joke, to count each cluster's versions. */
-export function stackRows(visible: Joke[], all: Joke[], { clusters, showDiscarded, flat }: Options): ListRow[] {
-  const shown = new Map<string, Joke[]>()
-  for (const j of visible) if (j.cluster_id) shown.set(j.cluster_id, [...(shown.get(j.cluster_id) ?? []), j])
-  const info = new Map<string, { face: Joke; lead?: Joke; total: number; matching: number; discarded: boolean }>()
-  for (const [id, members] of shown) {
-    const versions = versionsOf(id, all)
-    const lead = leadOf(clusters.find((c) => c.id === id), versions)
-    const counted = showDiscarded ? versions : versions.filter((j) => !isDiscarded(j))
-    const face = lead && members.includes(lead) ? lead : members[0]
-    info.set(id, { face, lead, total: Math.max(counted.length, members.length), matching: members.length, discarded: allDiscarded(versions) })
+/** Keep a cluster where its representative sorts, even when another version sorts earlier. */
+export function stackRows(visible: Joke[], all: Joke[], { clusters, showDiscarded }: Options): ListRow[] {
+  const versionsByCluster = new Map<string, Joke[]>()
+  for (const joke of all) {
+    if (!joke.cluster_id) continue
+    const versions = versionsByCluster.get(joke.cluster_id)
+    if (versions) versions.push(joke)
+    else versionsByCluster.set(joke.cluster_id, [joke])
   }
+  const byId = new Map(clusters.map((c) => [c.id, c]))
+  const visibleIds = new Set(visible.map((joke) => joke.id))
+  const byCluster = new Map<string, ListRow>()
   const rows: ListRow[] = []
   for (const joke of visible) {
-    const cluster = joke.cluster_id ? info.get(joke.cluster_id) : undefined
-    if (!cluster) {
-      rows.push({ joke, total: 1, matching: 1, discarded: false, isLead: false })
+    const id = joke.cluster_id
+    if (!id) {
+      rows.push({ joke, total: 1, matching: 1, discarded: false })
       continue
     }
-    if (!flat && cluster.face !== joke) continue
-    const base = { joke, clusterId: joke.cluster_id ?? undefined, total: cluster.total, discarded: cluster.discarded, isLead: cluster.lead === joke }
-    rows.push({ ...base, matching: flat ? 1 : cluster.matching })
+    let row = byCluster.get(id)
+    if (!row) {
+      const versions = versionsByCluster.get(id) ?? [joke]
+      const cluster = byId.get(id)
+      const lead = leadOf(cluster, versions) ?? joke
+      row = {
+        joke: visibleIds.has(lead.id) ? lead : joke,
+        cluster: { id, name: cluster?.title.trim() || lead.setup, lead },
+        total: showDiscarded ? versions.length : versions.filter((j) => !isDiscarded(j)).length,
+        matching: 0, discarded: allDiscarded(versions),
+      }
+      byCluster.set(id, row)
+    }
+    row.matching++
+    if (row.joke.id === joke.id) rows.push(row)
   }
   return rows
 }
 
-/** The badge on a stacked row: "3 versions", or "2 of 3 versions" when the filters narrow it. */
-export function badge(row: ListRow, flat: boolean): string {
-  if (flat) return row.isLead ? `Lead of ${row.total}` : `1 of ${row.total} versions`
+/** "3 versions", or "2 of 3 versions" when the filters narrow the cluster. */
+export function badge(row: ListRow): string {
   const n = row.matching < row.total ? `${row.matching} of ${row.total}` : String(row.total)
   return `${n} ${row.total === 1 ? 'version' : 'versions'}`
 }

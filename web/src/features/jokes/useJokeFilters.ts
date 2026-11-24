@@ -1,7 +1,7 @@
 /**
  * Jokes list state lives in the URL (?topic=&sub=&premise=&type=&status=&q=&sort=&discarded=&versions=), so back,
  * refresh and links keep your place. Discarded jokes are hidden until ?discarded=show (discarded.ts). Filtering runs in the browser, so it works offline.
- * A cluster's versions stack into one row (cluster/stacks.ts) until ?versions=all lists each one.
+ * A cluster's versions stack into one row (cluster/stacks.ts) in either display mode.
  * Arrive with no filters in the URL and the ones you used last come back (lib/useRememberedParams).
  */
 import { useMemo } from 'react'
@@ -29,10 +29,10 @@ export const SORTS: Record<SortKey, string> = {
 export const sortDate = (sort: SortKey): ((b: Joke) => string) | null =>
   sort === 'edited' ? (b) => b.updated_at : sort === 'new' || sort === 'old' ? (b) => b.created_at : null
 
-export function matchesSearch(joke: Joke, q: string): boolean {
+export function matchesSearch(joke: Joke, q: string, clusterTitle = ''): boolean {
   if (!q) return true
   const needle = q.toLowerCase()
-  return [joke.setup, joke.punchline, joke.comments, ...joke.hashtags, ...joke.tag_lines, ...(joke.alt_punchlines ?? [])].some((t) => t.toLowerCase().includes(needle))
+  return [clusterTitle, joke.setup, joke.punchline, joke.comments, ...joke.hashtags, ...joke.tag_lines, ...(joke.alt_punchlines ?? [])].some((t) => t.toLowerCase().includes(needle))
 }
 
 export function matchesPremise(joke: Joke, premise: string | null): boolean {
@@ -53,13 +53,13 @@ export type FilterKey = 'topic' | 'sub' | 'premise' | 'type' | 'status' | 'q' | 
 type Narrowing = { topic: string | null; sub: string | null; premise: string | null; type: string | null; status: string | null; q: string }
 
 /** Does the joke pass every filter that's set? Discarded jokes are left to keepDiscarded. */
-export const matchesFilters = (b: Joke, f: Narrowing): boolean =>
+export const matchesFilters = (b: Joke, f: Narrowing, clusterTitle = ''): boolean =>
   (!f.topic || b.topic_id === f.topic) &&
   (!f.sub || b.subtopic_id === f.sub) &&
   matchesPremise(b, f.premise) &&
   matchesType(b, f.type) &&
   (!f.status || b.status === f.status) &&
-  matchesSearch(b, f.q)
+  matchesSearch(b, f.q, clusterTitle)
 
 export const SORTERS: Record<SortKey, (a: Joke, b: Joke) => number> = {
   new: (a, b) => b.created_at.localeCompare(a.created_at),
@@ -83,7 +83,8 @@ export function useJokeFilters() {
     q: params.get('q') ?? '',
     sort: (params.get('sort') as SortKey | null) ?? 'new',
     showDiscarded: params.get('discarded') === 'show',
-    flat: params.get('versions') === 'all',
+    // Older links and remembered filters with versions=all now open the lead-joke view.
+    showClusterNames: !['lead', 'all'].includes(params.get('versions') ?? ''),
   }
 
   const set = (changes: Partial<Record<FilterKey, string | null>>) =>
@@ -95,11 +96,12 @@ export function useJokeFilters() {
     })
 
   const { visible, discarded } = useMemo(() => {
-    const matching = jokes.filter((b) => matchesFilters(b, { topic: f.topic, sub: f.sub, premise: f.premise, type: f.type, status: f.status, q: f.q }))
+    const titles = new Map(clusters.map((c) => [c.id, c.title]))
+    const matching = jokes.filter((b) => matchesFilters(b, { topic: f.topic, sub: f.sub, premise: f.premise, type: f.type, status: f.status, q: f.q }, titles.get(b.cluster_id ?? '')))
     const { kept, discarded } = keepDiscarded(matching, f.showDiscarded, Boolean(f.status))
     return { visible: kept.sort(SORTERS[f.sort] ?? SORTERS.new), discarded }
-  }, [jokes, f.topic, f.sub, f.premise, f.type, f.status, f.q, f.sort, f.showDiscarded])
-  const rows = useMemo(() => stackRows(visible, jokes, { clusters, showDiscarded: f.showDiscarded || Boolean(f.status), flat: f.flat }), [visible, jokes, clusters, f.showDiscarded, f.status, f.flat])
+  }, [jokes, clusters, f.topic, f.sub, f.premise, f.type, f.status, f.q, f.sort, f.showDiscarded])
+  const rows = useMemo(() => stackRows(visible, jokes, { clusters, showDiscarded: f.showDiscarded || Boolean(f.status) }), [visible, jokes, clusters, f.showDiscarded, f.status])
 
   const active = Boolean(f.topic || f.premise || f.type || f.status || f.q)
   // Hidden discarded jokes narrow the list without being a filter you set, so Clear leaves them be.
