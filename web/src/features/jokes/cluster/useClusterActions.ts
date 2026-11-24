@@ -3,8 +3,8 @@
  * usual queued saves so it works offline: pick the lead, discard or bring back a version, take one
  * out, copy one as a new version, delete one, dissolve the cluster. When the lead stops being one,
  * a toast says which version leads now (the same rule as the server's, see lead.ts). A new
- * version starts with what versions share: the premise, the observations it came from and the
- * joke it follows. (The jokes that follow it can't be shared: each follows one joke.)
+ * version starts with what versions share: the premise and the observations it came from. Its
+ * place in a chain (Follows, Followed by) starts blank: chains of versions get messy fast.
  */
 import { useNavigate } from 'react-router'
 import { useDissolveCluster, useSaveCluster, type Cluster } from '../../../api/clusters'
@@ -74,7 +74,7 @@ export function useClusterActions(clusterId: string, cluster: Cluster | undefine
   const duplicate = (joke: Joke) => {
     const { version: _v, ...input } = toInput(joke)
     const id = newId()
-    saveJoke.mutate({ id, input: { ...input, status: DEFAULT_STATUS, strength: null, cluster_id: clusterId, created_at: new Date().toISOString() } })
+    saveJoke.mutate({ id, input: { ...input, status: DEFAULT_STATUS, strength: null, follows_id: null, cluster_id: clusterId, created_at: new Date().toISOString() } })
     for (const o of cameFrom(joke)) link.mutate({ id: o, kind: 'jokes', targetId: id, on: true })
     toast('Copied as a new version')
   }

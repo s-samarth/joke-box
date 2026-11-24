@@ -45,8 +45,8 @@ export function ClusterPage() {
   const sub = topic?.subtopics.find((s) => s.id === lead?.subtopic_id)
   const discarded = versions.filter(isDiscarded).length
   const shown = inOrder(cluster, versions).filter((v) => showDiscarded || !isDiscarded(v) || v === lead)
-  // Filed like the lead: on its premise, from its observations, after the joke it follows.
-  const writeVersion = () => openCapture({ topicId: lead?.topic_id, subtopicId: lead?.subtopic_id, premiseId: lead?.premise_id, observationIds: actions.cameFrom(lead), followsId: lead?.follows_id ?? undefined, clusterId })
+  // Filed like the lead, on its premise and from its observations. Its place in a chain starts blank.
+  const writeVersion = () => openCapture({ topicId: lead?.topic_id, subtopicId: lead?.subtopic_id, premiseId: lead?.premise_id, observationIds: actions.cameFrom(lead), clusterId })
 
   return (
     <article className="pb-10">
