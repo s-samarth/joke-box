@@ -261,6 +261,16 @@ which turns a vertical wheel into a sideways scroll, slide left whenever you scr
 Topic menu on Jokes, Premises or Observations. A handler that should only react to its own element
 checks `element.contains(event.target)` first.
 
+## Nothing may be wider than the screen
+
+On a phone, anything wider than the screen makes the whole page wider, and Safari then lets a pinch
+zoom out to show all of it. On 24 Nov 2026 a joke row did this: its details line (strength, two
+types, topic, date, runtime) couldn't wrap, and with two long type names it ran 58 px past a 375 px
+screen. Two guards now: rows whose parts can't shrink wrap instead (`flex-wrap`, as Premises and
+Observations rows already did), and `main` in [AppShell.tsx](../web/src/layout/AppShell.tsx) has
+`overflow-x: clip`, so whatever overflows next is cut at the edge instead of widening the page.
+`clip`, not `hidden`: `hidden` makes `main` a scroll box and breaks the sticky headings inside it.
+
 ## Adaptive layout
 
 - **Breakpoints:** `md` 768 px (lists go two across), `lg` 1024 px (the rail and side-by-side

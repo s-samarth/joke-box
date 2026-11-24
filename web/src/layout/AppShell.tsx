@@ -33,7 +33,9 @@ export function AppShell() {
             <AccountMenu />
           </div>
         </header>
-        <main className="px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-10 lg:pt-[env(safe-area-inset-top)] lg:pb-12">
+        {/* overflow-x-clip: nothing inside can make the page wider than the screen (a phone would let you zoom out
+            to it). Clip, not hidden, so sticky headings inside still stick. */}
+        <main className="overflow-x-clip px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-10 lg:pt-[env(safe-area-inset-top)] lg:pb-12">
           <UnsyncedBanner />
           <Suspense fallback={<div className="py-16"><Spinner /></div>}>
             <Outlet />
