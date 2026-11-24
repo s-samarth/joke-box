@@ -8,7 +8,6 @@ from sqlalchemy.orm import Session
 
 from app.models import (
     Joke,
-    JokeCluster,
     JokeType,
     Premise,
     Status,
@@ -101,18 +100,6 @@ def check_premise(db: Session, user: User, data: JokeIn) -> None:
         raise HTTPException(422, "Unknown premise")
 
 
-def check_cluster(db: Session, user: User, data: JokeIn) -> None:
-    """One of the user's clusters. One dissolved since the edit was made (a save waiting
-    offline) is dropped rather than refused, so the joke is saved on its own."""
-    if data.cluster_id is None:
-        return
-    cluster = db.get(JokeCluster, data.cluster_id)
-    if cluster is None:
-        data.cluster_id = None
-    elif cluster.user_id != user.id:
-        raise HTTPException(422, "Unknown cluster")
-
-
 def plain_fields(data: JokeIn) -> dict[str, object]:
     """The fields copied as they are. An app too old to know about chains or premises leaves
     follows_id, premise_id or voice_note_ids out, and then the link is kept rather than cleared.
@@ -134,7 +121,7 @@ def apply(db: Session, user: User, joke: Joke, data: JokeIn) -> None:
     check_placement(db, user, data)
     subtopics.fill(db, user, data)  # no subtopic picked: the topic's "Subtopic unknown"
     check_premise(db, user, data)
-    check_cluster(db, user, data)
+    clusters.check(db, user, joke, data)  # one of theirs, and only one per joke
     fields = plain_fields(data)
     if "follows_id" in fields:
         chains.check_follows(db, user, joke.id, data.follows_id)
