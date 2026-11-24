@@ -222,10 +222,10 @@ separate log to fall out of step. Items in the Trash don't count.
   **Write a version** (New joke filed like the lead, on its premise and from its observations;
   Follows starts blank), **Add jokes you've written** and "1 discarded hidden **Show**".
 - **Add versions** ([AddVersionsDialog.tsx](../web/src/features/jokes/cluster/AddVersionsDialog.tsx)),
-  a sheet (full height on a phone): the lead pinned at the top to compare against, then the Jokes
+  the joke picker sheet (see [Picker sheets](#picker-sheets)): the lead pinned at the top to compare against, then the Jokes
   list's own search and filter row ([JokeFilters.tsx](../web/src/features/jokes/JokeFilters.tsx):
   Topic, Subtopic, Premise, Type, Status, Sort), starting on the lead's topic and subtopic and
-  Recently edited ([usePickerFilters.ts](../web/src/features/jokes/cluster/usePickerFilters.ts);
+  Recently edited ([useJokePickFilters.ts](../web/src/features/pickers/useJokePickFilters.ts);
   kept in the sheet, so the list's filters behind it don't change). A count line with discarded
   jokes hidden behind **Show** and **Clear filters**. Rows look like the list's
   ([JokeRowBody.tsx](../web/src/features/jokes/JokeRowBody.tsx)): setup, punchline, strength,
@@ -290,11 +290,14 @@ separate log to fall out of step. Items in the Trash don't count.
   ([ClusterField.tsx](../web/src/features/jokes/cluster/ClusterField.tsx)): one line, "Version of:
   …" with Lead and the number of versions, which opens the cluster, and × on the same line to
   take it out (a long name is cut short so the × never drops below it); or **Add to a cluster**,
-  to start one from this joke or join one. New joke has it in the same place. Then where the joke
+  to start one from this joke or join one. A cluster lives where its lead is filed, so the list
+  only offers clusters in the joke's topic and subtopic ("Clusters in Dating › Apps"; no subtopic
+  and Subtopic unknown count as one place, [place.ts](../web/src/features/jokes/cluster/place.ts)).
+  To join a cluster filed elsewhere, file the joke there first. New joke has it in the same place. Then where the joke
   came from, and below the words, a row of details: Strength (**Unrated**, then five bars; tap the lit bar again
   to clear it), Type (with Edit types), Filed under (topic and
-  subtopic, with Edit topics; with no subtopic picked, the topic's **Subtopic unknown**), Premise, Follows (the joke this one comes after in a chain),
-  Followed by (with a button to write the next one), Status, Runs for (type it, or step it five
+  subtopic, with Edit topics; with no subtopic picked, the topic's **Subtopic unknown**), Premise (the premise sheet), Follows (the joke this one comes after in a chain, from the joke sheet),
+  Followed by (**Write the next joke**, or **Pick jokes that follow** from the joke sheet; a joke already following another says "Now follows: …" and moves here), Status, Runs for (type it, or step it five
   seconds at a time with − and +), Clean rating, Language (Hinglish, Hindi or English) and
   Hashtags, followed by a Notes box. Then **Rewrites** (earlier sessions and **Start a rewrite**),
   **In sets** (with Add to a set), the show record once the joke has been logged at a show
@@ -368,33 +371,57 @@ writing a premise sits beside the list; on a phone the list gives way to the pre
   premises, found by title. Below, **Notes**: an empty box for anything else about it,
   growing as you write up to about half the screen (24rem at most), then scrolling inside, and saving on its own ([NotesBox.tsx](../web/src/components/ui/NotesBox.tsx)).
   Then **Jokes on it**: every joke resting on it in reading
-  order, chains kept together, with **Write a joke on it** and **Add jokes you’ve written** (from
-  any topic). Once it has a joke, a **List / Web** switch shows the same jokes as this premise's
+  order, chains kept together, with **Write a joke on it** and **Add jokes you’ve written** (the
+  joke sheet, starting on the premise's topic; a joke on another premise says "Moves from: …"). Once it has a joke, a **List / Web** switch shows the same jokes as this premise's
   web: the drawing the premise web on Jokes uses, for this premise alone, fitted to the width
   until you zoom. Tap a joke for the same reading panel. The device remembers which you used last;
   jokes come off the premise from the List. **Delete premise**
   asks first and sends it to the Trash; its jokes stay where they are, just not on a premise,
   until you put it back.
-- **On a joke:** the Premise row on the joke page picks one, or starts a new one.
+- **On a joke:** the Premise row on the joke page picks one from the premise sheet (starting on
+  the joke's topic, the current one marked), or starts a new one with **New premise** at its foot.
 - **+** on this screen opens **New premise** (`?new=1`): Topic, Your take, Why it's true (the
   because), From observations and Notes (anything else), the premise page's own fields, with the
   guide folded at the bottom.
 - **Observations:** the observations it came from (see below).
 
+### Picker sheets
+
+[pickers/](../web/src/features/pickers/): [PickSheet.tsx](../web/src/features/pickers/PickSheet.tsx),
+[JokePickSheet.tsx](../web/src/features/pickers/JokePickSheet.tsx),
+[PremisePickSheet.tsx](../web/src/features/pickers/PremisePickSheet.tsx),
+[ObservationPickSheet.tsx](../web/src/features/pickers/ObservationPickSheet.tsx).
+
+Everywhere you link something you've already written, one kind of sheet opens (full height on a
+phone, wide on a computer): the tab's own search and filter row, a count line (discarded ones
+hidden behind **Show**, **Clear filters**), and rows that look like that tab's list. The filters
+start where the thing on the page is filed (its topic, and for jokes its subtopic) and live in
+the sheet, so the list behind it keeps its own; clear them to pick from anywhere.
+
+| Sheet | Filters | Opened from |
+|---|---|---|
+| Jokes | The Jokes row: Topic, Subtopic, Premise, Type, Status, Sort | Add versions (cluster), Add jokes you've written (premise), Follows and Followed by (joke), Link jokes (observation) |
+| Premises | Topic, Status, Sort | Premise (joke), Link premises (observation) |
+| Observations | Topic, Kind, Not used yet, Sort | From observations (joke, premise, New joke, New premise) |
+
+Picking many (versions, jokes on a premise, observations, jokes that follow): a tap ticks a row
+(yellow edge and filled tick) and the bar at the bottom says how many, with **Clear** and
+**Add 2 versions** / **Link 3 observations**. Picking one (a premise, the joke before): a tap
+picks it and closes, and the current one is marked. A row that can't be picked is greyed at the
+bottom and says why (a joke in another cluster).
+
 ### Observations on a premise or joke
 
-[ObservationsOn.tsx](../web/src/features/observations/ObservationsOn.tsx), [LinkSearch.tsx](../web/src/features/observations/LinkSearch.tsx),
+[ObservationsOn.tsx](../web/src/features/observations/ObservationsOn.tsx), [ObservationPicker.tsx](../web/src/features/observations/ObservationPicker.tsx),
 [LinkedRows.tsx](../web/src/features/observations/LinkedRows.tsx).
 
 A joke (right under its words and tag lines) and a premise (right under "Why it's true") have
 **From observations**, high up so it's in view without scrolling: the observations it came from,
 each opening its own page, with × to unlink. The New joke and New premise sheets have the same
-box under the words, so you can link while you write; the picks are linked when you save. Under them, **Search
-observations to link**: type and the three best matches show (every word has to appear; focused
-and empty, it suggests three, same topic first). Tap one to link it; the box clears for the next,
-so you can link as many as you like. Enter links the first match. Ones already linked still show,
-dimmed with a tick and "Linked · tap to unlink"; tapping one unlinks it. A tap outside closes the list. It's the same box everywhere
-something gets linked, as linking a page works in Notion. × shows **Undo** for a moment.
+box under the words, so you can link while you write; the picks are linked when you save. Under them, **Link
+observations** opens the observation sheet (see [Picker sheets](#picker-sheets)), starting on the
+joke's or premise's topic: tick as many as you like and **Link 3 observations**. Ones already
+linked aren't listed; × on a linked one unlinks it and shows **Undo** for a moment.
 
 A joke written from a voice note also has **From voice notes** under it (on its page and in the
 New joke sheet): each recording with a play button, × to unlink (with Undo)
@@ -491,8 +518,8 @@ open beside it on an iPad in landscape or a laptop, or as its own page on a phon
   already under **From observations**, so you write your own words with it in view; either new
   one is linked back when saved. A new joke also starts on the premise this observation already
   led to, when there's exactly one. Then **Notes** (the same box as on a premise), and **Jokes from it** and **Premises from it**: what's
-  linked, each opening its page, × to unlink (with **Undo**), and a search to link ones you've
-  written (the three best matches, same topic first). Then **Brainstorms with it**: the sessions
+  linked, each opening its page, × to unlink (with **Undo**), and **Link jokes** / **Link
+  premises**, which open the joke and premise sheets on the observation's topic. Then **Brainstorms with it**: the sessions
   it's linked to, each opening the session (the session holds that link, so it's changed there). **Delete observation** asks first; what came from it stays.
 - **Kinds:** **Manage kinds…** ends the Kind menu: drag to reorder, rename, or delete one (its
   observations become plain).

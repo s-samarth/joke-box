@@ -123,6 +123,8 @@ sets and show record, so the stage decides which one works.
 
 1. Open one of the versions. Under its words, **Cluster** → **Add to a cluster** → **New cluster
    from this joke**. That joke leads, and the cluster opens beside the list.
+   **Add to a cluster** on another joke only offers clusters filed where that joke is (same topic
+   and subtopic, by the lead), so the list stays short.
 2. **Add jokes you've written** opens a picker with the lead pinned at the top and the Jokes
    list's filters already set to the lead's topic and subtopic. Search, or change the filters
    (Clear filters looks everywhere), and tap each version to tick it, then **Add N versions**. A

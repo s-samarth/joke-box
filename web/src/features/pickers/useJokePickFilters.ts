@@ -1,18 +1,25 @@
 /**
- * The picker's own filters, shaped like the Jokes list's (JokeFilters reads either), but kept in
- * the sheet instead of the URL: opening the picker never changes the list behind it. It starts on
- * the lead's topic and subtopic, where versions usually are, sorted by Recently edited.
+ * A joke picker's own filters, shaped like the Jokes list's (JokeFilters reads either), but kept in
+ * the sheet instead of the URL: opening a picker never changes the list behind it. It starts on
+ * the topic and subtopic the caller gives (where what you want usually is: a cluster's lead, the
+ * joke being linked), sorted by Recently edited; clear them to pick from anywhere.
  */
 import { useMemo, useState } from 'react'
-import type { Joke } from '../../../api/types'
-import { keepDiscarded } from '../discarded'
-import type { Filters } from '../JokeFilters'
-import { matchesFilters, SORTERS, type FilterKey, type SortKey } from '../useJokeFilters'
+import type { Joke } from '../../api/types'
+import { keepDiscarded } from '../jokes/discarded'
+import type { Filters } from '../jokes/JokeFilters'
+import { matchesFilters, SORTERS, type FilterKey, type SortKey } from '../jokes/useJokeFilters'
 
 type State = Omit<Filters, 'active' | 'set'> & { showDiscarded: boolean }
 
-export function usePickerFilters(candidates: Joke[], lead?: Joke) {
-  const [s, setS] = useState<State>({ topic: lead?.topic_id ?? null, sub: lead?.subtopic_id ?? null, premise: null, type: null, status: null, q: '', sort: 'edited', showDiscarded: false })
+/** Where the filters start; null for all topics. */
+export interface StartAt {
+  topic: string | null
+  sub?: string | null
+}
+
+export function useJokePickFilters(candidates: Joke[], start: StartAt) {
+  const [s, setS] = useState<State>({ topic: start.topic, sub: start.topic ? (start.sub ?? null) : null, premise: null, type: null, status: null, q: '', sort: 'edited', showDiscarded: false })
   const set = (changes: Partial<Record<FilterKey, string | null>>) =>
     setS((now) => {
       const next = { ...now }

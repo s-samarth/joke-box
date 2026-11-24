@@ -11,7 +11,7 @@ import { usePremises } from '../../api/premises'
 import { countByPremise } from '../../lib/premises'
 import { useRememberedParams } from '../../lib/useRememberedParams'
 import { keepDiscarded } from '../jokes/discarded'
-import { premiseSort, sortPremises } from './premiseSort'
+import { premiseMatches, premiseSort, sortPremises } from './premiseSort'
 
 export { PREMISE_SORTS, type PremiseSort } from './premiseSort'
 
@@ -39,10 +39,7 @@ export function usePremiseFilters() {
     })
 
   const { visible, discarded } = useMemo(() => {
-    const needle = q.trim().toLowerCase()
-    const matching = premises.filter((p) =>
-      (!topic || p.topic_id === topic) && (!status || p.status === status) &&
-      (!needle || `${p.take}\n${p.notes}\n${p.extra_notes ?? ''}`.toLowerCase().includes(needle)))
+    const matching = premises.filter((p) => premiseMatches(p, q, topic, status))
     const { kept, discarded } = keepDiscarded(matching, showDiscarded, Boolean(status))
     const order = sortPremises(kept, sort, (p) => counts.get(p.id) ?? 0, topics.map((t) => t.id))
     return { visible: order, discarded }

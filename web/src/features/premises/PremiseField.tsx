@@ -1,43 +1,32 @@
 /**
- * "Premise" on a joke: the idea it rests on, picked from every premise you have. A joke from any
- * topic can rest on any premise, so the list isn't limited to the joke's topic; that topic's
- * premises just come first.
+ * "Premise" on a joke: the idea it rests on. Picking opens the premise sheet with the Premises
+ * tab's filters, starting on the joke's topic; a joke from any topic can rest on any premise, so
+ * clearing the filters reaches them all. New premise starts one on the joke's topic.
  */
-import { Lightbulb, Plus, Search, X } from 'lucide-react'
+import { Lightbulb, Plus, X } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { useTopics } from '../../api/library'
 import { usePremises } from '../../api/premises'
-import { Input } from '../../components/ui/Field'
-import { Modal } from '../../components/ui/Modal'
-import { topicName } from '../../lib/jokeMeta'
+import { PremisePickSheet } from '../pickers/PremisePickSheet'
 import { NewPremiseDialog } from './NewPremiseDialog'
 
 const chip = 'inline-flex h-10 items-center gap-2 rounded-lg bg-ink-3 px-3 text-[15px] hover:bg-ink-4'
 
 interface Props {
   value: string | null
-  /** The joke's topic: its premises are listed first, and a new premise starts there. */
+  /** The joke's topic: the filters start there, and a new premise starts there. */
   topicId: string
   onChange: (id: string | null) => void
 }
 
 export function PremiseField({ value, topicId, onChange }: Props) {
   const { data: premises = [] } = usePremises()
-  const { data: topics = [] } = useTopics()
   const [picking, setPicking] = useState(false)
   const [creating, setCreating] = useState(false)
-  const [q, setQ] = useState('')
   const current = premises.find((p) => p.id === value)
-  const needle = q.trim().toLowerCase()
-  const order = [topicId, ...topics.map((t) => t.id).filter((id) => id !== topicId)]
-  const groups = order
-    .map((id) => ({ topic: topics.find((t) => t.id === id), items: premises.filter((p) => p.topic_id === id && p.take.toLowerCase().includes(needle)) }))
-    .filter((g) => g.items.length > 0)
   const pick = (id: string | null) => {
     onChange(id)
     setPicking(false)
-    setQ('')
   }
 
   return (
@@ -55,31 +44,11 @@ export function PremiseField({ value, topicId, onChange }: Props) {
       ) : (
         <button type="button" onClick={() => setPicking(true)} className={`${chip} text-dim hover:text-paper`}><Lightbulb size={16} /> Add to a premise</button>
       )}
-      <Modal open={picking} onOpenChange={setPicking} title="Which premise does it rest on?" description="Any premise, from any topic.">
-        <div className="relative">
-          <Search size={16} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-faint" />
-          <Input type="search" aria-label="Search premises" placeholder="Search premises" className="pl-9" value={q} onChange={(e) => setQ(e.target.value)} />
-        </div>
-        <div className="mt-3 max-h-[50dvh] overflow-y-auto">
-          {groups.length === 0 && <p className="py-6 text-dim">{premises.length ? 'No premises match.' : 'No premises yet.'}</p>}
-          {groups.map((g) => (
-            <section key={g.topic?.id} className="mb-3">
-              <h3 className="py-1 text-xs text-faint">{topicName(g.topic)}</h3>
-              <ul className="divide-y divide-rule">
-                {g.items.map((p) => (
-                  <li key={p.id}>
-                    <button type="button" onClick={() => pick(p.id)} aria-pressed={p.id === value}
-                      className={`w-full py-3 text-left leading-snug hover:text-tape ${p.id === value ? 'text-tape' : ''}`}>
-                      <span className="line-clamp-2">{p.take}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
-        </div>
-        <button type="button" onClick={() => setCreating(true)} className={`${chip} mt-2 text-dim hover:text-paper`}><Plus size={16} /> New premise</button>
-      </Modal>
+      {picking && (
+        <PremisePickSheet title="Which premise does it rest on?" description="Starts on this joke's topic. Clear the filters for any premise." onClose={() => setPicking(false)}
+          topicId={topicId} current={value} onPick={([id]) => pick(id)}
+          after={<button type="button" onClick={() => setCreating(true)} className={`${chip} mt-3 text-dim hover:text-paper`}><Plus size={16} /> New premise</button>} />
+      )}
       <NewPremiseDialog open={creating} onOpenChange={setCreating} topicId={topicId} onCreated={pick} />
     </>
   )

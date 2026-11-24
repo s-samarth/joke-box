@@ -292,11 +292,19 @@ Observations rows already did), and `main` in [AppShell.tsx](../web/src/layout/A
   1024 and 1279 px (iPad landscape), the list column is 22rem and its content 19rem, so screen
   breakpoints alone gave "Observations" 56 px and pushed New into the open item. Phone and laptop
   sizes are unchanged: there the caps match what the screen breakpoints already give.
-- **Linking by search:** [LinkSearch.tsx](../web/src/features/observations/LinkSearch.tsx) is the one
-  way to link observations with jokes and premises, from either side: type, see the three best
-  matches, tap to link. No lists to scroll. What's already linked still shows in the matches,
-  dimmed with a tick, and a tap unlinks it, so the box both links and unlinks (as a relation
-  picker does in Notion). Brainstorm sessions use the same box.
+- **Picker sheets:** linking anything you've written to anything else (observations with jokes
+  and premises, jokes on a premise, versions in a cluster, a joke's premise and chain) opens one
+  sheet ([PickSheet.tsx](../web/src/features/pickers/PickSheet.tsx)) wearing the tab's own filters
+  (`JokePickSheet`, `PremisePickSheet`, `ObservationPickSheet`), not a search box. Filter state
+  lives in the sheet, never the URL, and starts where the item on the page is filed. Callers render
+  a sheet only while it's open, so each opening starts fresh. *Why:* with hundreds of jokes and
+  observations a keyword box (three best matches) stopped finding things: you remember where a
+  bit is filed long before its exact words. The cluster's Add versions sheet was the one people
+  liked, so it became the pattern ([screens.md](screens.md#picker-sheets)).
+- **Linking by search:** [LinkSearch.tsx](../web/src/features/observations/LinkSearch.tsx) is now
+  only the brainstorm session's **Link a joke or observation** box: type, see the three best
+  matches, tap to link. What's already linked still shows in the matches, dimmed with a tick, and
+  a tap unlinks it (as a relation picker does in Notion).
   *Failure we hit:* the list used to close when the box lost focus. On an iPhone, touching a
   match blurs the box before the tap lands (cancelling `pointerdown` doesn't stop that on touch),
   so the list vanished under the finger and nothing linked; on a computer it worked. The list now

@@ -1,7 +1,7 @@
 /**
  * The words of a joke as a list row shows them: the setup and the punchline, two lines each, and a
- * line of details under them that the caller fills in. The Jokes list and the picker for adding
- * versions to a cluster both use it, so a joke looks the same wherever you pick it from.
+ * line of details under them that the caller fills in. The Jokes list and every joke picker sheet
+ * both use it, so a joke looks the same wherever you pick it from.
  */
 import type { ReactNode } from 'react'
 import type { Joke } from '../../api/types'
