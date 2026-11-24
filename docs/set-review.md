@@ -36,7 +36,8 @@ only what it found. The recording never leaves the Mac.
    Remarks on the night go in the notes, and what you learned goes in as the show's **What did
    you learn?**, a comment on the show beside the remarks. The engine calls the connector's
    **`log_show`**, with no jokes tagged: add the jokes you did in JokeBox yourself if you want
-   them there.
+   them there. If you already logged the show by hand, say so. Set Review can attach the review
+   to that entry and keep the jokes you tagged, their results and their comments.
 
 ## The laugh scale
 

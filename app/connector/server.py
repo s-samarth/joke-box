@@ -97,8 +97,8 @@ def get_set(set_id: str) -> dict[str, Any]:
 def list_shows(
     query: str = "", since: str = "", until: str = "", offset: int = 0, limit: int = 25
 ) -> dict[str, Any]:
-    """Logged shows, newest first: date, venue, minutes, audience, rating (1-5), LPM, the topics
-    done and the comic's notes, plus the LPM across every show that matches. Narrow by words in
+    """Logged shows, newest first: show_id, performed_at, date, venue, minutes, audience, rating,
+    LPM, topics and notes, plus the LPM across every show that matches. Narrow by words in
     the venue, topics or notes, and by date: `since` and `until` are dates like 2026-10-31 (IST,
     both included). At most 25 a call: when next_offset is set, call again with that offset
     for the rest. LPM scores each laugh 1-5 by how much of the room reacted (1 one or two
@@ -123,9 +123,9 @@ def log_show(
     duration_seconds: int,
     rating: int,
     laughs: list[int],
-    jokes: list[dict[str, Any]],
     engine_version: str,
     events: list[dict[str, Any]],
+    jokes: list[dict[str, Any]] | None = None,
     topics: list[str] | None = None,
     audience_size: int = 0,
     notes: str = "",
@@ -139,8 +139,9 @@ def log_show(
     null) and suggested_result the engine's. `events` is the laugh timeline, each {start, end}
     in seconds, kind (laugh or applause), points 1-5 and the joke_id it's credited to or null.
     `topics` are the comic's topic names, as they gave them: one that matches none is refused
-    with the list of topics. The jokes' topics are added; with none at all, the show goes under
-    Random. `notes` are remarks on the night; `learned` is what the comic learned, saved on
+    with the list of topics. Without topics or jokes, a new show goes under Random and an
+    existing one keeps its topics. Empty or omitted jokes keep the comic's entries.
+    `notes` are remarks on the night. `learned` is what the comic learned, saved on
     the show beside them (empty keeps what's there). Pass `show_id` to replace a show logged
     before."""
     show = {

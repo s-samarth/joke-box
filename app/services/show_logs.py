@@ -63,7 +63,7 @@ def save_show(
     if body.jokes is not None:  # left out by app versions from before: the jokes stay
         set_jokes(log, jokes, hidden)
     if review is not None:
-        set_review(log, review, {j.joke_id for j in jokes})
+        set_review(log, review, {row.joke_id for row in log.jokes if row.joke_id not in hidden})
     db.add(log)
     db.commit()
     db.refresh(log)

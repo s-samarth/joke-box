@@ -123,3 +123,47 @@ def test_the_consent_page_says_when_an_app_will_log_shows(db: Any) -> None:
     assert "read your JokeBox and log shows" in asks
     reads = browser.get(authorize(browser, client_id, "v" * 50)).text
     assert "log shows" not in reads and "can't change or delete anything" in reads
+
+
+@pytest.mark.parametrize("joke_field", [{}, {"jokes": []}])
+def test_review_updates_manual_show_without_losing_its_details(
+    engine: Engine, joke_field: dict[str, Any]
+) -> None:
+    browser, client, token, jokes = engine
+    target = str(uuid.uuid4())
+    topic = browser.post("/api/topics", json={"name": "Fake Fridges"}).json()["id"]
+    manual = {
+        "performed_at": "2026-11-18T21:30:00+05:30",
+        "venue_name": "Fake Hall",
+        "audience_size": 17,
+        "topic_ids": [topic],
+        "notes": "Fake remarks",
+        "learned": "Fake lesson",
+        "jokes": [{"joke_id": jokes[0], "result": "killed", "note": "Fake pause"}],
+    }
+    original = browser.put(f"/api/logs/{target}", json=manual).json()
+    listed = call(client, token, "list_shows", since="2026-11-18", until="2026-11-18")
+    (entry,) = listed["structuredContent"]["shows"]
+    assert entry["show_id"] == target and entry["reviewed_by"] is None
+    review = show(jokes, show_id=entry["show_id"], venue="Unidentified Venue", audience_size=0)
+    del review["jokes"]
+    for _ in range(2):
+        saved = call(client, token, "log_show", **(review | joke_field))["structuredContent"]
+        assert saved["show_id"] == target and saved["events_kept"] == 3
+    (updated,) = browser.get("/api/logs").json()
+    for key in ("venue_name", "audience_size", "topic_ids", "notes", "learned", "jokes"):
+        assert updated[key] == original[key]
+    assert updated["review"]["events"][0]["joke_id"] == jokes[0]
+    assert updated["laughs"] == review["laughs"] and updated["rating"] == review["rating"]
+
+
+def test_missing_or_unowned_show_id_cannot_be_used_as_an_update_target(engine: Engine) -> None:
+    browser, client, token, jokes = engine
+    other = signed_in("other@example.com")
+    target = str(uuid.uuid4())
+    assert other.put(f"/api/logs/{target}", json={"performed_at": "2026-11-18T21:30:00"}).is_success
+    for invalid in (target, str(uuid.uuid4())):
+        result = call(client, token, "log_show", **show(jokes, show_id=invalid))
+        assert result["isError"] and "not found" in result["content"][0]["text"]
+    assert browser.get("/api/logs").json() == []
+    assert other.get("/api/logs").json()[0]["review"] is None

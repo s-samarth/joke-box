@@ -12,9 +12,10 @@ from pydantic import ValidationError
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.auth.deps import get_owned
 from app.connector.performing import lpm
 from app.connector.text import ist_date
-from app.models import Joke, Topic, User
+from app.models import Joke, PerformanceLog, Topic, User
 from app.schemas.reviews import ReviewIn
 from app.schemas.shows import LogIn
 from app.services.show_logs import save_show
@@ -79,18 +80,33 @@ def log_show(db: Session, user: User, raw_id: str, show: dict[str, Any]) -> dict
     """Save the show and say what was kept."""
     jokes = show.get("jokes") or []
     named = topics_named(db, user, show.get("topics") or [])
-    topic_ids = list(dict.fromkeys(named + topics_of(db, user, jokes))) or random_topic(db, user)
+    topic_ids = list(dict.fromkeys(named + (topics_of(db, user, jokes) if jokes else [])))
     try:
         # Nothing learned leaves what's there: logging the show again doesn't wipe it.
         learned = (show.get("learned") or "").strip() or None
-        body = LogIn.model_validate({**show, "topic_ids": topic_ids, "learned": learned})
+        body = LogIn.model_validate(
+            {**show, "topic_ids": topic_ids, "learned": learned, "jokes": jokes or None}
+        )
         review = ReviewIn.model_validate(
             {"engine_version": show.get("engine_version"), "events": show.get("events") or []}
         )
     except ValidationError as exc:
         raise ValueError(problem(exc)) from None
     try:
-        log = save_show(db, user, show_id(raw_id), body, review)
+        target = show_id(raw_id)
+        if raw_id:
+            previous = get_owned(db, PerformanceLog, target, user)
+            if not topic_ids:
+                body.topic_ids = [t.id for t in previous.topics]
+            if not body.notes.strip():
+                body.notes = previous.notes
+            if not body.audience_size:
+                body.audience_size = previous.audience_size
+            if body.venue_name == "Unidentified Venue" and previous.venue:
+                body.venue_name = previous.venue.name
+        elif not topic_ids:
+            body.topic_ids = random_topic(db, user)
+        log = save_show(db, user, target, body, review)
     except HTTPException as exc:
         raise ValueError(str(exc.detail)) from None
     return {
