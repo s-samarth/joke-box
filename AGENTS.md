@@ -52,12 +52,15 @@ directly, so a model change can break them, and Claude only finds out mid-conver
 
 - **Change a model, check the connector in the same change.** Renaming, moving or removing a
   field on `Joke`, `Premise`, `Setlist`, `PerformanceLog`, `Observation`, `VoiceNote`, `WritingSession`,
-  `Brainstorm`, `CraftNote`, `Analysis`, `ShowReview` or their topics means updating `app/connector/`.
+  `Brainstorm`, `CraftNote`, `Analysis`, `ShowReview`, `JokeCluster` or their topics means updating `app/connector/`.
 - **`tests/test_connector_contract.py` must pass.** It runs every tool over the demo data plus
   one of everything and checks each returns exactly its listed fields. A new tool must be added
   there too.
 - **Changing a tool's output on purpose?** Update the contract test and the tool table in
   `docs/api.md` together. The comedy-writer skill relies on those field names.
+- **A cluster's lead is worked out twice:** on the server (`app/services/clusters.py`, which
+  stores it) and in the browser (`web/src/features/jokes/cluster/lead.ts`, so the list is right
+  offline). Change the rule in both, with `tests/test_clusters.py` and `lead.test.ts`.
 - **The writing pulse is worked out twice:** in the browser for the Daily activity screen
   (`web/src/features/daily/pulse.ts`, `pulseNotes.ts`) and in `app/connector/pulse.py` for Claude.
   Change a rule in both, with the matching cases in `pulse.test.ts` and `tests/test_connector_pulse.py`.

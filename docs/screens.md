@@ -175,7 +175,7 @@ separate log to fall out of step. Items in the Trash don't count.
   wrote, grouped by kind, each linking to its joke, premise or observation. This is where a phone
   shows the counts.
 
-## Jokes: `/jokes`, `/jokes/map`, `/jokes/web` and `/jokes/:jokeId`
+## Jokes: `/jokes`, `/jokes/map`, `/jokes/web`, `/jokes/:jokeId` and `/jokes/c/:clusterId`
 
 [JokesLayout.tsx](../web/src/features/jokes/JokesLayout.tsx), [JokeFilters.tsx](../web/src/features/jokes/JokeFilters.tsx),
 [useJokeFilters.ts](../web/src/features/jokes/useJokeFilters.ts), [JokePage.tsx](../web/src/features/jokes/JokePage.tsx),
@@ -197,6 +197,36 @@ separate log to fall out of step. Items in the Trash don't count.
   months under pinned headings, with the time scrubber down its side ([JokeList.tsx](../web/src/features/jokes/JokeList.tsx)).
   A joke brought in with an older date (an import) counts as last edited then, not on the day it
   arrived. The ⋯ menu has **Export as CSV** (with Created At and Edited At).
+- **Clusters** ([cluster/](../web/src/features/jokes/cluster/)): versions of one joke kept
+  together, each still a whole joke. Like Google Photos stacking similar shots, the list shows a
+  cluster as one row with a tape-yellow **3 versions** badge
+  ([stacks.ts](../web/src/features/jokes/cluster/stacks.ts)). The row shows the lead, or, when the
+  filters leave the lead out, the version that sorts first among those that match ("1 of 3
+  versions"), and sits where that version sorts. A cluster whose versions are all discarded hides
+  with the discarded jokes and says "discarded" when shown. ⋯ → **Show every version** (`?versions=all`)
+  lists each version on its own row ("1 of 3 versions", "Lead of 3"); **Stack versions** puts
+  them back. Export as CSV adds Cluster and Lead columns.
+- **A cluster** ([ClusterPage.tsx](../web/src/features/jokes/cluster/ClusterPage.tsx)) opens
+  beside the list like a joke, with the same full-width and close buttons, and on a phone as its
+  own page. At the top, where it's filed and how many versions, then what the versions share
+  (the title, edited in place; empty, the lead's setup shows) and notes. ⋯ → **Dissolve cluster**
+  asks first, frees every version and offers Undo. Below, the versions as boxes
+  ([VersionCard.tsx](../web/src/features/jokes/cluster/VersionCard.tsx)), lead first in a tape-yellow
+  outline, then newest first; three across on a wide screen, two on a laptop, stacked on a phone.
+  Each box edits its setup and punchline in place and shows status, strength, runtime, its show
+  record and **Open** (the joke page, which then has **Back to cluster** above the setup). Every
+  active version that isn't the lead has a **Make lead** button. Its ⋯: Make lead, Duplicate as a
+  new version, Discard (or Bring back), Take out of cluster, Delete joke. Discarding, taking out or
+  deleting the lead says which version leads now
+  ([useClusterActions.ts](../web/src/features/jokes/cluster/useClusterActions.ts)). Under the boxes,
+  **Write a version** (New joke filed like the lead, on its premise and from its observations;
+  Follows starts blank), **Add jokes you've written** (a tick list, the lead's subtopic first; a
+  joke in another cluster moves) and "1 discarded hidden **Show**".
+- **The lead:** the version you'd do tonight. While only one version is active, it leads. When the
+  lead is discarded, trashed or taken out, the strongest active version takes over (the most
+  recently edited on a tie) and keeps the lead after the old one comes back. With every version
+  discarded the lead stays put ([lead.ts](../web/src/features/jokes/cluster/lead.ts), the same
+  rules as the server's).
 - **Discarded jokes** ([discarded.ts](../web/src/features/jokes/discarded.ts)) are hidden from the
   list, map and web by default, like completed tasks in Todoist. The count line under the filters
   says so ("40 of 324 jokes · 6 discarded hidden **Show**"); **Show** brings them in ("6 discarded
@@ -228,7 +258,8 @@ separate log to fall out of step. Items in the Trash don't count.
   - **On their own:** jokes in no chain, in a grid under the map.
   - **Tap a box** to read the joke in a panel beside the map (above the bottom bar on a phone):
     its setup, punchline, tag lines, strength and types, **Comes after** and **Followed by**
-    (tap one to walk along the chain; the map scrolls to it) and **Open joke**. The joke's chain
+    (tap one to walk along the chain; the map scrolls to it), "A version in: …" for a joke in a
+    cluster (opens it) and **Open joke**. The joke's chain
     lights up and the others step back; hovering a box does the same. Escape closes the panel.
   - **Move around** by scrolling, or with a mouse by dragging the map (a drag that ends on a box
     doesn't open it). Zoom out, zoom in and **Fit to width**; a phone starts at 70%.
@@ -245,14 +276,15 @@ separate log to fall out of step. Items in the Trash don't count.
   empty stays on screen but isn't saved. They show only here and in New joke, never on stage, in
   print or in a peek, and search finds them. Below the words, a row of details: Strength (**Unrated**, then five bars; tap the lit bar again
   to clear it), Type (with Edit types), Filed under (topic and
-  subtopic, with Edit topics), Premise, Follows (the joke this one comes after in a chain),
+  subtopic, with Edit topics), Premise, Cluster ("Version of: …", which opens it, or **Add to a
+  cluster** to start one from this joke or join one; × takes it out), Follows (the joke this one comes after in a chain),
   Followed by (with a button to write the next one), Status, Runs for (type it, or step it five
   seconds at a time with − and +), Clean rating, Language (Hinglish, Hindi or English) and
   Hashtags, followed by a Notes box. Then **Rewrites** (earlier sessions and **Start a rewrite**),
   **In sets** (with Add to a set), the show record once the joke has been logged at a show
   ("Done at 3 shows: 2 killed, 1 ok. Last done 12 Oct", [JokeShowRecord.tsx](../web/src/features/jokes/JokeShowRecord.tsx)),
   and **Delete joke**, which asks first and sends it to the Trash.
-- **State:** the filters live in the URL (`?topic=&sub=&premise=&type=&status=&q=&sort=&discarded=`). Filtering runs in
+- **State:** the filters live in the URL (`?topic=&sub=&premise=&type=&status=&q=&sort=&discarded=&versions=`). Filtering runs in
   the browser, so it works offline. Edits go into a local draft and save about a moment after you
   stop typing, through the offline-safe joke save.
 - **Remembered filters** ([useRememberedParams.ts](../web/src/lib/useRememberedParams.ts)): come

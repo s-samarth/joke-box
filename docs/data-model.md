@@ -32,6 +32,7 @@ erDiagram
   subtopics |o--o{ jokes : "files (optional)"
   topics ||--o{ premises : files
   premises |o--o{ jokes : "rests on (optional, any topic)"
+  clusters |o--o{ jokes : "versions (optional)"
   statuses |o--o{ jokes : "status (optional)"
   jokes }o--o{ joke_types : joke_type_links
   jokes ||--o{ brainstorms : rewrites
@@ -60,11 +61,12 @@ erDiagram
 | `topics` | `name`, `position`, `is_system` | One `is_system` topic per user, named and shown as **Random**. It can't be deleted; deleting another topic moves its jokes there. `position` is the order you drag them into (new ones go last) |
 | `subtopics` | `topic_id → topics` (cascade), `name`, `position` | Unique per topic, in the order you drag them into. Deleting one clears it from its jokes |
 | `premises` | `topic_id → topics` (cascade), `take`, `notes` (why it's true), `extra_notes` (the **Notes** box: anything else; a save that leaves it out keeps it), `strength` (1 to 5, or null: not rated yet), `status` (Draft, Testing, Stage Ready or Discarded; Draft to start), `position`, `version` (up by one per save that changes it) | The idea under a group of jokes: your take and the reasoning behind it. Filed under a topic, but a joke from any topic can rest on it. Upserted by client id, like jokes. Its status is its own, a fixed four unlike the jokes' named statuses: discarding a premise leaves its jokes and their statuses alone. A save that leaves `strength` or `status` out (an older app) keeps them |
+| `clusters` | `title` (the core idea; empty, the lead's setup stands in), `notes`, `lead_joke_id` (no foreign key: jokes already point here), `version` (up by one per save that changes it) | Versions of one joke, each a whole joke pointing here with `cluster_id`. Upserted by client id; a field a save leaves out stays. The server keeps the lead on a version that isn't discarded or in the Trash while there is one ([clusters.py](../app/services/clusters.py)): when it stops being one, the strongest such version takes over (most recently edited on a tie) and keeps it. A lead whose own save into the cluster is still on its way (an undone dissolve) is kept. A cluster with no jokes at all, the Trash included, is deleted; it never goes to the Trash itself |
 | `joke_types` | `name` | Pruned whenever no joke uses it. Renaming onto an existing name merges the two |
 | `type_colors` | `name` (unique per user, any case), `color` (`#rrggbb`) | The colour of a type's dot. Kept by name in its own table, so a type that's pruned and used again keeps its colour |
 | `joke_type_links` | `joke_id`, `type_id` (both cascade) | Many-to-many |
 | `statuses` | `name`, `position` | Six defaults made on first sign-in; new ones are created by name when a joke uses them. A joke saved with no status (or the retired "Status Unknown") gets Draft |
-| `jokes` | `topic_id` (required), `subtopic_id` (set null), `premise_id` (set null, any topic), `follows_id → jokes` (set null: the joke this one continues from; many can follow one, so chains branch), `status_id` (set null), `setup`, `punchline`, `strength` 1–5 or null (unrated; new jokes start that way), `duration_seconds`, `hashtags` JSON, `tag_lines` JSON, `alt_punchlines` JSON (other punchlines for the same setup; a save that leaves the field out keeps them), `clean_rating` (clean / mild / dirty / null), `language`, `comments`, `voice_note_ids` JSON (the voice notes it came from; kept on the joke because a recording made offline can reach the server after the joke, and one deleted just isn't shown), `version` (up by one per save that changes it) | Check constraints on strength and clean rating. The API sends types and status as names. `version` catches edits made on two devices |
+| `jokes` | `topic_id` (required), `subtopic_id` (set null), `premise_id` (set null, any topic), `follows_id → jokes` (set null: the joke this one continues from; many can follow one, so chains branch), `status_id` (set null), `setup`, `punchline`, `strength` 1–5 or null (unrated; new jokes start that way), `duration_seconds`, `hashtags` JSON, `tag_lines` JSON, `alt_punchlines` JSON (other punchlines for the same setup; a save that leaves the field out keeps them), `clean_rating` (clean / mild / dirty / null), `language`, `comments`, `voice_note_ids` JSON (the voice notes it came from; kept on the joke because a recording made offline can reach the server after the joke, and one deleted just isn't shown), `cluster_id → clusters` (set null: the cluster it's a version in; a save that leaves it out keeps it, one naming a dissolved cluster is saved with none), `version` (up by one per save that changes it) | Check constraints on strength and clean rating. The API sends types and status as names. `version` catches edits made on two devices |
 
 ### Connector sign-in
 
@@ -125,6 +127,8 @@ sound.
 | A joke | To the Trash with its live rewrites (same `deleted_at`, so they come back together). Its set places stay but are hidden; saving a set keeps them where they were. Links to it from shows' lessons and brainstorms stay. Erased: its rewrites, versions and set places go (cascade) |
 | A rewrite, observation, brainstorm, show, analysis, routine or craft note | To the Trash. Links to it (a lesson's show or analysis, an analysis's routine, a brainstorm's technique) stay while it's there and clear when it's erased |
 | A topic | Its jokes, premises and observations move to Random, the jokes with no subtopic; its show links move to Random; its subtopics go |
+| A joke in a cluster | Goes to the Trash still in its cluster, and comes back to it. If it led, the lead moves on and stays there. Erased: if it was the cluster's last joke, the cluster goes |
+| A cluster (dissolve) | Every joke in it, the Trash included, goes back to being on its own; the cluster row is deleted. Nothing goes to the Trash |
 | A premise | To the Trash. Its jokes (live or in the Trash) stay, on no premise, and `trashed_joke_ids` remembers them: put back, it takes back those still on no premise (one moved to another premise meanwhile stays there). A joke saved later (offline) still pointing at it is saved with no premise. Erased: nothing else changes |
 | A subtopic | Its jokes keep their topic and lose the subtopic |
 | A type | Removed from every joke; a joke left with none shows as "Undefined" |
@@ -179,6 +183,7 @@ All of these run in one transaction ([services/topics.py](../app/services/topics
 | `0038` | `performance_logs.title`, `performance_jokes.suggested_result`, and `show_reviews`: shows logged from a recording by set-review |
 | `0039` | `performance_logs.learned`: what you learned at a show is a comment on it, not a Craft note. Craft notes linked to a show moved onto it (body, else title; several joined by a blank line) and went to the Trash, where they can be put back for 30 days |
 | `0040` | `premises.strength` and `premises.status`, `observations.strength`: every one starts unrated, and every premise a Draft |
+| `0041` | `clusters` and `jokes.cluster_id`: versions of one joke kept together under a lead. Every joke starts in no cluster |
 
 Merged migrations are shared history. CI fails a PR that edits, deletes or renames one; fix
 forward with a new revision. CI also runs upgrade → downgrade → upgrade on Postgres 16, so every
