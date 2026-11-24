@@ -27,4 +27,9 @@ describe('keepDiscarded', () => {
     const none = [jokes[0], jokes[2]]
     expect(keepDiscarded(none, false, false).kept).toBe(none)
   })
+
+  it('hides discarded observations too, and keeps an old cached one with no status', () => {
+    const notes = [{ id: 'a', status: 'Discarded' }, { id: 'b', status: 'Work in Progress' }, { id: 'c' }]
+    expect(keepDiscarded(notes, false, false)).toEqual({ kept: [notes[1], notes[2]], discarded: 1 })
+  })
 })
