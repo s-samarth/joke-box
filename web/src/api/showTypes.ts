@@ -14,6 +14,7 @@ export interface LogJoke {
 }
 
 export interface PerformanceLog {
+  version?: number // absent on older offline copies
   id: string
   venue_name: string
   performed_at: string

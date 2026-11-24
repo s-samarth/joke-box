@@ -90,7 +90,7 @@ in IST and the headline **"Got something?"** with a search button beside it (it 
 |---|---|---|
 | Daily joke nudge | `daily/DailyBanner.tsx` | Days since your last new joke: today written, a small green line with your streak; 1 or 2 days, yellow **Write a joke today**; 3 to 7, red **N days without a joke**; over a week, a dark, spooky card (a drifting ghost, a cobweb, a flickering line; still under reduced motion). Waits for the jokes to load so it never flashes the wrong state. On Home its button opens the Joke tab |
 | Voice notes | `TodayVoice.tsx` | The same recorder as the Voice screen, plus "All N" |
-| Write | `CaptureTabs.tsx` | Three tabs, **Observation** (picked when Home opens), **Premise** and **Joke**, each with its own box; drafts survive switching. Observation: `ObservationBox` (text, Topic, Kind, **Log it**). Premise: `premises/PremiseBox.tsx` (the take, "Because…", Topic, **Add premise**; the toast's **Open** goes to it). Joke: `QuickCapture.tsx` (setup and punchline; Enter saves to Random). The nudge's **Write it** switches to Joke and puts the cursor in the setup |
+| Write | `CaptureTabs.tsx` | Three tabs, **Observation** (picked when Home opens), **Premise** and **Joke**, each with its own box; the words stay on this device through a tab switch or reload until you submit or erase them. Observation: `ObservationBox` (text, Topic, Kind, **Log it**). Premise: `premises/PremiseBox.tsx` (the take, "Because…", Topic, **Add premise**; the toast's **Open** goes to it). Joke: `QuickCapture.tsx` (setup and punchline; Enter saves to Random). The nudge's **Write it** switches to Joke and puts the cursor in the setup |
 | Your material | `LibraryTiles.tsx` | Three tiles, **Observations**, **Premises** and **Jokes** (the tabs' order), each with its count and its Activity colour; a tap opens that list |
 | Activity | `TodayActivity.tsx`, `daily/ActivityPanel.tsx` | The same streak cards, calendar card and Today box as [Activity](#activity-activity), plus **Open**. The pulse, highlights and year review are on Activity only |
 | Brainstorm | `TodayBrainstorm.tsx` | Start a session, or pick up the last one |
@@ -514,7 +514,7 @@ close, the timer, reset and **Save**; Checklists, New session and History sit be
 nothing runs off the screen. The original joke is pinned at the top,
 with **Where it came from** folded under it when it has any (its observations, and voice notes
 you can play), then an optional session name and a free-writing area. On the right are **This session** (its saved
-versions) and **Earlier sessions**. `?session=<id>` reopens a past session.
+versions) and **Earlier sessions**. Search opens the matching session with `?session=<id>`. Unsaved words return when you reopen that rewrite on this device. **Discard draft** drops those edits. **Save version** adds them to History.
 
 **Checklists** opens the craft checklists from the areas set to show on Rewrite, in a sheet
 ([CraftSheet.tsx](../web/src/features/craft/CraftSheet.tsx)). Pick one from the row at the top and

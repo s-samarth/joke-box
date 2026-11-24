@@ -63,7 +63,7 @@ const KINDS: Kind<unknown>[] = [
     kind: 'Brainstorms', items: (l) => l.sessions, texts: (s) => [s.title, s.content], title: (s) => sessionName(s), body: (s) => s.content, to: (s) => `/brainstorm/${s.id}`,
   }),
   kind<Brainstorm>({
-    kind: 'Rewrites', items: (l) => l.rewrites, texts: (r) => [r.title, r.content], title: (r) => r.title || 'Rewrite', body: (r) => r.content, to: (r) => `/jokes/${r.joke_id}/rewrite`,
+    kind: 'Rewrites', items: (l) => l.rewrites, texts: (r) => [r.title, r.content], title: (r) => r.title || 'Rewrite', body: (r) => r.content, to: (r) => `/jokes/${r.joke_id}/rewrite?session=${r.id}`,
   }),
   kind<VoiceNote>({
     kind: 'Voice notes', items: (l) => l.voice, texts: (v) => [v.label], tags: (v) => v.hashtags,

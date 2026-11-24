@@ -3,6 +3,7 @@
  * the joke box, filed under a topic (Random unless you pick one, and it stays picked). Linking
  * observations is on the premise's own page; Open in the toast takes you there.
  */
+import { useDraftText } from '../capture/useDraftText'
 import { useState, type KeyboardEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { newId } from '../../api/client'
@@ -16,8 +17,8 @@ import { TopicMenu } from '../observations/ObservationMenus'
 const field = 'block w-full resize-none bg-transparent px-4 text-lg leading-snug outline-none placeholder:text-faint'
 
 export function PremiseBox() {
-  const [take, setTake] = useState('')
-  const [notes, setNotes] = useState('')
+  const [take, setTake] = useDraftText('capture.take')
+  const [notes, setNotes] = useDraftText('capture.reason')
   const [topicId, setTopicId] = useState<string | null>(null)
   const { data: topics = [] } = useTopics()
   const save = useSavePremise()
@@ -28,7 +29,7 @@ export function PremiseBox() {
   const submit = () => {
     if (!take.trim() || !topic) return
     const id = newId()
-    const saving = save.mutateAsync({ id, input: { topic_id: topic, take: take.trim(), notes } })
+    const saving = save.mutateAsync({ id, input: { created_at: new Date().toISOString(), topic_id: topic, take: take.trim(), notes } })
     saving.catch((e: Error) => toast(`Not saved: ${e.message}`))
     setTake('')
     setNotes('')

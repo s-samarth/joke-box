@@ -3,6 +3,7 @@
  * topics) and a kind if it isn't a plain observation. Both stay picked, so you can log a run of
  * things about the same subject.
  */
+import { useDraftText } from '../capture/useDraftText'
 import { useState } from 'react'
 import { newId } from '../../api/client'
 import { useSaveObservation } from '../../api/notebook'
@@ -16,7 +17,7 @@ interface Props {
 }
 
 export function ObservationBox({ initialTopicId = null, initialKindId = null }: Props) {
-  const [text, setText] = useState('')
+  const [text, setText] = useDraftText('capture.observation')
   const [topicId, setTopicId] = useState<string | null>(initialTopicId)
   const [kindId, setKindId] = useState<string | null>(initialKindId)
   const save = useSaveObservation()

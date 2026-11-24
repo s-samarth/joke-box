@@ -177,9 +177,13 @@ async function recoverInterrupted() {
   try {
     const waiting = new Set((await values<PendingNote>(store)).map((n) => n.id))
     for (const r of await interrupted()) {
-      if (!waiting.has(r.id)) await addRecording(r.id, r.audio, r.seconds, 'Recovered recording', r.startedAt).catch(() => {})
+      try {
+        if (waiting.has(r.id)) await forgetLive(r.id)
+        else await addRecording(r.id, r.audio, r.seconds, 'Recovered recording', r.startedAt)
+      } catch {
+        // Keep this recording's chunks for the next launch if storage is full.
+      }
     }
-    await clearLive()
   } catch {
     // storage unavailable: nothing to recover
   }

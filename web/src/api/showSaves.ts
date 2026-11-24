@@ -3,14 +3,15 @@
  * and it waits on the phone, then syncs in order once you're back. Defaults are registered by key
  * so a save made offline survives a reload; main.tsx imports this file before saves replay.
  */
+import { forgetSavedRewrite, rewriteKey } from '../features/jokes/rewriteDraft'
 import { api } from './client'
-import { ownVersions } from './ownVersions'
+import { ownVersions, sendChecked } from './ownVersions'
 import { keys, queryClient, refreshWhenSynced } from './queryClient'
 import { QUEUED } from './sync'
 import type { Brainstorm, PerformanceLog, Setlist } from './types'
 import type { BrainstormInput, LogInput, SetlistInput } from './shows'
 
-export type SaveLogVars = { id: string; input: LogInput }
+export type SaveLogVars = { id: string; input: LogInput; keepMine?: boolean }
 /** `keepMine`: a clash being retried from Couldn't sync, to go over the other device's version. */
 export type SaveSetlistVars = { id: string; input: SetlistInput; keepMine?: boolean }
 export type SaveBrainstormVars = { id: string; input: BrainstormInput }
@@ -38,13 +39,16 @@ const now = () => new Date().toISOString()
 const createdAt = <T extends { id: string; created_at: string }>(list: readonly unknown[], id: string) =>
   queryClient.getQueryData<T[]>(list)?.find((r) => r.id === id)?.created_at ?? now()
 
+const ownLogs = ownVersions('show-own-versions')
+
 queryClient.setMutationDefaults(saveLogKey, {
   ...QUEUED,
-  mutationFn: ({ id, input }: SaveLogVars) => api<PerformanceLog>(`/api/logs/${id}`, 'PUT', input),
+  mutationFn: ({ id, input, keepMine }: SaveLogVars) => sendChecked<PerformanceLog & { version: number }>(ownLogs, `/api/logs/${id}`, id, input, keepMine),
   // A save that leaves out the jokes (an older app version's, waiting on a phone) keeps them.
   onMutate: ({ id, input }: SaveLogVars) => {
-    const jokes = input.jokes ?? queryClient.getQueryData<PerformanceLog[]>(keys.logs)?.find((l) => l.id === id)?.jokes
-    return upsert<PerformanceLog>(keys.logs, { ...input, jokes, id, created_at: createdAt<PerformanceLog>(keys.logs, id) })
+    const existing = queryClient.getQueryData<PerformanceLog[]>(keys.logs)?.find((l) => l.id === id)
+    const jokes = input.jokes ?? existing?.jokes
+    return upsert<PerformanceLog>(keys.logs, { ...existing, ...input, version: input.version ?? existing?.version ?? 0, jokes, id, created_at: createdAt<PerformanceLog>(keys.logs, id) })
   },
   onSettled: () => refreshWhenSynced(keys.logs, keys.venues),
 })
@@ -93,6 +97,12 @@ queryClient.setMutationDefaults(deleteSetlistKey, {
 queryClient.setMutationDefaults(saveBrainstormKey, {
   ...QUEUED,
   mutationFn: ({ id, input }: SaveBrainstormVars) => api<Brainstorm>(`/api/brainstorms/${id}`, 'PUT', input),
+  onSuccess: (_saved, { id, input }: SaveBrainstormVars) => {
+    // Also runs when an offline Save version replays after the editor was closed.
+    const sent = { id, title: input.title, content: input.content }
+    forgetSavedRewrite(rewriteKey(input.joke_id, id), sent)
+    forgetSavedRewrite(rewriteKey(input.joke_id), sent)
+  },
   onSettled: () => refreshWhenSynced(keys.brainstorms),
 })
 

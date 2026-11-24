@@ -39,7 +39,7 @@ export async function forgetLive(id: string) {
   await delMany((await allFor(id)).map(([k]) => k), store)
 }
 
-/** Drop everything: called once the interrupted recordings have been moved to the outbox. */
+/** Drop everything: used when clearing device data at sign-out. */
 export const clearLive = () => clear(store)
 
 /** Recordings that never reached the outbox, put back together from their chunks. */

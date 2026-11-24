@@ -55,10 +55,11 @@ describe('lessons', () => {
 
 describe('LPM', () => {
   it('scores laughs per minute and weights shows by length', () => {
-    expect(lpm([0, 0, 0, 0, 0], 300)).toBeNull()
+    expect(lpm(null, 300)).toBeNull()
+    expect(lpm([0, 0, 0, 0, 0], 300)).toBe(0)
     expect(lpm([2, 0, 0, 0, 2], 120)).toBe(6) // (2*1 + 2*5) / 2 minutes
     const log = (laughs: number[] | null, duration_seconds: number) => ({ laughs, duration_seconds }) as PerformanceLog
-    expect(averageLpm([log([0, 0, 0, 0, 6], 60), log([0, 0, 0, 0, 0], 60), log([10, 0, 0, 0, 0], 180)])).toEqual({ lpm: 10, shows: 2 })
+    expect(averageLpm([log([0, 0, 0, 0, 6], 60), log([0, 0, 0, 0, 0], 60), log([10, 0, 0, 0, 0], 180), log(null, 300)])).toEqual({ lpm: 8, shows: 3 })
     expect(formatLpm(12.34)).toBe('12.3 LPM, beast')
   })
 })

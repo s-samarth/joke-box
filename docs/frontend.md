@@ -81,7 +81,7 @@ under fixed keys (`setMutationDefaults`), each spreading the shared `QUEUED` opt
 - **Nothing refused is lost:** a queued save that fails for good goes, with its variables, to the
   **Couldn't sync** list ([unsynced.ts](../web/src/api/unsynced.ts), its own IndexedDB key) via
   the `MutationCache` `onError`. A strip above every page opens it, with Retry, Copy and Discard.
-- **Written-at times:** new jokes, observations, voice notes and craft notes send `created_at`, so
+- **Written-at times:** new jokes, premises, observations, voice notes and craft notes send `created_at`, so
   something written offline keeps the time it was written; the server keeps it on create only and
   caps it at now.
 - **Edits on two devices (jokes):** every joke has a `version`. A save sends the version it was
@@ -94,7 +94,7 @@ under fixed keys (`setMutationDefaults`), each spreading the shared `QUEUED` opt
   without the check. Resending the very same edit is never a clash, and a save that changes
   nothing (Save with no edit, a word typed and deleted) doesn't move the version on, so it can't
   make another device's waiting edit clash.
-- **Sets, Craft notes, observations, premises and clusters go the same way** (`sendChecked` in
+- **Shows, sets, Craft notes, observations, premises and clusters go the same way** (`sendChecked` in
   ownVersions.ts), each with Couldn't sync and Keep mine. A cluster's save queues before the joke
   saves that put versions in it ([clusters.ts](../web/src/api/clusters.ts)); dissolving one shows
   as "Dissolve cluster" in Couldn't sync. Observation saves live in
@@ -130,7 +130,8 @@ under fixed keys (`setMutationDefaults`), each spreading the shared `QUEUED` opt
 - **Afterwards, the data refreshes, once:** `onSettled` calls `refreshWhenSynced(...)`, which
   collects the keys and invalidates them only when the last queued save settles. Refetching
   earlier would show the server's older copy and make a waiting change seem to vanish. On
-  reconnect TanStack also resumes saves before it refetches queries.
+  reconnect TanStack also resumes saves before it refetches queries. A successful wording-only
+  joke edit refreshes the jokes list. Structural edits and failed saves also refresh related lists.
 
 Anything not queued (renaming a topic, deleting a venue) uses the default
 `networkMode: 'always'` with no retries: offline it fails at once with "You're offline" instead
@@ -342,7 +343,8 @@ flowchart LR
   and the screen is kept awake (`useWakeLock`, which reports `asking`, `held` or `refused` so
   the recorder only promises what the phone agreed to). If the phone takes the mic (the track ends or the
   recorder errors), what was recorded is filed as if stop was tapped. If the app is killed, the
-  next launch puts the chunks back together as "Recovered recording", dated when it started.
+  next launch puts the chunks back together as "Recovered recording", dated when it started. If the outbox write fails, its source chunks
+  stay on the device for another recovery attempt.
 - **Uploads time out:** a minute plus time to send at 20 KB/s (at most 15 minutes), so a stalled
   upload can't hold up the recordings behind it; a timeout counts as no connection.
 - **Outbox:** every recording is saved on the device first. The details and the audio upload as two

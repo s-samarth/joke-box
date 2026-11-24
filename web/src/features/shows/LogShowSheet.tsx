@@ -21,7 +21,6 @@ import { type StageTime, stageSeconds, toStageTime } from './stageTime'
 import { fromIstInput, toIstInput } from '../../lib/time'
 import { useChanged } from '../../lib/useChanged'
 import { LaughTally } from './LaughTally'
-import { NO_LAUGHS, counted } from './lpm'
 import { setTopics, swapTopics } from './setPick'
 import { ShowJokesField } from './ShowJokesField'
 
@@ -36,6 +35,7 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
   const { data: jokes = [] } = useJokes()
   const { save } = useLogActions()
   const { toast } = useFeedback()
+  const [version] = useState(log ? log.version ?? 1 : undefined)
   const [venue, setVenue] = useState(log?.venue_name ?? '')
   const [when, setWhen] = useState(() => toIstInput(log?.performed_at ?? new Date().toISOString()))
   const [rating, setRating] = useState(log?.rating ?? 0)
@@ -45,7 +45,7 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
   const [topicIds, setTopicIds] = useState<string[]>(log?.topic_ids ?? [])
   const [done, setDone] = useState<LogJoke[]>(log?.jokes ?? [])
   const [notes, setNotes] = useState(log?.notes ?? '')
-  const [laughs, setLaughs] = useState(log?.laughs ?? NO_LAUGHS)
+  const [laughs, setLaughs] = useState(log?.laughs ?? null)
   const [lesson, setLesson] = useState(log?.learned ?? '')
   const [error, setError] = useState('')
   // One id for this sheet, made once: tapping Log show twice saves the same show twice, not two shows.
@@ -76,7 +76,7 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
     const performedAt = fromIstInput(when)
     // The save is queued and the sheet closes at once, signal or not.
     const saving = save.mutateAsync(
-      { id, input: { venue_name: venueName, performed_at: performedAt, duration_seconds: seconds, audience_size: Number(crowd) || 0, rating, topic_ids: topicIds, notes: notes.trim(), laughs: counted(laughs) ? laughs : null, ...learned, ...jokesDone } },
+      { id, input: { version, venue_name: venueName, performed_at: performedAt, duration_seconds: seconds, audience_size: Number(crowd) || 0, rating, topic_ids: topicIds, notes: notes.trim(), laughs, ...learned, ...jokesDone } },
     )
     saving.catch((e: Error) => toast(`Show not saved: ${e.message}`))
     announceSave(saving, toast, log ? 'Show updated' : 'Show logged')

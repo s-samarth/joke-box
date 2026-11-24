@@ -67,6 +67,7 @@ export function useSetlistActions() {
 }
 
 export interface LogInput {
+  version?: number
   venue_name: string
   performed_at: string
   duration_seconds: number

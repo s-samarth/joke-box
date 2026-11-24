@@ -12,6 +12,7 @@ import type { Joke } from './types'
 
 /** The idea under a group of jokes: your take, and the reasoning behind it. */
 export interface PremiseInput {
+  created_at?: string
   topic_id: string
   take: string
   notes: string
@@ -63,7 +64,7 @@ queryClient.setMutationDefaults(saveKey, {
     queryClient.setQueryData<Premise[]>(keys.premises, (old = []) => {
       const existing = old.find((p) => p.id === id)
       // A save that leaves a field out keeps what's there (or the server's default, for a new one).
-      const next: Premise = { extra_notes: '', strength: null, status: 'Draft', ...existing, ...input, id, version: input.version ?? existing?.version ?? 0, created_at: existing?.created_at ?? now, updated_at: now }
+      const next: Premise = { extra_notes: '', strength: null, status: 'Draft', ...existing, ...input, id, version: input.version ?? existing?.version ?? 0, created_at: existing?.created_at ?? input.created_at ?? now, updated_at: now }
       return existing ? old.map((p) => (p.id === id ? next : p)) : [...old, next]
     })
   },
