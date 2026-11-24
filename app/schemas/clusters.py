@@ -9,10 +9,11 @@ from app.schemas.limits import INT_MAX
 
 
 class ClusterIn(BaseModel):
-    # The core idea, in a line. Empty: the lead's setup stands in for it.
-    title: str = Field(default="", max_length=2000)
-    notes: str = Field(default="", max_length=20_000)
-    # The version you'd do tonight. Left out (a rename), the lead stays as it is.
+    # The core idea, in a line. Empty: the lead's setup stands in for it. Each of these three left
+    # out keeps what's stored, so picking a lead never undoes a title typed on the way.
+    title: str | None = Field(default=None, max_length=2000)
+    notes: str | None = Field(default=None, max_length=20_000)
+    # The version you'd do tonight.
     lead_joke_id: uuid.UUID | None = None
     # The version this edit started from. Omitted (a new one), nothing is checked.
     base_version: int | None = Field(default=None, le=INT_MAX)

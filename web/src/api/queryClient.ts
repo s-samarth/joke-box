@@ -42,6 +42,7 @@ export const keys = {
   trash: ['trash'],
   setTags: ['set-tags'],
   premises: ['premises'],
+  clusters: ['clusters'],
 } as const
 
 export const queryClient = new QueryClient({

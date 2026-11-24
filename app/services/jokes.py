@@ -186,8 +186,9 @@ def save(db: Session, user: User, joke_id: uuid.UUID, data: JokeIn, existing: Jo
     db.add(joke)  # after apply, so lookups inside it don't flush a half-filled joke
     db.flush()
     prune_unused_types(db, user)
-    for cluster_id in {was_in, joke.cluster_id}:  # its status or strength can move the lead
-        clusters.settle(db, user, cluster_id)
+    if was_in != joke.cluster_id:  # it left: a lead leaving hands the lead on
+        clusters.settle(db, user, was_in, left=joke.id)
+    clusters.settle(db, user, joke.cluster_id)  # its status or strength can move the lead
     db.commit()
     db.refresh(joke)
     return joke

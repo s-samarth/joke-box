@@ -81,7 +81,7 @@ export const clearUnsynced = () => update(() => [])
  * version check.
  */
 /** The saves that send a version, so a clash can be resent with Keep mine. */
-const CHECKED = new Set(['joke', 'setlist', 'craft', 'observation', 'premise'])
+const CHECKED = new Set(['joke', 'setlist', 'craft', 'observation', 'premise', 'cluster'])
 
 export async function retryUnsynced(client: QueryClient, item: Unsynced) {
   await discardUnsynced(item.id)
@@ -95,7 +95,7 @@ const KINDS: Record<string, string> = {
   joke: 'Joke', observation: 'Observation', session: 'Brainstorm session', watch: 'Watchlist routine',
   analysis: 'Analysis', craft: 'Craft note', log: 'Show', setlist: 'Set', brainstorm: 'Rewrite',
   'brainstorm-version': 'Rewrite version', voice: 'Voice note', board: 'Joke moved on the board',
-  premise: 'Premise',
+  premise: 'Premise', cluster: 'Cluster',
 }
 
 const TRASH: Record<string, string> = { restore: 'Put back from the Trash', erase: 'Delete from the Trash', empty: 'Empty the Trash' }
@@ -109,6 +109,7 @@ export function summary(saved: string[], variables: unknown): { title: string; t
   if (key[0] === 'trash') return { title: TRASH[key[1]] ?? 'Trash', text: '' }
   if (key[0] === 'board' && key[1] === 'tidy') return { title: 'Tidy up the board', text: '' }
   const kind = KINDS[key[0]] ?? 'Change'
+  if (key[0] === 'cluster' && key[1] === 'delete') return { title: 'Dissolve cluster', text: '' }
   if (key[1] === 'delete') return { title: `Delete ${kind.toLowerCase()}`, text: '' }
   if (key[1] === 'link') return { title: `${kind}: what came from it`, text: '' }
   const input = (variables as { input?: Record<string, unknown> } | null)?.input ?? {}

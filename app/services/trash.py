@@ -137,7 +137,7 @@ def erase(db: Session, user: User, row: Trashable) -> str | None:
     db.flush()
     if isinstance(row, Joke):
         prune_unused_types(db, user)
-        clusters.settle(db, user, row.cluster_id)  # its last version gone: the cluster goes
+        clusters.settle(db, user, row.cluster_id, left=row.id)  # its last version: the cluster goes
     return recording
 
 

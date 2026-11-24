@@ -1,14 +1,17 @@
 /**
- * Jokes list state lives in the URL (?topic=&sub=&premise=&type=&status=&q=&sort=&discarded=), so back,
+ * Jokes list state lives in the URL (?topic=&sub=&premise=&type=&status=&q=&sort=&discarded=&versions=), so back,
  * refresh and links keep your place. Discarded jokes are hidden until ?discarded=show (discarded.ts). Filtering runs in the browser, so it works offline.
+ * A cluster's versions stack into one row (cluster/stacks.ts) until ?versions=all lists each one.
  * Arrive with no filters in the URL and the ones you used last come back (lib/useRememberedParams).
  */
 import { useMemo } from 'react'
+import { useClusters } from '../../api/clusters'
 import { useJokes } from '../../api/library'
 import type { Joke } from '../../api/types'
 import { byStrength, UNDEFINED_TYPE } from '../../lib/jokeMeta'
 import { NO_PREMISE, ON_A_PREMISE } from '../../lib/premises'
 import { useRememberedParams } from '../../lib/useRememberedParams'
+import { stackRows } from './cluster/stacks'
 import { keepDiscarded } from './discarded'
 
 export type SortKey = 'new' | 'old' | 'edited' | 'strong' | 'weak' | 'long'
@@ -57,6 +60,7 @@ const SORTERS: Record<SortKey, (a: Joke, b: Joke) => number> = {
 export function useJokeFilters() {
   const { params, update, filters: query } = useRememberedParams('jokes-filters')
   const { data: jokes = [], isPending } = useJokes()
+  const { data: clusters = [] } = useClusters()
   const f = {
     topic: params.get('topic'),
     sub: params.get('sub'),
@@ -66,9 +70,10 @@ export function useJokeFilters() {
     q: params.get('q') ?? '',
     sort: (params.get('sort') as SortKey | null) ?? 'new',
     showDiscarded: params.get('discarded') === 'show',
+    flat: params.get('versions') === 'all',
   }
 
-  const set = (changes: Partial<Record<'topic' | 'sub' | 'premise' | 'type' | 'status' | 'q' | 'sort' | 'discarded', string | null>>) =>
+  const set = (changes: Partial<Record<'topic' | 'sub' | 'premise' | 'type' | 'status' | 'q' | 'sort' | 'discarded' | 'versions', string | null>>) =>
     update((next) => {
       for (const [key, value] of Object.entries(changes)) {
         if (value) next.set(key, value)
@@ -89,9 +94,10 @@ export function useJokeFilters() {
     const { kept, discarded } = keepDiscarded(matching, f.showDiscarded, Boolean(f.status))
     return { visible: kept.sort(SORTERS[f.sort] ?? SORTERS.new), discarded }
   }, [jokes, f.topic, f.sub, f.premise, f.type, f.status, f.q, f.sort, f.showDiscarded])
+  const rows = useMemo(() => stackRows(visible, jokes, { clusters, showDiscarded: f.showDiscarded || Boolean(f.status), flat: f.flat }), [visible, jokes, clusters, f.showDiscarded, f.status, f.flat])
 
   const active = Boolean(f.topic || f.premise || f.type || f.status || f.q)
   // Hidden discarded jokes narrow the list without being a filter you set, so Clear leaves them be.
   const hidingDiscarded = discarded > 0 && !f.showDiscarded
-  return { ...f, set, visible, discarded, hidingDiscarded, total: jokes.length, isPending, active, query }
+  return { ...f, set, visible, rows, discarded, hidingDiscarded, total: jokes.length, isPending, active, query }
 }

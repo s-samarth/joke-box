@@ -16,6 +16,7 @@ import { useFeedback } from '../../components/ui/feedbackContext'
 import { formatDateTime } from '../../lib/time'
 import { ObservationsOn } from '../observations/ObservationsOn'
 import { VoiceNotesOn } from '../voice/VoiceNotesOn'
+import { BackToCluster } from './cluster/BackToCluster'
 import { JokeDetails } from './JokeDetails'
 import { JokeExtras } from './JokeExtras'
 import { JokeShowRecord } from './JokeShowRecord'
@@ -44,6 +45,7 @@ function Editor({ joke }: { joke: Joke }) {
     <article className="mx-auto max-w-2xl pb-10">
       <Link to={back} className="inline-flex h-12 items-center gap-1.5 text-dim hover:text-paper lg:hidden"><ArrowLeft size={18} /> Jokes</Link>
       <div className="pt-2 lg:pt-10">
+        {joke.cluster_id && <div className="-mt-2 mb-2 lg:-mt-8"><BackToCluster clusterId={joke.cluster_id} /></div>}
         <GrowingText aria-label="Setup" placeholder="The setup" className="text-[26px] leading-tight font-medium sm:text-[30px]" value={draft.setup}
           onChange={(e) => update({ setup: e.target.value })} />
         <GrowingText aria-label="Punchline" placeholder="The punchline" className="mt-4 text-[26px] leading-tight text-tape sm:text-[30px]" value={draft.punchline}

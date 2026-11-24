@@ -44,8 +44,9 @@ def test_make_a_cluster_and_pick_a_lead(alice: TestClient) -> None:
     assert put_cluster(alice, cid, title="Fake core", lead_joke_id=b).status_code == 200
     assert lead(alice, cid) == b
     put_cluster(alice, cid, title="Fake renamed")  # a rename keeps the lead
-    assert (cluster(alice, cid) or {})["title"] == "Fake renamed"
     assert lead(alice, cid) == b
+    put_cluster(alice, cid, lead_joke_id=a)  # and a new lead keeps the title
+    assert (cluster(alice, cid) or {})["title"] == "Fake renamed"
     assert {j["setup"]: j["cluster_id"] for j in alice.get("/api/jokes").json()} == {
         "Fake A": cid,
         "Fake B": cid,
@@ -120,3 +121,20 @@ def test_clusters_are_private(alice: TestClient, bob: TestClient) -> None:
     assert bob.get("/api/clusters").json() == []
     assert put_cluster(bob, cid, title="Fake").status_code == 404
     assert put_joke(bob, setup="Fake", cluster_id=cid).status_code == 422
+
+
+def test_undoing_a_dissolve_keeps_the_lead(alice: TestClient) -> None:
+    """The cluster comes back first, then its jokes one by one; the lead waits for its own."""
+    cid, (a, b, c) = new(alice, "Fake A", "Fake B", "Fake C")
+    put_cluster(alice, cid, lead_joke_id=c)
+    alice.delete(f"/api/clusters/{cid}")
+    put_cluster(alice, cid, title="Fake core", notes="", lead_joke_id=c)
+    for joke_id, setup in ((a, "Fake A"), (b, "Fake B"), (c, "Fake C")):
+        put_joke(alice, joke_id, setup=setup, cluster_id=cid)
+        assert lead(alice, cid) == c
+
+
+def test_a_lead_taken_out_hands_on(alice: TestClient) -> None:
+    cid, (a, b) = new(alice, "Fake A", "Fake B")
+    put_joke(alice, a, setup="Fake A", cluster_id=None)
+    assert lead(alice, cid) == b

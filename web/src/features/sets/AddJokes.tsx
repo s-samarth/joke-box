@@ -1,5 +1,6 @@
 /**
  * Pick jokes for a set: search, filter by topic, status and clean rating, tap + (or drag on desktop). Tap a joke to read it.
+ * A joke whose cluster already has another version in the set says so.
  * The jokes you worked on last come first, since those are usually the ones you're building the set from.
  * The search, topic, filters and sort are remembered for an hour (lib/sessionMemory), so leaving to
  * look at a joke or another screen and coming back finds the list as you left it.
@@ -32,13 +33,17 @@ const FRESH: Picker = { q: '', topic: '', picks: NO_PICKS, sort: 'edited' }
 
 const own = { onKeyDown: (e: React.KeyboardEvent) => e.stopPropagation() }
 
-function Candidate({ joke, used, onAdd, onOpen, draggable }: { joke: Joke; used: boolean; onAdd: () => void; onOpen: () => void; draggable: boolean }) {
+interface CandidateProps { joke: Joke; used: boolean; sibling: boolean; onAdd: () => void; onOpen: () => void; draggable: boolean }
+
+function Candidate({ joke, used, sibling, onAdd, onOpen, draggable }: CandidateProps) {
   const { attributes, listeners, setNodeRef } = useDraggable({ id: `lib:${joke.id}`, disabled: used || !draggable })
   return (
     <li ref={setNodeRef} {...(draggable ? { ...listeners, ...attributes } : {})} className={`flex items-center gap-3 py-2.5 ${used ? 'opacity-40' : draggable ? 'cursor-grab' : ''}`}>
       <button type="button" onClick={onOpen} {...own} aria-label={`Read the whole joke: ${joke.setup}`} className="min-w-0 flex-1 rounded-md text-left hover:text-tape">
         <p className="line-clamp-2 leading-snug">{joke.setup}</p>
         <p className="mt-1 flex items-center gap-3 text-[13px] text-faint"><StrengthTicks strength={joke.strength} /><span className="tabular">{clock(joke.duration_seconds)}</span></p>
+        {/* Two versions of one joke in a set is usually a slip: say so, but don't stop it. */}
+        {sibling && !used && <p className="mt-1 text-[13px] text-amber">Another version is already in this set</p>}
       </button>
       <button type="button" onClick={onAdd} {...own} disabled={used} aria-label={used ? 'Already in the set' : 'Add to set'} onPointerDown={(e) => e.stopPropagation()}
         className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg bg-ink-3 text-tape hover:bg-ink-4 disabled:bg-transparent disabled:text-faint">
@@ -64,6 +69,7 @@ export function AddJokes({ used, onAdd, onOpen, draggable = false }: Props) {
   const [picks, setPicks] = useState<PickState>(start.picks)
   const [sort, setSort] = useState<SortKey>(start.sort in SORTS ? start.sort : 'edited')
   useEffect(() => remember<Picker>(MEMORY, { q, topic, picks, sort }), [q, topic, picks, sort])
+  const usedClusters = new Set(jokes.flatMap((j) => (used.has(j.id) && j.cluster_id ? [j.cluster_id] : [])))
   const shown = jokes
     .filter((b) => (!topic || b.topic_id === topic) && matchesPicks(b, picks) && matchesSearch(b, q))
     .sort(SORTS[sort].by)
@@ -87,7 +93,7 @@ export function AddJokes({ used, onAdd, onOpen, draggable = false }: Props) {
       {draggable && <p className="text-sm text-faint">Drag onto the set or tap +.</p>}
       <ul className="min-h-0 flex-1 divide-y divide-rule overflow-y-auto">
         {shown.length === 0 && <li className="py-6 text-dim">No jokes match.</li>}
-        {shown.map((b) => <Candidate key={b.id} joke={b} used={used.has(b.id)} onAdd={() => onAdd(b)} onOpen={() => onOpen(b)} draggable={draggable} />)}
+        {shown.map((b) => <Candidate key={b.id} joke={b} used={used.has(b.id)} sibling={Boolean(b.cluster_id && usedClusters.has(b.cluster_id))} onAdd={() => onAdd(b)} onOpen={() => onOpen(b)} draggable={draggable} />)}
       </ul>
     </div>
   )

@@ -10,6 +10,7 @@ import type { Joke } from '../../../api/types'
 import { IconButton } from '../../../components/ui/Button'
 import { StrengthTicks, TypeLabel } from '../../../components/ui/pieces'
 import { displayTypes } from '../../../lib/jokeMeta'
+import { BackToCluster } from '../cluster/BackToCluster'
 import { JokeOrigins } from '../JokeOrigins'
 import { useHasOrigins } from '../useHasOrigins'
 
@@ -58,6 +59,7 @@ function MapPeek({ joke, before, beforeGone, after, query, onPick, onClose }: Pr
         <div>
           <p className="text-[17px] leading-snug font-medium whitespace-pre-wrap">{joke.setup}</p>
           {joke.punchline && <p className="mt-2 text-[17px] leading-snug whitespace-pre-wrap text-tape">{joke.punchline}</p>}
+          {joke.cluster_id && <div className="mt-2"><BackToCluster clusterId={joke.cluster_id} label="A version in" /></div>}
           {joke.tag_lines.filter((t) => t.trim()).map((t, i) => (
             <p key={i} className="mt-1.5 flex gap-2 leading-snug text-dim"><span className="text-tape" aria-hidden>+</span>{t}</p>
           ))}
