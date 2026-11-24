@@ -48,7 +48,13 @@ class Observation(Trashable, OwnedMixin, Base):
     """
 
     __tablename__ = "observations"
-    __table_args__ = (CheckConstraint("strength BETWEEN 1 AND 5", name="strength_range"),)
+    __table_args__ = (
+        CheckConstraint("strength BETWEEN 1 AND 5", name="strength_range"),
+        CheckConstraint(
+            "status IN ('Draft', 'Work in Progress', 'Stage Ready', 'Discarded')",
+            name="status_values",
+        ),
+    )
 
     text: Mapped[str] = mapped_column(Text)
     # Notes: anything more about it, kept apart from what was noticed.
@@ -65,6 +71,8 @@ class Observation(Trashable, OwnedMixin, Base):
     joke_ids: Mapped[list[str]] = mapped_column(JSON, default=list, server_default="[]")
     # 1 (Weak) to 5 (Killer), or None: not rated yet, as with jokes.
     strength: Mapped[int | None] = mapped_column(SmallInteger, default=None)
+    # Where it stands, the same four as a premise's (PREMISE_STATUSES); every one starts a Draft.
+    status: Mapped[str] = mapped_column(String(20), default="Draft", server_default="Draft")
     # Goes up by one on every save; a save edited from an older version is a conflict.
     version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
 

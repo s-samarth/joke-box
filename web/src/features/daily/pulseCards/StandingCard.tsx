@@ -1,6 +1,5 @@
 /**
- * Where everything stands: one bar per kind split by status (observations by whether anything
- * came of them), each part counted underneath. Draft is grey, Testing periwinkle, Stage Ready
+ * Where everything stands: one bar per kind split by status, each part counted underneath. Draft is grey, Work in Progress periwinkle, Stage Ready
  * green and Discarded a faded red; any other joke status of yours takes a shade of paper.
  */
 import type { Standing } from '../pulse'
@@ -9,11 +8,10 @@ import { PulseCard } from './PulseCard'
 
 const KNOWN: Record<string, string> = {
   draft: 'bg-faint',
+  'work in progress': 'bg-sky',
   testing: 'bg-sky',
   'stage ready': 'bg-ok',
   discarded: 'bg-light/60',
-  'led somewhere': 'bg-orchid',
-  unused: 'bg-faint',
 }
 const OTHERS = ['bg-paper/60', 'bg-paper/35', 'bg-paper/80', 'bg-paper/20']
 
@@ -25,7 +23,7 @@ function colours(labels: string[]): string[] {
 function Row({ kind, parts }: Standing) {
   const total = parts.reduce((s, p) => s + p.count, 0)
   const tone = colours(parts.map((p) => p.label))
-  const shown = parts.map((p, i) => ({ ...p, tone: tone[i] })).filter((p) => p.count > 0 || kind === 'premises')
+  const shown = parts.map((p, i) => ({ ...p, tone: tone[i] })).filter((p) => p.count > 0 || kind !== 'jokes')
   return (
     <div>
       <div className="flex items-baseline justify-between text-[15px]">

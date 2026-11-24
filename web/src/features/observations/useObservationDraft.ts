@@ -1,6 +1,7 @@
 /** Edit-in-place for one observation, saved after a short pause or when you leave, like a premise. */
 import { useEffect, useRef, useState } from 'react'
 import { useSaveObservation } from '../../api/notebook'
+import { premiseStatus } from '../../api/premises'
 import type { Observation, ObservationInput } from '../../api/types'
 import { onHide } from '../../lib/saveOnHide'
 
@@ -8,7 +9,7 @@ const DELAY = 700
 
 export function useObservationDraft(observation: Observation) {
   const [draft, setDraft] = useState<ObservationInput>(() => ({
-    text: observation.text, extra_notes: observation.extra_notes ?? '', topic_id: observation.topic_id, kind_id: observation.kind_id, strength: observation.strength ?? null, version: observation.version,
+    text: observation.text, extra_notes: observation.extra_notes ?? '', topic_id: observation.topic_id, kind_id: observation.kind_id, strength: observation.strength ?? null, status: premiseStatus(observation.status), version: observation.version,
   }))
   const save = useSaveObservation()
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)

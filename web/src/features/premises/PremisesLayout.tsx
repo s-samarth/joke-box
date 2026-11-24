@@ -8,7 +8,7 @@ import { Plus, Search, X } from 'lucide-react'
 import { Fragment, useRef, useState } from 'react'
 import { Outlet, useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
 import { useTopics } from '../../api/library'
-import { PREMISE_STATUSES } from '../../api/premises'
+import { PREMISE_STATUSES, premiseStatus } from '../../api/premises'
 import { Button } from '../../components/ui/Button'
 import { ChipRow } from '../../components/ui/ChipRow'
 import { Input } from '../../components/ui/Field'
@@ -54,7 +54,7 @@ export function PremisesLayout() {
   ]
   const statusItems: MenuItem[] = [
     { label: 'Any status', onSelect: () => f.set({ status: null }), checked: !f.status },
-    ...PREMISE_STATUSES.map((s) => ({ label: s, onSelect: () => f.set({ status: s }), checked: f.status === s })),
+    ...PREMISE_STATUSES.map((s) => ({ label: s, onSelect: () => f.set({ status: s }), checked: Boolean(f.status) && premiseStatus(f.status) === s })),
   ]
   const sortItems: MenuItem[] = (Object.keys(PREMISE_SORTS) as PremiseSort[]).map((k) => ({ label: PREMISE_SORTS[k], onSelect: () => f.set({ sort: k === 'new' ? null : k }), checked: f.sort === k }))
   // Sorted by topic, a small heading starts each topic's run.
@@ -72,7 +72,7 @@ export function PremisesLayout() {
       </div>
       <ChipRow className="mt-3 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
         <Dropdown align="start" items={topicItems} trigger={<span><MenuButton label={topic ? topicName(topic) : 'Topic'} on={Boolean(topic)} /></span>} />
-        <Dropdown align="start" items={statusItems} trigger={<span><MenuButton label={f.status ?? 'Status'} on={Boolean(f.status)} /></span>} />
+        <Dropdown align="start" items={statusItems} trigger={<span><MenuButton label={f.status ? premiseStatus(f.status) : 'Status'} on={Boolean(f.status)} /></span>} />
         <Dropdown align="start" items={sortItems} trigger={<span><MenuButton label={PREMISE_SORTS[f.sort]} on={false} /></span>} />
         {f.active && <button type="button" onClick={() => f.set({ q: null, topic: null, status: null })} className="inline-flex h-9 shrink-0 items-center gap-1 px-2 text-sm text-dim hover:text-paper"><X size={14} /> Clear</button>}
       </ChipRow>

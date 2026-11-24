@@ -69,7 +69,9 @@ class Premise(Trashable, OwnedMixin, Base):
     __table_args__ = (
         CheckConstraint("strength BETWEEN 1 AND 5", name="strength_range"),
         CheckConstraint(
-            "status IN ('Draft', 'Testing', 'Stage Ready', 'Discarded')", name="status_values"
+            # "Testing" is the old name of Work in Progress, still let in for older apps (0043).
+            "status IN ('Draft', 'Work in Progress', 'Stage Ready', 'Discarded', 'Testing')",
+            name="status_values",
         ),
     )
 
@@ -92,7 +94,7 @@ class Premise(Trashable, OwnedMixin, Base):
 
 
 # Where a premise stands, from new to done. Not the jokes' statuses, which the comic names.
-PREMISE_STATUSES = ("Draft", "Testing", "Stage Ready", "Discarded")
+PREMISE_STATUSES = ("Draft", "Work in Progress", "Stage Ready", "Discarded")
 
 
 joke_type_links = Table(

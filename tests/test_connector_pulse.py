@@ -35,12 +35,18 @@ def premise(ago: int, premise_id: str = "", status: str = "Draft") -> PremiseRow
     return PremiseRow(premise_id or str(uuid.uuid4()), at(ago), status)
 
 
-def noted(ago: int, used: bool = False, hour: int = 12, joke_ids: tuple[str, ...] = ()) -> NotedRow:
+def noted(
+    ago: int,
+    used: bool = False,
+    hour: int = 12,
+    joke_ids: tuple[str, ...] = (),
+    status: str = "Draft",
+) -> NotedRow:
     used = used or bool(joke_ids)
-    return NotedRow(str(uuid.uuid4()), at(ago, hour), "t1", "Trains", joke_ids, used)
+    return NotedRow(str(uuid.uuid4()), at(ago, hour), "t1", "Trains", joke_ids, used, status)
 
 
-ORDER = ["Draft", "Testing", "Stage Ready", "Discarded"]
+ORDER = ["Draft", "Work in Progress", "Stage Ready", "Discarded"]
 
 
 def test_days_ago_go_by_the_calendar_in_india() -> None:
@@ -72,14 +78,14 @@ def test_the_narrowest_step_once_a_step_has_enough_in_it() -> None:
 
 
 def test_each_kind_by_where_it_stands_jokes_in_the_comics_order() -> None:
-    observations = [noted(1, used=True), noted(2), noted(3)]
-    premises = [premise(1, "a", "Testing"), premise(2, "b", "Discarded"), premise(3)]
+    observations = [noted(1, used=True, status="Stage Ready"), noted(2), noted(3)]
+    premises = [premise(1, "a", "Work in Progress"), premise(2, "b", "Discarded"), premise(3)]
     jokes = [joke(1, status="Need Tags"), joke(2, status="Stage Ready"), joke(3, status=None)]
     jokes.append(joke(4))
     out = work_out(jokes, premises, observations, TODAY, ORDER)
     assert out["where_everything_stands"] == {
-        "observations": {"Led somewhere": 1, "Unused": 2},
-        "premises": {"Draft": 1, "Testing": 1, "Stage Ready": 0, "Discarded": 1},
+        "observations": {"Draft": 2, "Work in Progress": 0, "Stage Ready": 1, "Discarded": 0},
+        "premises": {"Draft": 1, "Work in Progress": 1, "Stage Ready": 0, "Discarded": 1},
         "jokes": {"Draft": 2, "Stage Ready": 1, "Need Tags": 1},
     }
     assert list(out["where_everything_stands"]["jokes"]) == ["Draft", "Stage Ready", "Need Tags"]

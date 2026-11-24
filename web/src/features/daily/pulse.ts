@@ -8,7 +8,7 @@
  * Claude reads the same pulse through the connector (app/connector/pulse.py), which works it out
  * again on the server: change a rule here and there together.
  */
-import { PREMISE_STATUSES, type Premise } from '../../api/premises'
+import { PREMISE_STATUSES, premiseStatus, type Premise } from '../../api/premises'
 import type { Joke, Observation } from '../../api/types'
 import { statusOf } from '../../lib/jokeMeta'
 import { toIstInput } from '../../lib/time'
@@ -29,7 +29,7 @@ export interface PulseInput {
   today: string
 }
 
-/** A count by status (or, for observations, by whether anything came of them), in order. */
+/** A count by status, in order: observations and premises by the four they share, jokes by yours. */
 export interface Standing {
   kind: 'observations' | 'premises' | 'jokes'
   parts: { label: string; count: number }[]
@@ -96,13 +96,12 @@ export function narrowestOf(steps: Step[]): Step | null {
 }
 
 /** Each kind split by where it stands. Jokes follow your status order; any other name comes after. */
-function standingOf({ jokes, premises, observations, used, statusOrder }: PulseInput): Standing[] {
-  const led = observations.filter(used).length
+function standingOf({ jokes, premises, observations, statusOrder }: PulseInput): Standing[] {
   const byStatus = new Map<string, number>()
   for (const j of jokes) byStatus.set(statusOf(j.status), (byStatus.get(statusOf(j.status)) ?? 0) + 1)
   const names = [...statusOrder.filter((s) => byStatus.has(s)), ...[...byStatus.keys()].filter((s) => !statusOrder.includes(s))]
   return [
-    { kind: 'observations', parts: [{ label: 'Led somewhere', count: led }, { label: 'Unused', count: observations.length - led }] },
+    { kind: 'observations', parts: PREMISE_STATUSES.map((s) => ({ label: s, count: observations.filter((o) => premiseStatus(o.status) === s).length })) },
     { kind: 'premises', parts: PREMISE_STATUSES.map((s) => ({ label: s, count: premises.filter((p) => p.status === s).length })) },
     { kind: 'jokes', parts: names.map((s) => ({ label: s, count: byStatus.get(s) ?? 0 })) },
   ]

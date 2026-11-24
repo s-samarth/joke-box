@@ -20,6 +20,7 @@ from app.models import (
     User,
     WritingSession,
 )
+from app.schemas.premises import OLD_NAMES
 
 # The kind of an observation filed under no kind.
 PLAIN = "Observation"
@@ -54,6 +55,7 @@ def search_observations(
     limit: int = 25,
     kind: str = "",
     min_strength: int = 1,
+    status: str = "",
 ) -> dict[str, Any]:
     """Things you noticed, newest first. `topic` is a joke topic; `kind` is what sort of note it
     is, and a plain observation's kind is "Observation". `premise_ids` and `joke_ids` are what
@@ -85,6 +87,7 @@ def search_observations(
         and same_name(topic, topic_of(o))
         and same_name(kind, kind_of(o))
         and (min_strength <= 1 or (o.strength or 0) >= min_strength)
+        and same_name(OLD_NAMES.get(status.strip().lower(), status), o.status)
     ]
     shown, total = page(found, limit)
     premises, jokes = live_links(db, user)
@@ -99,6 +102,7 @@ def search_observations(
                 "topic": topic_of(o),
                 "kind": kind_of(o),
                 "strength": o.strength,
+                "status": o.status,
                 "noted": ist_date(o.created_at),
                 "premise_ids": [i for i in o.premise_ids or [] if i in premises],
                 "joke_ids": [i for i in o.joke_ids or [] if i in jokes],

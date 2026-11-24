@@ -1,4 +1,5 @@
 /** Shapes returned by the API (see app/schemas on the Python side). */
+import type { PremiseStatus } from './premises'
 
 export type CleanRating = 'clean' | 'mild' | 'dirty'
 
@@ -138,6 +139,8 @@ export interface ObservationInput {
   topic_id: string | null
   /** 1 (Weak) to 5 (Killer), or null: not rated yet. Left out of a save, it stays as stored. */
   strength?: number | null
+  /** The same four as a premise's. Left out of a save, it stays as stored. */
+  status?: PremiseStatus
   /** Sent when creating, so something written offline keeps the time it was written. */
   created_at?: string
   /** The version this edit started from, sent as the base of the save. Missing: a new one. */
@@ -151,6 +154,8 @@ export interface Observation extends ObservationInput {
   premise_ids: string[]
   joke_ids: string[]
   strength: number | null
+  /** Draft to start. Missing on one cached by an app version from before statuses: read it with premiseStatus. */
+  status?: PremiseStatus
   /** Up by one per save on the server; catches edits made on two devices. */
   version: number
   created_at: string

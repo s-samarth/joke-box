@@ -41,14 +41,14 @@ STALE = 30
 def standing(
     jokes: list[JokeRow], premises: list[PremiseRow], noted: list[NotedRow], order: list[str]
 ) -> dict[str, dict[str, int]]:
-    """Each kind by where it stands. Jokes follow the comic's status order; others come after."""
+    """Each kind by status: observations and premises by the four they share, jokes in the
+    comic's own status order (any other name after)."""
     by_status: dict[str, int] = {}
     for j in jokes:
         by_status[status_of(j.status)] = by_status.get(status_of(j.status), 0) + 1
     names = [s for s in order if s in by_status] + [s for s in by_status if s not in order]
-    led = sum(o.used for o in noted)
     return {
-        "observations": {"Led somewhere": led, "Unused": len(noted) - led},
+        "observations": {s: sum(o.status == s for o in noted) for s in PREMISE_STATUSES},
         "premises": {s: sum(p.status == s for p in premises) for s in PREMISE_STATUSES},
         "jokes": {s: by_status[s] for s in names},
     }
@@ -134,7 +134,8 @@ def writing_pulse(db: Session, user: User, today: date | None = None) -> dict[st
         used = bool(from_it) or led or str(o.id) in sessions
         topic_id = str(o.topic_id) if o.topic_id else None
         topic = (topics.get(o.topic_id) if o.topic_id else None) or "Random"
-        noted.append(NotedRow(str(o.id), o.created_at, topic_id, topic, from_it, used))
+        row = NotedRow(str(o.id), o.created_at, topic_id, topic, from_it, used, o.status)
+        noted.append(row)
     order = list(
         db.scalars(select(Status.name).where(Status.user_id == user.id).order_by(Status.position))
     )

@@ -26,8 +26,14 @@ export interface PremiseInput {
 }
 
 /** A premise's own status: new ones are Drafts. Discarded ones hide from the list until asked for. */
-export const PREMISE_STATUSES = ['Draft', 'Testing', 'Stage Ready', 'Discarded'] as const
+export const PREMISE_STATUSES = ['Draft', 'Work in Progress', 'Stage Ready', 'Discarded'] as const
 export type PremiseStatus = (typeof PREMISE_STATUSES)[number]
+
+/** Work in Progress was called Testing until November 2026: a copy cached before then, or an old
+ *  filter in the address, reads as the new name. The server does the same for a queued save. */
+export const premiseStatus = (status: string | null | undefined): PremiseStatus =>
+  status?.trim().toLowerCase() === 'testing' ? 'Work in Progress' : ((status as PremiseStatus | undefined) ?? 'Draft')
+const current = (list: Premise[]): Premise[] => (list.some((p) => (p.status as string) === 'Testing') ? list.map((p) => ({ ...p, status: premiseStatus(p.status) })) : list)
 
 export interface Premise extends PremiseInput {
   id: string
@@ -76,6 +82,6 @@ queryClient.setMutationDefaults(deleteKey, {
   onSettled: () => refreshWhenSynced(keys.premises, keys.jokes),
 })
 
-export const usePremises = () => useQuery({ queryKey: keys.premises, queryFn: () => api<Premise[]>('/api/premises') })
+export const usePremises = () => useQuery({ queryKey: keys.premises, queryFn: () => api<Premise[]>('/api/premises'), select: current })
 export const useSavePremise = () => useMutation<Premise, Error, SavePremiseVars>({ mutationKey: saveKey })
 export const useDeletePremise = () => useMutation<void, Error, string>({ mutationKey: deleteKey })
