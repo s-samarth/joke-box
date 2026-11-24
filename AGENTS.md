@@ -45,8 +45,8 @@ It runs on Vercel's free Hobby plan, and the comic uses it every day.
 
 ## The Claude connector (`app/connector/`)
 
-Claude reads JokeBox through an MCP server at `/mcp`: 17 read-only tools over jokes, premises,
-sets, shows, observations, voice notes, brainstorms, Craft notes, analyses and the writing pulse,
+Claude reads JokeBox through an MCP server at `/mcp`: 18 read-only tools over jokes, clusters,
+premises, sets, shows, observations, voice notes, brainstorms, Craft notes, analyses and the writing pulse,
 plus `log_show`, which set-review uses to log a reviewed show. The tools read the models
 directly, so a model change can break them, and Claude only finds out mid-conversation.
 

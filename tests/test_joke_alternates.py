@@ -5,7 +5,7 @@ import uuid
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.connector import library
+from app.connector import library, search
 from tests.conftest import signed_in
 from tests.test_connector_voice import user
 from tests.test_jokes import put_joke
@@ -61,4 +61,4 @@ def test_claude_reads_and_searches_the_alternates(db: Session) -> None:
     me = user(db, "dev@example.com")
     [found] = library.get_jokes(db, me, [joke["id"]])["jokes"]
     assert found["alt_punchlines"] == ["Fake marmalade ending"]
-    assert library.search_jokes(db, me, "marmalade")["total"] == 1
+    assert search.search_jokes(db, me, "marmalade")["total"] == 1

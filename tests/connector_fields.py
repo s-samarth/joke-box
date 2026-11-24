@@ -56,12 +56,24 @@ PULSE = {
     "sitting_idle",
     "worth_knowing",
 }
+CLUSTER = {
+    "id",
+    "title",
+    "notes",
+    "lead",
+    "topic",
+    "versions",
+    "discarded",
+    "version_ids",
+    "shows",
+}
 # Every tool Claude is offered. A new one goes here, and gets its fields checked.
 TOOLS = {
     "jokebox_overview",
     "writing_pulse",
     "search_jokes",
     "get_jokes",
+    "list_clusters",
     "list_premises",
     "get_premise",
     "list_sets",

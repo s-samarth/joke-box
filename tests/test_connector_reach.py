@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.connector import brainstorm, library, notebook, performing
+from app.connector import brainstorm, notebook, performing, search
 from app.models import User
 from tests.conftest import signed_in
 from tests.test_jokes import put_joke
@@ -69,13 +69,13 @@ def test_jokes_by_hashtag_and_subtopic(dev: TestClient, db: Session) -> None:
     sub = dev.post(f"/api/topics/{topic}/subtopics", json={"name": "Fake trains"}).json()
     put_joke(dev, setup="Fake platform", topic_id=topic, subtopic_id=sub["id"])
     put_joke(dev, setup="Fake airport", topic_id=topic, hashtags=["#fakeclosers", "fakegate"])
-    tagged = library.search_jokes(db, me(db), query="#fakeclosers")
+    tagged = search.search_jokes(db, me(db), query="#fakeclosers")
     assert [j["setup"] for j in tagged["jokes"]] == ["Fake airport"]
     for query in ("#fakegate", "fakegate"):  # saved without its #, found either way
-        assert library.search_jokes(db, me(db), query=query)["total"] == 1
-    trains = library.search_jokes(db, me(db), subtopic="fake TRAINS")
+        assert search.search_jokes(db, me(db), query=query)["total"] == 1
+    trains = search.search_jokes(db, me(db), subtopic="fake TRAINS")
     assert [j["setup"] for j in trains["jokes"]] == ["Fake platform"]
-    assert library.search_jokes(db, me(db), subtopic="Fake planes")["total"] == 0
+    assert search.search_jokes(db, me(db), subtopic="Fake planes")["total"] == 0
 
 
 def test_rewrites_sort_with_brainstorms_and_open(dev: TestClient, db: Session) -> None:

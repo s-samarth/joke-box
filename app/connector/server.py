@@ -1,6 +1,7 @@
 """The tools Claude sees for the library and the stage: jokes, premises, the writing pulse, sets
 and shows. Each one reads, never writes, except log_show, which only the set-review engine may
-call (it needs the `shows` scope). The notebook and study tools are in server_notebook.py.
+call (it needs the `shows` scope). Searching jokes and listing clusters are in server_jokes.py,
+the notebook and study tools in server_notebook.py.
 
 The work lives in the area modules; these wrappers give each tool its name, its description
 (the docstring, which Claude reads to decide when to call it) and its database session.
@@ -17,8 +18,8 @@ from app.connector.log_show import when
 
 @server.tool(annotations=READ)
 def jokebox_overview() -> dict[str, Any]:
-    """What's in JokeBox: topics and subtopics with joke counts, how many premises, sets, shows
-    and observations there are, the Craft areas, and the statuses and types in use."""
+    """What's in JokeBox: topics and subtopics with joke counts, how many premises, clusters,
+    sets, shows and observations there are, the Craft areas, and the statuses and types in use."""
     with reading() as (db, user):
         return library.overview(db, user)
 
@@ -37,45 +38,12 @@ def writing_pulse() -> dict[str, Any]:
 
 
 @server.tool(annotations=READ)
-def search_jokes(
-    query: str = "",
-    topic: str = "",
-    subtopic: str = "",
-    status: str = "",
-    joke_type: str = "",
-    min_strength: int = 1,
-    premise_id: str = "",
-    limit: int = 25,
-    offset: int = 0,
-) -> dict[str, Any]:
-    """Find jokes. Every word of `query` must appear in the setup, punchline, tag lines,
-    hashtags or notes; a word starting with # finds that hashtag. Filters are exact names
-    (topic, subtopic, status, type), a strength from 1 to 5 and up, or a premise id. Strength is
-    1 (Weak) to 5 (Killer), or null when the comic hasn't rated the joke yet; a min_strength
-    above 1 leaves unrated jokes out. Returns short versions (at most 25) and the total; open
-    them with get_jokes. When next_offset is set, call again with that offset for the rest."""
-    with reading() as (db, user):
-        return library.search_jokes(
-            db,
-            user,
-            query,
-            topic,
-            status,
-            joke_type,
-            min_strength,
-            premise_id,
-            limit,
-            subtopic=subtopic,
-            offset=offset,
-        )
-
-
-@server.tool(annotations=READ)
 def get_jokes(ids: list[str]) -> dict[str, Any]:
     """Up to 20 jokes in full: setup, punchline, tag lines, notes, premise, the joke each one
     follows and the jokes that follow it, the sets it's in, how many rewrites it has, its
-    record at logged shows (shows done, how many killed, ok or bombed, the date last done), and
-    the observations and voice notes it came from."""
+    record at logged shows (shows done, how many killed, ok or bombed, the date last done), the
+    observations and voice notes it came from, and its cluster: the other versions of the same
+    joke (each with whether it's the lead) when it's one of several."""
     with reading() as (db, user):
         return library.get_jokes(db, user, ids)
 
@@ -190,4 +158,4 @@ def log_show(
 
 
 # The rest of the tools register themselves on the same server when this loads.
-from app.connector import server_notebook  # noqa: E402, F401
+from app.connector import server_jokes, server_notebook  # noqa: E402, F401
