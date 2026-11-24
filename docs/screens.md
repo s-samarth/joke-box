@@ -147,7 +147,8 @@ From the top:
   - **How far ideas got**, of what you wrote in the last 90 days: observations that led somewhere
     (a joke, premise or brainstorm, the same test as **Not used yet**), premises with a joke on
     them, jokes marked Stage Ready. The narrowest is red.
-  - **Month on month**, the last six months: pieces written and each of those three shares, each
+  - **Month on month**, the last six months: pieces written and how many went on at each of those
+    three steps, as counts (a share would call one observation that led somewhere "100%"), each
     month counted on what was written that month. No status history is kept, so a month can only be
     judged by where its writing stands now: months that ended under 30 days ago are faded as still
     settling (for pieces written, only this month), and the arrow compares the last two settled.
@@ -161,13 +162,14 @@ From the top:
 - **Highlights:** six **best months**, all-time (jokes, observations, premises, all writing, shows,
   stage time), as tiles, 3 across on a phone and 6 on a wider screen (like Strava's best efforts).
   A tile is also the switch for the chart under it: that measure over the last 12 months, the
-  record month lit, this month outlined, with its pace. Then **Big days** (like Garmin's records):
+  record month lit, this month outlined, with its pace; months read Dec, Jan, Feb (the 12 ending
+  this one, rolling). Then the last 12 months as a grid of days across the full width (like
+  GitHub's), greener the more you wrote, the three biggest days gold. Under it **Big days** (like
+  Garmin's records), two columns from tablet width:
   the biggest writing day, the most jokes in a day, the longest night on stage, the best room by
-  LPM and the longest joke streak, each beside a small calendar day; and the last 12 months as a
-  grid of days (like GitHub's), greener the more you wrote, the three biggest days gold. Side by
-  side from tablet width. Ties go to the earliest, so a record moves only when it's beaten.
+  LPM and the longest joke streak, each beside a small calendar day. Ties go to the earliest, so a record moves only when it's beaten.
 - **Year review** (like Spotify Wrapped): a card with "2026 so far" on tape, how far through the
-  year you are, and every past year with anything in it ("2025, wrapped"). This year stays "so
+  year you are, and every past year with anything in it ("2025 wrapped"). This year stays "so
   far" until 31 December is over. A year opens as full-screen cards on a phone (a tall card in the
   middle on an iPad or laptop): the total and its split (against last year, and the pace to 31
   December), the best month, the biggest day, the longest joke streak, the top topic, when you

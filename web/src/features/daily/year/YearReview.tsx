@@ -50,12 +50,12 @@ export function YearReview() {
           </div>
           <span className="text-xs text-dim tabular">{now.daysCounted} of {now.daysIn} days</span>
           {past.map((y) => (
-            <button key={y} type="button" onClick={() => setOpen(y)} className="inline-flex min-h-9 items-center rounded-full bg-ink-3 px-3 text-[13px] hover:bg-ink-4">{y}, wrapped</button>
+            <button key={y} type="button" onClick={() => setOpen(y)} className="inline-flex min-h-9 items-center rounded-full bg-ink-3 px-3 text-[13px] hover:bg-ink-4">{y} wrapped</button>
           ))}
         </div>
       </div>
       {shown && open !== null && (
-        <YearStories title={shown.sofar ? `${open} so far` : `${open}, wrapped`} stories={storiesFor(shown)} onClose={() => setOpen(null)} />
+        <YearStories title={shown.sofar ? `${open} so far` : `${open} wrapped`} stories={storiesFor(shown)} onClose={() => setOpen(null)} />
       )}
     </section>
   )

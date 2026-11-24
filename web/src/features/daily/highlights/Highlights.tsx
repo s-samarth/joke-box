@@ -1,6 +1,7 @@
 /**
  * Highlights on Activity: the records shelf (best month for each measure) that doubles as the
- * switch for the month-by-month chart, then big days beside the last 12 months as a grid of days.
+ * switch for the month-by-month chart, then the last 12 months as a grid of days across the whole
+ * width, and big days under it, two columns wide where there's room.
  */
 import { useMemo, useState } from 'react'
 import { useLogs } from '../../../api/shows'
@@ -33,15 +34,13 @@ export function Highlights() {
       </div>
       <RecordShelf rows={data.rows} picked={picked} onPick={setPicked} />
       <MonthChart rows={data.rows} window={data.window} measure={measure} today={today} />
-      <div className="grid gap-x-5 gap-y-3 pt-2 @lg:grid-cols-2">
-        <div>
-          <h3 className="mb-1 text-sm text-dim">Big days</h3>
-          <BigDaysList days={data.days} />
-        </div>
-        <div>
-          <h3 className="mb-2 text-sm text-dim">Days that stood out, last 12 months</h3>
-          <YearGrid weeks={data.grid.weeks} top={data.grid.top} />
-        </div>
+      <div className="pt-2">
+        <h3 className="mb-2 text-sm text-dim">Days that stood out, last 12 months</h3>
+        <YearGrid weeks={data.grid.weeks} top={data.grid.top} />
+      </div>
+      <div className="pt-2">
+        <h3 className="mb-1 text-sm text-dim">Big days</h3>
+        <BigDaysList days={data.days} />
       </div>
     </section>
   )

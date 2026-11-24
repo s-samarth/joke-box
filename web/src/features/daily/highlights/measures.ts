@@ -36,5 +36,5 @@ const LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'A
 export const shortMonth = (month: string) => `${SHORT[Number(month.slice(5)) - 1]} ${month.slice(0, 4)}`
 /** "August". */
 export const longMonth = (month: string) => LONG[Number(month.slice(5)) - 1]
-/** "A" for August, the chart's axis. */
-export const letter = (month: string) => SHORT[Number(month.slice(5)) - 1][0]
+/** "Aug", the chart's axis. */
+export const monthAbbr = (month: string) => SHORT[Number(month.slice(5)) - 1]

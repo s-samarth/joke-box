@@ -47,7 +47,7 @@ export function BestMonth({ s }: { s: YearStats }) {
       <div className="mt-auto flex h-24 items-end gap-1" aria-hidden>
         {s.months.map((m) => <span key={m.month} className={`flex-1 rounded-[2px] ${m.month === best.month ? 'bg-ok' : m.days ? 'bg-ink-4' : 'border border-dashed border-ink-4'}`} style={{ height: m.days ? `${Math.max(3, (m.total / max) * 100)}%` : '25%' }} />)}
       </div>
-      <div className="mt-1 flex gap-1 text-[11px] opacity-60" aria-hidden>{s.months.map((m) => <span key={m.month} className="flex-1 text-center">{longMonth(m.month)[0]}</span>)}</div>
+      <div className="mt-1 flex gap-1 text-[11px] opacity-60" aria-hidden>{s.months.map((m) => <span key={m.month} className="min-w-0 flex-1 text-center">{longMonth(m.month).slice(0, 3)}</span>)}</div>
     </>
   )
 }
