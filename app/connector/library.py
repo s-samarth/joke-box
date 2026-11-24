@@ -34,6 +34,7 @@ from app.models import (
     Topic,
     User,
 )
+from app.schemas.premises import OLD_NAMES
 
 
 def count(db: Session, model: Any, user: User) -> int:
@@ -125,7 +126,7 @@ def list_premises(
         for p in rows
         if matches(query, p.take, p.notes, p.extra_notes)
         and same_name(topic, topic_name(names, p.topic_id))
-        and same_name(status, p.status)
+        and same_name(OLD_NAMES.get(status.strip().lower(), status), p.status)
         and (min_strength <= 1 or (p.strength or 0) >= min_strength)
     ]
     return {"total": len(found), "premises": found}

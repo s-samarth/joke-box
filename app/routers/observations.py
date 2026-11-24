@@ -77,12 +77,16 @@ def put_observation(
             fields["extra_notes"] = body.extra_notes
         if "strength" in body.model_fields_set:
             fields["strength"] = body.strength
+        if body.status is not None:
+            fields["status"] = body.status
         check_fields(observation, body.base_version, fields, OBSERVATION_CLASH)
     observation.text = body.text
     if body.extra_notes is not None:  # left out by an older app: what's stored stays
         observation.extra_notes = body.extra_notes
     if "strength" in body.model_fields_set:  # left out by an older app: what's stored stays
         observation.strength = body.strength
+    if body.status is not None:  # left out by an older app: what's stored stays
+        observation.status = body.status
     observation.kind_id = kind_id
     observation.topic_id = topic_id
     db.commit()

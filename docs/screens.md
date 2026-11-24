@@ -141,10 +141,9 @@ From the top:
     the list that holds them; it waits until a step has 5 ideas in it. Under it, the sentences
     worth knowing: a kind with nothing new in 21 days, and the topic with the biggest pile of
     unused observations (at least 5, 3 unused).
-  - **Where everything stands:** a bar per kind split by status. Observations: led somewhere or
-    unused. Premises: Draft, Testing, Stage Ready, Discarded. Jokes: your statuses in your order
-    (Draft grey, Testing periwinkle, Stage Ready green, Discarded faded red, any other a shade of
-    paper).
+  - **Where everything stands:** a bar per kind split by status. Observations and premises: Draft,
+    Work in Progress, Stage Ready, Discarded. Jokes: your statuses in your order (Draft grey, Work
+    in Progress periwinkle, Stage Ready green, Discarded faded red, any other a shade of paper).
   - **How far ideas got**, of what you wrote in the last 90 days: observations that led somewhere
     (a joke, premise or brainstorm, the same test as **Not used yet**), premises with a joke on
     them, jokes marked Stage Ready. The narrowest is red.
@@ -399,7 +398,7 @@ writing a premise sits beside the list; on a phone the list gives way to the pre
 - **A premise:** the take and its notes (why it's true) are edited in place and save on their own.
   Under them, **Strength** (Unrated, or Weak to Killer, the picker jokes use:
   [StrengthPicker.tsx](../web/src/components/ui/StrengthPicker.tsx)) and **Status**: Draft (every
-  premise starts there), Testing, Stage Ready or Discarded
+  premise starts there), Work in Progress, Stage Ready or Discarded
   ([PremiseStatusPicker.tsx](../web/src/features/premises/PremiseStatusPicker.tsx)). The status is
   the premise's own: discarding it leaves its jokes, and their statuses, as they are.
   A short guide ([PremiseGuide.tsx](../web/src/features/premises/PremiseGuide.tsx)) opens while the
@@ -544,13 +543,13 @@ open beside it on an iPad in landscape or a laptop, or as its own page on a phon
 
 - **The list:** **New** opens New observation (`?new=1`; the + button opens it too): the words,
   **Topic** (Random, or the one you're filtered to) and **Kind (optional)**, then Save opens its page. Below are a search box
-  (`?q=`), and **Topic**, **Kind** and **Not used yet** (`?unused=1`) in a row that scrolls
+  (`?q=`), and **Topic**, **Kind**, **Status** (`?status=`) and **Not used yet** (`?unused=1`) in a row that scrolls
   sideways, then a sort (Newest, the default, Oldest, Strongest, Weakest; `?sort=`); each choice
   counts within the other filters, and **Clear** ends the row while any filter is set. They're remembered for an hour like Jokes' filters, so the tab bar brings you back to them
   (an open New sheet isn't). Then how many there are. Each row: the words (three lines), then its topic, kind,
-  what came from it ("1 joke · 1 premise · 1 brainstorm" or "Not used yet"), the date and its strength ticks.
+  what came from it ("1 joke · 1 premise · 1 brainstorm" or "Not used yet"), the date, its strength ticks and its status (none for a Draft).
 - **An observation:** the words, edited in place and saved on their own; **Topic** and
-  **Kind (optional)**, each ending in New topic… / New kind…; **Strength**, Unrated until you rate it, as on a joke; **Write a joke from it** and **Write a premise from it**
+  **Kind (optional)**, each ending in New topic… / New kind…; **Strength**, Unrated until you rate it, as on a joke; **Status**, the same four chips as a premise's (Draft to start); **Write a joke from it** and **Write a premise from it**
   open New joke or New premise on its topic with the setup (or take) empty and this observation
   already under **From observations**, so you write your own words with it in view; either new
   one is linked back when saved. A new joke also starts on the premise this observation already

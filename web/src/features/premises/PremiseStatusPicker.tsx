@@ -1,6 +1,7 @@
 /**
- * A premise's status, as four chips: Draft (where every premise starts), Testing, Stage Ready and
- * Discarded. It's the premise's own: discarding one leaves its jokes, and their statuses, as they are.
+ * A premise's or an observation's status, as four chips: Draft (where every one starts), Work in
+ * Progress, Stage Ready and Discarded. It's its own: discarding a premise leaves its jokes, and
+ * their statuses, as they are.
  */
 import { PREMISE_STATUSES, type PremiseStatus } from '../../api/premises'
 import { choice } from '../../components/ui/choice'

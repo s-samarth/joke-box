@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from app.schemas.legacy import JOKE_IDS
 from app.schemas.limits import INT_MAX
+from app.schemas.premises import OLD_NAMES, PremiseStatus
 
 
 class ObservationIn(BaseModel):
@@ -24,10 +25,18 @@ class ObservationIn(BaseModel):
     topic_id: uuid.UUID | None = None
     # 1 to 5, or null for not rated. Left out (an app from before strength), what's stored stays.
     strength: int | None = Field(default=None, ge=1, le=5)
+    # The same four as a premise's. Left out (an older app), what's stored stays; a new one is a
+    # Draft.
+    status: PremiseStatus | None = None
     # Kept only when the observation is created: an import can keep the original date.
     created_at: datetime | None = None
     # The version this edit started from. Omitted (a new one, an older app), nothing is checked.
     base_version: int | None = Field(default=None, le=INT_MAX)
+
+    @field_validator("status", mode="before")
+    @classmethod
+    def old_status_name(cls, value: object) -> object:
+        return OLD_NAMES.get(value.strip().lower(), value) if isinstance(value, str) else value
 
     @field_validator("text")
     @classmethod
@@ -49,6 +58,7 @@ class ObservationOut(BaseModel):
     premise_ids: list[uuid.UUID]
     joke_ids: list[uuid.UUID]
     strength: int | None
+    status: str
     version: int
     created_at: datetime
     updated_at: datetime

@@ -22,7 +22,7 @@ const input = (lists: Partial<PulseInput>): PulseInput => ({
   jokes: [], premises: [], observations: [], today: TODAY,
   used: (o) => o.joke_ids.length + o.premise_ids.length > 0,
   topicName: (id) => (id === 't1' ? 'Trains' : 'Random'),
-  statusOrder: ['Draft', 'Testing', 'Stage Ready', 'Discarded'],
+  statusOrder: ['Draft', 'Work in Progress', 'Stage Ready', 'Discarded'],
   ...lists,
 })
 
@@ -54,13 +54,13 @@ describe('writing pulse', () => {
 
   it('splits each kind by where it stands, jokes in your status order', () => {
     const p = pulse(input({
-      observations: [obs(1, used), obs(2), obs(3)],
-      premises: [premise(1, 'a', 'Testing'), premise(2, 'b', 'Discarded'), premise(3)],
+      observations: [obs(1, { ...used, status: 'Stage Ready' }), obs(2), obs(3)],
+      premises: [premise(1, 'a', 'Work in Progress'), premise(2, 'b', 'Discarded'), premise(3)],
       jokes: [joke(1, { status: 'Need Tags' }), joke(2, { status: 'Stage Ready' }), joke(3, { status: null }), joke(4)],
     }))
     expect(p.standing.map((s) => s.parts.map((x) => [x.label, x.count]))).toEqual([
-      [['Led somewhere', 1], ['Unused', 2]],
-      [['Draft', 1], ['Testing', 1], ['Stage Ready', 0], ['Discarded', 1]],
+      [['Draft', 2], ['Work in Progress', 0], ['Stage Ready', 1], ['Discarded', 0]],
+      [['Draft', 1], ['Work in Progress', 1], ['Stage Ready', 0], ['Discarded', 1]],
       [['Draft', 2], ['Stage Ready', 1], ['Need Tags', 1]],
     ])
   })

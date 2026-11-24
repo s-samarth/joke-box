@@ -59,7 +59,7 @@ def test_an_observation_keeps_its_strength(alice: TestClient) -> None:
 
 def test_claude_can_narrow_by_status_and_strength(dev: TestClient, db: Session) -> None:
     topic = new_topic(dev, "Fake weddings")
-    put_premise(dev, topic, take="Fake strong", strength=5, status="Testing")
+    put_premise(dev, topic, take="Fake strong", strength=5, status="Work in Progress")
     put_premise(dev, topic, take="Fake weak", strength=1)
     put_obs(dev, text="Fake sharp noticing", strength=4)
     me = account(db, "dev@example.com")
@@ -69,3 +69,27 @@ def test_claude_can_narrow_by_status_and_strength(dev: TestClient, db: Session) 
     assert [p["take"] for p in strong] == ["Fake strong"]
     [seen] = notebook.search_observations(db, me, "fake sharp", min_strength=4)["observations"]
     assert seen["strength"] == 4
+
+
+def test_testing_is_now_work_in_progress(alice: TestClient) -> None:
+    """An older app's queued save may still say Testing: it lands as Work in Progress."""
+    topic = new_topic(alice, "Fake family")
+    made = put_premise(alice, topic, status="Testing").json()
+    assert made["status"] == "Work in Progress"
+    assert put_obs(alice, status="testing").json()["status"] == "Work in Progress"
+
+
+def test_an_observation_has_the_premises_four_statuses(alice: TestClient) -> None:
+    oid = str(uuid.uuid4())
+    assert put_obs(alice, oid).json()["status"] == "Draft"
+    assert put_obs(alice, oid, status="Stage Ready").json()["status"] == "Stage Ready"
+    assert put_obs(alice, oid, text="Fake edited").json()["status"] == "Stage Ready"  # older app
+    assert put_obs(alice, status="Complete").status_code == 422
+
+
+def test_claude_can_narrow_observations_by_status(dev: TestClient, db: Session) -> None:
+    put_obs(dev, text="Fake ready noticing", status="Stage Ready")
+    put_obs(dev, text="Fake rough noticing")
+    me = account(db, "dev@example.com")
+    found = notebook.search_observations(db, me, "fake", status="stage ready")["observations"]
+    assert [(o["text"], o["status"]) for o in found] == [("Fake ready noticing", "Stage Ready")]

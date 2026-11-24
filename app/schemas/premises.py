@@ -8,7 +8,9 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.schemas.limits import INT_MAX
 
-PremiseStatus = Literal["Draft", "Testing", "Stage Ready", "Discarded"]
+PremiseStatus = Literal["Draft", "Work in Progress", "Stage Ready", "Discarded"]
+# What Work in Progress was called until November 2026; an older app may still send it.
+OLD_NAMES = {"testing": "Work in Progress"}
 
 
 class PremiseIn(BaseModel):
@@ -23,6 +25,12 @@ class PremiseIn(BaseModel):
     status: PremiseStatus | None = None
     # The version this edit started from. Omitted (a new one, an older app), nothing is checked.
     base_version: int | None = Field(default=None, le=INT_MAX)
+
+    @field_validator("status", mode="before")
+    @classmethod
+    def old_status_name(cls, value: object) -> object:
+        """A queued save from an older app may still say Testing."""
+        return OLD_NAMES.get(value.strip().lower(), value) if isinstance(value, str) else value
 
     @field_validator("take")
     @classmethod

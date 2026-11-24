@@ -46,6 +46,7 @@ class NotedRow:
     topic: str = "Random"
     joke_ids: tuple[str, ...] = ()
     used: bool = False
+    status: str = "Draft"
 
 
 def status_of(name: str | None) -> str:

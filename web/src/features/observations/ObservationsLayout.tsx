@@ -1,8 +1,8 @@
 /**
  * Observations, like Premises: a searchable list with the open observation beside it (see
  * SplitView); on a phone the list gives way to the one you open. Filter by topic and kind, or to
- * the ones nothing has come from yet, and sort by date or strength; all of it lives in the URL
- * (?topic=, ?kind=, ?unused=1, ?q=, ?sort=) and is remembered for a while like Jokes' (lib/useRememberedParams), so the tab bar brings
+ * status, or the ones nothing has come from yet, and sort by date or strength; all of it lives in the URL
+ * (?topic=, ?kind=, ?status=, ?unused=1, ?q=, ?sort=) and is remembered for a while like Jokes' (lib/useRememberedParams), so the tab bar brings
  * you back to it. New opens a sheet (?new=1, so the + button can open it too).
  */
 import { Eye, Plus, Search, X } from 'lucide-react'
@@ -10,6 +10,7 @@ import { useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate, useParams } from 'react-router'
 import { useTopics } from '../../api/library'
 import { useObservationKinds, useObservations } from '../../api/notebook'
+import { PREMISE_STATUSES, premiseStatus } from '../../api/premises'
 import type { Observation } from '../../api/types'
 import { Button } from '../../components/ui/Button'
 import { ChipRow } from '../../components/ui/ChipRow'
@@ -27,6 +28,7 @@ import { KindMenu, TopicMenu } from './ObservationMenus'
 import { MenuButton } from '../jokes/JokeFilters'
 import { kindLabel, matchesFilters, OBSERVATION_SORTS, observationSort, PLAIN, PLAIN_KIND, sortObservations, topicLabel, type ObservationSort } from './observationMeta'
 import { useUses } from './useUsed'
+import { PremiseStatusTag } from '../premises/PremiseStatusPicker'
 import { IdeasSwitch } from '../../layout/IdeasSwitch'
 
 const chip = (on: boolean) => `inline-flex h-9 shrink-0 items-center rounded-lg px-3 text-sm transition ${on ? 'bg-paper font-medium text-ink' : 'bg-ink-3 text-dim hover:text-paper'}`
@@ -42,24 +44,30 @@ export function ObservationsLayout() {
   const navigate = useNavigate()
   const [managing, setManaging] = useState(false)
   const setParam = (name: string, value: string | null) => update((p) => { if (value) p.set(name, value); else p.delete(name) })
-  const clear = () => update((p) => { for (const name of ['topic', 'kind', 'unused', 'q']) p.delete(name) })
+  const clear = () => update((p) => { for (const name of ['topic', 'kind', 'unused', 'status', 'q']) p.delete(name) })
   // An old ?topic=none (Not sorted, now gone) or a deleted topic's id reads as all topics.
   const topicParam = params.get('topic')
   const topic = topicParam && topics.some((t) => t.id === topicParam) ? topicParam : null
   const kind = params.get('kind')
   const unused = params.get('unused') === '1'
+  const statusParam = params.get('status')
+  const status = statusParam ? premiseStatus(statusParam) : null
   const query = params.get('q') ?? ''
   const sort = observationSort(params.get('sort'))
   const kept = new URLSearchParams(useLocation().search)
   kept.delete('new')
   const search = kept.size ? `?${kept}` : ''
   const all = sortObservations(observations ?? [], sort)
-  const open = (o: Observation) => !(unused && uses.used(o))
+  const open = (o: Observation) => !(unused && uses.used(o)) && (!status || premiseStatus(o.status) === status)
   const shown = all.filter((o) => matchesFilters(o, topic, kind) && open(o) && matchesWords(query, [o.text]))
-  const active = Boolean(topic || kind || unused || query.trim())
+  const active = Boolean(topic || kind || unused || status || query.trim())
   // Each menu counts within the other filters, so the numbers match what picking would show.
   const topicCount = (v: string | null) => all.filter((o) => matchesFilters(o, v, kind) && open(o)).length
   const kindCount = (v: string | null) => all.filter((o) => matchesFilters(o, topic, v) && open(o)).length
+  const statusItems: MenuItem[] = [
+    { label: 'Any status', onSelect: () => setParam('status', null), checked: !status },
+    ...PREMISE_STATUSES.map((s) => ({ label: s, onSelect: () => setParam('status', s), checked: status === s })),
+  ]
   const sortItems: MenuItem[] = (Object.keys(OBSERVATION_SORTS) as ObservationSort[]).map((k) => ({ label: OBSERVATION_SORTS[k], onSelect: () => setParam('sort', k === 'new' ? null : k), checked: sort === k }))
   const about = (o: Observation) => [topicLabel(topics, o.topic_id), o.kind_id && kindLabel(kinds, o.kind_id)].filter((x) => x && x !== PLAIN).join(' · ')
 
@@ -76,6 +84,7 @@ export function ObservationsLayout() {
       <ChipRow className="mt-3 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
         <TopicMenu value={topic} onChange={(v) => setParam('topic', v)} counts={topicCount} />
         <KindMenu value={kind} onChange={(v) => setParam('kind', v)} counts={kindCount} onManage={() => setManaging(true)} />
+        <Dropdown align="start" items={statusItems} trigger={<span><MenuButton label={status ?? 'Status'} on={Boolean(status)} /></span>} />
         <button type="button" aria-pressed={unused} onClick={() => setParam('unused', unused ? null : '1')} className={chip(unused)}>Not used yet</button>
         <Dropdown align="start" items={sortItems} trigger={<span><MenuButton label={OBSERVATION_SORTS[sort]} on={false} /></span>} />
         {active && <button type="button" onClick={clear} className="inline-flex h-9 shrink-0 items-center gap-1 px-2 text-sm text-dim hover:text-paper"><X size={14} /> Clear</button>}
@@ -101,6 +110,7 @@ export function ObservationsLayout() {
                     <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-faint">
                       <span>{about(o)} · {uses.label(o)} · {formatDate(o.created_at)}</span>
                       <StrengthTicks strength={o.strength} />
+                      <PremiseStatusTag status={premiseStatus(o.status)} />
                     </span>
                   </span>
                 </Link>

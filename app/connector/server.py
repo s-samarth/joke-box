@@ -28,7 +28,7 @@ def jokebox_overview() -> dict[str, Any]:
 def writing_pulse() -> dict[str, Any]:
     """How the writing is going, worked out from what's saved (nothing is logged for it), the
     same as the Writing pulse on the comic's Activity screen. `where_everything_stands`:
-    observations led somewhere or unused, premises by status, jokes by status in the comic's
+    observations and premises by the four statuses they share, jokes by status in the comic's
     order. `how_far_ideas_got`: of what was written in the last 90 days, how many observations
     led to a joke, premise or brainstorm, premises got a joke, and jokes were marked Stage Ready;
     `narrowest_step` names the step fewest got through (null until a step has 5 in it).
@@ -58,11 +58,11 @@ def list_premises(
 ) -> dict[str, Any]:
     """Premises: each one's take, topic and how many jokes rest on it. A joke from any topic
     can rest on any premise. `notes` say why the take is true and `extra_notes` hold anything
-    else the comic kept on it (both shortened here). `status` is Draft, Testing, Stage Ready or
-    Discarded: the premise's own, apart from its jokes' (a Discarded premise's jokes are as they
-    were). `strength` is 1 (Weak) to 5 (Killer), or null when not rated yet. Narrow by words in
-    the take or either notes, by topic name, by status, or by a strength from min_strength up
-    (which leaves out unrated ones)."""
+    else the comic kept on it (both shortened here). `status` is Draft, Work in Progress, Stage
+    Ready or Discarded: the premise's own, apart from its jokes' (a Discarded premise's jokes
+    are as they were). `strength` is 1 (Weak) to 5 (Killer), or null when not rated yet. Narrow
+    by words in the take or either notes, by topic name, by status, or by a strength from
+    min_strength up (which leaves out unrated ones)."""
     with reading() as (db, user):
         return library.list_premises(db, user, query, topic, status, min_strength)
 

@@ -13,7 +13,12 @@ from app.connector.identity import reading
 
 @server.tool(annotations=READ)
 def search_observations(
-    query: str = "", topic: str = "", kind: str = "", limit: int = 25, min_strength: int = 1
+    query: str = "",
+    topic: str = "",
+    kind: str = "",
+    limit: int = 25,
+    min_strength: int = 1,
+    status: str = "",
 ) -> dict[str, Any]:
     """Observations: things the comic noticed that aren't jokes yet, newest first. `topic` is a
     joke topic (the same list as jokes and premises; Random unless filed elsewhere). `kind` says
@@ -21,9 +26,13 @@ def search_observations(
     `extra_notes` is anything the comic added under it (often empty). Words match either.
     `premise_ids` and `joke_ids` are what came from it and `brainstorm_ids` the brainstorm
     sessions it was used in: all empty means it hasn't been used yet. `strength` is 1 (Weak) to
-    5 (Killer), or null when not rated yet; min_strength leaves out weaker and unrated ones."""
+    5 (Killer), or null when not rated yet; min_strength leaves out weaker and unrated ones.
+    `status` is Draft, Work in Progress, Stage Ready or Discarded, the same four as a premise's;
+    narrow by it with `status`."""
     with reading() as (db, user):
-        return notebook.search_observations(db, user, query, topic, limit, kind, min_strength)
+        return notebook.search_observations(
+            db, user, query, topic, limit, kind, min_strength, status
+        )
 
 
 @server.tool(annotations=READ)
