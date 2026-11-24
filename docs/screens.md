@@ -229,8 +229,9 @@ separate log to fall out of step. Items in the Trash don't count.
   kept in the sheet, so the list's filters behind it don't change). A count line with discarded
   jokes hidden behind **Show** and **Clear filters**. Rows look like the list's
   ([JokeRowBody.tsx](../web/src/features/jokes/JokeRowBody.tsx)): setup, punchline, strength,
-  status, subtopic, runtime; a tap ticks one (yellow edge and tick), and a joke in another cluster
-  says "In "…" · moves here". The bar at the bottom says how many are picked, with **Clear** and
+  status, subtopic, runtime; a tap ticks one (yellow edge and tick). A joke in another cluster is
+  greyed out at the bottom and can't be ticked: "In "…" · take it out there first" (the count line
+  says how many). The bar at the bottom says how many are picked, with **Clear** and
   **Add 2 versions**. Jokes already in this cluster aren't listed.
 - **The lead:** the version you'd do tonight. While only one version is active, it leads. When the
   lead is discarded, trashed or taken out, the strongest active version takes over (the most

@@ -1,8 +1,9 @@
 /**
  * Put jokes you've already written into a cluster. The lead stays pinned at the top to compare
  * against; the same filters as the Jokes list start on the lead's topic and subtopic, where the
- * versions usually are; rows look like the list's, and a tap ticks one. A joke in another cluster
- * says so, and moves here. Rendered only while open, so every opening starts fresh.
+ * versions usually are; rows look like the list's, and a tap ticks one. A joke is a version in one
+ * cluster at most: one already in another is greyed out at the bottom, naming that cluster, and has
+ * to be taken out of it first. Rendered only while open, so every opening starts fresh.
  */
 import { Check, Crown, Layers } from 'lucide-react'
 import { useState } from 'react'
@@ -35,7 +36,10 @@ export function AddVersionsDialog({ clusterId, lead, onClose }: Props) {
   const { data: clusters = [] } = useClusters()
   const save = useSaveJoke()
   const [candidates] = useState(() => jokes.filter((j) => j.cluster_id !== clusterId))
-  const { f, shown, discarded, showDiscarded } = usePickerFilters(candidates, lead)
+  const { f, shown: matching, discarded, showDiscarded } = usePickerFilters(candidates, lead)
+  // The ones you can pick first; those in another cluster after them, greyed out.
+  const shown = [...matching.filter((j) => !j.cluster_id), ...matching.filter((j) => j.cluster_id)]
+  const taken = matching.filter((j) => j.cluster_id).length
   const [ticked, setTicked] = useState<Set<string>>(new Set())
   const subOf = (j: Joke) => topics.find((t) => t.id === j.topic_id)?.subtopics.find((s) => s.id === j.subtopic_id)?.name
   const otherCluster = (id: string) => clusterName(clusters.find((c) => c.id === id), versionsOf(id, jokes))
@@ -68,7 +72,7 @@ export function AddVersionsDialog({ clusterId, lead, onClose }: Props) {
       )}
       <JokeFilters f={f} edge="-mx-5 px-5" />
       <p className="mt-3 text-sm text-faint">
-        {`${shown.length} ${shown.length === 1 ? 'joke' : 'jokes'}`}
+        {`${shown.length} ${shown.length === 1 ? 'joke' : 'jokes'}`}{taken > 0 && ` · ${taken} in other clusters`}
         {discarded > 0 && <>{` · ${discarded} discarded ${showDiscarded ? 'shown' : 'hidden'} `}<button type="button" onClick={() => f.set({ discarded: showDiscarded ? null : 'show' })} className={link}>{showDiscarded ? 'Hide' : 'Show'}</button></>}
         {f.active && <> · <button type="button" onClick={() => f.set({ topic: null, sub: null, premise: null, type: null, status: null, q: null })} className={link}>Clear filters</button></>}
       </p>
@@ -76,16 +80,19 @@ export function AddVersionsDialog({ clusterId, lead, onClose }: Props) {
         {shown.length === 0 && <li className="px-5 py-6 text-dim">No jokes match. Try another word, or Clear filters.</li>}
         {shown.map((j) => {
           const on = ticked.has(j.id)
+          const elsewhere = Boolean(j.cluster_id)
           return (
             <li key={j.id} className="border-b border-rule">
-              <button type="button" role="checkbox" aria-checked={on} onClick={() => toggle(j.id)}
-                className={`flex w-full items-start gap-3 border-l-[3px] py-3.5 pr-5 pl-[17px] text-left transition-colors ${on ? 'border-tape bg-tape/10' : 'border-transparent hover:bg-ink-3/60'}`}>
-                <span className={`mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full border-[1.5px] ${on ? 'border-tape bg-tape text-tape-ink' : 'border-faint'}`}>
-                  {on && <Check size={13} strokeWidth={3} aria-hidden />}
-                </span>
-                <span className="block min-w-0 flex-1">
+              <button type="button" role="checkbox" aria-checked={on} disabled={elsewhere} onClick={() => toggle(j.id)}
+                className={`flex w-full items-start gap-3 border-l-[3px] py-3.5 pr-5 pl-[17px] text-left transition-colors ${on ? 'border-tape bg-tape/10' : 'border-transparent'} ${elsewhere ? 'cursor-not-allowed' : on ? '' : 'hover:bg-ink-3/60'}`}>
+                {elsewhere
+                  ? <Layers size={18} className="mt-0.5 shrink-0 text-faint" aria-hidden />
+                  : <span className={`mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full border-[1.5px] ${on ? 'border-tape bg-tape text-tape-ink' : 'border-faint'}`}>
+                      {on && <Check size={13} strokeWidth={3} aria-hidden />}
+                    </span>}
+                <span className={`block min-w-0 flex-1 ${elsewhere ? 'opacity-55' : ''}`}>
                   <JokeRowBody joke={j} punchClass="text-tape/90">
-                    {j.cluster_id && <span className="flex items-center gap-1 rounded-md bg-ink-3 px-1.5 py-0.5"><Layers size={12} aria-hidden />In “{otherCluster(j.cluster_id)}” · moves here</span>}
+                    {j.cluster_id && <span className="flex items-center gap-1 rounded-md bg-ink-3 px-1.5 py-0.5 text-paper"><Layers size={12} aria-hidden />In “{otherCluster(j.cluster_id)}” · take it out there first</span>}
                     <StrengthTicks strength={j.strength} />
                     <span>{statusOf(j.status)}</span>
                     {subOf(j) && <span className="truncate">{subOf(j)}</span>}

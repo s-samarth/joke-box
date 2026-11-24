@@ -138,3 +138,15 @@ def test_a_lead_taken_out_hands_on(alice: TestClient) -> None:
     cid, (a, b) = new(alice, "Fake A", "Fake B")
     put_joke(alice, a, setup="Fake A", cluster_id=None)
     assert lead(alice, cid) == b
+
+
+def test_a_joke_is_in_one_cluster_at_a_time(alice: TestClient) -> None:
+    """Straight from one cluster to another is refused: take it out first, then add it."""
+    first, (a, _) = new(alice, "Fake A", "Fake B")
+    other, _ = new(alice, "Fake C")
+    moved = put_joke(alice, a, setup="Fake A", cluster_id=other)
+    assert moved.status_code == 422
+    assert "another cluster" in moved.json()["detail"]
+    assert put_joke(alice, a, setup="Fake A", cluster_id=first).status_code == 200
+    assert put_joke(alice, a, setup="Fake A", cluster_id=None).status_code == 200
+    assert put_joke(alice, a, setup="Fake A", cluster_id=other).status_code == 200

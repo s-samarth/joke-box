@@ -121,8 +121,9 @@ A joke points at its premise with `premise_id`; a premise doesn't list its jokes
 | PUT | `/api/clusters/{id}` | `{title?, notes?, lead_joke_id?, base_version?}`. Create or update by client id; each field left out keeps what's stored (so picking a lead never undoes a title). The lead is put right on save: a discarded version can't lead while another can (see [data-model.md](data-model.md)). With `base_version`, an edit made from an older version that would change it answers **409** |
 | DELETE | `/api/clusters/{id}` | Dissolve: its jokes (the Trash too) go back to being on their own; nothing is deleted. Already gone is 204 |
 
-A joke joins, moves or leaves through its own save (`cluster_id` on `PUT /api/jokes/{id}`; left
-out, it stays where it is). Its status, strength, Trash and erasing all keep the lead right, and
+A joke joins or leaves through its own save (`cluster_id` on `PUT /api/jokes/{id}`; left out, it
+stays where it is). It's a version in one cluster at most: a save moving it straight from one
+cluster to another is refused (422), so it leaves the first, then joins. Its status, strength, Trash and erasing all keep the lead right, and
 a cluster left with no jokes at all goes.
 
 ## Rewrites (Studio)

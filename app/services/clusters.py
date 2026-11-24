@@ -1,6 +1,8 @@
 """Clusters: keeping the lead valid, letting jokes go, and tidying away empty ones.
 
-The rules, in one place (the browser follows the same ones in `web/src/lib/clusters.ts`):
+The rules, in one place (the browser follows the same ones in
+`web/src/features/jokes/cluster/lead.ts`):
+- A joke is a version in one cluster at most. Moving it straight to another is refused.
 - The lead is a version that isn't discarded or in the Trash, while the cluster has one. When it
   stops being one, the strongest such version takes over (the most recently edited, on a tie),
   and keeps the lead after the old one comes back.
@@ -10,16 +12,19 @@ The rules, in one place (the browser follows the same ones in `web/src/lib/clust
 
 import uuid
 
+from fastapi import HTTPException
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from app.models import Joke, JokeCluster, User
 from app.models.trash import INCLUDE_TRASHED
 from app.schemas.clusters import ClusterIn
+from app.schemas.library import JokeIn
 from app.services.clashes import check_fields
 
 CLUSTER_CLASH = "This cluster was changed on another device after you edited it."
 DISCARDED = "discarded"
+ONE_CLUSTER = "This joke is already a version in another cluster. Take it out of that one first."
 
 
 def is_discarded(joke: Joke) -> bool:
@@ -122,3 +127,19 @@ def dissolve(db: Session, user: User, cluster: JokeCluster) -> None:
     )
     db.delete(cluster)
     db.commit()
+
+
+def check(db: Session, user: User, joke: Joke, data: JokeIn) -> None:
+    """One of the user's clusters. One dissolved since the edit was made (a save waiting
+    offline) is dropped rather than refused, so the joke is saved on its own. A joke is a
+    version in one cluster at most: moving it straight from one to another is refused, so it's
+    taken out (and the lead handed on) first."""
+    if data.cluster_id is None:
+        return
+    if joke.cluster_id not in (None, data.cluster_id) and "cluster_id" in data.model_fields_set:
+        raise HTTPException(422, ONE_CLUSTER)
+    cluster = db.get(JokeCluster, data.cluster_id)
+    if cluster is None:
+        data.cluster_id = None
+    elif cluster.user_id != user.id:
+        raise HTTPException(422, "Unknown cluster")
