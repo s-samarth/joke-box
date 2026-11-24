@@ -27,14 +27,14 @@ export function YearGrid({ weeks, top }: { weeks: GridCell[][]; top: Set<string>
   const biggest = [...top].sort().map((d) => formatDate(`${d}T12:00:00+05:30`)).join(', ')
   return (
     <div className="rounded-xl border border-rule bg-ink-2 p-3">
-      <div className="grid grid-flow-col grid-cols-[repeat(53,minmax(0,1fr))] gap-[2px] text-[10px] text-faint" aria-hidden>
+      <div className="grid grid-flow-col grid-cols-[repeat(53,minmax(0,1fr))] gap-[2px] text-[10px] text-faint @lg:gap-[3px] @lg:text-[11px]" aria-hidden>
         {labels.map((l, i) => <span key={i} className="col-span-1 overflow-visible whitespace-nowrap">{l ?? ''}</span>)}
       </div>
       <div role="img" aria-label={`Days written in the last 12 months. Your biggest: ${biggest || 'none yet'}.`}
-        className="mt-1 grid grid-flow-col grid-cols-[repeat(53,minmax(0,1fr))] grid-rows-7 gap-[2px]">
+        className="mt-1 grid grid-flow-col grid-cols-[repeat(53,minmax(0,1fr))] grid-rows-7 gap-[2px] @lg:gap-[3px]">
         {weeks.flat().map((c) => (
           <span key={c.day} title={c.future ? undefined : `${formatDate(`${c.day}T12:00:00+05:30`)}: ${c.total} written`}
-            className={`aspect-square rounded-[1.5px] ${c.future ? 'bg-transparent' : top.has(c.day) ? 'bg-tape' : shade(c.total)}`} />
+            className={`aspect-square rounded-[1.5px] @lg:rounded-[2px] ${c.future ? 'bg-transparent' : top.has(c.day) ? 'bg-tape' : shade(c.total)}`} />
         ))}
       </div>
       <p className="mt-2.5 flex items-center gap-1.5 text-xs text-dim"><span className="size-2 rounded-[2px] bg-tape" aria-hidden />Your three biggest days</p>

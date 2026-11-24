@@ -23,7 +23,7 @@ function MiniDay({ day, dots }: { day: string; dots: string[] }) {
 
 function Row({ mark, big, what }: { mark: ReactNode; big: string; what: string }) {
   return (
-    <li className="flex items-center gap-3 py-2">
+    <li className="flex min-w-0 items-center gap-3 border-b border-rule py-2.5">
       {mark}
       <div className="min-w-0">
         <p className="text-[15px] font-semibold">{big}</p>
@@ -38,7 +38,7 @@ export function BigDaysList({ days }: { days: BigDays }) {
   if (!writing && !stage && !streak) return <p className="text-[15px] text-dim">Your biggest days show up here once you've written a few.</p>
   const short = (d: string) => date(d).split(' ').slice(0, 2).join(' ')
   return (
-    <ul className="divide-y divide-rule">
+    <ul className="grid gap-x-6 @lg:grid-cols-2">
       {writing && <Row mark={<MiniDay day={writing.day} dots={writing.kinds.map((k) => KIND_META[k].dot)} />} big={plural(writing.total, 'piece')} what={`Your biggest writing day · ${date(writing.day)}`} />}
       {jokes && jokes.jokes > 1 && <Row mark={<MiniDay day={jokes.day} dots={[KIND_META.jokes.dot]} />} big={plural(jokes.jokes, 'joke')} what={`Most jokes in a day · ${date(jokes.day)}`} />}
       {stage && <Row mark={<MiniDay day={stage.day} dots={Array.from({ length: Math.min(stage.shows, 3) }, () => 'bg-tape')} />} big={`${plural(stage.shows, 'show')} · ${stageTotal(stage.seconds)}`} what={`Your longest night on stage · ${date(stage.day)}`} />}

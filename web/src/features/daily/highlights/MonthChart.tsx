@@ -1,11 +1,11 @@
 /**
- * One measure month by month, the last 12 months (like Apple Health's monthly view): the record
+ * One measure month by month, the 12 months ending this one, rolling (like Apple Health's monthly view): the record
  * month lit in its colour when it falls in the window, this month outlined, and how this month
  * is pacing.
  */
 import { daysBetween } from '../dailyMath'
 import { bestMonth, type MonthTotals } from './highlightMath'
-import { letter, longMonth, shortMonth, type MeasureMeta } from './measures'
+import { longMonth, monthAbbr, shortMonth, type MeasureMeta } from './measures'
 
 const daysIn = (month: string) => new Date(Date.UTC(Number(month.slice(0, 4)), Number(month.slice(5)), 0)).getUTCDate()
 
@@ -38,7 +38,7 @@ export function MonthChart({ rows, window, measure, today }: { rows: MonthTotals
         })}
       </div>
       <div className="mt-1 flex gap-1 sm:gap-1.5" aria-hidden>
-        {window.map((r) => <span key={r.month} className={`flex-1 text-center text-[11px] ${best?.month === r.month ? measure.text : 'text-faint'}`}>{letter(r.month)}</span>)}
+        {window.map((r) => <span key={r.month} className={`flex-1 text-center text-[11px] ${best?.month === r.month ? measure.text : 'text-faint'}`}>{monthAbbr(r.month)}</span>)}
       </div>
       <p className="mt-2.5 text-sm text-dim">
         {longMonth(current.month)} so far: {measure.say(current[measure.key])}{current[measure.key] ? `, on pace for ${measure.say(pace)}` : ''}.
