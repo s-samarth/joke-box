@@ -457,13 +457,14 @@ the sheet, so the list behind it keeps its own; clear them to pick from anywhere
 
 | Sheet | Filters | Opened from |
 |---|---|---|
-| Jokes | The Jokes row: Topic, Subtopic, Premise, Type, Status, Sort | Add versions (cluster), Add jokes you've written (premise), Follows and Followed by (joke), Link jokes (observation) |
-| Premises | Topic, Status, Sort | Premise (joke), Link premises (observation) |
+| Jokes | The Jokes row: Topic, Subtopic, Premise, Type, Status, Sort | Add versions (cluster), Add jokes you've written (premise), Follows and Followed by (joke), Link jokes (observation), Add jokes (set beat, with clusters as one row: see [screens-perform.md](screens-perform.md)) |
+| Premises | Topic, Status, Sort | Premise (joke), Link premises (observation), Premise and Put under a premise (set beat) |
 | Observations | Topic, Kind, Not used yet, Sort | From observations (joke, premise, New joke, New premise) |
 
 Picking many (versions, jokes on a premise, observations, jokes that follow): a tap ticks a row
 (yellow edge and filled tick) and the bar at the bottom says how many, with **Clear** and
-**Add 2 versions** / **Link 3 observations**. Picking one (a premise, the joke before): a tap
+**Add 2 versions** / **Link 3 observations**. They're added in the order you ticked them, and a
+tick hidden by a later filter stays picked. Picking one (a premise, the joke before): a tap
 picks it and closes, and the current one is marked. A row that can't be picked is greyed at the
 bottom and says why (a joke in another cluster).
 

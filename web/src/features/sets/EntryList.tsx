@@ -1,9 +1,11 @@
 /**
  * A beat's list, in order: premises with their jokes, jokes with no premise (they can sit
  * between premises), and crowd work. A premise after the first can be gated on the one before.
+ * Jokes first, premise later: Select in a no-premise list ticks jokes to put under a premise.
  */
-import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react'
-import { useEffect, useRef } from 'react'
+import { ArrowDown, ArrowUp, Lightbulb, ListChecks, Plus, Trash2 } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Button } from '../../components/ui/Button'
 import type { Premise } from '../../api/premises'
 import type { Beat, Joke, SetEntry } from '../../api/types'
 import { useFeedback } from '../../components/ui/feedbackContext'
@@ -19,6 +21,7 @@ interface Props {
   leadOf: (clusterId: string) => string | null | undefined
   onOpen: (joke: Joke) => void
   onAddJokes: (entryId: string | null) => void
+  onGroup: (entryId: string, pieceIds: string[]) => void
 }
 
 const icon = 'inline-flex size-11 items-center justify-center rounded-md text-faint hover:bg-ink-3 hover:text-paper disabled:opacity-30'
@@ -30,9 +33,11 @@ function Heading({ entry, premise }: { entry: SetEntry; premise?: Premise }) {
   return <span className={`${eyebrow} text-faint`}>Premise{premise ? '' : ' (deleted)'}</span>
 }
 
-export function EntryList({ beat, onChange, jokes, premises, leadOf, onOpen, onAddJokes }: Props) {
+export function EntryList({ beat, onChange, jokes, premises, leadOf, onOpen, onAddJokes, onGroup }: Props) {
   const entries = beat.entries
   const { toast } = useFeedback()
+  const [selecting, setSelecting] = useState<{ entryId: string; ids: string[] } | null>(null)
+  const toggle = (id: string) => selecting && setSelecting({ ...selecting, ids: selecting.ids.includes(id) ? selecting.ids.filter((x) => x !== id) : [...selecting.ids, id] })
   const latest = useRef(beat) // Undo puts it back into the beat as it is by then
   useEffect(() => { latest.current = beat })
   const remove = (entry: SetEntry, at: number) => {
@@ -54,6 +59,10 @@ export function EntryList({ beat, onChange, jokes, premises, leadOf, onOpen, onA
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold text-faint tabular">{i + 1}</span>
               <Heading entry={entry} premise={premise} />
+              {entry.kind === 'jokes' && entry.pieces.length > 0 && selecting?.entryId !== entry.id && (
+                <button type="button" onClick={() => setSelecting({ entryId: entry.id, ids: [] })} title="Tick jokes to put under a premise"
+                  className="ml-1 inline-flex h-8 items-center gap-1 rounded-md px-2 text-[13px] text-dim hover:bg-ink-3 hover:text-paper"><ListChecks size={14} /> Select</button>
+              )}
               <span className="ml-auto flex">
                 <button type="button" className={icon} disabled={i === 0} onClick={() => onChange(setEntries(beat, swap(entries, i, -1)))} aria-label="Move up"><ArrowUp size={15} /></button>
                 <button type="button" className={icon} disabled={i === entries.length - 1} onClick={() => onChange(setEntries(beat, swap(entries, i, 1)))} aria-label="Move down"><ArrowDown size={15} /></button>
@@ -76,10 +85,18 @@ export function EntryList({ beat, onChange, jokes, premises, leadOf, onOpen, onA
               <div className="mt-2"><CrowdBlock entry={entry} onChange={(next) => onChange(mapEntry(beat, entry.id, () => next))} /></div>
             ) : (
               <div className={entry.kind === 'jokes' ? 'mt-2' : ''}>
-                <PieceList pieces={entry.pieces} jokes={jokes} leadOf={leadOf} onOpen={onOpen} onChange={(pieces) => onChange(mapPieces(beat, entry.id, () => pieces))} />
-                <button type="button" onClick={() => onAddJokes(entry.id)} className="mt-2 inline-flex h-8 items-center gap-1 rounded-md px-2 text-[13px] text-dim hover:bg-ink-3 hover:text-paper">
+                <PieceList pieces={entry.pieces} jokes={jokes} leadOf={leadOf} onOpen={onOpen} onChange={(pieces) => onChange(mapPieces(beat, entry.id, () => pieces))}
+                  picked={selecting?.entryId === entry.id ? selecting.ids : undefined} onPick={toggle} />
+                {selecting?.entryId === entry.id ? (
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <Button small variant="tape" icon={<Lightbulb size={15} />} disabled={!selecting.ids.length} onClick={() => { onGroup(entry.id, selecting.ids); setSelecting(null) }}>
+                      {selecting.ids.length ? `Put ${selecting.ids.length === 1 ? 'it' : `these ${selecting.ids.length}`} under a premise` : 'Tick jokes for a premise'}
+                    </Button>
+                    <Button small variant="quiet" onClick={() => setSelecting(null)}>Cancel</Button>
+                  </div>
+                ) : <button type="button" onClick={() => onAddJokes(entry.id)} className="mt-2 inline-flex h-8 items-center gap-1 rounded-md px-2 text-[13px] text-dim hover:bg-ink-3 hover:text-paper">
                   <Plus size={14} /> Joke
-                </button>
+                </button>}
               </div>
             )}
           </li>

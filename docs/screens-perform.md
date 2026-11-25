@@ -11,9 +11,10 @@ What a set is made of and why is in [sets.md](sets.md). Files:
 [BeatLabels.tsx](../web/src/features/sets/BeatLabels.tsx), [EntryList.tsx](../web/src/features/sets/EntryList.tsx),
 [PieceList.tsx](../web/src/features/sets/PieceList.tsx), [CrowdBlock.tsx](../web/src/features/sets/CrowdBlock.tsx),
 [SetChecks.tsx](../web/src/features/sets/SetChecks.tsx), [StatusTrack.tsx](../web/src/features/sets/StatusTrack.tsx),
-[FieldsSheet.tsx](../web/src/features/sets/FieldsSheet.tsx), [PremisePicker.tsx](../web/src/features/sets/PremisePicker.tsx),
+[FieldsSheet.tsx](../web/src/features/sets/FieldsSheet.tsx), [SetPickers.tsx](../web/src/features/sets/SetPickers.tsx),
 [SetGuide.tsx](../web/src/features/sets/SetGuide.tsx), [SetMeta.tsx](../web/src/features/sets/SetMeta.tsx),
-[SetTagsSheet.tsx](../web/src/features/sets/SetTagsSheet.tsx), [AddJokes.tsx](../web/src/features/sets/AddJokes.tsx),
+[SetTagsSheet.tsx](../web/src/features/sets/SetTagsSheet.tsx), [SetJokePicker.tsx](../web/src/features/sets/SetJokePicker.tsx),
+[setPicks.ts](../web/src/features/sets/setPicks.ts),
 [LightBar.tsx](../web/src/features/sets/LightBar.tsx), [beats.ts](../web/src/features/sets/beats.ts),
 [beatEdit.ts](../web/src/features/sets/beatEdit.ts), [useAutosaveSet.ts](../web/src/features/sets/useAutosaveSet.ts),
 [JokePeek.tsx](../web/src/features/jokes/JokePeek.tsx).
@@ -62,14 +63,39 @@ What a set is made of and why is in [sets.md](sets.md). Files:
     jokes it guards are indented under it, with "If it lands, do the next − N + jokes. If not, skip
     to #k."), **Follows the lead / Pinned version** for a cluster version, then up, down and
     remove.
-  - Add with **Premise** (pick one, then its jokes), **Jokes, no premise**, **Crowd work**, or
-    **+ Joke** under a list. The joke picker is the same one as before (search, topic, sort,
-    status and clean chips). A joke that follows others brings the ones before it.
+  - Add with **Premise**, **Jokes, no premise**, **Crowd work**, or **+ Joke** under a list.
+  - **Adding a premise** opens the premise sheet a joke's "Add to a premise" uses
+    ([PremisePickSheet.tsx](../web/src/features/pickers/PremisePickSheet.tsx)): search takes and
+    notes, Topic, Status and sort, discarded hidden, rows like the Premises list, one already in
+    the beat marked, and **New premise** at the bottom. The joke picker then opens on that
+    premise's jokes.
+  - **Adding jokes** ([SetJokePicker.tsx](../web/src/features/sets/SetJokePicker.tsx)) uses the
+    Jokes tab's search and filter row (Topic, Subtopic, Premise, Type, Status, sort; Recently
+    edited first) and rows like its list. A cluster is one row under its name with **N versions**
+    and adds the lead (which then follows the lead). **Pick another version** lists its versions
+    with the lead crowned; choosing one ticks the row and pins that version. Tick as many as you
+    like: **Add N jokes** puts them in in the order you ticked them. The book button reads a joke
+    whole first (`JokePeek`, with **Add to set**). Jokes in the set, and clusters with a version
+    in it, sit greyed at the bottom. Under a premise, the picker starts on that premise's jokes and
+    a joke from another premise says **Moves from: …**. With no premise, it remembers its filters
+    for an hour. A joke that follows others brings the ones before it.
+  - **Jokes first, premise later:** **Select** on a no-premise list turns its jokes into ticks.
+    **Put these N under a premise** opens the premise sheet (starting on their topic when they
+    share one, with **New premise**). They move under that premise in the beat, keeping order and
+    settings (just above the list, or at the end of that premise if the beat has it), and each
+    one rests on that premise in your library. One resting on another premise asks first. A
+    toast's **Undo** puts the beat and the jokes back.
 - **Fields** (the sliders icon) opens **Label fields**. There you rename, add and delete fields and
   options, say which field is the status track (each option is then marked win, neutral or loss)
   and which is the persona. Saved for every set on Done.
 - **Saving:** the set autosaves shortly after each change, offline too, as before.
 - **Notes on building a set** (the cap icon) opens your Craft notes from Building a set.
+
+<img src="screenshots/desktop-set-add-jokes.webp" alt="Adding jokes to a beat: the Jokes tab's filters, a cluster with its versions open and the lead crowned">
+<p>
+  <img src="screenshots/phone-set-select.webp" width="230" alt="Select on a no-premise list: two jokes ticked to put under a premise">
+  <img src="screenshots/phone-set-premise-pick.webp" width="230" alt="Which premise do they rest on: the premise sheet with New premise">
+</p>
 
 <img src="screenshots/desktop-sets.webp" alt="Sets: the four steps, status chips and set cards with their spines and checks">
 <p>

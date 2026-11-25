@@ -1,13 +1,16 @@
 /**
  * The sheet every "pick something you've written" opens: a tab's own filter row on top, a count
  * line, then rows that look like that tab's list. It began as the cluster's Add versions picker
- * and now serves them all (jokes, premises, observations), so finding a thing to link works the
- * same everywhere.
+ * and now serves them all (jokes, premises, observations, jokes for a set), so finding a thing to
+ * link works the same everywhere.
  *
- * Two ways to pick: `many` ticks as many as you like and adds them with the footer's button (a
- * picked row gets the tape edge and a filled tick); without it a tap picks that one and closes.
- * A `blocked` row can't be picked: it's greyed and says why in its own details. Callers render
- * the sheet only while it's open, so every opening starts with fresh filters and nothing ticked.
+ * Two ways to pick: `many` ticks as many as you like and adds them with the footer's button, in
+ * the order you ticked them (a picked row gets the tape edge and a filled tick); without it a tap
+ * picks that one and closes. A tick hidden by a later filter stays picked. A `blocked` row can't
+ * be picked: it's greyed and says why in its own details. A row can carry a button beside it
+ * (`aside`, e.g. read the whole joke) and controls under it (`below`, e.g. a cluster's versions).
+ * Callers render the sheet only while it's open, so every opening starts fresh, unless they hold
+ * the ticks themselves (`ticked` and `onTicked`).
  */
 import { Check } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
@@ -22,6 +25,10 @@ export interface PickRow {
   /** Can't be picked; the body says why. Shown with `blockedIcon` in place of the tick. */
   blocked?: boolean
   blockedIcon?: ReactNode
+  /** A button beside the row. */
+  aside?: ReactNode
+  /** Under the row, inside its highlight. */
+  below?: ReactNode
 }
 
 interface Props {
@@ -41,27 +48,28 @@ interface Props {
   current?: string | null
   /** Below the rows (New premise). */
   after?: ReactNode
+  /** Ticks held by the caller, in the order they were ticked. */
+  ticked?: string[]
+  onTicked?: (ids: string[]) => void
   onPick: (ids: string[]) => void
 }
 
-export function PickSheet({ title, description, onClose, pinned, filters, status, rows, empty, many, current, after, onPick }: Props) {
-  const [ticked, setTicked] = useState<Set<string>>(new Set())
-  const n = ticked.size
+export function PickSheet({ title, description, onClose, pinned, filters, status, rows, empty, many, current, after, onPick, ...held }: Props) {
+  const [own, setOwn] = useState<string[]>([])
+  const ticked = held.ticked ?? own
+  const setTicked = held.onTicked ?? setOwn
+  const n = ticked.length
   const tap = (id: string) => {
     if (!many) return onPick([id])
-    setTicked((t) => {
-      const next = new Set(t)
-      if (!next.delete(id)) next.add(id)
-      return next
-    })
+    setTicked(ticked.includes(id) ? ticked.filter((x) => x !== id) : [...ticked, id])
   }
   const add = () => {
-    onPick(rows.filter((r) => ticked.has(r.id)).map((r) => r.id))
+    onPick(ticked)
     onClose()
   }
   const footer = many && (
     <div className="flex flex-1 items-center justify-between gap-3">
-      <span className="text-sm text-dim">{n ? <>{n} picked · <button type="button" onClick={() => setTicked(new Set())} className={linkStyle}>Clear</button></> : 'None picked yet'}</span>
+      <span className="text-sm text-dim">{n ? <>{n} picked · <button type="button" onClick={() => setTicked([])} className={linkStyle}>Clear</button></> : 'None picked yet'}</span>
       <Button variant="tape" disabled={!n} onClick={add}>{n ? `${many[0]} ${n} ${n === 1 ? many[1] : many[2]}` : `${many[0]} ${many[2]}`}</Button>
     </div>
   )
@@ -74,19 +82,23 @@ export function PickSheet({ title, description, onClose, pinned, filters, status
       <ul className="-mx-5 mt-2 border-t border-rule">
         {rows.length === 0 && <li className="px-5 py-6 text-dim">{empty}</li>}
         {rows.map((r) => {
-          const on = ticked.has(r.id) || (!many && r.id === current)
+          const on = ticked.includes(r.id) || (!many && r.id === current)
           return (
-            <li key={r.id} className="border-b border-rule">
-              <button type="button" role={many ? 'checkbox' : undefined} aria-checked={many ? on : undefined} aria-current={!many && on ? 'true' : undefined}
-                disabled={r.blocked} onClick={() => tap(r.id)}
-                className={`flex w-full items-start gap-3 border-l-[3px] py-3.5 pr-5 pl-[17px] text-left transition-colors ${on ? 'border-tape bg-tape/10' : 'border-transparent'} ${r.blocked ? 'cursor-not-allowed' : on ? '' : 'hover:bg-ink-3/60'}`}>
-                {r.blocked ? <span className="mt-0.5 shrink-0 text-faint">{r.blockedIcon}</span> : many && (
-                  <span className={`mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full border-[1.5px] ${on ? 'border-tape bg-tape text-tape-ink' : 'border-faint'}`}>
-                    {on && <Check size={13} strokeWidth={3} aria-hidden />}
-                  </span>
-                )}
-                <span className={`block min-w-0 flex-1 ${r.blocked ? 'opacity-55' : ''}`}>{r.body}</span>
-              </button>
+            <li key={r.id} className={`border-b border-l-[3px] border-b-rule transition-colors ${on ? 'border-l-tape bg-tape/10' : 'border-l-transparent'}`}>
+              <div className="flex items-start">
+                <button type="button" role={many ? 'checkbox' : undefined} aria-checked={many ? on : undefined} aria-current={!many && on ? 'true' : undefined}
+                  disabled={r.blocked} onClick={() => tap(r.id)}
+                  className={`flex min-w-0 flex-1 items-start gap-3 py-3.5 pl-[17px] text-left ${r.aside ? 'pr-2' : 'pr-5'} ${r.blocked ? 'cursor-not-allowed' : on ? '' : 'hover:bg-ink-3/60'}`}>
+                  {r.blocked ? <span className="mt-0.5 shrink-0 text-faint">{r.blockedIcon}</span> : many && (
+                    <span className={`mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full border-[1.5px] ${on ? 'border-tape bg-tape text-tape-ink' : 'border-faint'}`}>
+                      {on && <Check size={13} strokeWidth={3} aria-hidden />}
+                    </span>
+                  )}
+                  <span className={`block min-w-0 flex-1 ${r.blocked ? 'opacity-55' : ''}`}>{r.body}</span>
+                </button>
+                {r.aside && <span className="shrink-0 pt-2 pr-3">{r.aside}</span>}
+              </div>
+              {r.below}
             </li>
           )
         })}

@@ -15,22 +15,18 @@ import type { Beat, Joke, Setlist } from '../../api/types'
 import { EmptyState, Spinner } from '../../components/ui/pieces'
 import { Field, GrowingText, Input } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
-import { Modal } from '../../components/ui/Modal'
-import { chainTo } from '../../lib/chains'
 import { clock, parse } from '../../lib/duration'
 import { CraftSheet } from '../craft/CraftSheet'
 import { leadOf as leadOfCluster, versionsOf } from '../jokes/cluster/lead'
-import { JokePeek } from '../jokes/JokePeek'
-import { AddJokes } from './AddJokes'
 import { BeatEditor } from './BeatEditor'
-import { addPiecesTo, mapBeat, newBeat, newPremise, pieceFor, setEntries, swap } from './beatEdit'
-import { beatTotal, jokeIds, needsWhy } from './beats'
+import { mapBeat, newBeat, swap } from './beatEdit'
+import { beatTotal, needsWhy } from './beats'
 import { FieldsSheet } from './FieldsSheet'
 import { LightBar } from './LightBar'
-import { PremisePicker } from './PremisePicker'
 import { SetChecks } from './SetChecks'
 import { SetGuide } from './SetGuide'
 import { SetMeta } from './SetMeta'
+import { SetPickers, type Picking } from './SetPickers'
 import { Spine } from './Spine'
 import { useAutosaveSet } from './useAutosaveSet'
 
@@ -46,11 +42,10 @@ function Builder({ setlist }: { setlist: Setlist }) {
   const config = useSetFields()
   const loaded = useLoadedSetFields()
   const saveFields = useSaveSetFields()
-  const { confirm, toast } = useFeedback()
+  const { confirm } = useFeedback()
   const [selected, setSelected] = useState<string | null>(draft.beats[0]?.id ?? null)
   const [sheet, setSheet] = useState<Sheet>(null)
-  const [picking, setPicking] = useState<{ beatId: string; entryId: string | null } | null>(null)
-  const [premiseFor, setPremiseFor] = useState<string | null>(null)
+  const [picking, setPicking] = useState<Picking | null>(null)
   const [reading, setReading] = useState<Joke | null>(null)
   const [target, setTarget] = useState(clock(draft.target_seconds))
   const editor = useRef<HTMLDivElement>(null)
@@ -66,34 +61,14 @@ function Builder({ setlist }: { setlist: Setlist }) {
   const beats = draft.beats
   const index = beats.findIndex((b) => b.id === selected)
   const beat = index >= 0 ? beats[index] : null
-  const used = jokeIds(beats)
   const setBeats = (change: (b: Beat[]) => Beat[]) => update((d) => ({ ...d, beats: change(d.beats) }))
   const changeBeat = (next: Beat) => setBeats((list) => mapBeat(list, next.id, () => next))
 
-  // A joke that follows others brings the ones before it that aren't in the set yet.
-  const add = (joke: Joke) => {
-    if (!picking || used.has(joke.id)) return
-    const pieces = chainTo(joke, byId).filter((j) => !used.has(j.id)).map((j) => pieceFor(j, leadOf))
-    const found = beats.find((b) => b.id === picking.beatId)
-    if (!found) return
-    const out = addPiecesTo(found, picking.entryId, pieces)
-    changeBeat(out.beat)
-    setPicking({ ...picking, entryId: out.entryId })
-    if (pieces.length > 1) toast(`Also added the ${pieces.length === 2 ? 'joke' : `${pieces.length - 1} jokes`} before it`)
-  }
   const addBeat = () => { const b = newBeat(); setBeats((list) => [...list, b]); open(b.id) }
   const deleteBeat = async (b: Beat) => {
     if (b.entries.length && !(await confirm({ title: `Delete ${b.cue || 'this beat'}?`, message: 'Its premises, jokes and crowd work come out of the set. The jokes stay in your library.', confirmLabel: 'Delete beat', danger: true }))) return
     setBeats((list) => list.filter((x) => x.id !== b.id))
     setSelected(beats.find((x) => x.id !== b.id)?.id ?? null)
-  }
-  const pickPremise = (premiseId: string) => {
-    const found = beats.find((b) => b.id === premiseFor)
-    if (!found) return
-    const entry = newPremise(premiseId)
-    changeBeat(setEntries(found, [...found.entries, entry]))
-    setPremiseFor(null)
-    setPicking({ beatId: found.id, entryId: entry.id })
   }
 
   return (
@@ -139,21 +114,17 @@ function Builder({ setlist }: { setlist: Setlist }) {
           {beat ? (
             <BeatEditor key={beat.id} beat={beat} previous={beats[index - 1] ?? null} needsWhy={needsWhy(beats, index, config.fields)} fields={config.fields}
               onChange={changeBeat} onDelete={() => deleteBeat(beat)} jokes={byId} premises={premises} leadOf={leadOf} onOpen={setReading}
-              onAddJokes={(entryId) => setPicking({ beatId: beat.id, entryId })} onAddPremise={() => setPremiseFor(beat.id)} />
+              onAddJokes={(entryId) => setPicking({ kind: 'jokes', beatId: beat.id, entryId })} onAddPremise={() => setPicking({ kind: 'premise', beatId: beat.id })}
+              onGroup={(entryId, pieceIds) => setPicking({ kind: 'group', beatId: beat.id, entryId, pieceIds })} />
           ) : (
             <p className="py-10 text-center text-dim">{beats.length ? 'Pick a beat to open it.' : 'No beats yet. Add the first one: a cue word for what you talk about first.'}</p>
           )}
         </div>
       </div>
-      <Modal open={Boolean(picking)} onOpenChange={(o) => !o && setPicking(null)} title="Add jokes" description={`Into ${beats.find((b) => b.id === picking?.beatId)?.cue || 'this beat'}. Tap + to add, tap a joke to read it.`}>
-        <div className="h-[62dvh]"><AddJokes used={used} onAdd={add} onOpen={setReading} /></div>
-      </Modal>
-      <PremisePicker open={Boolean(premiseFor)} onOpenChange={(o) => !o && setPremiseFor(null)} onPick={pickPremise}
-        used={new Set(beats.find((b) => b.id === premiseFor)?.entries.flatMap((e) => (e.kind === 'premise' && e.premise_id ? [e.premise_id] : [])) ?? [])} />
+      <SetPickers picking={picking} onPicking={setPicking} beats={beats} onBeat={changeBeat} leadOf={leadOf} reading={reading} onReading={setReading} />
       <SetGuide open={sheet === 'guide'} onOpenChange={(o) => setSheet(o ? 'guide' : null)} />
       <FieldsSheet open={sheet === 'fields'} onOpenChange={(o) => setSheet(o ? 'fields' : null)} />
       <CraftSheet open={sheet === 'craft'} onOpenChange={(o) => setSheet(o ? 'craft' : null)} title="Building a set" screen="sets" empty="No notes in the areas that show on the set builder." />
-      {reading && <JokePeek joke={reading} onClose={() => setReading(null)} onAdd={picking ? () => add(reading) : undefined} inSet={used.has(reading.id)} />}
     </div>
   )
 }

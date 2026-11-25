@@ -27,6 +27,8 @@ interface Props {
   /** null: into a new list with no premise, at the end of the beat. */
   onAddJokes: (entryId: string | null) => void
   onAddPremise: () => void
+  /** Put these jokes of a no-premise list under a premise. */
+  onGroup: (entryId: string, pieceIds: string[]) => void
 }
 
 const section = 'text-[11.5px] font-semibold tracking-[0.13em] text-faint uppercase'

@@ -31,7 +31,7 @@ export function SetGuide({ open, onOpenChange }: { open: boolean; onOpenChange: 
           <p>One ordered list of:</p>
           <ul className="list-disc space-y-1 pl-5">
             <li><b className="text-paper">Premises</b>, the take a run of jokes rests on, with those jokes under them.</li>
-            <li><b className="text-paper">Jokes with no premise</b>, which can sit between premises.</li>
+            <li><b className="text-paper">Jokes with no premise</b>, which can sit between premises. Tap Select to put some of them under a premise later.</li>
             <li><Swatch className="text-orchid">Crowd work</Swatch>: questions for the room, and lines for what they might say. Mark each question Have a reply or No reply yet.</li>
           </ul>
         </Part>
@@ -40,7 +40,8 @@ export function SetGuide({ open, onOpenChange }: { open: boolean; onOpenChange: 
           <p>A <Swatch className="text-sky">gate</Swatch> (blue) is a joke the next ones depend on. Tap Gate on a joke, then + and − to say how many jokes after it it guards. If it doesn't land, you skip them.</p>
           <p>A premise after the first can be gated too: do it only if the premise before it landed.</p>
         </Part>
-        <Part title="Clusters">A version from a cluster plays the cluster's lead, so changing the lead in Jokes changes the set. Pin a version to keep that one in this set whatever the lead is.</Part>
+        <Part title="Premises and your library">A joke under a premise in a set rests on that premise in your library too, so adding it here shows on the joke and in the premise. A joke on another premise moves, and you're told first.</Part>
+        <Part title="Clusters">A cluster shows once when you add jokes, and adds its lead. A version from a cluster plays the cluster's lead, so changing the lead in Jokes changes the set. Pick another version to pin that one in this set whatever the lead is.</Part>
         <Part title="Labels">
           <p>Each beat gets labels in this set, not on the jokes, because the same joke can play a different status somewhere else. The fields start as Status, Persona side, Tone and Voice fit. Change them in Fields. Not sure is always there.</p>
           <p>Status options count as a win, neutral (System attack: you and the room against the system together) or a loss. A loss is a humility top-up.</p>

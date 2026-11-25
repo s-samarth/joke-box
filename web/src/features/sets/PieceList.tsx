@@ -1,9 +1,10 @@
 /**
  * The jokes of a premise (or of a list with no premise), in order. Each keeps its number. Locked
  * is tape-yellow, loose is teal (still in order, just flexible), and a gate is sky blue: the
- * jokes it guards sit indented under it. Tap a joke to read it whole.
+ * jokes it guards sit indented under it. Tap a joke to read it whole. While you're picking jokes
+ * to put under a premise (`picked`), each row is a tick and the tools step aside.
  */
-import { ArrowDown, ArrowUp, Minus, Plus, X } from 'lucide-react'
+import { ArrowDown, ArrowUp, Check, Minus, Plus, X } from 'lucide-react'
 import type { Joke, SetPiece } from '../../api/types'
 import { guardMap, skipTarget } from './beats'
 import { stepGate, swap, toggleGate, toggleLoose, togglePin } from './beatEdit'
@@ -14,6 +15,9 @@ interface Props {
   jokes: Map<string, Joke>
   leadOf: (clusterId: string) => string | null | undefined
   onOpen: (joke: Joke) => void
+  /** Picking: the pieces ticked so far. */
+  picked?: string[]
+  onPick?: (pieceId: string) => void
 }
 
 const tool = 'inline-flex h-8 items-center gap-1 rounded-md px-2 text-[13px] font-semibold transition-colors'
@@ -24,7 +28,7 @@ function tone(p: SetPiece) {
   return p.loose ? { text: 'text-teal', border: 'border-teal', label: 'Loose' } : { text: 'text-tape', border: 'border-tape', label: 'Locked' }
 }
 
-export function PieceList({ pieces, onChange, jokes, leadOf, onOpen }: Props) {
+export function PieceList({ pieces, onChange, jokes, leadOf, onOpen, picked, onPick }: Props) {
   const guards = guardMap(pieces)
   if (!pieces.length) return <p className="py-2 text-sm text-faint">No jokes here yet.</p>
   return (
@@ -34,6 +38,21 @@ export function PieceList({ pieces, onChange, jokes, leadOf, onOpen }: Props) {
         const t = tone(p)
         const after = i + p.gate + 1
         const skip = p.gate ? skipTarget(pieces, i) : after
+        if (picked) {
+          const on = picked.includes(p.id)
+          return (
+            <li key={p.id}>
+              <button type="button" role="checkbox" aria-checked={on} onClick={() => onPick?.(p.id)}
+                className={`flex w-full gap-3 rounded-lg border-l-[3px] py-2 pr-2 pl-3 text-left ${on ? 'border-tape bg-tape/10' : `bg-ink-2 hover:bg-ink-3/60 ${t.border}`}`}>
+                <span className={`mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full border-[1.5px] ${on ? 'border-tape bg-tape text-tape-ink' : 'border-faint'}`}>{on && <Check size={13} strokeWidth={3} aria-hidden />}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="line-clamp-2 leading-snug">{joke?.setup ?? 'Deleted joke'}</span>
+                  {joke?.punchline && <span className={`mt-0.5 line-clamp-1 leading-snug ${t.text}`}>{joke.punchline}</span>}
+                </span>
+              </button>
+            </li>
+          )
+        }
         return (
           <li key={p.id} className={guards[i] !== null ? 'ml-5 border-l-2 border-dashed border-sky/50 pl-3' : ''}>
             <div className={`rounded-lg border-l-[3px] bg-ink-2 py-2 pr-1 pl-3 ${t.border}`}>
