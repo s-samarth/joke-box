@@ -7,6 +7,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.connector.jokes import (
+    NOT_SURE,
     brief,
     chain_order,
     detail,
@@ -125,6 +126,8 @@ def list_premises(
             "strength": p.strength,
             "notes": clip(p.notes, 240),
             "extra_notes": clip(p.extra_notes, 240),
+            "vibe": names.personas.get(p.persona or "", NOT_SURE),
+            "generic": p.generic,
         }
         for p in rows
         if matches(query, p.take, p.notes, p.extra_notes)
@@ -153,6 +156,8 @@ def get_premise(db: Session, user: User, premise_id: str) -> dict[str, Any]:
         "topic": topic_name(names, premise.topic_id),
         "status": premise.status,
         "strength": premise.strength,
+        "vibe": names.personas.get(premise.persona or "", NOT_SURE),
+        "generic": premise.generic,
         "from_observations": observations_behind(db, user).get(str(premise.id), []),
         "jokes": [
             {**brief(j, names), "follows_id": str(j.follows_id) if j.follows_id else None}

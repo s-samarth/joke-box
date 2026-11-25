@@ -113,6 +113,8 @@ class JokeIn(BaseModel):
     language: str | None = Field(default=None, max_length=40)
     # An option id from the persona field, or None for Not sure. Left out (an older app), kept.
     persona: str | None = Field(default=None, max_length=64)
+    # Generic or not; null is not answered yet. Left out (an older app), kept.
+    generic: bool | None = None
     comments: str = ""
     # The joke this one follows. Left out (an older app), the link stays as it is.
     follows_id: uuid.UUID | None = None
@@ -164,6 +166,7 @@ class JokeOut(BaseModel):
     clean_rating: CleanRating | None
     language: str | None
     persona: str | None
+    generic: bool | None
     comments: str
     follows_id: uuid.UUID | None
     voice_note_ids: list[str]

@@ -11,8 +11,7 @@ import { unknownOf } from '../../lib/topics'
 import { PremiseField } from '../premises/PremiseField'
 import { FollowedBy, FollowsField } from './ChainFields'
 import { StrengthPicker } from '../../components/ui/StrengthPicker'
-import { CleanPicker, HashtagField, PersonaPicker, TypeToggles } from './DetailControls'
-import { FieldsSheet } from '../sets/FieldsSheet'
+import { CleanPicker, GenericPicker, HashtagField, PersonaPicker, TypeToggles } from './DetailControls'
 import { usePersonaField } from './persona'
 import { RuntimeField } from './RuntimeField'
 import { SubtopicManager } from './SubtopicManager'
@@ -46,7 +45,7 @@ export function JokeDetails({ jokeId, draft, update }: { jokeId?: string; draft:
   const actions = useTopicActions()
   const newTopic = useNewTopic()
   const { prompt, toast } = useFeedback()
-  const [managing, setManaging] = useState<'topics' | 'subtopics' | 'types' | 'statuses' | 'personas' | null>(null)
+  const [managing, setManaging] = useState<'topics' | 'subtopics' | 'types' | 'statuses' | null>(null)
   const persona = usePersonaField()
   const topic = topics.find((t) => t.id === draft.topic_id)
   const status = statusOf(draft.status)
@@ -121,10 +120,9 @@ export function JokeDetails({ jokeId, draft, update }: { jokeId?: string; draft:
         </Select>
       </Row>
       {persona && (
-        <Row label="Persona" edit={{ label: 'Edit sides', open: () => setManaging('personas') }}>
-          <PersonaPicker field={persona} value={draft.persona ?? null} onChange={(p) => update({ persona: p })} />
-        </Row>
+        <Row label="Vibe"><PersonaPicker field={persona} value={draft.persona ?? null} onChange={(p) => update({ persona: p })} /></Row>
       )}
+      <Row label="Generic"><GenericPicker value={draft.generic ?? null} onChange={(generic) => update({ generic })} /></Row>
       <Row label="Runs for"><RuntimeField value={draft.duration_seconds} onChange={(duration_seconds) => update({ duration_seconds })} /></Row>
       <Row label="Clean rating"><CleanPicker value={draft.clean_rating} onChange={(clean_rating) => update({ clean_rating })} /></Row>
       <Row label="Language">
@@ -137,7 +135,6 @@ export function JokeDetails({ jokeId, draft, update }: { jokeId?: string; draft:
       <TopicManager open={managing === 'topics'} onClose={() => setManaging(null)} onRemoved={topicRemoved} />
       <SubtopicManager topicId={managing === 'subtopics' ? draft.topic_id : null} onClose={() => setManaging(null)} onRemoved={topicRemoved} />
       <StatusManager open={managing === 'statuses'} onClose={() => setManaging(null)} onRenamed={statusRenamed} />
-      <FieldsSheet open={managing === 'personas'} onOpenChange={(o) => setManaging(o ? 'personas' : null)} />
       <TypeManager open={managing === 'types'} onClose={() => setManaging(null)} onRenamed={typeRenamed} onRemoved={typeRemoved} />
     </div>
   )

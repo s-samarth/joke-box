@@ -20,7 +20,8 @@ router = APIRouter(prefix="/api/premises", tags=["premises"])
 
 
 def saved_fields(body: PremiseIn) -> dict[str, Any]:
-    """What a save writes. A field an older app leaves out (Notes, strength, status) stays."""
+    """What a save writes. A field an older app leaves out (Notes, strength, status, vibe)
+    stays."""
     fields: dict[str, Any] = {"topic_id": body.topic_id, "take": body.take, "notes": body.notes}
     if body.extra_notes is not None:
         fields["extra_notes"] = body.extra_notes
@@ -28,6 +29,9 @@ def saved_fields(body: PremiseIn) -> dict[str, Any]:
         fields["strength"] = body.strength
     if body.status is not None:
         fields["status"] = body.status
+    for kept in ("persona", "generic"):
+        if kept in body.model_fields_set:
+            fields[kept] = getattr(body, kept)
     return fields
 
 

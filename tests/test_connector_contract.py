@@ -72,7 +72,9 @@ def test_library_tools(claude: tuple[TestClient, str]) -> None:
     premises = result(claude, "list_premises")
     [premise] = items(premises, "premises")
     assert set(premise) == {"id", "take", "topic", "jokes", "status", "strength", "notes"} | {
-        "extra_notes"
+        "extra_notes",
+        "vibe",
+        "generic",
     }
     opened = result(claude, "get_premise", premise_id=premise["id"])
     assert set(opened) == {
@@ -83,6 +85,8 @@ def test_library_tools(claude: tuple[TestClient, str]) -> None:
         "topic",
         "status",
         "strength",
+        "vibe",
+        "generic",
         "from_observations",
         "jokes",
     }

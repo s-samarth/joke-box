@@ -22,6 +22,10 @@ export interface PremiseInput {
   strength?: number | null
   /** Where it stands, apart from its jokes' statuses. Left out of a save, it stays as stored. */
   status?: PremiseStatus
+  /** Vibe: an option id of your persona label field, null for Not sure. Left out, kept. */
+  persona?: string | null
+  /** Generic or not; null is not answered yet (flagged). Left out of a save, kept. */
+  generic?: boolean | null
   /** The version this edit started from, sent as the base of the save. Missing: a new one. */
   version?: number
 }

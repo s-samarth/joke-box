@@ -1,14 +1,16 @@
 /**
  * One block of a beat: a premise with its jokes, jokes with no premise, or crowd work. It drags by
  * the grip on its heading, or steps with the arrows. While any block is dragged, every block folds
- * to its heading (`folded`) so a long premise is easy to move.
+ * to its heading (`folded`) so a long premise is easy to move. A premise shows its Vibe and
+ * Generic under its take, saved on the premise itself.
  */
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { ArrowDown, ArrowUp, Lightbulb, ListChecks, Plus, Trash2 } from 'lucide-react'
-import type { Premise } from '../../api/premises'
+import { useSavePremise, type Premise } from '../../api/premises'
 import type { Beat, Joke, SetEntry } from '../../api/types'
 import { Button } from '../../components/ui/Button'
+import { MaterialTags, type Tags } from '../jokes/MaterialTags'
 import { CrowdBlock } from './CrowdBlock'
 import { mapEntry, mapPieces } from './beatEdit'
 import { DragGrip } from './DragGrip'
@@ -60,6 +62,9 @@ export function EntryBlock({ entry, index, beat, onChange, premises, canGatePrem
   const style = { transform: CSS.Transform.toString(transform && { ...transform, x: 0 }), transition }
   const premise = entry.kind === 'premise' && entry.premise_id ? premises.get(entry.premise_id) : undefined
   const gated = entry.kind === 'premise' && entry.gate
+  const savePremise = useSavePremise()
+  // Only what a save needs: fields left out (strength, status, Notes) stay as stored.
+  const tag = (patch: Tags) => { if (premise) savePremise.mutate({ id: premise.id, input: { topic_id: premise.topic_id, take: premise.take, notes: premise.notes, version: premise.version, ...patch } }) }
   const name = entry.kind === 'premise' ? (premise?.take ?? 'the premise') : entry.kind === 'crowd' ? 'the crowd work' : 'the jokes with no premise'
   return (
     <li ref={setNodeRef} style={style} data-entry={entry.id} className={`rounded-xl p-2.5 ring-1 sm:p-3 ${gated ? 'bg-sky/5 ring-sky/40' : 'ring-rule'} ${isDragging ? 'opacity-40' : ''}`}>
@@ -82,6 +87,7 @@ export function EntryBlock({ entry, index, beat, onChange, premises, canGatePrem
           <div className="mt-1.5 mb-3">
             <p className="leading-snug font-medium">{premise?.take ?? 'This premise was deleted. Its jokes stay.'}</p>
             {premise?.notes && <p className="mt-0.5 line-clamp-2 text-sm text-dim">{premise.notes}</p>}
+            {premise && <div className="mt-2 flex flex-wrap gap-1"><MaterialTags value={premise} onChange={tag} what="this premise" /></div>}
             {canGatePremise && (
               <label className={`mt-2 inline-flex cursor-pointer items-center gap-2 rounded-full px-3 py-1 text-[13px] ${gated ? 'bg-sky/15 text-sky' : 'bg-ink-3 text-dim'}`}>
                 <input type="checkbox" className="accent-sky" checked={gated} onChange={(e) => onChange(mapEntry(beat, entry.id, (x) => ({ ...x, gate: e.target.checked })))} />

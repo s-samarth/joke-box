@@ -11,6 +11,8 @@ from app.connector.text import by_id, clip
 from app.models import Brainstorm, Joke, JokeCluster, Premise, Setlist, Subtopic, Topic, User
 from app.services.set_fields import config_of, fields_out
 
+NOT_SURE = "Not sure"
+
 
 @dataclass
 class Names:
@@ -157,8 +159,9 @@ def detail(
         "premise": names.premises.get(joke.premise_id) if joke.premise_id else None,
         "clean_rating": joke.clean_rating,
         "language": joke.language,
-        # The persona side the joke shows; Not sure when unset or the option was deleted.
-        "persona": names.personas.get(joke.persona or "", "Not sure"),
+        # Its vibe, the persona side it shows; Not sure when unset or the option was deleted.
+        "vibe": names.personas.get(joke.persona or "", NOT_SURE),
+        "generic": joke.generic,
         "follows": {"id": str(before.id), "setup": clip(before.setup, 160)} if before else None,
         "followed_by": [{"id": str(j.id), "setup": clip(j.setup, 160)} for j in after],
         "in_sets": sets.get(joke.id, []),

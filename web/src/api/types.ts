@@ -1,6 +1,5 @@
 /** Shapes returned by the API (see app/schemas on the Python side). */
 import type { PremiseStatus } from './premises'
-
 export type CleanRating = 'clean' | 'mild' | 'dirty'
 
 export interface Me {
@@ -60,8 +59,9 @@ export interface JokeInput {
   alt_punchlines?: string[]
   clean_rating: CleanRating | null
   language: string | null
-  /** Persona side: an option id of your persona label field, null for Not sure. Left out, kept. */
+  /** Vibe (a persona option id, null: Not sure) and Generic (null: not answered). Left out, kept. */
   persona?: string | null
+  generic?: boolean | null
   comments: string
   /** The joke this one continues from. Many jokes can follow one, so chains branch. */
   follows_id: string | null

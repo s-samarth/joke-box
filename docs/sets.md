@@ -41,7 +41,7 @@ beat). Everything that depends on the room happens inside a beat.
 ### Label fields
 
 Every account starts with four fields. Open **Label fields** with **Edit labels** beside a
-beat's labels (or the sliders at the top of the builder, or **Edit sides** on a joke's Persona)
+beat's labels (or the sliders at the top of the builder)
 ([FieldsSheet.tsx](../web/src/features/sets/FieldsSheet.tsx)), stored in `set_field_configs`.
 There you add, rename and delete fields and their options: tap an option to rename it, × to
 delete it. A rename keeps the option's id, so every beat and joke that has it shows the new name.
@@ -64,21 +64,32 @@ with it. Nothing is rewritten: the beats keep the old id, which no option has no
 as Not sure everywhere (the builder, the checks, the cue card, Claude). The counts come from
 [fieldUsage.ts](../web/src/features/sets/fieldUsage.ts).
 
-<img src="screenshots/desktop-set-labels.webp" alt="A beat's labels with Edit labels, Storyteller added to Tone, and each joke's persona beside its tools">
+<img src="screenshots/desktop-set-labels.webp" alt="A beat's labels with Storyteller added to Tone; a premise and its jokes, each with Vibe and Generic beside Locked and Gate, and the Generic menu open">
 <img src="screenshots/desktop-label-delete.webp" alt="Deleting Edgy: it's on 2 beats in 1 set, and they'll be Not sure">
 
-### A joke's persona
+### Vibe and Generic, on jokes and premises
 
-A beat's label is about the beat in this set. **Persona** is about the joke itself: which side of
-you it shows (Riled up, Bakchod, Point prover, or Not sure), on the joke's page. It picks from the
-persona field's options, so there's one list to keep: add a side in Label fields and it's on
-every joke too. It shows beside a joke's tools in a set, in the joke peek, as a filter on Jokes,
-in the CSV export and to Claude (`get_jokes`). It's stored on the joke (`jokes.persona`, an
-option id), and a save that leaves it out keeps it.
+A beat's label is about the beat in this set. **Vibe** and **Generic** are about the material
+itself, so they're saved on the joke or the premise, not the set.
+
+- **Vibe** is which side of you it shows: Riled up, Bakchod, Point prover, or Not sure. It picks
+  from the persona field's options (the ones a beat's Dominant persona side uses), so there's one
+  list. Stored as `persona`, an option id; one deleted later reads as Not sure.
+- **Generic** says whether anyone could do it (Generic) or it's yours (Non-generic). Every joke
+  and premise should have one, but a save never waits on it: until it's answered it shows an amber
+  **Generic?**, and the Generic filter on Jokes and Premises (**Generic not answered**) finds the
+  rest. Stored as `generic`, true, false or null.
+
+In a set, both sit beside a joke's Locked and Gate, and under a premise's take, as small menus:
+tap to pick. Picking one saves the joke or premise right away. They're also on the joke's and the
+premise's pages, in the joke peek, as filters, in the CSV export, and to Claude (`vibe` and
+`generic` in `get_jokes`, `list_premises` and `get_premise`). A save that leaves either out keeps
+what's stored.
 
 <p>
-  <img src="screenshots/ipad-joke-persona.webp" width="360" alt="A joke's Persona row on an iPad, with Edit sides">
-  <img src="screenshots/phone-set-persona.webp" width="230" alt="A joke in a beat on a phone, showing Riled up">
+  <img src="screenshots/ipad-premise-vibe.webp" width="300" alt="A premise's Vibe and Generic on an iPad, with Generic not answered yet">
+  <img src="screenshots/ipad-joke-vibe.webp" width="300" alt="A joke's Vibe and Generic rows on an iPad">
+  <img src="screenshots/phone-set-vibe.webp" width="200" alt="A premise in a beat on a phone, with its Vibe and an amber Generic?">
 </p>
 
 ## Drag and arrows
@@ -230,7 +241,8 @@ until you hide them, and **How sets work** opens the whole guide.
 | **A joke dragged into a premise rests on it** | The same rule as adding it there: the set and the library agree. Moving one off another premise asks first | Dragging that changed only the set |
 | **Dragging stays inside a beat** | One beat is open at a time, and a joke between beats changes what you memorise. Take it out and add it to the other beat | Dragging onto a beat in the spine |
 | **Labels live on the beat in the set, not on jokes** | The same joke can play a different status in another set. The comic asked for this explicitly | Labels on jokes |
-| **A joke's persona is its own, from the same list** | A beat's labels depend on the set, but the side of you a joke shows doesn't. One list (the persona field's options) means a side added, renamed or deleted changes beats and jokes together | A fixed list on jokes, apart from the beats' |
+| **Vibe is the material's own, from the same list** | A beat's labels depend on the set, but the side of you a joke or premise shows doesn't. One list (the persona field's options) means beats and material use the same three sides | A fixed list on jokes, apart from the beats' |
+| **Generic is flagged, not forced** | Older material can't all be answered at once, and a forced question would slow quick capture. An amber Generic? and a filter nag without ever holding up a save. The comic chose this | Asking before a new joke saves |
 | **Deleting an option asks first, and rewrites nothing** | A delete you didn't mean costs labels you chose by hand, so it says how many first. Not rewriting the beats keeps the delete one save, and Not sure is already what an unknown id reads as | Deleting silently (the first version) |
 | **Fields are the comic's own**, with Not sure always there | Labels are a thinking tool. A forced answer is worse than an honest Not sure | Fixed fields |
 | **Neutral status** (System attack / Neutral) | Attacking the system together is neither a win nor a top-up | v2 had only win and loss shades |

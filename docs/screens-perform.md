@@ -95,7 +95,9 @@ What a set is made of and why is in [sets.md](sets.md). Files:
   field is the status track (each option is then marked win, neutral or loss) and which is the
   persona. Deleting an option or field in use asks first, with how many beats in how many sets
   (and, for the persona, jokes) turn to Not sure. Saved for every set on Done.
-- A joke in a beat with a **Persona** says it beside its tools (Bakchod, say), in grey.
+- **Vibe** and **Generic** sit beside each joke's Locked and Gate, and under a premise's take: small
+  menus that save on the joke or premise. Vibe reads "Vibe" until set; Generic shows an amber
+  **Generic?** until answered.
 - **Saving:** the set autosaves shortly after each change, offline too, as before.
 - **Notes on building a set** (the cap icon) opens your Craft notes from Building a set.
 

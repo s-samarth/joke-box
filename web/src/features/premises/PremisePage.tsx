@@ -1,6 +1,6 @@
 /**
  * One premise: the take and its reasoning, edited in place, its strength and status (its own, apart
- * from its jokes'), and the observations it came from
+ * from its jokes'), its Vibe and Generic (as on jokes), and the observations it came from
  * (see ObservationsOn: search to link more). Then Notes, for anything else, and the jokes resting on it as a list or its web
  * (see PremiseJokes): write a new joke on it, or add ones you've written, from any topic.
  */
@@ -17,6 +17,8 @@ import { EmptyState, Spinner } from '../../components/ui/pieces'
 import { topicName } from '../../lib/jokeMeta'
 import { jokesOn } from '../../lib/premises'
 import { formatDateTime } from '../../lib/time'
+import { GenericPicker, PersonaPicker } from '../jokes/DetailControls'
+import { usePersonaField } from '../jokes/persona'
 import { NEW_TOPIC, useNewTopic } from '../jokes/useNewTopic'
 import { ObservationsOn } from '../observations/ObservationsOn'
 import { PremiseGuide } from './PremiseGuide'
@@ -39,6 +41,7 @@ function Editor({ premise }: { premise: Premise }) {
     if (made) update({ topic_id: made.id })
   }
   const hasJokes = jokesOn(premise.id, all).length > 0
+  const persona = usePersonaField()
 
   const onDelete = async () => {
     const ok = await confirm({ title: 'Delete this premise?', message: 'It goes to the Trash for 30 days. Its jokes stay where they are, just not on a premise, until you put it back.', confirmLabel: 'Delete premise', danger: true })
@@ -60,6 +63,8 @@ function Editor({ premise }: { premise: Premise }) {
         {/* Not a Field: a label around buttons would pass a click on its words to the first one. */}
         <div className="space-y-1.5"><span className="text-sm text-dim">Strength</span><StrengthPicker value={draft.strength ?? null} onChange={(strength) => update({ strength })} /></div>
         <div className="space-y-1.5"><span className="text-sm text-dim">Status</span><PremiseStatusPicker value={draft.status ?? 'Draft'} onChange={(status) => update({ status })} /></div>
+        {persona && <div className="space-y-1.5"><span className="text-sm text-dim">Vibe</span><PersonaPicker field={persona} value={draft.persona ?? null} onChange={(p) => update({ persona: p })} /></div>}
+        <div className="space-y-1.5"><span className="text-sm text-dim">Generic</span><GenericPicker value={draft.generic ?? null} onChange={(generic) => update({ generic })} /></div>
         <ObservationsOn kind="premises" id={premise.id} topicId={draft.topic_id} />
         <Field label="Topic">
           <Select value={draft.topic_id} onChange={(e) => pickTopic(e.target.value)} className="block sm:max-w-xs">

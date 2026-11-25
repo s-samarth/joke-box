@@ -50,7 +50,7 @@ export function JokePickSheet({ candidates, start, blockedBy = () => null, block
     <>
       {`${shown.length} ${shown.length === 1 ? 'joke' : 'jokes'}`}{blocked > 0 && ` · ${blocked} can't be picked`}
       {discarded > 0 && <>{` · ${discarded} discarded ${showDiscarded ? 'shown' : 'hidden'} `}<button type="button" onClick={() => f.set({ discarded: showDiscarded ? null : 'show' })} className={linkStyle}>{showDiscarded ? 'Hide' : 'Show'}</button></>}
-      {f.active && <> · <button type="button" onClick={() => f.set({ topic: null, sub: null, premise: null, type: null, status: null, persona: null, q: null })} className={linkStyle}>Clear filters</button></>}
+      {f.active && <> · <button type="button" onClick={() => f.set({ topic: null, sub: null, premise: null, type: null, status: null, persona: null, generic: null, q: null })} className={linkStyle}>Clear filters</button></>}
     </>
   )
   const rows = shown.map((j) => {

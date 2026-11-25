@@ -24,6 +24,10 @@ class PremiseIn(BaseModel):
     strength: int | None = Field(default=None, ge=1, le=5)
     # Left out (an older app), what's stored stays; a new premise starts as a Draft.
     status: PremiseStatus | None = None
+    # Its vibe: an option id from the persona field, or null for Not sure. Left out, kept.
+    persona: str | None = Field(default=None, max_length=64)
+    # Generic or not; null is not answered yet. Left out, kept.
+    generic: bool | None = None
     # The version this edit started from. Omitted (a new one, an older app), nothing is checked.
     base_version: int | None = Field(default=None, le=INT_MAX)
 
@@ -52,6 +56,8 @@ class PremiseOut(BaseModel):
     extra_notes: str
     strength: int | None
     status: str
+    persona: str | None
+    generic: bool | None
     version: int
     created_at: datetime
     updated_at: datetime

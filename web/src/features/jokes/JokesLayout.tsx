@@ -22,7 +22,7 @@ import { clusterName, leadOf, versionsOf } from './cluster/lead'
 import { JokeCount } from './JokeCount'
 import { JokeFilters } from './JokeFilters'
 import { JokeList } from './JokeList'
-import { personaLabel, usePersonaField } from './persona'
+import { genericLabel, personaLabel, usePersonaField } from './persona'
 import { JokeMapAside, JokeMapScreen } from './map/JokeMapPage'
 import { sortDate, useJokeFilters } from './useJokeFilters'
 import { ViewSwitch } from './ViewSwitch'
@@ -35,11 +35,11 @@ function exportCsv(jokes: Joke[], all: Joke[], topics: Topic[], clusters: Cluste
     const cluster = clusters.find((c) => c.id === b.cluster_id)
     return [clusterName(cluster, versions), leadOf(cluster, versions) === b ? 'Yes' : '']
   }
-  const headers = ['Setup', 'Punchline', 'Type', 'Topic', 'Subtopic', 'Rating', 'Status', 'Duration', 'Tags', 'Comments', 'Created At', 'Edited At', 'Tag Lines', 'Clean', 'Language', 'Cluster', 'Lead', 'Persona']
+  const headers = ['Setup', 'Punchline', 'Type', 'Topic', 'Subtopic', 'Rating', 'Status', 'Duration', 'Tags', 'Comments', 'Created At', 'Edited At', 'Tag Lines', 'Clean', 'Language', 'Cluster', 'Lead', 'Vibe', 'Generic']
   const rows = jokes.map((b) => [
     b.setup, b.punchline, b.types.join('; '), topicName(topicOf(b)), topicOf(b)?.subtopics.find((s) => s.id === b.subtopic_id)?.name ?? '',
     b.strength ?? '', b.status ?? '', long(b.duration_seconds), b.hashtags.join(' '), b.comments, formatDateTime(b.created_at), formatDateTime(b.updated_at),
-    b.tag_lines.join(' | '), b.clean_rating ? CLEAN_LABELS[b.clean_rating] : '', b.language ?? '', ...clusterOf(b), personaLabel(b.persona, persona) ?? '',
+    b.tag_lines.join(' | '), b.clean_rating ? CLEAN_LABELS[b.clean_rating] : '', b.language ?? '', ...clusterOf(b), personaLabel(b.persona, persona) ?? '', genericLabel(b.generic) ?? '',
   ])
   downloadCsv(`jokebox-jokes-${todayIst()}.csv`, headers, rows)
 }
