@@ -28,7 +28,7 @@ beat). Everything that depends on the room happens inside a beat.
 | **Beat** | A section of the set, in a fixed order. It has a cue word, its own time, a description, labels and one ordered list | `setlists.beats[]` |
 | **Cue** | The one word you remember on stage for a beat | `beat.cue` |
 | **Beat time** | Set by hand, per beat. The set's length is the beats' times added up | `beat.seconds` |
-| **Premise entry** | A premise from your library with the jokes that rest on it, in order. Outlined and written in leaf green (sky blue when gated) | `entry.kind = "premise"` |
+| **Premise entry** | A premise from your library with the jokes you put under it in this set, in order. Outlined and written in leaf green (sky blue when gated) | `entry.kind = "premise"` |
 | **Jokes with no premise** | A list of jokes that aren't under a premise. A beat can have as many as you like, before, between or after premises. Select some to put them under a premise later | `entry.kind = "jokes"` |
 | **Crowd work** | Plain-text questions for the room. Each question has replies ("if they say X → my line") and a Have a reply / No reply yet flag. Outlined and headed in orchid pink | `entry.kind = "crowd"` |
 | **Locked / Loose** | Locked (tape yellow): done in this place. Loose (teal): it keeps its number, but you can move it or drop it on the night | `piece.loose` |
@@ -139,7 +139,7 @@ and tested: [gateRows.ts](../web/src/features/sets/gateRows.ts) reads a list as 
 | A joke in a gate | Outside the box | Not gated any more. A gate left with no jokes is a plain joke again |
 | A gate's joke | Anywhere | The whole box moves, inner gate and all |
 | A gate | Inside another gate | It becomes that gate's inner gate, if it has none of its own; a gate with an inner gate can't go in (three levels). Never into itself |
-| A joke or gate | Into another premise in the beat | Each joke rests on that premise in your library. One resting on another premise asks first, and Cancel puts it back. Undo after |
+| A joke or gate | Into another premise in the beat | Only the set changes: in your library each joke keeps its premise, or none |
 | A joke or gate | Into No premise | Only the set changes |
 | A joke | Into an empty block | Drop it on "No jokes here yet" |
 | A joke | Into crowd work, or another beat | Not allowed |
@@ -156,10 +156,10 @@ has two parts, so a joke can always leave a premise without picking another one:
 
 | Part | Pick | What you end up with |
 |---|---|---|
-| No premise | New block, just below | A No premise block of its own, just below the block it was in. From a premise, only the set changes: in your library it still rests on that premise, and the toast says so. Not offered when it's already all of its No premise block |
+| No premise | New block, just below | A No premise block of its own, just below the block it was in. From a premise, only the set changes, and the toast says your library stays as it is. Not offered when it's already all of its No premise block |
 | No premise | Into N · No premise | At the end of that No premise block (N is its number in the beat) |
-| Under a premise | Into N · a premise | At the end of that premise's block. It rests on it in your library, as when dragged there |
-| Under a premise | Another premise… (Pick a premise… when the beat has none) | The premise sheet, with **New premise**. It goes into that premise's block if the beat has it, else into a new premise block just below. It rests on it in your library; one on another premise asks first |
+| Under a premise | Into N · a premise | At the end of that premise's block. Only the set changes |
+| Under a premise | Another premise… (Pick a premise… when the beat has none) | The premise sheet, with **New premise**. It goes into that premise's block if the beat has it, else into a new premise block just below. Only the set changes |
 
 Jokes with no premise are a normal part of a beat: as many No premise blocks as you like, before,
 between or after premises, each moved with its grip or arrows like any block.
@@ -274,7 +274,7 @@ until you hide them, and **How sets work** opens the whole guide.
 | **Gates nest two levels, no deeper** | A gate inside a gate is useful (a joke that only works if the room took the one before it); a third level is more than a set needs and fiddly to drag on a phone. The comic set the cap | Any depth; one level |
 | **Drag only from the grip** | A finger on a joke still scrolls the page and opens the joke; only the grip starts a drag, after a short hold on touch | Drag from anywhere on the row (it fights scrolling on a phone) |
 | **The arrows stay, and walk through gates** | Dragging can fail (a stiff finger, a screen reader), and the arrows are exact. One place per press is predictable | Arrows removed; arrows that jump over a whole gate |
-| **A joke dragged into a premise rests on it** | The same rule as adding it there: the set and the library agree. Moving one off another premise asks first | Dragging that changed only the set |
+| **Dragging and Move change only the set** | The same rule as adding under a premise: sets never write the library | Dragging into a premise linked the joke to it (until Nov 2026) |
 | **Move names where a joke goes, in two parts** | A drag needs the other block on screen and a steady hand, and in a beat with one premise there's nowhere to drag to. A menu of the beat's blocks, plus any premise, works anywhere. No premise comes first, with a new block of its own always there, because the old menu made taking a joke off a premise feel like picking another one | Drag only; a separate "Take out of the premise" button |
 | **Dragging stays inside a beat** | One beat is open at a time, and a joke between beats changes what you memorise. Take it out and add it to the other beat | Dragging onto a beat in the spine |
 | **Labels live on the beat in the set, not on jokes** | The same joke can play a different status in another set. The comic asked for this explicitly | Labels on jokes |
@@ -287,7 +287,7 @@ until you hide them, and **How sets work** opens the whole guide.
 | **A check that can't apply yet says so**, greyed out, instead of ticking | A one-beat set showed ticks for rules it couldn't break ("0:00 with no top-up ✓") and a persona warning no single beat could fix. Each check now applies only once the set can break its rule, a threshold that follows from the rule itself, and never guesses Not sure | Ticks from the first beat (the comic found them meaningless) |
 | **Checks are deterministic and quote their note** | The comic distrusts AI-judged analysis. A rule he wrote, applied to labels he chose, can be checked by hand | v2's checks guessed from jokes and used invented thresholds |
 | **No new-room / known-room toggle** | Not something he plans a set around | v2 had it |
-| **A joke under a premise in a set rests on it in your library** | A premise is the take its jokes rest on. If the set says a joke sits under a premise but the joke says it doesn't, the two disagree and one of them is wrong. Putting jokes under a premise (adding them to it, or picking loose ones and choosing a premise) saves the premise on each joke, so it shows on the joke and in the premise's jokes. A joke rests on one premise at a time, so one that moves says so first. The premise keeps its other jokes, in the set or not | A premise only in the set, leaving the library as it was |
+| **Sets never change a joke's premise in your library** | A set is one night's arrangement: a joke can sit under a premise on stage that it doesn't rest on in the library, or leave one it does. Adding jokes under a premise, picking loose ones and choosing a premise, dragging and Move all change only the set. In the library a joke keeps the premise it rests on, or none; link it on the joke itself. The comic asked for this | Putting a joke under a premise in a set saved that premise on the joke, moving it off any other (until Nov 2026) |
 | **The set's pickers are the library's own** | The Jokes tab's filters and the joke's premise sheet are what the comic already knows; a second set of pickers in the builder searched less and looked different | Set-only pickers with status and clean-rating chips |
 | **A cluster is one row in the joke picker, adding its lead** | A cluster is one piece of material. The lead is the version you'd do tonight, so it's the default; another version is a choice, and pinned | Every version as its own row, with a warning when two went in |
 | **Clusters follow the lead unless pinned** | Changing your lead in Jokes should update every set that plays it. Pin when a set needs one version | Copying the joke id at add time |

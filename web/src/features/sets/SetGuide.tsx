@@ -47,7 +47,7 @@ export function SetGuide({ open, onOpenChange }: { open: boolean; onOpenChange: 
           <p>Or tap Move on a joke. It has two parts. No premise: New block, just below (its own block, out of any premise), or into another No premise block. Under a premise: into another premise in the beat, or pick any premise.</p>
           <p>The arrows move a thing one place, walking into and out of gates on the way. They don't leave the block: drag or Move for that.</p>
         </Part>
-        <Part title="Premises and your library">A joke under a premise in a set rests on that premise in your library too, so adding or dragging it here shows on the joke and in the premise. A joke on another premise moves, and you're asked first. Dragged or moved into No premise, only the set changes: in your library it still rests on the premise.</Part>
+        <Part title="Premises and your library">Sets never change your library. Adding a joke under a premise here, dragging or moving it into one, or taking it out changes only the set: in your library each joke keeps the premise it rests on, or none. Link a joke to a premise on the joke itself.</Part>
         <Part title="Clusters">A cluster shows once when you add jokes, and adds its lead. A version from a cluster plays the cluster's lead, so changing the lead in Jokes changes the set. Pick another version to pin that one in this set whatever the lead is.</Part>
         <Part title="Labels">
           <p>Each beat gets labels in this set, not on the jokes, because the same joke can play a different status somewhere else. The fields start as Status, Dominant persona side, Tone and Voice fit. Not sure is always there.</p>

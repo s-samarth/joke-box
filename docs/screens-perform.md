@@ -89,9 +89,9 @@ What a set is made of and why is in [sets.md](sets.md). Files:
     its jokes into ticks.
     **Put these N under a premise** opens the premise sheet (starting on their topic when they
     share one, with **New premise**). They move under that premise in the beat, keeping order and
-    settings (just above the list, or at the end of that premise if the beat has it), and each
-    one rests on that premise in your library. One resting on another premise asks first. A
-    toast's **Undo** puts the beat and the jokes back.
+    settings (just above the list, or at the end of that premise if the beat has it). Only the
+    set changes: in your library each joke keeps its premise, or none. A toast's **Undo** puts
+    the beat back.
 - **Edit labels** (beside a beat's labels, or the sliders icon at the top) opens **Label fields**.
   There you rename, add and delete fields and options (tap an option to rename it), say which
   field is the status track (each option is then marked win, neutral or loss) and which is the

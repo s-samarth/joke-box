@@ -184,8 +184,8 @@ sets work** (the ? on Sets and in the builder).
    again. A joke in a box can be a gate too, one level down. A premise after the first can be gated
    on the one before it landing.
 7. Put things in order by dragging the grips (or the arrows): blocks within the beat, jokes within
-   a block or into another one. A joke dragged into a premise rests on it in your library; if it
-   rested on another, you're asked first.
+   a block or into another one. Drags and moves change only the set, never a joke's premise in
+   your library.
 8. Read the shape: the **status track** across the set, and the checks under it. Each check
    is a rule from your Craft notes (a shift needs a reason; a humility top-up every few minutes,
    the limit yours to change; every persona side gets a beat), and the labels still Not sure.
