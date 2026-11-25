@@ -1,5 +1,7 @@
 /** Sets: beats, entries, pieces and label fields (docs/sets.md, app/schemas/set_beats.py). */
 
+import type { PremiseStatus } from './premises'
+
 export interface SetlistItem {
   joke_id: string
   position: number
@@ -62,6 +64,8 @@ export interface Setlist {
   point?: string
   /** Beats in running order. Older copies in the cache lack them. */
   beats?: Beat[]
+  /** Draft, Work in Progress, Stage Ready or Discarded. Older copies in the cache lack it. */
+  status?: PremiseStatus
   /** Up by one per save on the server; catches edits made on two devices. */
   version: number
   created_at: string

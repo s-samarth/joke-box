@@ -185,7 +185,10 @@ sets work** (the ? on Sets and in the builder).
    is a rule from your Craft notes (a shift needs a reason; a humility top-up every few minutes,
    the limit yours to change; every persona side gets a beat; how many labels are Not sure).
 8. Watch the light bar: the beats' time against the slot.
-9. Rate the set with stars and tag it. There's no Save button: the set saves as you go.
+9. Set its **Status** as it moves along (Draft, Work in Progress, Stage Ready; Discarded hides it
+   from All), rate it with stars and tag it. There's no Save button: the set saves as you go.
+10. Back on **Sets**, the card shows the set's spine and checks at a glance, and the status chips
+   find it again (for example, everything Stage Ready before a show).
 
 ## 7. Go on stage
 

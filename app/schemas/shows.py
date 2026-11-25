@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.schemas.legacy import JOKE_ID
 from app.schemas.limits import INT_MAX
+from app.schemas.premises import PremiseStatus
 from app.schemas.reviews import ReviewOut
 from app.schemas.set_beats import BeatIn
 
@@ -38,6 +39,8 @@ class SetlistIn(BaseModel):
     # The set's point and beats (docs/sets.md). Left out (an older app), they stay as they are.
     point: str | None = Field(default=None, max_length=1000)
     beats: list[BeatIn] | None = Field(default=None, max_length=200)
+    # Draft, Work in Progress, Stage Ready or Discarded. Left out (an older app), it stays.
+    status: PremiseStatus | None = None
     # The version this edit started from. Omitted (a new set, an older app), nothing is checked.
     base_version: int | None = Field(default=None, le=INT_MAX)
 
@@ -62,6 +65,7 @@ class SetlistOut(BaseModel):
     items: list[SetlistItemOut]
     point: str = ""
     beats: list[BeatIn] = Field(default_factory=list)
+    status: str = "Draft"
     version: int
     created_at: datetime
     updated_at: datetime

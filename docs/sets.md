@@ -24,6 +24,7 @@ beat). Everything that depends on the room happens inside a beat.
 | Part | What it is | Where |
 |---|---|---|
 | **Point** | One sentence: what the room should think by the end | `setlists.point` |
+| **Status** | Where the set stands: Draft (every set starts there), Work in Progress, Stage Ready or Discarded. The same four as premises and observations. The Sets screen filters by it, and All leaves Discarded out | `setlists.status` |
 | **Beat** | A section of the set, in a fixed order. It has a cue word, its own time, a description, labels and one ordered list | `setlists.beats[]` |
 | **Cue** | The one word you remember on stage for a beat | `beat.cue` |
 | **Beat time** | Set by hand, per beat. The set's length is the beats' times added up | `beat.seconds` |
@@ -67,6 +68,21 @@ from ([beats.ts](../web/src/features/sets/beats.ts) `analyse`, tested in `beats.
 | Persona sides | Every option of the persona field labels at least one beat | "The persona is the balance", My persona |
 | Not sure | Counted and listed, never judged | |
 
+## The Sets screen
+
+Each set is a card ([SetCard.tsx](../web/src/features/sets/SetCard.tsx)), so you see a set's shape
+without opening it: its point, its spine as yellow cue strips sized by beat time with the status
+colour under each, its checks in a word each, and its length against the slot. The checks are the
+builder's, from [setCard.ts](../web/src/features/sets/setCard.ts) `cardChecks`. They need labels,
+so until a beat has a status the card asks you to label them instead. A set from before beats says
+so and offers **Split into beats**. Chips filter by status. The four steps of a set sit on top
+until you hide them, and **How sets work** opens the whole guide.
+
+<p>
+  <img src="screenshots/ipad-sets.webp" width="360" alt="Sets on an iPad: the four steps, status chips and set cards">
+  <img src="screenshots/phone-sets.webp" width="230" alt="Sets on a phone">
+</p>
+
 ## On stage and the cue card
 
 - **On stage** ([StageView.tsx](../web/src/features/sets/StageView.tsx),
@@ -103,6 +119,8 @@ from ([beats.ts](../web/src/features/sets/beats.ts) `analyse`, tested in `beats.
 | **Clusters follow the lead unless pinned** | Changing your lead in Jokes should update every set that plays it. Pin when a set needs one version | Copying the joke id at add time |
 | **Beats are JSON on the set, `items` worked out from them** | A set is saved whole already (one `PUT`, one version). Keeping `setlist_items` means a joke's "In sets", show logging and the connector's "sets it's in" keep working unchanged | New `set_beats` and `set_entries` tables: more joins, more migrations, and the same whole-set saves |
 | **Sets from before read as one beat**, with no data migration | Nothing to move, and nothing breaks if an older app is still open | Rewriting every set in the migration |
+| **Sets are filtered by status, not tags** | A tag says what a set is; a status says where it is, which is what you look for before a show. The same four as premises and observations, so the words mean one thing everywhere. Tags stay on the card and in the builder | Chips per tag in use |
+| **The set's shape is on its card** | The spine and checks are the point of a set. Hiding them behind a tap made the list look empty | Cards with counts and a time bar only |
 | **An older app's save keeps the beats** | A save queued offline by an app from before beats sends only `items`. Taking those over would wipe the beats | |
 
 ## Compatibility

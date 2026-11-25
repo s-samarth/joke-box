@@ -1,11 +1,13 @@
 /**
- * A set's rating and tags, under its name. Tap a star to rate (tap it again to clear); tap a tag
+ * A set's status, rating and tags, under its name. Status is the premises' four, Draft to start. Tap a star to rate (tap it again to clear); tap a tag
  * to put it on or take it off. "Edit tags" opens the sheet where you add, rename and delete them.
  */
 import { Settings2, Star } from 'lucide-react'
 import { useState } from 'react'
 import type { SetlistInput } from '../../api/shows'
 import { useSetTags } from '../../api/setTags'
+import { premiseStatus } from '../../api/premises'
+import { PremiseStatusPicker } from '../premises/PremiseStatusPicker'
 import { tagChip } from './chips'
 import { SetTagsSheet } from './SetTagsSheet'
 
@@ -24,6 +26,10 @@ export function SetMeta({ draft, update }: Props) {
 
   return (
     <div className="mt-5 space-y-3">
+      <div className="flex items-start gap-3">
+        <span className="w-14 shrink-0 pt-1.5 text-sm text-dim">Status</span>
+        <PremiseStatusPicker value={premiseStatus(draft.status)} onChange={(status) => update((d) => ({ ...d, status }))} />
+      </div>
       <div className="flex items-center gap-3">
         <span className="w-14 text-sm text-dim">Rating</span>
         <div className="flex" role="radiogroup" aria-label="Rate this set">

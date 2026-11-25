@@ -58,6 +58,7 @@ def setlist_out(s: Setlist, jokes: Jokes) -> SetlistOut:
         tag_ids=[t.id for t in s.tags],
         items=[item_out(i, jokes) for i in s.items if i.joke_id not in jokes.hidden],
         point=s.point or "",
+        status=s.status or "Draft",
         beats=shown(stored_beats(s), jokes),
         version=s.version,
         created_at=s.created_at,
@@ -106,6 +107,8 @@ def save_set(db: Session, user: User, setlist_id: uuid.UUID, body: SetlistIn) ->
     setlist.rating = body.rating
     if body.point is not None:
         setlist.point = body.point
+    if body.status is not None:
+        setlist.status = body.status
     # Only your tags that still exist: one deleted while a save waited (offline, or with the set
     # open) just drops off, rather than failing the save.
     mine = select(SetTag).where(SetTag.id.in_(body.tag_ids), SetTag.user_id == user.id)

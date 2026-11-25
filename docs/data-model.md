@@ -92,7 +92,7 @@ erDiagram
 | Table | Columns | Rules |
 |---|---|---|
 | `venues` | `name` | Created by name when a set or show uses one; "Unidentified Venue" is the default |
-| `setlists` | `name`, `show_date` (no longer shown or set by the app), `target_seconds` (default 900), `venue_id` (set null), `rating` (1–5 or null), `version` (up by one per save that changes it), `point` (0045: one sentence, the set's point), `beats` (0045: JSON, the beats in running order; null for a set saved before beats) | Saved whole: `PUT` replaces the beats, items and tags in one transaction. `version` catches edits made on two devices. The shape of `beats` is [schemas/set_beats.py](../app/schemas/set_beats.py) `BeatIn`, and what it means is [sets.md](sets.md) |
+| `setlists` | `name`, `show_date` (no longer shown or set by the app), `target_seconds` (default 900), `venue_id` (set null), `rating` (1–5 or null), `version` (up by one per save that changes it), `point` (0045: one sentence, the set's point), `beats` (0045: JSON, the beats in running order; null for a set saved before beats), `status` (0046: Draft, Work in Progress, Stage Ready or Discarded; default Draft) | Saved whole: `PUT` replaces the beats, items and tags in one transaction. `version` catches edits made on two devices. The shape of `beats` is [schemas/set_beats.py](../app/schemas/set_beats.py) `BeatIn`, and what it means is [sets.md](sets.md) |
 | `set_field_configs` | `user_id` (unique, cascade), `fields` JSON (each field's `id`, `name`, `role` of `status`, `persona` or null, and `options`: `id`, `label`, `group` of win, neutral or loss for the status field), `top_up_seconds` (default 240) | Your label fields for beats (0045). No row means the defaults in [services/set_fields.py](../app/services/set_fields.py). A beat's labels point at option ids; an option deleted later reads as Not sure |
 | `set_tags` | `name` (unique per user, any case), `position` | Your labels for sets (In progress, Weak, Opener set...). Everyone got eight to start, once; deleting them all sticks |
 | `setlist_tag_links` | `setlist_id`, `tag_id` (both cascade) | Many-to-many. Deleting a tag takes it off its sets |
@@ -190,6 +190,7 @@ All of these run in one transaction ([services/topics.py](../app/services/topics
 | `0043` | Work in Progress statuses (see `premises` and `observations`) |
 | `0044` | `performance_logs.version`: shows catch edits made on two devices |
 | `0045` | `setlists.point` and `setlists.beats` (sets as beats, [sets.md](sets.md)), and `set_field_configs` (your label fields). Nothing is moved: a set saved before reads as one beat until it's saved again |
+| `0046` | `setlists.status`: the premises' four statuses, every existing set a Draft |
 
 Merged migrations are shared history. CI fails a PR that edits, deletes or renames one; fix
 forward with a new revision. CI also runs upgrade → downgrade → upgrade on Postgres 16, so every

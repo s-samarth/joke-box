@@ -39,6 +39,7 @@ def summary(s: Setlist, jokes: dict[uuid.UUID, Joke]) -> dict[str, Any]:
         "id": str(s.id),
         "name": s.name,
         "point": s.point or None,
+        "status": s.status,
         "tags": [t.name for t in s.tags],
         "rating": s.rating,
         "venue": s.venue.name if s.venue else None,
