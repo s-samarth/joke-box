@@ -34,11 +34,15 @@ def _protect(status: Status, action: str) -> None:
         raise HTTPException(400, f"Draft is where new jokes start, so it can't be {action}")
 
 
-def _move_jokes(db: Session, user: User, source: Status, target: Status) -> None:
+def _move_jokes(db: Session, user: User, source: Status, target: Status | None = None) -> None:
+    """Move (or, with no target, just touch) the jokes on a status. Each goes up a version, so
+    a save made before, still naming the old status, is a clash rather than bringing it back."""
     db.execute(
         update(Joke)
         .where(Joke.user_id == user.id, Joke.status_id == source.id)
-        .values(status_id=target.id, updated_at=Joke.updated_at)
+        .values(
+            status_id=(target or source).id, version=Joke.version + 1, updated_at=Joke.updated_at
+        )
     )
 
 
@@ -54,6 +58,7 @@ def rename(db: Session, user: User, status: Status, new_name: str) -> None:
         )
     )
     if target is None:
+        _move_jokes(db, user, status)
         status.name = new_name
     else:
         _move_jokes(db, user, status, target)

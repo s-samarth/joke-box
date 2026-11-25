@@ -2,7 +2,8 @@
  * The lead of a cluster, worked out the way the server keeps it (app/services/clusters.py), so the
  * list and the cluster are right offline and before the server answers:
  * - The stored lead, while it isn't discarded.
- * - Otherwise the strongest version that isn't discarded, the most recently edited on a tie.
+ * - Otherwise the strongest version that isn't discarded, the most recently edited on a tie,
+ *   then the newest, then the highest id.
  * - With every version discarded, the stored lead still (the cluster counts as discarded).
  */
 import type { Cluster } from '../../../api/clusters'
@@ -12,7 +13,8 @@ import { isDiscarded } from '../discarded'
 /** The versions in a cluster, from the jokes the app has (the Trash is never among them). */
 export const versionsOf = (clusterId: string, jokes: Joke[]): Joke[] => jokes.filter((j) => j.cluster_id === clusterId)
 
-const stronger = (a: Joke, b: Joke) => (b.strength ?? 0) - (a.strength ?? 0) || b.updated_at.localeCompare(a.updated_at)
+const stronger = (a: Joke, b: Joke) =>
+  (b.strength ?? 0) - (a.strength ?? 0) || b.updated_at.localeCompare(a.updated_at) || b.created_at.localeCompare(a.created_at) || (a.id < b.id ? 1 : a.id > b.id ? -1 : 0)
 
 export function leadOf(cluster: Pick<Cluster, 'lead_joke_id'> | undefined, versions: Joke[]): Joke | undefined {
   const active = versions.filter((j) => !isDiscarded(j))

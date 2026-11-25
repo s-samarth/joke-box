@@ -6,6 +6,7 @@ from fastapi import HTTPException
 from sqlalchemy import delete, exists, func, select
 from sqlalchemy.orm import Session
 
+from app.auth.bootstrap import random_topic_for
 from app.models import (
     Joke,
     JokeType,
@@ -18,7 +19,7 @@ from app.models import (
 )
 from app.models.base import written_at
 from app.schemas.library import JokeIn, JokeOut, status_name
-from app.services import chains, clusters, subtopics, type_colors
+from app.services import chains, clusters, gone, subtopics, type_colors
 from app.services.clashes import next_version
 
 
@@ -78,11 +79,18 @@ def get_or_create_status(db: Session, user: User, name: str) -> Status:
 
 
 def check_placement(db: Session, user: User, data: JokeIn) -> None:
-    """The topic and subtopic must be the user's own, and the subtopic must sit in the topic."""
+    """The topic and subtopic must be the user's own, and the subtopic must sit in the topic.
+    One deleted since the edit was made goes where the delete moved the joke (see gone.py)."""
+    if gone.deleted(db, Topic, data.topic_id):
+        random_topic = random_topic_for(db, user)
+        data.topic_id = random_topic.id
+        data.subtopic_id = subtopics.unknown_for(db, user, random_topic).id
     topic = db.scalar(select(Topic).where(Topic.id == data.topic_id, Topic.user_id == user.id))
     if topic is None:
         raise HTTPException(422, "Unknown topic")
-    if data.subtopic_id is not None:
+    if gone.deleted(db, Subtopic, data.subtopic_id):
+        data.subtopic_id = subtopics.unknown_for(db, user, topic).id
+    elif data.subtopic_id is not None:
         sub = db.get(Subtopic, data.subtopic_id)
         if sub is None or sub.topic_id != topic.id:
             raise HTTPException(422, "Subtopic does not belong to that topic")

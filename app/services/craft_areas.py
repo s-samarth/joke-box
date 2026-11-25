@@ -56,7 +56,7 @@ def delete_area(db: Session, user: User, area: CraftArea, move_to: uuid.UUID | N
     db.execute(
         update(CraftNote)
         .where(CraftNote.user_id == user.id, CraftNote.area_id == area.id)
-        .values(area_id=target.id)
+        .values(area_id=target.id, updated_at=CraftNote.updated_at)
     )
     db.delete(area)
     db.commit()

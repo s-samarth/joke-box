@@ -23,7 +23,7 @@ def set_loose(db: Session, user: User, premise: Premise) -> None:
     db.execute(
         update(Joke)
         .where(Joke.user_id == user.id, Joke.premise_id == premise.id)
-        .values(premise_id=None)
+        .values(premise_id=None, updated_at=Joke.updated_at)
     )
 
 
@@ -33,6 +33,6 @@ def put_back(db: Session, user: User, premise: Premise) -> None:
         db.execute(
             update(Joke)
             .where(Joke.user_id == user.id, Joke.id.in_(ids), Joke.premise_id.is_(None))
-            .values(premise_id=premise.id)
+            .values(premise_id=premise.id, updated_at=Joke.updated_at)
         )
     premise.trashed_joke_ids = None

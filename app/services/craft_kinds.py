@@ -44,7 +44,7 @@ def delete_kind(db: Session, user: User, kind: NoteKind, move_to: uuid.UUID | No
     db.execute(
         update(CraftNote)
         .where(CraftNote.user_id == user.id, CraftNote.kind_id == kind.id)
-        .values(kind_id=target.id)
+        .values(kind_id=target.id, updated_at=CraftNote.updated_at)
     )
     db.delete(kind)
     db.commit()

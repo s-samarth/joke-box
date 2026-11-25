@@ -68,7 +68,11 @@ def test_no_status_or_status_unknown_saves_as_draft(alice: TestClient) -> None:
 def test_validation(alice: TestClient) -> None:
     assert put_joke(alice, setup="   ").status_code == 422
     assert put_joke(alice, strength=6).status_code == 422
-    assert put_joke(alice, topic_id=str(uuid.uuid4())).status_code == 422
+    # A topic that doesn't exist (deleted since a save waiting offline was made) isn't refused,
+    # or the save would never go through: the joke goes to Random, where the delete moved it.
+    moved = put_joke(alice, topic_id=str(uuid.uuid4()))
+    random_id = next(t["id"] for t in alice.get("/api/topics").json() if t["name"] == "Random")
+    assert moved.status_code == 200 and moved.json()["topic_id"] == random_id
 
 
 def test_a_new_joke_is_unrated_until_rated(alice: TestClient) -> None:

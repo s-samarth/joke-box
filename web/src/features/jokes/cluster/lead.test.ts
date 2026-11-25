@@ -15,6 +15,10 @@ describe('the lead', () => {
     expect(leadOf({ lead_joke_id: 'a' }, versions)?.id).toBe('c')
     const tie = [joke('a', { updated_at: '2026-02-01' }), joke('b', { updated_at: '2026-03-01' })]
     expect(leadOf({ lead_joke_id: 'gone' }, tie)?.id).toBe('b')
+    // Edited at the same moment (a bulk move): the newest, then the highest id, as on the server
+    const same = { updated_at: '2026-02-01' }
+    expect(leadOf({ lead_joke_id: 'gone' }, [joke('x', { ...same, created_at: '2026-01-02' }), joke('y', { ...same, created_at: '2026-01-01' })])?.id).toBe('x')
+    expect(leadOf({ lead_joke_id: 'gone' }, [joke('m', same), joke('n', same)])?.id).toBe('n')
   })
 
   it('is the only active version by default', () => {

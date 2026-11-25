@@ -68,14 +68,15 @@ queryClient.setMutationDefaults(saveJokeKey, {
       const next: Joke = { ...input, id, version: existing?.version ?? 0, created_at: existing?.created_at ?? input.created_at ?? now, updated_at: now }
       return existing ? old.map((b) => (b.id === id ? next : b)) : [next, ...old]
     })
-    return { wordingOnly: !keepMine && wordingOnly(before, input) }
+    return { wordingOnly: !keepMine && wordingOnly(before, input), clustered: Boolean(before?.cluster_id || input.cluster_id) }
   },
   // A change of wording alone needs no list back: the version and time are already in the cache
   // (above), and the text is what was sent. Refetching every joke after every autosave pause was
-  // most of the app's data transfer. Anything else refreshes what it may have changed.
+  // most of the app's data transfer. Anything else refreshes what it may have changed, and a
+  // version's status or strength can move its cluster's lead on the server.
   onSettled: (_saved, error, _vars, context) => !error && context?.wordingOnly
     ? refreshWhenSynced()
-    : refreshWhenSynced(keys.jokes, keys.types, keys.statuses, keys.setlists),
+    : refreshWhenSynced(keys.jokes, keys.types, keys.statuses, keys.setlists, ...(context?.clustered ? [keys.clusters] : [])),
 })
 
 queryClient.setMutationDefaults(deleteJokeKey, {
@@ -83,9 +84,12 @@ queryClient.setMutationDefaults(deleteJokeKey, {
   mutationFn: (id: string) => api<void>(`/api/jokes/${id}`, 'DELETE'),
   onMutate: async (id: string) => {
     await queryClient.cancelQueries({ queryKey: keys.jokes })
+    const gone = queryClient.getQueryData<Joke[]>(keys.jokes)?.find((b) => b.id === id)
     queryClient.setQueryData<Joke[]>(keys.jokes, (old = []) => old.filter((b) => b.id !== id))
+    return { clustered: Boolean(gone?.cluster_id) } // the Trash hands its cluster's lead on
   },
-  onSettled: () => refreshWhenSynced(keys.jokes, keys.types, keys.brainstorms, keys.setlists),
+  onSettled: (_r, _e, _id, context?: { clustered: boolean }) =>
+    refreshWhenSynced(keys.jokes, keys.types, keys.brainstorms, keys.setlists, ...(context?.clustered ? [keys.clusters] : [])),
 })
 
 // Saves an older version queued under the old key go out the same way (see legacy.ts).

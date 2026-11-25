@@ -57,7 +57,9 @@ def delete_venue(
         target = get_owned(db, Venue, move_to, user)
         if target.id == venue.id:
             raise HTTPException(422, "Pick a different venue to move them to")
-        for model in (PerformanceLog, Setlist):
-            db.execute(update(model).where(model.venue_id == venue.id).values(venue_id=target.id))
+        for model in (PerformanceLog, Setlist):  # a version up: an older save naming the old
+            moved = {"venue_id": target.id, "version": model.version + 1}  # venue then clashes
+            moved["updated_at"] = model.updated_at
+            db.execute(update(model).where(model.venue_id == venue.id).values(**moved))
     db.delete(venue)
     db.commit()

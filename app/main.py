@@ -55,6 +55,16 @@ async def require_csrf_header(request: Request, call_next: RequestResponseEndpoi
     return await call_next(request)
 
 
+async def refuse_nul(request: Request, call_next: RequestResponseEndpoint) -> Response:
+    """Postgres can't store the NUL character, so a save holding one (pasted from somewhere odd)
+    is refused plainly here instead of failing in the database as a 500."""
+    writes = request.url.path.startswith("/api/") and request.method not in SAFE_METHODS
+    if writes and b"\\u0000" in await request.body():
+        detail = "That text has an invisible character (NUL) that can't be saved. Retype it."
+        return JSONResponse({"detail": detail}, status_code=422)
+    return await call_next(request)
+
+
 def create_app() -> FastAPI:
     settings = get_settings()
     settings.check_production_safety()
@@ -63,6 +73,7 @@ def create_app() -> FastAPI:
         docs_url="/api/docs" if settings.is_local else None,
         lifespan=connector.lifespan,
     )
+    app.add_middleware(BaseHTTPMiddleware, dispatch=refuse_nul)
     app.add_middleware(BaseHTTPMiddleware, dispatch=require_csrf_header)
     app.add_middleware(UnpackRequests)  # large saves arrive gzip-packed (see packed.py)
     app.add_middleware(

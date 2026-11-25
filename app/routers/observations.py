@@ -16,6 +16,7 @@ from app.models import Observation, ObservationTopic, Topic
 from app.models.base import written_at
 from app.schemas.library import NamedOut, NameIn, OrderIn
 from app.schemas.notebook import ObservationIn, ObservationOut
+from app.services import gone
 from app.services.clashes import OBSERVATION_CLASH, check_fields
 from app.services.ordering import next_position, set_order
 from app.services.topics import commit_or_conflict
@@ -58,6 +59,8 @@ def put_observation(
     """Create or update. The client picks the id, so a retried offline save never duplicates."""
     observation = find_owned(db, Observation, observation_id, user)
     kind_id, topic_id = saved_fields(body, observation)
+    kind_id = None if gone.deleted(db, ObservationTopic, kind_id, Topic) else kind_id  # deleted
+    topic_id = None if gone.deleted(db, Topic, topic_id, ObservationTopic) else topic_id  # since
     if kind_id is not None:
         get_owned(db, ObservationTopic, kind_id, user)
     if topic_id is None:
@@ -189,7 +192,7 @@ def delete_observation_topic(topic_id: uuid.UUID, user: CurrentUser, db: DbSessi
     db.execute(
         update(Observation)
         .where(Observation.user_id == user.id, Observation.kind_id == topic.id)
-        .values(kind_id=None)
+        .values(kind_id=None, updated_at=Observation.updated_at)
     )
     db.delete(topic)
     db.commit()

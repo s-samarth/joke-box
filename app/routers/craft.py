@@ -9,6 +9,7 @@ from app.auth.deps import CurrentUser, DbSession, find_owned, get_owned
 from app.models import Analysis, CraftArea, CraftNote, NoteKind, PerformanceLog
 from app.models.base import written_at
 from app.schemas.craft import CraftNoteIn, CraftNoteOut
+from app.services import gone
 from app.services.clashes import NOTE_CLASH, check_fields
 from app.services.trash import move_to_trash
 
@@ -26,6 +27,12 @@ def put_craft_note(
     note_id: uuid.UUID, body: CraftNoteIn, user: CurrentUser, db: DbSession
 ) -> CraftNote:
     """Create or update. The client picks the id, so a save made offline replays safely."""
+    note = find_owned(db, CraftNote, note_id, user)
+    if note is not None:  # an area or kind deleted since the save: keep where the delete moved it
+        if gone.deleted(db, CraftArea, body.area_id):
+            body.area_id = note.area_id
+        if gone.deleted(db, NoteKind, body.kind_id):
+            body.kind_id = note.kind_id
     get_owned(db, CraftArea, body.area_id, user)  # only your own areas and kinds
     get_owned(db, NoteKind, body.kind_id, user)
     if body.performance_log_id is not None:  # only your own shows and analyses
@@ -33,13 +40,13 @@ def put_craft_note(
     if body.analysis_id is not None:
         get_owned(db, Analysis, body.analysis_id, user, in_trash=True)
     fields = body.model_dump(exclude={"created_at", "base_version"})
-    note = find_owned(db, CraftNote, note_id, user)
     if note is None:
         note = CraftNote(id=note_id, user_id=user.id)
         if body.created_at:
             note.created_at = written_at(body.created_at)
         db.add(note)
-    else:
+    else:  # the editor never moves a note: an old copy's position would undo a reorder
+        del fields["position"]
         check_fields(note, body.base_version, fields, NOTE_CLASH)
     for field, value in fields.items():
         setattr(note, field, value)
