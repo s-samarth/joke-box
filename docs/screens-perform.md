@@ -105,6 +105,7 @@ What a set is made of and why is in [sets.md](sets.md). Files:
 
 <img src="screenshots/desktop-set-add-jokes.webp" alt="Adding jokes to a beat: the Jokes tab's filters, a cluster with its versions open and the lead crowned">
 <p>
+  <img src="screenshots/phone-set-add-jokes.webp" width="230" alt="Add jokes on a phone: each joke its own card, its details on one dot-separated line">
   <img src="screenshots/phone-set-select.webp" width="230" alt="Select on a no-premise list: two jokes ticked to put under a premise">
   <img src="screenshots/phone-set-premise-pick.webp" width="230" alt="Which premise do they rest on: the premise sheet with New premise">
 </p>
@@ -115,6 +116,7 @@ What a set is made of and why is in [sets.md](sets.md). Files:
   <img src="screenshots/phone-sets.webp" width="230" alt="Sets on a phone">
 </p>
 <img src="screenshots/desktop-set-builder.webp" alt="Set builder: the status track, the checks, the spine and an open beat">
+<img src="screenshots/desktop-set-blocks.webp" alt="A beat's blocks: No premise in plain rule, a premise outlined and written in green, crowd work outlined in pink, and Move open on a joke">
 <img src="screenshots/desktop-set-beat.webp" alt="An open beat: labels, the shift reason, a premise with a gate box holding an inner gate">
 <img src="screenshots/ipad-set-builder.webp" width="420" alt="A beat's list on an iPad: a gate box with an inner gate">
 <p>

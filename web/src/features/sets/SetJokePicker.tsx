@@ -62,13 +62,12 @@ export function SetJokePicker({ used, start, memory, premiseId, onAdd, onRead, .
     setChosen(new Map(chosen).set(clusterId, joke.id))
     if (!ticked.includes(ROW + clusterId)) setTicked([...ticked, ROW + clusterId])
   }
+  // One quiet line, dot-separated, so it reads apart from the chips beside it.
   const details = (j: Joke) => (
-    <>
+    <span className="flex min-w-0 flex-wrap items-center gap-x-1.5">
       <StrengthTicks strength={j.strength} />
-      <span>{statusOf(j.status)}</span>
-      {where(j) && <span className="truncate">{where(j)}</span>}
-      {j.duration_seconds > 0 && <span className="tabular">{clock(j.duration_seconds)}</span>}
-    </>
+      {[statusOf(j.status), where(j), j.duration_seconds > 0 ? clock(j.duration_seconds) : ''].filter(Boolean).map((t) => <span key={t} className="tabular before:mr-1.5 before:content-['·']">{t}</span>)}
+    </span>
   )
   const read = (j: Joke) => (
     <button type="button" onClick={() => onRead(j)} aria-label={`Read the whole joke: ${j.setup}`} title="Read it whole"
@@ -83,7 +82,7 @@ export function SetJokePicker({ used, start, memory, premiseId, onAdd, onRead, .
     const note = used.has(joke.id) ? 'In the set' : here ? 'Another version is in the set' : from ? `Moves from: ${from}` : null
     const body = (
       <>
-        {c && c.name !== c.lead.setup && <p className="mb-1 line-clamp-1 text-[13px] font-medium text-dim">{c.name}</p>}
+        {c && c.name !== c.lead.setup && <p className="mb-1.5 flex items-center gap-1.5 text-[13px] font-medium text-dim"><Layers size={13} className="shrink-0 text-tape" aria-hidden /><span className="line-clamp-1">{c.name}</span></p>}
         <JokeRowBody joke={joke} punchClass="text-tape/90">
           {c && <span className="flex items-center gap-1 rounded-md bg-tape/15 px-1.5 py-0.5 text-tape"><Layers size={12} aria-hidden />{badge(row)}</span>}
           {note && <span className={`rounded-md bg-ink-3 px-1.5 py-0.5 ${here && !used.has(joke.id) ? 'text-amber' : 'text-paper'}`}>{note}</span>}
@@ -93,7 +92,7 @@ export function SetJokePicker({ used, start, memory, premiseId, onAdd, onRead, .
     )
     const open = c && opened === c.id
     const below = c && (
-      <div className="pr-5 pb-3 pl-[49px]">
+      <div className="mx-4 border-t border-rule pt-1 pb-2 pl-8">
         <button type="button" onClick={() => setOpened(open ? null : c.id)} aria-expanded={Boolean(open)} className="inline-flex h-8 items-center gap-1 text-[13px] text-dim hover:text-paper">
           {joke.id === c.lead.id ? 'Adds the lead' : 'Adds this version, pinned'} · {open ? 'Hide versions' : 'Pick another version'}
           <ChevronDown size={14} className={open ? 'rotate-180' : ''} />

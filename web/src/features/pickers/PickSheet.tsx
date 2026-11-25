@@ -1,11 +1,11 @@
 /**
  * The sheet every "pick something you've written" opens: a tab's own filter row on top, a count
- * line, then rows that look like that tab's list. It began as the cluster's Add versions picker
+ * line, then rows, each its own card, that look like that tab's list. It began as the cluster's Add versions picker
  * and now serves them all (jokes, premises, observations, jokes for a set), so finding a thing to
  * link works the same everywhere.
  *
  * Two ways to pick: `many` ticks as many as you like and adds them with the footer's button, in
- * the order you ticked them (a picked row gets the tape edge and a filled tick); without it a tap
+ * the order you ticked them (a picked row gets a tape outline and a filled tick); without it a tap
  * picks that one and closes. A tick hidden by a later filter stays picked. A `blocked` row can't
  * be picked: it's greyed and says why in its own details. A row can carry a button beside it
  * (`aside`, e.g. read the whole joke) and controls under it (`below`, e.g. a cluster's versions).
@@ -79,16 +79,16 @@ export function PickSheet({ title, description, onClose, pinned, filters, status
       {pinned}
       {filters}
       <p className="mt-3 text-sm text-faint">{status}</p>
-      <ul className="-mx-5 mt-2 border-t border-rule">
-        {rows.length === 0 && <li className="px-5 py-6 text-dim">{empty}</li>}
+      <ul className="mt-3 space-y-2">
+        {rows.length === 0 && <li className="py-6 text-dim">{empty}</li>}
         {rows.map((r) => {
           const on = ticked.includes(r.id) || (!many && r.id === current)
           return (
-            <li key={r.id} className={`border-b border-l-[3px] border-b-rule transition-colors ${on ? 'border-l-tape bg-tape/10' : 'border-l-transparent'}`}>
+            <li key={r.id} className={`overflow-hidden rounded-xl ring-1 transition-colors ${on ? 'bg-tape/10 ring-tape/70' : 'bg-ink ring-rule'}`}>
               <div className="flex items-start">
                 <button type="button" role={many ? 'checkbox' : undefined} aria-checked={many ? on : undefined} aria-current={!many && on ? 'true' : undefined}
                   disabled={r.blocked} onClick={() => tap(r.id)}
-                  className={`flex min-w-0 flex-1 items-start gap-3 py-3.5 pl-[17px] text-left ${r.aside ? 'pr-2' : 'pr-5'} ${r.blocked ? 'cursor-not-allowed' : on ? '' : 'hover:bg-ink-3/60'}`}>
+                  className={`flex min-w-0 flex-1 items-start gap-3 py-3.5 pl-4 text-left ${r.aside ? 'pr-2' : 'pr-4'} ${r.blocked ? 'cursor-not-allowed' : on ? '' : 'hover:bg-ink-3/60'}`}>
                   {r.blocked ? <span className="mt-0.5 shrink-0 text-faint">{r.blockedIcon}</span> : many && (
                     <span className={`mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full border-[1.5px] ${on ? 'border-tape bg-tape text-tape-ink' : 'border-faint'}`}>
                       {on && <Check size={13} strokeWidth={3} aria-hidden />}
@@ -96,7 +96,7 @@ export function PickSheet({ title, description, onClose, pinned, filters, status
                   )}
                   <span className={`block min-w-0 flex-1 ${r.blocked ? 'opacity-55' : ''}`}>{r.body}</span>
                 </button>
-                {r.aside && <span className="shrink-0 pt-2 pr-3">{r.aside}</span>}
+                {r.aside && <span className="shrink-0 pt-2 pr-2">{r.aside}</span>}
               </div>
               {r.below}
             </li>

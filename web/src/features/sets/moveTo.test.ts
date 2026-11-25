@@ -13,18 +13,22 @@ const crowd: SetEntry = { kind: 'crowd', id: 'c', title: '', questions: [] }
 const shown = (b: Beat) => b.entries.map((e) => (e.kind === 'crowd' ? 'crowd' : `${e.kind === 'premise' ? e.premise_id : 'none'}: ${show(e.pieces)}`))
 
 describe('Move to…', () => {
-  it('takes a joke out of its premise into a new No premise just below', () => {
+  it('takes a joke out of its premise on its own, into a new No premise block just below', () => {
     const b = beat(premise('x', 'a b'), crowd)
-    expect(shown(moveTo(b, 'b', { out: true }))).toEqual(['Px: a', 'none: b', 'crowd'])
+    expect(shown(moveTo(b, 'b', { alone: true }))).toEqual(['Px: a', 'none: b', 'crowd'])
   })
 
-  it('takes it out into the No premise block right below, at its top', () => {
+  it('makes a new block even when a No premise block is right below', () => {
     const b = beat(premise('x', 'a b'), jokes('j', 'c'))
-    expect(shown(moveTo(b, 'a', { out: true }))).toEqual(['Px: b', 'none: a c'])
+    expect(shown(moveTo(b, 'a', { alone: true }))).toEqual(['Px: b', 'none: a', 'none: c'])
+  })
+
+  it('splits a No premise block, so jokes with no premise can sit anywhere', () => {
+    expect(shown(moveTo(beat(jokes('j', 'a b c')), 'b', { alone: true }))).toEqual(['none: a c', 'none: b'])
   })
 
   it('leaves the premise in the beat when its last joke goes', () => {
-    expect(shown(moveTo(beat(premise('x', 'a')), 'a', { out: true }))).toEqual(['Px: ', 'none: a'])
+    expect(shown(moveTo(beat(premise('x', 'a')), 'a', { alone: true }))).toEqual(['Px: ', 'none: a'])
   })
 
   it('moves into another block, at its end, a gate bringing its jokes', () => {
@@ -49,19 +53,25 @@ describe('Move to…', () => {
     expect(shown(moveTo(b, 'a', { premiseId: 'Pz' }))).toEqual(['none: b', 'Pz: a', 'Py: c'])
   })
 
-  it('does nothing for a move to where it is, or out of No premise', () => {
-    const b = beat(premise('x', 'a'), jokes('j', 'b'))
+  it('does nothing for a move to where it is, or alone when it is already all of its block', () => {
+    const b = beat(premise('x', 'a'), jokes('j', 'b'), jokes('k', 'c1 d'))
     expect(moveTo(b, 'a', { entryId: 'x' })).toBe(b)
     expect(moveTo(b, 'a', { premiseId: 'Px' })).toBe(b)
-    expect(moveTo(b, 'b', { out: true })).toBe(b)
-    expect(moveTo(b, 'zz', { out: true })).toBe(b)
+    expect(moveTo(b, 'b', { alone: true })).toBe(b)
+    expect(moveTo(b, 'c', { alone: true })).toBe(b)
+    expect(moveTo(b, 'zz', { alone: true })).toBe(b)
   })
 
-  it('offers out of the premise, then the other blocks by number', () => {
+  it('takes a joke out of a gate into a block of its own', () => {
+    expect(shown(moveTo(beat(jokes('j', 'a1 b')), 'b', { alone: true }))).toEqual(['none: a', 'none: b'])
+  })
+
+  it('offers No premise, then Under a premise, blocks by number', () => {
     const b = beat(premise('x', 'a'), crowd, jokes('j', ''), premise('y', 'b'))
     const take = (id: string | null) => (id === 'Py' ? 'A take that is far too long to fit on one line of the menu' : undefined)
-    expect(moveChoices(b, 'a', take).map((c) => c.label)).toEqual(['Out of the premise', 'Into 3 · No premise', 'Into 4 · A take that is far too long to fit on o…'])
-    expect(moveChoices(b, 'b', take).map((c) => c.label)).toEqual(['Out of the premise', 'Into 1 · Deleted premise', 'Into 3 · No premise'])
-    expect(moveChoices(beat(jokes('j', 'a')), 'a', take)).toEqual([])
+    const labels = (id: string) => { const g = moveChoices(b, id, take); return [g.none.map((c) => c.label), g.premise.map((c) => c.label)] }
+    expect(labels('a')).toEqual([['New block, just below', 'Into 3 · No premise'], ['Into 4 · A take that is far too long to fit on o…']])
+    expect(labels('b')).toEqual([['New block, just below', 'Into 3 · No premise'], ['Into 1 · Deleted premise']])
+    expect(moveChoices(beat(jokes('j', 'a')), 'a', take)).toEqual({ none: [], premise: [] })
   })
 })
