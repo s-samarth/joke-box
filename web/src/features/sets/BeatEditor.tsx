@@ -24,8 +24,8 @@ interface Props {
   premises: Map<string, Premise>
   leadOf: (clusterId: string) => string | null | undefined
   onOpen: (joke: Joke) => void
-  /** null: into a new list with no premise, at the end of the beat. */
-  onAddJokes: (entryId: string | null) => void
+  /** null: into a new list with no premise, at the end of the beat. With a gate: into it. */
+  onAddJokes: (entryId: string | null, gateId?: string | null) => void
   onAddPremise: () => void
   /** Put these jokes of a no-premise list under a premise. */
   onGroup: (entryId: string, pieceIds: string[]) => void

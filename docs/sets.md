@@ -32,7 +32,7 @@ beat). Everything that depends on the room happens inside a beat.
 | **Jokes with no premise** | A list of jokes that aren't under a premise. They can sit between premises. Select some to put them under a premise later | `entry.kind = "jokes"` |
 | **Crowd work** | Plain-text questions for the room. Each question has replies ("if they say X → my line") and a Have a reply / No reply yet flag | `entry.kind = "crowd"` |
 | **Locked / Loose** | Locked (tape yellow): done in this place. Loose (teal): it keeps its number, but you can move it or drop it on the night | `piece.loose` |
-| **Gate** | A joke the next N jokes in the same list depend on. If it doesn't land, you skip them. Sky blue | `piece.gate` (N) |
+| **Gate** | A box: a joke on top, and inside it the jokes you do only if it lands. If it doesn't, you skip the box. A gate can hold one gate of its own, no deeper. Sky blue | `piece.gate` (N: how many jokes after it are inside) |
 | **Premise gate** | A premise after the first in a beat that's done only if the premise before it landed | `entry.gate` |
 | **Cluster version** | A joke from a cluster follows the cluster's lead unless the set pins that version | `piece.cluster_id`, `piece.pinned` |
 | **Labels** | Per beat, per set: an option from each of your label fields, or Not sure | `beat.labels` |
@@ -80,6 +80,66 @@ option id), and a save that leaves it out keeps it.
   <img src="screenshots/ipad-joke-persona.webp" width="360" alt="A joke's Persona row on an iPad, with Edit sides">
   <img src="screenshots/phone-set-persona.webp" width="230" alt="A joke in a beat on a phone, showing Riled up">
 </p>
+
+## Drag and arrows
+
+Everything moves inside one beat; beats move in the spine. You can move a thing three ways, and
+all three follow the same rules: drag it by its **grip** (⋮⋮), press its **arrows**, or, with a
+keyboard, Tab to the grip, Space, the arrow keys, Space (Escape puts it back). The logic is pure
+and tested: [gateRows.ts](../web/src/features/sets/gateRows.ts) reads a list as gate boxes,
+[beatMove.ts](../web/src/features/sets/beatMove.ts) moves jokes and blocks,
+[gateEdit.ts](../web/src/features/sets/gateEdit.ts) makes gates and walks the arrows, and
+[useBeatDrag.ts](../web/src/features/sets/useBeatDrag.ts) is the dragging itself.
+
+<p>
+  <img src="screenshots/desktop-set-drag.webp" width="560" alt="A joke dragged inside a gate's box, which holds an inner gate: the gap opens where it will land">
+  <img src="screenshots/phone-set-fold.webp" width="230" alt="Dragging a block on a phone: every block folds to its heading">
+</p>
+
+### Beats and blocks
+
+| You move | Where | What you end up with |
+|---|---|---|
+| A beat | Anywhere in the spine | A new running order. Its labels, time and contents go with it; the shift flags and checks follow the new order |
+| A block (premise, No premise, crowd work) | Anywhere among the blocks of its beat | Its jokes and gates come with it. While you drag, every block folds to its heading |
+| A premise that becomes the beat's first | | Its premise gate turns off: there's no premise before it |
+| A block into another block, or another beat | Not allowed | Blocks don't nest; take it out and add it there |
+
+### Jokes and gates
+
+| You drag | Drop it | What you end up with |
+|---|---|---|
+| A joke | Between jokes of its block | Reordered |
+| A joke | Inside a gate's box (or an inner gate's) | It's done only if that gate (and the gate around it) lands |
+| A joke in a gate | Outside the box | Not gated any more. A gate left with no jokes is a plain joke again |
+| A gate's joke | Anywhere | The whole box moves, inner gate and all |
+| A gate | Inside another gate | It becomes that gate's inner gate, if it has none of its own; a gate with an inner gate can't go in (three levels). Never into itself |
+| A joke or gate | Into another premise in the beat | Each joke rests on that premise in your library. One resting on another premise asks first, and Cancel puts it back. Undo after |
+| A joke or gate | Into No premise | Only the set changes |
+| A joke | Into an empty block | Drop it on "No jokes here yet" |
+| A joke | Into crowd work, or another beat | Not allowed |
+
+A drop that isn't allowed is never offered: the box doesn't light up, and the joke goes back.
+
+### The arrows
+
+Each press moves a thing one place, to what you see next to it, so pressing ↑ again and again
+walks a joke up through every gate on the way:
+
+- Just below a gate's box, ↑ goes into it, last. Just above one, ↓ goes in, first.
+- At the top of a box, ↑ comes out above its joke; at the bottom, ↓ comes out below the box.
+- A gate goes into a neighbouring gate only if it has no inner gate; otherwise it steps past it.
+- The arrows never leave the block (drag, or Select and "Put under a premise", for that), and are
+  greyed out at its ends.
+
+### Making gates
+
+- **Gate** on a joke takes in the joke under it (with that joke's own gate, if the two levels
+  allow). It's greyed out when there's nothing under it or the levels are used up, and jokes inside
+  an inner gate have no Gate button.
+- **Gate** on a gate's joke opens the box: its jokes stay where they are, one level up.
+- **+ Joke in this gate** adds from the joke picker straight into the end of the gate.
+- In Select mode (ticking jokes for a premise), the grips and arrows step aside.
 
 ## The checks
 
@@ -162,7 +222,13 @@ until you hide them, and **How sets work** opens the whole guide.
 | **No fixed counts** of beats, premises or jokes | Sets differ: a story set has few beats, a one-liner set many | v1 suggested 4–6 beats per 5 minutes |
 | **Time is set per beat, never summed from jokes** | A joke's runtime on paper isn't its time on stage (tags, pauses, crowd). The comic knows how long a section runs | Summing joke runtimes, as the old builder did |
 | **Loose keeps its number**, it's only coloured | Loose means flexible on the night, not unordered. The order you wrote is still the plan | v3 had "pools" with no order; the comic found that wrong |
-| **A gate guards the next N jokes**, set with + and − | One control on the joke itself, no extra objects to build | "Runs" and "pools" (jargon the comic didn't use) |
+| **A gate guards the next N jokes**, stored as N on the joke | One number on the joke itself, no extra objects to store, so older sets and apps read it as before | "Runs" and "pools" (jargon the comic didn't use) |
+| **A gate is a box you drag jokes into** | Tapping + and − to stretch a gate over the jokes after it was hard to follow: what's in the box is what it guards | The + and − count |
+| **Gates nest two levels, no deeper** | A gate inside a gate is useful (a joke that only works if the room took the one before it); a third level is more than a set needs and fiddly to drag on a phone. The comic set the cap | Any depth; one level |
+| **Drag only from the grip** | A finger on a joke still scrolls the page and opens the joke; only the grip starts a drag, after a short hold on touch | Drag from anywhere on the row (it fights scrolling on a phone) |
+| **The arrows stay, and walk through gates** | Dragging can fail (a stiff finger, a screen reader), and the arrows are exact. One place per press is predictable | Arrows removed; arrows that jump over a whole gate |
+| **A joke dragged into a premise rests on it** | The same rule as adding it there: the set and the library agree. Moving one off another premise asks first | Dragging that changed only the set |
+| **Dragging stays inside a beat** | One beat is open at a time, and a joke between beats changes what you memorise. Take it out and add it to the other beat | Dragging onto a beat in the spine |
 | **Labels live on the beat in the set, not on jokes** | The same joke can play a different status in another set. The comic asked for this explicitly | Labels on jokes |
 | **A joke's persona is its own, from the same list** | A beat's labels depend on the set, but the side of you a joke shows doesn't. One list (the persona field's options) means a side added, renamed or deleted changes beats and jokes together | A fixed list on jokes, apart from the beats' |
 | **Deleting an option asks first, and rewrites nothing** | A delete you didn't mean costs labels you chose by hand, so it says how many first. Not rewriting the beats keeps the delete one save, and Not sure is already what an unknown id reads as | Deleting silently (the first version) |
@@ -193,6 +259,11 @@ until you hide them, and **How sets work** opens the whole guide.
 - **The connector**: `list_sets` adds `point` and `beat_count`, and its `runtime_seconds` is the
   beats' time. `get_set` adds `beats`, with label names, and keeps `running_order` with every
   field it had (`optional` is now the same as the new `loose`). See [api.md](api.md).
+- **Gates that don't fit**: a gate nested three deep, or one that runs past the end of the gate it
+  sits in, folds into the gate around it, so every joke that was guarded still is. The app does it
+  as it reads the list ([gateRows.ts](../web/src/features/sets/gateRows.ts) `fitGates`) and the
+  server as it saves ([set_beats.py](../app/services/set_beats.py) `clamp`), with the same cases in
+  `gateEdit.test.ts` and `tests/test_set_gates.py`.
 - **The Trash**: a joke in the Trash is hidden from its beat and keeps its place there, as it did
   in the old list. A gate counts only the jokes shown, and widens again over a guarded joke put
   back. A premise in the Trash keeps its place too. A joke erased for good drops out of `items`.

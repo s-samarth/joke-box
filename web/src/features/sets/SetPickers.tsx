@@ -5,26 +5,26 @@
  *
  * A joke under a premise in a set rests on that premise in your library (docs/sets.md): adding
  * jokes to a premise, or putting loose jokes under one, saves the premise on each joke, so it
- * shows on the joke and in the premise's jokes. A joke rests on one premise at a time, so one
- * on another premise moves, and says so first. Undo puts the beat and the jokes back.
+ * shows on the joke and in the premise's jokes (usePremiseLink). Undo puts the beat and the jokes
+ * back. Jokes can also go straight into a gate (+ Joke inside its box).
  */
 import { Plus } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
-import { useJokes, useSaveJoke } from '../../api/library'
+import { useState } from 'react'
+import { useJokes } from '../../api/library'
 import { usePremises } from '../../api/premises'
 import type { Beat, Joke } from '../../api/types'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { chainTo } from '../../lib/chains'
 import { JokePeek } from '../jokes/JokePeek'
-import { toInput } from '../jokes/useAutosaveJoke'
 import { PremisePickSheet } from '../pickers/PremisePickSheet'
 import { NewPremiseDialog } from '../premises/NewPremiseDialog'
 import { addPiecesTo, groupUnder, newPremise, pieceFor, setEntries } from './beatEdit'
 import { jokeIds } from './beats'
 import { SetJokePicker } from './SetJokePicker'
+import { many, short, usePremiseLink } from './usePremiseLink'
 
 export type Picking =
-  | { kind: 'jokes'; beatId: string; entryId: string | null }
+  | { kind: 'jokes'; beatId: string; entryId: string | null; gateId?: string | null }
   | { kind: 'premise'; beatId: string }
   | { kind: 'group'; beatId: string; entryId: string; pieceIds: string[] }
 
@@ -39,30 +39,18 @@ interface Props {
 }
 
 const chip = 'mt-3 inline-flex h-10 items-center gap-2 rounded-lg bg-ink-3 px-3 text-[15px] text-dim hover:bg-ink-4 hover:text-paper'
-const short = (take: string, most = 60) => (take.length > most ? `${take.slice(0, most - 1).trimEnd()}…` : take)
-const many = (n: number) => (n === 1 ? 'joke' : `${n} jokes`)
 
 export function SetPickers({ picking, onPicking, beats, onBeat, leadOf, reading, onReading }: Props) {
   const { data: jokes = [] } = useJokes()
   const { data: premises = [] } = usePremises()
-  const save = useSaveJoke()
-  const { confirm, toast } = useFeedback()
+  const { toast } = useFeedback()
+  const { attach, askToMove, takeOf } = usePremiseLink()
   const [creating, setCreating] = useState(false)
-  const latest = useRef(jokes) // Undo saves each joke from its version by then
-  useEffect(() => { latest.current = jokes })
   const byId = new Map(jokes.map((j) => [j.id, j]))
-  const takeOf = (id: string | null | undefined) => premises.find((p) => p.id === id)?.take
   const used = jokeIds(beats)
   const beat = beats.find((b) => b.id === picking?.beatId)
   const entry = picking?.kind !== 'premise' ? beat?.entries.find((e) => e.id === picking?.entryId) : undefined
   const premiseId = entry?.kind === 'premise' ? entry.premise_id : null
-
-  /** Rest these jokes on the premise; returns how to put them back. */
-  const attach = (list: Joke[], to: string) => {
-    const was = list.filter((j) => j.premise_id !== to).map((j) => [j.id, j.premise_id ?? null] as const)
-    for (const [id] of was) { const j = byId.get(id); if (j) save.mutate({ id, input: { ...toInput(j), premise_id: to } }) }
-    return () => { for (const [id, premise] of was) { const j = latest.current.find((x) => x.id === id); if (j) save.mutate({ id, input: { ...toInput(j), premise_id: premise } }) } }
-  }
 
   // A joke that follows others brings the ones before it that aren't in the set yet.
   const addJokes = (list: Joke[]) => {
@@ -74,7 +62,7 @@ export function SetPickers({ picking, onPicking, beats, onBeat, leadOf, reading,
       for (const j of chainTo(joke, byId)) if (!taken.has(j.id)) { taken.add(j.id); adding.push(j) }
     }
     if (!adding.length) return
-    const out = addPiecesTo(beat, picking.entryId, adding.map((j) => pieceFor(j, leadOf)))
+    const out = addPiecesTo(beat, picking.entryId, adding.map((j) => pieceFor(j, leadOf)), picking.gateId ?? null)
     onBeat(out.beat)
     onPicking({ ...picking, entryId: out.entryId })
     const before = adding.length - list.filter((j) => !used.has(j.id)).length
@@ -92,9 +80,7 @@ export function SetPickers({ picking, onPicking, beats, onBeat, leadOf, reading,
     }
     if (picking.kind !== 'group' || entry?.kind !== 'jokes') return
     const list = entry.pieces.filter((p) => picking.pieceIds.includes(p.id)).flatMap((p) => byId.get(p.joke_id) ?? [])
-    const moving = list.filter((j) => j.premise_id && j.premise_id !== id)
-    const message = moving.length === 1 ? `“${short(moving[0].setup)}” rests on “${short(takeOf(moving[0].premise_id) ?? 'another premise')}”.` : `${moving.length} of them rest on other premises.`
-    if (moving.length && !(await confirm({ title: `Move ${moving.length === 1 ? 'it' : 'them'} to this premise?`, message: `${message} A joke rests on one premise at a time, so ${moving.length === 1 ? 'it moves' : 'they move'} here.`, confirmLabel: 'Move' }))) return
+    if (!(await askToMove(list, id))) return
     onBeat(groupUnder(beat, entry.id, picking.pieceIds, id))
     onPicking(null)
     const undo = attach(list, id)
@@ -109,8 +95,8 @@ export function SetPickers({ picking, onPicking, beats, onBeat, leadOf, reading,
   return (
     <>
       {picking?.kind === 'jokes' && (
-        <SetJokePicker key={picking.entryId ?? 'new'} title="Add jokes" onClose={() => onPicking(null)} used={used} onAdd={addJokes} onRead={onReading} premiseId={premiseId}
-          description={premiseId ? `Under “${short(takeOf(premiseId) ?? 'a deleted premise')}”. Starts on its jokes: clear the filters for any. Jokes you add rest on it.` : `Into ${beat?.cue || 'this beat'}, with no premise. Tick them in the order you want them.`}
+        <SetJokePicker key={`${picking.entryId}/${picking.gateId}`} title={picking.gateId ? 'Add jokes to the gate' : 'Add jokes'} onClose={() => onPicking(null)} used={used} onAdd={addJokes} onRead={onReading} premiseId={premiseId}
+          description={(picking.gateId ? 'Inside the gate: only if it lands. ' : '') + (premiseId ? `Under “${short(takeOf(premiseId) ?? 'a deleted premise')}”. Starts on its jokes: clear the filters for any. Jokes you add rest on it.` : `Into ${beat?.cue || 'this beat'}, with no premise. Tick them in the order you want them.`)}
           start={premiseId ? { topic: null, premise: premiseId } : { topic: null }} memory={premiseId ? undefined : 'set-joke-picker'} />
       )}
       {(picking?.kind === 'premise' || picking?.kind === 'group') && (

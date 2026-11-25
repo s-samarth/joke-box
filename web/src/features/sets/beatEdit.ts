@@ -2,6 +2,8 @@
 import { newId } from '../../api/client'
 import type { Beat, Joke, SetEntry, SetPiece } from '../../api/types'
 import { hasPieces } from './beats'
+import { addToGate } from './gateEdit'
+import { fitGates } from './gateRows'
 
 export const newBeat = (): Beat => ({ id: newId(), cue: '', description: '', seconds: 120, labels: {}, shift_reason: '', entries: [] })
 export const newPremise = (premiseId: string): SetEntry => ({ kind: 'premise', id: newId(), premise_id: premiseId, gate: false, pieces: [] })
@@ -26,8 +28,8 @@ export function swap<T>(list: T[], i: number, d: number): T[] {
   return out
 }
 
-/** A gate can guard only the jokes after it. */
-export const clampGates = (pieces: SetPiece[]) => pieces.map((p, i) => (p.gate > pieces.length - 1 - i ? { ...p, gate: pieces.length - 1 - i } : p))
+/** A gate guards only jokes after it, and gates go two deep at most (beatMove.ts). */
+export const clampGates = fitGates
 
 /** The first premise of a beat has no premise before it to be gated on. */
 export function tidyEntries(entries: SetEntry[]): SetEntry[] {
@@ -48,15 +50,7 @@ export const setEntries = (beat: Beat, entries: SetEntry[]): Beat => ({ ...beat,
 export const mapPieces = (beat: Beat, entryId: string, change: (p: SetPiece[]) => SetPiece[]) =>
   mapEntry(beat, entryId, (e) => (hasPieces(e) ? { ...e, pieces: clampGates(change(e.pieces)) } : e))
 
-/** Gate on: guards the joke after it. Gate off: guards nothing. */
-export const toggleGate = (pieces: SetPiece[], i: number) =>
-  pieces.map((p, n) => (n === i ? { ...p, gate: p.gate ? 0 : Math.min(1, pieces.length - 1 - i) } : p))
-
-/** Guard one more (d = 1) or one fewer (d = -1) joke, between 1 and the jokes left after it. */
-export const stepGate = (pieces: SetPiece[], i: number, d: number) =>
-  pieces.map((p, n) => (n === i ? { ...p, gate: Math.max(1, Math.min(pieces.length - 1 - i, p.gate + d)) } : p))
-
-export const toggleLoose = (pieces: SetPiece[], i: number) => pieces.map((p, n) => (n === i ? { ...p, loose: !p.loose } : p))
+export const toggleLoose = (pieces: SetPiece[], id: string) => pieces.map((p) => (p.id === id ? { ...p, loose: !p.loose } : p))
 
 /**
  * Follow the cluster's lead, or pin the version playing now. Following, the piece shows the
@@ -86,11 +80,12 @@ export function addToEnd(beats: Beat[], pieces: SetPiece[]): Beat[] {
 }
 
 /**
- * Add jokes into a premise or no-premise list. `entryId` null starts a new no-premise list at
- * the end of the beat. Returns the beat and the list they went into, for the next add.
+ * Add jokes into a premise or no-premise list, at its end or at the end of gate `gateId` in it.
+ * `entryId` null starts a new no-premise list at the end of the beat. Returns the beat and the
+ * list they went into, for the next add.
  */
-export function addPiecesTo(beat: Beat, entryId: string | null, pieces: SetPiece[]): { beat: Beat; entryId: string } {
-  if (entryId && beat.entries.some((e) => e.id === entryId)) return { beat: mapPieces(beat, entryId, (p) => [...p, ...pieces]), entryId }
+export function addPiecesTo(beat: Beat, entryId: string | null, pieces: SetPiece[], gateId: string | null = null): { beat: Beat; entryId: string } {
+  if (entryId && beat.entries.some((e) => e.id === entryId)) return { beat: mapPieces(beat, entryId, (p) => (gateId ? addToGate(p, gateId, pieces) : [...p, ...pieces])), entryId }
   const entry = { kind: 'jokes' as const, id: newId(), pieces }
   return { beat: setEntries(beat, [...beat.entries, entry]), entryId: entry.id }
 }

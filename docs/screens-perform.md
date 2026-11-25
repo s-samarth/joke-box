@@ -44,14 +44,16 @@ What a set is made of and why is in [sets.md](sets.md). Files:
   line on what it needs, never a tick. The top-up limit is edited in place. The track scrolls sideways on a phone.
 - **Spine:** the beats in their fixed order, as tape strips. Each strip shows the cue, the time,
   its labels (Not sure outlined), "Why the shift?" in amber when a reason is missing, and what's in
-  it (premises, jokes, crowd work). Up and down arrows move a beat, and **Add beat** adds one at
+  it (premises, jokes, crowd work). Drag a beat by its grip, or use the up and down arrows, and **Add beat** adds one at
   the end. From 1024px wide, the spine sits beside the open beat. Narrower (phones, iPads in
   portrait), it sits above it, and tapping a beat scrolls to it.
 - **The open beat:** the cue on a tape strip (type into it), **Time for this beat** (m:ss, set by
   hand), **What it's for**, and **Labels for this beat, in this set** (one row of options per field,
   plus Not sure). When the status group changes from the beat before, an amber box asks **Why the
   shift?** (Top-up, Planned turn, Clash). Then **The beat, in order**: numbered entries, each with
-  up, down and remove:
+  a grip, up, down and remove. Dragging one folds every entry to its heading (and a summary line)
+  until you drop it. The full rules for dragging and the arrows are in
+  [sets.md](sets.md#drag-and-arrows):
   - **Premise:** the take and its reasoning, then its jokes. From the second premise on, a
     **Gate: only if the premise before it landed** toggle (sky blue when on).
   - **No premise:** jokes that aren't under a premise.
@@ -59,10 +61,13 @@ What a set is made of and why is in [sets.md](sets.md). Files:
     (green) or **No reply yet** (amber), and replies as "If they say… → your line". On a phone, a
     reply's two boxes stack.
   - **Jokes** keep their number and show the setup with the punchline under it. Tap one to read it
-    whole (`JokePeek`). Under each joke: **Locked/Loose** (yellow/teal), **Gate** (sky blue: the
-    jokes it guards are indented under it, with "If it lands, do the next − N + jokes. If not, skip
-    to #k."), **Follows the lead / Pinned version** for a cluster version, then up, down and
-    remove.
+    whole (`JokePeek`). Each has a grip on the left. Under each joke: **Locked/Loose**
+    (yellow/teal), **Gate**, **Follows the lead / Pinned version** for a cluster version, then up,
+    down and remove.
+  - **A gate** is a sky-blue box: its joke on top, **If it lands**, the jokes it guards inside (a
+    dashed line), then **+ Joke in this gate** and "Guards N jokes. If not, skip to #k." Jokes drag
+    in and out; dragging the gate's joke moves the box. A joke inside can open one inner box;
+    jokes inside that have no Gate button.
   - Add with **Premise**, **Jokes, no premise**, **Crowd work**, or **+ Joke** under a list.
   - **Adding a premise** opens the premise sheet a joke's "Add to a premise" uses
     ([PremisePickSheet.tsx](../web/src/features/pickers/PremisePickSheet.tsx)): search takes and
@@ -106,8 +111,8 @@ What a set is made of and why is in [sets.md](sets.md). Files:
   <img src="screenshots/phone-sets.webp" width="230" alt="Sets on a phone">
 </p>
 <img src="screenshots/desktop-set-builder.webp" alt="Set builder: the status track, the checks, the spine and an open beat">
-<img src="screenshots/desktop-set-beat.webp" alt="An open beat: labels, the shift reason, a premise with a gate">
-<img src="screenshots/ipad-set-builder.webp" width="420" alt="A beat's list on an iPad: a gate guarding two jokes">
+<img src="screenshots/desktop-set-beat.webp" alt="An open beat: labels, the shift reason, a premise with a gate box holding an inner gate">
+<img src="screenshots/ipad-set-builder.webp" width="420" alt="A beat's list on an iPad: a gate box with an inner gate">
 <p>
   <img src="screenshots/phone-set-builder.webp" width="230" alt="The spine on a phone">
   <img src="screenshots/phone-set-beat.webp" width="230" alt="A beat on a phone">

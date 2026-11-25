@@ -1,19 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import type { Beat, Joke, SetPiece } from '../../api/types'
-import { addLoose, addPiecesTo, clampGates, groupUnder, pieceFor, stepGate, swap, tidyEntries, toggleGate, togglePin } from './beatEdit'
+import { addLoose, addPiecesTo, clampGates, groupUnder, pieceFor, swap, tidyEntries, togglePin } from './beatEdit'
 
 const piece = (id: string, extra: Partial<SetPiece> = {}): SetPiece => ({ id, joke_id: id, loose: false, gate: 0, ...extra })
 
 describe('editing beats', () => {
-  it('turns a gate on over the next joke, and steps it within the jokes left', () => {
-    const list = [piece('a'), piece('b'), piece('c')]
-    expect(toggleGate(list, 0)[0].gate).toBe(1)
-    expect(toggleGate(list, 2)[2].gate).toBe(0)
-    expect(stepGate(toggleGate(list, 0), 0, 1)[0].gate).toBe(2)
-    expect(stepGate(stepGate(toggleGate(list, 0), 0, 1), 0, 1)[0].gate).toBe(2)
-    expect(stepGate(toggleGate(list, 0), 0, -1)[0].gate).toBe(1)
-  })
-
   it('keeps gates inside their list after a move', () => {
     const moved = clampGates(swap([piece('a', { gate: 1 }), piece('b')], 0, 1))
     expect(moved.map((p) => [p.id, p.gate])).toEqual([['b', 0], ['a', 0]])

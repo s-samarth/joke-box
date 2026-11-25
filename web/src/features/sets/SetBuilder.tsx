@@ -108,13 +108,14 @@ function Builder({ setlist }: { setlist: Setlist }) {
       <div className="mt-8 grid gap-6 lg:grid-cols-[20rem_minmax(0,1fr)]">
         <div>
           <p className={`${section} mb-2`}>Spine · beats run in this order</p>
-          <Spine beats={beats} fields={config.fields} selected={selected} onSelect={open} onAdd={addBeat} onMove={(i, d) => setBeats((list) => swap(list, i, d))} />
+          <Spine beats={beats} fields={config.fields} selected={selected} onSelect={open} onAdd={addBeat} onMove={(i, d) => setBeats((list) => swap(list, i, d))}
+            onReorder={(ids) => setBeats((list) => ids.flatMap((id) => list.filter((b) => b.id === id)))} />
         </div>
         <div ref={editor} className="min-w-0 scroll-mt-16 rounded-2xl p-4 ring-1 ring-rule">
           {beat ? (
             <BeatEditor key={beat.id} beat={beat} previous={beats[index - 1] ?? null} needsWhy={needsWhy(beats, index, config.fields)} fields={config.fields}
               onChange={changeBeat} onDelete={() => deleteBeat(beat)} jokes={byId} premises={premises} leadOf={leadOf} onOpen={setReading}
-              onAddJokes={(entryId) => setPicking({ kind: 'jokes', beatId: beat.id, entryId })} onAddPremise={() => setPicking({ kind: 'premise', beatId: beat.id })}
+              onAddJokes={(entryId, gateId) => setPicking({ kind: 'jokes', beatId: beat.id, entryId, gateId })} onAddPremise={() => setPicking({ kind: 'premise', beatId: beat.id })}
               onGroup={(entryId, pieceIds) => setPicking({ kind: 'group', beatId: beat.id, entryId, pieceIds })} onEditFields={() => setSheet('fields')} />
           ) : (
             <p className="py-10 text-center text-dim">{beats.length ? 'Pick a beat to open it.' : 'No beats yet. Add the first one: a cue word for what you talk about first.'}</p>
