@@ -91,6 +91,8 @@ class FieldOptionIn(BaseModel):
     label: str = Field(min_length=1, max_length=80)
     # What a status option means to the checks. Only the status field's options have one.
     group: Group | None = None
+    # Hex. Left out (an older app), a save keeps the stored colour; none stored, the default.
+    color: str | None = Field(default=None, pattern=r"^#[0-9a-fA-F]{6}$")
 
 
 class SetFieldIn(BaseModel):

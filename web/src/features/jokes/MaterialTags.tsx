@@ -7,7 +7,7 @@ import { ChevronDown } from 'lucide-react'
 import { Dropdown, type MenuItem } from '../../components/ui/Menu'
 import { GENERIC_ASK, NOT_SURE, VIBE, genericLabel, personaLabel, usePersonaField } from './persona'
 import { VibeDot } from './VibeDot'
-import { genericTone, vibeTone } from './vibeTone'
+import { genericTone, useVibeTone } from './vibeTone'
 
 const chip = 'inline-flex h-8 items-center gap-1 rounded-md px-2 text-[13px] font-semibold transition-colors pointer-coarse:h-10'
 
@@ -15,6 +15,7 @@ export interface Tags { persona?: string | null; generic?: boolean | null }
 
 export function MaterialTags({ value, onChange, what }: { value: Tags; onChange: (patch: Tags) => void; what: string }) {
   const field = usePersonaField()
+  const vibeTone = useVibeTone()
   const vibe = personaLabel(value.persona, field)
   const vibeId = vibe ? value.persona : null
   const generic = genericLabel(value.generic)
@@ -30,7 +31,7 @@ export function MaterialTags({ value, onChange, what }: { value: Tags; onChange:
     <>
       {field && (
         <Dropdown align="start" items={vibeItems} trigger={
-          <button type="button" aria-label={`${VIBE} of ${what}: ${vibe ?? NOT_SURE}`} className={`${chip} ${vibe ? vibeTone(vibeId).chip : 'text-dim hover:bg-ink-3'}`}>
+          <button type="button" aria-label={`${VIBE} of ${what}: ${vibe ?? NOT_SURE}`} className={`${chip} ${vibe ? '' : 'text-dim hover:bg-ink-3'}`} style={vibe ? vibeTone(vibeId).chip : undefined}>
             {!vibe && <VibeDot id={null} />}{vibe ?? VIBE}<ChevronDown size={13} className="text-faint" />
           </button>
         } />

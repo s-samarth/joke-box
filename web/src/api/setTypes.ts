@@ -45,7 +45,8 @@ export interface Beat {
 }
 
 export type StatusGroup = 'win' | 'neutral' | 'loss'
-export interface SetFieldOption { id: string; label: string; group?: StatusGroup | null }
+/** `color` is hex; missing on one saved before colours, which then gets its default (lib/labelColors). */
+export interface SetFieldOption { id: string; label: string; group?: StatusGroup | null; color?: string | null }
 export interface SetField { id: string; name: string; role?: 'status' | 'persona' | null; options: SetFieldOption[] }
 export interface SetFields { fields: SetField[]; top_up_seconds: number }
 

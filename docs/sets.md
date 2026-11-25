@@ -46,12 +46,22 @@ beat's labels (or the sliders at the top of the builder)
 There you add, rename and delete fields and their options: tap an option to rename it, × to
 delete it. A rename keeps the option's id, so every beat and joke that has it shows the new name.
 
+**Every option has a colour.** Tap its dot for a small panel of swatches, drawn from the app's
+own colours ([labelColors.ts](../web/src/lib/labelColors.ts)). A new option gets one its field
+isn't using yet. On a beat, each option shows its dot, and the picked one is filled with its
+colour; Not sure is always orange. The colour is stored on the option (`color`, hex); an option
+saved before colours existed gets its default by id (the same map is in
+`app/services/set_fields.py`), and a save from an older app that leaves `color` out keeps the
+stored one. Claude and exports read only the labels, so colours don't reach them.
+
+<img src="screenshots/phone-label-colours.webp" width="200" alt="Label fields on a phone, with the swatch panel open for Playful">
+
 | Field | Options | Used by |
 |---|---|---|
-| Status (the status track) | I win (win), Mixed (loss), System attack / Neutral (neutral), We lose (loss), I lose (loss) | The status track, the shift check, the top-up check |
-| Dominant persona side (the persona) | Riled up, Bakchod, Point prover | The persona check, and each joke's Persona |
-| Tone | Opinionated, Playful, Edgy, Heartfelt | Nothing: it's for you |
-| Voice fit | Mine, Half, Anyone's | Nothing: it's for you |
+| Status (the status track) | I win (win, green), Mixed (loss, lime), System attack / Neutral (neutral, blue), We lose (loss, soft red), I lose (loss, red) | The status track, the shift check, the top-up check |
+| Dominant persona side (the persona) | Riled up (red), Bakchod (blue), Point prover (green) | The persona check, and each joke's Persona |
+| Tone | Opinionated (violet), Playful (cyan), Edgy (rose), Heartfelt (pink) | Nothing: it's for you |
+| Voice fit | Mine (green), Half (lime), Anyone's (stone) | Nothing: it's for you |
 
 Not sure is never stored as an option. A beat with no label for a field, or whose option was
 deleted, is Not sure. That's why it's always there and can't be removed. One field at most is
@@ -64,7 +74,7 @@ with it. Nothing is rewritten: the beats keep the old id, which no option has no
 as Not sure everywhere (the builder, the checks, the cue card, Claude). The counts come from
 [fieldUsage.ts](../web/src/features/sets/fieldUsage.ts).
 
-<img src="screenshots/desktop-set-labels.webp" alt="A beat's labels with Storyteller added to Tone; a premise and its jokes, each with Vibe and Generic beside Locked and Gate, and the Generic menu open">
+<img src="screenshots/desktop-set-labels.webp" alt="A beat's labels in colour: I win green, Bakchod blue, Playful cyan, Mine green, each other option with its dot">
 <img src="screenshots/desktop-label-delete.webp" alt="Deleting Edgy: it's on 2 beats in 1 set, and they'll be Not sure">
 
 ### Vibe and Generic, on jokes and premises
@@ -75,8 +85,8 @@ itself, so they're saved on the joke or the premise, not the set.
 - **Vibe** is which side of you it shows: Riled up, Bakchod, Point prover, or Not sure. It picks
   from the persona field's options (the ones a beat's Dominant persona side uses), so there's one
   list. Stored as `persona`, an option id; one deleted later reads as Not sure.
-  Each wears a colour wherever it shows (`vibeTone.ts`): Riled up red, Bakchod blue, Point prover
-  green, Not sure orange; an option you add yourself stays neutral.
+  Each wears its option's colour wherever it shows (`vibeTone.ts`): Riled up red, Bakchod blue,
+  Point prover green by default, or whatever you pick in Label fields; Not sure is orange.
 - **Generic** says whether anyone could do it (Generic) or it's yours (Non-generic). Every joke
   and premise should have one, but a save never waits on it: until it's answered it shows an amber
   **Generic?**, and the Generic filter on Jokes and Premises (**Generic not answered**) finds the

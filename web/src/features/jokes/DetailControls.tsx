@@ -9,7 +9,7 @@ import { choice } from '../../components/ui/choice'
 import { NewTypeDialog } from './NewTypeDialog'
 import { GENERIC_ASK, NOT_SURE, VIBE } from './persona'
 import { VibeDot } from './VibeDot'
-import { genericTone, vibeTone } from './vibeTone'
+import { genericTone, useVibeTone } from './vibeTone'
 
 export function TypeToggles({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
   const { data: types = [] } = useTypes()
@@ -44,18 +44,18 @@ export function CleanPicker({ value, onChange }: { value: CleanRating | null; on
   )
 }
 
-const vibeChoice = (id: string | null, on: boolean) =>
-  `hit relative inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm transition ${on ? vibeTone(id).on : 'bg-ink-3 text-dim hover:text-paper'}`
+const vibeChoice = (on: boolean) => `hit relative inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm transition ${on ? 'font-medium' : 'bg-ink-3 text-dim hover:text-paper'}`
 
 /** Its vibe: the side of you it shows, from your persona field's options. Not sure is always there. */
 export function PersonaPicker({ field, value, onChange }: { field: SetField; value: string | null; onChange: (v: string | null) => void }) {
   const current = field.options.some((o) => o.id === value) ? value : null
+  const tone = useVibeTone()
   return (
     <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={VIBE}>
       {field.options.map((o) => (
-        <button key={o.id} type="button" role="radio" aria-checked={current === o.id} onClick={() => onChange(o.id)} className={vibeChoice(o.id, current === o.id)}><VibeDot id={o.id} />{o.label}</button>
+        <button key={o.id} type="button" role="radio" aria-checked={current === o.id} onClick={() => onChange(o.id)} className={vibeChoice(current === o.id)} style={current === o.id ? tone(o.id).on : undefined}><VibeDot id={o.id} />{o.label}</button>
       ))}
-      <button type="button" role="radio" aria-checked={!current} onClick={() => onChange(null)} className={vibeChoice(null, !current)}><VibeDot id={null} />{NOT_SURE}</button>
+      <button type="button" role="radio" aria-checked={!current} onClick={() => onChange(null)} className={vibeChoice(!current)} style={!current ? tone(null).on : undefined}><VibeDot id={null} />{NOT_SURE}</button>
     </div>
   )
 }
