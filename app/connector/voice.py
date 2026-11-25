@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.connector.origins import jokes_from_voice
-from app.connector.text import ist_date, matches, page
+from app.connector.text import ist_date, matches, next_offset, page
 from app.models import User, VoiceNote
 
 
@@ -16,17 +16,20 @@ def tag_words(hashtags: list[str]) -> str:
     return " ".join(bare + [f"#{t}" for t in bare])
 
 
-def search_voice_notes(db: Session, user: User, query: str = "", limit: int = 25) -> dict[str, Any]:
+def search_voice_notes(
+    db: Session, user: User, query: str = "", limit: int = 25, offset: int = 0
+) -> dict[str, Any]:
     """Voice notes, newest first, found by every word of the query in the label or hashtags.
     `joke_ids` are the jokes written from each."""
     rows = db.scalars(
         select(VoiceNote).where(VoiceNote.user_id == user.id).order_by(VoiceNote.created_at.desc())
     )
     found = [n for n in rows if matches(query, n.label, tag_words(n.hashtags))]
-    shown, total = page(found, limit)
+    shown, total = page(found, limit, offset=offset)
     jokes = jokes_from_voice(db, user)
     return {
         "total": total,
+        "next_offset": next_offset(offset, shown, total),
         "voice_notes": [
             {
                 "id": str(n.id),

@@ -192,9 +192,14 @@ def test_notebook_and_study_tools(claude: tuple[TestClient, str]) -> None:
     fields |= {"premise_ids", "joke_ids", "brainstorm_ids"}
     assert set(items(observations, "observations")[0]) == fields
     # Each voice note's fields are checked in test_connector_voice.py.
-    assert set(result(claude, "search_voice_notes")) == {"total", "voice_notes"}
+    paged = {"total", "next_offset"}  # each of these four pages with offset / next_offset
+    assert set(observations) == paged | {"observations"}
+    assert set(result(claude, "search_voice_notes")) == paged | {"voice_notes"}
+    assert set(result(claude, "search_analyses")) == paged | {"analyses"}
+    brainstorms = result(claude, "search_brainstorms")
+    assert set(brainstorms) == paged | {"results"}
 
-    found = items(result(claude, "search_brainstorms"), "results")
+    found = items(brainstorms, "results")
     by_kind = {r["kind"]: set(r) for r in found}
     assert by_kind["brainstorm"] == {
         "kind",

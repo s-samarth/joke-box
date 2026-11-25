@@ -50,6 +50,12 @@ def page[T](rows: list[T], limit: int, cap: int = LIMIT, offset: int = 0) -> tup
     return rows[start : start + max(1, min(limit, cap))], len(rows)
 
 
+def next_offset(offset: int, shown: list[Any], total: int) -> int | None:
+    """Where the next page starts, or None on the last page."""
+    after = max(0, offset) + len(shown)
+    return after if after < total else None
+
+
 def day(value: str, name: str) -> str:
     """A date filter as an ISO date (empty means no filter). Comparing these as strings
     orders them by date."""

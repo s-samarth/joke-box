@@ -42,14 +42,16 @@ def topic_name(names: Names, topic_id: uuid.UUID) -> str:
     return names.topics.get(topic_id, "")
 
 
-def user_jokes(db: Session, user: User) -> list[Joke]:
-    """All live jokes, newest first, with their types and status loaded."""
+def user_jokes(db: Session, user: User, ids: set[uuid.UUID] | None = None) -> list[Joke]:
+    """All live jokes (or just those of `ids`), newest first, with their types and status."""
     query = (
         select(Joke)
         .where(Joke.user_id == user.id)
         .options(selectinload(Joke.types), selectinload(Joke.status))
         .order_by(Joke.updated_at.desc())
     )
+    if ids is not None:
+        query = query.where(Joke.id.in_(ids))
     return list(db.scalars(query))
 
 

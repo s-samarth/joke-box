@@ -106,7 +106,10 @@ def test_search_counts_handwritten_pages(claude: tuple[TestClient, str]) -> None
     save([scribble(0), scribble(1)], title="Fake handwritten only")
     client, token = claude
     found = call(client, token, "search_brainstorms", query="handwritten only")["structuredContent"]
-    assert found["results"][0]["handwritten_pages"] == 2
+    assert found["results"][0]["handwritten_pages"] == 3  # its notebook's pages (one blank)
+    save([], title="Fake typed only")
+    typed = call(client, token, "search_brainstorms", query="typed only")["structuredContent"]
+    assert typed["results"][0]["handwritten_pages"] == 0
 
 
 @pytest.mark.parametrize("kind", ["brainstorm", "rewrite"])
@@ -142,36 +145,22 @@ def test_typed_continuation_preserves_every_character_without_rendering_again(
     assert text == words
 
 
-def test_search_only_counts_ink_for_returned_matches(
-    claude: tuple[TestClient, str], monkeypatch: pytest.MonkeyPatch, db: Any
-) -> None:
+def test_search_never_reads_the_ink(claude: tuple[TestClient, str], db: Any) -> None:
+    """Page counts come from the stored counts: reading the ink was megabytes a call."""
     from sqlalchemy import event
-
-    from app.connector import notebook
 
     save([scribble(0)], "Fake match")
     save([scribble(1)], "Fake match")
-    save([scribble(2)], "Something else")
     ink_queries = []
 
-    def record(conn, cursor, sql, params, context, executemany):
+    def record(conn, cursor, sql, params, context, executemany):  # type: ignore[no-untyped-def]
         if "writing_sessions.ink," in sql or "writing_sessions.ink " in sql:
             ink_queries.append(params)
 
-    count = notebook.pages_with_ink
-    calls = []
-
-    def counted(ink):
-        calls.append(ink)
-        return count(ink)
-
-    monkeypatch.setattr(notebook, "pages_with_ink", counted)
     bind = db.get_bind()
     event.listen(bind, "before_cursor_execute", record)
     try:
-        for query, expected in [("Absent", 0), ("Fake match", 2)]:
-            result = call(*claude, "search_brainstorms", query=query, limit=1)["structuredContent"]
-            assert result["total"] == expected
-            assert len(ink_queries) == len(calls) == min(1, expected)
+        result = call(*claude, "search_brainstorms", query="Fake match")["structuredContent"]
+        assert result["total"] == 2 and ink_queries == []
     finally:
         event.remove(bind, "before_cursor_execute", record)
