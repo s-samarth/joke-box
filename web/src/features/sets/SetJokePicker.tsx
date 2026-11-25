@@ -4,14 +4,12 @@
  * lead); "Pick another version" lists its versions, lead crowned, and choosing one pins it. Tick
  * as many as you like: they go in in the order you ticked them. The book button reads a joke
  * whole first. Jokes already in the set, and clusters with a version in it, sit at the bottom.
- * Going under a premise, a joke that rests on another premise says it will move (see
- * docs/sets.md: a joke under a premise in a set rests on it in your library).
+ * Adding under a premise changes only the set, never a joke's premise in your library.
  */
 import { BookOpen, Check, ChevronDown, Crown, Layers } from 'lucide-react'
 import { useState } from 'react'
 import { useClusters } from '../../api/clusters'
 import { useJokes, useTopics } from '../../api/library'
-import { usePremises } from '../../api/premises'
 import type { Joke } from '../../api/types'
 import { StrengthTicks } from '../../components/ui/pieces'
 import { clock } from '../../lib/duration'
@@ -34,16 +32,14 @@ interface Props {
   start: StartAt
   memory?: string
   /** The premise they go under, or null for a list with no premise. */
-  premiseId: string | null
   onAdd: (jokes: Joke[]) => void
   onRead: (joke: Joke) => void
 }
 
-export function SetJokePicker({ used, start, memory, premiseId, onAdd, onRead, ...sheet }: Props) {
+export function SetJokePicker({ used, start, memory, onAdd, onRead, ...sheet }: Props) {
   const { data: jokes = [] } = useJokes()
   const { data: clusters = [] } = useClusters()
   const { data: topics = [] } = useTopics()
-  const { data: premises = [] } = usePremises()
   const { f, shown, discarded, showDiscarded } = useJokePickFilters(jokes, start, memory)
   const [ticked, setTicked] = useState<string[]>([])
   const [chosen, setChosen] = useState<Map<string, string>>(new Map())
@@ -52,7 +48,6 @@ export function SetJokePicker({ used, start, memory, premiseId, onAdd, onRead, .
   const stacked = stackRows(shown, jokes, { clusters, showDiscarded: showDiscarded || Boolean(f.status) })
   const versions = (clusterId: string) => inOrder(clusters.find((c) => c.id === clusterId), versionsOf(clusterId, jokes)).filter((j) => showDiscarded || !isDiscarded(j))
   const pick = (clusterId: string, lead: Joke) => byId.get(chosen.get(clusterId) ?? '') ?? lead
-  const moves = (j: Joke) => (premiseId && j.premise_id && j.premise_id !== premiseId ? premises.find((p) => p.id === j.premise_id)?.take : undefined)
   const where = (j: Joke) => {
     const topic = topics.find((t) => t.id === j.topic_id)
     const sub = topic?.subtopics.find((s) => s.id === j.subtopic_id && !s.is_system)?.name
@@ -78,8 +73,7 @@ export function SetJokePicker({ used, start, memory, premiseId, onAdd, onRead, .
     const c = row.cluster
     const joke = c ? pick(c.id, c.lead) : row.joke
     const here = inSet(row.joke, used, jokes)
-    const from = moves(joke)
-    const note = used.has(joke.id) ? 'In the set' : here ? 'Another version is in the set' : from ? `Moves from: ${from}` : null
+    const note = used.has(joke.id) ? 'In the set' : here ? 'Another version is in the set' : null
     const body = (
       <>
         {c && c.name !== c.lead.setup && <p className="mb-1.5 flex items-center gap-1.5 text-[13px] font-medium text-dim"><Layers size={13} className="shrink-0 text-tape" aria-hidden /><span className="line-clamp-1">{c.name}</span></p>}

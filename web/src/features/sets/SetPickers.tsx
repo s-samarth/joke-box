@@ -3,11 +3,10 @@
  * Jokes tab's filters), a premise for a beat, and a premise for jokes you picked in a no-premise
  * list (jokes first, premise later). Plus reading a joke whole (JokePeek).
  *
- * A joke under a premise in a set rests on that premise in your library (docs/sets.md): adding
- * jokes to a premise, or putting loose jokes under one, saves the premise on each joke, so it
- * shows on the joke and in the premise's jokes (usePremiseLink). Undo puts the beat and the jokes
- * back. Jokes can also go straight into a gate (+ Joke inside its box). Move to… › Under another
- * premise picks the premise for one joke (a gate brings its jokes) the same way.
+ * Putting jokes under a premise here changes only the set: in your library each joke keeps the
+ * premise it rests on, or none (docs/sets.md). Undo puts the beat back. Jokes can also go
+ * straight into a gate (+ Joke inside its box). Move › Another premise… picks the premise for one
+ * joke (a gate brings its jokes) the same way.
  */
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
@@ -24,7 +23,7 @@ import { movedLists } from './beatMove'
 import { hasPieces, jokeIds } from './beats'
 import { moveTo } from './moveTo'
 import { SetJokePicker } from './SetJokePicker'
-import { many, short, usePremiseLink } from './usePremiseLink'
+import { many, short, usePremiseTake } from './usePremiseTake'
 
 export type Picking =
   | { kind: 'jokes'; beatId: string; entryId: string | null; gateId?: string | null }
@@ -48,7 +47,7 @@ export function SetPickers({ picking, onPicking, beats, onBeat, leadOf, reading,
   const { data: jokes = [] } = useJokes()
   const { data: premises = [] } = usePremises()
   const { toast } = useFeedback()
-  const { attach, askToMove, takeOf } = usePremiseLink()
+  const takeOf = usePremiseTake()
   const [creating, setCreating] = useState(false)
   const byId = new Map(jokes.map((j) => [j.id, j]))
   const used = jokeIds(beats)
@@ -71,12 +70,10 @@ export function SetPickers({ picking, onPicking, beats, onBeat, leadOf, reading,
     onBeat(out.beat)
     onPicking({ ...picking, entryId: out.entryId })
     const before = adding.length - list.filter((j) => !used.has(j.id)).length
-    const undo = premiseId ? attach(adding, premiseId) : null
-    if (undo && adding.some((j) => j.premise_id !== premiseId)) toast(`${many(adding.length)} now on “${short(takeOf(premiseId) ?? 'this premise', 40)}”`, { label: 'Undo', onClick: () => { undo(); onBeat(beat) } })
-    else if (before > 0) toast(`Also added the ${before === 1 ? 'joke' : `${before} jokes`} before it`)
+    if (before > 0) toast(`Also added the ${before === 1 ? 'joke' : `${before} jokes`} before it`)
   }
 
-  const pickPremise = async (id: string) => {
+  const pickPremise = (id: string) => {
     if (!beat || !picking) return
     if (picking.kind === 'premise') {
       const added = newPremise(id)
@@ -85,21 +82,16 @@ export function SetPickers({ picking, onPicking, beats, onBeat, leadOf, reading,
     }
     if (picking.kind === 'move') {
       const next = moveTo(beat, picking.pieceId, { premiseId: id })
-      const list = [...movedLists(beat, next).keys()].flatMap((p) => pieceJoke(p) ?? [])
-      if (!(await askToMove(list, id))) return
       onPicking(null)
       if (next === beat) return
       onBeat(next)
-      const undo = attach(list, id)
-      return toast(`${many(list.length)} now on “${short(takeOf(id) ?? 'the premise', 40)}”`, { label: 'Undo', onClick: () => { undo(); onBeat(beat) } })
+      const count = movedLists(beat, next).size
+      return toast(`${many(count)} under “${short(takeOf(id) ?? 'the premise', 40)}” in this set`, { label: 'Undo', onClick: () => onBeat(beat) })
     }
     if (picking.kind !== 'group' || entry?.kind !== 'jokes') return
-    const list = entry.pieces.filter((p) => picking.pieceIds.includes(p.id)).flatMap((p) => byId.get(p.joke_id) ?? [])
-    if (!(await askToMove(list, id))) return
     onBeat(groupUnder(beat, entry.id, picking.pieceIds, id))
     onPicking(null)
-    const undo = attach(list, id)
-    toast(`${many(list.length)} now on “${short(takeOf(id) ?? 'the premise', 40)}”`, { label: 'Undo', onClick: () => { undo(); onBeat(beat) } })
+    toast(`${many(picking.pieceIds.length)} under “${short(takeOf(id) ?? 'the premise', 40)}” in this set`, { label: 'Undo', onClick: () => onBeat(beat) })
   }
 
   const inBeat = new Set(beat?.entries.flatMap((e) => (e.kind === 'premise' && e.premise_id ? [e.premise_id] : [])) ?? [])
@@ -113,19 +105,19 @@ export function SetPickers({ picking, onPicking, beats, onBeat, leadOf, reading,
   return (
     <>
       {picking?.kind === 'jokes' && (
-        <SetJokePicker key={`${picking.entryId}/${picking.gateId}`} title={picking.gateId ? 'Add jokes to the gate' : 'Add jokes'} onClose={() => onPicking(null)} used={used} onAdd={addJokes} onRead={onReading} premiseId={premiseId}
-          description={(picking.gateId ? 'Inside the gate: only if it lands. ' : '') + (premiseId ? `Under “${short(takeOf(premiseId) ?? 'a deleted premise')}”. Starts on its jokes: clear the filters for any. Jokes you add rest on it.` : `Into ${beat?.cue || 'this beat'}, with no premise. Tick them in the order you want them.`)}
+        <SetJokePicker key={`${picking.entryId}/${picking.gateId}`} title={picking.gateId ? 'Add jokes to the gate' : 'Add jokes'} onClose={() => onPicking(null)} used={used} onAdd={addJokes} onRead={onReading}
+          description={(picking.gateId ? 'Inside the gate: only if it lands. ' : '') + (premiseId ? `Under “${short(takeOf(premiseId) ?? 'a deleted premise')}”. Starts on its jokes: clear the filters for any. Only the set changes.` : `Into ${beat?.cue || 'this beat'}, with no premise. Tick them in the order you want them.`)}
           start={premiseId ? { topic: null, premise: premiseId } : { topic: null }} memory={premiseId ? undefined : 'set-joke-picker'} />
       )}
       {(picking?.kind === 'premise' || forJokes) && (
-        <PremisePickSheet topicId={forJokes ? sameTopic : null} onClose={() => onPicking(null)} onPick={([id]) => void pickPremise(id)}
-          title={forJokes ? `Which premise ${one ? 'does it' : 'do they'} rest on?` : 'Add a premise'}
-          description={picking.kind === 'move' ? `“${short(picked[0]?.setup ?? 'This joke', 50)}” goes under it here, and rests on it in your library.`
-            : forJokes ? `${many(picked.length)} picked. They go under it here, and rest on it in your library.` : 'The take this part of the beat rests on. You pick its jokes next.'}
+        <PremisePickSheet topicId={forJokes ? sameTopic : null} onClose={() => onPicking(null)} onPick={([id]) => pickPremise(id)}
+          title={forJokes ? `Which premise ${one ? 'does it' : 'do they'} go under?` : 'Add a premise'}
+          description={picking.kind === 'move' ? `“${short(picked[0]?.setup ?? 'This joke', 50)}” goes under it in this set. Its premise in your library stays as it is.`
+            : forJokes ? `${many(picked.length)} picked. They go under it in this set. Their premises in your library stay as they are.` : 'The take this part of the beat rests on. You pick its jokes next.'}
           note={(p) => (inBeat.has(p.id) ? (forJokes ? `In this beat: ${one ? 'it joins' : 'they join'} it` : 'Already in this beat') : null)}
           after={<button type="button" onClick={() => setCreating(true)} className={chip}><Plus size={16} /> New premise</button>} />
       )}
-      <NewPremiseDialog open={creating} onOpenChange={setCreating} topicId={sameTopic} onCreated={(id) => { setCreating(false); void pickPremise(id) }} />
+      <NewPremiseDialog open={creating} onOpenChange={setCreating} topicId={sameTopic} onCreated={(id) => { setCreating(false); pickPremise(id) }} />
       {reading && <JokePeek joke={reading} onClose={() => onReading(null)} onAdd={picking?.kind === 'jokes' ? () => addJokes([reading]) : undefined} inSet={used.has(reading.id)} />}
     </>
   )
