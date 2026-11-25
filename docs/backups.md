@@ -98,7 +98,9 @@ The workflow never runs on pull requests, so code from a fork can't reach these 
 ## Test it
 
 On GitHub open **Actions → Backup → Run workflow** (on `main`). It takes a couple of minutes. A
-green run has one artifact, `jokebox-backup-<run id>`, holding one `.tar.age` file. Every run
+green run has one artifact, `jokebox-backup-<run id>` (or `jokebox-backup-monthly-<run id>` when
+it has the recordings: on the 1st, or a manual run with **recordings** ticked), holding one
+`.tar.age` file. Every run
 already restores its own dump before keeping it, so the one thing left to prove is that your key
 opens it: download the artifact once and do step 1 of the restore below.
 
@@ -125,16 +127,22 @@ You need `age` and a Postgres 18 client (`brew install age postgresql@18`).
 
 2. **Restore the database into a new Neon branch first, never straight over production.** In
    Neon, create a branch from production (say `restore-2026-11-04`) and copy its direct URL.
-   `--clean` drops each table before loading the backup's version, so the branch ends up
-   exactly as the backup was:
+   Restore into an **empty** schema, then bring it up to the current migrations. Don't
+   `pg_restore --clean` over a schema newer than the backup: tables added since (such as
+   `set_field_configs`) still point at the ones being dropped, so the restore fails part way and
+   the next deploy's migration breaks.
 
    ```bash
-   pg_restore --clean --if-exists --no-owner --no-privileges --dbname="<branch URL>" backup/jokebox.dump
+   psql "<branch URL>" -c "drop schema public cascade; create schema public;"
+   pg_restore --no-owner --no-privileges --dbname="<branch URL>" backup/jokebox.dump
+   DATABASE_URL="<branch URL>" uv run alembic upgrade head
    psql "<branch URL>" -c "select count(*) from jokes"
    ```
 
-   Once the branch looks right, run the same `pg_restore` against production's direct URL at a
-   quiet moment. Or point Vercel's `DATABASE_URL` at the branch and redeploy.
+   If the app connects as a different role from the one you restored with, grant it the schema
+   again (`grant all on schema public to <role>; grant all on all tables in schema public to
+   <role>;`). Once the branch looks right, point Vercel's `DATABASE_URL` at it and redeploy, or
+   repeat these steps against production's direct URL at a quiet moment.
 
 3. **Put the recordings back.** Each one goes back at its original name, which is what the
    database's `voice_notes.audio_path` holds, so the notes play again. The script checks every

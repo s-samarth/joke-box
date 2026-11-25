@@ -74,9 +74,10 @@ CI runs the same checks, plus the migrations on Postgres 16 and a production bui
   reads jokes, premises, sets, shows, observations, brainstorms, Craft notes and analyses
   directly. When you rename, move or remove a field on any of them, update the connector in the
   same change. Three things catch a miss: mypy (the connector is typed against the models),
-  [test_connector_contract.py](../tests/test_connector_contract.py) (every tool, run over the
-  demo data plus one of everything, must succeed and return exactly its listed fields), and the
-  per-tool tests. If a tool's output changes on purpose, update the contract test and the tool
+  [test_connector_contract.py](../tests/test_connector_contract.py) and
+  `test_connector_contract_notebook.py` (every tool, run over the demo data plus one of
+  everything, must succeed and return exactly the fields in `tests/connector_fields.py`), and the
+  per-tool tests. If a tool's output changes on purpose, update `connector_fields.py` and the tool
   table in [api.md](api.md#claude-connector-mcp) together: Claude, and the comedy-writer skill,
   rely on those field names. The writing pulse is the one tool whose rules also live in the web
   app ([pulse.ts](../web/src/features/daily/pulse.ts), pulseTrends.ts, pulseNotes.ts): change a rule in both, and keep the
@@ -105,7 +106,10 @@ uv run alembic downgrade -1 && uv run alembic upgrade head   # prove downgrade w
 
 - Migrations are **append-only** once merged. CI rejects edits to existing ones.
 - Write them to work on both SQLite and Postgres: use `batch_alter_table` for SQLite column
-  changes, and give a `server_default` to new non-null columns.
+  changes, and give a `server_default` to new non-null columns. On SQLite, foreign keys are off
+  while migrations run ([alembic/env.py](../alembic/env.py)): a batch rebuild drops the old
+  table, which would otherwise cascade-delete its child rows. A batch rebuild also drops
+  expression indexes like `lower(name)`, so recreate them in the same migration.
 - Production migrates during the Vercel build (`scripts/vercel_build.py`). Prefer
   expand-then-contract changes, so the previous deployment keeps working during a rollout.
 - On Postgres a migration waits at most 5 seconds for a lock and 2 minutes for a statement
@@ -150,7 +154,9 @@ First-time setup:
 
 4. **Voice storage:** go to Storage → Create → **Blob**, set access to **Private**, and connect it.
    That adds `BLOB_STORE_ID`. The app authenticates with Vercel's OIDC token, so there's no key
-   to copy. The free plan holds 1 GB.
+   to copy. A store connected the older way sets `BLOB_READ_WRITE_TOKEN` instead, which works
+   too. The free plan holds 1 GB. With neither (running locally), recordings are kept in the
+   folder `AUDIO_DIR` names, `.voice-notes` by default.
 5. **Import the repo** with the root directory left as is; Vercel detects FastAPI from
    `app/main.py`.
 6. **Domain:** go to Project → Domains → add the domain, then add the CNAME record at your DNS
@@ -165,7 +171,7 @@ registered fixed domain).
 |---|---|
 | Is it up? | `curl https://jokebox.samarthsaraswat.com/health` should return `{"status":"ok",…}` |
 | Invite someone | Add their Google email to `ALLOWED_EMAILS`, then redeploy. Taking an email off signs that person out (and their Claude connector) on their next request |
-| Roll back | Vercel → Deployments → choose the previous production deployment → **Promote**. Migrations don't roll back automatically, so keep them backwards-compatible |
+| Roll back | Vercel → Deployments → choose the previous production deployment → **Promote**. Migrations don't roll back automatically, so keep them backwards-compatible. Rolling back to a build from before beats (before #187) is safe to open, but a set edited there changes only its old joke list: back on the new build, the set shows its beats as they were, and that edit is gone |
 | Rotate the session secret | Change `SESSION_SECRET` and redeploy. Everyone is signed out |
 | Logs | Vercel → Project → Logs (runtime) or the deployment's build log |
 | "Can't reach JokeBox", and requests answer `403` with `x-vercel-mitigated: challenge` | Vercel's bot checkpoint has flagged your IP, usually after scripted traffic (a polling loop). Open the site in a normal browser tab so the checkpoint can verify it, or wait for it to lift. Nothing is wrong with the app. Don't poll the live site (see AGENTS.md) |

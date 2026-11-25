@@ -13,6 +13,7 @@ missed. [docs/README.md](docs/README.md) lists every doc.
 | Shows logged from recordings, the laugh scale | [docs/set-review.md](docs/set-review.md) |
 | The web app | [docs/frontend.md](docs/frontend.md), [docs/design-system.md](docs/design-system.md) |
 | Why it's built this way | [docs/architecture.md](docs/architecture.md) |
+| What JokeBox is for, and who uses it | [docs/product.md](docs/product.md) |
 
 ## Checks after every change
 
@@ -27,6 +28,9 @@ cd web && npx tsc -b && npx oxlint --deny-warnings src && npx vitest run
 - Every query is scoped to the signed-in user, and the Trash stays hidden from lists.
 - No real jokes or material in seeds, fixtures, tests or screenshots: use made-up material.
 - Ask before adding a dependency, and commit the lockfile with it.
+- **A field left out of a save keeps what's stored.** Saves queued offline by an older app don't
+  send fields added since, so a new field must be optional on the way in, and missing must mean
+  "unchanged", never "clear it". Clearing is an explicit null or empty value.
 
 ## The live site (jokebox.samarthsaraswat.com)
 
@@ -52,12 +56,15 @@ plus `log_show`, which set-review uses to log a reviewed show. The tools read th
 directly, so a model change can break them, and Claude only finds out mid-conversation.
 
 - **Change a model, check the connector in the same change.** Renaming, moving or removing a
-  field on `Joke`, `Premise`, `Setlist`, `PerformanceLog`, `Observation`, `VoiceNote`, `WritingSession`,
-  `Brainstorm`, `CraftNote`, `Analysis`, `ShowReview`, `JokeCluster` or their topics means updating `app/connector/`.
-- **`tests/test_connector_contract.py` must pass.** It runs every tool over the demo data plus
-  one of everything and checks each returns exactly its listed fields. A new tool must be added
-  there too.
-- **Changing a tool's output on purpose?** Update the contract test and the tool table in
+  field on `Joke`, `Premise`, `Setlist`, `PerformanceLog`, `PerformanceJoke`, `ShowReview`,
+  `Observation`, `ObservationTopic`, `VoiceNote`, `WritingSession`, `Brainstorm`, `CraftNote`,
+  `CraftArea`, `Analysis`, `WatchItem`, `JokeCluster`, `Topic`, `Subtopic`, `Status` or
+  `JokeType` means updating `app/connector/`.
+- **`tests/test_connector_contract.py` and `test_connector_contract_notebook.py` must pass.**
+  They run every tool over the demo data plus one of everything (`tests/connector_world.py`) and
+  check each returns exactly the fields listed in `tests/connector_fields.py`. A new tool must be
+  added there too.
+- **Changing a tool's output on purpose?** Update `tests/connector_fields.py` and the tool table in
   `docs/api.md` together. The comedy-writer skill relies on those field names.
 - **A cluster's lead is worked out twice:** on the server (`app/services/clusters.py`, which
   stores it) and in the browser (`web/src/features/jokes/cluster/lead.ts`, so the list is right

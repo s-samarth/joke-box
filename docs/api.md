@@ -92,6 +92,7 @@ still accept the old `bit_id` and `bit_ids` for good. Responses use only the new
   "comments": "",
   "premise_id": "optional: the premise it rests on (yours, any topic), or null",
   "follows_id": "optional: the joke this one continues from (yours), or null to unlink",
+  "cluster_id": "optional: the cluster it's a version in (yours), or null to leave it; left out, it stays where it is",
   "voice_note_ids": "optional: the voice notes it came from (each once, up to 50); left out, kept as stored. Not checked, so a recording still uploading can be named",
   "created_at": "optional, kept only on create and capped at now (imports, and jokes written offline)",
   "base_version": "optional: the version this edit started from"
@@ -103,7 +104,7 @@ that changes nothing keeps it, so it never puts another device's waiting edit in
 `base_version`, a save made from an older version that would change the joke answers **409**
 ("This joke was changed on another device after you edited it.") rather than overwriting;
 resending the same edit is fine. Without it, nothing is checked. Sets, sessions, Craft notes,
-observations and premises follow the same rules.
+observations, premises, shows and clusters follow the same rules.
 
 `follows_id` links a joke to the one before it. Many jokes can follow one, so chains branch into
 trees. Following itself or a joke that comes after it, or someone else's joke, answers **422**.
@@ -205,7 +206,7 @@ On a deployment without a Blob store, these answer **503**.
 | GET | `/api/set-fields` | Your label fields for beats and the top-up limit: `{fields: [{id, name, role, options: [{id, label, group}]}], top_up_seconds}`. Until you save, the defaults (Status, Persona side, Tone, Voice fit; 240 seconds) |
 | PUT | `/api/set-fields` | The same shape, saved whole; the last save wins. At most one field with `role` `status` and one with `persona` (422 otherwise) |
 | GET | `/api/logs` | Every show, most recent first, with `venue_name`, `topic_ids`, `jokes` (`[{joke_id, result, suggested_result, note}]` in running order; jokes in the Trash left out) and `review` (`{engine_version, events: [{start, end, kind, points, joke_id}]}` for a show logged from a recording by set-review, else null) |
-| PUT | `/api/logs/{id}` | `{venue_name, performed_at, duration_seconds, audience_size, rating 1–5, topic_ids[], notes, laughs?, jokes?, base_version?}`. The answer includes `version`. A stale edit that would change the show returns 409. Five zeros mean counted zero laughs. Null means uncounted. Shows have no title (topics say what a show was): a `title` sent by an older app is ignored, and every save clears the old column. A joke's `suggested_result` (set-review's guess) is kept unless sent; the app never sends it, and the laugh timeline is written only through the connector's `log_show`. `laughs` is five counts of 0 or more, or null. `jokes` is up to 200 `{joke_id, result, note?}` in running order, `result` one of `bombed`, `ok`, `killed` or null, `note` a comment of up to 2,000 characters (left out, the comment there stays); each of your jokes once (repeats are dropped). Left out, the show's jokes stay as they are (saves queued by older app versions); a joke in the Trash keeps its place and result |
+| PUT | `/api/logs/{id}` | `{venue_name, performed_at, duration_seconds, audience_size, rating 1–5, topic_ids[], notes, learned?, laughs?, jokes?, base_version?}`. `learned` is the "What did you learn?" box; left out (an older app), what's stored stays. The answer includes `version` and `learned`. A stale edit that would change the show returns 409. Five zeros mean counted zero laughs. Null means uncounted. Shows have no title (topics say what a show was): a `title` sent by an older app is ignored, and every save clears the old column. A joke's `suggested_result` (set-review's guess) is kept unless sent; the app never sends it, and the laugh timeline is written only through the connector's `log_show`. `laughs` is five counts of 0 or more, or null. `jokes` is up to 200 `{joke_id, result, note?}` in running order, `result` one of `bombed`, `ok`, `killed` or null, `note` a comment of up to 2,000 characters (left out, the comment there stays); each of your jokes once (repeats are dropped). Left out, the show's jokes stay as they are (saves queued by older app versions); a joke in the Trash keeps its place and result |
 | DELETE | `/api/logs/{id}` | |
 
 The venue is given by name and created if it's new; it defaults to "Unidentified Venue" (a name

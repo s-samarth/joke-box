@@ -23,6 +23,7 @@ jobs:
     name: migrations
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
         with:
@@ -46,9 +47,10 @@ jobs:
   api:
     name: api
     runs-on: ubuntu-latest
+    timeout-minutes: 20 # a hung test stops here, not at GitHub's 6 hours
     services:
       postgres:
-        image: postgres:16
+        image: postgres:18 # the version production (Neon) runs
         env:
           POSTGRES_USER: jokebox
           POSTGRES_PASSWORD: jokebox-ci-only # throwaway CI database, not a real secret
@@ -74,6 +76,8 @@ jobs:
           fi
       - name: Migrations apply, roll back and re-apply on Postgres
         run: uv run alembic upgrade head && uv run alembic downgrade base && uv run alembic upgrade head
+      - name: The models match the migrations (no change left without a migration)
+        run: uv run alembic check
       - name: Reset the database for tests
         run: uv run alembic downgrade base
       - run: uv run pytest
@@ -82,6 +86,7 @@ jobs:
   web:
     name: web
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: web

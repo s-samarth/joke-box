@@ -15,4 +15,4 @@
 | [frontend.md](frontend.md) | The web app's structure, offline queue and caching |
 | [development.md](development.md) | Running it, checks, conventions, git, deploying |
 | [backups.md](backups.md) | Backups and restores |
-| [move-region.md](move-region.md) | Moving the deployment to another region |
+| [move-region.md](move-region.md) | How the deployment moved to Singapore, and the steps for a next move |

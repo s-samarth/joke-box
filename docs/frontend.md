@@ -6,7 +6,7 @@ The overall system is in [architecture.md](architecture.md).
 ## Server state vs UI state
 Data from the API lives in TanStack Query ([queryClient.ts](../web/src/api/queryClient.ts)), never
 in `useState`. Each resource has a hooks file (`api/library.ts`, `api/shows.ts`, ...) exposing
-`useJokes()`, `useSaveSetlist()` and so on. `useState` is only for UI: whether a sheet is open, or
+`useJokes()`, `useSetlistActions()` and so on. `useState` is only for UI: whether a sheet is open, or
 a draft being typed.
 
 **When lists refetch:** a list counts as fresh for 5 minutes (`staleTime`). Coming back to the app,
@@ -34,8 +34,9 @@ New rows get their UUID in the browser (`crypto.randomUUID()`) and are saved wit
 therefore never makes a duplicate. That's what makes the offline queue safe.
 
 ## Optimistic updates and the offline queue
-Saving and deleting jokes, observations, brainstorm sessions, shows, sets, rewrites, voice note
-details, watchlist routines, analyses and craft notes are registered as **mutation defaults**
+Saving and deleting jokes, premises, clusters, observations (and linking one to what came from
+it), brainstorm sessions, shows, sets, set label fields, rewrites, voice note details, watchlist
+routines, analyses, craft notes, the joke board and the Trash's restore and erase are registered as **mutation defaults**
 under fixed keys (`setMutationDefaults`), each spreading the shared `QUEUED` options from
 [sync.ts](../web/src/api/sync.ts).
 
@@ -226,8 +227,9 @@ back to the top for each item opened. `GrowingText` measures itself again when i
 changes, so turning a phone or iPad no longer cuts off the last line of a setup or punchline.
 
 ## URL as state
-The filters for Jokes (`?topic&sub&premise&type&status&q&sort&discarded&versions`), Premises (`?q&topic&sort`)
-and Observations (`?topic&kind&unused&q`) live in the query string, so back, refresh and shared
+The filters for Jokes (`?topic&sub&premise&type&status&q&sort&discarded&versions`), Premises
+(`?q&topic&status&sort&discarded`), Observations (`?topic&kind&unused&status&q&sort&discarded`),
+Sets (`?status`) and Voice notes (`?order`) live in the query string, so back, refresh and shared
 links keep your place. The tab bar links to the bare list, so each list also remembers its filters
 for an hour in that browser tab ([useRememberedParams.ts](../web/src/lib/useRememberedParams.ts),
 over [sessionMemory.ts](../web/src/lib/sessionMemory.ts)) and puts them back when you arrive with

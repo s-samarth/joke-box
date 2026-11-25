@@ -44,7 +44,7 @@
  "venues": [
   {
    "id": "v1",
-   "name": "The Comedy Store"
+   "name": "The Lantern Room"
   },
   {
    "id": "v2",
@@ -341,13 +341,13 @@
   },
   {
    "id": "b15",
-   "setup": "My therapist told me to write letters to people I hate and then burn them.",
-   "punchline": "I've done that, but now what do I do with the letters?",
+   "setup": "My plant app sends me a notification every morning that says my fern is thirsty.",
+   "punchline": "I've never had a relationship where the other side texts first.",
    "type": "One-Liner",
    "rating": 4,
    "tags": [
     "#dark",
-    "#therapy"
+    "#plants"
    ],
    "topic": "Observational",
    "status": "Complete",
@@ -401,7 +401,7 @@
  "logs": [
   {
    "id": "pl1",
-   "venueName": "The Comedy Store",
+   "venueName": "The Lantern Room",
    "date": "2025-03-17T20:00:00Z",
    "duration": "10m 00s",
    "audienceSize": 45,
@@ -434,7 +434,7 @@
   },
   {
    "id": "pl3",
-   "venueName": "The Comedy Store",
+   "venueName": "The Lantern Room",
    "date": "2025-02-28T20:00:00Z",
    "duration": "7m 00s",
    "audienceSize": 38,
@@ -473,7 +473,7 @@
   {
    "id": "sl1",
    "name": "Open Mic Night",
-   "venue": "The Comedy Store",
+   "venue": "The Lantern Room",
    "date": "2025-10-24T20:00:00Z",
    "targetDuration": "15m 00s",
    "bits": [

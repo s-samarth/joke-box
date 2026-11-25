@@ -229,16 +229,17 @@ recording and you only check it.
 2. In Claude Code on the Mac, attach the memo and say you performed it, with anything about the
    night. If you haven't said how the room was, it asks once: how many people, how many sat near
    and far, where the phone was.
-3. Read the draft: LPM and laugh tally, each joke with its laugh points and a suggested killed /
-   ok / bombed, peaks, dead stretches, riffs that landed, and questions about unsure matches. The
-   **laugh map** opens beside it: laughs along the set over the jokes, the biggest ones with what
-   you said just before.
+3. Read the draft: LPM and laugh tally, peaks, dead stretches and riffs that landed. The **laugh
+   map** opens beside it: laughs along the set, the biggest ones with what you said just before.
+   (Since set-review 0.3.0 it no longer matches laughs to jokes or suggests killed / ok / bombed
+   per joke: add the jokes you did yourself on the show.)
 4. Talk about it (notes) and correct it: a message starting **"Correction:"** fixes the draft
    and retunes the engine; anything else is a note.
 5. Say **"log this show"** with your rating and which topic it was (the AI asks if you
    haven't said; none means Random). What you learned is saved on the show, beside the remarks. It
    appears on **Shows** under its topic, with the laugh
-   tally, each joke's result (the engine's beside it) and **Laughs through the set**.
+   tally and **Laughs through the set**. Shows logged before 0.3.0 also show the engine's result
+   beside each joke's.
 
 ## 9. Review how it's going
 

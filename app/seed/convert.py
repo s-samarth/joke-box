@@ -7,19 +7,10 @@ from typing import Any
 from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
-from app.models import (
-    Brainstorm,
-    Joke,
-    JokeCluster,
-    PerformanceLog,
-    Setlist,
-    Subtopic,
-    Topic,
-    User,
-    Venue,
-)
+from app.models import Base, User
 
 Json = dict[str, Any]
+KEEP = "connector_tokens"  # signed-in connectors survive a reload
 TAGS_IN_PUNCHLINE = re.compile(r"\s*\btags?\s*:\s*", re.IGNORECASE)
 
 
@@ -46,7 +37,10 @@ def split_tags(punchline: str) -> tuple[str, list[str]]:
 
 
 def wipe(db: Session, user: User) -> None:
-    """Remove every row the user owns, keeping the user."""
-    for model in (PerformanceLog, Setlist, Brainstorm, Joke, JokeCluster, Venue, Subtopic, Topic):
-        db.execute(delete(model).where(model.user_id == user.id))
+    """Remove every row the user owns, keeping the user and their connector sign-ins. Children go
+    before parents, so nothing is left pointing at a row that's gone (premises, observations,
+    sessions, voice notes and Craft notes too, not only what a load brings back)."""
+    for table in reversed(Base.metadata.sorted_tables):
+        if "user_id" in table.c and table.name != KEEP:
+            db.execute(delete(table).where(table.c.user_id == user.id))
     db.flush()
