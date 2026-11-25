@@ -30,6 +30,7 @@ import { claim, isAside, stepAsideWhenClaimed } from './lib/oneTab'
 import { repairIfStale } from './lib/recover'
 import { flushAll, writeWhenHidden } from './lib/saveOnHide'
 import './app.css'
+import './motion.css'
 
 const root = createRoot(document.getElementById('root')!)
 

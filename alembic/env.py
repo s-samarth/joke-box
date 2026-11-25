@@ -14,6 +14,12 @@ def run_migrations() -> None:
     url = context.config.attributes.get("url") or get_settings().database_url
     engine = build_engine(url)
     with engine.connect() as connection:
+        if connection.dialect.name == "sqlite":
+            # Batch mode rebuilds a table by copying it and dropping the old one. With foreign
+            # keys on (build_engine turns them on), that drop cascades and deletes child rows.
+            # The pragma only takes effect outside a transaction, so set it and commit first.
+            connection.exec_driver_sql("PRAGMA foreign_keys=OFF")
+            connection.commit()
         context.configure(
             connection=connection,
             target_metadata=target_metadata,

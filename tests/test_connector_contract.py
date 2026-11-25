@@ -7,60 +7,21 @@ expected fields (here and in tests/connector_fields.py) and the tool table in do
 together. Everything here is made up.
 """
 
-import json
-import uuid
 from collections.abc import Iterator
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.main import app
-from app.models import User
-from app.seed import reseed
 from tests import connector_fields as fields
-from tests.conftest import random_topic_id, signed_in
-from tests.connector_auth import connect, content, items, result, rpc
-from tests.connector_fields import BRIEF, CLUSTER, DETAIL, LONG, PULSE, SET, TOOLS
-from tests.test_craft import note_in
+from tests.connector_auth import items, result, rpc
+from tests.connector_fields import BRIEF, CLUSTER, DETAIL, PULSE, SET, TOOLS
+from tests.connector_world import full_jokebox
 
 
 @pytest.fixture
 def claude(db: Session) -> Iterator[tuple[TestClient, str]]:
-    """A JokeBox with something in every section (the demo set plus the rest), and a token."""
-    browser = signed_in("dev@example.com")
-    user = db.scalar(select(User).where(User.email == "dev@example.com"))
-    assert user is not None
-    reseed(db, user)
-    jokes = browser.get("/api/jokes").json()
-    premise = str(uuid.uuid4())
-    browser.put(
-        f"/api/premises/{premise}",
-        json={"topic_id": random_topic_id(browser), "take": "Fake take", "notes": "Fake because"},
-    )
-    cluster = str(uuid.uuid4())
-    browser.put(f"/api/clusters/{cluster}", json={"title": "Fake core"})
-    for joke in jokes[:2]:  # two versions of one joke, the first resting on the premise
-        on = premise if joke is jokes[0] else None
-        browser.put(
-            f"/api/jokes/{joke['id']}", json={**joke, "premise_id": on, "cluster_id": cluster}
-        )
-    browser.put(
-        f"/api/brainstorms/{uuid.uuid4()}",
-        json={"joke_id": jokes[0]["id"], "content": "Fake rewrite"},
-    )
-    page = {"color": "#ece6da", "size": 2.4, "page": 0, "points": [[10, 20, 0.5], [60, 80, 0.7]]}
-    session = {"title": "Fake", "content": "Fake page", "ink": [page]}
-    browser.put(f"/api/sessions/{uuid.uuid4()}", json=session)
-    noticed = str(uuid.uuid4())
-    browser.put(f"/api/observations/{noticed}", json={"text": "Fake noticed"})
-    browser.put(f"/api/observations/{noticed}/links/premises/{premise}")
-    browser.put(f"/api/craft-notes/{uuid.uuid4()}", json=note_in(browser) | {"title": "Fake"})
-    browser.put(f"/api/analyses/{uuid.uuid4()}", json={"title": "Fake", "body": "Fake why"})
-    browser.put(f"/api/setlists/{uuid.uuid4()}", json=fields.beats_set(jokes, premise))
-    with TestClient(app) as client:
-        yield client, connect(browser)["access_token"]
+    yield from full_jokebox(db)
 
 
 def test_every_tool_is_covered_here(claude: tuple[TestClient, str]) -> None:
@@ -184,73 +145,3 @@ def test_performing_tools(claude: tuple[TestClient, str]) -> None:
         "learned",
         "notes",
     }
-
-
-def test_notebook_and_study_tools(claude: tuple[TestClient, str]) -> None:
-    observations = result(claude, "search_observations")
-    fields = {"id", "text", "extra_notes", "topic", "kind", "strength", "status", "noted"}
-    fields |= {"premise_ids", "joke_ids", "brainstorm_ids"}
-    assert set(items(observations, "observations")[0]) == fields
-    # Each voice note's fields are checked in test_connector_voice.py.
-    paged = {"total", "next_offset"}  # each of these four pages with offset / next_offset
-    assert set(observations) == paged | {"observations"}
-    assert set(result(claude, "search_voice_notes")) == paged | {"voice_notes"}
-    assert set(result(claude, "search_analyses")) == paged | {"analyses"}
-    brainstorms = result(claude, "search_brainstorms")
-    assert set(brainstorms) == paged | {"results"}
-
-    found = items(brainstorms, "results")
-    by_kind = {r["kind"]: set(r) for r in found}
-    assert by_kind["brainstorm"] == {
-        "kind",
-        "id",
-        "title",
-        "text",
-        "technique",
-        "linked_joke_ids",
-        "handwritten_pages",
-        "updated",
-    }
-    assert by_kind["rewrite"] == {"kind", "id", "joke_id", "title", "text", "updated"}
-
-    brainstorm_id = next(r["id"] for r in found if r["kind"] == "brainstorm")
-    blocks = content(claude, "get_brainstorm", brainstorm_id=brainstorm_id)
-    assert set(json.loads(blocks[0]["text"])) == {
-        "kind",
-        "id",
-        "title",
-        "text",
-        "text_length",
-        "more_from_char",
-        "technique",
-        "linked_joke_ids",
-        "linked_observation_ids",
-        "updated",
-        "handwritten_pages",
-        "pages_shown",
-        "more_from_page",
-    }
-    assert [b["type"] for b in blocks[1:]] == ["text", "image"]  # "Page 1", then the page
-    rewrite_id = next(r["id"] for r in found if r["kind"] == "rewrite")
-    [rewrite] = content(claude, "get_brainstorm", brainstorm_id=rewrite_id)
-    assert set(json.loads(rewrite["text"])) == {
-        "kind",
-        "id",
-        "joke_id",
-        "joke_setup",
-        "title",
-        "text",
-        "text_length",
-        "more_from_char",
-        "updated",
-    }
-
-    notes = items(result(claude, "search_craft"), "notes")
-    assert set(notes[0]) == {"id", "title", "area", "kind", "hashtags", "preview"}
-    full = items(result(claude, "get_craft_notes", ids=[notes[0]["id"]]), "notes")
-    assert set(full[0]) == {"id", "title", "area", "kind", "hashtags", "source", "url"} | LONG
-
-    analyses = items(result(claude, "search_analyses"), "analyses")
-    assert set(analyses[0]) == {"id", "title", "routine", "preview", "updated"}
-    analysis = result(claude, "get_analysis", analysis_id=analyses[0]["id"])
-    assert set(analysis) == {"id", "title", "url", "routine"} | LONG

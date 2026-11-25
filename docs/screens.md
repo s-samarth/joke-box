@@ -52,8 +52,10 @@ visit, so the app opens fast on a phone.
   list: what it was, when, why, the text you wrote, and **Retry** (or **Keep mine** for a clash
   with another device's edit), **Copy** and **Discard**; **Retry all** skips clashes.
 - **Update banner:** "A new version of JokeBox is ready", with **Update now** and **Later**.
-- **Avatar menu:** Sign out (asks first if changes haven't synced), plus **Reset to demo data**
-  when running locally.
+- **Avatar menu:** **Import** (Bit Vault data), **Download everything** (a zip of all your
+  material and recordings), **Claude connector** (how to connect Claude, and what it can read),
+  **Several tabs** (a tick: allow the app open in more than one tab), and **Sign out** (asks first
+  if changes haven't synced). Running locally, **Reset to demo data** comes first.
 - **Another tab:** a tab that stepped aside shows "Open in another tab" with **Use it here** and **Keep both open** (allows several tabs; switch it off under **Several tabs** in the account menu).
 
 <p>

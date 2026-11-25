@@ -40,8 +40,8 @@ CORS, the session is a plain HttpOnly cookie, and CSRF protection is one header 
 | Layer | Choice | Why |
 |---|---|---|
 | API | **FastAPI** on Python 3.12, Pydantic v2 | Typed request and response schemas; the owner is strongest in Python |
-| ORM and migrations | **SQLAlchemy 2.0** and **Alembic** | Explicit transactions for many-row changes; append-only migrations checked by CI |
-| Database | **Postgres** on Neon (production and CI), **SQLite** locally | Zero-setup local development; only Production has a database |
+| ORM and migrations | **SQLAlchemy 2.1** and **Alembic** | Explicit transactions for many-row changes; append-only migrations checked by CI |
+| Database | **Postgres 18** on Neon in production (and a throwaway Postgres 18 in CI), **SQLite** locally | Zero-setup local development; only Production has a database |
 | Files | **Vercel Blob** (private) | Voice recordings, without managing a bucket or keys |
 | Auth | **Authlib** (Google OIDC with PKCE) and Starlette's signed session cookie | No passwords to store; an allowlist decides who gets in |
 | Frontend | **React 19**, **TypeScript** (strict), **Vite 8**, **React Router 8** | |
@@ -66,9 +66,10 @@ app/                    FastAPI application
   services/             logic that spans tables (joke save, topic delete, audio store)
   connector/            the MCP server Claude reads JokeBox through (see api.md)
   seed/                 demo data, Bit Vault importer
-alembic/versions/       migrations 0001-0031 (append-only)
+alembic/versions/       migrations 0001-0047 (append-only)
 tests/                  pytest, against SQLite locally and Postgres in CI
-scripts/                vercel_build.py, export_firestore.py, make_icons.py
+scripts/                vercel_build.py, backup_audio.py, restore_audio.py, backup_verify.py,
+                        export_firestore.py, make_icons.py, screenshot_demo.py, screenshot_extras.py
 web/                    the React app (Vite)
   src/api/              fetch client, query keys, one hooks file per resource
   src/components/ui/    design-system primitives
@@ -181,7 +182,7 @@ in [frontend.md](frontend.md).
 ```mermaid
 flowchart LR
   PR[Pull request] --> CI{GitHub Actions<br/>migrations · api · web}
-  CI -->|green, squash merge| Main[main]
+  CI -->|green, merge| Main[main]
   Main --> Build["Vercel build<br/>scripts/vercel_build.py"]
   Build -->|"npm ci && npm run build"| Dist[web/dist → CDN]
   Build -->|"alembic upgrade head"| Neon[(Neon)]
@@ -214,8 +215,12 @@ flowchart LR
 | Job | Checks |
 |---|---|
 | `migrations` | On a PR, fails if any migration already on the base branch was modified, deleted or renamed |
-| `api` | `ruff check`, `ruff format --check`, `mypy app`; exactly one Alembic head (two PRs that each add a migration would leave two); Alembic upgrade → downgrade → upgrade on Postgres 16; `pytest` |
+| `api` | `ruff check`, `ruff format --check`, `mypy app`; exactly one Alembic head (two PRs that each add a migration would leave two); Alembic upgrade → downgrade → upgrade on Postgres 18 (the version Neon runs); `alembic check` (the models and migrations agree); `pytest` |
 | `web` | `tsc -b`, `oxlint --deny-warnings`, `vitest run`, `vite build` |
+
+Each job has a time limit (migrations 5 minutes, api 20, web 15), so a hung step fails instead of
+holding a runner for six hours. Vercel deploys `main` whether or not CI passed on it, so merge
+only a green PR.
 
 [backup.yml](../.github/workflows/backup.yml) runs the nightly encrypted backup
 ([backups.md](backups.md)), and [move-database.yml](../.github/workflows/move-database.yml) the

@@ -105,7 +105,7 @@ accessibility (focus trapping, Escape, screen readers); Tailwind supplies the lo
 ## Motion
 
 There's very little of it, on purpose. Sheets slide and buttons change colour. Three animations
-loop, all in [app.css](../web/src/app.css): `.light-pulse`, the stage clock blinking when you're
+loop, all in [motion.css](../web/src/motion.css): `.light-pulse`, the stage clock blinking when you're
 over time, and two on the daily joke nudge once you've gone quiet for over a week,
 `.ghost-float` (a drifting ghost) and `.spooky-flicker` (a flickering line). All three are turned
 off under `prefers-reduced-motion`.
