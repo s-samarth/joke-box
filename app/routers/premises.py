@@ -6,10 +6,12 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
 
+from app.auth.bootstrap import random_topic_for
 from app.auth.deps import CurrentUser, DbSession, find_owned
 from app.models import Premise, Topic
 from app.models.base import written_at
 from app.schemas.premises import PremiseIn, PremiseOut
+from app.services import gone
 from app.services.clashes import PREMISE_CLASH, check_fields
 from app.services.ordering import next_position
 from app.services.trash import move_to_trash
@@ -44,6 +46,8 @@ def put_premise(
     premise_id: uuid.UUID, body: PremiseIn, user: CurrentUser, db: DbSession
 ) -> Premise:
     """Create or update. The client picks the id, so a retried offline save never duplicates."""
+    if gone.deleted(db, Topic, body.topic_id):  # deleted since the save was made: its premises
+        body.topic_id = random_topic_for(db, user).id  # went to Random
     topic = db.scalar(select(Topic).where(Topic.id == body.topic_id, Topic.user_id == user.id))
     if topic is None:
         raise HTTPException(422, "Unknown topic")

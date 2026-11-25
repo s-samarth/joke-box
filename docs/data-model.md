@@ -137,7 +137,7 @@ sound.
 | An observation kind | Its observations stay, as plain observations |
 | A set | To the Trash with its items and tags, and comes back as it was. Erased: its items go; the jokes stay |
 | A watchlist routine | Analyses of it stay, unlinked |
-| A voice note | To the Trash; the audio file stays until it's erased. One whose recording hasn't uploaded yet is erased at once (the sound was only on the phone). Deleting twice is fine (a replayed delete) |
+| A voice note | To the Trash; the audio file stays until it's erased. One whose recording never uploaded goes to the Trash too, with no sound to play. Deleting twice is fine (a replayed delete) |
 
 All of these run in one transaction ([services/topics.py](../app/services/topics.py)).
 

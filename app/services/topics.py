@@ -39,18 +39,20 @@ def delete_topic(db: Session, user: User, topic: Topic) -> None:
         update(Joke)
         .where(Joke.user_id == user.id, Joke.topic_id == topic.id)
         .values(
-            topic_id=random_topic.id, subtopic_id=subtopics.unknown_for(db, user, random_topic).id
+            topic_id=random_topic.id,
+            subtopic_id=subtopics.unknown_for(db, user, random_topic).id,
+            updated_at=Joke.updated_at,
         )
     )
     db.execute(
         update(Premise)
         .where(Premise.user_id == user.id, Premise.topic_id == topic.id)
-        .values(topic_id=random_topic.id)
+        .values(topic_id=random_topic.id, updated_at=Premise.updated_at)
     )
     db.execute(
         update(Observation)
         .where(Observation.user_id == user.id, Observation.topic_id == topic.id)
-        .values(topic_id=random_topic.id)
+        .values(topic_id=random_topic.id, updated_at=Observation.updated_at)
     )
     linked = select(performance_log_topics.c.log_id).where(
         performance_log_topics.c.topic_id == topic.id
@@ -70,7 +72,9 @@ def delete_subtopic(db: Session, user: User, sub: Subtopic) -> None:
     db.execute(
         update(Joke)
         .where(Joke.user_id == user.id, Joke.subtopic_id == sub.id)
-        .values(subtopic_id=subtopics.unknown_for(db, user, sub.topic).id)
+        .values(
+            subtopic_id=subtopics.unknown_for(db, user, sub.topic).id, updated_at=Joke.updated_at
+        )
     )
     db.delete(sub)
     db.commit()
@@ -79,6 +83,14 @@ def delete_subtopic(db: Session, user: User, sub: Subtopic) -> None:
 def rename_type(db: Session, user: User, joke_type: JokeType, new_name: str) -> None:
     """Rename a type; if the new name already exists, merge the two."""
     type_colors.rename(db, user, joke_type.name, new_name)
+    # Its jokes go up a version: a save made before, naming the old type, is then a clash
+    # rather than bringing the old type back.
+    tagged = select(joke_type_links.c.joke_id).where(joke_type_links.c.type_id == joke_type.id)
+    db.execute(
+        update(Joke)
+        .where(Joke.user_id == user.id, Joke.id.in_(tagged))
+        .values(version=Joke.version + 1, updated_at=Joke.updated_at)
+    )
     target = db.scalar(
         select(JokeType).where(
             JokeType.user_id == user.id,

@@ -10,6 +10,7 @@ from app.auth.deps import CurrentUser, DbSession, find_owned, get_owned
 from app.models import CraftNote, WritingSession
 from app.packed import packed_json
 from app.schemas.notebook import WritingSessionIn, WritingSessionOut, WritingSessionSummary
+from app.services import gone
 from app.services.clashes import check_session
 from app.services.trash import move_to_trash
 
@@ -62,6 +63,8 @@ def put_session(
     session_id: uuid.UUID, body: WritingSessionIn, user: CurrentUser, db: DbSession
 ) -> WritingSession:
     """Create or update. The client picks the id, so autosaves and offline retries are safe."""
+    if gone.deleted(db, CraftNote, body.technique_id):  # emptied from the Trash since
+        body.technique_id = None
     if body.technique_id is not None:
         get_owned(db, CraftNote, body.technique_id, user, in_trash=True)  # only your own techniques
     data = body.model_dump(mode="json")

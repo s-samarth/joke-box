@@ -123,6 +123,8 @@ def set_type_color(body: TypeColorIn, user: CurrentUser, db: DbSession) -> None:
 
 @router.patch("/types/{type_id}", status_code=204)
 def rename_type(type_id: uuid.UUID, body: ShortNameIn, user: CurrentUser, db: DbSession) -> None:
+    if body.name.lower() == "undefined":  # what a joke with no type shows, so never stored
+        raise HTTPException(422, "Undefined is what a joke with no type shows. Pick another name.")
     svc.rename_type(db, user, get_owned(db, JokeType, type_id, user), body.name)
 
 

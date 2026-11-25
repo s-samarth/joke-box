@@ -18,7 +18,14 @@ A JSON API under `/api`, served from the same origin as the app. Running locally
 - **Lists** return the whole collection. Filtering, searching, sorting and totals happen in the
   browser, so they work offline.
 - **Errors:** `{"detail": "message"}`. 409 means a name clash (for example a topic name already in
-  use) and 422 means a validation error.
+  use) and 422 means a validation error. Text holding the NUL character answers 422 (Postgres
+  can't store it).
+- **Saves that waited:** a save naming something deleted since it was made (a topic, subtopic,
+  observation kind, Craft area or kind, or a technique emptied from the Trash) isn't refused: it
+  goes where the delete moved things (Random, Subtopic unknown, the note's new area) or to none.
+  Renaming or merging a status or type, and moving a venue's shows and sets, move each row's
+  version on, so a save from before (naming the old one) is a clash instead of bringing it back.
+  Bulk moves like these keep each row's `updated_at`.
 
 ## Old names
 
@@ -177,7 +184,7 @@ handwriting fit. A packed body that unpacks past 64 MB is refused with 413, a da
 | PUT | `/api/voice-notes/{id}` | `{label, hashtags[], duration_seconds, created_at?}`. `created_at` is kept only on create (imports) |
 | PUT | `/api/voice-notes/{id}/audio` | Raw bytes with `Content-Type: audio/*`. At most 4 MiB (413 over); 400 if empty; 415 if not audio |
 | GET | `/api/voice-notes/{id}/audio` | The recording. `Cache-Control: private, max-age=31536000` |
-| DELETE | `/api/voice-notes/{id}` | To the Trash; the recording is deleted only when it's erased. One whose audio never uploaded is erased at once |
+| DELETE | `/api/voice-notes/{id}` | To the Trash; the recording is deleted only when it's erased. One whose audio never uploaded goes to the Trash the same way |
 
 On a deployment without a Blob store, these answer **503**.
 
@@ -201,8 +208,9 @@ On a deployment without a Blob store, these answer **503**.
 | PUT | `/api/logs/{id}` | `{venue_name, performed_at, duration_seconds, audience_size, rating 1–5, topic_ids[], notes, laughs?, jokes?, base_version?}`. The answer includes `version`. A stale edit that would change the show returns 409. Five zeros mean counted zero laughs. Null means uncounted. Shows have no title (topics say what a show was): a `title` sent by an older app is ignored, and every save clears the old column. A joke's `suggested_result` (set-review's guess) is kept unless sent; the app never sends it, and the laugh timeline is written only through the connector's `log_show`. `laughs` is five counts of 0 or more, or null. `jokes` is up to 200 `{joke_id, result, note?}` in running order, `result` one of `bombed`, `ok`, `killed` or null, `note` a comment of up to 2,000 characters (left out, the comment there stays); each of your jokes once (repeats are dropped). Left out, the show's jokes stay as they are (saves queued by older app versions); a joke in the Trash keeps its place and result |
 | DELETE | `/api/logs/{id}` | |
 
-The venue is given by name and created if it's new; it defaults to "Unidentified Venue".
-Every `joke_id` and `topic_id` must belong to you (otherwise 404).
+The venue is given by name and created if it's new; it defaults to "Unidentified Venue" (a name
+of only spaces counts as none). A `topic_id` that isn't yours answers 422; a `joke_id` that isn't
+yours, or no longer exists, is left out.
 
 ## Study
 

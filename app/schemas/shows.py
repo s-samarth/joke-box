@@ -33,6 +33,12 @@ class SetlistIn(BaseModel):
     target_seconds: int = Field(default=900, ge=0, le=INT_MAX)
     venue_name: str | None = Field(default=None, max_length=160)
     rating: int | None = Field(default=None, ge=1, le=5)
+
+    @field_validator("venue_name")
+    @classmethod
+    def blank_venue_is_none(cls, value: str | None) -> str | None:
+        return (value or "").strip() or None  # a venue of only spaces is no venue
+
     tag_ids: list[uuid.UUID] = Field(default_factory=list)
     # Older apps send only `items`. A set saved with beats works its items out from them.
     items: list[SetlistItemIn] = Field(default_factory=list)
@@ -95,6 +101,12 @@ class LogIn(BaseModel):
     base_version: int | None = Field(default=None, le=INT_MAX)
     venue_name: str = Field(default="Unidentified Venue", min_length=1, max_length=160)
     performed_at: datetime
+
+    @field_validator("venue_name")
+    @classmethod
+    def blank_venue_is_unidentified(cls, value: str) -> str:
+        return value.strip() or "Unidentified Venue"  # not a venue named ""
+
     duration_seconds: int = Field(default=0, ge=0, le=INT_MAX)
     audience_size: int = Field(default=0, ge=0, le=INT_MAX)
     rating: int = Field(default=3, ge=1, le=5)

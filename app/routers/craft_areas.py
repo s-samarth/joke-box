@@ -9,6 +9,7 @@ from app.auth.deps import CurrentUser, DbSession, get_owned
 from app.models import CraftArea
 from app.schemas.craft import AreaOrderIn, CraftAreaIn, CraftAreaOut
 from app.services import craft_areas as svc
+from app.services.ordering import next_position
 from app.services.topics import commit_or_conflict
 
 router = APIRouter(prefix="/api/craft-areas", tags=["craft"])
@@ -28,8 +29,8 @@ def list_areas(user: CurrentUser, db: DbSession) -> list[CraftArea]:
 @router.post("", response_model=CraftAreaOut, status_code=201)
 def create_area(body: CraftAreaIn, user: CurrentUser, db: DbSession) -> CraftArea:
     """A new area goes last."""
-    count = len(list(db.scalars(select(CraftArea.id).where(CraftArea.user_id == user.id))))
-    area = CraftArea(user_id=user.id, position=count, **body.model_dump())
+    position = next_position(db, CraftArea.position, CraftArea.user_id == user.id)  # at the end
+    area = CraftArea(user_id=user.id, position=position, **body.model_dump())
     db.add(area)
     commit_or_conflict(db, CLASH)
     return area

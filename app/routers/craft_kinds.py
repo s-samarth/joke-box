@@ -3,12 +3,13 @@
 import uuid
 
 from fastapi import APIRouter
-from sqlalchemy import func, select
+from sqlalchemy import select
 
 from app.auth.deps import CurrentUser, DbSession, get_owned
 from app.models import NoteKind
 from app.schemas.craft import NoteKindIn, NoteKindOut
 from app.services import craft_kinds as svc
+from app.services.ordering import next_position
 from app.services.topics import commit_or_conflict
 
 router = APIRouter(prefix="/api/craft-kinds", tags=["craft"])
@@ -28,8 +29,8 @@ def list_kinds(user: CurrentUser, db: DbSession) -> list[NoteKind]:
 @router.post("", response_model=NoteKindOut, status_code=201)
 def create_kind(body: NoteKindIn, user: CurrentUser, db: DbSession) -> NoteKind:
     """A new kind goes last."""
-    count = db.scalar(select(func.count()).where(NoteKind.user_id == user.id)) or 0
-    kind = NoteKind(user_id=user.id, position=count, **body.model_dump())
+    position = next_position(db, NoteKind.position, NoteKind.user_id == user.id)  # at the end
+    kind = NoteKind(user_id=user.id, position=position, **body.model_dump())
     db.add(kind)
     commit_or_conflict(db, CLASH)
     return kind

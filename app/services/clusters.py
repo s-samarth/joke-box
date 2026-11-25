@@ -43,8 +43,9 @@ def versions(db: Session, user: User, cluster_id: uuid.UUID) -> list[Joke]:
 
 
 def pick_lead(jokes: list[Joke]) -> Joke:
-    """The strongest, then the most recently edited. Unrated counts as weakest."""
-    return max(jokes, key=lambda j: (j.strength or 0, j.updated_at))
+    """The strongest, then the most recently edited, then the newest (then the id, so a tie
+    always picks the same one, here and in lead.ts). Unrated counts as weakest."""
+    return max(jokes, key=lambda j: (j.strength or 0, j.updated_at, j.created_at, str(j.id)))
 
 
 def joining(db: Session, user: User, joke_id: uuid.UUID | None, left: uuid.UUID | None) -> bool:
@@ -104,6 +105,11 @@ def save(
         fields["notes"] = body.notes
     if "lead_joke_id" in body.model_fields_set:
         fields["lead_joke_id"] = body.lead_joke_id
+        # A lead picked from an old list, on a joke taken out since, is ignored. (A cluster with
+        # no versions yet takes any lead: its first jokes are saved after it.)
+        ids = {j.id for j in versions(db, user, cluster.id)} if cluster else set()
+        if ids and body.lead_joke_id not in ids:
+            del fields["lead_joke_id"]
     if cluster is None:
         cluster = JokeCluster(id=cluster_id, user_id=user.id, title="", notes="")
         db.add(cluster)
@@ -122,7 +128,7 @@ def dissolve(db: Session, user: User, cluster: JokeCluster) -> None:
     db.execute(
         update(Joke)
         .where(Joke.user_id == user.id, Joke.cluster_id == cluster.id)
-        .values(cluster_id=None)
+        .values(cluster_id=None, updated_at=Joke.updated_at)
         .execution_options(synchronize_session=False)
     )
     db.delete(cluster)
