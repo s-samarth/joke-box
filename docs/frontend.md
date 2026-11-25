@@ -16,6 +16,14 @@ another app and back doesn't reload everything. Your own saves refresh what they
 coming back. Each refetch is a server call, and Vercel's Hobby plan caps the month's CPU, so this
 was raised from 30 seconds in November 2026. The Trash always refetches when opened.
 
+**Lists asked for together go as one request** ([batch.ts](../web/src/api/batch.ts)): list GETs
+made within 10 ms of each other are sent as one `POST /api/batch`, and each still settles as if
+fetched alone (its data, or the same error). On Vercel each request that finds no server awake
+starts its own copy, and each start costs CPU against the Hobby plan, so one app open used to
+start about 13. Lists asked for while the account check (`/api/me`) is on its way wait for its
+answer, so they reach the copy it woke. A GET made on its own, a save, or anything with an id
+goes out as before; a batch the server doesn't answer properly is fetched one list at a time.
+
 **Refreshing on demand:** pull down at the top of a screen, by touch
 ([usePullToRefresh.ts](../web/src/layout/usePullToRefresh.ts)) or with a trackpad swipe
 ([useWheelPull.ts](../web/src/layout/useWheelPull.ts)); see [refresh.ts](../web/src/api/refresh.ts)

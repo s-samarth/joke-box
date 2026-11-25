@@ -1,5 +1,6 @@
 /** A thin wrapper around fetch for our same-origin JSON API. */
 import { handedOver } from '../lib/oneTab'
+import { batchable, batchedGet } from './batch'
 import { NetworkError, isConnectionFailure, isForeign, lostConnection } from './network'
 import { PACKED_JSON, requestBody, unpack } from './packed'
 
@@ -43,6 +44,12 @@ const sizeOf = (data: string | Blob) => (typeof data === 'string' ? new Blob([da
 export async function api<T>(path: string, method: Method = 'GET', body?: unknown): Promise<T> {
   // This tab handed over to another, which sends the waiting saves now (see lib/oneTab.ts).
   if (handedOver()) throw new NetworkError()
+  // Lists asked for together go as one request, so one server copy starts, not one each (batch.ts).
+  if (method === 'GET' && body === undefined && batchable(path)) return batchedGet(path, () => one<T>(path))
+  return one<T>(path, method, body)
+}
+
+async function one<T>(path: string, method: Method = 'GET', body?: unknown): Promise<T> {
   // A big body (a session full of handwriting) goes gzip-packed: see packed.ts.
   const sent = body === undefined ? undefined : await requestBody(body)
   const bytes = sent ? sizeOf(sent.data) : 0
