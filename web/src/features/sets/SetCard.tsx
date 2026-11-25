@@ -3,7 +3,7 @@
  * time and edged with the status colour, its checks in a word each, and its length against the
  * slot. A set from before beats says so and offers to split it. The card opens the builder.
  */
-import { MoreHorizontal, Play, ScrollText, Trash2 } from 'lucide-react'
+import { Eye, MoreHorizontal, ScrollText, Trash2 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router'
 import type { SetFields, Setlist } from '../../api/types'
 import { IconButton } from '../../components/ui/Button'
@@ -43,9 +43,9 @@ export function SetCard({ set: s, config, tagName, onDelete }: Props) {
           <p className="mt-1.5 flex flex-wrap items-center gap-x-2 text-[13.5px] text-dim">{meta}{s.rating && <Stars rating={s.rating} size={13} />}</p>
         </Link>
         <span className={`inline-flex h-8 shrink-0 items-center rounded-full px-3 text-[13px] font-semibold whitespace-nowrap ${STATUS[status_]}`}>{status_}</span>
+        {s.items.length > 0 && <IconButton label="Bird's eye view" onClick={() => navigate(`${open}/stage`)}><Eye size={18} /></IconButton>}
+        <IconButton label="Cue card" onClick={() => navigate(`${open}/print`)}><ScrollText size={18} /></IconButton>
         <Dropdown items={[
-          ...(s.items.length > 0 ? [{ label: 'Stage view', icon: <Play size={16} />, onSelect: () => navigate(`${open}/stage`) }] : []),
-          { label: 'Cue card', icon: <ScrollText size={16} />, onSelect: () => navigate(`${open}/print`) },
           { label: 'Delete set', icon: <Trash2 size={16} />, danger: true, onSelect: () => onDelete(s) },
         ]} trigger={<IconButton label="More"><MoreHorizontal size={18} /></IconButton>} />
       </div>

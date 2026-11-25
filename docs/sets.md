@@ -243,9 +243,9 @@ until you hide them, and **How sets work** opens the whole guide.
   <img src="screenshots/phone-sets.webp" width="230" alt="Sets on a phone">
 </p>
 
-## On stage and the cue card
+## Bird's eye view and the cue card
 
-- **On stage** ([StageView.tsx](../web/src/features/sets/StageView.tsx),
+- **Bird's eye view** ([StageView.tsx](../web/src/features/sets/StageView.tsx),
   [stageWalk.ts](../web/src/features/sets/stageWalk.ts)) walks the set one beat at a time. Each
   joke shows its punchline as the cue line, coloured as in the builder. A gate is asked when you
   reach it (It landed / It didn't). If it didn't, what it guards is struck out. A gate that is
@@ -256,7 +256,7 @@ until you hide them, and **How sets work** opens the whole guide.
   no premise (as punchlines) and its crowd work under it. It replaces the old printout.
 
 <p>
-  <img src="screenshots/phone-stage.webp" width="230" alt="On stage: a gate that didn't land strikes out what it guards">
+  <img src="screenshots/phone-stage.webp" width="230" alt="Bird's eye view: a gate that didn't land strikes out what it guards">
   <img src="screenshots/phone-set-guide.webp" width="230" alt="How sets work, in the app">
 </p>
 <img src="screenshots/desktop-cue-card.webp" alt="The cue card">

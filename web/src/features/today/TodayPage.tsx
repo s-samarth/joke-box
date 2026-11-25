@@ -1,5 +1,5 @@
 /** Home brings voice and written capture together above the library and activity. */
-import { Play, Search } from 'lucide-react'
+import { Eye, Search } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { useLogs, useSetlists } from '../../api/shows'
@@ -74,7 +74,7 @@ export function TodayPage() {
                 </p>
               </Link>
               <Link to={`/sets/${nextSet.id}/stage`} className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg bg-tape px-3 font-semibold text-tape-ink">
-                <Play size={16} /> On stage
+                <Eye size={16} /> Bird's eye view
               </Link>
             </div>
             <div className="space-y-2">
