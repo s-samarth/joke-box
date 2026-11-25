@@ -14,8 +14,15 @@ const timeFmt = new Intl.DateTimeFormat('en-IN', {
   minute: '2-digit',
 })
 
-export const formatDate = (iso: string): string => dateFmt.format(new Date(iso))
-export const formatTime = (iso: string): string => timeFmt.format(new Date(iso))
+/** A date that can't be read (a show saved with no time) shows as a dash rather than crashing the screen. */
+export const formatDate = (iso: string): string => {
+  const date = new Date(iso)
+  return Number.isNaN(date.getTime()) ? '–' : dateFmt.format(date)
+}
+export const formatTime = (iso: string): string => {
+  const date = new Date(iso)
+  return Number.isNaN(date.getTime()) ? '–' : timeFmt.format(date)
+}
 export const formatDateTime = (iso: string): string => `${formatDate(iso)}, ${formatTime(iso)}`
 
 /** ISO instant -> "2026-10-01T20:30" in IST, for <input type="datetime-local">. */

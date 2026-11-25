@@ -25,10 +25,17 @@ export function shouldRepair(lastRepairAt: number | null, now: number): boolean 
   return lastRepairAt === null || now - lastRepairAt > RETRY_GAP
 }
 
+/** This device's own bookkeeping, not a list: which versions it saved itself, and sessions kept
+ * as copies. Without it, saves still waiting after a repair would clash with this device's own. */
+const ownBookkeeping = (key: unknown) => {
+  const first = Array.isArray(key) ? String(key[0]) : ''
+  return first.endsWith('-own-versions') || first === 'session-moved'
+}
+
 /** The saved copy without its lists, which come back from the server; waiting saves stay. */
 export function withoutLists(saved: string): string {
-  const client = JSON.parse(saved) as { clientState?: { queries?: unknown[] } }
-  if (client.clientState) client.clientState.queries = []
+  const client = JSON.parse(saved) as { clientState?: { queries?: { queryKey?: unknown }[] } }
+  if (client.clientState) client.clientState.queries = (client.clientState.queries ?? []).filter((q) => ownBookkeeping(q.queryKey))
   return JSON.stringify(client)
 }
 

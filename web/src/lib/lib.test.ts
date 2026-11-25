@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { toCsv } from './csv'
 import { clock, long, parse } from './duration'
 import { byDate, groupByMonth, monthOf } from './months'
-import { fromIstInput, toIstInput } from './time'
+import { formatDate, formatTime, fromIstInput, toIstInput } from './time'
 
 describe('duration', () => {
   it('formats', () => {
@@ -28,6 +28,13 @@ describe('IST conversion', () => {
   it('round-trips through the datetime input', () => {
     expect(toIstInput('2026-10-01T15:00:00Z')).toBe('2026-10-01T20:30')
     expect(new Date(fromIstInput('2026-10-01T20:30')).toISOString()).toBe('2026-10-01T15:00:00.000Z')
+  })
+})
+
+describe('showing dates', () => {
+  it("shows a dash for a time that can't be read, instead of crashing the screen", () => {
+    expect(formatDate(fromIstInput(''))).toBe('–')
+    expect(formatTime('not a date')).toBe('–')
   })
 })
 

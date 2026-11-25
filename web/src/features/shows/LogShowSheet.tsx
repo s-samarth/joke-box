@@ -72,6 +72,7 @@ export function LogShowSheet({ log, onClose }: { log?: PerformanceLog; onClose: 
   const submit = () => {
     const seconds = stageSeconds(duration)
     if (!rating) return setError('Give it a rating from one to five stars.')
+    if (Number.isNaN(Date.parse(fromIstInput(when)))) return setError('Say when the show was.')
     const venueName = venue.trim() || UNKNOWN
     const performedAt = fromIstInput(when)
     // The save is queued and the sheet closes at once, signal or not.

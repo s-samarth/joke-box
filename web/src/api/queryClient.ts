@@ -11,7 +11,7 @@ import { del, get, set } from 'idb-keyval'
 import { handedOver } from '../lib/oneTab'
 import { ApiError } from './client'
 import { QUEUED } from './sync'
-import { keepUnsynced } from './unsynced'
+import { forgetSuperseded, keepUnsynced } from './unsynced'
 import type { ObservationInput, SessionSummary, WritingSession, WritingSessionInput } from './types'
 
 const WEEK = 1000 * 60 * 60 * 24 * 7
@@ -53,6 +53,10 @@ export const queryClient = new QueryClient({
     onError: (error, variables, _result, mutation) => {
       const key = mutation.options.mutationKey
       if (key && mutation.options.scope?.id === QUEUED.scope.id) keepUnsynced(key, variables, error)
+    },
+    onSuccess: (_data, variables, _result, mutation) => {
+      const key = mutation.options.mutationKey
+      if (key && mutation.options.scope?.id === QUEUED.scope.id) forgetSuperseded(key, variables)
     },
   }),
   defaultOptions: {

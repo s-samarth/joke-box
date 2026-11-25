@@ -19,17 +19,9 @@ import { deleteVoiceNote, saveVoiceDetails, uploadVoiceAudio } from '../../api/v
 import { cacheAudio } from './audioCache'
 import { clearLive, forgetLive, interrupted } from './inProgress'
 import { oneTabAtATime } from '../../lib/oneTab'
+import { type PendingNote, sameInput, upgrade } from './outboxNote'
 
-export interface PendingNote {
-  id: string
-  input: VoiceNoteInput
-  bytes: ArrayBuffer
-  type: string
-  created_at: string
-  detailsSaved: boolean
-  /** Set when the server refused the upload for good (e.g. too large); no more retries. */
-  failed?: string
-}
+export type { PendingNote }
 
 interface OutboxState {
   items: PendingNote[]
@@ -43,12 +35,6 @@ const listeners = new Set<() => void>()
 function emit(next: Partial<OutboxState>) {
   state = { ...state, ...next }
   listeners.forEach((l) => l())
-}
-
-/** Notes saved by the first version kept a Blob; those uploads failed, so offer them for deletion. */
-function upgrade(note: PendingNote & { audio?: Blob }): PendingNote {
-  if (note.bytes) return note
-  return { ...note, bytes: new ArrayBuffer(0), type: note.audio?.type ?? '', failed: 'Recording was lost. Delete it and record again.' }
 }
 
 async function reload() {
@@ -110,8 +96,6 @@ export async function discardPending(id: string): Promise<PendingNote | undefine
   return note
 }
 
-const sameInput = (a: VoiceNoteInput, b: VoiceNoteInput) => JSON.stringify(a) === JSON.stringify(b)
-
 /** Upload one note. Re-reads it between steps, since it may be edited or deleted meanwhile. */
 async function send(note: PendingNote): Promise<void> {
   const gone = async () => {
@@ -135,11 +119,16 @@ async function send(note: PendingNote): Promise<void> {
 }
 
 let running = false
+let again = false // a recording made mid-pass goes in a second pass
+let retry: ReturnType<typeof setTimeout> | undefined
 
-/** Upload everything waiting, oldest first. Safe to call often: it runs one pass at a time. */
+/** Upload everything waiting, oldest first. Safe to call often: it runs one pass at a time. A
+ * pass cut short by a server error tries again in 30 seconds, even if the signal never drops. */
 export async function flush(): Promise<void> {
+  if (running) again = true
   if (running || !onlineManager.isOnline()) return
   running = true
+  clearTimeout(retry)
   try {
     // Another tab may be uploading the same notes: wait for it, then start from what's left.
     await oneTabAtATime('jokebox-outbox', async () => {
@@ -159,13 +148,14 @@ export async function flush(): Promise<void> {
           }
           // Other 4xx (too large, not audio) won't get better by retrying; the rest waits for next time.
           const permanent = e instanceof ApiError && e.status >= 400 && e.status < 500 && ![401, 408, 429].includes(e.status)
-          if (!permanent) break
+          if (!permanent) { retry = setTimeout(() => void flush(), 30_000); break }
           await set(note.id, { ...now, failed: e.message }, store)
         }
       }
     })
   } finally {
     running = false
+    if (again) { again = false; void flush() }
     emit({ uploading: null })
     await reload()
     void queryClient.invalidateQueries({ queryKey: keys.voiceNotes })

@@ -30,4 +30,10 @@ describe('crash recovery', () => {
     const saved = JSON.stringify({ buster: 'v1', clientState: { queries: [{ queryKey: ['jokes'] }], mutations: [{ mutationKey: ['fake'] }] } })
     expect(JSON.parse(withoutLists(saved))).toEqual({ buster: 'v1', clientState: { queries: [], mutations: [{ mutationKey: ['fake'] }] } })
   })
+
+  it("keeps this device's own versions and moved sessions, so waiting saves don't clash with its own", () => {
+    const own = [{ queryKey: ['joke-own-versions'] }, { queryKey: ['session-moved'] }]
+    const saved = JSON.stringify({ clientState: { queries: [{ queryKey: ['jokes'] }, ...own], mutations: [] } })
+    expect(JSON.parse(withoutLists(saved)).clientState.queries).toEqual(own)
+  })
 })
