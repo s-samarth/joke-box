@@ -18,7 +18,7 @@ What they need, in order of how often it comes up:
 1. **Catch an idea before it's gone:** typed, spoken, or written by hand, in a couple of seconds,
    with or without a signal.
 2. **Work an idea into a joke:** setup, punchline, alternate punches, tag lines, rewrites against a clock.
-3. **Build and run a set:** pick the jokes, order them, fit them to the slot, rehearse, perform.
+3. **Build and run a set:** a point and beats in order, each with its premises, jokes and crowd work; gates for jokes that depend on the one before; timed against the slot; walked through on stage.
 4. **Learn from each show:** log it on the way home, see the trend over weeks.
 5. **Study the craft:** what you've learned about doing stand-up (checklists, writing techniques,
    reference and goals), a watchlist of routines, and written analyses of sets.
@@ -48,9 +48,9 @@ own data. Today that is one comedian, but the system works for more than one.
    refuses waits in Couldn't sync with what you wrote.
 4. **Phone first, laptop comfortable.** Every screen is designed at 390 px wide, with large tap
    targets and safe-area padding. Desktop adds a side rail (icons only on an iPad in landscape) and list-and-detail layouts that give the list the whole screen until something is open.
-5. **Stage-ready.** Rehearse shows the whole set as one scrolling script in big type, with the
-   clock and the open-mic light pinned on top, and it keeps the screen awake. Printing gives
-   clean paper.
+5. **Stage-ready.** On stage walks the set one beat at a time in big type, asking each gate as you
+   reach it, with the clock and the open-mic light pinned on top, and it keeps the screen awake.
+   The cue card gives you the spine to memorise, on screen or paper.
 6. **Your material stays yours.** It's private by default and allowlisted, and real jokes never go
    into seeds, fixtures or tests. Deleting anything sends it to the Trash for 30 days first, a
    nightly encrypted backup keeps a copy of everything, and Download everything gives you all of
@@ -70,9 +70,9 @@ own data. Today that is one comedian, but the system works for more than one.
 | **Observations** | Things you noticed that aren't jokes yet, by joke topic and kind (set ideas, questions), linked both ways to the jokes and premises that came from them | `/observations` |
 | **Brainstorm** | Free writing sessions with a timer: type or handwrite (Apple Pencil), link jokes and observations, search the typed words, and turn a session into a joke | `/brainstorm`, `/brainstorm/:id` |
 | **Voice notes** | Record, see the level meter, name and tag it straight away, play back, search by label or hashtag, turn one into a joke | `/voice` |
-| **Sets** | Jokes as masking-tape strips: drag to order, time against the slot, opener and closer marked | `/sets`, `/sets/:id` |
-| **Rehearse** | The whole set as one scrolling script, every joke in full, with the clock and the open-mic light pinned on top. Leaving after the clock has run offers to log the show | `/sets/:id/stage` |
-| **Print** | A set on paper with each joke's running time | `/sets/:id/print` |
+| **Sets** | A point and a spine of beats in a fixed order. Each beat has a cue, its own time, labels (status, persona side...) and an ordered list of premises, jokes and crowd work; jokes are locked or loose, and a gate guards the jokes after it. A status track and checks from your Craft notes ([sets.md](sets.md)) | `/sets`, `/sets/:id` |
+| **On stage** | The set one beat at a time, punchlines as cue lines, each gate asked as you reach it, with the clock and the open-mic light pinned on top | `/sets/:id/stage` |
+| **Cue card** | What you memorise: the point, then each beat's cue and time with its premises under it. Prints | `/sets/:id/print` |
 | **Shows** | Log a show, optionally marking particular jokes bombed, ok or killed with a comment; totals, filters, a sortable table, CSV export; Timeline and Insights views | `/shows` |
 | **Craft** | What you know about doing stand-up: your path as a staircase, techniques to write with, and your own areas as folders of note cards | `/craft`, `/craft/area/:id`, `/craft/:id` |
 | **Watchlist** | Routines you add to study, scored and ticked off. Long notes open with More. A category gets a **Read the guide** link when an analysis has the same name as the category | `/watchlist` |
@@ -100,7 +100,8 @@ The vocabulary is a comic's, not a database's. Keep to it in the code and in the
 | **Status** | Incomplete, Work in Progress, Complete, Draft, Stage Ready, Need Tags, or your own. Every joke has one; new jokes start as Draft. |
 | **Runs for** | How long the joke takes on stage (m:ss). |
 | **Clean rating** | Clean, Mild or Dirty. |
-| **Set** | An ordered list of jokes for one show, with a slot length. The first is the **opener**, the last the **closer**. |
+| **Set** | One show's material: a **point**, then **beats** in a fixed order, each with a **cue**, its own time and an ordered list of premises, jokes and crowd work. See [sets.md](sets.md). |
+| **Beat** | A section of a set you remember by one cue word. Beats never branch; anything that depends on the room (a **gate**: the next jokes only if this one lands) lives inside a beat. |
 | **Slot** | The time you've been given. The **light** is the open-mic signal: amber with a minute to go, red once you're over. |
 | **Show** | One performance, logged afterwards: venue, date, time on stage, crowd size, 1–5 stars, topics, remarks, and optionally particular jokes with how each went (bombed, ok, killed) and a comment. |
 | **Rewrite** | A timed session reworking one joke. Each save is a version. |

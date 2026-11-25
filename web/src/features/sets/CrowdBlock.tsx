@@ -32,13 +32,13 @@ export function CrowdBlock({ entry, onChange }: { entry: Crowd; onChange: (e: Cr
           </div>
           <ul className="mt-2 space-y-1.5">
             {q.replies.map((r) => (
-              <li key={r.id} className="flex items-center gap-2">
-                <Input aria-label="If they say" placeholder="If they say…" value={r.when} className="h-9 basis-2/5 text-sm sm:h-9"
+              <li key={r.id} className="grid grid-cols-[1fr_auto] items-center gap-x-2 gap-y-1 sm:flex">
+                <Input aria-label="If they say" placeholder="If they say…" value={r.when} className="h-9 text-sm sm:h-9 sm:basis-2/5"
                   onChange={(e) => setQ(q.id, (x) => ({ ...x, replies: x.replies.map((y) => (y.id === r.id ? { ...y, when: e.target.value } : y)) }))} />
-                <span className="text-faint" aria-hidden>→</span>
-                <Input aria-label="Your line" placeholder="your line" value={r.line} className="h-9 flex-1 text-sm italic sm:h-9"
+                <span className="hidden text-faint sm:inline" aria-hidden>→</span>
+                <Input aria-label="Your line" placeholder="→ your line" value={r.line} className="col-start-1 h-9 text-sm italic sm:h-9 sm:flex-1"
                   onChange={(e) => setQ(q.id, (x) => ({ ...x, replies: x.replies.map((y) => (y.id === r.id ? { ...y, line: e.target.value } : y)) }))} />
-                <button type="button" className={remove} aria-label="Remove reply" onClick={() => setQ(q.id, (x) => ({ ...x, replies: x.replies.filter((y) => y.id !== r.id) }))}><X size={15} /></button>
+                <button type="button" className={`${remove} col-start-2 row-span-2 row-start-1`} aria-label="Remove reply" onClick={() => setQ(q.id, (x) => ({ ...x, replies: x.replies.filter((y) => y.id !== r.id) }))}><X size={15} /></button>
               </li>
             ))}
           </ul>

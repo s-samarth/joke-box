@@ -97,7 +97,7 @@ in IST and the headline **"Got something?"** with a search button beside it (it 
 | Craft | `TodayCraft.tsx`, `craft/PathLadder.tsx` | **Path:** a small copy of the Craft staircase: the first Path note with tick boxes still open, how many are done, and the next step (one small staircase per heading when the note has tracks). When the step names minutes, it shows your most solid material on one topic (Strong and Killer jokes, by runtime) against that target. Below it, a box to save a lesson to one of your areas (chips in their colours) |
 | Study | `TodayStudy.tsx` | Craft notes, watchlist progress, analyses |
 | Topics | `TopicFolders.tsx` | Topics as folders with live counts; tap through to a subtopic |
-| Your latest set | (inline) | The set you edited last, its joke count and slot, its first three strips, the light bar and **Rehearse** |
+| Your latest set | (inline) | The set you edited last, its beat and joke count and slot, its first three beat cues on tape with their times, the light bar (the beats' time) and **On stage** |
 | Last show | (inline) | Venue, date, time on stage, crowd and stars, plus **Log a show** |
 
 <img src="screenshots/desktop-home.webp" alt="Home on desktop">

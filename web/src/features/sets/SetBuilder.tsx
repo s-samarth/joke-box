@@ -4,7 +4,7 @@
  * Desktop shows the spine beside the open beat; phones and iPads in portrait stack them.
  */
 import { ArrowLeft, CircleHelp, GraduationCap, Play, ScrollText, SlidersHorizontal } from 'lucide-react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { useClusters } from '../../api/clusters'
 import { useJokes } from '../../api/library'
@@ -51,6 +51,12 @@ function Builder({ setlist }: { setlist: Setlist }) {
   const [premiseFor, setPremiseFor] = useState<string | null>(null)
   const [reading, setReading] = useState<Joke | null>(null)
   const [target, setTarget] = useState(clock(draft.target_seconds))
+  const editor = useRef<HTMLDivElement>(null)
+  // Stacked (phone, iPad in portrait), the open beat is below the spine: go to it.
+  const open = (id: string) => {
+    setSelected(id)
+    if (window.matchMedia('(max-width: 1023px)').matches) requestAnimationFrame(() => editor.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+  }
   const byId = new Map(jokes.map((j) => [j.id, j]))
   const premises = new Map(premiseList.map((p) => [p.id, p]))
   const leadOf = (id: string) => clusters.find((c) => c.id === id)?.lead_joke_id
@@ -72,7 +78,7 @@ function Builder({ setlist }: { setlist: Setlist }) {
     setPicking({ ...picking, entryId: out.entryId })
     if (pieces.length > 1) toast(`Also added the ${pieces.length === 2 ? 'joke' : `${pieces.length - 1} jokes`} before it`)
   }
-  const addBeat = () => { const b = newBeat(); setBeats((list) => [...list, b]); setSelected(b.id) }
+  const addBeat = () => { const b = newBeat(); setBeats((list) => [...list, b]); open(b.id) }
   const deleteBeat = async (b: Beat) => {
     if (b.entries.length && !(await confirm({ title: `Delete ${b.cue || 'this beat'}?`, message: 'Its premises, jokes and crowd work come out of the set. The jokes stay in your library.', confirmLabel: 'Delete beat', danger: true }))) return
     setBeats((list) => list.filter((x) => x.id !== b.id))
@@ -124,9 +130,9 @@ function Builder({ setlist }: { setlist: Setlist }) {
       <div className="mt-8 grid gap-6 lg:grid-cols-[20rem_minmax(0,1fr)]">
         <div>
           <p className={`${section} mb-2`}>Spine · beats run in this order</p>
-          <Spine beats={beats} fields={config.fields} selected={selected} onSelect={setSelected} onAdd={addBeat} onMove={(i, d) => setBeats((list) => swap(list, i, d))} />
+          <Spine beats={beats} fields={config.fields} selected={selected} onSelect={open} onAdd={addBeat} onMove={(i, d) => setBeats((list) => swap(list, i, d))} />
         </div>
-        <div className="min-w-0 rounded-2xl p-4 ring-1 ring-rule">
+        <div ref={editor} className="min-w-0 scroll-mt-16 rounded-2xl p-4 ring-1 ring-rule">
           {beat ? (
             <BeatEditor key={beat.id} beat={beat} previous={beats[index - 1] ?? null} needsWhy={needsWhy(beats, index, config.fields)} fields={config.fields}
               onChange={changeBeat} onDelete={() => deleteBeat(beat)} jokes={byId} premises={premises} leadOf={leadOf} onOpen={setReading}

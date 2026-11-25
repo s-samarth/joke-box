@@ -34,8 +34,10 @@ const section = 'text-[11.5px] font-semibold tracking-[0.13em] text-faint upperc
 function BeatTime({ seconds, onChange }: { seconds: number; onChange: (s: number) => void }) {
   const [text, setText] = useState(clock(seconds))
   return (
-    <Input inputMode="numeric" aria-label="Time for this beat" className="w-24 text-center tabular" value={text} onChange={(e) => setText(e.target.value)}
-      onBlur={() => { const s = parse(text); if (s !== null) onChange(s); setText(clock(s ?? seconds)) }} />
+    <div className="w-24 shrink-0">
+      <Input inputMode="numeric" aria-label="Time for this beat" className="text-center tabular" value={text} onChange={(e) => setText(e.target.value)}
+        onBlur={() => { const s = parse(text); if (s !== null) onChange(s); setText(clock(s ?? seconds)) }} />
+    </div>
   )
 }
 
@@ -44,15 +46,15 @@ export function BeatEditor({ beat, previous, needsWhy, fields, onChange, onDelet
     <div className="space-y-6">
       <div className="flex items-start gap-3">
         <div className="tape min-w-0 flex-1 px-4 py-1.5" style={{ '--tilt': '-0.5deg' } as CSSProperties}>
-          <input aria-label="Cue" placeholder="Cue word" maxLength={80} value={beat.cue} onChange={(e) => onChange({ ...beat, cue: e.target.value })}
+          <input aria-label="Cue word" placeholder="Cue word" maxLength={80} value={beat.cue} onChange={(e) => onChange({ ...beat, cue: e.target.value })}
             className="w-full bg-transparent font-marker text-2xl text-tape-ink placeholder:text-tape-ink/50 outline-none" />
         </div>
         <button type="button" onClick={onDelete} aria-label="Delete this beat" title="Delete this beat" className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg text-faint hover:bg-ink-3 hover:text-light"><Trash2 size={17} /></button>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <span className="text-sm text-dim">Time for this beat</span>
         <BeatTime key={beat.id} seconds={beat.seconds} onChange={(seconds) => onChange({ ...beat, seconds })} />
-        <span className="text-sm text-faint">Joke times don't count.</span>
+        <span className="basis-full text-xs text-faint sm:basis-auto">You set this. Joke times don't count.</span>
       </div>
       <div>
         <p className={section}>What it's for</p>
