@@ -4,25 +4,30 @@
  * (docs/sets.md, "Drag and arrows"). A joke dragged into a premise rests on it in your library,
  * as when it's added there; a drop that moves one off another premise asks first.
  * Jokes first, premise later: Select in a no-premise list ticks jokes to put under a premise.
+ * Move to… on a joke does what a drag does, by name: out of its premise, into another block, or
+ * under another premise (picked in SetPickers).
  */
 import { DndContext, DragOverlay } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { Beat, Joke, SetEntry } from '../../api/types'
 import { useFeedback } from '../../components/ui/feedbackContext'
+import type { MenuItem } from '../../components/ui/Menu'
 import { setEntries } from './beatEdit'
-import { moveEntry, movedLists } from './beatMove'
+import { moveEntry, movedLists, spotOf } from './beatMove'
 import { hasPieces } from './beats'
 import { DragPreview } from './DragPreview'
 import { EntryBlock, type BlockProps } from './EntryBlock'
+import { dropEmptied, moveChoices, moveTo, type MoveTo } from './moveTo'
 import { many, short, usePremiseLink } from './usePremiseLink'
 import { entryKey, useBeatDrag } from './useBeatDrag'
 
 interface Props extends BlockProps {
   onGroup: (entryId: string, pieceIds: string[]) => void
+  onMoveToPremise: (pieceId: string) => void
 }
 
-export function EntryList({ beat, onChange, onGroup, ...rest }: Props) {
+export function EntryList({ beat, onChange, onGroup, onMoveToPremise, ...rest }: Props) {
   const { toast } = useFeedback()
   const { attach, askToMove, takeOf } = usePremiseLink()
   const [selecting, setSelecting] = useState<{ entryId: string; ids: string[] } | null>(null)
@@ -43,12 +48,27 @@ export function EntryList({ beat, onChange, onGroup, ...rest }: Props) {
     const before = beat
     const moving = newlyUnder(next)
     for (const [premise, list] of moving) if (!(await askToMove(list, premise))) return
-    onChange(setEntries(next, next.entries))
+    onChange(setEntries(next, dropEmptied(before, next).entries))
     if (!moving.size) return
     const undo = [...moving].map(([premise, list]) => attach(list, premise))
     const count = [...moving.values()].reduce((n, l) => n + l.length, 0)
     const [first] = moving.keys()
     toast(`${many(count)} now on “${short(takeOf(first) ?? 'the premise', 40)}”`, { label: 'Undo', onClick: () => { undo.forEach((u) => u()); onChange(before) } })
+  }
+  // Move to…: into a premise it doesn't rest on goes the way a drop does; the rest only moves it in the set.
+  const move = (pieceId: string, to: MoveTo, label: string) => {
+    const next = moveTo(beat, pieceId, to)
+    if (next === beat) return
+    if (newlyUnder(next).size) return void drop(next)
+    const before = beat
+    const from = beat.entries.find((e) => e.id === spotOf(beat, pieceId)?.entryId)
+    onChange(setEntries(next, next.entries))
+    const left = from?.kind === 'premise' && !next.entries.some((e) => e.kind === 'premise' && e.premise_id === from.premise_id && e.pieces.some((p) => p.id === pieceId))
+    toast(left ? `Out of “${short(takeOf(from.premise_id) ?? 'the premise', 40)}” in this set. In your library it still rests on that premise.` : `Moved ${label.replace(/^Into/, 'into')}`, { label: 'Undo', onClick: () => onChange(before) })
+  }
+  const moveItems = (pieceId: string): (MenuItem | 'divider')[] => {
+    const choices = moveChoices(beat, pieceId, takeOf).map((c): MenuItem => ({ label: c.label, onSelect: () => move(pieceId, c.to, c.label) }))
+    return [...choices, ...(choices.length ? ['divider' as const] : []), { label: 'Under another premise…', onSelect: () => onMoveToPremise(pieceId) }]
   }
   const { shown, active, context } = useBeatDrag(beat, (next) => void drop(next))
   // A held block folds every block to its heading: keep the one in your hand where it was.
@@ -88,7 +108,7 @@ export function EntryList({ beat, onChange, onGroup, ...rest }: Props) {
               folded={active?.kind === 'entry'} onStep={(d) => onChange(setEntries(beat, moveEntry(beat.entries, entry.id, i + d)))} onRemove={() => remove(entry, i)}
               selecting={selecting?.entryId === entry.id ? selecting.ids : null} onSelect={(on) => setSelecting(on ? { entryId: entry.id, ids: [] } : null)}
               onPick={(id) => selecting && setSelecting({ ...selecting, ids: selecting.ids.includes(id) ? selecting.ids.filter((x) => x !== id) : [...selecting.ids, id] })}
-              onGroup={(ids) => { onGroup(entry.id, ids); setSelecting(null) }} />
+              onGroup={(ids) => { onGroup(entry.id, ids); setSelecting(null) }} moveItems={moveItems} />
           ))}
         </ol>
       </SortableContext>

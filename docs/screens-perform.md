@@ -62,8 +62,9 @@ What a set is made of and why is in [sets.md](sets.md). Files:
     reply's two boxes stack.
   - **Jokes** keep their number and show the setup with the punchline under it. Tap one to read it
     whole (`JokePeek`). Each has a grip on the left. Under each joke: **Locked/Loose**
-    (yellow/teal), **Gate**, **Follows the lead / Pinned version** for a cluster version, then up,
-    down and remove.
+    (yellow/teal), **Gate**, **Follows the lead / Pinned version** for a cluster version, then
+    **Move** (a menu: Out of the premise, Into each other block by its number, Under another
+    premise…), up, down and remove.
   - **A gate** is a sky-blue box: its joke on top, **If it lands**, the jokes it guards inside (a
     dashed line), then **+ Joke in this gate** and "Guards N jokes. If not, skip to #k." Jokes drag
     in and out; dragging the gate's joke moves the box. A joke inside can open one inner box;
@@ -84,7 +85,8 @@ What a set is made of and why is in [sets.md](sets.md). Files:
     in it, sit greyed at the bottom. Under a premise, the picker starts on that premise's jokes and
     a joke from another premise says **Moves from: …**. With no premise, it remembers its filters
     for an hour. A joke that follows others brings the ones before it.
-  - **Jokes first, premise later:** **Select** on a no-premise list turns its jokes into ticks.
+  - **Jokes first, premise later:** **Select some for a premise**, under a no-premise list, turns
+    its jokes into ticks.
     **Put these N under a premise** opens the premise sheet (starting on their topic when they
     share one, with **New premise**). They move under that premise in the beat, keeping order and
     settings (just above the list, or at the end of that premise if the beat has it), and each

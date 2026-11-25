@@ -6,7 +6,8 @@
  * A joke under a premise in a set rests on that premise in your library (docs/sets.md): adding
  * jokes to a premise, or putting loose jokes under one, saves the premise on each joke, so it
  * shows on the joke and in the premise's jokes (usePremiseLink). Undo puts the beat and the jokes
- * back. Jokes can also go straight into a gate (+ Joke inside its box).
+ * back. Jokes can also go straight into a gate (+ Joke inside its box). Move to… › Under another
+ * premise picks the premise for one joke (a gate brings its jokes) the same way.
  */
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
@@ -19,7 +20,9 @@ import { JokePeek } from '../jokes/JokePeek'
 import { PremisePickSheet } from '../pickers/PremisePickSheet'
 import { NewPremiseDialog } from '../premises/NewPremiseDialog'
 import { addPiecesTo, groupUnder, newPremise, pieceFor, setEntries } from './beatEdit'
-import { jokeIds } from './beats'
+import { movedLists } from './beatMove'
+import { hasPieces, jokeIds } from './beats'
+import { moveTo } from './moveTo'
 import { SetJokePicker } from './SetJokePicker'
 import { many, short, usePremiseLink } from './usePremiseLink'
 
@@ -27,6 +30,7 @@ export type Picking =
   | { kind: 'jokes'; beatId: string; entryId: string | null; gateId?: string | null }
   | { kind: 'premise'; beatId: string }
   | { kind: 'group'; beatId: string; entryId: string; pieceIds: string[] }
+  | { kind: 'move'; beatId: string; pieceId: string }
 
 interface Props {
   picking: Picking | null
@@ -49,7 +53,8 @@ export function SetPickers({ picking, onPicking, beats, onBeat, leadOf, reading,
   const byId = new Map(jokes.map((j) => [j.id, j]))
   const used = jokeIds(beats)
   const beat = beats.find((b) => b.id === picking?.beatId)
-  const entry = picking?.kind !== 'premise' ? beat?.entries.find((e) => e.id === picking?.entryId) : undefined
+  const entry = picking && 'entryId' in picking ? beat?.entries.find((e) => e.id === picking.entryId) : undefined
+  const pieceJoke = (id: string) => byId.get(beat?.entries.flatMap((e) => (hasPieces(e) ? e.pieces : [])).find((p) => p.id === id)?.joke_id ?? '')
   const premiseId = entry?.kind === 'premise' ? entry.premise_id : null
 
   // A joke that follows others brings the ones before it that aren't in the set yet.
@@ -78,6 +83,16 @@ export function SetPickers({ picking, onPicking, beats, onBeat, leadOf, reading,
       onBeat(setEntries(beat, [...beat.entries, added]))
       return onPicking({ kind: 'jokes', beatId: beat.id, entryId: added.id })
     }
+    if (picking.kind === 'move') {
+      const next = moveTo(beat, picking.pieceId, { premiseId: id })
+      const list = [...movedLists(beat, next).keys()].flatMap((p) => pieceJoke(p) ?? [])
+      if (!(await askToMove(list, id))) return
+      onPicking(null)
+      if (next === beat) return
+      onBeat(next)
+      const undo = attach(list, id)
+      return toast(`${many(list.length)} now on “${short(takeOf(id) ?? 'the premise', 40)}”`, { label: 'Undo', onClick: () => { undo(); onBeat(beat) } })
+    }
     if (picking.kind !== 'group' || entry?.kind !== 'jokes') return
     const list = entry.pieces.filter((p) => picking.pieceIds.includes(p.id)).flatMap((p) => byId.get(p.joke_id) ?? [])
     if (!(await askToMove(list, id))) return
@@ -88,7 +103,10 @@ export function SetPickers({ picking, onPicking, beats, onBeat, leadOf, reading,
   }
 
   const inBeat = new Set(beat?.entries.flatMap((e) => (e.kind === 'premise' && e.premise_id ? [e.premise_id] : [])) ?? [])
-  const picked = picking?.kind === 'group' && entry?.kind === 'jokes' ? entry.pieces.filter((p) => picking.pieceIds.includes(p.id)).flatMap((p) => byId.get(p.joke_id) ?? []) : []
+  const picked = picking?.kind === 'move' ? [pieceJoke(picking.pieceId)].flatMap((j) => j ?? [])
+    : picking?.kind === 'group' && entry?.kind === 'jokes' ? entry.pieces.filter((p) => picking.pieceIds.includes(p.id)).flatMap((p) => byId.get(p.joke_id) ?? []) : []
+  const one = picked.length === 1
+  const forJokes = picking?.kind === 'group' || picking?.kind === 'move'
   // Start on the picked jokes' topic when they share one that has premises, else on every topic.
   const shared = picked.length && picked.every((j) => j.topic_id === picked[0].topic_id) ? picked[0].topic_id : null
   const sameTopic = premises.some((p) => p.topic_id === shared && p.status !== 'Discarded') ? shared : null
@@ -99,11 +117,12 @@ export function SetPickers({ picking, onPicking, beats, onBeat, leadOf, reading,
           description={(picking.gateId ? 'Inside the gate: only if it lands. ' : '') + (premiseId ? `Under “${short(takeOf(premiseId) ?? 'a deleted premise')}”. Starts on its jokes: clear the filters for any. Jokes you add rest on it.` : `Into ${beat?.cue || 'this beat'}, with no premise. Tick them in the order you want them.`)}
           start={premiseId ? { topic: null, premise: premiseId } : { topic: null }} memory={premiseId ? undefined : 'set-joke-picker'} />
       )}
-      {(picking?.kind === 'premise' || picking?.kind === 'group') && (
-        <PremisePickSheet topicId={picking.kind === 'group' ? sameTopic : null} onClose={() => onPicking(null)} onPick={([id]) => void pickPremise(id)}
-          title={picking.kind === 'group' ? `Which premise ${picked.length === 1 ? 'does it' : 'do they'} rest on?` : 'Add a premise'}
-          description={picking.kind === 'group' ? `${many(picked.length)} picked. They go under it here, and rest on it in your library.` : 'The take this part of the beat rests on. You pick its jokes next.'}
-          note={(p) => (inBeat.has(p.id) ? (picking.kind === 'group' ? 'In this beat: they join it' : 'Already in this beat') : null)}
+      {(picking?.kind === 'premise' || forJokes) && (
+        <PremisePickSheet topicId={forJokes ? sameTopic : null} onClose={() => onPicking(null)} onPick={([id]) => void pickPremise(id)}
+          title={forJokes ? `Which premise ${one ? 'does it' : 'do they'} rest on?` : 'Add a premise'}
+          description={picking.kind === 'move' ? `“${short(picked[0]?.setup ?? 'This joke', 50)}” goes under it here, and rests on it in your library.`
+            : forJokes ? `${many(picked.length)} picked. They go under it here, and rest on it in your library.` : 'The take this part of the beat rests on. You pick its jokes next.'}
+          note={(p) => (inBeat.has(p.id) ? (forJokes ? `In this beat: ${one ? 'it joins' : 'they join'} it` : 'Already in this beat') : null)}
           after={<button type="button" onClick={() => setCreating(true)} className={chip}><Plus size={16} /> New premise</button>} />
       )}
       <NewPremiseDialog open={creating} onOpenChange={setCreating} topicId={sameTopic} onCreated={(id) => { setCreating(false); void pickPremise(id) }} />

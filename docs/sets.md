@@ -83,12 +83,14 @@ option id), and a save that leaves it out keeps it.
 
 ## Drag and arrows
 
-Everything moves inside one beat; beats move in the spine. You can move a thing three ways, and
-all three follow the same rules: drag it by its **grip** (⋮⋮), press its **arrows**, or, with a
-keyboard, Tab to the grip, Space, the arrow keys, Space (Escape puts it back). The logic is pure
+Everything moves inside one beat; beats move in the spine. You can move a thing four ways, and
+all four follow the same rules: drag it by its **grip** (⋮⋮), press its **arrows**, pick a place
+from a joke's **Move** menu, or, with a keyboard, Tab to the grip, Space, the arrow keys, Space
+(Escape puts it back). The logic is pure
 and tested: [gateRows.ts](../web/src/features/sets/gateRows.ts) reads a list as gate boxes,
 [beatMove.ts](../web/src/features/sets/beatMove.ts) moves jokes and blocks,
-[gateEdit.ts](../web/src/features/sets/gateEdit.ts) makes gates and walks the arrows, and
+[gateEdit.ts](../web/src/features/sets/gateEdit.ts) makes gates and walks the arrows,
+[moveTo.ts](../web/src/features/sets/moveTo.ts) is the Move menu, and
 [useBeatDrag.ts](../web/src/features/sets/useBeatDrag.ts) is the dragging itself.
 
 <p>
@@ -120,6 +122,23 @@ and tested: [gateRows.ts](../web/src/features/sets/gateRows.ts) reads a list as 
 | A joke | Into crowd work, or another beat | Not allowed |
 
 A drop that isn't allowed is never offered: the box doesn't light up, and the joke goes back.
+A No premise block that a drop leaves empty goes; an emptied premise stays, so you can add to it
+or remove it.
+
+### Move
+
+**Move** on a joke opens a menu of where it can go, by name. It does what a drag does, without
+the drag: on a phone, when the other block is far down the beat, or when it doesn't exist yet.
+
+| Pick | What you end up with |
+|---|---|
+| Out of the premise | In No premise just below the premise: at the top of the one already there, else a new one. Only the set changes: in your library it still rests on that premise, and the toast says so |
+| Into N · No premise, or Into N · a premise | At the end of that block (N is its number in the beat). Into a premise, it rests on it in your library, as when dragged there |
+| Under another premise… | The premise sheet, with **New premise**. It goes into that premise's block if the beat has it, else into a new premise block just below. It rests on it in your library; one on another premise asks first |
+
+A gate's joke brings its box; a joke inside a gate comes out of the gate. Every move has Undo.
+
+<img src="screenshots/phone-set-move.webp" width="230" alt="Move on a joke in a premise: Out of the premise, Into 2 No premise, Into 3 another premise, Under another premise">
 
 ### The arrows
 
@@ -129,7 +148,7 @@ walks a joke up through every gate on the way:
 - Just below a gate's box, ↑ goes into it, last. Just above one, ↓ goes in, first.
 - At the top of a box, ↑ comes out above its joke; at the bottom, ↓ comes out below the box.
 - A gate goes into a neighbouring gate only if it has no inner gate; otherwise it steps past it.
-- The arrows never leave the block (drag, or Select and "Put under a premise", for that), and are
+- The arrows never leave the block (drag, Move, or Select and "Put under a premise", for that), and are
   greyed out at its ends.
 
 ### Making gates
@@ -228,6 +247,7 @@ until you hide them, and **How sets work** opens the whole guide.
 | **Drag only from the grip** | A finger on a joke still scrolls the page and opens the joke; only the grip starts a drag, after a short hold on touch | Drag from anywhere on the row (it fights scrolling on a phone) |
 | **The arrows stay, and walk through gates** | Dragging can fail (a stiff finger, a screen reader), and the arrows are exact. One place per press is predictable | Arrows removed; arrows that jump over a whole gate |
 | **A joke dragged into a premise rests on it** | The same rule as adding it there: the set and the library agree. Moving one off another premise asks first | Dragging that changed only the set |
+| **Move names where a joke goes** | A drag needs the other block on screen and a steady hand, and in a beat with one premise there's nowhere to drag to. A menu of the beat's blocks, plus any premise, works anywhere | Drag only; a separate "Take out of the premise" button |
 | **Dragging stays inside a beat** | One beat is open at a time, and a joke between beats changes what you memorise. Take it out and add it to the other beat | Dragging onto a beat in the spine |
 | **Labels live on the beat in the set, not on jokes** | The same joke can play a different status in another set. The comic asked for this explicitly | Labels on jokes |
 | **A joke's persona is its own, from the same list** | A beat's labels depend on the set, but the side of you a joke shows doesn't. One list (the persona field's options) means a side added, renamed or deleted changes beats and jokes together | A fixed list on jokes, apart from the beats' |

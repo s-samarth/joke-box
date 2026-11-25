@@ -116,7 +116,8 @@ function Builder({ setlist }: { setlist: Setlist }) {
             <BeatEditor key={beat.id} beat={beat} previous={beats[index - 1] ?? null} needsWhy={needsWhy(beats, index, config.fields)} fields={config.fields}
               onChange={changeBeat} onDelete={() => deleteBeat(beat)} jokes={byId} premises={premises} leadOf={leadOf} onOpen={setReading}
               onAddJokes={(entryId, gateId) => setPicking({ kind: 'jokes', beatId: beat.id, entryId, gateId })} onAddPremise={() => setPicking({ kind: 'premise', beatId: beat.id })}
-              onGroup={(entryId, pieceIds) => setPicking({ kind: 'group', beatId: beat.id, entryId, pieceIds })} onEditFields={() => setSheet('fields')} />
+              onGroup={(entryId, pieceIds) => setPicking({ kind: 'group', beatId: beat.id, entryId, pieceIds })}
+              onMoveToPremise={(pieceId) => setPicking({ kind: 'move', beatId: beat.id, pieceId })} onEditFields={() => setSheet('fields')} />
           ) : (
             <p className="py-10 text-center text-dim">{beats.length ? 'Pick a beat to open it.' : 'No beats yet. Add the first one: a cue word for what you talk about first.'}</p>
           )}
