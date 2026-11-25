@@ -65,9 +65,9 @@ export function SetGuide({ open, onOpenChange }: { open: boolean; onOpenChange: 
           <p>Until a check applies, it's greyed out and says what it needs: <b className="text-paper">Needs more beats</b> or <b className="text-paper">Needs labels</b>. It never ticks a rule it can't test yet.</p>
           <p>Not sure is never guessed. The top-up check warns only if the stretch is too long even with every Not sure beat as a top-up, and ticks only if it's fine with none of them as one. In between, it names the beats to label.</p>
         </Part>
-        <Part title="On stage and the cue card">
-          <p><b className="text-paper">On stage</b> walks the set one beat at a time. Answer each gate as you reach it, and what it guards is struck out if it didn't land. Next always means the next beat.</p>
-          <p>The <b className="text-paper">cue card</b> is what you memorise: the beat cues and times, with each beat's premises under them. Print it or keep it on your phone.</p>
+        <Part title="Bird's eye view and the cue card">
+          <p><b className="text-paper">Bird's eye view</b> (the eye icon) walks the set one beat at a time. Answer each gate as you reach it, and what it guards is struck out if it didn't land. Next always means the next beat.</p>
+          <p>The <b className="text-paper">cue card</b> (the scroll icon) is what you memorise: the beat cues and times, with each beat's premises under them. Print it or keep it on your phone.</p>
         </Part>
       </div>
     </Modal>

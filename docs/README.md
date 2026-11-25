@@ -5,7 +5,7 @@
 | [product.md](product.md) | What JokeBox is for and who it's for |
 | [user-flows.md](user-flows.md) | The jobs, step by step: catching ideas, writing, sets, shows, Claude |
 | [screens.md](screens.md) | Every screen except Perform |
-| [screens-perform.md](screens-perform.md) | Sets, On stage, the cue card, Shows and their stats |
+| [screens-perform.md](screens-perform.md) | Sets, Bird's eye view, the cue card, Shows and their stats |
 | [sets.md](sets.md) | How a set is kept: beats, gates, labels and checks, what each means and why it was built that way |
 | [set-review.md](set-review.md) | Logging a show from its recording: the review engine, the laugh scale, what's stored |
 | [design-system.md](design-system.md) | Colours, type, components |

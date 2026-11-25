@@ -1,5 +1,5 @@
 /**
- * On stage: the set one beat at a time (docs/sets.md). The beat's cue, its time on the clock,
+ * Bird's eye view: the set one beat at a time (docs/sets.md). The beat's cue, its time on the clock,
  * and its list with each joke's punchline as the cue line, coloured as in the builder: yellow
  * locked, teal loose, blue gate. Answer each gate as you reach it; what it guards is struck out
  * if it didn't land. Tap an answered gate to take the answer back. Next always means the next beat.

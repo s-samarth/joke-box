@@ -199,7 +199,7 @@ sets work** (the ? on Sets and in the builder).
 
 ## 7. Go on stage
 
-1. From the set (or from **Your latest set** on Home), tap **On stage**.
+1. From the set (or from **Your latest set** on Home), tap **Bird's eye view** (the eye icon on a set card).
 2. It goes full screen, one beat at a time: its cue, its time on the clock, what it's for, and its
    list with each joke's punchline as the cue line. The screen stays awake.
 3. Tap ▶ to start the clock. The clock turns amber with a minute to go and red when you're over.

@@ -48,7 +48,7 @@ own data. Today that is one comedian, but the system works for more than one.
    refuses waits in Couldn't sync with what you wrote.
 4. **Phone first, laptop comfortable.** Every screen is designed at 390 px wide, with large tap
    targets and safe-area padding. Desktop adds a side rail (icons only on an iPad in landscape) and list-and-detail layouts that give the list the whole screen until something is open.
-5. **Stage-ready.** On stage walks the set one beat at a time in big type, asking each gate as you
+5. **Stage-ready.** Bird's eye view walks the set one beat at a time in big type, asking each gate as you
    reach it, with the clock and the open-mic light pinned on top, and it keeps the screen awake.
    The cue card gives you the spine to memorise, on screen or paper.
 6. **Your material stays yours.** It's private by default and allowlisted, and real jokes never go
@@ -71,7 +71,7 @@ own data. Today that is one comedian, but the system works for more than one.
 | **Brainstorm** | Free writing sessions with a timer: type or handwrite (Apple Pencil), link jokes and observations, search the typed words, and turn a session into a joke | `/brainstorm`, `/brainstorm/:id` |
 | **Voice notes** | Record, see the level meter, name and tag it straight away, play back, search by label or hashtag, turn one into a joke | `/voice` |
 | **Sets** | A point and a spine of beats in a fixed order. Each beat has a cue, its own time, labels (status, persona side...) and an ordered list of premises, jokes and crowd work; jokes are locked or loose, and a gate guards the jokes after it. A status track and checks from your Craft notes ([sets.md](sets.md)) | `/sets`, `/sets/:id` |
-| **On stage** | The set one beat at a time, punchlines as cue lines, each gate asked as you reach it, with the clock and the open-mic light pinned on top | `/sets/:id/stage` |
+| **Bird's eye view** | The set one beat at a time, punchlines as cue lines, each gate asked as you reach it, with the clock and the open-mic light pinned on top | `/sets/:id/stage` |
 | **Cue card** | What you memorise: the point, then each beat's cue and time with its premises under it. Prints | `/sets/:id/print` |
 | **Shows** | Log a show, optionally marking particular jokes bombed, ok or killed with a comment; totals, filters, a sortable table, CSV export; Timeline and Insights views | `/shows` |
 | **Craft** | What you know about doing stand-up: your path as a staircase, techniques to write with, and your own areas as folders of note cards | `/craft`, `/craft/area/:id`, `/craft/:id` |

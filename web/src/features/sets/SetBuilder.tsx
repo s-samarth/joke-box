@@ -3,7 +3,7 @@
  * its status, and the open beat with its premises, jokes and crowd work. Saves itself as you go.
  * Desktop shows the spine beside the open beat; phones and iPads in portrait stack them.
  */
-import { ArrowLeft, CircleHelp, GraduationCap, Play, ScrollText, SlidersHorizontal } from 'lucide-react'
+import { ArrowLeft, CircleHelp, Eye, GraduationCap, ScrollText, SlidersHorizontal } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { useClusters } from '../../api/clusters'
@@ -79,7 +79,7 @@ function Builder({ setlist }: { setlist: Setlist }) {
           <button type="button" onClick={() => setSheet('fields')} aria-label="Label fields" title="Label fields" className={iconLink}><SlidersHorizontal size={18} /></button>
           <button type="button" onClick={() => setSheet('craft')} aria-label="Notes on building a set" title="Notes on building a set" className={iconLink}><GraduationCap size={18} /></button>
           <Link to={`/sets/${setlist.id}/print`} aria-label="Cue card" title="Cue card" className={iconLink}><ScrollText size={18} /></Link>
-          <Link to={`/sets/${setlist.id}/stage`} aria-label="On stage" className="ml-1 inline-flex h-10 shrink-0 items-center gap-2 rounded-lg bg-tape px-3 font-semibold text-tape-ink"><Play size={16} /><span className="max-[359px]:hidden">On stage</span></Link>
+          <Link to={`/sets/${setlist.id}/stage`} aria-label="Bird's eye view" title="Bird's eye view" className="ml-1 inline-flex h-10 shrink-0 items-center gap-2 rounded-lg bg-tape px-3 font-semibold text-tape-ink"><Eye size={16} /><span className="max-[359px]:hidden">Bird's eye view</span></Link>
         </div>
       </div>
       <div className="max-w-3xl">
