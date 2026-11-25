@@ -23,6 +23,8 @@ starts its own copy, and each start costs CPU against the Hobby plan, so one app
 start about 13. Lists asked for while the account check (`/api/me`) is on its way wait for its
 answer, so they reach the copy it woke. A GET made on its own, a save, or anything with an id
 goes out as before; a batch the server doesn't answer properly is fetched one list at a time.
+The voice outbox refreshes the voice notes list only after a pass that uploaded something: it
+runs at every launch and return online, and an empty pass used to send that list alone.
 
 **Refreshing on demand:** pull down at the top of a screen, by touch
 ([usePullToRefresh.ts](../web/src/layout/usePullToRefresh.ts)) or with a trackpad swipe
