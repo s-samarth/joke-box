@@ -7,20 +7,13 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
-from app.auth.deps import CurrentUser, DbSession, find_owned
-from app.models import Joke, PerformanceLog, Setlist, SetlistItem, SetTag, Topic, User
+from app.auth.deps import CurrentUser, DbSession
+from app.models import Joke, PerformanceLog, Setlist, Topic, User
 from app.schemas.reviews import ReviewOut
-from app.schemas.shows import (
-    LogIn,
-    LogOut,
-    SetlistIn,
-    SetlistItemIn,
-    SetlistItemOut,
-    SetlistOut,
-)
-from app.services.clashes import check_set
+from app.schemas.shows import LogIn, LogOut, SetlistIn, SetlistOut
+from app.services.setlists import save_set, setlist_out, your_jokes
 from app.services.show_jokes import jokes_out
-from app.services.show_logs import save_show, venue_named
+from app.services.show_logs import save_show
 from app.services.trash import move_to_trash, trashed_joke_ids
 
 router = APIRouter(prefix="/api", tags=["shows"])
@@ -34,36 +27,6 @@ def check_all_owned(
         raise HTTPException(422, f"Unknown {model.__name__.lower()} in request")
 
 
-def joke_runtimes(db: Session, user: User) -> dict[uuid.UUID, int]:
-    """Each live joke's runtime. A set shows a joke as it is now, so its time comes from here."""
-    rows = db.execute(select(Joke.id, Joke.duration_seconds).where(Joke.user_id == user.id))
-    return {joke_id: seconds for joke_id, seconds in rows}
-
-
-def item_out(item: SetlistItem, runtimes: dict[uuid.UUID, int]) -> SetlistItemOut:
-    """One place in a set, timed by its joke's current runtime."""
-    out = SetlistItemOut.model_validate(item)
-    out.duration_seconds = runtimes.get(item.joke_id, item.duration_seconds)
-    return out
-
-
-def setlist_out(s: Setlist, hidden: set[uuid.UUID], runtimes: dict[uuid.UUID, int]) -> SetlistOut:
-    """A set as the app sees it: jokes in the Trash are left out until they come back."""
-    return SetlistOut(
-        id=s.id,
-        name=s.name,
-        show_date=s.show_date,
-        target_seconds=s.target_seconds,
-        venue_name=s.venue.name if s.venue else None,
-        rating=s.rating,
-        tag_ids=[t.id for t in s.tags],
-        items=[item_out(i, runtimes) for i in s.items if i.joke_id not in hidden],
-        version=s.version,
-        created_at=s.created_at,
-        updated_at=s.updated_at,
-    )
-
-
 @router.get("/setlists", response_model=list[SetlistOut])
 def list_setlists(user: CurrentUser, db: DbSession) -> list[SetlistOut]:
     query = (
@@ -74,47 +37,16 @@ def list_setlists(user: CurrentUser, db: DbSession) -> list[SetlistOut]:
         )
         .order_by(Setlist.updated_at.desc())
     )
-    hidden = trashed_joke_ids(db, user)
-    runtimes = joke_runtimes(db, user)
-    return [setlist_out(s, hidden, runtimes) for s in db.scalars(query)]
+    jokes = your_jokes(db, user)
+    return [setlist_out(s, jokes) for s in db.scalars(query)]
 
 
 @router.put("/setlists/{setlist_id}", response_model=SetlistOut)
 def save_setlist(
     setlist_id: uuid.UUID, body: SetlistIn, user: CurrentUser, db: DbSession
 ) -> SetlistOut:
-    """Create or replace a setlist and its items in one transaction."""
-    hidden = trashed_joke_ids(db, user)
-    # A set saved offline may still list a joke deleted since on another device: it keeps its
-    # place, hidden like any joke in the Trash.
-    sent = [i for i in body.items if i.joke_id not in hidden]
-    check_all_owned(db, Joke, {i.joke_id for i in sent}, user)
-    venue = venue_named(db, user, body.venue_name) if body.venue_name else None
-    found = find_owned(db, Setlist, setlist_id, user)
-    if found is not None:
-        # Times follow the jokes and don't count as a change, so no runtimes are looked up.
-        check_set(found, body, lambda: setlist_out(found, hidden, {}))
-    setlist = found or Setlist(id=setlist_id, user_id=user.id)
-    setlist.name = body.name
-    setlist.show_date = body.show_date
-    setlist.target_seconds = body.target_seconds
-    setlist.venue = venue
-    setlist.rating = body.rating
-    # Only your tags that still exist: one deleted while a save waited (offline, or with the set
-    # open) just drops off, rather than failing the save.
-    mine = select(SetTag).where(SetTag.id.in_(body.tag_ids), SetTag.user_id == user.id)
-    setlist.tags = list(db.scalars(mine))
-    db.add(setlist)
-    items = [SetlistItemIn.model_validate(i, from_attributes=True) for i in sent]
-    # Jokes in the Trash aren't sent by the app, so keep their places for when they come back.
-    for away in sorted(setlist.items, key=lambda i: i.position):
-        if away.joke_id in hidden:
-            kept = SetlistItemIn.model_validate(away, from_attributes=True)
-            items.insert(min(away.position, len(items)), kept)
-    setlist.items = [SetlistItem(position=n, **item.model_dump()) for n, item in enumerate(items)]
-    db.commit()
-    db.refresh(setlist)
-    return setlist_out(setlist, hidden, joke_runtimes(db, user))
+    """Create or replace a set, its beats and its items in one transaction."""
+    return save_set(db, user, setlist_id, body)
 
 
 @router.delete("/setlists/{setlist_id}", status_code=204)

@@ -21,8 +21,21 @@ from app.models import User
 from app.seed import reseed
 from tests.conftest import random_topic_id, signed_in
 from tests.connector_auth import connect, content, items, result, rpc
-from tests.connector_fields import BRIEF, CLUSTER, DETAIL, LONG, PULSE, SET, TOOLS
+from tests.connector_fields import BEAT, BRIEF, CLUSTER, DETAIL, LONG, PULSE, SET, SET_JOKE, TOOLS
 from tests.test_craft import note_in
+
+
+def beats_set(jokes: list[dict[str, str]], premise: str) -> dict[str, object]:
+    """A set with one of every kind of entry: a premise, jokes with no premise, crowd work."""
+    piece = lambda n: {"id": f"p{n}", "joke_id": jokes[n]["id"], "gate": 1}  # noqa: E731
+    question = {"id": "q", "text": "Fake question", "replies": [{"id": "r", "line": "Fake"}]}
+    entries = [
+        {"kind": "premise", "id": "e1", "premise_id": premise, "pieces": [piece(0), piece(1)]},
+        {"kind": "jokes", "id": "e2", "pieces": [piece(2)]},
+        {"kind": "crowd", "id": "e3", "title": "Fake", "questions": [question]},
+    ]
+    beat = {"id": "b", "cue": "Fake", "seconds": 90, "labels": {"status": "i-lose"}}
+    return {"name": "Fake beats", "point": "Fake point", "beats": [beat | {"entries": entries}]}
 
 
 @pytest.fixture
@@ -57,6 +70,7 @@ def claude(db: Session) -> Iterator[tuple[TestClient, str]]:
     browser.put(f"/api/observations/{noticed}/links/premises/{premise}")
     browser.put(f"/api/craft-notes/{uuid.uuid4()}", json=note_in(browser) | {"title": "Fake"})
     browser.put(f"/api/analyses/{uuid.uuid4()}", json={"title": "Fake", "body": "Fake why"})
+    browser.put(f"/api/setlists/{uuid.uuid4()}", json=beats_set(jokes, premise))
     with TestClient(app) as client:
         yield client, connect(browser)["access_token"]
 
@@ -146,9 +160,22 @@ def test_performing_tools(claude: tuple[TestClient, str]) -> None:
     sets = items(result(claude, "list_sets"), "sets")
     assert set(sets[0]) == SET
     opened = result(claude, "get_set", set_id=sets[0]["id"])
-    assert set(opened) == SET | {"topics", "running_order"}
+    assert set(opened) == SET | {"topics", "beats", "running_order"}
     first = items(opened, "running_order")[0]
-    assert set(first) == BRIEF | {"place", "role", "optional", "premise", "follows_id"}
+    assert set(first) == BRIEF | {"place", "role", "optional", "loose", "premise", "follows_id"}
+    beat = items(opened, "beats")[0]
+    assert set(beat) == BEAT
+    kinds = {e["kind"]: e for b in opened["beats"] for e in b["entries"]}
+    assert set(kinds) == {"premise", "jokes_without_premise", "crowd_work"}
+    assert set(kinds["premise"]) == {"kind", "premise_id", "premise", "jokes"} | {
+        "only_if_previous_premise_landed"
+    }
+    assert set(kinds["jokes_without_premise"]) == {"kind", "jokes"}
+    assert set(items(kinds["premise"], "jokes")[0]) == SET_JOKE
+    assert set(kinds["crowd_work"]) == {"kind", "title", "questions"}
+    question = items(kinds["crowd_work"], "questions")[0]
+    assert set(question) == {"question", "has_reply", "replies"}
+    assert set(items(question, "replies")[0]) == {"if_they_say", "line"}
 
     shows = result(claude, "list_shows")
     assert set(shows) == {

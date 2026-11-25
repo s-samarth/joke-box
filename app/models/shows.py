@@ -2,7 +2,7 @@
 
 import uuid
 from datetime import date, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import (
     JSON,
@@ -75,6 +75,12 @@ class Setlist(Trashable, OwnedMixin, Base):
     tags: Mapped[list[SetTag]] = relationship(secondary=setlist_tag_links, order_by=SetTag.position)
     # Goes up by one on every save; a save edited from an older version is a conflict.
     version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
+    # The one point the set makes tonight, in a sentence (docs/sets.md).
+    point: Mapped[str] = mapped_column(Text, default="", server_default="")
+    # The set's beats in running order, as JSON in the shape of schemas/set_beats.py BeatIn.
+    # None for a set saved before beats (0045): it reads as one beat holding `items`. `items`
+    # stays, worked out from the beats on every save, for what lists a joke's sets.
+    beats: Mapped[list[dict[str, Any]] | None] = mapped_column(JSON)
 
 
 class SetlistItem(IdMixin, Base):

@@ -34,14 +34,21 @@ def next_version(current: int, base: int | None, unchanged: Callable[[], bool], 
 
 
 def same_set(now: SetlistOut, body: SetlistIn) -> bool:
-    """Would this save leave the set as it is? Times follow the jokes, so only the jokes, their
-    order and which are optional count, beside the set's own details."""
+    """Would this save leave the set as it is? Times follow the jokes, so beside the set's own
+    details only its point and beats count; from an older app without beats, its jokes, their
+    order and which are optional."""
+    if body.beats is not None:
+        same_jokes = [b.model_dump() for b in now.beats] == [b.model_dump() for b in body.beats]
+    else:
+        same_jokes = [(i.joke_id, i.optional) for i in now.items] == [
+            (i.joke_id, i.optional) for i in body.items
+        ]
     return (
         (now.name, now.show_date, now.target_seconds, now.venue_name, now.rating)
         == (body.name, body.show_date, body.target_seconds, body.venue_name, body.rating)
         and set(now.tag_ids) == set(body.tag_ids)
-        and [(i.joke_id, i.optional) for i in now.items]
-        == [(i.joke_id, i.optional) for i in body.items]
+        and (body.point is None or body.point == now.point)
+        and same_jokes
     )
 
 

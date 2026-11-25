@@ -40,6 +40,8 @@ DETAIL = BRIEF | {
 SET = {
     "id",
     "name",
+    "point",
+    "beat_count",
     "tags",
     "rating",
     "venue",
@@ -92,3 +94,13 @@ TOOLS = {
     "search_analyses",
     "get_analysis",
 }
+BEAT = {
+    "cue",
+    "description",
+    "seconds",
+    "starts_at_seconds",
+    "labels",
+    "shift_reason",
+    "entries",
+}
+SET_JOKE = {"place", "joke_id", "loose", "guards", "cluster_id", "pinned_version"}
