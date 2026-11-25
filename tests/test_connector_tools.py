@@ -89,7 +89,8 @@ def test_a_joke_in_full(dev: TestClient, db: Session) -> None:
 
 def test_a_set_in_running_order(dev: TestClient, db: Session) -> None:
     topic = new_topic(dev, "Fake doctors")
-    a = put_joke(dev, setup="Fake opener", duration_seconds=60).json()
+    a = put_joke(dev, setup="Fake opener", duration_seconds=60, persona="riled-up", generic=True)
+    a = a.json()
     b = put_joke(dev, setup="Fake middle", duration_seconds=30, topic_id=topic).json()
     c = put_joke(dev, setup="Fake closer", duration_seconds=45).json()
     set_id = str(uuid.uuid4())
@@ -99,6 +100,8 @@ def test_a_set_in_running_order(dev: TestClient, db: Session) -> None:
     opened = performing.get_set(db, me, set_id)
     assert [i["role"] for i in opened["running_order"]] == ["opener", None, "closer"]
     assert opened["runtime_seconds"] == 105  # the optional joke doesn't count
+    vibes = [(i["vibe"], i["generic"]) for i in opened["running_order"]]
+    assert vibes == [("Riled up", True), ("Not sure", None), ("Not sure", None)]
     assert opened["topics"] == {"Random": 2, "Fake doctors": 1}
     assert performing.list_sets(db, me)["sets"][0]["jokes"] == 3
 

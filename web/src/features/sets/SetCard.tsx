@@ -37,17 +37,20 @@ export function SetCard({ set: s, config, tagName, onDelete }: Props) {
 
   return (
     <article className="flex min-w-0 flex-col gap-3.5 rounded-2xl bg-ink-2 p-4 ring-1 ring-rule sm:p-5">
-      <div className="flex items-start gap-2">
-        <Link to={open} className="min-w-0 flex-1">
+      {/* On a phone the status and buttons leave the name too little room, so they wrap below it. */}
+      <div className="flex flex-wrap items-start gap-2">
+        <Link to={open} className="min-w-48 flex-1">
           <h2 className="headline truncate text-[28px] sm:text-[32px]">{s.name}</h2>
           <p className="mt-1.5 flex flex-wrap items-center gap-x-2 text-[13.5px] text-dim">{meta}{s.rating && <Stars rating={s.rating} size={13} />}</p>
         </Link>
-        <span className={`inline-flex h-8 shrink-0 items-center rounded-full px-3 text-[13px] font-semibold whitespace-nowrap ${STATUS[status_]}`}>{status_}</span>
-        {s.items.length > 0 && <IconButton label="Bird's eye view" onClick={() => navigate(`${open}/stage`)}><Eye size={18} /></IconButton>}
-        <IconButton label="Cue card" onClick={() => navigate(`${open}/print`)}><ScrollText size={18} /></IconButton>
-        <Dropdown items={[
-          { label: 'Delete set', icon: <Trash2 size={16} />, danger: true, onSelect: () => onDelete(s) },
-        ]} trigger={<IconButton label="More"><MoreHorizontal size={18} /></IconButton>} />
+        <div className="flex shrink-0 items-start gap-2">
+          <span className={`inline-flex h-8 shrink-0 items-center rounded-full px-3 text-[13px] font-semibold whitespace-nowrap ${STATUS[status_]}`}>{status_}</span>
+          {s.items.length > 0 && <IconButton label="Bird's eye view" onClick={() => navigate(`${open}/stage`)}><Eye size={18} /></IconButton>}
+          <IconButton label="Cue card" onClick={() => navigate(`${open}/print`)}><ScrollText size={18} /></IconButton>
+          <Dropdown items={[
+            { label: 'Delete set', icon: <Trash2 size={16} />, danger: true, onSelect: () => onDelete(s) },
+          ]} trigger={<IconButton label="More"><MoreHorizontal size={18} /></IconButton>} />
+        </div>
       </div>
 
       {s.point ? (

@@ -6,7 +6,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from app.connector.jokes import brief, load_names, topic_name, user_jokes
+from app.connector.jokes import NOT_SURE, brief, load_names, topic_name, user_jokes
 from app.connector.library import parse_id
 from app.connector.set_beats import beats_out, label_names, live_beats
 from app.connector.show_record import jokes_done
@@ -79,8 +79,8 @@ def role(place: int, size: int) -> str | None:
 
 
 def get_set(db: Session, user: User, set_id: str) -> dict[str, Any]:
-    """A set's beats, and every joke in running order with its topic, premise, strength and
-    time. Each joke in a beat points to its place in the running order."""
+    """A set's beats, and every joke in running order with its topic, premise, strength, time,
+    vibe and Generic answer. Each joke in a beat points to its place in the running order."""
     wanted = parse_id(set_id)
     s = db.scalar(sets_query(user).where(Setlist.id == wanted))  # just this set
     if s is None:
@@ -105,11 +105,12 @@ def get_set(db: Session, user: User, set_id: str) -> dict[str, Any]:
             {
                 "place": place,
                 "role": role(place, len(pieces)),
-                # Kept for readers from before beats: the same as loose.
-                "optional": piece.loose,
+                "optional": piece.loose,  # for readers from before beats: the same as loose
                 "loose": piece.loose,
                 **brief(joke, names),
                 "premise": names.premises.get(joke.premise_id) if joke.premise_id else None,
+                "vibe": names.personas.get(joke.persona or "", NOT_SURE),
+                "generic": joke.generic,
                 "follows_id": str(joke.follows_id) if joke.follows_id else None,
             }
         )

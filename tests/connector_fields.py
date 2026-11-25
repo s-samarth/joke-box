@@ -39,6 +39,8 @@ DETAIL = BRIEF | {
     "from_observations",
     "from_voice_notes",
 }
+# A joke in a set's running order.
+RUNNING = BRIEF | {"place", "role", "optional", "loose", "premise", "follows_id", "vibe", "generic"}
 SET = {
     "id",
     "name",

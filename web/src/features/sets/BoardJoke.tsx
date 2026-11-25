@@ -45,8 +45,9 @@ function JokeCard({ piece, data }: { piece: SetPiece; data: BoardData }) {
       <span className={`text-[12.5px] font-bold tabular ${tone}`}>{n}</span>
       <div className="min-w-0">
         {!joke ? <p className="text-[12px] text-faint">This joke is gone.</p> : <>
-          <p className="text-[11px] leading-snug whitespace-pre-line text-dim">{joke.setup}</p>
-          <p className={`mt-0.5 text-[12.5px] leading-snug font-medium whitespace-pre-line ${tone}`}>{joke.punchline || joke.setup}</p>
+          {/* A one-liner (no punchline) is its setup, said once in the punch's colour. */}
+          {joke.punchline && <p className="mb-0.5 text-[11px] leading-snug whitespace-pre-line text-dim">{joke.setup}</p>}
+          <p className={`text-[12.5px] leading-snug font-medium whitespace-pre-line ${tone}`}>{joke.punchline || joke.setup}</p>
           {joke.tag_lines.map((t, i) => <p key={i} className="mt-0.5 text-[10.5px] leading-snug whitespace-pre-line text-amber">+ {t}</p>)}
           <div className="mt-1 flex flex-wrap items-center gap-1 text-[10.5px] text-faint">
             <VibeChip id={joke.persona} data={data} />

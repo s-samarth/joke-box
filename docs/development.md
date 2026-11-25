@@ -203,7 +203,9 @@ key and the export **out of the repo**.
   3. `PYTHONPATH=. uv run python scripts/screenshot_demo.py <that folder>` adds shows over six
      months, rated and tagged sets, observations, voice notes, craft notes, a brainstorm, a
      rewrite, the watchlist, an analysis, a few things in the Trash, and (from
-     `screenshot_extras.py`) two premises and how the demo set's jokes went at the last four shows.
+     `screenshot_extras.py`) two premises and how the demo set's jokes went at the last four shows,
+     and (from `screenshot_sets.py`) a set in four labelled beats with gates, a titled Standalone
+     block, crowd work, and a Vibe and Generic answer on its jokes and premises.
   4. Run the app on that database, sign in with the local test account and capture at 2x:
      1440×900 (desktop) and 390×844 (phone). Save them as WebP (`cwebp -q 82`) to keep the repo
      small.
