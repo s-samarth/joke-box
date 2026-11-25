@@ -4,10 +4,15 @@
  * why: Top-up, Planned turn or Clash ("Shift, don't flip").
  */
 import type { Beat, SetField } from '../../api/types'
+import { vibeTone } from '../jokes/vibeTone'
 import { NOT_SURE, SHIFT_REASONS, labelOf, statusField } from './beats'
 
 const seg = (on: boolean, unsure = false) =>
   `min-h-8 rounded-md px-2.5 py-1 text-[13px] font-semibold transition-colors ${on ? (unsure ? 'bg-faint text-ink' : 'bg-paper text-ink') : 'bg-ink-3 text-dim hover:text-paper'}`
+
+/** Dominant persona side wears the Vibe colours (vibeTone); other fields stay plain. */
+const segFor = (persona: boolean, id: string | null, on: boolean) =>
+  persona && on ? `min-h-8 rounded-md px-2.5 py-1 text-[13px] font-semibold transition-colors ${vibeTone(id).on}` : seg(on, id === null)
 
 interface Props {
   beat: Beat
@@ -36,9 +41,9 @@ export function BeatLabels({ beat, previous, fields, needsWhy, onChange }: Props
             <p className="mb-1.5 text-sm text-dim">{f.name}</p>
             <div className="flex flex-wrap gap-1" role="group" aria-label={f.name}>
               {f.options.map((o) => (
-                <button key={o.id} type="button" aria-pressed={current?.id === o.id} className={seg(current?.id === o.id)} onClick={() => set(f.id, o.id)}>{o.label}</button>
+                <button key={o.id} type="button" aria-pressed={current?.id === o.id} className={segFor(f.role === 'persona', o.id, current?.id === o.id)} onClick={() => set(f.id, o.id)}>{o.label}</button>
               ))}
-              <button type="button" aria-pressed={!current} className={seg(!current, true)} onClick={() => set(f.id, null)}>{NOT_SURE}</button>
+              <button type="button" aria-pressed={!current} className={segFor(f.role === 'persona', null, !current)} onClick={() => set(f.id, null)}>{NOT_SURE}</button>
             </div>
           </div>
         )

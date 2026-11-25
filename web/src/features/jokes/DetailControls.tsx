@@ -8,6 +8,8 @@ import { CLEAN_LABELS, DEFAULT_TYPES } from '../../lib/jokeMeta'
 import { choice } from '../../components/ui/choice'
 import { NewTypeDialog } from './NewTypeDialog'
 import { GENERIC_ASK, NOT_SURE, VIBE } from './persona'
+import { VibeDot } from './VibeDot'
+import { genericTone, vibeTone } from './vibeTone'
 
 export function TypeToggles({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
   const { data: types = [] } = useTypes()
@@ -42,25 +44,31 @@ export function CleanPicker({ value, onChange }: { value: CleanRating | null; on
   )
 }
 
+const vibeChoice = (id: string | null, on: boolean) =>
+  `hit relative inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm transition ${on ? vibeTone(id).on : 'bg-ink-3 text-dim hover:text-paper'}`
+
 /** Its vibe: the side of you it shows, from your persona field's options. Not sure is always there. */
 export function PersonaPicker({ field, value, onChange }: { field: SetField; value: string | null; onChange: (v: string | null) => void }) {
   const current = field.options.some((o) => o.id === value) ? value : null
   return (
     <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={VIBE}>
       {field.options.map((o) => (
-        <button key={o.id} type="button" role="radio" aria-checked={current === o.id} onClick={() => onChange(o.id)} className={choice(current === o.id)}>{o.label}</button>
+        <button key={o.id} type="button" role="radio" aria-checked={current === o.id} onClick={() => onChange(o.id)} className={vibeChoice(o.id, current === o.id)}><VibeDot id={o.id} />{o.label}</button>
       ))}
-      <button type="button" role="radio" aria-checked={!current} onClick={() => onChange(null)} className={choice(!current)}>{NOT_SURE}</button>
+      <button type="button" role="radio" aria-checked={!current} onClick={() => onChange(null)} className={vibeChoice(null, !current)}><VibeDot id={null} />{NOT_SURE}</button>
     </div>
   )
 }
+
+const genericChoice = (g: boolean, on: boolean) =>
+  `hit relative h-9 rounded-lg px-3 text-sm transition ${on ? genericTone(g).on : 'bg-ink-3 text-dim hover:text-paper'}`
 
 /** Generic (anyone could do it) or not. Unanswered, it says so in amber until you pick. */
 export function GenericPicker({ value, onChange }: { value: boolean | null; onChange: (v: boolean) => void }) {
   return (
     <div className="flex flex-wrap items-center gap-2" role="radiogroup" aria-label="Generic">
-      <button type="button" role="radio" aria-checked={value === true} onClick={() => onChange(true)} className={choice(value === true)}>Generic</button>
-      <button type="button" role="radio" aria-checked={value === false} onClick={() => onChange(false)} className={choice(value === false)}>Non-generic</button>
+      <button type="button" role="radio" aria-checked={value === true} onClick={() => onChange(true)} className={genericChoice(true, value === true)}>Generic</button>
+      <button type="button" role="radio" aria-checked={value === false} onClick={() => onChange(false)} className={genericChoice(false, value === false)}>Non-generic</button>
       {value == null && <span className="text-sm text-amber">{GENERIC_ASK} Pick one</span>}
     </div>
   )
