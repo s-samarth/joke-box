@@ -85,3 +85,6 @@ directly, so a model change can break them, and Claude only finds out mid-conver
   them together with `set_review/payload.py`.
 - **Sign-in is OAuth** (`oauth.py`, `tokens.py`, `consent.py`). Deployed, the MCP SDK's host
   check must stay explicitly off in `http.py`: left unset, it refuses the real domain.
+- **The app never imports the connector at startup.** `lazy.py` lists its paths (`PATHS`, checked
+  by `tests/test_connector_lazy.py`) and loads `http.py` on the first call, to keep cold starts
+  cheap on the Hobby plan's CPU allowance. A new connector path goes in `PATHS` too.
