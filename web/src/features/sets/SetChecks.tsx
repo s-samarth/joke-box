@@ -4,9 +4,9 @@
  * can't apply yet is greyed out with what it needs, instead of a tick it hasn't earned.
  * The top-up limit is yours to change (it's saved with your label fields).
  */
-import { useState, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import type { Beat, SetField, SetFields } from '../../api/types'
-import { clock, parse } from '../../lib/duration'
+import { DurationInput } from '../../components/ui/DurationInput'
 import { type Analysis, statusField } from './beats'
 import { type Check, type CheckState, setChecks } from './checks'
 import { StatusTrack } from './StatusTrack'
@@ -46,12 +46,7 @@ function Unsure({ analysis: a, fields, waiting }: { analysis: Analysis; fields: 
 }
 
 function Limit({ seconds, onChange }: { seconds: number; onChange: (s: number) => void }) {
-  const [text, setText] = useState(clock(seconds))
-  return (
-    <input aria-label="Top-up limit" inputMode="numeric" value={text} onChange={(e) => setText(e.target.value)}
-      onBlur={() => { const s = parse(text); if (s && s !== seconds) onChange(s); setText(clock(s || seconds)) }}
-      className="mx-1 inline-block h-7 w-14 rounded-md bg-ink-3 text-center text-paper tabular ring-1 ring-rule-strong outline-none focus:ring-2 focus:ring-tape" />
-  )
+  return <span className="mx-1 inline-block"><DurationInput small label="Top-up limit" value={seconds} onChange={(s) => { if (s) onChange(s) }} /></span>
 }
 
 export function SetChecks({ beats, config, onLimit }: { beats: Beat[]; config: SetFields; onLimit: (s: number) => void }) {
@@ -60,7 +55,7 @@ export function SetChecks({ beats, config, onLimit }: { beats: Beat[]; config: S
   const status = statusField(fields)
   const source: Record<Check['id'], ReactNode> = {
     shift: <>A change in status needs a reason. From “Shift, don't flip”, My status: a flow.</>,
-    topup: <>Keep it under<Limit key={limit} seconds={limit} onChange={onLimit} />(“every 2–4 minutes”, My status: a flow). Neutral doesn't count as a top-up.</>,
+    topup: <>Keep it under<Limit seconds={limit} onChange={onLimit} />(“every 2–4 minutes”, My status: a flow). Neutral doesn't count as a top-up.</>,
     persona: <>All sides show up. From “The persona is the balance”, My persona.</>,
   }
   return (

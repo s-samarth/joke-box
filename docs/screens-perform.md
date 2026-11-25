@@ -47,7 +47,7 @@ What a set is made of and why is in [sets.md](sets.md). Files:
   it (premises, jokes, crowd work). Drag a beat by its grip, or use the up and down arrows, and **Add beat** adds one at
   the end. From 1024px wide, the spine sits beside the open beat. Narrower (phones, iPads in
   portrait), it sits above it, and tapping a beat scrolls to it.
-- **The open beat:** the cue on a tape strip (type into it), **Time for this beat** (m:ss, set by
+- **The open beat:** the cue on a tape strip (type into it), **Time for this beat** (minutes and seconds boxes, set by
   hand), **What it's for**, and **Labels for this beat, in this set** (one row of options per field,
   plus Not sure). When the status group changes from the beat before, an amber box asks **Why the
   shift?** (Top-up, Planned turn, Clash). Then **The beat, in order**: numbered entries, each with

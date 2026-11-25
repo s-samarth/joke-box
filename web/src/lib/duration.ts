@@ -35,3 +35,8 @@ export function parse(text: string): number | null {
   return null
 }
 
+
+/** Minutes and seconds boxes as typed: ("2", "75") -> 179, seconds clamped to 59; blanks are 0. */
+export function fromParts(min: string, sec: string): number {
+  return Number(min || 0) * 60 + Math.min(59, Number(sec || 0))
+}
