@@ -39,6 +39,7 @@ still accept the old `bit_id` and `bit_ids` for good. Responses use only the new
 |---|---|---|
 | GET | `/health` | `{status, env, version}`. No auth, and no database query, so a pinger can't keep the database awake |
 | GET | `/api/me` | The signed-in user: `id, email, display_name, avatar_url, plan, env` |
+| POST | `/api/batch` | `{paths: [...]}`, up to 30 list addresses (`/api/name` or `/api/name/name`: no ids, no query). Each runs as its own GET with the caller's cookie and comes back in order as `{status, body}`, exactly as it would alone; an answer that isn't JSON, or past 3.5 MB in all, comes back as `{status: null}` for the app to fetch alone. The app sends lists asked for together this way (`web/src/api/batch.ts`), so one server copy starts instead of one per list |
 | POST | `/api/dev/reseed` | Wipes the account and loads the demo data. Local only (404 otherwise) |
 | GET | `/auth/google/login` | Redirects to Google (503 if `GOOGLE_CLIENT_ID` isn't set) |
 | GET | `/auth/google/callback` | Finishes sign-in, then redirects to `/` or `/login?error=not_invited\|failed` |

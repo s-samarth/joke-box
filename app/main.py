@@ -13,6 +13,7 @@ from app.connector import lazy as connector
 from app.packed import UnpackRequests
 from app.routers import (
     analyses,
+    batch,
     clusters,
     connections,
     craft,
@@ -86,6 +87,7 @@ def create_app() -> FastAPI:
     )
     routers = (
         system,
+        batch,
         topics,
         jokes,
         premises,
