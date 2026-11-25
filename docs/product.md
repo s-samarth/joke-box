@@ -98,7 +98,7 @@ The vocabulary is a comic's, not a database's. Keep to it in the code and in the
 | **Type** | The form of a joke: One-Liner, Story, Crowd Work, Roast, Observation, Premise, Act Out, or your own. A type exists only while some joke uses it; a joke with no type shows as "Undefined". |
 | **Strength** | 1–5: Weak, Needs work, Decent, Strong, Killer, drawn as five ticks; or **Unrated**, which is how every new joke starts, so a 3 always means you chose it. Sorting by strength puts unrated jokes last. |
 | **Status** | Incomplete, Work in Progress, Complete, Draft, Stage Ready, Need Tags, or your own. Every joke has one; new jokes start as Draft. |
-| **Runs for** | How long the joke takes on stage (m:ss). |
+| **Runs for** | How long the joke takes on stage (minutes and seconds boxes). |
 | **Clean rating** | Clean, Mild or Dirty. |
 | **Set** | One show's material: a **point**, then **beats** in a fixed order, each with a **cue**, its own time and an ordered list of premises, jokes and crowd work. See [sets.md](sets.md). |
 | **Beat** | A section of a set you remember by one cue word. Beats never branch; anything that depends on the room (a **gate**: the next jokes only if this one lands) lives inside a beat. |

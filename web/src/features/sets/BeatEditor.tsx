@@ -3,12 +3,12 @@
  * count), what it's for, its labels, and its list of premises, jokes and crowd work.
  */
 import { Lightbulb, MessagesSquare, Plus, Trash2 } from 'lucide-react'
-import { useState, type CSSProperties } from 'react'
+import type { CSSProperties } from 'react'
 import type { Premise } from '../../api/premises'
 import type { Beat, Joke, SetField } from '../../api/types'
 import { Button } from '../../components/ui/Button'
-import { GrowingText, Input } from '../../components/ui/Field'
-import { clock, parse } from '../../lib/duration'
+import { DurationInput } from '../../components/ui/DurationInput'
+import { GrowingText } from '../../components/ui/Field'
 import { BeatLabels } from './BeatLabels'
 import { newCrowd, setEntries } from './beatEdit'
 import { EntryList } from './EntryList'
@@ -38,13 +38,7 @@ interface Props {
 const section = 'text-[11.5px] font-semibold tracking-[0.13em] text-faint uppercase'
 
 function BeatTime({ seconds, onChange }: { seconds: number; onChange: (s: number) => void }) {
-  const [text, setText] = useState(clock(seconds))
-  return (
-    <div className="w-24 shrink-0">
-      <Input inputMode="numeric" aria-label="Time for this beat" className="text-center tabular" value={text} onChange={(e) => setText(e.target.value)}
-        onBlur={() => { const s = parse(text); if (s !== null) onChange(s); setText(clock(s ?? seconds)) }} />
-    </div>
-  )
+  return <div className="shrink-0"><DurationInput label="Time for this beat" value={seconds} onChange={onChange} /></div>
 }
 
 export function BeatEditor({ beat, previous, needsWhy, fields, onChange, onDelete, onAddPremise, onEditFields, ...lists }: Props) {

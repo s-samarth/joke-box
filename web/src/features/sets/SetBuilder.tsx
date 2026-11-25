@@ -13,9 +13,9 @@ import { useLoadedSetFields, useSaveSetFields, useSetFields } from '../../api/se
 import { useSetlists } from '../../api/shows'
 import type { Beat, Joke, Setlist } from '../../api/types'
 import { EmptyState, Spinner } from '../../components/ui/pieces'
-import { Field, GrowingText, Input } from '../../components/ui/Field'
+import { DurationInput } from '../../components/ui/DurationInput'
+import { GrowingText } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
-import { clock, parse } from '../../lib/duration'
 import { CraftSheet } from '../craft/CraftSheet'
 import { leadOf as leadOfCluster, versionsOf } from '../jokes/cluster/lead'
 import { BeatEditor } from './BeatEditor'
@@ -47,7 +47,6 @@ function Builder({ setlist }: { setlist: Setlist }) {
   const [sheet, setSheet] = useState<Sheet>(null)
   const [picking, setPicking] = useState<Picking | null>(null)
   const [reading, setReading] = useState<Joke | null>(null)
-  const [target, setTarget] = useState(clock(draft.target_seconds))
   const editor = useRef<HTMLDivElement>(null)
   // Stacked (phone, iPad in portrait), the open beat is below the spine: go to it.
   const open = (id: string) => {
@@ -91,10 +90,10 @@ function Builder({ setlist }: { setlist: Setlist }) {
             className="mt-1.5 rounded-lg bg-ink-2 px-3 py-2.5 text-lg leading-snug ring-1 ring-rule-strong focus:ring-2 focus:ring-tape" onChange={(e) => update((d) => ({ ...d, point: e.target.value }))} />
         </div>
         <div className="mt-5 grid grid-cols-2 gap-3">
-          <Field label="Slot length">
-            <Input inputMode="numeric" className="tabular" value={target} onChange={(e) => setTarget(e.target.value)}
-              onBlur={() => { const s = parse(target); if (s) update((d) => ({ ...d, target_seconds: s })); setTarget(clock(s || draft.target_seconds)) }} />
-          </Field>
+          <div className="space-y-1.5">
+            <p className="text-sm text-dim">Slot length</p>
+            <DurationInput label="Slot length" value={draft.target_seconds} onChange={(s) => { if (s) update((d) => ({ ...d, target_seconds: s })) }} />
+          </div>
         </div>
         <SetMeta draft={draft} update={update} />
         <div className="mt-8"><LightBar total={beatTotal(beats)} target={draft.target_seconds} big /></div>
