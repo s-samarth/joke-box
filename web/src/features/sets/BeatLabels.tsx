@@ -3,16 +3,23 @@
  * another set). Not sure is always there. When the status changes from the beat before, it asks
  * why: Top-up, Planned turn or Clash ("Shift, don't flip").
  */
-import type { Beat, SetField } from '../../api/types'
-import { vibeTone } from '../jokes/vibeTone'
+import type { Beat, SetField, SetFieldOption } from '../../api/types'
+import { filled, optionColor } from '../../lib/labelColors'
 import { NOT_SURE, SHIFT_REASONS, labelOf, statusField } from './beats'
 
 const seg = (on: boolean, unsure = false) =>
   `min-h-8 rounded-md px-2.5 py-1 text-[13px] font-semibold transition-colors ${on ? (unsure ? 'bg-faint text-ink' : 'bg-paper text-ink') : 'bg-ink-3 text-dim hover:text-paper'}`
 
-/** Dominant persona side wears the Vibe colours (vibeTone); other fields stay plain. */
-const segFor = (persona: boolean, id: string | null, on: boolean) =>
-  persona && on ? `min-h-8 rounded-md px-2.5 py-1 text-[13px] font-semibold transition-colors ${vibeTone(id).on}` : seg(on, id === null)
+/** Every option wears its colour (lib/labelColors): a dot until it's picked, then filled. Not sure is amber. */
+function Option({ option, on, label, onPick }: { option: SetFieldOption | null; on: boolean; label: string; onPick: () => void }) {
+  const hex = optionColor(option)
+  return (
+    <button type="button" aria-pressed={on} onClick={onPick} style={on ? filled(hex) : undefined}
+      className={`inline-flex min-h-8 items-center gap-1.5 rounded-md px-2.5 py-1 text-[13px] font-semibold transition-colors ${on ? '' : 'bg-ink-3 text-dim hover:text-paper'}`}>
+      {!on && <span aria-hidden className="size-2 shrink-0 rounded-full" style={{ backgroundColor: hex }} />}{label}
+    </button>
+  )
+}
 
 interface Props {
   beat: Beat
@@ -40,10 +47,8 @@ export function BeatLabels({ beat, previous, fields, needsWhy, onChange }: Props
           <div key={f.id}>
             <p className="mb-1.5 text-sm text-dim">{f.name}</p>
             <div className="flex flex-wrap gap-1" role="group" aria-label={f.name}>
-              {f.options.map((o) => (
-                <button key={o.id} type="button" aria-pressed={current?.id === o.id} className={segFor(f.role === 'persona', o.id, current?.id === o.id)} onClick={() => set(f.id, o.id)}>{o.label}</button>
-              ))}
-              <button type="button" aria-pressed={!current} className={segFor(f.role === 'persona', null, !current)} onClick={() => set(f.id, null)}>{NOT_SURE}</button>
+              {f.options.map((o) => <Option key={o.id} option={o} label={o.label} on={current?.id === o.id} onPick={() => set(f.id, o.id)} />)}
+              <Option option={null} label={NOT_SURE} on={!current} onPick={() => set(f.id, null)} />
             </div>
           </div>
         )

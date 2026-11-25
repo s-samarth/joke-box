@@ -3,7 +3,8 @@
  * it). One field can be drawn as the status track (its options say win, neutral or loss, which
  * the checks read), and one can be the persona: the persona check counts it, and a joke's persona
  * picks from it. Not sure is always there and can't be removed. Deleting an option, or a field,
- * says first how many beats and jokes it's on: they turn to Not sure. Saved for every set on Done.
+ * says first how many beats and jokes it's on: they turn to Not sure. Each option has a colour: tap
+ * its dot for the swatches (a new option gets one its field isn't using). Saved for every set on Done.
  */
 import { Plus, X } from 'lucide-react'
 import { useState } from 'react'
@@ -16,6 +17,7 @@ import { Button } from '../../components/ui/Button'
 import { Input, Select } from '../../components/ui/Field'
 import { Modal } from '../../components/ui/Modal'
 import { useFeedback } from '../../components/ui/feedbackContext'
+import { LABEL_PALETTE, NOT_SURE_COLOR, nextLabelColor, optionColor } from '../../lib/labelColors'
 import { NOT_SURE } from './beats'
 import { optionUsage, usageText } from './fieldUsage'
 
@@ -34,10 +36,13 @@ interface CardProps {
 
 function FieldCard({ field, onChange, onDelete, onRemoveOption, onRenameOption, roleTaken }: CardProps) {
   const [adding, setAdding] = useState('')
+  const [painting, setPainting] = useState<string | null>(null)
+  const paint = painting ? field.options.find((o) => o.id === painting) : undefined
+  const recolor = (id: string, color: string) => onChange({ ...field, options: field.options.map((x) => (x.id === id ? { ...x, color } : x)) })
   const add = () => {
     const label = adding.trim()
     if (!label || same(label, NOT_SURE) || field.options.length >= MAX_OPTIONS || field.options.some((o) => same(o.label, label))) return
-    onChange({ ...field, options: [...field.options, { id: newId(), label, group: field.role === 'status' ? 'neutral' : null }] })
+    onChange({ ...field, options: [...field.options, { id: newId(), label, group: field.role === 'status' ? 'neutral' : null, color: nextLabelColor(field.options) }] })
     setAdding('')
   }
   return (
@@ -55,6 +60,8 @@ function FieldCard({ field, onChange, onDelete, onRemoveOption, onRenameOption, 
       <ul className="mt-3 flex flex-wrap gap-1.5">
         {field.options.map((o) => (
           <li key={o.id} className="inline-flex items-center gap-1 rounded-full bg-ink-3 py-0.5 pr-1 pl-1 text-sm">
+            <button type="button" aria-label={`Colour of ${o.label}`} aria-expanded={painting === o.id} title="Colour" onClick={() => setPainting(painting === o.id ? null : o.id)}
+              className="inline-flex size-6 items-center justify-center rounded-full hover:bg-ink-4"><span aria-hidden className={`size-3.5 rounded-full ${painting === o.id ? 'ring-2 ring-paper ring-offset-1 ring-offset-ink-3' : ''}`} style={{ backgroundColor: optionColor(o) }} /></button>
             <button type="button" aria-label={`Rename ${o.label}`} title="Rename" className="rounded-full px-1.5 py-0.5 hover:bg-ink-4" onClick={() => onRenameOption(o)}>{o.label}</button>
             {field.role === 'status' && (
               <select aria-label={`What ${o.label} counts as`} value={o.group ?? 'neutral'} className="rounded bg-ink-4 px-1 text-xs text-dim"
@@ -66,8 +73,16 @@ function FieldCard({ field, onChange, onDelete, onRemoveOption, onRenameOption, 
               onClick={() => onRemoveOption(o)}><X size={13} /></button>
           </li>
         ))}
-        <li className="rounded-full px-2.5 py-0.5 text-sm text-faint ring-1 ring-rule">{NOT_SURE}</li>
+        <li className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-sm text-faint ring-1 ring-rule"><span aria-hidden className="size-2.5 rounded-full" style={{ backgroundColor: NOT_SURE_COLOR }} />{NOT_SURE}</li>
       </ul>
+      {paint && (
+        <div role="radiogroup" aria-label={`Colour for ${paint.label}`} className="mt-2 flex flex-wrap gap-1.5 rounded-lg bg-ink-2 p-2 ring-1 ring-rule">
+          {LABEL_PALETTE.map(({ name, color: c }) => (
+            <button key={c} type="button" role="radio" aria-checked={optionColor(paint) === c} aria-label={name} title={name} onClick={() => { recolor(paint.id, c); setPainting(null) }}
+              className={`size-7 rounded-full pointer-coarse:size-9 ${optionColor(paint) === c ? 'ring-2 ring-paper ring-offset-2 ring-offset-ink-2' : 'hover:scale-110'}`} style={{ backgroundColor: c }} />
+          ))}
+        </div>
+      )}
       <div className="mt-2 flex gap-2">
         <Input aria-label={`New option for ${field.name}`} placeholder="New option" value={adding} maxLength={80} onChange={(e) => setAdding(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); add() } }} />
         <Button small onClick={add}>Add</Button>
