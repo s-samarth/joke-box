@@ -1,8 +1,9 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { MemoryRouter } from 'react-router'
 import { describe, expect, it } from 'vitest'
-import type { Joke } from '../../api/types'
-import { formatDateTime } from '../../lib/time'
+import type { Joke, Topic } from '../../api/types'
+import { formatDate } from '../../lib/time'
 import { stackRows } from './cluster/stacks'
 import { JokeList } from './JokeList'
 import { matchesFilters } from './useJokeFilters'
@@ -32,7 +33,27 @@ describe('Jokes list display', () => {
     expect(html.includes(cluster.title)).toBe(showClusterNames)
     expect(html.includes(lead.setup)).toBe(!showClusterNames)
     expect(html.includes(lead.punchline)).toBe(!showClusterNames)
-    if (showClusterNames) expect(html).toContain(formatDateTime(lead.created_at))
+    expect(html).toContain(formatDate(lead.created_at))
+  })
+
+  it("fills a named cluster row's details from its lead, even when another version matches", () => {
+    const topics = [{ id: 'lead-topic', name: 'Lead topic' }, { id: 'topic', name: 'Other topic' }] as Topic[]
+    const strong = { ...lead, strength: 4, types: ['One-liner'], topic_id: 'lead-topic', duration_seconds: 75 }
+    const weak = { ...alternate, strength: 1, types: ['Act-out'], duration_seconds: 20 }
+    const narrowed = stackRows([weak], [weak, strong], { clusters: [cluster], showDiscarded: false })
+    const html = renderToStaticMarkup(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter><JokeList rows={narrowed} topics={topics} sort="new" showClusterNames query="" /></MemoryRouter>
+      </QueryClientProvider>,
+    )
+    expect(html).toContain('Strength: ')
+    expect(html.match(/bg-tape"/g)).toHaveLength(4)
+    expect(html).toContain('One-liner')
+    expect(html).toContain('Lead topic')
+    expect(html).toContain('1:15')
+    expect(html).toContain('1 of 2 versions')
+    expect(html).not.toContain('Act-out')
+    expect(html).not.toContain(strong.setup)
   })
 
   it('finds a cluster by name while respecting the other filters', () => {

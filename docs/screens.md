@@ -249,12 +249,20 @@ From the top:
   together, each still a whole joke. Like Google Photos stacking similar shots, the list shows a
   cluster as one row with a tape-yellow **3 versions** badge
   ([stacks.ts](../web/src/features/jokes/cluster/stacks.ts)). With **⋯ → Show cluster names** checked (the default), the row shows the cluster
-  name (or the lead's setup if unnamed), version count, and the lead's date and time. Uncheck it to
-  read the lead's setup and punchline. A standalone joke shows its setup and punchline in both views.
+  name (or the lead's setup if unnamed) in place of the words, and under it the version count and
+  the lead's details line, the same one a joke row has: strength, type dots, topic, date and runtime.
+  They're always the lead's, the version you'd do tonight, even when a filter matched another
+  version. Uncheck it to read the lead's setup and punchline. A standalone joke shows its setup and punchline in both views.
   Search matches cluster names as well as joke text. If only another version matches a filter, the row
   sits where that version sorts, counts the matches (e.g. "1 of 3 versions"), and shows that version
   in the joke-text view. A fully discarded cluster hides with discarded jokes and says "discarded" when shown.
   Export as CSV adds Cluster and Lead columns.
+
+  <p>
+    <img src="screenshots/ipad-jokes-clusters.webp" width="360" alt="Named cluster rows among jokes on an iPad">
+    <img src="screenshots/phone-jokes-clusters.webp" width="230" alt="A named cluster row on a phone">
+  </p>
+
 - **A cluster** ([ClusterPage.tsx](../web/src/features/jokes/cluster/ClusterPage.tsx)) opens
   beside the list like a joke, with the same full-width and close buttons, and on a phone as its
   own page. At the top, where it's filed and how many versions, then what the versions share
