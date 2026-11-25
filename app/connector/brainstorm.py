@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.connector.ink_image import draw_page, pages_with_ink, strokes_on
 from app.connector.library import parse_id
+from app.connector.notebook import live_links
 from app.connector.text import clip, ist_date
 from app.models import Brainstorm, CraftNote, Joke, User, WritingSession
 
@@ -86,13 +87,14 @@ def get_brainstorm(
             break
         shown.append((number, png))
         used += len(png)
+    _, live = live_links(db, user)  # a linked joke in the Trash isn't listed
     about = {
         "kind": "brainstorm",
         "id": str(session.id),
         "title": session.title,
         **typed_part(session.content, from_char),
         "technique": technique or None,
-        "linked_joke_ids": [str(i) for i in session.joke_ids or []],
+        "linked_joke_ids": [str(i) for i in session.joke_ids or [] if str(i) in live],
         "linked_observation_ids": [str(i) for i in session.observation_ids or []],
         "updated": ist_date(session.updated_at),
         "handwritten_pages": [p + 1 for p in pages] if from_char <= 0 else None,

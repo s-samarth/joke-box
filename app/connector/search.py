@@ -1,13 +1,39 @@
 """search_jokes: jokes matching words and filters, a page at a time (see server_jokes.py)."""
 
+import uuid
 from typing import Any
 
 from sqlalchemy.orm import Session
 
 from app.connector.clusters import wanted
-from app.connector.jokes import brief, hashtags, lines, load_names, topic_name, user_jokes
+from app.connector.jokes import (
+    Names,
+    brief,
+    hashtags,
+    is_lead,
+    lines,
+    load_names,
+    topic_name,
+    user_jokes,
+)
 from app.connector.text import matches, page, same_name
-from app.models import User
+from app.models import Joke, User
+
+
+def once_per_cluster(found: list[Joke], names: Names) -> list[Joke]:
+    """Each cluster once: its lead when the lead matched, else the first version that did (so
+    a cluster isn't dropped because only another version has the words)."""
+    lead_matched = {j.cluster_id for j in found if j.cluster_id and is_lead(j, names)}
+    seen: set[uuid.UUID] = set()
+    out = []
+    for j in found:
+        c = j.cluster_id
+        if c is not None and (c in seen or (c in lead_matched and not is_lead(j, names))):
+            continue
+        if c is not None:
+            seen.add(c)
+        out.append(j)
+    return out
 
 
 def search_jokes(
@@ -37,8 +63,10 @@ def search_jokes(
         and (not joke_type or any(same_name(joke_type, t.name) for t in j.types))
         and (min_strength <= 1 or (j.strength or 0) >= min_strength)
         and (not premise_id or str(j.premise_id) == premise_id)
-        and wanted(j, names, cluster_id, leads_only)
+        and wanted(j, names, cluster_id, False)
     ]
+    if leads_only:
+        found = once_per_cluster(found, names)
     shown, total = page(found, limit, offset=offset)
     after = max(0, offset) + len(shown)
     return {

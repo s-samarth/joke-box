@@ -22,7 +22,8 @@ from app.services.show_logs import save_show
 
 
 def show_id(raw: str) -> uuid.UUID:
-    """The show to update, or a new id. Logging the same id again replaces that show's details."""
+    """The show to update, or a new id. Logging the same id again replaces that show's details;
+    so does logging a show at the same time without an id."""
     if not raw:
         return uuid.uuid4()
     try:
@@ -76,6 +77,18 @@ def problem(exc: ValidationError) -> str:
     return "; ".join(f"{'.'.join(map(str, e['loc']))}: {e['msg']}" for e in exc.errors())
 
 
+def merged(sent: str | None, before: str | None, first: bool) -> str | None:
+    """What a re-logged show keeps. Nothing sent, or text cut short by list_shows ("…"),
+    leaves what's there. On a hand-logged show's first review, what was written by hand stays,
+    with the review's text after it; after that, logging the show again replaces it."""
+    sent, before = (sent or "").strip(), (before or "").strip()
+    if not sent or (sent.endswith("…") and before.startswith(sent[:-1].rstrip())):
+        return before or None
+    if first and before and before not in sent:
+        return before if sent in before else f"{before}\n\n{sent}"
+    return sent
+
+
 def log_show(db: Session, user: User, raw_id: str, show: dict[str, Any]) -> dict[str, Any]:
     """Save the show and say what was kept."""
     jokes = show.get("jokes") or []
@@ -99,10 +112,19 @@ def log_show(db: Session, user: User, raw_id: str, show: dict[str, Any]) -> dict
             previous = find_owned(db, PerformanceLog, target, user, lock=True)
             if previous is None:
                 raise ValueError("PerformanceLog not found")
+        else:  # the same show logged again without its id (a retried call) isn't a second show
+            same = (
+                PerformanceLog.user_id == user.id,
+                PerformanceLog.performed_at == body.performed_at,
+            )
+            previous = db.scalar(select(PerformanceLog).where(*same))
+            target = previous.id if previous else target
+        if previous is not None:
             if not topic_ids:
                 body.topic_ids = [t.id for t in previous.topics]
-            if not body.notes.strip():
-                body.notes = previous.notes
+            first = previous.review is None  # a show logged by hand, reviewed for the first time
+            body.notes = merged(body.notes, previous.notes, first) or ""
+            body.learned = merged(body.learned, previous.learned, first)
             if not body.audience_size:
                 body.audience_size = previous.audience_size
             if body.venue_name == "Unidentified Venue" and previous.venue:
@@ -126,5 +148,10 @@ def log_show(db: Session, user: User, raw_id: str, show: dict[str, Any]) -> dict
 
 def when(performed_at: str) -> datetime:
     """An ISO date and time; one without a zone is read as IST, where the comic performs."""
-    value = datetime.fromisoformat(performed_at)
+    try:
+        value = datetime.fromisoformat(performed_at)
+    except ValueError:
+        raise ValueError(
+            f"performed_at {performed_at!r} isn't an ISO date and time, like 2026-11-20T21:30"
+        ) from None
     return value if value.tzinfo else datetime.fromisoformat(performed_at + "+05:30")

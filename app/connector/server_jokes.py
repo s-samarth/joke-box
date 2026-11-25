@@ -31,7 +31,8 @@ def search_jokes(
     id (that cluster's versions only). Strength is 1 (Weak) to 5 (Killer), or null when the
     comic hasn't rated the joke yet; a min_strength above 1 leaves unrated jokes out. Each joke
     says its `cluster_id` and whether it's that cluster's `lead`; `leads_only` lists each
-    cluster once, as its lead, so versions aren't counted as separate material. Returns short
+    cluster once, as its lead (or the version that matched, if the lead didn't), so versions
+    aren't counted as separate material. Returns short
     versions (at most 25) and the total; open them with get_jokes. When next_offset is set,
     call again with that offset for the rest."""
     with reading() as (db, user):

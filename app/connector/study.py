@@ -13,6 +13,7 @@ from app.connector.text import (
     clip,
     ist_date,
     matches,
+    next_offset,
     page,
     part,
     same_name,
@@ -91,7 +92,9 @@ def get_craft_notes(db: Session, user: User, ids: list[str], from_char: int = 0)
     }
 
 
-def search_analyses(db: Session, user: User, query: str = "", limit: int = 25) -> dict[str, Any]:
+def search_analyses(
+    db: Session, user: User, query: str = "", limit: int = 25, offset: int = 0
+) -> dict[str, Any]:
     """Your write-ups of sets and jokes you studied, with the watchlist routine each is about."""
     routines = {w.id: w for w in db.scalars(select(WatchItem).where(WatchItem.user_id == user.id))}
     rows = db.scalars(
@@ -103,9 +106,10 @@ def search_analyses(db: Session, user: User, query: str = "", limit: int = 25) -
         return f"{r.title} ({r.comedian})".replace(" ()", "") if r else ""
 
     found = [a for a in rows if matches(query, a.title, a.body, about(a))]
-    shown, total = page(found, limit)
+    shown, total = page(found, limit, offset=offset)
     return {
         "total": total,
+        "next_offset": next_offset(offset, shown, total),
         "analyses": [
             {
                 "id": str(a.id),

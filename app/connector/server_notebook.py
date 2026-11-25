@@ -19,6 +19,7 @@ def search_observations(
     limit: int = 25,
     min_strength: int = 1,
     status: str = "",
+    offset: int = 0,
 ) -> dict[str, Any]:
     """Observations: things the comic noticed that aren't jokes yet, newest first. `topic` is a
     joke topic (the same list as jokes and premises; Random unless filed elsewhere). `kind` says
@@ -28,29 +29,32 @@ def search_observations(
     sessions it was used in: all empty means it hasn't been used yet. `strength` is 1 (Weak) to
     5 (Killer), or null when not rated yet; min_strength leaves out weaker and unrated ones.
     `status` is Draft, Work in Progress, Stage Ready or Discarded, the same four as a premise's;
-    narrow by it with `status`."""
+    narrow by it with `status`.
+    At most 25 a call: when next_offset is set, call again with that offset for the rest."""
     with reading() as (db, user):
         return notebook.search_observations(
-            db, user, query, topic, limit, kind, min_strength, status
+            db, user, query, topic, limit, kind, min_strength, status, offset
         )
 
 
 @server.tool(annotations=READ)
-def search_voice_notes(query: str = "", limit: int = 25) -> dict[str, Any]:
+def search_voice_notes(query: str = "", limit: int = 25, offset: int = 0) -> dict[str, Any]:
     """Voice notes: ideas the comic recorded out loud, newest first, by label and hashtags.
     Only what each is called and tagged, how long it runs, when it was recorded and `joke_ids`
-    (the jokes written from it): the recordings themselves can't be heard here."""
+    (the jokes written from it): the recordings themselves can't be heard here.
+    At most 25 a call: when next_offset is set, call again with that offset for the rest."""
     with reading() as (db, user):
-        return voice.search_voice_notes(db, user, query, limit)
+        return voice.search_voice_notes(db, user, query, limit, offset)
 
 
 @server.tool(annotations=READ)
-def search_brainstorms(query: str = "", limit: int = 25) -> dict[str, Any]:
+def search_brainstorms(query: str = "", limit: int = 25, offset: int = 0) -> dict[str, Any]:
     """Brainstorm sessions (free writing, maybe running a Craft technique) and Rewrites
     (reworking one joke), searched by title and typed text. Handwriting can't be searched: a
-    brainstorm's handwritten_pages says how many pages it has; read them with get_brainstorm."""
+    brainstorm's handwritten_pages says how many pages it has; read them with get_brainstorm.
+    At most 25 a call: when next_offset is set, call again with that offset for the rest."""
     with reading() as (db, user):
-        return notebook.search_brainstorms(db, user, query, limit)
+        return notebook.search_brainstorms(db, user, query, limit, offset)
 
 
 @server.tool(annotations=READ)
@@ -85,10 +89,11 @@ def get_craft_notes(ids: list[str], from_char: int = 0) -> dict[str, Any]:
 
 
 @server.tool(annotations=READ)
-def search_analyses(query: str = "", limit: int = 25) -> dict[str, Any]:
-    """The comic's analyses of other comics' sets and jokes, with the routine each is about."""
+def search_analyses(query: str = "", limit: int = 25, offset: int = 0) -> dict[str, Any]:
+    """The comic's analyses of other comics' sets and jokes, with the routine each is about.
+    At most 25 a call: when next_offset is set, call again with that offset for the rest."""
     with reading() as (db, user):
-        return study.search_analyses(db, user, query, limit)
+        return study.search_analyses(db, user, query, limit, offset)
 
 
 @server.tool(annotations=READ)

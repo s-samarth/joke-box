@@ -147,8 +147,8 @@ def log_show(
     `notes` are remarks on the night. `learned` is what the comic learned, saved on
     the show beside them (empty keeps what's there). Pass `show_id` to replace a show logged
     before."""
-    show = {
-        "performed_at": when(performed_at),
+    show: dict[str, Any] = {
+        "performed_at": performed_at,
         "venue_name": venue,
         "topics": topics or [],
         "duration_seconds": duration_seconds,
@@ -161,7 +161,8 @@ def log_show(
         "engine_version": engine_version,
         "events": events,
     }
-    with logging_shows() as (db, user):
+    with logging_shows() as (db, user):  # a bad date is a readable tool error, raised in here
+        show["performed_at"] = when(performed_at)
         return save_logged_show(db, user, show_id, show)
 
 

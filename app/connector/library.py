@@ -79,11 +79,14 @@ def overview(db: Session, user: User) -> dict[str, Any]:
 
 
 def get_jokes(db: Session, user: User, ids: list[str]) -> dict[str, Any]:
-    """Full detail for up to 20 jokes. Ids that aren't yours (or are in the Trash) are listed."""
+    """Full detail for up to 20 jokes. Ids that aren't yours, are in the Trash or aren't ids at
+    all are listed as not found; more than 20 is refused, so none go missing unsaid."""
+    if len(ids) > 20:
+        raise ValueError(f"That's {len(ids)} ids: ask for at most 20 at a time.")
     names = load_names(db, user)
     jokes = {j.id: j for j in user_jokes(db, user)}
     sets, rewrites = sets_by_joke(db, user), rewrite_counts(db, user)
-    wanted = [parse_id(i) for i in ids[:20]]
+    wanted = [maybe_id(i) for i in ids]
     done = records(db, user, (i for i in wanted if i in jokes))
     behind, voices = observations_behind(db, user), voice_notes_behind(db, user)
     return {
@@ -94,7 +97,7 @@ def get_jokes(db: Session, user: User, ids: list[str]) -> dict[str, Any]:
             for i in wanted
             if i in jokes
         ],
-        "not_found": [str(i) for i in wanted if i not in jokes],
+        "not_found": [raw for raw, i in zip(ids, wanted, strict=True) if i not in jokes],
     }
 
 
@@ -156,6 +159,13 @@ def get_premise(db: Session, user: User, premise_id: str) -> dict[str, Any]:
             for j in chain_order(on_it)
         ],
     }
+
+
+def maybe_id(value: str) -> uuid.UUID | None:
+    try:
+        return uuid.UUID(value.strip())
+    except ValueError:
+        return None
 
 
 def parse_id(value: str) -> uuid.UUID:

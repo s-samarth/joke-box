@@ -181,9 +181,11 @@ def test_the_overview_counts(dev: TestClient, db: Session) -> None:
     assert {"name": "Fake topic", "jokes": 1, "subtopics": unknown} in seen["topics"]
 
 
-def test_a_bad_id_is_a_clear_error(db: Session, dev: TestClient) -> None:
-    with pytest.raises(ValueError, match="isn't a JokeBox id"):
-        library.get_jokes(db, account(db, "dev@example.com"), ["not-an-id"])
+def test_a_bad_id_is_listed_not_found_and_too_many_is_refused(db: Session, dev: TestClient) -> None:
+    me = account(db, "dev@example.com")
+    assert library.get_jokes(db, me, ["not-an-id"])["not_found"] == ["not-an-id"]
+    with pytest.raises(ValueError, match="at most 20"):
+        library.get_jokes(db, me, [str(uuid.uuid4()) for _ in range(21)])
 
 
 def test_craft_lists_every_title_without_a_query(dev: TestClient, db: Session) -> None:

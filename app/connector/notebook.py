@@ -7,9 +7,8 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.connector.ink_image import pages_with_ink
 from app.connector.origins import brainstorms_using
-from app.connector.text import by_id, clip, ist_date, matches, page, same_name
+from app.connector.text import by_id, clip, ist_date, matches, next_offset, page, same_name
 from app.models import (
     Brainstorm,
     CraftNote,
@@ -57,6 +56,7 @@ def search_observations(
     kind: str = "",
     min_strength: int = 1,
     status: str = "",
+    offset: int = 0,
 ) -> dict[str, Any]:
     """Things you noticed, newest first. `topic` is a joke topic; `kind` is what sort of note it
     is, and a plain observation's kind is "Observation". `premise_ids` and `joke_ids` are what
@@ -90,11 +90,12 @@ def search_observations(
         and (min_strength <= 1 or (o.strength or 0) >= min_strength)
         and same_name(OLD_NAMES.get(status.strip().lower(), status), o.status)
     ]
-    shown, total = page(found, limit)
+    shown, total = page(found, limit, offset=offset)
     premises, jokes = live_links(db, user)
     sessions = brainstorms_using(db, user)
     return {
         "total": total,
+        "next_offset": next_offset(offset, shown, total),
         "observations": [
             {
                 "id": str(o.id),
@@ -114,13 +115,16 @@ def search_observations(
     }
 
 
-def search_brainstorms(db: Session, user: User, query: str = "", limit: int = 25) -> dict[str, Any]:
+def search_brainstorms(
+    db: Session, user: User, query: str = "", limit: int = 25, offset: int = 0
+) -> dict[str, Any]:
     """Brainstorm sessions and Rewrites of a joke together, most recently changed first, by
     title and typed text (handwriting is counted, and read with get_brainstorm)."""
     techniques = by_id(
         db.execute(select(CraftNote.id, CraftNote.title).where(CraftNote.user_id == user.id))
     )
     sessions = db.scalars(select(WritingSession).where(WritingSession.user_id == user.id))
+    _, live = live_links(db, user)  # a linked joke in the Trash isn't listed
     rewrites = db.scalars(select(Brainstorm).where(Brainstorm.user_id == user.id))
     found: list[tuple[datetime, dict[str, Any]]] = [
         (
@@ -132,7 +136,7 @@ def search_brainstorms(db: Session, user: User, query: str = "", limit: int = 25
                 "title": s.title,
                 "text": clip(s.content, 2000),
                 "technique": techniques.get(s.technique_id) if s.technique_id else None,
-                "linked_joke_ids": list(s.joke_ids or []),
+                "linked_joke_ids": [str(i) for i in s.joke_ids or [] if str(i) in live],
                 "updated": ist_date(s.updated_at),
             },
         )
@@ -155,13 +159,13 @@ def search_brainstorms(db: Session, user: User, query: str = "", limit: int = 25
         if matches(query, r.title, r.content)
     ]
     found.sort(key=lambda pair: pair[0], reverse=True)
-    shown, total = page([result for _, result in found], limit)
+    shown, total = page([result for _, result in found], limit, offset=offset)
     sessions_shown = {uuid.UUID(r["id"]): r for r in shown if r["kind"] == "brainstorm"}
-    if sessions_shown:
-        for session_id, ink in db.execute(
-            select(WritingSession.id, WritingSession.ink).where(
+    if sessions_shown:  # from the stored counts: reading the ink itself was megabytes a call
+        for session_id, pages, strokes in db.execute(
+            select(WritingSession.id, WritingSession.ink_pages, WritingSession.ink_strokes).where(
                 WritingSession.user_id == user.id, WritingSession.id.in_(sessions_shown)
             )
         ):
-            sessions_shown[session_id]["handwritten_pages"] = len(pages_with_ink(ink or []))
-    return {"total": total, "results": shown}
+            sessions_shown[session_id]["handwritten_pages"] = pages if strokes else 0
+    return {"total": total, "next_offset": next_offset(offset, shown, total), "results": shown}
