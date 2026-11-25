@@ -75,10 +75,12 @@ itself, so they're saved on the joke or the premise, not the set.
 - **Vibe** is which side of you it shows: Riled up, Bakchod, Point prover, or Not sure. It picks
   from the persona field's options (the ones a beat's Dominant persona side uses), so there's one
   list. Stored as `persona`, an option id; one deleted later reads as Not sure.
+  Each wears a colour wherever it shows (`vibeTone.ts`): Riled up red, Bakchod blue, Point prover
+  green, Not sure orange; an option you add yourself stays neutral.
 - **Generic** says whether anyone could do it (Generic) or it's yours (Non-generic). Every joke
   and premise should have one, but a save never waits on it: until it's answered it shows an amber
   **Generic?**, and the Generic filter on Jokes and Premises (**Generic not answered**) finds the
-  rest. Stored as `generic`, true, false or null.
+  rest. Stored as `generic`, true, false or null. Generic shows red, Non-generic green.
 
 In a set, both sit beside a joke's Locked and Gate, and under a premise's take, as small menus:
 tap to pick. Picking one saves the joke or premise right away. They're also on the joke's and the
@@ -89,7 +91,7 @@ what's stored.
 <p>
   <img src="screenshots/ipad-premise-vibe.webp" width="300" alt="A premise's Vibe and Generic on an iPad, with Generic not answered yet">
   <img src="screenshots/ipad-joke-vibe.webp" width="300" alt="A joke's Vibe and Generic rows on an iPad">
-  <img src="screenshots/phone-set-vibe.webp" width="200" alt="A premise in a beat on a phone, with its Vibe and an amber Generic?">
+  <img src="screenshots/phone-set-vibe.webp" width="200" alt="A joke in a beat on a phone, with a red Riled up Vibe and a green Non-generic">
 </p>
 
 ## Drag and arrows

@@ -17,6 +17,7 @@ import { clock } from '../../lib/duration'
 import { JokeOrigins } from './JokeOrigins'
 import { useHasOrigins } from './useHasOrigins'
 import { genericLabel, personaLabel, usePersonaField } from './persona'
+import { VibeDot } from './VibeDot'
 
 interface Props {
   joke: Joke
@@ -44,8 +45,8 @@ export function JokePeek({ joke, onClose, onAdd, inSet }: Props) {
     ...(premise ? [['Premise', <span key="p" className="line-clamp-2">{premise.take}</span>] as [string, ReactNode]] : []),
     ['Filed under', [topicName(topic), subtopic?.name].filter(Boolean).join(' / ')],
     ['Status', statusOf(joke.status)],
-    ...(personaName ? [['Vibe', personaName] as [string, ReactNode]] : []),
-    ['Generic', genericLabel(joke.generic) ?? <span key="g" className="text-amber">Not answered</span>],
+    ...(personaName ? [['Vibe', <span key="v" className="inline-flex items-center gap-2"><VibeDot id={joke.persona} />{personaName}</span>] as [string, ReactNode]] : []),
+    ['Generic', joke.generic != null ? <span key="g" className={joke.generic ? 'text-light' : 'text-ok'}>{genericLabel(joke.generic)}</span> : <span key="g" className="text-amber">Not answered</span>],
     ...(joke.clean_rating ? [['Clean rating', CLEAN_LABELS[joke.clean_rating]] as [string, ReactNode]] : []),
     ...(joke.language ? [['Language', joke.language] as [string, ReactNode]] : []),
     ...(joke.hashtags.length ? [['Hashtags', joke.hashtags.map((h) => (h.startsWith('#') ? h : `#${h}`)).join(' ')] as [string, ReactNode]] : []),

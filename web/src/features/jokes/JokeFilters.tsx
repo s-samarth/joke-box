@@ -21,6 +21,7 @@ import { TypeManager } from './TypeManager'
 import { useNewTopic } from './useNewTopic'
 import { PERSONA_NOT_SURE, SORTS, type FilterKey, type SortKey } from './useJokeFilters'
 import { GENERIC_FILTERS, NOT_SURE, VIBE, usePersonaField } from './persona'
+import { VibeDot } from './VibeDot'
 
 /** What the row reads and changes: the Jokes list's filters (in the URL) or a picker's own. */
 export interface Filters {
@@ -105,8 +106,8 @@ export function JokeFilters({ f, edge = '-mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:
   ]
   const personaItems: MenuItem[] = [
     { label: 'Any vibe', onSelect: () => f.set({ persona: null }), checked: !f.persona },
-    ...(persona?.options ?? []).map((o) => ({ label: o.label, onSelect: () => f.set({ persona: o.id }), checked: f.persona === o.id })),
-    { label: NOT_SURE, onSelect: () => f.set({ persona: PERSONA_NOT_SURE }), checked: f.persona === PERSONA_NOT_SURE },
+    ...(persona?.options ?? []).map((o) => ({ label: o.label, icon: <VibeDot id={o.id} />, onSelect: () => f.set({ persona: o.id }), checked: f.persona === o.id })),
+    { label: NOT_SURE, icon: <VibeDot id={null} />, onSelect: () => f.set({ persona: PERSONA_NOT_SURE }), checked: f.persona === PERSONA_NOT_SURE },
   ]
   const genericItems: MenuItem[] = [
     { label: 'Generic or not', onSelect: () => f.set({ generic: null }), checked: !f.generic },
