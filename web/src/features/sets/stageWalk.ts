@@ -1,7 +1,8 @@
 /**
  * On stage, one beat at a time: what's left to do in the beat, given the gates answered so far.
  * A gate is asked when you reach it. If it didn't land, what it guards is struck out; a gate
- * that is itself struck out is never asked, and what it guards goes too. Tested in stageWalk.test.ts.
+ * that is itself struck out is never asked, and what it guards goes too. So is a premise gate whose
+ * premise before was struck out: that premise never ran. Tested in stageWalk.test.ts.
  */
 import type { Beat, SetEntry, SetPiece } from '../../api/types'
 import { guardMap, hasPieces } from './beats'
@@ -22,6 +23,7 @@ export const pieceKey = (beat: Beat, entry: SetEntry, piece: SetPiece) => `${bea
 export function walk(beat: Beat, answers: Answers): { rows: Row[]; pending: Pending } {
   const rows: Row[] = []
   let pending: Pending = null
+  let lastPremiseOff = false // a premise gate asks about the premise before: struck out, it never ran
   for (const entry of beat.entries) {
     if (!hasPieces(entry)) {
       rows.push({ kind: 'crowd', key: entry.id, entry })
@@ -30,8 +32,9 @@ export function walk(beat: Beat, answers: Answers): { rows: Row[]; pending: Pend
     let premiseSkipped = false
     if (entry.kind === 'premise') {
       const key = premiseKey(beat, entry)
-      premiseSkipped = entry.gate && answers[key] === false
-      if (entry.gate && answers[key] === undefined && !pending) pending = { key, premise: true }
+      premiseSkipped = entry.gate && (lastPremiseOff || answers[key] === false)
+      if (entry.gate && !premiseSkipped && answers[key] === undefined && !pending) pending = { key, premise: true }
+      lastPremiseOff = premiseSkipped
       rows.push({ kind: 'premise', key, entry, gated: entry.gate, skipped: premiseSkipped })
     }
     const guards = guardMap(entry.pieces)

@@ -44,6 +44,16 @@ export function guardMap(pieces: SetPiece[]): (number | null)[] {
   return g
 }
 
+/** Where the stage goes on if gate `i` didn't land: the first joke after it not guarded by it,
+ * counting what its guarded gates guard too (as stageWalk strikes them). */
+export function skipTarget(pieces: SetPiece[], i: number): number {
+  const guards = guardMap(pieces)
+  const off = new Set([i])
+  let j = i + 1
+  while (j < pieces.length && guards[j] !== null && off.has(guards[j]!)) off.add(j++)
+  return j
+}
+
 export const statusField = (fields: SetField[]) => fields.find((f) => f.role === 'status')
 export const personaField = (fields: SetField[]) => fields.find((f) => f.role === 'persona')
 
@@ -60,12 +70,16 @@ export function groupOf(beat: Beat, fields: SetField[]): StatusGroup | null {
   return o ? (o.group ?? 'neutral') : null
 }
 
-/** A beat whose status group differs from the beat before it needs a reason for the shift. */
+/** A beat whose status group differs from the last labelled beat before it needs a reason for
+ * the shift (a Not sure beat between them doesn't hide it, as the status track draws it). */
 export function needsWhy(beats: Beat[], i: number, fields: SetField[]): boolean {
-  if (i <= 0) return false
-  const a = groupOf(beats[i - 1], fields)
-  const b = groupOf(beats[i], fields)
-  return Boolean(a && b && a !== b)
+  const b = i > 0 ? groupOf(beats[i], fields) : null
+  if (!b) return false
+  for (let k = i - 1; k >= 0; k--) {
+    const a = groupOf(beats[k], fields)
+    if (a) return a !== b
+  }
+  return false
 }
 
 export const hasReason = (b: Beat) => SHIFT_REASONS.some((r) => r === b.shift_reason)
@@ -87,9 +101,10 @@ export function analyse(beats: Beat[], fields: SetField[]): Analysis {
   let worst: [number, number] | null = null
   beats.forEach((b) => {
     const g = groupOf(b, fields)
-    // A loss is a top-up and ends the run; Not sure leaves it as it was; win and neutral add to it.
+    // A loss is a top-up and ends the run; win and neutral add to it, and so does Not sure once a
+    // run has started (no top-up came), so the longest run is the stretch of clock it shades.
     if (g === 'loss') run = 0
-    else if (g) {
+    else if (g || run > 0) {
       if (run === 0) runStart = t
       run += b.seconds
       if (run > longest) { longest = run; worst = [runStart, t + b.seconds] }

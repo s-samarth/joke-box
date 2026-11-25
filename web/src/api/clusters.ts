@@ -54,7 +54,8 @@ queryClient.setMutationDefaults(saveKey, {
       return existing ? old.map((c) => (c.id === id ? next : c)) : [...old, next]
     })
   },
-  onSettled: () => refreshWhenSynced(keys.clusters),
+  // A new lead changes what sets play (their beats and items come back worked out from it).
+  onSettled: (_c, _e, vars: SaveClusterVars) => refreshWhenSynced(keys.clusters, ...('lead_joke_id' in vars.input ? [keys.setlists] : [])),
 })
 
 queryClient.setMutationDefaults(dissolveKey, {
@@ -66,7 +67,7 @@ queryClient.setMutationDefaults(dissolveKey, {
     // Its jokes stay, each on its own.
     queryClient.setQueryData<Joke[]>(keys.jokes, (old = []) => old.map((j) => (j.cluster_id === id ? { ...j, cluster_id: null } : j)))
   },
-  onSettled: () => refreshWhenSynced(keys.clusters, keys.jokes),
+  onSettled: () => refreshWhenSynced(keys.clusters, keys.jokes, keys.setlists),
 })
 
 export const useClusters = () => useQuery({ queryKey: keys.clusters, queryFn: () => api<Cluster[]>('/api/clusters') })

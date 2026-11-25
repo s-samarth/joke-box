@@ -5,7 +5,7 @@
  */
 import { ArrowDown, ArrowUp, Minus, Plus, X } from 'lucide-react'
 import type { Joke, SetPiece } from '../../api/types'
-import { guardMap } from './beats'
+import { guardMap, skipTarget } from './beats'
 import { stepGate, swap, toggleGate, toggleLoose, togglePin } from './beatEdit'
 
 interface Props {
@@ -33,6 +33,7 @@ export function PieceList({ pieces, onChange, jokes, leadOf, onOpen }: Props) {
         const joke = jokes.get(p.joke_id)
         const t = tone(p)
         const after = i + p.gate + 1
+        const skip = p.gate ? skipTarget(pieces, i) : after
         return (
           <li key={p.id} className={guards[i] !== null ? 'ml-5 border-l-2 border-dashed border-sky/50 pl-3' : ''}>
             <div className={`rounded-lg border-l-[3px] bg-ink-2 py-2 pr-1 pl-3 ${t.border}`}>
@@ -54,10 +55,10 @@ export function PieceList({ pieces, onChange, jokes, leadOf, onOpen }: Props) {
                     title={p.pinned ? 'This version, even if the lead changes. Tap to follow the lead.' : 'Plays the cluster lead. Tap to pin this version.'}
                     className={`${tool} text-dim hover:bg-ink-3`}>{p.pinned ? 'Pinned version' : 'Follows the lead'}</button>
                 )}
-                <span className="ml-auto flex">
+                <span className="ml-auto flex [&>button]:size-11">
                   <button type="button" className={icon} disabled={i === 0} onClick={() => onChange(swap(pieces, i, -1))} aria-label="Move up"><ArrowUp size={15} /></button>
                   <button type="button" className={icon} disabled={i === pieces.length - 1} onClick={() => onChange(swap(pieces, i, 1))} aria-label="Move down"><ArrowDown size={15} /></button>
-                  <button type="button" className={icon} onClick={() => onChange(pieces.filter((_, n) => n !== i))} aria-label="Take out of the beat"><X size={15} /></button>
+                  <button type="button" className={`${icon} ml-3`} onClick={() => onChange(pieces.filter((_, n) => n !== i))} aria-label="Take out of the beat"><X size={15} /></button>
                 </span>
               </div>
             </div>
@@ -67,7 +68,7 @@ export function PieceList({ pieces, onChange, jokes, leadOf, onOpen }: Props) {
                 <button type="button" className={icon} onClick={() => onChange(stepGate(pieces, i, -1))} disabled={p.gate <= 1} aria-label="Guard fewer"><Minus size={14} /></button>
                 <b className="text-sky tabular">{p.gate}</b>
                 <button type="button" className={icon} onClick={() => onChange(stepGate(pieces, i, 1))} disabled={after >= pieces.length} aria-label="Guard more"><Plus size={14} /></button>
-                {p.gate === 1 ? 'joke' : 'jokes'}. If not, skip to {after < pieces.length ? `#${after + 1}` : 'the end of this list'}.
+                {p.gate === 1 ? 'joke' : 'jokes'}. If not, skip to {skip < pieces.length ? `#${skip + 1}` : 'the end of this list'}.
               </p>
             )}
           </li>

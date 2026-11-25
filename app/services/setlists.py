@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.auth.deps import find_owned
 from app.models import Joke, Setlist, SetlistItem, SetTag, User
+from app.schemas.set_beats import BeatIn
 from app.schemas.shows import SetlistIn, SetlistItemIn, SetlistItemOut, SetlistOut
 from app.services.clashes import check_set
 from app.services.set_beats import (
@@ -46,8 +47,25 @@ def item_out(item: SetlistItem, jokes: Jokes) -> SetlistItemOut:
     return out
 
 
+def items_out(s: Setlist, beats: list[BeatIn], jokes: Jokes) -> list[SetlistItemOut]:
+    """The set's jokes in running order. A set with beats lists what its beats play now (a
+    cluster's lead as it is today); one from before beats, its stored items."""
+    if s.beats is None:
+        return [item_out(i, jokes) for i in s.items if i.joke_id not in jokes.hidden]
+    return [
+        SetlistItemOut(
+            joke_id=i.joke_id,
+            position=n,
+            duration_seconds=jokes.runtimes.get(i.joke_id, 0),
+            optional=i.optional,
+        )
+        for n, i in enumerate(items_from(beats))
+    ]
+
+
 def setlist_out(s: Setlist, jokes: Jokes) -> SetlistOut:
     """A set as the app sees it: jokes in the Trash are left out until they come back."""
+    beats = shown(stored_beats(s), jokes)
     return SetlistOut(
         id=s.id,
         name=s.name,
@@ -56,10 +74,10 @@ def setlist_out(s: Setlist, jokes: Jokes) -> SetlistOut:
         venue_name=s.venue.name if s.venue else None,
         rating=s.rating,
         tag_ids=[t.id for t in s.tags],
-        items=[item_out(i, jokes) for i in s.items if i.joke_id not in jokes.hidden],
+        items=items_out(s, beats, jokes),
         point=s.point or "",
         status=s.status or "Draft",
-        beats=shown(stored_beats(s), jokes),
+        beats=beats,
         version=s.version,
         created_at=s.created_at,
         updated_at=s.updated_at,
@@ -77,6 +95,15 @@ def legacy_items(setlist: Setlist, body: SetlistIn, hidden: set[uuid.UUID]) -> l
     return items
 
 
+def old_build_edit(found: Setlist, body: SetlistIn, jokes: Jokes) -> None:
+    """An app from before beats can't change a beats set's jokes: refused, rather than its
+    change dropped with a 200. Its other details (name, venue, date) still save."""
+    now = [(i.joke_id, i.optional) for i in setlist_out(found, jokes).items]
+    sent = [(i.joke_id, i.optional) for i in body.items]
+    if sent and sent != now:  # no items at all reads as "not about the jokes" (an import, say)
+        raise HTTPException(409, "This set has beats now. Reload the app to change its jokes.")
+
+
 def save_set(db: Session, user: User, setlist_id: uuid.UUID, body: SetlistIn) -> SetlistOut:
     """Create or replace a set, its beats and its items in one transaction."""
     jokes = your_jokes(db, user)
@@ -89,6 +116,8 @@ def save_set(db: Session, user: User, setlist_id: uuid.UUID, body: SetlistIn) ->
         check_jokes_owned(db, {i.joke_id for i in body.items} - hidden, user)
     venue = venue_named(db, user, body.venue_name) if body.venue_name else None
     found = find_owned(db, Setlist, setlist_id, user)
+    if found is not None and body.beats is None and found.beats is not None:
+        old_build_edit(found, body, jokes)
     if found is not None:
         check_set(found, body, lambda: setlist_out(found, jokes))
     setlist = found or Setlist(id=setlist_id, user_id=user.id)
@@ -100,6 +129,9 @@ def save_set(db: Session, user: User, setlist_id: uuid.UUID, body: SetlistIn) ->
     items = items_from(stored_beats(setlist)) if setlist.beats is not None else None
     if items is None:
         items = legacy_items(setlist, body, hidden)
+    # A joke erased for good can still sit in stored beats (they aren't rewritten when it goes):
+    # it has no row left to point at, so it isn't stored as an item.
+    items = [i for i in items if i.joke_id in jokes.runtimes or i.joke_id in hidden]
     setlist.name = body.name
     setlist.show_date = body.show_date
     setlist.target_seconds = body.target_seconds

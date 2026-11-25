@@ -32,4 +32,11 @@ describe('walking a beat on stage', () => {
     expect(skipped({ 'b/p1/a': true, 'b/p1/b': true, 'b/p2': false })).toEqual(['e'])
     expect(walk(beat, { 'b/p1/a': true, 'b/p1/b': true, 'b/p2': true }).pending).toBeNull()
   })
+
+  it('never asks a premise gate whose premise before was struck out (it never ran)', () => {
+    const chained: Beat = { ...beat, entries: [...beat.entries, { kind: 'premise', id: 'p3', premise_id: null, gate: true, pieces: [piece('f')] }] }
+    const after = walk(chained, { 'b/p1/a': true, 'b/p1/b': true, 'b/p2': false })
+    expect(after.pending).toBeNull()
+    expect(after.rows.flatMap((r) => (r.kind === 'piece' && r.skipped ? [r.piece.id] : []))).toEqual(['e', 'f'])
+  })
 })

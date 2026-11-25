@@ -13,7 +13,8 @@ from dataclasses import dataclass, field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import JokeCluster, Premise, Setlist, User
+from app.models import Joke, JokeCluster, Premise, Setlist, User
+from app.models.trash import INCLUDE_TRASHED
 from app.schemas.set_beats import BeatIn, JokesEntry, PieceIn, PremiseEntry
 from app.schemas.shows import SetlistItemIn
 
@@ -73,7 +74,10 @@ def shown(beats: list[BeatIn], jokes: Jokes) -> list[BeatIn]:
             lead = jokes.leads.get(p.cluster_id) if p.cluster_id and not p.pinned else None
             if lead and jokes.live(lead):
                 p.joke_id = lead
-        pieces[:] = [p for p in pieces if jokes.live(p.joke_id)]
+        live = [jokes.live(p.joke_id) for p in pieces]
+        for n, p in enumerate(pieces):  # a gate counts the jokes it guards that are shown
+            p.gate = sum(live[n + 1 : n + 1 + p.gate]) if p.gate else 0
+        pieces[:] = [p for p, shows in zip(pieces, live, strict=True) if shows]
         clamp(pieces)
     return out
 
@@ -85,10 +89,19 @@ def clamp(pieces: list[PieceIn]) -> None:
 
 
 def tidy(db: Session, user: User, beats: list[BeatIn]) -> list[BeatIn]:
-    """Ready to store: premises and clusters deleted meanwhile are let go, the first premise of a
-    beat has no premise before it to be gated on, and gates fit their lists."""
-    premises = set(db.scalars(select(Premise.id).where(Premise.user_id == user.id)))
+    """Ready to store: premises and clusters deleted meanwhile are let go, jokes clustered since
+    join their cluster, the first premise of a beat has no premise before it to be gated on, and
+    gates fit their lists."""
+    # A premise in the Trash keeps its place: put back, it's there again.
+    mine = select(Premise.id).where(Premise.user_id == user.id)
+    premises = set(db.scalars(mine.execution_options(**{INCLUDE_TRASHED: True})))
     clusters = set(db.scalars(select(JokeCluster.id).where(JokeCluster.user_id == user.id)))
+    # A joke clustered after it went into the set follows its cluster from now on, pinned to
+    # itself unless it's the lead, so the set still plays what was picked.
+    jokes = {p.joke_id for pieces in piece_lists(beats) for p in pieces}
+    rows = select(Joke.id, Joke.cluster_id).where(Joke.user_id == user.id, Joke.id.in_(jokes))
+    cluster_of = dict(db.execute(rows.execution_options(**{INCLUDE_TRASHED: True})).tuples().all())
+    leads = cluster_leads(db, user)
     out = [b.model_copy(deep=True) for b in beats]
     for beat in out:
         first = True
@@ -102,6 +115,8 @@ def tidy(db: Session, user: User, beats: list[BeatIn]) -> list[BeatIn]:
         for p in pieces:
             if p.cluster_id is not None and p.cluster_id not in clusters:
                 p.cluster_id, p.pinned = None, False
+            elif p.cluster_id is None and (joined := cluster_of.get(p.joke_id)) is not None:
+                p.cluster_id, p.pinned = joined, leads.get(joined) != p.joke_id
         clamp(pieces)
     return out
 
@@ -117,9 +132,32 @@ def keep_hidden(old: list[BeatIn], new: list[BeatIn], hidden: set[uuid.UUID]) ->
             if not isinstance(entry, PremiseEntry | JokesEntry):
                 continue
             sent = {p.id for p in entry.pieces}
-            for n, p in enumerate(before.get(entry.id, [])):
+            was = before.get(entry.id, [])
+            for n, p in enumerate(was):
                 if p.joke_id in hidden and p.id not in sent:
                     entry.pieces.insert(min(n, len(entry.pieces)), p)
+            widen(entry.pieces, sent, was)
+
+
+def widen(pieces: list[PieceIn], sent: set[str], was: list[PieceIn]) -> None:
+    """The app counts a gate over the jokes it shows. With hidden ones put back, a gate also
+    guards those among its jokes, and those it guarded before at its end."""
+    before = {p.id: {q.id for q in was[n + 1 : n + 1 + p.gate]} for n, p in enumerate(was)}
+    for n, p in enumerate(pieces):
+        old = before.get(p.id, set())
+        # Gate 0 is shown for a gate whose jokes are all hidden: that one comes back too.
+        if p.id not in sent or (not p.gate and (not old or old & sent)):
+            continue
+        left, span = p.gate, 0
+        for q in pieces[n + 1 :]:
+            if q.id in sent:
+                if not left:
+                    break
+                left -= 1
+            elif not left and q.id not in old:
+                break
+            span += 1
+        p.gate = span
 
 
 def joke_ids(beats: list[BeatIn]) -> set[uuid.UUID]:

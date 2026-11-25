@@ -36,4 +36,7 @@ export const useSetFields = () => {
   const query = useQuery({ queryKey: keys.setFields, queryFn: () => api<SetFields>('/api/set-fields') })
   return query.data ?? DEFAULT_SET_FIELDS
 }
+/** The fields as saved, or undefined before they've loaded: a save built on the defaults then
+ * would put the defaults over your own fields. */
+export const useLoadedSetFields = () => useQuery({ queryKey: keys.setFields, queryFn: () => api<SetFields>('/api/set-fields') }).data
 export const useSaveSetFields = () => useMutation<SetFields, Error, SetFields>({ mutationKey: saveKey })
