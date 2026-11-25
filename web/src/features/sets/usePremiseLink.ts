@@ -12,7 +12,7 @@ import { useFeedback } from '../../components/ui/feedbackContext'
 import { toInput } from '../jokes/useAutosaveJoke'
 
 export const short = (take: string, most = 60) => (take.length > most ? `${take.slice(0, most - 1).trimEnd()}…` : take)
-export const many = (n: number) => (n === 1 ? 'joke' : `${n} jokes`)
+export const many = (n: number) => (n === 1 ? '1 joke' : `${n} jokes`)
 
 export function usePremiseLink() {
   const { data: jokes = [] } = useJokes()

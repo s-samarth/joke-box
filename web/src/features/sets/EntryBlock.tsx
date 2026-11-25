@@ -10,6 +10,7 @@ import { ArrowDown, ArrowUp, Lightbulb, ListChecks, Plus, Trash2 } from 'lucide-
 import { useSavePremise, type Premise } from '../../api/premises'
 import type { Beat, Joke, SetEntry } from '../../api/types'
 import { Button } from '../../components/ui/Button'
+import type { MenuItem } from '../../components/ui/Menu'
 import { MaterialTags, type Tags } from '../jokes/MaterialTags'
 import { CrowdBlock } from './CrowdBlock'
 import { mapEntry, mapPieces } from './beatEdit'
@@ -39,9 +40,11 @@ interface Props extends BlockProps {
   onSelect: (on: boolean) => void
   onPick: (pieceId: string) => void
   onGroup: (pieceIds: string[]) => void
+  moveItems: (pieceId: string) => (MenuItem | 'divider')[]
 }
 
 const icon = 'inline-flex size-11 items-center justify-center rounded-md text-faint hover:bg-ink-3 hover:text-paper disabled:opacity-30'
+const foot = 'inline-flex h-8 items-center gap-1 rounded-md px-2 text-[13px] text-dim hover:bg-ink-3 hover:text-paper pointer-coarse:h-10'
 const eyebrow = 'text-[11.5px] font-semibold tracking-[0.13em] uppercase'
 
 function heading(entry: SetEntry, premise?: Premise) {
@@ -72,10 +75,6 @@ export function EntryBlock({ entry, index, beat, onChange, premises, canGatePrem
         <DragGrip label={name} listeners={listeners} attributes={attributes} setRef={setActivatorNodeRef} />
         <span className="w-5 text-sm font-semibold text-faint tabular">{index + 1}</span>
         {heading(entry, premise)}
-        {entry.kind === 'jokes' && entry.pieces.length > 0 && !selecting && !folded && (
-          <button type="button" onClick={() => onSelect(true)} title="Tick jokes to put under a premise"
-            className="ml-1 inline-flex h-8 items-center gap-1 rounded-md px-2 text-[13px] text-dim hover:bg-ink-3 hover:text-paper"><ListChecks size={14} /> Select</button>
-        )}
         <span className="ml-auto flex">
           <button type="button" className={icon} disabled={index === 0} onClick={() => onStep(-1)} aria-label={`Move up: ${name}`}><ArrowUp size={15} /></button>
           <button type="button" className={icon} disabled={index === beat.entries.length - 1} onClick={() => onStep(1)} aria-label={`Move down: ${name}`}><ArrowDown size={15} /></button>
@@ -109,9 +108,10 @@ export function EntryBlock({ entry, index, beat, onChange, premises, canGatePrem
                 </Button>
                 <Button small variant="quiet" onClick={() => onSelect(false)}>Cancel</Button>
               </div>
-            ) : <button type="button" onClick={() => onAddJokes(entry.id)} className="mt-2 inline-flex h-8 items-center gap-1 rounded-md px-2 text-[13px] text-dim hover:bg-ink-3 hover:text-paper pointer-coarse:h-10">
-              <Plus size={14} /> Joke
-            </button>}
+            ) : <div className="mt-2 flex flex-wrap gap-1">
+              <button type="button" onClick={() => onAddJokes(entry.id)} className={foot}><Plus size={14} /> Joke</button>
+              {entry.kind === 'jokes' && entry.pieces.length > 0 && <button type="button" onClick={() => onSelect(true)} className={foot}><ListChecks size={14} /> Select some for a premise</button>}
+            </div>}
           </div>
         )}
       </>}

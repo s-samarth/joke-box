@@ -1,13 +1,15 @@
 /**
  * One joke in a beat's list: its grip, its number, the joke (tap to read it whole) and its tools.
  * Locked is tape-yellow, loose is teal (still in order, just flexible), a gate is sky blue. The
- * arrows walk it one place at a time, into and out of gates on the way (gateEdit.ts). Its Vibe and
- * Generic sit beside Locked and Gate: they're the joke's own (saved on the joke, not the set).
+ * arrows walk it one place at a time, into and out of gates on the way (gateEdit.ts); Move takes it
+ * to another block or premise by name (moveTo.ts). Its Vibe and Generic sit beside Locked and
+ * Gate: they're the joke's own (saved on the joke, not the set).
  */
 import type { DraggableAttributes, DraggableSyntheticListeners } from '@dnd-kit/core'
-import { ArrowDown, ArrowUp, X } from 'lucide-react'
+import { ArrowDown, ArrowUp, ChevronDown, X } from 'lucide-react'
 import type { Joke, SetPiece } from '../../api/types'
 import { useSaveJoke } from '../../api/library'
+import { Dropdown, type MenuItem } from '../../components/ui/Menu'
 import { MaterialTags, type Tags } from '../jokes/MaterialTags'
 import { toInput } from '../jokes/useAutosaveJoke'
 import { togglePin, toggleLoose } from './beatEdit'
@@ -26,6 +28,8 @@ export interface ListProps {
   onOpen: (joke: Joke) => void
   /** + Joke inside a gate's box. */
   onAddToGate: (gateId: string) => void
+  /** What Move to… offers this joke: other blocks of the beat, or another premise. */
+  moveItems?: (pieceId: string) => (MenuItem | 'divider')[]
 }
 
 interface Props extends ListProps {
@@ -39,7 +43,7 @@ interface Props extends ListProps {
 const tool = 'inline-flex h-8 items-center gap-1 rounded-md px-2 text-[13px] font-semibold transition-colors pointer-coarse:h-10'
 const icon = 'inline-flex size-8 pointer-coarse:size-11 items-center justify-center rounded-md text-faint hover:bg-ink-3 hover:text-paper disabled:opacity-30'
 
-export function JokeCard({ piece: p, isGate, depth, grip, pieces, onChange, jokes, leadOf, onOpen }: Props) {
+export function JokeCard({ piece: p, isGate, depth, grip, pieces, onChange, jokes, leadOf, onOpen, moveItems }: Props) {
   const joke = jokes.get(p.joke_id)
   const save = useSaveJoke()
   const tag = (patch: Tags) => { if (joke) save.mutate({ id: joke.id, input: { ...toInput(joke), ...patch } }) }
@@ -71,7 +75,9 @@ export function JokeCard({ piece: p, isGate, depth, grip, pieces, onChange, joke
             className={`${tool} text-dim hover:bg-ink-3`}>{p.pinned ? 'Pinned version' : 'Follows the lead'}</button>
         )}
         {joke && <MaterialTags value={joke} onChange={tag} what="this joke" />}
-        <span className="ml-auto flex">
+        <span className="ml-auto flex items-center">
+          {moveItems && <Dropdown items={moveItems(p.id)} trigger={<button type="button" className={`${tool} text-dim hover:bg-ink-3 hover:text-paper`} aria-label={`Move to another block: ${name}`}
+            title="Out of the premise, into another block of this beat, or under another premise">Move <ChevronDown size={13} aria-hidden /></button>} />}
           <button type="button" className={icon} disabled={!canStep(pieces, p.id, -1)} onClick={() => onChange(stepJoke(pieces, p.id, -1))} aria-label={`Move up: ${name}`}><ArrowUp size={15} /></button>
           <button type="button" className={icon} disabled={!canStep(pieces, p.id, 1)} onClick={() => onChange(stepJoke(pieces, p.id, 1))} aria-label={`Move down: ${name}`}><ArrowDown size={15} /></button>
           <button type="button" className={`${icon} ml-2`} onClick={() => onChange(pieces.filter((x) => x.id !== p.id))} aria-label={`Take out of the beat: ${name}`}><X size={15} /></button>

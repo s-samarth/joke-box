@@ -29,6 +29,8 @@ interface Props {
   onAddPremise: () => void
   /** Put these jokes of a no-premise list under a premise. */
   onGroup: (entryId: string, pieceIds: string[]) => void
+  /** Move to… › Under another premise: pick the premise. */
+  onMoveToPremise: (pieceId: string) => void
   /** Opens Label fields, to add, rename or delete the options. */
   onEditFields: () => void
 }
