@@ -45,7 +45,7 @@ export function guardMap(pieces: SetPiece[]): (number | null)[] {
 }
 
 /** Where the stage goes on if gate `i` didn't land: the first joke after it not guarded by it,
- * counting what its guarded gates guard too (as stageWalk strikes them). */
+ * counting what its guarded gates guard too (as a gate that didn't land would skip them). */
 export function skipTarget(pieces: SetPiece[], i: number): number {
   const guards = guardMap(pieces)
   const off = new Set([i])

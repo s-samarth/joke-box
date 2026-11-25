@@ -38,10 +38,12 @@ class PremiseEntry(BaseModel):
 
 
 class JokesEntry(BaseModel):
-    """Jokes with no premise, which can sit between premises."""
+    """Jokes with no premise, which can sit between premises. The title is a short name you give
+    them, like a premise's take. Left out (an older app), a save keeps the stored one."""
 
     kind: Literal["jokes"]
     id: Id
+    title: str | None = Field(default=None, max_length=200)
     pieces: list[PieceIn] = Field(default_factory=list, max_length=500)
 
 

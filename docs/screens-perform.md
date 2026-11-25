@@ -129,31 +129,50 @@ What a set is made of and why is in [sets.md](sets.md). Files:
 
 ## Bird's eye view: `/sets/:setId/stage`
 
-[StageView.tsx](../web/src/features/sets/StageView.tsx), [stageWalk.ts](../web/src/features/sets/stageWalk.ts).
+[BirdsEyeView.tsx](../web/src/features/sets/BirdsEyeView.tsx), [TimeStrip.tsx](../web/src/features/sets/TimeStrip.tsx),
+[BeatBoard.tsx](../web/src/features/sets/BeatBoard.tsx), [BoardJoke.tsx](../web/src/features/sets/BoardJoke.tsx),
+[birdsEye.ts](../web/src/features/sets/birdsEye.ts).
 
-A full screen with no frame, opened by **Bird's eye view** in the builder or on Home, or the eye icon on a set card. The clock against the slot, reset and
-play/pause stay pinned at the top. The clock turns amber in the last minute and red when you're
-over, and the wake lock keeps the phone awake. Under the clock is a row of beat cues: tap one to
-jump to it. Then the open beat: "Beat 2 of 5 · 2:30 → 3:45", its cue on tape, what it's for, and
-its list. Premises appear as small headings, and crowd work in an orchid box with its questions
-and replies. For each joke, the setup is dimmed and the punchline sits under it as the cue line,
-coloured yellow (locked), teal (loose) or blue (gate, with a fork icon). The footer asks the
-next gate in order (**It landed** / **It didn't · skip what it guards**, or **The premise before
-landed**). A gate that didn't land strikes out what it guards. Tap an answered gate to take the
-answer back. With no gate left to answer, the footer is **Next beat: cue**, and after the last
-beat it goes back to the set. The cap icon opens **Before you go on** (your On stage notes).
+The whole set from above, on a dark full screen with no frame, opened by **Bird's eye view** in the
+builder or on Home, or the eye icon on a set card. The header has the set's name, its beats' time
+against the slot, zoom (−, the percentage, which goes back to 100%, +, and **Fit**, the whole width
+on screen), the cue card and **Before you go on**. Under it, one frame scrolls both ways at any
+zoom: ctrl and the scroll wheel (or a trackpad pinch) zoom too, a pinch on a phone zooms the page,
+and each device remembers its zoom.
 
-<img src="screenshots/desktop-stage.webp" alt="On stage">
-<img src="screenshots/phone-stage.webp" width="230" alt="On stage on a phone">
+- **The time strip**, on top, to scale against the slot. Lanes: the time (with what's left of the
+  slot hatched amber, or how far over), the beats as cue strips, one lane per label field in its
+  options' colours (Not sure hatched amber, and the shift reason, or **Needs a reason**, where the
+  status changes), the blocks in order, and the jokes as numbered chips in their Vibe colour, edged
+  yellow (locked) or dashed teal (loose), with gates as sky brackets ("if 6 lands"). Crowd work
+  questions are orchid **?** chips. Only beats have time: blocks and jokes keep their order in equal
+  slots, so their widths say nothing about how long they run. Tap a joke chip to scroll to it on
+  the board, outlined for a moment.
+- **The beat board**, under it: one 300 px column per beat, in running order. The column head has
+  the cue on tape, a bar for its time against the longest beat in its status colour, its start and
+  end, every label with its colour, and what it's for. Then its blocks: a premise outlined leaf green
+  (sky blue, "only if the premise before landed", when gated) with its take, Vibe, Generic and
+  status; Standalone jokes outlined white with their title; crowd work in orchid with its questions,
+  Have a reply or No reply yet, and the replies. Each joke shows its number in the set, setup,
+  punchline (yellow locked, teal loose), Vibe, Generic, status, runtime, Locked or Loose and its
+  tag lines; a gate is a sky box with what rides on it under "If 6 lands". Between columns, an arrow
+  and the shift reason, amber **Shift needs a reason** when one is missing.
+
+<img src="screenshots/desktop-birds-eye.webp" alt="Bird's eye view: the time strip over the beat board">
+<img src="screenshots/phone-birds-eye.webp" width="230" alt="Bird's eye view on a phone">
 
 ## Cue card: `/sets/:setId/print`
 
 [PrintView.tsx](../web/src/features/sets/PrintView.tsx).
 
-A white page to read off a phone or print. It has the set name, the beats' time and the slot, and
-the point. Then each beat, numbered, with its cue in marker, its time and when it starts. Under
-each beat are its premises (marked "(gate)" when gated), its jokes with no premise as
-punchlines, and its crowd work. **Print** opens the browser's print dialog.
+A dark page in the app's colours, to read off a phone (printing turns it black on white). It has
+the set name, the beats' time and the slot, and the point. Then each beat, numbered, with its cue
+in marker, its time and when it starts, its Status and Dominant persona side as coloured chips and
+its shift reason. Under it: each premise's take (leaf green, or sky blue after "If that landed:"
+when gated), a Standalone block's title, then a line of jokes, each the start of its punchline with
+a dot in its Vibe colour, teal when loose, and what rides on a gate in sky after "if it lands";
+crowd work in orchid with each question and whether you have a reply. **Print** opens the
+browser's print dialog.
 
 <img src="screenshots/desktop-cue-card.webp" alt="Cue card">
 

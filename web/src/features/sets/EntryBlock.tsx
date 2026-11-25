@@ -11,6 +11,7 @@ import { ArrowDown, ArrowUp, Lightbulb, ListChecks, Plus, Trash2 } from 'lucide-
 import { useSavePremise, type Premise } from '../../api/premises'
 import type { Beat, Joke, SetEntry } from '../../api/types'
 import { Button } from '../../components/ui/Button'
+import { Input } from '../../components/ui/Field'
 import type { MenuRow } from '../../components/ui/Menu'
 import { MaterialTags, type Tags } from '../jokes/MaterialTags'
 import { CrowdBlock } from './CrowdBlock'
@@ -65,7 +66,8 @@ function ring(entry: SetEntry, gated: boolean) {
 function summary(entry: SetEntry, premise?: Premise) {
   if (entry.kind === 'crowd') return `${entry.questions.length} ${entry.questions.length === 1 ? 'question' : 'questions'}`
   const jokes = `${entry.pieces.length} ${entry.pieces.length === 1 ? 'joke' : 'jokes'}`
-  return entry.kind === 'premise' ? `${premise?.take ?? 'Deleted premise'} · ${jokes}` : jokes
+  if (entry.kind === 'jokes') return entry.title?.trim() ? `${entry.title.trim()} · ${jokes}` : jokes
+  return `${premise?.take ?? 'Deleted premise'} · ${jokes}`
 }
 
 export function EntryBlock({ entry, index, beat, onChange, premises, canGatePremise, folded, onStep, onRemove, selecting, onSelect, onPick, onGroup, onAddJokes, ...list }: Props) {
@@ -77,7 +79,7 @@ export function EntryBlock({ entry, index, beat, onChange, premises, canGatePrem
   const savePremise = useSavePremise()
   // Only what a save needs: fields left out (strength, status, Notes) stay as stored.
   const tag = (patch: Tags) => { if (premise) savePremise.mutate({ id: premise.id, input: { topic_id: premise.topic_id, take: premise.take, notes: premise.notes, version: premise.version, ...patch } }) }
-  const name = entry.kind === 'premise' ? (premise?.take ?? 'the premise') : entry.kind === 'crowd' ? 'the crowd work' : 'the standalone jokes'
+  const name = entry.kind === 'premise' ? (premise?.take ?? 'the premise') : entry.kind === 'crowd' ? 'the crowd work' : entry.title?.trim() || 'the standalone jokes'
   return (
     <li ref={setNodeRef} style={style} data-entry={entry.id} className={`rounded-xl border-l-[5px] p-2.5 ring-[1.5px] sm:p-3 ${ring(entry, gated)} ${isDragging ? 'opacity-40' : ''}`}>
       <div className="flex items-center gap-1">
@@ -108,6 +110,8 @@ export function EntryBlock({ entry, index, beat, onChange, premises, canGatePrem
           <div className="mt-2"><CrowdBlock entry={entry} onChange={(next) => onChange(mapEntry(beat, entry.id, () => next))} /></div>
         ) : (
           <div className={entry.kind === 'jokes' ? 'mt-2' : ''}>
+            {entry.kind === 'jokes' && <Input aria-label="Name these jokes" maxLength={200} placeholder="Name these jokes (Gym reels?)" value={entry.title ?? ''} className="mb-2 font-medium"
+              onChange={(e) => onChange(mapEntry(beat, entry.id, (x) => ({ ...x, title: e.target.value })))} />}
             <PieceList {...list} entryId={entry.id} pieces={entry.pieces} onChange={(pieces) => onChange(mapPieces(beat, entry.id, () => pieces))}
               onAddToGate={(gateId) => onAddJokes(entry.id, gateId)} picked={selecting ?? undefined} onPick={onPick} />
             {selecting ? (

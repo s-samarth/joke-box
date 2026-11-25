@@ -28,7 +28,8 @@ export interface SetQuestion { id: string; text: string; has_reply: boolean; rep
 
 export type SetEntry =
   | { kind: 'premise'; id: string; premise_id: string | null; gate: boolean; pieces: SetPiece[] }
-  | { kind: 'jokes'; id: string; pieces: SetPiece[] }
+  /** `title`: a short name you give the block, like a premise's take. Missing or null: none yet. */
+  | { kind: 'jokes'; id: string; title?: string | null; pieces: SetPiece[] }
   | { kind: 'crowd'; id: string; title: string; questions: SetQuestion[] }
 
 export interface Beat {

@@ -74,4 +74,9 @@ describe('Move to…', () => {
     expect(labels('b')).toEqual([['New block, just below', 'Into 3 · Standalone'], ['Into 1 · Deleted premise']])
     expect(moveChoices(beat(jokes('j', 'a')), 'a', take)).toEqual({ none: [], premise: [] })
   })
+
+  it('names a Standalone block by its title', () => {
+    const b = beat(premise('x', 'a'), Object.assign(jokes('j', ''), { title: 'Fake gym bits' }), Object.assign(jokes('k', ''), { title: '  ' }))
+    expect(moveChoices(b, 'a', () => undefined).none.map((c) => c.label)).toEqual(['New block, just below', 'Into 2 · Fake gym bits', 'Into 3 · Standalone'])
+  })
 })

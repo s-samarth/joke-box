@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.auth.deps import find_owned
 from app.models import Joke, Setlist, SetlistItem, SetTag, User
-from app.schemas.set_beats import BeatIn
+from app.schemas.set_beats import BeatIn, JokesEntry
 from app.schemas.shows import SetlistIn, SetlistItemIn, SetlistItemOut, SetlistOut
 from app.services.clashes import check_set
 from app.services.set_beats import (
@@ -104,6 +104,16 @@ def old_build_edit(found: Setlist, body: SetlistIn, jokes: Jokes) -> None:
         raise HTTPException(409, "This set has beats now. Reload the app to change its jokes.")
 
 
+def keep_titles(old: list[BeatIn], new: list[BeatIn]) -> None:
+    """A Standalone block's title left out of a save (an app from before titles) keeps the stored
+    one. An empty title clears it."""
+    before = {e.id: e.title for b in old for e in b.entries if isinstance(e, JokesEntry)}
+    for beat in new:
+        for entry in beat.entries:
+            if isinstance(entry, JokesEntry) and entry.title is None:
+                entry.title = before.get(entry.id)
+
+
 def save_set(db: Session, user: User, setlist_id: uuid.UUID, body: SetlistIn) -> SetlistOut:
     """Create or replace a set, its beats and its items in one transaction."""
     jokes = your_jokes(db, user)
@@ -124,6 +134,7 @@ def save_set(db: Session, user: User, setlist_id: uuid.UUID, body: SetlistIn) ->
     if body.beats is not None:
         beats = tidy(db, user, body.beats)
         keep_hidden(stored_beats(setlist) if found else [], beats, hidden)
+        keep_titles(stored_beats(setlist) if found else [], beats)
         setlist.beats = [b.model_dump(mode="json") for b in beats]
     # An older app sends no beats: the beats there are stay, and the items follow them.
     items = items_from(stored_beats(setlist)) if setlist.beats is not None else None
