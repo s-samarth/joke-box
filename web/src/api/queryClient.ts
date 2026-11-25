@@ -41,6 +41,7 @@ export const keys = {
   craftKinds: ['craft-kinds'],
   trash: ['trash'],
   setTags: ['set-tags'],
+  setFields: ['set-fields'],
   premises: ['premises'],
   clusters: ['clusters'],
 } as const

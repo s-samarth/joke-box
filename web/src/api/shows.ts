@@ -6,7 +6,7 @@ import {
   type SaveBrainstormVars, type SaveLogVars, type SaveSetlistVars, deleteBrainstormKey, deleteBrainstormVersionKey,
   deleteLogKey, deleteSetlistKey, saveBrainstormKey, saveLogKey, saveSetlistKey,
 } from './showSaves'
-import type { Brainstorm, LogJoke, PerformanceLog, Setlist, Venue } from './types'
+import type { Beat, Brainstorm, LogJoke, PerformanceLog, Setlist, Venue } from './types'
 
 export const useBrainstorms = () =>
   useQuery({ queryKey: keys.brainstorms, queryFn: () => api<Brainstorm[]>('/api/brainstorms') })
@@ -55,7 +55,10 @@ export interface SetlistInput {
   venue_name: string | null
   rating: number | null
   tag_ids: string[]
+  /** Worked out from `beats` on the way out (see features/sets/beats.ts flatItems). */
   items: { joke_id: string; duration_seconds: number; optional: boolean }[]
+  point: string
+  beats: Beat[]
   /** The version this edit started from, sent as the base of the save. Missing: a new set. */
   version?: number
 }

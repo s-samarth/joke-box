@@ -3,7 +3,7 @@
  * "New set" creates one and opens it straight away; so does /sets?new=1, which is what the +
  * button opens on this screen.
  */
-import { MoreHorizontal, Play, Plus, Printer, Trash2 } from 'lucide-react'
+import { CircleHelp, MoreHorizontal, Play, Plus, ScrollText, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import { newId } from '../../api/client'
@@ -15,14 +15,17 @@ import { EmptyState, PageHead, Spinner, Stars } from '../../components/ui/pieces
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { Dropdown } from '../../components/ui/Menu'
 import { clock } from '../../lib/duration'
+import { emptySet } from './beatEdit'
 import { tagChip } from './chips'
 import { LightBar } from './LightBar'
-import { draftItems, optionalSeconds, totalSeconds } from './setlistMath'
+import { beatTotal, beatsOf, setSummary } from './beats'
+import { SetGuide } from './SetGuide'
 
 export function SetsPage() {
   const { data: sets = [], isPending } = useSetlists()
   const { data: tags = [] } = useSetTags()
   const [tag, setTag] = useState<string | null>(null)
+  const [guide, setGuide] = useState(false)
   const tagName = new Map(tags.map((t) => [t.id, t.name]))
   const used = tags.filter((t) => sets.some((s) => s.tag_ids?.includes(t.id)))
   const showing = tag && used.some((t) => t.id === tag) ? tag : null
@@ -34,7 +37,7 @@ export function SetsPage() {
   const create = () => {
     const id = newId()
     // Shown at once and saved in the background (offline too), like a new joke.
-    save.mutateAsync({ id, input: { name: 'Untitled set', show_date: null, target_seconds: 420, venue_name: null, rating: null, tag_ids: [], items: [] } }).catch((e: Error) => toast(`Set not saved: ${e.message}`))
+    save.mutateAsync({ id, input: emptySet() }).catch((e: Error) => toast(`Set not saved: ${e.message}`))
     navigate(`/sets/${id}`)
   }
   // The + button's flag. The ref stops a second set when React runs the effect twice in development.
@@ -55,11 +58,15 @@ export function SetsPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <PageHead title="Sets"><Button variant="tape" icon={<Plus size={18} />} onClick={create}>New set</Button></PageHead>
+      <PageHead title="Sets">
+        <IconButton label="How sets work" onClick={() => setGuide(true)}><CircleHelp size={18} /></IconButton>
+        <Button variant="tape" icon={<Plus size={18} />} onClick={create}>New set</Button>
+      </PageHead>
+      <SetGuide open={guide} onOpenChange={setGuide} />
       {isPending && !sets.length ? (
         <Spinner />
       ) : sorted.length === 0 ? (
-        <EmptyState title="No sets yet">Got a spot coming up? Make a set, drop your jokes in, and see if it fits the slot.</EmptyState>
+        <EmptyState title="No sets yet">Got a spot coming up? Make a set: a point, then beats in order, each with its premises and jokes. “How sets work” explains every part.</EmptyState>
       ) : (
         <>
         {used.length > 0 && (
@@ -75,7 +82,7 @@ export function SetsPage() {
                 <Link to={`/sets/${s.id}`} className="min-w-0 flex-1">
                   <p className="headline truncate text-[26px]">{s.name}</p>
                   <p className="mt-1 text-sm text-dim">
-                    {s.items.length} {s.items.length === 1 ? 'joke' : 'jokes'}, {clock(s.target_seconds)} slot
+                    {setSummary(s)}, {clock(s.target_seconds)} slot
                   </p>
                   {(s.rating || s.tag_ids?.length > 0) && (
                     <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-dim">
@@ -84,13 +91,13 @@ export function SetsPage() {
                     </p>
                   )}
                 </Link>
-                <Link to={`/sets/${s.id}/stage`} aria-label={`Rehearse ${s.name}`} className="inline-flex size-10 items-center justify-center rounded-lg bg-ink-3 text-paper hover:bg-ink-4"><Play size={17} /></Link>
+                <Link to={`/sets/${s.id}/stage`} aria-label={`${s.name} on stage`} className="inline-flex size-10 items-center justify-center rounded-lg bg-ink-3 text-paper hover:bg-ink-4"><Play size={17} /></Link>
                 <Dropdown items={[
-                  { label: 'Print', icon: <Printer size={16} />, onSelect: () => navigate(`/sets/${s.id}/print`) },
+                  { label: 'Cue card', icon: <ScrollText size={16} />, onSelect: () => navigate(`/sets/${s.id}/print`) },
                   { label: 'Delete set', icon: <Trash2 size={16} />, danger: true, onSelect: () => onDelete(s) },
                 ]} trigger={<IconButton label="More"><MoreHorizontal size={18} /></IconButton>} />
               </div>
-              <div className="mt-4"><LightBar total={totalSeconds(draftItems(s.items))} optional={optionalSeconds(draftItems(s.items))} target={s.target_seconds} /></div>
+              <div className="mt-4"><LightBar total={beatTotal(beatsOf(s))} target={s.target_seconds} /></div>
             </li>
           ))}
         </ul>
