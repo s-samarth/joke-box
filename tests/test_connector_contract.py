@@ -19,6 +19,7 @@ from sqlalchemy.orm import Session
 from app.main import app
 from app.models import User
 from app.seed import reseed
+from tests import connector_fields as fields
 from tests.conftest import random_topic_id, signed_in
 from tests.connector_auth import connect, content, items, result, rpc
 from tests.connector_fields import BRIEF, CLUSTER, DETAIL, LONG, PULSE, SET, TOOLS
@@ -57,6 +58,7 @@ def claude(db: Session) -> Iterator[tuple[TestClient, str]]:
     browser.put(f"/api/observations/{noticed}/links/premises/{premise}")
     browser.put(f"/api/craft-notes/{uuid.uuid4()}", json=note_in(browser) | {"title": "Fake"})
     browser.put(f"/api/analyses/{uuid.uuid4()}", json={"title": "Fake", "body": "Fake why"})
+    browser.put(f"/api/setlists/{uuid.uuid4()}", json=fields.beats_set(jokes, premise))
     with TestClient(app) as client:
         yield client, connect(browser)["access_token"]
 
@@ -146,9 +148,17 @@ def test_performing_tools(claude: tuple[TestClient, str]) -> None:
     sets = items(result(claude, "list_sets"), "sets")
     assert set(sets[0]) == SET
     opened = result(claude, "get_set", set_id=sets[0]["id"])
-    assert set(opened) == SET | {"topics", "running_order"}
+    assert set(opened) == SET | {"topics", "beats", "running_order"}
     first = items(opened, "running_order")[0]
-    assert set(first) == BRIEF | {"place", "role", "optional", "premise", "follows_id"}
+    assert set(first) == BRIEF | {"place", "role", "optional", "loose", "premise", "follows_id"}
+    beat = items(opened, "beats")[0]
+    assert set(beat) == fields.BEAT
+    kinds = {e["kind"]: e for b in opened["beats"] for e in b["entries"]}
+    assert {k: set(e) for k, e in kinds.items()} == fields.ENTRIES
+    assert set(items(kinds["premise"], "jokes")[0]) == fields.SET_JOKE
+    question = items(kinds["crowd_work"], "questions")[0]
+    assert set(question) == fields.QUESTION
+    assert set(items(question, "replies")[0]) == {"if_they_say", "line"}
 
     shows = result(claude, "list_shows")
     assert set(shows) == {

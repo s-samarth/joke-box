@@ -2,6 +2,7 @@
 import { PenLine, Plus } from 'lucide-react'
 import { Link, useNavigate } from 'react-router'
 import { newId } from '../../api/client'
+import { useClusters } from '../../api/clusters'
 import { useJokes } from '../../api/library'
 import { useBrainstorms, useSetlistActions, useSetlists } from '../../api/shows'
 import type { Joke } from '../../api/types'
@@ -12,6 +13,8 @@ import { Dropdown } from '../../components/ui/Menu'
 import { formatDate } from '../../lib/time'
 import { chainItems, chainNote } from '../sets/setlistMath'
 import { setlistInput } from '../sets/setlistInput'
+import { addToEnd, emptySet, pieceFor } from '../sets/beatEdit'
+import { flatItems } from '../sets/beats'
 
 const words = (text: string) => (text.trim() ? text.trim().split(/\s+/).length : 0)
 
@@ -19,6 +22,8 @@ export function JokeExtras({ joke }: { joke: Joke }) {
   const { data: brainstorms = [] } = useBrainstorms()
   const { data: sets = [] } = useSetlists()
   const { data: jokes = [] } = useJokes()
+  const { data: clusters = [] } = useClusters()
+  const leadOf = (id: string) => clusters.find((c) => c.id === id)?.lead_joke_id
   const { save } = useSetlistActions()
   const { toast } = useFeedback()
   const navigate = useNavigate()
@@ -29,9 +34,12 @@ export function JokeExtras({ joke }: { joke: Joke }) {
   const addTo = (setId: string | null) => {
     const target = sets.find((s) => s.id === setId)
     const id = target?.id ?? newId()
-    const base = target ? setlistInput(target) : { name: 'Untitled set', show_date: null, target_seconds: 420, venue_name: null, rating: null, tag_ids: [], items: [] }
-    const added = chainItems(joke, new Map(jokes.map((b) => [b.id, b])), new Set(base.items.map((i) => i.joke_id)))
-    save.mutateAsync({ id, input: { ...base, items: [...base.items, ...added] } })
+    const base = target ? setlistInput(target) : emptySet()
+    const byId = new Map(jokes.map((b) => [b.id, b]))
+    const added = chainItems(joke, byId, new Set(base.items.map((i) => i.joke_id)))
+    const pieces = added.flatMap((i) => { const j = byId.get(i.joke_id); return j ? [pieceFor(j, leadOf)] : [] })
+    const beats = addToEnd(base.beats, pieces)
+    save.mutateAsync({ id, input: { ...base, beats, items: flatItems(beats) } })
       .catch((e: Error) => toast(`Not added: ${e.message}`))
     const note = chainNote(added.length)
     toast(`Added to ${base.name}${note ? `. ${note}` : ''}`, { label: 'Open set', onClick: () => navigate(`/sets/${id}`) })

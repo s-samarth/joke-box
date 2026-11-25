@@ -8,9 +8,12 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.connector.jokes import brief, load_names, topic_name, user_jokes
 from app.connector.library import parse_id
+from app.connector.set_beats import beats_out, label_names, live_beats
 from app.connector.show_record import jokes_done
 from app.connector.text import clip, day, ist_date, matches, page
 from app.models import Joke, PerformanceLog, Setlist, User
+from app.schemas.set_beats import PieceIn
+from app.services.set_beats import beat_seconds, piece_lists, stored_beats
 
 
 def sets_query(user: User) -> Any:
@@ -25,16 +28,23 @@ def sets_query(user: User) -> Any:
 
 
 def summary(s: Setlist, jokes: dict[uuid.UUID, Joke]) -> dict[str, Any]:
-    """A set at a glance. Jokes in the Trash are left out, as in the app."""
+    """A set at a glance. Jokes in the Trash are left out, as in the app. A set with beats runs
+    as long as its beats; one from before beats, as long as its jokes that aren't optional."""
     items = [i for i in s.items if i.joke_id in jokes]
+    if s.beats is None:
+        runtime = sum(jokes[i.joke_id].duration_seconds for i in items if not i.optional)
+    else:
+        runtime = beat_seconds(stored_beats(s))
     return {
         "id": str(s.id),
         "name": s.name,
+        "point": s.point or None,
         "tags": [t.name for t in s.tags],
         "rating": s.rating,
         "venue": s.venue.name if s.venue else None,
         "target_seconds": s.target_seconds,
-        "runtime_seconds": sum(jokes[i.joke_id].duration_seconds for i in items if not i.optional),
+        "runtime_seconds": runtime,
+        "beat_count": len(stored_beats(s)),
         "jokes": len(items),
         "updated": ist_date(s.updated_at),
     }
@@ -53,31 +63,41 @@ def role(place: int, size: int) -> str | None:
 
 
 def get_set(db: Session, user: User, set_id: str) -> dict[str, Any]:
-    """A set in running order, with each joke's topic, premise, strength and time."""
+    """A set's beats, and every joke in running order with its topic, premise, strength and
+    time. Each joke in a beat points to its place in the running order."""
     wanted = parse_id(set_id)
     s = next((s for s in db.scalars(sets_query(user)) if s.id == wanted), None)
     if s is None:
         raise ValueError(f"No set with id {set_id}")
     names = load_names(db, user)
     jokes = {j.id: j for j in user_jokes(db, user)}
-    items = [i for i in s.items if i.joke_id in jokes]
+    beats = live_beats(db, user, s, set(jokes))
+    pieces: list[PieceIn] = [p for ps in piece_lists(beats) for p in ps]
+    places = {p.id: n for n, p in enumerate(pieces, start=1)}
     running = []
     topics: dict[str, int] = {}
-    for place, item in enumerate(items, start=1):
-        joke = jokes[item.joke_id]
+    for place, piece in enumerate(pieces, start=1):
+        joke = jokes[piece.joke_id]
         topic = topic_name(names, joke.topic_id)
         topics[topic] = topics.get(topic, 0) + 1
         running.append(
             {
                 "place": place,
-                "role": role(place, len(items)),
-                "optional": item.optional,
+                "role": role(place, len(pieces)),
+                # Kept for readers from before beats: the same as loose.
+                "optional": piece.loose,
+                "loose": piece.loose,
                 **brief(joke, names),
                 "premise": names.premises.get(joke.premise_id) if joke.premise_id else None,
                 "follows_id": str(joke.follows_id) if joke.follows_id else None,
             }
         )
-    return {**summary(s, jokes), "topics": topics, "running_order": running}
+    return {
+        **summary(s, jokes),
+        "topics": topics,
+        "beats": beats_out(beats, label_names(db, user), names, places),
+        "running_order": running,
+    }
 
 
 def lpm(laughs: list[int] | None, seconds: int) -> float | None:

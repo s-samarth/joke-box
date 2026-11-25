@@ -1,69 +1,106 @@
 # Screens: perform and study
 
-Sets, stage, print, shows and the study screens. The frame, capture and writing screens are in
+Sets, On stage, the cue card, shows and the study screens. The frame, capture and writing screens are in
 [screens.md](screens.md).
 
 ## Sets: `/sets` and `/sets/:setId`
 
+What a set is made of and why is in [sets.md](sets.md). Files:
 [SetsPage.tsx](../web/src/features/sets/SetsPage.tsx), [SetBuilder.tsx](../web/src/features/sets/SetBuilder.tsx),
-[TapeRow.tsx](../web/src/features/sets/TapeRow.tsx), [SetMeta.tsx](../web/src/features/sets/SetMeta.tsx), [SetTagsSheet.tsx](../web/src/features/sets/SetTagsSheet.tsx), [AddJokes.tsx](../web/src/features/sets/AddJokes.tsx),
-[LightBar.tsx](../web/src/features/sets/LightBar.tsx), [setlistMath.ts](../web/src/features/sets/setlistMath.ts),
-[useAutosaveSet.ts](../web/src/features/sets/useAutosaveSet.ts), [JokePeek.tsx](../web/src/features/jokes/JokePeek.tsx).
+[Spine.tsx](../web/src/features/sets/Spine.tsx), [BeatEditor.tsx](../web/src/features/sets/BeatEditor.tsx),
+[BeatLabels.tsx](../web/src/features/sets/BeatLabels.tsx), [EntryList.tsx](../web/src/features/sets/EntryList.tsx),
+[PieceList.tsx](../web/src/features/sets/PieceList.tsx), [CrowdBlock.tsx](../web/src/features/sets/CrowdBlock.tsx),
+[SetChecks.tsx](../web/src/features/sets/SetChecks.tsx), [StatusTrack.tsx](../web/src/features/sets/StatusTrack.tsx),
+[FieldsSheet.tsx](../web/src/features/sets/FieldsSheet.tsx), [PremisePicker.tsx](../web/src/features/sets/PremisePicker.tsx),
+[SetGuide.tsx](../web/src/features/sets/SetGuide.tsx), [SetMeta.tsx](../web/src/features/sets/SetMeta.tsx),
+[SetTagsSheet.tsx](../web/src/features/sets/SetTagsSheet.tsx), [AddJokes.tsx](../web/src/features/sets/AddJokes.tsx),
+[LightBar.tsx](../web/src/features/sets/LightBar.tsx), [beats.ts](../web/src/features/sets/beats.ts),
+[beatEdit.ts](../web/src/features/sets/beatEdit.ts), [useAutosaveSet.ts](../web/src/features/sets/useAutosaveSet.ts),
+[JokePeek.tsx](../web/src/features/jokes/JokePeek.tsx).
 
-- **List:** sets you worked on last first. Each card shows the joke count, slot length, its
-  stars and tags, and the light bar, with Rehearse and a ⋯ menu (Open set, Print, Delete set).
-  Chips above the list (All, then each tag in use) show only the sets with that tag. **New set**
-  creates one and opens it.
-- **Builder:** the set name, then Slot length (a set has no show date; the show is logged separately). Then **Rating** (five stars; tap
-  the same star again to clear it) and **Tags** (tap a tag on or off; **Edit tags** opens a sheet to
-  add, rename and delete them, with how many sets use each). Below them, the total against the slot
-  with "N left", and the light bar. Then one **tape strip** per joke: a drag handle, the setup in
-  marker, the joke's strength as periwinkle ticks, an **optional** toggle (the dashed circle), an
-  the joke's runtime (editing it here changes the joke, and every set it's in), up and down arrows, and remove. Every control is a full 44px tap
-  target: on a phone they sit in a row under the strip (so the words keep the whole width), with
-  remove set apart from the arrows; from tablet width up they sit beside it. The opener and closer are labelled on their
-  strips. An optional joke (one to cut if time is short) is on faded paper tape, labelled Optional;
-  it doesn't count towards the slot, and the total says "+N optional". Stage, Print and Home show
-  optional jokes the same way.
-- **Your jokes:** a column on desktop and a sheet behind **Add jokes** on a phone. It has search,
-  a topic filter, a sort (Recently edited by default, or Newest or Strongest), and **Status and clean rating**: chips you tap once to show only those, again to hide them (so you can ask for Stage Ready or Interesting jokes, and leave out Dirty ones); jokes already in the set are dimmed, and a joke whose cluster already has another version in the set says so in amber (it can still be added). Tap a
-  joke to read it in full (`JokePeek`). The search, topic, filters and sort are remembered for an hour in that
-  browser tab ([sessionMemory.ts](../web/src/lib/sessionMemory.ts)), so you can leave and come back mid-build.
-- **Drag and drop** uses dnd-kit, with pointer, touch and keyboard sensors, so it works on phones.
-- **Saving:** the set autosaves shortly after each change.
-- **Notes on building a set** (the cap icon) opens your Craft notes from Building a set in a sheet:
-  checklists tick through, everything else reads as written.
+- **List:** the sets you worked on last come first. Each card shows how many beats and jokes it
+  has, the slot length, its stars and tags, and the light bar (the beats' time against the slot).
+  Each card has **On stage** and a ⋯ menu (Cue card, Delete set). Chips above the list (All,
+  then each tag in use) show only the sets with that tag. **New set** creates one and opens it.
+  The **?** opens **How sets work**.
+- **Builder, top:** the set name, then **The point** (one sentence), Slot length, **Rating** and
+  **Tags** (as before: tap a star again to clear it, and **Edit tags** opens the tags sheet). Below
+  them, the beats' total against the slot, with the light bar.
+- **Shape:** once there are beats, the **status track** shows your status field across the set by
+  beat time. There's a row per option, a tape-yellow line through the beats, and a dotted grey
+  line for a Not sure beat at the level before it. A shift with no reason is marked "why?". Next
+  to it are the four **checks**, each naming the Craft note it comes from. The top-up limit is
+  edited in place. The track scrolls sideways on a phone.
+- **Spine:** the beats in their fixed order, as tape strips. Each strip shows the cue, the time,
+  its labels (Not sure outlined), "Why the shift?" in amber when a reason is missing, and what's in
+  it (premises, jokes, crowd work). Up and down arrows move a beat, and **Add beat** adds one at
+  the end. From 1024px wide, the spine sits beside the open beat. Narrower (phones, iPads in
+  portrait), it sits above it, and tapping a beat scrolls to it.
+- **The open beat:** the cue on a tape strip (type into it), **Time for this beat** (m:ss, set by
+  hand), **What it's for**, and **Labels for this beat, in this set** (one row of options per field,
+  plus Not sure). When the status group changes from the beat before, an amber box asks **Why the
+  shift?** (Top-up, Planned turn, Clash). Then **The beat, in order**: numbered entries, each with
+  up, down and remove:
+  - **Premise:** the take and its reasoning, then its jokes. From the second premise on, a
+    **Gate: only if the premise before it landed** toggle (sky blue when on).
+  - **No premise:** jokes that aren't under a premise.
+  - **Crowd work** (orchid): what it's about, then questions. Each question has **Have a reply**
+    (green) or **No reply yet** (amber), and replies as "If they say… → your line". On a phone, a
+    reply's two boxes stack.
+  - **Jokes** keep their number and show the setup with the punchline under it. Tap one to read it
+    whole (`JokePeek`). Under each joke: **Locked/Loose** (yellow/teal), **Gate** (sky blue: the
+    jokes it guards are indented under it, with "If it lands, do the next − N + jokes. If not, skip
+    to #k."), **Follows the lead / Pinned version** for a cluster version, then up, down and
+    remove.
+  - Add with **Premise** (pick one, then its jokes), **Jokes, no premise**, **Crowd work**, or
+    **+ Joke** under a list. The joke picker is the same one as before (search, topic, sort,
+    status and clean chips). A joke that follows others brings the ones before it.
+- **Fields** (the sliders icon) opens **Label fields**. There you rename, add and delete fields and
+  options, say which field is the status track (each option is then marked win, neutral or loss)
+  and which is the persona. Saved for every set on Done.
+- **Saving:** the set autosaves shortly after each change, offline too, as before.
+- **Notes on building a set** (the cap icon) opens your Craft notes from Building a set.
 
-<img src="screenshots/desktop-set-builder.webp" alt="Set builder">
+<img src="screenshots/desktop-sets.webp" alt="Sets">
+<img src="screenshots/desktop-set-builder.webp" alt="Set builder: the status track, the checks, the spine and an open beat">
+<img src="screenshots/desktop-set-beat.webp" alt="An open beat: labels, the shift reason, a premise with a gate">
+<img src="screenshots/ipad-set-builder.webp" width="420" alt="A beat's list on an iPad: a gate guarding two jokes">
 <p>
-  <img src="screenshots/phone-set-builder.webp" width="230" alt="Set builder on a phone">
-  <img src="screenshots/phone-stage.webp" width="230" alt="Rehearsing a set on a phone">
+  <img src="screenshots/phone-set-builder.webp" width="230" alt="The spine on a phone">
+  <img src="screenshots/phone-set-beat.webp" width="230" alt="A beat on a phone">
+  <img src="screenshots/phone-set-guide.webp" width="230" alt="How sets work">
 </p>
+<img src="screenshots/desktop-set-fields.webp" alt="Label fields">
 
-## Rehearse (Stage): `/sets/:setId/stage`
+## On stage: `/sets/:setId/stage`
 
-[StageView.tsx](../web/src/features/sets/StageView.tsx).
+[StageView.tsx](../web/src/features/sets/StageView.tsx), [stageWalk.ts](../web/src/features/sets/stageWalk.ts).
 
-A full screen with no frame, opened by **Rehearse**: the set as a script to read before a show. The clock against the
-slot, reset and play/pause stay pinned at the top. Below, every joke in full in one scrolling
-column: its number (and Opener, Closer or Optional), runtime and "by m:ss", then the setup, the
-punchline in tape yellow and each tag line. The clock turns amber in
-the last minute and red when you're over. The screen wake lock keeps the phone awake. The cap icon
-opens **Before you go on**: your On stage notes, like crowd work and hecklers, with checklists to
-tick through. Leaving (the ✕) goes straight back to the set: rehearsing
-doesn't mean you did a show.
+A full screen with no frame, opened by **On stage**. The clock against the slot, reset and
+play/pause stay pinned at the top. The clock turns amber in the last minute and red when you're
+over, and the wake lock keeps the phone awake. Under the clock is a row of beat cues: tap one to
+jump to it. Then the open beat: "Beat 2 of 5 · 2:30 → 3:45", its cue on tape, what it's for, and
+its list. Premises appear as small headings, and crowd work in an orchid box with its questions
+and replies. For each joke, the setup is dimmed and the punchline sits under it as the cue line,
+coloured yellow (locked), teal (loose) or blue (gate, with a fork icon). The footer asks the
+next gate in order (**It landed** / **It didn't · skip what it guards**, or **The premise before
+landed**). A gate that didn't land strikes out what it guards. Tap an answered gate to take the
+answer back. With no gate left to answer, the footer is **Next beat: cue**, and after the last
+beat it goes back to the set. The cap icon opens **Before you go on** (your On stage notes).
 
-<img src="screenshots/desktop-stage.webp" alt="Rehearsing a set">
+<img src="screenshots/desktop-stage.webp" alt="On stage">
+<img src="screenshots/phone-stage.webp" width="230" alt="On stage on a phone">
 
-## Print: `/sets/:setId/print`
+## Cue card: `/sets/:setId/print`
 
 [PrintView.tsx](../web/src/features/sets/PrintView.tsx).
 
-A white page. It shows the set name, then the slot (a set has no date). Below that, the jokes, numbered,
-each with its setup in marker, the punchline, its runtime and "by m:ss" (the running total). A
-**Print** button opens the browser's print dialog.
+A white page to read off a phone or print. It has the set name, the beats' time and the slot, and
+the point. Then each beat, numbered, with its cue in marker, its time and when it starts. Under
+each beat are its premises (marked "(gate)" when gated), its jokes with no premise as
+punchlines, and its crowd work. **Print** opens the browser's print dialog.
 
-<img src="screenshots/desktop-print.webp" alt="Print view">
+<img src="screenshots/desktop-cue-card.webp" alt="Cue card">
 
 ## Shows: `/shows`
 

@@ -2,7 +2,6 @@
 import { Play, Search } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { useJokes } from '../../api/library'
 import { useLogs, useSetlists } from '../../api/shows'
 import { SectionHead, Stars, Tape } from '../../components/ui/pieces'
 import { clock } from '../../lib/duration'
@@ -10,7 +9,7 @@ import { formatDate } from '../../lib/time'
 import { DailyBanner } from '../daily/DailyBanner'
 import { useHabit } from '../daily/useHabit'
 import { LightBar } from '../sets/LightBar'
-import { draftItems, optionalSeconds, totalSeconds } from '../sets/setlistMath'
+import { beatTotal, beatsOf, setSummary } from '../sets/beats'
 import { CaptureTabs, type CaptureTab } from './CaptureTabs'
 import { InstallHint } from './InstallHint'
 import { LibraryTiles } from './LibraryTiles'
@@ -25,12 +24,10 @@ const longDate = new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', we
 
 export function TodayPage() {
   const [dateLabel] = useState(() => longDate.format(new Date()))
-  const { data: jokes = [] } = useJokes()
   const { data: sets = [] } = useSetlists()
   const { data: logs = [] } = useLogs()
   // The set you worked on last; sets have no show date.
   const nextSet = [...sets].sort((a, b) => b.updated_at.localeCompare(a.updated_at))[0]
-  const byId = new Map(jokes.map((b) => [b.id, b]))
   const lastShow = logs[0]
   const daily = useHabit()
   const [tab, setTab] = useState<CaptureTab>('observation')
@@ -73,23 +70,23 @@ export function TodayPage() {
               <Link to={`/sets/${nextSet.id}`} className="min-w-0">
                 <p className="truncate text-lg font-medium">{nextSet.name}</p>
                 <p className="text-sm text-dim">
-                  {nextSet.items.length} {nextSet.items.length === 1 ? 'joke' : 'jokes'}, {clock(nextSet.target_seconds)} slot
+                  {setSummary(nextSet)}, {clock(nextSet.target_seconds)} slot
                 </p>
               </Link>
               <Link to={`/sets/${nextSet.id}/stage`} className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg bg-tape px-3 font-semibold text-tape-ink">
-                <Play size={16} /> Rehearse
+                <Play size={16} /> On stage
               </Link>
             </div>
             <div className="space-y-2">
-              {nextSet.items.slice(0, 3).map((item, i) => (
-                <Tape key={item.joke_id} seed={i} optional={item.optional} className="px-4 py-2 text-lg leading-tight">
-                  <span className="line-clamp-1">{byId.get(item.joke_id)?.setup ?? 'Deleted joke'}</span>
+              {beatsOf(nextSet).slice(0, 3).map((beat, i) => (
+                <Tape key={beat.id} seed={i} dim={!beat.cue} className="flex items-baseline justify-between gap-3 px-4 py-2 text-lg leading-tight">
+                  <span className="line-clamp-1">{beat.cue || `Beat ${i + 1}`}</span><span className="shrink-0 font-sans text-sm tabular">{clock(beat.seconds)}</span>
                 </Tape>
               ))}
-              {nextSet.items.length > 3 && <p className="pt-1 text-sm text-faint">and {nextSet.items.length - 3} more</p>}
+              {beatsOf(nextSet).length > 3 && <p className="pt-1 text-sm text-faint">and {beatsOf(nextSet).length - 3} more beats</p>}
             </div>
             <div className="mt-4">
-              <LightBar total={totalSeconds(draftItems(nextSet.items))} optional={optionalSeconds(draftItems(nextSet.items))} target={nextSet.target_seconds} />
+              <LightBar total={beatTotal(beatsOf(nextSet))} target={nextSet.target_seconds} />
             </div>
           </div>
         ) : (

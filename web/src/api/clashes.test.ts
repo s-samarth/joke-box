@@ -33,7 +33,7 @@ function serve(versions: Record<string, number>) {
 }
 
 const set = (version?: number, name = 'Fake set'): SetlistInput => ({
-  name, show_date: null, target_seconds: 300, venue_name: null, rating: null, tag_ids: [], items: [], version,
+  name, show_date: null, target_seconds: 300, venue_name: null, rating: null, tag_ids: [], items: [], point: '', beats: [], version,
 })
 const saveSet = (vars: SaveSetlistVars) => new MutationObserver<unknown, Error, SaveSetlistVars>(queryClient, { mutationKey: saveSetlistKey }).mutate(vars)
 

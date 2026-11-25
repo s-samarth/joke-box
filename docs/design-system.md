@@ -24,8 +24,9 @@ block, so every token is also a utility class (`bg-ink-2`, `text-tape`, `ring-ru
 | `amber` | `#ffb547` | The last minute of the slot; offline |
 | `light` | `#ff5a47` | Over time; destructive actions; errors |
 | `ok` | `#74d3a8` | Success; jokes on the Activity calendar |
-| `sky` | `#9db4ff` | Strength beside a joke in a set; premises on the Activity calendar |
-| `orchid` | `#e7a3e0` | Observations on the Activity calendar |
+| `sky` | `#9db4ff` | A gate in a set (the joke and what it guards); premises on the Activity calendar |
+| `orchid` | `#e7a3e0` | Observations on the Activity calendar; crowd work in a set |
+| `teal` | `#6fd6d0` | A loose joke in a set: it keeps its number, only marked as flexible. Locked jokes are `tape` |
 
 Joke types get a small coloured dot, never a filled chip: One-Liner sky, Story violet,
 Crowd Work amber, Roast rose, Observation emerald, Premise pink, Act Out orange. Every other type

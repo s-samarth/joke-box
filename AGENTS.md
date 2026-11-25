@@ -7,6 +7,7 @@ missed. [docs/README.md](docs/README.md) lists every doc.
 | Working on | Read first |
 |---|---|
 | Screens and flows | [docs/screens.md](docs/screens.md), [docs/screens-perform.md](docs/screens-perform.md), [docs/user-flows.md](docs/user-flows.md) |
+| Sets (beats, gates, labels, checks) | [docs/sets.md](docs/sets.md): what each part means and why |
 | Models, migrations | [docs/data-model.md](docs/data-model.md) |
 | API, the Claude connector | [docs/api.md](docs/api.md) |
 | Shows logged from recordings, the laugh scale | [docs/set-review.md](docs/set-review.md) |
@@ -61,6 +62,11 @@ directly, so a model change can break them, and Claude only finds out mid-conver
 - **A cluster's lead is worked out twice:** on the server (`app/services/clusters.py`, which
   stores it) and in the browser (`web/src/features/jokes/cluster/lead.ts`, so the list is right
   offline). Change the rule in both, with `tests/test_clusters.py` and `lead.test.ts`.
+- **A set's beats are read twice:** on the server (`app/services/set_beats.py`, which works
+  out `items`, cluster leads and the Trash) and in the browser (`web/src/features/sets/beats.ts`).
+  The default label fields are in both `app/services/set_fields.py` and `web/src/api/setFields.ts`.
+  Change them together, with `tests/test_set_beats.py` and `beats.test.ts`, and keep
+  `docs/sets.md` and the in-app guide (`SetGuide.tsx`) saying the same thing.
 - **The writing pulse is worked out twice:** in the browser for the Activity screen
   (`web/src/features/daily/pulse.ts`, `pulseTrends.ts`, `pulseNotes.ts`) and in `app/connector/`
   for Claude (`pulse.py`, `pulse_rows.py`, `pulse_trends.py`, `pulse_notes.py`).

@@ -1,141 +1,157 @@
 /**
- * Building a set: the set itself as tape strips you reorder, the slot length as the light bar,
- * and your jokes beside it (desktop) or in a sheet (phone). Saves itself as you go.
+ * Building a set (docs/sets.md): its point, its beats in a fixed order (the spine), the shape of
+ * its status, and the open beat with its premises, jokes and crowd work. Saves itself as you go.
+ * Desktop shows the spine beside the open beat; phones and iPads in portrait stack them.
  */
-import { DndContext, KeyboardSensor, PointerSensor, TouchSensor, closestCenter, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
-import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { ArrowLeft, GraduationCap, Play, Plus, Printer } from 'lucide-react'
-import { useState, type ReactNode } from 'react'
+import { ArrowLeft, CircleHelp, GraduationCap, Play, ScrollText, SlidersHorizontal } from 'lucide-react'
+import { useRef, useState } from 'react'
 import { Link, useParams } from 'react-router'
-import { useJokes, useSaveJoke } from '../../api/library'
+import { useClusters } from '../../api/clusters'
+import { useJokes } from '../../api/library'
+import { usePremises } from '../../api/premises'
+import { useSaveSetFields, useSetFields } from '../../api/setFields'
 import { useSetlists } from '../../api/shows'
-import type { Joke, Setlist } from '../../api/types'
-import { Button } from '../../components/ui/Button'
+import type { Beat, Joke, Setlist } from '../../api/types'
 import { EmptyState, Spinner } from '../../components/ui/pieces'
 import { Field, GrowingText, Input } from '../../components/ui/Field'
 import { useFeedback } from '../../components/ui/feedbackContext'
 import { Modal } from '../../components/ui/Modal'
+import { chainTo } from '../../lib/chains'
 import { clock, parse } from '../../lib/duration'
-import { JokePeek } from '../jokes/JokePeek'
-import { toInput } from '../jokes/useAutosaveJoke'
 import { CraftSheet } from '../craft/CraftSheet'
+import { JokePeek } from '../jokes/JokePeek'
 import { AddJokes } from './AddJokes'
+import { BeatEditor } from './BeatEditor'
+import { addPiecesTo, mapBeat, newBeat, newPremise, pieceFor, setEntries, swap } from './beatEdit'
+import { beatTotal, jokeIds, needsWhy } from './beats'
+import { FieldsSheet } from './FieldsSheet'
 import { LightBar } from './LightBar'
+import { PremisePicker } from './PremisePicker'
+import { SetChecks } from './SetChecks'
+import { SetGuide } from './SetGuide'
 import { SetMeta } from './SetMeta'
-import { chainItems, chainNote, draftItems, move, optionalSeconds, positionLabel, totalSeconds } from './setlistMath'
-import { TapeRow } from './TapeRow'
+import { Spine } from './Spine'
 import { useAutosaveSet } from './useAutosaveSet'
 
-function DropArea({ empty, children }: { empty: boolean; children: ReactNode }) {
-  const { setNodeRef, isOver } = useDroppable({ id: 'set' })
-  return (
-    <div ref={setNodeRef} className={`rounded-xl transition ${isOver ? 'bg-tape/10 ring-2 ring-tape/50' : ''} ${empty ? 'border border-dashed border-rule-strong p-8 text-center text-dim' : ''}`}>
-      {empty ? 'Nothing taped down yet. Add jokes to start the set.' : children}
-    </div>
-  )
-}
+const iconLink = 'inline-flex size-10 items-center justify-center rounded-lg text-dim hover:bg-ink-3 hover:text-paper'
+const section = 'text-[11.5px] font-semibold tracking-[0.13em] text-faint uppercase'
+type Sheet = 'guide' | 'fields' | 'craft' | null
 
 function Builder({ setlist }: { setlist: Setlist }) {
   const { draft, update } = useAutosaveSet(setlist)
   const { data: jokes = [] } = useJokes()
-  const [picking, setPicking] = useState(false)
+  const { data: premiseList = [] } = usePremises()
+  const { data: clusters = [] } = useClusters()
+  const config = useSetFields()
+  const saveFields = useSaveSetFields()
+  const { confirm, toast } = useFeedback()
+  const [selected, setSelected] = useState<string | null>(draft.beats[0]?.id ?? null)
+  const [sheet, setSheet] = useState<Sheet>(null)
+  const [picking, setPicking] = useState<{ beatId: string; entryId: string | null } | null>(null)
+  const [premiseFor, setPremiseFor] = useState<string | null>(null)
   const [reading, setReading] = useState<Joke | null>(null)
-  const [craft, setCraft] = useState(false)
   const [target, setTarget] = useState(clock(draft.target_seconds))
-  const { toast } = useFeedback()
-  const byId = new Map(jokes.map((b) => [b.id, b]))
-  const saveJoke = useSaveJoke()
-  // A set times each joke by the joke's own runtime, so a new time here is saved on the joke.
-  const setRuntime = (jokeId: string, seconds: number) => {
-    const joke = byId.get(jokeId)
-    if (joke) saveJoke.mutate({ id: jokeId, input: { ...toInput(joke), duration_seconds: seconds } })
-    update((d) => ({ ...d, items: d.items.map((x) => (x.joke_id === jokeId ? { ...x, duration_seconds: seconds } : x)) }))
+  const editor = useRef<HTMLDivElement>(null)
+  // Stacked (phone, iPad in portrait), the open beat is below the spine: go to it.
+  const open = (id: string) => {
+    setSelected(id)
+    if (window.matchMedia('(max-width: 1023px)').matches) requestAnimationFrame(() => editor.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
   }
-  const used = new Set(draft.items.map((i) => i.joke_id))
-  const items = draftItems(draft.items)
-  const total = totalSeconds(items)
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 120, tolerance: 6 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
-  )
+  const byId = new Map(jokes.map((j) => [j.id, j]))
+  const premises = new Map(premiseList.map((p) => [p.id, p]))
+  const leadOf = (id: string) => clusters.find((c) => c.id === id)?.lead_joke_id
+  const beats = draft.beats
+  const index = beats.findIndex((b) => b.id === selected)
+  const beat = index >= 0 ? beats[index] : null
+  const used = jokeIds(beats)
+  const setBeats = (change: (b: Beat[]) => Beat[]) => update((d) => ({ ...d, beats: change(d.beats) }))
+  const changeBeat = (next: Beat) => setBeats((list) => mapBeat(list, next.id, () => next))
 
   // A joke that follows others brings the ones before it that aren't in the set yet.
-  const add = (joke: Joke, at?: number) => {
-    if (used.has(joke.id)) return
-    const added = chainItems(joke, byId, used)
-    update((d) => {
-      const list = [...d.items]
-      list.splice(at ?? list.length, 0, ...added)
-      return { ...d, items: list }
-    })
-    const note = chainNote(added.length)
-    if (note) toast(note)
+  const add = (joke: Joke) => {
+    if (!picking || used.has(joke.id)) return
+    const pieces = chainTo(joke, byId).filter((j) => !used.has(j.id)).map((j) => pieceFor(j, leadOf))
+    const found = beats.find((b) => b.id === picking.beatId)
+    if (!found) return
+    const out = addPiecesTo(found, picking.entryId, pieces)
+    changeBeat(out.beat)
+    setPicking({ ...picking, entryId: out.entryId })
+    if (pieces.length > 1) toast(`Also added the ${pieces.length === 2 ? 'joke' : `${pieces.length - 1} jokes`} before it`)
   }
-  const onDragEnd = ({ active, over }: DragEndEvent) => {
-    if (!over) return
-    const id = String(active.id)
-    const to = draft.items.findIndex((i) => i.joke_id === over.id)
-    if (id.startsWith('lib:')) {
-      const joke = byId.get(id.slice(4))
-      if (joke) add(joke, to >= 0 ? to : undefined)
-      return
-    }
-    const from = draft.items.findIndex((i) => i.joke_id === id)
-    if (from >= 0 && to >= 0 && from !== to) update((d) => ({ ...d, items: move(d.items, from, to) }))
+  const addBeat = () => { const b = newBeat(); setBeats((list) => [...list, b]); open(b.id) }
+  const deleteBeat = async (b: Beat) => {
+    if (b.entries.length && !(await confirm({ title: `Delete ${b.cue || 'this beat'}?`, message: 'Its premises, jokes and crowd work come out of the set. The jokes stay in your library.', confirmLabel: 'Delete beat', danger: true }))) return
+    setBeats((list) => list.filter((x) => x.id !== b.id))
+    setSelected(beats.find((x) => x.id !== b.id)?.id ?? null)
+  }
+  const pickPremise = (premiseId: string) => {
+    const found = beats.find((b) => b.id === premiseFor)
+    if (!found) return
+    const entry = newPremise(premiseId)
+    changeBeat(setEntries(found, [...found.entries, entry]))
+    setPremiseFor(null)
+    setPicking({ beatId: found.id, entryId: entry.id })
   }
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-      <div className="mx-auto flex max-w-6xl gap-10">
-        <div className="min-w-0 flex-1 pb-10">
-          <div className="flex h-12 items-center justify-between gap-2 lg:mt-6">
-            <Link to="/sets" className="inline-flex items-center gap-1.5 text-dim hover:text-paper"><ArrowLeft size={18} /> Sets</Link>
-            <div className="flex gap-1">
-              <button type="button" onClick={() => setCraft(true)} aria-label="Notes on building a set" title="Notes on building a set" className="inline-flex size-10 items-center justify-center rounded-lg text-dim hover:bg-ink-3 hover:text-paper"><GraduationCap size={18} /></button>
-              <Link to={`/sets/${setlist.id}/print`} aria-label="Print" className="inline-flex size-10 items-center justify-center rounded-lg text-dim hover:bg-ink-3 hover:text-paper"><Printer size={18} /></Link>
-              <Link to={`/sets/${setlist.id}/stage`} className="inline-flex h-10 items-center gap-2 rounded-lg bg-tape px-3 font-semibold text-tape-ink"><Play size={16} /> Rehearse</Link>
-            </div>
-          </div>
-          <GrowingText aria-label="Set name" className="headline mt-4 text-[44px] sm:text-[56px]" value={draft.name} placeholder="Untitled set"
-            onChange={(e) => update((d) => ({ ...d, name: e.target.value }))} />
-          <div className="mt-5 grid grid-cols-2 gap-3">
-            <Field label="Slot length">
-              <Input inputMode="numeric" className="tabular" value={target} onChange={(e) => setTarget(e.target.value)}
-                onBlur={() => { const s = parse(target); if (s) update((d) => ({ ...d, target_seconds: s })); setTarget(clock(s || draft.target_seconds)) }} />
-            </Field>
-          </div>
-          <SetMeta draft={draft} update={update} />
-          <div className="mt-8"><LightBar total={total} optional={optionalSeconds(items)} target={draft.target_seconds} big /></div>
-          <div className="mt-8">
-            <SortableContext items={items.map((i) => i.jokeId)} strategy={verticalListSortingStrategy}>
-              <DropArea empty={items.length === 0}>
-                <ol className="space-y-3">
-                  {items.map((item, i) => (
-                    <TapeRow key={item.jokeId} item={item} joke={byId.get(item.jokeId)} index={i} count={items.length} note={items.length > 1 ? positionLabel(i, items.length) : null}
-                      onDuration={(s) => setRuntime(item.jokeId, s)}
-                      onOptional={() => update((d) => ({ ...d, items: d.items.map((x) => (x.joke_id === item.jokeId ? { ...x, optional: !x.optional } : x)) }))}
-                      onMove={(to) => update((d) => ({ ...d, items: move(d.items, i, to) }))}
-                      onRemove={() => update((d) => ({ ...d, items: d.items.filter((x) => x.joke_id !== item.jokeId) }))}
-                      onOpen={() => setReading(byId.get(item.jokeId) ?? null)} />
-                  ))}
-                </ol>
-              </DropArea>
-            </SortableContext>
-          </div>
-          <div className="mt-5 lg:hidden"><Button className="w-full" icon={<Plus size={18} />} onClick={() => setPicking(true)}>Add jokes</Button></div>
+    <div className="mx-auto max-w-6xl pb-12">
+      <div className="flex h-12 items-center justify-between gap-2 lg:mt-6">
+        <Link to="/sets" className="inline-flex items-center gap-1.5 text-dim hover:text-paper"><ArrowLeft size={18} /> Sets</Link>
+        <div className="flex gap-0.5">
+          <button type="button" onClick={() => setSheet('guide')} aria-label="How sets work" title="How sets work" className={iconLink}><CircleHelp size={18} /></button>
+          <button type="button" onClick={() => setSheet('fields')} aria-label="Label fields" title="Label fields" className={iconLink}><SlidersHorizontal size={18} /></button>
+          <button type="button" onClick={() => setSheet('craft')} aria-label="Notes on building a set" title="Notes on building a set" className={iconLink}><GraduationCap size={18} /></button>
+          <Link to={`/sets/${setlist.id}/print`} aria-label="Cue card" title="Cue card" className={iconLink}><ScrollText size={18} /></Link>
+          <Link to={`/sets/${setlist.id}/stage`} className="ml-1 inline-flex h-10 items-center gap-2 rounded-lg bg-tape px-3 font-semibold text-tape-ink"><Play size={16} /> On stage</Link>
         </div>
-        <aside className="sticky top-[env(safe-area-inset-top)] hidden h-[calc(100dvh-env(safe-area-inset-top))] w-80 shrink-0 flex-col py-10 lg:flex">
-          <h2 className="headline mb-3 text-2xl">Your jokes</h2>
-          <AddJokes used={used} onAdd={(b) => add(b)} onOpen={setReading} draggable />
-        </aside>
       </div>
-      <Modal open={picking} onOpenChange={setPicking} title="Add jokes" description={`${items.length} in the set, ${clock(total)} so far`}>
-        <div className="h-[62dvh]"><AddJokes used={used} onAdd={(b) => add(b)} onOpen={setReading} /></div>
+      <div className="max-w-3xl">
+        <GrowingText aria-label="Set name" className="headline mt-4 text-[44px] sm:text-[56px]" value={draft.name} placeholder="Untitled set" onChange={(e) => update((d) => ({ ...d, name: e.target.value }))} />
+        <div className="mt-5">
+          <p className={section}>The point</p>
+          <GrowingText aria-label="The point" placeholder="Your one point tonight, in one sentence" value={draft.point}
+            className="mt-1.5 rounded-lg bg-ink-2 px-3 py-2.5 text-lg leading-snug ring-1 ring-rule-strong focus:ring-2 focus:ring-tape" onChange={(e) => update((d) => ({ ...d, point: e.target.value }))} />
+        </div>
+        <div className="mt-5 grid grid-cols-2 gap-3">
+          <Field label="Slot length">
+            <Input inputMode="numeric" className="tabular" value={target} onChange={(e) => setTarget(e.target.value)}
+              onBlur={() => { const s = parse(target); if (s) update((d) => ({ ...d, target_seconds: s })); setTarget(clock(s || draft.target_seconds)) }} />
+          </Field>
+        </div>
+        <SetMeta draft={draft} update={update} />
+        <div className="mt-8"><LightBar total={beatTotal(beats)} target={draft.target_seconds} big /></div>
+      </div>
+      {beats.length > 0 && (
+        <section className="mt-8 rounded-2xl bg-ink-2/50 p-4 ring-1 ring-rule">
+          <p className={`${section} mb-3`}>{config.fields.find((f) => f.role === 'status')?.name ?? 'Status'} across the set, by beat time</p>
+          <SetChecks beats={beats} config={config} onLimit={(s) => saveFields.mutate({ ...config, top_up_seconds: s })} />
+        </section>
+      )}
+      <div className="mt-8 grid gap-6 lg:grid-cols-[20rem_minmax(0,1fr)]">
+        <div>
+          <p className={`${section} mb-2`}>Spine · beats run in this order</p>
+          <Spine beats={beats} fields={config.fields} selected={selected} onSelect={open} onAdd={addBeat} onMove={(i, d) => setBeats((list) => swap(list, i, d))} />
+        </div>
+        <div ref={editor} className="min-w-0 scroll-mt-16 rounded-2xl p-4 ring-1 ring-rule">
+          {beat ? (
+            <BeatEditor key={beat.id} beat={beat} previous={beats[index - 1] ?? null} needsWhy={needsWhy(beats, index, config.fields)} fields={config.fields}
+              onChange={changeBeat} onDelete={() => deleteBeat(beat)} jokes={byId} premises={premises} leadOf={leadOf} onOpen={setReading}
+              onAddJokes={(entryId) => setPicking({ beatId: beat.id, entryId })} onAddPremise={() => setPremiseFor(beat.id)} />
+          ) : (
+            <p className="py-10 text-center text-dim">{beats.length ? 'Pick a beat to open it.' : 'No beats yet. Add the first one: a cue word for what you talk about first.'}</p>
+          )}
+        </div>
+      </div>
+      <Modal open={Boolean(picking)} onOpenChange={(o) => !o && setPicking(null)} title="Add jokes" description={`Into ${beats.find((b) => b.id === picking?.beatId)?.cue || 'this beat'}. Tap + to add, tap a joke to read it.`}>
+        <div className="h-[62dvh]"><AddJokes used={used} onAdd={add} onOpen={setReading} /></div>
       </Modal>
-      <CraftSheet open={craft} onOpenChange={setCraft} title="Building a set" screen="sets" empty="No notes in the areas that show on the set builder." />
-      {reading && <JokePeek joke={reading} onClose={() => setReading(null)} onAdd={() => add(reading)} inSet={used.has(reading.id)} />}
-    </DndContext>
+      <PremisePicker open={Boolean(premiseFor)} onOpenChange={(o) => !o && setPremiseFor(null)} onPick={pickPremise}
+        used={new Set(beats.find((b) => b.id === premiseFor)?.entries.flatMap((e) => (e.kind === 'premise' && e.premise_id ? [e.premise_id] : [])) ?? [])} />
+      <SetGuide open={sheet === 'guide'} onOpenChange={(o) => setSheet(o ? 'guide' : null)} />
+      <FieldsSheet open={sheet === 'fields'} onOpenChange={(o) => setSheet(o ? 'fields' : null)} />
+      <CraftSheet open={sheet === 'craft'} onOpenChange={(o) => setSheet(o ? 'craft' : null)} title="Building a set" screen="sets" empty="No notes in the areas that show on the set builder." />
+      {reading && <JokePeek joke={reading} onClose={() => setReading(null)} onAdd={picking ? () => add(reading) : undefined} inSet={used.has(reading.id)} />}
+    </div>
   )
 }
 

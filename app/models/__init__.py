@@ -17,6 +17,7 @@ from app.models.library import (
 )
 from app.models.notebook import Observation, ObservationTopic, WritingSession
 from app.models.reviews import ShowReview
+from app.models.set_fields import SetFieldConfig
 from app.models.shows import (
     PerformanceJoke,
     PerformanceLog,
@@ -53,6 +54,7 @@ __all__ = [
     "PerformanceLog",
     "Setlist",
     "SetlistItem",
+    "SetFieldConfig",
     "SetTag",
     "ShowReview",
     "Status",

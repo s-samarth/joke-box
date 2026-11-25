@@ -1,14 +1,20 @@
 import type { SetlistInput } from '../../api/shows'
 import type { Setlist } from '../../api/types'
+import { beatsOf, flatItems } from './beats'
 
 /** A saved set in the shape the API takes back, so it can be changed and saved again. */
-export const setlistInput = (s: Setlist): SetlistInput => ({
-  name: s.name,
-  show_date: s.show_date,
-  target_seconds: s.target_seconds,
-  venue_name: s.venue_name,
-  rating: s.rating ?? null,
-  tag_ids: s.tag_ids ?? [],
-  items: s.items.map((i) => ({ joke_id: i.joke_id, duration_seconds: i.duration_seconds, optional: i.optional ?? false })),
-  version: s.version,
-})
+export const setlistInput = (s: Setlist): SetlistInput => {
+  const beats = beatsOf(s)
+  return {
+    name: s.name,
+    show_date: s.show_date,
+    target_seconds: s.target_seconds,
+    venue_name: s.venue_name,
+    rating: s.rating ?? null,
+    tag_ids: s.tag_ids ?? [],
+    items: flatItems(beats),
+    point: s.point ?? '',
+    beats,
+    version: s.version,
+  }
+}

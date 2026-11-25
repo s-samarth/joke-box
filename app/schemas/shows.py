@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from app.schemas.legacy import JOKE_ID
 from app.schemas.limits import INT_MAX
 from app.schemas.reviews import ReviewOut
+from app.schemas.set_beats import BeatIn
 
 
 class VenueOut(BaseModel):
@@ -32,7 +33,11 @@ class SetlistIn(BaseModel):
     venue_name: str | None = Field(default=None, max_length=160)
     rating: int | None = Field(default=None, ge=1, le=5)
     tag_ids: list[uuid.UUID] = Field(default_factory=list)
+    # Older apps send only `items`. A set saved with beats works its items out from them.
     items: list[SetlistItemIn] = Field(default_factory=list)
+    # The set's point and beats (docs/sets.md). Left out (an older app), they stay as they are.
+    point: str | None = Field(default=None, max_length=1000)
+    beats: list[BeatIn] | None = Field(default=None, max_length=200)
     # The version this edit started from. Omitted (a new set, an older app), nothing is checked.
     base_version: int | None = Field(default=None, le=INT_MAX)
 
@@ -55,6 +60,8 @@ class SetlistOut(BaseModel):
     rating: int | None
     tag_ids: list[uuid.UUID]
     items: list[SetlistItemOut]
+    point: str = ""
+    beats: list[BeatIn] = Field(default_factory=list)
     version: int
     created_at: datetime
     updated_at: datetime

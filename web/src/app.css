@@ -26,6 +26,8 @@
   --color-sky: #9db4ff;
   /* Observations on the Activity calendar, beside green jokes and sky premises. */
   --color-orchid: #e7a3e0;
+  /* A loose joke in a set's beat: it keeps its place, only marked as flexible (docs/sets.md). */
+  --color-teal: #6fd6d0;
 
   --font-sans: "Archivo Variable", ui-sans-serif, system-ui, sans-serif;
   --font-marker: "Permanent Marker", "Archivo Variable", cursive;

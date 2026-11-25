@@ -105,30 +105,6 @@ export interface Brainstorm {
   updated_at: string
 }
 
-export interface SetlistItem {
-  joke_id: string
-  position: number
-  duration_seconds: number
-  /** One to cut if time is short: it doesn't count towards the slot. */
-  optional: boolean
-}
-
-export interface Setlist {
-  id: string
-  name: string
-  show_date: string | null
-  target_seconds: number
-  venue_name: string | null
-  /** 1-5 stars, or null until rated. */
-  rating: number | null
-  tag_ids: string[]
-  items: SetlistItem[]
-  /** Up by one per save on the server; catches edits made on two devices. */
-  version: number
-  created_at: string
-  updated_at: string
-}
-
 export interface ObservationInput {
   text: string
   /** Notes: anything more about it. Left out of a save, it stays as stored; older copies lack it. */
@@ -217,5 +193,6 @@ export interface VoiceNote extends VoiceNoteInput {
 }
 
 // Study and craft shapes live in their own file; re-exported so every import stays `./types`.
+export * from './setTypes'
 export * from './showTypes'
 export * from './studyTypes'

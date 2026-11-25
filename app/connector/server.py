@@ -78,17 +78,20 @@ def get_premise(premise_id: str) -> dict[str, Any]:
 
 @server.tool(annotations=READ)
 def list_sets() -> dict[str, Any]:
-    """Sets, most recently changed first: tags, rating, venue, target time, runtime (optional
-    jokes don't count) and how many jokes."""
+    """Sets, most recently changed first: the set's point, tags, rating, venue, target time,
+    runtime (the beats' own times added up) and how many beats and jokes."""
     with reading() as (db, user):
         return performing.list_sets(db, user)
 
 
 @server.tool(annotations=READ)
 def get_set(set_id: str) -> dict[str, Any]:
-    """A set in running order. The first joke is the opener and the last the closer; optional
-    jokes are the ones to cut if time is short. Each joke comes with its topic, premise,
-    strength and time, plus a count of jokes per topic in the set."""
+    """A set as the comic builds it: beats in a fixed order, each with a cue, a description, its
+    own time, labels (Status, Persona side and the comic's other fields; Not sure if unset) and
+    the reason for a status shift. A beat is an ordered list of premises with their jokes, jokes
+    with no premise, and crowd work. A loose joke keeps its place but is flexible; a joke that
+    guards N jokes is a gate: if it doesn't land, those are skipped. Then every joke in running
+    order with its topic, premise, strength and time, and a count of jokes per topic."""
     with reading() as (db, user):
         return performing.get_set(db, user, set_id)
 

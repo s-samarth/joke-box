@@ -162,32 +162,44 @@ sets and show record, so the stage decides which one works.
 
 ## 6. Build a set for tonight
 
+What every part means, and why, is in [sets.md](sets.md); the app has the same note under **How
+sets work** (the ? on Sets and in the builder).
+
 1. On **Sets**, tap **New set**. It opens straight away.
-2. Set the slot length (for example 15:00). A set isn't tied to a venue; you name the venue when you log the show.
-3. Add jokes from **Your jokes**, which is beside the set on desktop and behind **Add jokes** on a
-   phone. Search or filter, then tap **+** (or drag on desktop). The list starts with the jokes you
-   edited most recently; sort by Newest or Strongest instead.
-   Tap a joke to read it in full without leaving.
-4. Reorder by dragging the handle (this works on touch) or with the arrows. Fix each joke's runtime
-   on its strip.
-5. Watch the light bar. It stays tape-yellow while there's room, turns amber inside the last
-   minute and red when you're over. The first strip is marked **Opener** and the last **Closer**.
-6. Mark a joke **optional** (the dashed circle on its strip) if you'll cut it when time is short. It
-   turns to faded paper tape and leaves the total; the time it would add shows as "+N optional".
-7. Rate the set with stars and tag it (In progress, Weak, Opener set, your own...). On **Sets**,
-   the tag chips show only the sets with that tag.
-8. There's no Save button: the set saves as you go.
+2. Write **The point**: one sentence, what the room should think by the end. Set the slot length
+   (for example 8:00). A set isn't tied to a venue; you name the venue when you log the show.
+3. **Add beat** for each section of the set, in order. Give each a **cue** (the one word you'll
+   remember on stage), its own **time** (set by hand: joke times don't add up to it) and a line on
+   what it's for. Arrows on the spine move a beat.
+4. Label the beat **in this set**: Status, Persona side, Tone, Voice fit (or your own fields, from
+   **Fields**). Leave any as **Not sure**. If the status changes from the beat before, say why:
+   Top-up, Planned turn or Clash.
+5. Fill the beat, in order. Use **Premise** to pick a premise, then its jokes; **Jokes, no premise**
+   for jokes that aren't under one (they can sit between premises); **Crowd work** for questions to
+   the room, with "if they say… → your line" replies and whether you have a reply yet. A joke from a
+   cluster follows the cluster's lead; tap **Follows the lead** to pin that version.
+6. For each joke: **Locked** (yellow, in this place) or **Loose** (teal, keeps its number but can
+   move or go on the night). Tap **Gate** on a joke the next ones depend on, then + and − for how
+   many it guards. A premise after the first can be gated on the one before it landing.
+7. Read the shape: the **status track** across the set, and the four checks under it. Each check
+   is a rule from your Craft notes (a shift needs a reason; a humility top-up every few minutes,
+   the limit yours to change; every persona side gets a beat; how many labels are Not sure).
+8. Watch the light bar: the beats' time against the slot.
+9. Rate the set with stars and tag it. There's no Save button: the set saves as you go.
 
-## 7. Rehearse and perform
+## 7. Go on stage
 
-1. From the set (or from **Your latest set** on Home), tap **Rehearse**.
-2. Rehearse goes full screen with the whole set as a script: every joke's setup, punchline and
-   tag lines in order, to scroll through. The screen stays awake.
+1. From the set (or from **Your latest set** on Home), tap **On stage**.
+2. It goes full screen, one beat at a time: its cue, its time on the clock, what it's for, and its
+   list with each joke's punchline as the cue line. The screen stays awake.
 3. Tap ▶ to start the clock. The clock turns amber with a minute to go and red when you're over.
-   Before you start, the cap icon shows **Before you go on**: crowd work, hecklers and delivery notes.
-4. For paper, use the printer icon: **Print** lays out numbered jokes, each with its runtime and
-   where you should be by then.
-5. ✕ takes you back to the set. Rehearsing logs nothing: log a show yourself when you've done one.
+   Before you start, the cap icon shows **Before you go on**.
+4. When you reach a gate, answer it: **It landed**, or **It didn't · skip what it guards** (what it
+   guards is struck out). Tap an answer to take it back. **Next beat** always goes to the next
+   beat; the cues along the top jump to any.
+5. To memorise the spine, open the **Cue card** (the scroll icon): the point, then each beat's cue
+   and time with its premises under it. **Print** puts it on paper.
+6. ✕ takes you back to the set. Going on stage logs nothing: log a show yourself when you've done one.
 
 ## 8. Log the show on the way home
 
