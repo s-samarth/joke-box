@@ -13,6 +13,7 @@ import type { Joke } from '../../api/types'
 import { recall, remember } from '../../lib/sessionMemory'
 import { keepDiscarded } from '../jokes/discarded'
 import type { Filters } from '../jokes/JokeFilters'
+import { usePersonaField } from '../jokes/persona'
 import { matchesFilters, SORTERS, type FilterKey, type SortKey } from '../jokes/useJokeFilters'
 
 type State = Omit<Filters, 'active' | 'set'> & { showDiscarded: boolean }
@@ -25,11 +26,12 @@ export interface StartAt {
 }
 
 const startState = (start: StartAt): State => ({
-  topic: start.topic, sub: start.topic ? (start.sub ?? null) : null, premise: start.premise ?? null, type: null, status: null, q: '', sort: 'edited', showDiscarded: false,
+  topic: start.topic, sub: start.topic ? (start.sub ?? null) : null, premise: start.premise ?? null, type: null, status: null, persona: null, q: '', sort: 'edited', showDiscarded: false,
 })
 
 export function useJokePickFilters(candidates: Joke[], start: StartAt, memory?: string) {
   const { data: clusters = [] } = useClusters()
+  const personaField = usePersonaField()
   const [s, setS] = useState<State>(() => ({ ...startState(start), ...(memory ? recall<State>(memory) : undefined) }))
   useEffect(() => { if (memory) remember<State>(memory, s) }, [memory, s])
   const set = (changes: Partial<Record<FilterKey, string | null>>) =>
@@ -45,11 +47,12 @@ export function useJokePickFilters(candidates: Joke[], start: StartAt, memory?: 
     })
   const { shown, discarded } = useMemo(() => {
     const titles = new Map(clusters.map((c) => [c.id, c.title]))
-    const matching = candidates.filter((j) => matchesFilters(j, s, titles.get(j.cluster_id ?? '')))
+    const personas = new Set(personaField?.options.map((o) => o.id))
+    const matching = candidates.filter((j) => matchesFilters(j, { ...s, personas }, titles.get(j.cluster_id ?? '')))
     const { kept, discarded } = keepDiscarded(matching, s.showDiscarded, Boolean(s.status))
     return { shown: [...kept].sort(SORTERS[s.sort] ?? SORTERS.edited), discarded }
-  }, [candidates, clusters, s])
-  const active = Boolean(s.topic || s.premise || s.type || s.status || s.q)
+  }, [candidates, clusters, personaField, s])
+  const active = Boolean(s.topic || s.premise || s.type || s.status || s.persona || s.q)
   const f: Filters = { ...s, active, set }
   return { f, shown, discarded, showDiscarded: s.showDiscarded }
 }

@@ -57,6 +57,6 @@ describe('beats', () => {
     expect(a.missing).toEqual(['Riled up', 'Point prover'])
     expect(a.personaUnsure.map((b) => b.cue)).toEqual([''])
     // A deleted option reads as Not sure, and a beat with no cue is named by its place.
-    expect(a.unsure.map((u) => [u.name, u.fields])).toEqual([['a', ['Status', 'Tone', 'Voice fit']], ['Beat 2', ['Status', 'Persona side', 'Tone', 'Voice fit']]])
+    expect(a.unsure.map((u) => [u.name, u.fields])).toEqual([['a', ['Status', 'Tone', 'Voice fit']], ['Beat 2', ['Status', 'Dominant persona side', 'Tone', 'Voice fit']]])
   })
 })

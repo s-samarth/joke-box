@@ -29,6 +29,8 @@ interface Props {
   onAddPremise: () => void
   /** Put these jokes of a no-premise list under a premise. */
   onGroup: (entryId: string, pieceIds: string[]) => void
+  /** Opens Label fields, to add, rename or delete the options. */
+  onEditFields: () => void
 }
 
 const section = 'text-[11.5px] font-semibold tracking-[0.13em] text-faint uppercase'
@@ -43,7 +45,7 @@ function BeatTime({ seconds, onChange }: { seconds: number; onChange: (s: number
   )
 }
 
-export function BeatEditor({ beat, previous, needsWhy, fields, onChange, onDelete, onAddPremise, ...lists }: Props) {
+export function BeatEditor({ beat, previous, needsWhy, fields, onChange, onDelete, onAddPremise, onEditFields, ...lists }: Props) {
   return (
     <div className="space-y-6">
       <div className="flex items-start gap-3">
@@ -64,7 +66,10 @@ export function BeatEditor({ beat, previous, needsWhy, fields, onChange, onDelet
           className="mt-1.5 rounded-lg bg-ink-2 px-3 py-2.5 leading-relaxed ring-1 ring-rule-strong focus:ring-2 focus:ring-tape" onChange={(e) => onChange({ ...beat, description: e.target.value })} />
       </div>
       <div>
-        <p className={`${section} mb-2`}>Labels for this beat, in this set</p>
+        <div className="mb-2 flex items-baseline justify-between gap-3">
+          <p className={section}>Labels for this beat, in this set</p>
+          <button type="button" onClick={onEditFields} className="text-sm text-tape hover:underline">Edit labels</button>
+        </div>
         <BeatLabels beat={beat} previous={previous} fields={fields} needsWhy={needsWhy} onChange={onChange} />
       </div>
       <div>

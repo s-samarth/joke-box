@@ -1,5 +1,5 @@
 /**
- * Your label fields for set beats (Status, Persona side, Tone, Voice fit, or your own) and the
+ * Your label fields for set beats (Status, Dominant persona side, Tone, Voice fit, or your own) and the
  * status check's top-up limit. Saved whole, queued like a set, so editing them offline works.
  * Until the server answers (or you change them), the defaults below are used: they match
  * app/services/set_fields.py DEFAULT_FIELDS, so change both together.
@@ -14,7 +14,7 @@ const opts = (...list: [string, string, ('win' | 'neutral' | 'loss')?][]) => lis
 
 export const DEFAULT_FIELDS: SetField[] = [
   { id: 'status', name: 'Status', role: 'status', options: opts(['i-win', 'I win', 'win'], ['mixed', 'Mixed', 'loss'], ['neutral', 'System attack / Neutral', 'neutral'], ['we-lose', 'We lose', 'loss'], ['i-lose', 'I lose', 'loss']) },
-  { id: 'persona', name: 'Persona side', role: 'persona', options: opts(['riled-up', 'Riled up'], ['bakchod', 'Bakchod'], ['point-prover', 'Point prover']) },
+  { id: 'persona', name: 'Dominant persona side', role: 'persona', options: opts(['riled-up', 'Riled up'], ['bakchod', 'Bakchod'], ['point-prover', 'Point prover']) },
   { id: 'tone', name: 'Tone', role: null, options: opts(['opinionated', 'Opinionated'], ['playful', 'Playful'], ['edgy', 'Edgy'], ['heartfelt', 'Heartfelt']) },
   { id: 'voice', name: 'Voice fit', role: null, options: opts(['mine', 'Mine'], ['half', 'Half'], ['anyones', "Anyone's"]) },
 ]

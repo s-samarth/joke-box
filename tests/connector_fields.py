@@ -28,6 +28,7 @@ DETAIL = BRIEF | {
     "premise",
     "clean_rating",
     "language",
+    "persona",
     "follows",
     "followed_by",
     "in_sets",

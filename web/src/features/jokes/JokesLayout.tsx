@@ -8,7 +8,7 @@ import { Download, Layers, MoreHorizontal } from 'lucide-react'
 import { Outlet, useMatch, useParams } from 'react-router'
 import { useClusters, type Cluster } from '../../api/clusters'
 import { useJokes, useTopics } from '../../api/library'
-import type { Joke, Topic } from '../../api/types'
+import type { Joke, SetField, Topic } from '../../api/types'
 import { IconButton } from '../../components/ui/Button'
 import { SplitView, WIDE_LIST } from '../../components/ui/SplitView'
 import { EmptyState, PageHead, Spinner } from '../../components/ui/pieces'
@@ -22,11 +22,12 @@ import { clusterName, leadOf, versionsOf } from './cluster/lead'
 import { JokeCount } from './JokeCount'
 import { JokeFilters } from './JokeFilters'
 import { JokeList } from './JokeList'
+import { personaLabel, usePersonaField } from './persona'
 import { JokeMapAside, JokeMapScreen } from './map/JokeMapPage'
 import { sortDate, useJokeFilters } from './useJokeFilters'
 import { ViewSwitch } from './ViewSwitch'
 
-function exportCsv(jokes: Joke[], all: Joke[], topics: Topic[], clusters: Cluster[]) {
+function exportCsv(jokes: Joke[], all: Joke[], topics: Topic[], clusters: Cluster[], persona: SetField | undefined) {
   const topicOf = (b: Joke) => topics.find((t) => t.id === b.topic_id)
   const clusterOf = (b: Joke) => {
     if (!b.cluster_id) return ['', '']
@@ -34,11 +35,11 @@ function exportCsv(jokes: Joke[], all: Joke[], topics: Topic[], clusters: Cluste
     const cluster = clusters.find((c) => c.id === b.cluster_id)
     return [clusterName(cluster, versions), leadOf(cluster, versions) === b ? 'Yes' : '']
   }
-  const headers = ['Setup', 'Punchline', 'Type', 'Topic', 'Subtopic', 'Rating', 'Status', 'Duration', 'Tags', 'Comments', 'Created At', 'Edited At', 'Tag Lines', 'Clean', 'Language', 'Cluster', 'Lead']
+  const headers = ['Setup', 'Punchline', 'Type', 'Topic', 'Subtopic', 'Rating', 'Status', 'Duration', 'Tags', 'Comments', 'Created At', 'Edited At', 'Tag Lines', 'Clean', 'Language', 'Cluster', 'Lead', 'Persona']
   const rows = jokes.map((b) => [
     b.setup, b.punchline, b.types.join('; '), topicName(topicOf(b)), topicOf(b)?.subtopics.find((s) => s.id === b.subtopic_id)?.name ?? '',
     b.strength ?? '', b.status ?? '', long(b.duration_seconds), b.hashtags.join(' '), b.comments, formatDateTime(b.created_at), formatDateTime(b.updated_at),
-    b.tag_lines.join(' | '), b.clean_rating ? CLEAN_LABELS[b.clean_rating] : '', b.language ?? '', ...clusterOf(b),
+    b.tag_lines.join(' | '), b.clean_rating ? CLEAN_LABELS[b.clean_rating] : '', b.language ?? '', ...clusterOf(b), personaLabel(b.persona, persona) ?? '',
   ])
   downloadCsv(`jokebox-jokes-${todayIst()}.csv`, headers, rows)
 }
@@ -53,6 +54,7 @@ export function JokesLayout() {
   const { data: topics = [] } = useTopics()
   const { data: clusters = [] } = useClusters()
   const { data: allJokes = [] } = useJokes()
+  const persona = usePersonaField()
   const { openCapture } = useCapture()
   const q = f.query ? `?${f.query}` : ''
   const narrowed = f.active || f.hidingDiscarded
@@ -63,7 +65,7 @@ export function JokesLayout() {
         <ViewSwitch current={view} query={f.query} compact={Boolean(openId)} />
         <Dropdown items={[
           ...(view === 'list' ? [{ label: 'Show cluster names', icon: <Layers size={16} />, checked: f.showClusterNames, onSelect: () => f.set({ versions: f.showClusterNames ? 'lead' : null }) }] : []),
-          { label: 'Export as CSV', icon: <Download size={16} />, onSelect: () => exportCsv(f.visible, allJokes, topics, clusters), disabled: !f.visible.length },
+          { label: 'Export as CSV', icon: <Download size={16} />, onSelect: () => exportCsv(f.visible, allJokes, topics, clusters, persona), disabled: !f.visible.length },
         ]}
           trigger={<IconButton label="More"><MoreHorizontal size={20} /></IconButton>} />
       </PageHead>

@@ -40,20 +40,46 @@ beat). Everything that depends on the room happens inside a beat.
 
 ### Label fields
 
-Every account starts with four fields. You can rename, add and delete fields and their options
-in **Fields** ([FieldsSheet.tsx](../web/src/features/sets/FieldsSheet.tsx)), stored in
-`set_field_configs`.
+Every account starts with four fields. Open **Label fields** with **Edit labels** beside a
+beat's labels (or the sliders at the top of the builder, or **Edit sides** on a joke's Persona)
+([FieldsSheet.tsx](../web/src/features/sets/FieldsSheet.tsx)), stored in `set_field_configs`.
+There you add, rename and delete fields and their options: tap an option to rename it, × to
+delete it. A rename keeps the option's id, so every beat and joke that has it shows the new name.
 
 | Field | Options | Used by |
 |---|---|---|
 | Status (the status track) | I win (win), Mixed (loss), System attack / Neutral (neutral), We lose (loss), I lose (loss) | The status track, the shift check, the top-up check |
-| Persona side (the persona) | Riled up, Bakchod, Point prover | The persona check |
+| Dominant persona side (the persona) | Riled up, Bakchod, Point prover | The persona check, and each joke's Persona |
 | Tone | Opinionated, Playful, Edgy, Heartfelt | Nothing: it's for you |
 | Voice fit | Mine, Half, Anyone's | Nothing: it's for you |
 
 Not sure is never stored as an option. A beat with no label for a field, or whose option was
 deleted, is Not sure. That's why it's always there and can't be removed. One field at most is
 the status track, and one at most the persona.
+
+**Deleting says what it touches first.** Deleting an option that's in use asks first, with the
+count: "Edgy is on 3 beats in 2 sets. They'll be Not sure." For the persona it counts jokes too.
+Deleting a whole field does the same, and says when the status track or the persona check goes
+with it. Nothing is rewritten: the beats keep the old id, which no option has now, so they read
+as Not sure everywhere (the builder, the checks, the cue card, Claude). The counts come from
+[fieldUsage.ts](../web/src/features/sets/fieldUsage.ts).
+
+<img src="screenshots/desktop-set-labels.webp" alt="A beat's labels with Edit labels, Storyteller added to Tone, and each joke's persona beside its tools">
+<img src="screenshots/desktop-label-delete.webp" alt="Deleting Edgy: it's on 2 beats in 1 set, and they'll be Not sure">
+
+### A joke's persona
+
+A beat's label is about the beat in this set. **Persona** is about the joke itself: which side of
+you it shows (Riled up, Bakchod, Point prover, or Not sure), on the joke's page. It picks from the
+persona field's options, so there's one list to keep: add a side in Label fields and it's on
+every joke too. It shows beside a joke's tools in a set, in the joke peek, as a filter on Jokes,
+in the CSV export and to Claude (`get_jokes`). It's stored on the joke (`jokes.persona`, an
+option id), and a save that leaves it out keeps it.
+
+<p>
+  <img src="screenshots/ipad-joke-persona.webp" width="360" alt="A joke's Persona row on an iPad, with Edit sides">
+  <img src="screenshots/phone-set-persona.webp" width="230" alt="A joke in a beat on a phone, showing Riled up">
+</p>
 
 ## The checks
 
@@ -138,6 +164,8 @@ until you hide them, and **How sets work** opens the whole guide.
 | **Loose keeps its number**, it's only coloured | Loose means flexible on the night, not unordered. The order you wrote is still the plan | v3 had "pools" with no order; the comic found that wrong |
 | **A gate guards the next N jokes**, set with + and − | One control on the joke itself, no extra objects to build | "Runs" and "pools" (jargon the comic didn't use) |
 | **Labels live on the beat in the set, not on jokes** | The same joke can play a different status in another set. The comic asked for this explicitly | Labels on jokes |
+| **A joke's persona is its own, from the same list** | A beat's labels depend on the set, but the side of you a joke shows doesn't. One list (the persona field's options) means a side added, renamed or deleted changes beats and jokes together | A fixed list on jokes, apart from the beats' |
+| **Deleting an option asks first, and rewrites nothing** | A delete you didn't mean costs labels you chose by hand, so it says how many first. Not rewriting the beats keeps the delete one save, and Not sure is already what an unknown id reads as | Deleting silently (the first version) |
 | **Fields are the comic's own**, with Not sure always there | Labels are a thinking tool. A forced answer is worse than an honest Not sure | Fixed fields |
 | **Neutral status** (System attack / Neutral) | Attacking the system together is neither a win nor a top-up | v2 had only win and loss shades |
 | **"Mixed"**, not "Both" | "Both" was unclear. The comic may rename it, which is what Fields is for | |

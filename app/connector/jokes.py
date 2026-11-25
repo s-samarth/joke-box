@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.connector.text import by_id, clip
 from app.models import Brainstorm, Joke, JokeCluster, Premise, Setlist, Subtopic, Topic, User
+from app.services.set_fields import config_of, fields_out
 
 
 @dataclass
@@ -20,6 +21,14 @@ class Names:
     subtopics: dict[uuid.UUID, str]
     premises: dict[uuid.UUID, str]
     clusters: dict[uuid.UUID, JokeCluster]
+    # The persona field's options by id: what a joke's persona says.
+    personas: dict[str, str]
+
+
+def persona_labels(db: Session, user: User) -> dict[str, str]:
+    fields = fields_out(config_of(db, user)).fields
+    persona = next((f for f in fields if f.role == "persona"), None)
+    return {o.id: o.label for o in persona.options} if persona else {}
 
 
 def load_names(db: Session, user: User) -> Names:
@@ -34,6 +43,7 @@ def load_names(db: Session, user: User) -> Names:
         clusters={
             c.id: c for c in db.scalars(select(JokeCluster).where(JokeCluster.user_id == user.id))
         },
+        personas=persona_labels(db, user),
     )
 
 
@@ -147,6 +157,8 @@ def detail(
         "premise": names.premises.get(joke.premise_id) if joke.premise_id else None,
         "clean_rating": joke.clean_rating,
         "language": joke.language,
+        # The persona side the joke shows; Not sure when unset or the option was deleted.
+        "persona": names.personas.get(joke.persona or "", "Not sure"),
         "follows": {"id": str(before.id), "setup": clip(before.setup, 160)} if before else None,
         "followed_by": [{"id": str(j.id), "setup": clip(j.setup, 160)} for j in after],
         "in_sets": sets.get(joke.id, []),

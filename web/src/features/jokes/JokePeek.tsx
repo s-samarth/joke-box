@@ -16,6 +16,7 @@ import { CLEAN_LABELS, displayTypes, statusOf, strengthLabel, topicName } from '
 import { clock } from '../../lib/duration'
 import { JokeOrigins } from './JokeOrigins'
 import { useHasOrigins } from './useHasOrigins'
+import { personaLabel, usePersonaField } from './persona'
 
 interface Props {
   joke: Joke
@@ -34,6 +35,7 @@ export function JokePeek({ joke, onClose, onAdd, inSet }: Props) {
   const premise = premises.find((p) => p.id === joke.premise_id)
   const before = joke.follows_id ? jokes.find((b) => b.id === joke.follows_id) : undefined
   const hasOrigins = useHasOrigins(joke)
+  const personaName = personaLabel(joke.persona, usePersonaField())
   const rows: [string, ReactNode][] = [
     ['Strength', <span key="s" className="inline-flex items-center gap-2"><StrengthTicks strength={joke.strength} />{joke.strength != null && strengthLabel(joke.strength)}</span>],
     ['Runs for', <span key="d" className="tabular">{joke.duration_seconds ? clock(joke.duration_seconds) : 'Not timed'}</span>],
@@ -42,6 +44,7 @@ export function JokePeek({ joke, onClose, onAdd, inSet }: Props) {
     ...(premise ? [['Premise', <span key="p" className="line-clamp-2">{premise.take}</span>] as [string, ReactNode]] : []),
     ['Filed under', [topicName(topic), subtopic?.name].filter(Boolean).join(' / ')],
     ['Status', statusOf(joke.status)],
+    ...(personaName ? [['Persona', personaName] as [string, ReactNode]] : []),
     ...(joke.clean_rating ? [['Clean rating', CLEAN_LABELS[joke.clean_rating]] as [string, ReactNode]] : []),
     ...(joke.language ? [['Language', joke.language] as [string, ReactNode]] : []),
     ...(joke.hashtags.length ? [['Hashtags', joke.hashtags.map((h) => (h.startsWith('#') ? h : `#${h}`)).join(' ')] as [string, ReactNode]] : []),

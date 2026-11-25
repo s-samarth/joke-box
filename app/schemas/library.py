@@ -111,6 +111,8 @@ class JokeIn(BaseModel):
     alt_punchlines: list[str] = Field(default_factory=list)
     clean_rating: CleanRating | None = None
     language: str | None = Field(default=None, max_length=40)
+    # An option id from the persona field, or None for Not sure. Left out (an older app), kept.
+    persona: str | None = Field(default=None, max_length=64)
     comments: str = ""
     # The joke this one follows. Left out (an older app), the link stays as it is.
     follows_id: uuid.UUID | None = None
@@ -161,6 +163,7 @@ class JokeOut(BaseModel):
     alt_punchlines: list[str]
     clean_rating: CleanRating | None
     language: str | None
+    persona: str | None
     comments: str
     follows_id: uuid.UUID | None
     voice_note_ids: list[str]

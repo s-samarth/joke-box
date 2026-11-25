@@ -134,7 +134,8 @@ def test_label_fields_start_as_the_defaults_and_are_yours(
     alice: TestClient, bob: TestClient
 ) -> None:
     start = alice.get("/api/set-fields").json()
-    assert [f["name"] for f in start["fields"]] == ["Status", "Persona side", "Tone", "Voice fit"]
+    names = [f["name"] for f in start["fields"]]
+    assert names == ["Status", "Dominant persona side", "Tone", "Voice fit"]
     assert start["top_up_seconds"] == 240
     status = start["fields"][0]
     assert [o["group"] for o in status["options"]] == ["win", "loss", "neutral", "loss", "loss"]

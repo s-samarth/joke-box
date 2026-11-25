@@ -85,9 +85,12 @@ What a set is made of and why is in [sets.md](sets.md). Files:
     settings (just above the list, or at the end of that premise if the beat has it), and each
     one rests on that premise in your library. One resting on another premise asks first. A
     toast's **Undo** puts the beat and the jokes back.
-- **Fields** (the sliders icon) opens **Label fields**. There you rename, add and delete fields and
-  options, say which field is the status track (each option is then marked win, neutral or loss)
-  and which is the persona. Saved for every set on Done.
+- **Edit labels** (beside a beat's labels, or the sliders icon at the top) opens **Label fields**.
+  There you rename, add and delete fields and options (tap an option to rename it), say which
+  field is the status track (each option is then marked win, neutral or loss) and which is the
+  persona. Deleting an option or field in use asks first, with how many beats in how many sets
+  (and, for the persona, jokes) turn to Not sure. Saved for every set on Done.
+- A joke in a beat with a **Persona** says it beside its tools (Bakchod, say), in grey.
 - **Saving:** the set autosaves shortly after each change, offline too, as before.
 - **Notes on building a set** (the cap icon) opens your Craft notes from Building a set.
 

@@ -171,8 +171,8 @@ sets work** (the ? on Sets and in the builder).
 3. **Add beat** for each section of the set, in order. Give each a **cue** (the one word you'll
    remember on stage), its own **time** (set by hand: joke times don't add up to it) and a line on
    what it's for. Arrows on the spine move a beat.
-4. Label the beat **in this set**: Status, Persona side, Tone, Voice fit (or your own fields, from
-   **Fields**). Leave any as **Not sure**. If the status changes from the beat before, say why:
+4. Label the beat **in this set**: Status, Dominant persona side, Tone, Voice fit (or your own fields, from
+   **Edit labels**, where you add, rename or delete options). Leave any as **Not sure**. If the status changes from the beat before, say why:
    Top-up, Planned turn or Clash.
 5. Fill the beat, in order. Use **Premise** to pick a premise, then its jokes; **Jokes, no premise**
    for jokes that aren't under one (they can sit between premises); **Crowd work** for questions to
