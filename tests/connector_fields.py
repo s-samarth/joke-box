@@ -41,6 +41,7 @@ SET = {
     "id",
     "name",
     "point",
+    "status",
     "beat_count",
     "tags",
     "rating",

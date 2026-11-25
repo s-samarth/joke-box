@@ -18,13 +18,22 @@ What a set is made of and why is in [sets.md](sets.md). Files:
 [beatEdit.ts](../web/src/features/sets/beatEdit.ts), [useAutosaveSet.ts](../web/src/features/sets/useAutosaveSet.ts),
 [JokePeek.tsx](../web/src/features/jokes/JokePeek.tsx).
 
-- **List:** the sets you worked on last come first. Each card shows how many beats and jokes it
-  has, the slot length, its stars and tags, and the light bar (the beats' time against the slot).
-  Each card has **On stage** and a ⋯ menu (Cue card, Delete set). Chips above the list (All,
-  then each tag in use) show only the sets with that tag. **New set** creates one and opens it.
-  The **?** opens **How sets work**.
-- **Builder, top:** the set name, then **The point** (one sentence), Slot length, **Rating** and
-  **Tags** (as before: tap a star again to clear it, and **Edit tags** opens the tags sheet). Below
+- **List** ([SetCard.tsx](../web/src/features/sets/SetCard.tsx),
+  [SetsGuideStrip.tsx](../web/src/features/sets/SetsGuideStrip.tsx)): the sets you worked on last
+  come first, two columns on a laptop and one on an iPad in portrait or a phone. Each card shows the
+  show day, venue, slot and stars; the point (or **+ Write your point**); the spine as yellow cue
+  strips sized by beat time, each edged with its status colour (green win, blue neutral, amber
+  loss, grey Not sure), and what's left of the slot as **to plan**; the checks in a word each
+  (shifts with no reason, the longest stretch with no top-up, a persona side no beat drives, beats
+  with Not sure); and the length against the slot (amber in the last minute, red when over), with
+  the status and tags. A set from before beats shows its one beat and **Split into beats**. Each
+  card has **On stage** and a ⋯ menu (Cue card, Delete set). Chips filter by status (All, Draft,
+  Work in Progress, Stage Ready, Discarded, each with a count, kept in `?status=`); All leaves
+  Discarded out. Above them, the four steps of a set (on a phone, one line that opens the guide)
+  until you hide them with ×. **How sets work** (the ? on a phone) opens the whole guide. **New
+  set** creates one and opens it.
+- **Builder, top:** the set name, then **The point** (one sentence), Slot length, **Status** (Draft,
+  Work in Progress, Stage Ready, Discarded), **Rating** and **Tags** (as before: tap a star again to clear it, and **Edit tags** opens the tags sheet). Below
   them, the beats' total against the slot, with the light bar.
 - **Shape:** once there are beats, the **status track** shows your status field across the set by
   beat time. There's a row per option, a tape-yellow line through the beats, and a dotted grey
@@ -61,7 +70,11 @@ What a set is made of and why is in [sets.md](sets.md). Files:
 - **Saving:** the set autosaves shortly after each change, offline too, as before.
 - **Notes on building a set** (the cap icon) opens your Craft notes from Building a set.
 
-<img src="screenshots/desktop-sets.webp" alt="Sets">
+<img src="screenshots/desktop-sets.webp" alt="Sets: the four steps, status chips and set cards with their spines and checks">
+<p>
+  <img src="screenshots/ipad-sets.webp" width="360" alt="Sets on an iPad">
+  <img src="screenshots/phone-sets.webp" width="230" alt="Sets on a phone">
+</p>
 <img src="screenshots/desktop-set-builder.webp" alt="Set builder: the status track, the checks, the spine and an open beat">
 <img src="screenshots/desktop-set-beat.webp" alt="An open beat: labels, the shift reason, a premise with a gate">
 <img src="screenshots/ipad-set-builder.webp" width="420" alt="A beat's list on an iPad: a gate guarding two jokes">

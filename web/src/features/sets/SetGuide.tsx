@@ -21,6 +21,7 @@ export function SetGuide({ open, onOpenChange }: { open: boolean; onOpenChange: 
     <Modal open={open} onOpenChange={onOpenChange} wide title="How sets work" description="A set is the case you make, not a script. You memorise its shape, and the jokes hang off it.">
       <div className="space-y-4">
         <Part title="The point">One sentence: what the room should think by the end. Every beat serves it.</Part>
+        <Part title="Status">Where the set stands: Draft (every set starts there), Work in Progress, Stage Ready or Discarded. Sets filters by it, and All leaves Discarded out.</Part>
         <Part title="Beats, in a fixed order">
           <p>The spine of the set. Each beat has a <b className="text-paper">cue</b> (the one word you remember on stage), its own <b className="text-paper">time</b> and a line on what it's for.</p>
           <p>You set a beat's time by hand. Joke times don't add up to it, because on stage a joke runs longer than on paper. The set's length is the beats' times added up.</p>

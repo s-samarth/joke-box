@@ -58,7 +58,13 @@ setlist_tag_links = Table(
 
 class Setlist(Trashable, OwnedMixin, Base):
     __tablename__ = "setlists"
-    __table_args__ = (CheckConstraint("rating BETWEEN 1 AND 5", name="rating_range"),)
+    __table_args__ = (
+        CheckConstraint("rating BETWEEN 1 AND 5", name="rating_range"),
+        CheckConstraint(
+            "status IN ('Draft', 'Work in Progress', 'Stage Ready', 'Discarded')",
+            name="status_values",
+        ),
+    )
 
     name: Mapped[str] = mapped_column(String(200), default="Untitled Setlist")
     show_date: Mapped[date | None] = mapped_column(Date)
@@ -81,6 +87,8 @@ class Setlist(Trashable, OwnedMixin, Base):
     # None for a set saved before beats (0045): it reads as one beat holding `items`. `items`
     # stays, worked out from the beats on every save, for what lists a joke's sets.
     beats: Mapped[list[dict[str, Any]] | None] = mapped_column(JSON)
+    # Where the set stands: the premises' four statuses, Draft to start (0046).
+    status: Mapped[str] = mapped_column(String(20), default="Draft", server_default="Draft")
 
 
 class SetlistItem(IdMixin, Base):

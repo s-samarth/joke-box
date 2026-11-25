@@ -75,7 +75,7 @@ export function addLoose(beat: Beat, pieces: SetPiece[]): Beat {
 }
 
 /** A new set, as "New set" and a joke's "Add to a new set" make it. */
-export const emptySet = () => ({ name: 'Untitled set', show_date: null, target_seconds: 420, venue_name: null, rating: null, tag_ids: [], items: [], point: '', beats: [] as Beat[] })
+export const emptySet = () => ({ name: 'Untitled set', show_date: null, target_seconds: 420, venue_name: null, rating: null, tag_ids: [], items: [], point: '', beats: [] as Beat[], status: 'Draft' as const })
 
 /** Jokes added from outside the builder (a joke's page) go at the end of the last beat. */
 export function addToEnd(beats: Beat[], pieces: SetPiece[]): Beat[] {

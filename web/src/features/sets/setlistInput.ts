@@ -1,3 +1,4 @@
+import { premiseStatus } from '../../api/premises'
 import type { SetlistInput } from '../../api/shows'
 import type { Setlist } from '../../api/types'
 import { beatsOf, flatItems } from './beats'
@@ -15,6 +16,7 @@ export const setlistInput = (s: Setlist): SetlistInput => {
     items: flatItems(beats),
     point: s.point ?? '',
     beats,
+    status: premiseStatus(s.status),
     version: s.version,
   }
 }

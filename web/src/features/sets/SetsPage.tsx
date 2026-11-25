@@ -1,39 +1,46 @@
 /**
- * Your sets, soonest show first, with their rating and tags; the chips show only sets with a tag.
- * "New set" creates one and opens it straight away; so does /sets?new=1, which is what the +
- * button opens on this screen.
+ * Your sets as cards (docs/screens-perform.md): each shows its point, its spine, its checks and
+ * its length. Chips filter by status (Draft, Work in Progress, Stage Ready, Discarded); All
+ * leaves Discarded out, as premises do. The four steps of a set sit on top until you hide them.
+ * "New set" creates one and opens it straight away; so does /sets?new=1 (the + button).
  */
-import { CircleHelp, MoreHorizontal, Play, Plus, ScrollText, Trash2 } from 'lucide-react'
+import { CircleHelp, Plus } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router'
+import { useNavigate, useSearchParams } from 'react-router'
 import { newId } from '../../api/client'
+import { useSetFields } from '../../api/setFields'
 import { useSetTags } from '../../api/setTags'
 import { useSetlistActions, useSetlists } from '../../api/shows'
 import type { Setlist } from '../../api/types'
 import { Button, IconButton } from '../../components/ui/Button'
-import { EmptyState, PageHead, Spinner, Stars } from '../../components/ui/pieces'
+import { EmptyState, PageHead, Spinner } from '../../components/ui/pieces'
 import { useFeedback } from '../../components/ui/feedbackContext'
-import { Dropdown } from '../../components/ui/Menu'
-import { clock } from '../../lib/duration'
 import { emptySet } from './beatEdit'
 import { tagChip } from './chips'
-import { LightBar } from './LightBar'
-import { beatTotal, beatsOf, setSummary } from './beats'
+import { SET_FILTERS, shows, type SetFilter } from './setCard'
+import { SetCard } from './SetCard'
 import { SetGuide } from './SetGuide'
+import { SetsGuideStrip } from './SetsGuideStrip'
+
+const HIDDEN = 'jokebox.setsGuideHidden'
+const guideHidden = () => { try { return localStorage.getItem(HIDDEN) === '1' } catch { return false } }
 
 export function SetsPage() {
   const { data: sets = [], isPending } = useSetlists()
   const { data: tags = [] } = useSetTags()
-  const [tag, setTag] = useState<string | null>(null)
+  const config = useSetFields()
+  const [params, setParams] = useSearchParams()
+  const filter: SetFilter = SET_FILTERS.find((f) => f === params.get('status')) ?? 'All'
   const [guide, setGuide] = useState(false)
+  const [stripHidden, setStripHidden] = useState(guideHidden)
   const tagName = new Map(tags.map((t) => [t.id, t.name]))
-  const used = tags.filter((t) => sets.some((s) => s.tag_ids?.includes(t.id)))
-  const showing = tag && used.some((t) => t.id === tag) ? tag : null
   const { save, remove } = useSetlistActions()
   const { confirm, toast } = useFeedback()
   const navigate = useNavigate()
-  const sorted = sets.filter((s) => !showing || s.tag_ids?.includes(showing)).sort((a, b) => b.updated_at.localeCompare(a.updated_at))
+  const sorted = sets.filter((s) => shows(s, filter)).sort((a, b) => b.updated_at.localeCompare(a.updated_at))
 
+  const pick = (f: SetFilter) => setParams((p) => { if (f === 'All') p.delete('status'); else p.set('status', f); return p }, { replace: true })
+  const hideStrip = () => { setStripHidden(true); try { localStorage.setItem(HIDDEN, '1') } catch { /* hidden for now only */ } }
   const create = () => {
     const id = newId()
     // Shown at once and saved in the background (offline too), like a new joke.
@@ -41,7 +48,6 @@ export function SetsPage() {
     navigate(`/sets/${id}`)
   }
   // The + button's flag. The ref stops a second set when React runs the effect twice in development.
-  const [params] = useSearchParams()
   const started = useRef(false)
   useEffect(() => {
     if (params.has('new') && !started.current) {
@@ -57,51 +63,34 @@ export function SetsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto max-w-6xl pb-12">
       <PageHead title="Sets">
-        <IconButton label="How sets work" onClick={() => setGuide(true)}><CircleHelp size={18} /></IconButton>
+        <span className="hidden sm:block"><Button variant="quiet" icon={<CircleHelp size={18} />} onClick={() => setGuide(true)} className="ring-1 ring-rule-strong">How sets work</Button></span>
+        <span className="sm:hidden"><IconButton label="How sets work" onClick={() => setGuide(true)}><CircleHelp size={18} /></IconButton></span>
         <Button variant="tape" icon={<Plus size={18} />} onClick={create}>New set</Button>
       </PageHead>
       <SetGuide open={guide} onOpenChange={setGuide} />
+      {!stripHidden && <SetsGuideStrip onOpen={() => setGuide(true)} onHide={hideStrip} />}
       {isPending && !sets.length ? (
         <Spinner />
-      ) : sorted.length === 0 ? (
+      ) : sets.length === 0 ? (
         <EmptyState title="No sets yet">Got a spot coming up? Make a set: a point, then beats in order, each with its premises and jokes. “How sets work” explains every part.</EmptyState>
       ) : (
         <>
-        {used.length > 0 && (
-          <div className="-mx-4 mb-4 flex gap-1.5 overflow-x-auto px-4 pb-1" role="group" aria-label="Show sets tagged">
-            <button type="button" aria-pressed={!showing} onClick={() => setTag(null)} className={tagChip(!showing)}>All</button>
-            {used.map((t) => <button key={t.id} type="button" aria-pressed={showing === t.id} onClick={() => setTag(t.id)} className={tagChip(showing === t.id)}>{t.name}</button>)}
+          <div className="-mx-4 mb-4 flex gap-1.5 overflow-x-auto px-4 pb-1" role="group" aria-label="Show sets by status">
+            {SET_FILTERS.map((f) => (
+              <button key={f} type="button" aria-pressed={filter === f} onClick={() => pick(f)} className={tagChip(filter === f)}>
+                {f} <span className={filter === f ? 'text-ink/60' : 'text-faint'}>{sets.filter((s) => shows(s, f)).length}</span>
+              </button>
+            ))}
           </div>
-        )}
-        <ul className="space-y-3">
-          {sorted.map((s) => (
-            <li key={s.id} className="rounded-xl bg-ink-2 p-4 ring-1 ring-rule">
-              <div className="flex items-start gap-2">
-                <Link to={`/sets/${s.id}`} className="min-w-0 flex-1">
-                  <p className="headline truncate text-[26px]">{s.name}</p>
-                  <p className="mt-1 text-sm text-dim">
-                    {setSummary(s)}, {clock(s.target_seconds)} slot
-                  </p>
-                  {(s.rating || s.tag_ids?.length > 0) && (
-                    <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-dim">
-                      {s.rating && <Stars rating={s.rating} />}
-                      {s.tag_ids?.map((id) => tagName.get(id)).filter(Boolean).map((name) => <span key={name} className="rounded-full bg-ink-3 px-2 py-0.5 text-[13px]">{name}</span>)}
-                    </p>
-                  )}
-                </Link>
-                <Link to={`/sets/${s.id}/stage`} aria-label={`${s.name} on stage`} className="inline-flex size-10 items-center justify-center rounded-lg bg-ink-3 text-paper hover:bg-ink-4"><Play size={17} /></Link>
-                <Dropdown items={[
-                  { label: 'Cue card', icon: <ScrollText size={16} />, onSelect: () => navigate(`/sets/${s.id}/print`) },
-                  { label: 'Delete set', icon: <Trash2 size={16} />, danger: true, onSelect: () => onDelete(s) },
-                ]} trigger={<IconButton label="More"><MoreHorizontal size={18} /></IconButton>} />
-              </div>
-              <div className="mt-4"><LightBar total={beatTotal(beatsOf(s))} target={s.target_seconds} /></div>
-            </li>
-          ))}
-        </ul>
-        {sorted.length === 0 && <p className="text-dim">No sets with that tag.</p>}
+          {sorted.length ? (
+            <div className="grid gap-4 lg:grid-cols-2">
+              {sorted.map((s) => <SetCard key={s.id} set={s} config={config} tagName={tagName} onDelete={onDelete} />)}
+            </div>
+          ) : (
+            <p className="py-10 text-center text-dim">No sets are {filter} yet.</p>
+          )}
         </>
       )}
     </div>

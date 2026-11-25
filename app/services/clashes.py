@@ -48,6 +48,7 @@ def same_set(now: SetlistOut, body: SetlistIn) -> bool:
         == (body.name, body.show_date, body.target_seconds, body.venue_name, body.rating)
         and set(now.tag_ids) == set(body.tag_ids)
         and (body.point is None or body.point == now.point)
+        and (body.status is None or body.status == now.status)
         and same_jokes
     )
 

@@ -7,6 +7,7 @@ import {
   deleteLogKey, deleteSetlistKey, saveBrainstormKey, saveLogKey, saveSetlistKey,
 } from './showSaves'
 import type { Beat, Brainstorm, LogJoke, PerformanceLog, Setlist, Venue } from './types'
+import type { PremiseStatus } from './premises'
 
 export const useBrainstorms = () =>
   useQuery({ queryKey: keys.brainstorms, queryFn: () => api<Brainstorm[]>('/api/brainstorms') })
@@ -59,6 +60,8 @@ export interface SetlistInput {
   items: { joke_id: string; duration_seconds: number; optional: boolean }[]
   point: string
   beats: Beat[]
+  /** Left out (an older copy), the server keeps the status the set has. */
+  status?: PremiseStatus
   /** The version this edit started from, sent as the base of the save. Missing: a new set. */
   version?: number
 }
