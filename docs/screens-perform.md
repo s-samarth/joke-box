@@ -27,8 +27,9 @@ What a set is made of and why is in [sets.md](sets.md). Files:
   loss, grey Not sure), and what's left of the slot as **to plan**; the checks in a word each
   (shifts with no reason, the longest stretch with no top-up, a persona side no beat drives, beats
   with Not sure), with checks that don't apply yet folded into one grey pill; and the length against the slot (amber in the last minute, red when over), with
-  the status and tags. A set from before beats shows its one beat and **Split into beats**. Each
-  card has **On stage** and a ⋯ menu (Cue card, Delete set). Chips filter by status (All, Draft,
+  the tags. A set from before beats shows its one beat and **Split into beats**. Each
+  card shows its status in the top corner (Draft white, Work in Progress yellow, Stage Ready
+  green, Discarded red) and a ⋯ menu (Stage view, Cue card, Delete set). Chips filter by status (All, Draft,
   Work in Progress, Stage Ready, Discarded, each with a count, kept in `?status=`); All leaves
   Discarded out. Above them, the four steps of a set (on a phone, one line that opens the guide)
   until you hide them with ×. **How sets work** (the ? on a phone) opens the whole guide. **New
@@ -130,7 +131,7 @@ What a set is made of and why is in [sets.md](sets.md). Files:
 
 [StageView.tsx](../web/src/features/sets/StageView.tsx), [stageWalk.ts](../web/src/features/sets/stageWalk.ts).
 
-A full screen with no frame, opened by **On stage**. The clock against the slot, reset and
+A full screen with no frame, opened by **On stage** in the builder or **Stage view** on a set card's ⋯ menu. The clock against the slot, reset and
 play/pause stay pinned at the top. The clock turns amber in the last minute and red when you're
 over, and the wake lock keeps the phone awake. Under the clock is a row of beat cues: tap one to
 jump to it. Then the open beat: "Beat 2 of 5 · 2:30 → 3:45", its cue on tape, what it's for, and

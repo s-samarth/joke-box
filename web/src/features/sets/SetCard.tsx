@@ -10,12 +10,13 @@ import { IconButton } from '../../components/ui/Button'
 import { Stars } from '../../components/ui/pieces'
 import { Dropdown } from '../../components/ui/Menu'
 import { clock } from '../../lib/duration'
-import { PremiseStatusTag } from '../premises/PremiseStatusPicker'
 import { beatTotal, beatsOf, groupOf, statusField } from './beats'
 import { cardChecks, madeBeforeBeats, showDay, statusOf } from './setCard'
 import { lightState } from './setlistMath'
 
 const EDGE = { win: 'border-ok', neutral: 'border-sky', loss: 'border-amber' }
+/** The set's status in the card's corner: Draft white, Work in Progress yellow, Stage Ready green, Discarded red. */
+const STATUS = { Draft: 'bg-paper text-ink', 'Work in Progress': 'bg-tape text-tape-ink', 'Stage Ready': 'bg-ok text-ink', Discarded: 'bg-light text-paper' }
 const PILL = { ok: 'bg-ok/15 text-ok', warn: 'bg-amber/15 text-amber', info: 'bg-ink-3 text-dim' }
 
 interface Props { set: Setlist; config: SetFields; tagName: Map<string, string>; onDelete: (s: Setlist) => void }
@@ -30,6 +31,7 @@ export function SetCard({ set: s, config, tagName, onDelete }: Props) {
   const status = statusField(config.fields)
   const checks = older ? [] : cardChecks(beats, config)
   const open = `/sets/${s.id}`
+  const status_ = statusOf(s)
   const meta = [s.show_date && showDay(s.show_date), s.venue_name, `${clock(s.target_seconds)} slot`].filter(Boolean).join(' · ')
   const tags = (s.tag_ids ?? []).map((id) => tagName.get(id)).filter((n): n is string => Boolean(n))
 
@@ -40,12 +42,9 @@ export function SetCard({ set: s, config, tagName, onDelete }: Props) {
           <h2 className="headline truncate text-[28px] sm:text-[32px]">{s.name}</h2>
           <p className="mt-1.5 flex flex-wrap items-center gap-x-2 text-[13.5px] text-dim">{meta}{s.rating && <Stars rating={s.rating} size={13} />}</p>
         </Link>
-        {s.items.length > 0 && (
-          <Link to={`${open}/stage`} aria-label={`${s.name} on stage`} className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-lg bg-tape px-3 text-sm font-semibold text-tape-ink">
-            <Play size={14} className="fill-current" /><span className="hidden sm:inline">On stage</span>
-          </Link>
-        )}
+        <span className={`inline-flex h-8 shrink-0 items-center rounded-full px-3 text-[13px] font-semibold whitespace-nowrap ${STATUS[status_]}`}>{status_}</span>
         <Dropdown items={[
+          ...(s.items.length > 0 ? [{ label: 'Stage view', icon: <Play size={16} />, onSelect: () => navigate(`${open}/stage`) }] : []),
           { label: 'Cue card', icon: <ScrollText size={16} />, onSelect: () => navigate(`${open}/print`) },
           { label: 'Delete set', icon: <Trash2 size={16} />, danger: true, onSelect: () => onDelete(s) },
         ]} trigger={<IconButton label="More"><MoreHorizontal size={18} /></IconButton>} />
@@ -96,10 +95,9 @@ export function SetCard({ set: s, config, tagName, onDelete }: Props) {
           <span className="text-dim"> of {clock(s.target_seconds)}</span>
         </span>
         <span className="text-[13.5px] text-dim">· {beats.length} {beats.length === 1 ? 'beat' : 'beats'} · {s.items.length} {s.items.length === 1 ? 'joke' : 'jokes'}</span>
-        <span className="ml-auto flex flex-wrap items-center gap-1.5">
-          <PremiseStatusTag status={statusOf(s)} />
+        {tags.length > 0 && <span className="ml-auto flex flex-wrap items-center gap-1.5">
           {tags.map((t) => <span key={t} className="rounded-full bg-ink-3 px-2 py-0.5 text-[12.5px] text-dim">{t}</span>)}
-        </span>
+        </span>}
       </div>
     </article>
   )
