@@ -48,9 +48,9 @@ own data. Today that is one comedian, but the system works for more than one.
    refuses waits in Couldn't sync with what you wrote.
 4. **Phone first, laptop comfortable.** Every screen is designed at 390 px wide, with large tap
    targets and safe-area padding. Desktop adds a side rail (icons only on an iPad in landscape) and list-and-detail layouts that give the list the whole screen until something is open.
-5. **Stage-ready.** Bird's eye view walks the set one beat at a time in big type, asking each gate as you
-   reach it, with the clock and the open-mic light pinned on top, and it keeps the screen awake.
-   The cue card gives you the spine to memorise, on screen or paper.
+5. **Stage-ready.** Bird's eye view shows the whole set from above: a time strip to scale against
+   the slot, and a board with a column per beat, every label, block, gate and joke in it. The cue
+   card gives you the spine to memorise, on screen or paper.
 6. **Your material stays yours.** It's private by default and allowlisted, and real jokes never go
    into seeds, fixtures or tests. Deleting anything sends it to the Trash for 30 days first, a
    nightly encrypted backup keeps a copy of everything, and Download everything gives you all of
@@ -71,8 +71,8 @@ own data. Today that is one comedian, but the system works for more than one.
 | **Brainstorm** | Free writing sessions with a timer: type or handwrite (Apple Pencil), link jokes and observations, search the typed words, and turn a session into a joke | `/brainstorm`, `/brainstorm/:id` |
 | **Voice notes** | Record, see the level meter, name and tag it straight away, play back, search by label or hashtag, turn one into a joke | `/voice` |
 | **Sets** | A point and a spine of beats in a fixed order. Each beat has a cue, its own time, labels (status, persona side...) and an ordered list of premises, jokes and crowd work; jokes are locked or loose, and a gate guards the jokes after it. A status track and checks from your Craft notes ([sets.md](sets.md)) | `/sets`, `/sets/:id` |
-| **Bird's eye view** | The set one beat at a time, punchlines as cue lines, each gate asked as you reach it, with the clock and the open-mic light pinned on top | `/sets/:id/stage` |
-| **Cue card** | What you memorise: the point, then each beat's cue and time with its premises under it. Prints | `/sets/:id/print` |
+| **Bird's eye view** | The whole set from above: a time strip to scale against the slot (label lanes, blocks in order, jokes as chips), and under it a column per beat with its labels, blocks, gates and every joke in full. Scrolls both ways and zooms | `/sets/:id/stage` |
+| **Cue card** | What you memorise: the point, then each beat's cue, time, Status and persona, with its premises, titled Standalone jokes and crowd work under it, each joke dotted in its Vibe colour. Dark on screen, prints black on white | `/sets/:id/print` |
 | **Shows** | Log a show, optionally marking particular jokes bombed, ok or killed with a comment; totals, filters, a sortable table, CSV export; Timeline and Insights views | `/shows` |
 | **Craft** | What you know about doing stand-up: your path as a staircase, techniques to write with, and your own areas as folders of note cards | `/craft`, `/craft/area/:id`, `/craft/:id` |
 | **Watchlist** | Routines you add to study, scored and ticked off. Long notes open with More. A category gets a **Read the guide** link when an analysis has the same name as the category | `/watchlist` |

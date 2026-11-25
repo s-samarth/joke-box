@@ -71,7 +71,7 @@ export function moveChoices(beat: Beat, pieceId: string, takeOf: (premiseId: str
   if (canGoAlone(beat, pieceId)) out.none.push({ label: 'New block, just below', to: { alone: true } })
   beat.entries.forEach((e, i) => {
     if (e.id === from.entryId || !hasPieces(e)) return
-    if (e.kind === 'jokes') out.none.push({ label: `Into ${i + 1} · Standalone`, to: { entryId: e.id } })
+    if (e.kind === 'jokes') out.none.push({ label: `Into ${i + 1} · ${short(e.title?.trim() || 'Standalone')}`, to: { entryId: e.id } })
     else out.premise.push({ label: `Into ${i + 1} · ${short(takeOf(e.premise_id) ?? 'Deleted premise')}`, to: { entryId: e.id } })
   })
   return out

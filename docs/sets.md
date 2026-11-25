@@ -29,7 +29,7 @@ beat). Everything that depends on the room happens inside a beat.
 | **Cue** | The one word you remember on stage for a beat | `beat.cue` |
 | **Beat time** | Set by hand, per beat. The set's length is the beats' times added up | `beat.seconds` |
 | **Premise entry** | A premise from your library with the jokes you put under it in this set, in order. Outlined and written in leaf green (sky blue when gated) | `entry.kind = "premise"` |
-| **Standalone jokes** | A list of jokes that aren't under a premise. A beat can have as many as you like, before, between or after premises. Select some to put them under a premise later | `entry.kind = "jokes"` |
+| **Standalone jokes** | A list of jokes that aren't under a premise. A beat can have as many as you like, before, between or after premises. Give it a short title ("Gym reels") to call it by, as a premise has its take: Move, the Bird's eye view and the cue card use it. Select some to put them under a premise later | `entry.kind = "jokes"`, `entry.title` |
 | **Crowd work** | Plain-text questions for the room. Each question has replies ("if they say X → my line") and a Have a reply / No reply yet flag. Outlined and headed in orchid pink | `entry.kind = "crowd"` |
 | **Locked / Loose** | Locked (tape yellow): done in this place. Loose (teal): it keeps its number, but you can move it or drop it on the night | `piece.loose` |
 | **Gate** | A box: a joke on top, and inside it the jokes you do only if it lands. If it doesn't, you skip the box. A gate can hold one gate of its own, no deeper. Sky blue | `piece.gate` (N: how many jokes after it are inside) |
@@ -245,20 +245,29 @@ until you hide them, and **How sets work** opens the whole guide.
 
 ## Bird's eye view and the cue card
 
-- **Bird's eye view** ([StageView.tsx](../web/src/features/sets/StageView.tsx),
-  [stageWalk.ts](../web/src/features/sets/stageWalk.ts)) walks the set one beat at a time. Each
-  joke shows its punchline as the cue line, coloured as in the builder. A gate is asked when you
-  reach it (It landed / It didn't). If it didn't, what it guards is struck out. A gate that is
-  itself struck out is never asked, and what it guards goes too. Tap an answered gate to take the
-  answer back. **Next** always goes to the next beat.
+- **Bird's eye view** ([BirdsEyeView.tsx](../web/src/features/sets/BirdsEyeView.tsx), laid out by
+  [birdsEye.ts](../web/src/features/sets/birdsEye.ts)) shows the whole set from above. On top, a
+  **time strip** to scale against the slot: the beats, a lane per label field in its colours (Not
+  sure hatched amber, and where the status shifts, the reason or "Needs a reason"), the blocks in
+  order, and the jokes as numbered chips in their Vibe colour, with gates as sky brackets. Under it,
+  the **beat board**: a column per beat with its labels, and its blocks, gates and every joke in
+  full (setup, punchline, Vibe, Generic, status, runtime, tags). Both scroll together, both ways,
+  and zoom. Tap a chip on the strip to find the joke on the board.
+- **Only beats have time.** On the strip, a beat is as wide as its time; inside it, every joke and
+  crowd work question gets an equal slot in running order, and a block is as wide as its slots. So
+  a block's width is never a time: blocks and jokes keep only their order.
 - **The cue card** ([PrintView.tsx](../web/src/features/sets/PrintView.tsx)) is what you
-  memorise: the point, then each beat's cue, time and start, with its premises, its jokes with
-  no premise (as punchlines) and its crowd work under it. It replaces the old printout.
+  memorise, in the app's dark colours: the point, then each beat's cue, time, start, Status and
+  persona, with its premises, Standalone jokes (by title) and crowd work under it. Each joke is the
+  start of its punchline with a dot in its Vibe colour: teal when loose, and what rides on a gate in
+  sky after "if it lands". Printing turns it black on white.
 
 <p>
-  <img src="screenshots/phone-stage.webp" width="230" alt="Bird's eye view: a gate that didn't land strikes out what it guards">
+  <img src="screenshots/phone-birds-eye.webp" width="230" alt="Bird's eye view on a phone: the time strip over the first beat's column">
+  <img src="screenshots/phone-standalone-title.webp" width="230" alt="A Standalone block titled Shopping in the builder">
   <img src="screenshots/phone-set-guide.webp" width="230" alt="How sets work, in the app">
 </p>
+<img src="screenshots/desktop-birds-eye.webp" alt="Bird's eye view: the time strip over the beat board">
 <img src="screenshots/desktop-cue-card.webp" alt="The cue card">
 
 ## Decisions, and why
@@ -294,6 +303,9 @@ until you hide them, and **How sets work** opens the whole guide.
 | **Beats are JSON on the set, `items` worked out from them** | A set is saved whole already (one `PUT`, one version). Keeping `setlist_items` means a joke's "In sets", show logging and the connector's "sets it's in" keep working unchanged | New `set_beats` and `set_entries` tables: more joins, more migrations, and the same whole-set saves |
 | **Sets from before read as one beat**, with no data migration | Nothing to move, and nothing breaks if an older app is still open | Rewriting every set in the migration |
 | **Sets are filtered by status, not tags** | A tag says what a set is; a status says where it is, which is what you look for before a show. The same four as premises and observations, so the words mean one thing everywhere. Tags stay on the card and in the builder | Chips per tag in use |
+| **Bird's eye view shows the set from above**, instead of walking it one beat at a time | A set is a spine of beats with blocks, gates and labels; one beat at a time with a clock hid that shape. The comic asked for a view of the whole object, to read and plan from | On stage: one beat at a time, gates asked as you reach them, a clock (until Nov 2026) |
+| **On the strip, blocks and jokes have no time** | Only beats have a time you set. Sizing a block by its jokes' runtimes would draw a time the set doesn't have | Blocks sized by joke runtimes |
+| **Standalone blocks can have a title** | A premise block has its take to call it by; a list of loose jokes had only "Standalone". A short name (stored on the block, in the set) makes Move, the strip and the cue card readable | Numbers only ("Into 3 · Standalone") |
 | **The set's shape is on its card** | The spine and checks are the point of a set. Hiding them behind a tap made the list look empty | Cards with counts and a time bar only |
 | **An older app's save keeps the beats** | A save queued offline by an app from before beats sends only `items`. Taking those over would wipe the beats | |
 
@@ -316,6 +328,9 @@ until you hide them, and **How sets work** opens the whole guide.
 - **The Trash**: a joke in the Trash is hidden from its beat and keeps its place there, as it did
   in the old list. A gate counts only the jokes shown, and widens again over a guarded joke put
   back. A premise in the Trash keeps its place too. A joke erased for good drops out of `items`.
+- **Standalone titles**: `title` on a jokes entry. A save that leaves it out (an app from before
+  titles) keeps the stored one (`keep_titles` in `app/services/setlists.py`); an empty title clears
+  it. Tested in `tests/test_set_standalone_titles.py`.
 - **Clusters**: a set's `items` list what its beats play now, so a new lead shows in "In sets"
   at once. A joke clustered after it went into a set follows its cluster from the next save
   (pinned to itself unless it's the lead).

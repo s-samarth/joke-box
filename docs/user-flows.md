@@ -197,19 +197,19 @@ sets work** (the ? on Sets and in the builder).
 11. Back on **Sets**, the card shows the set's spine and checks at a glance, and the status chips
     find it again (for example, everything Stage Ready before a show).
 
-## 7. Go on stage
+## 7. Look at the whole set, then memorise it
 
 1. From the set (or from **Your latest set** on Home), tap **Bird's eye view** (the eye icon on a set card).
-2. It goes full screen, one beat at a time: its cue, its time on the clock, what it's for, and its
-   list with each joke's punchline as the cue line. The screen stays awake.
-3. Tap ▶ to start the clock. The clock turns amber with a minute to go and red when you're over.
-   Before you start, the cap icon shows **Before you go on**.
-4. When you reach a gate, answer it: **It landed**, or **It didn't · skip what it guards** (what it
-   guards is struck out). Tap an answer to take it back. **Next beat** always goes to the next
-   beat; the cues along the top jump to any.
-5. To memorise the spine, open the **Cue card** (the scroll icon): the point, then each beat's cue
-   and time with its premises under it. **Print** puts it on paper.
-6. ✕ takes you back to the set. Going on stage logs nothing: log a show yourself when you've done one.
+2. It goes full screen: the time strip on top shows the beats to scale against the slot, their
+   labels as coloured lanes, the blocks in order and every joke as a numbered chip in its Vibe
+   colour. Under it, the board has a column per beat with everything in it.
+3. Scroll both ways. Zoom with − and +, or **Fit** to see the whole width; on a laptop, ctrl and
+   the scroll wheel (or a pinch) zoom too, and on a phone a pinch zooms the page.
+4. Tap a joke chip on the strip to jump to it on the board. The cap icon shows **Before you go on**.
+5. To memorise the spine, open the **Cue card** (the scroll icon): the point, then each beat's cue,
+   time, Status and persona, with its premises, Standalone jokes and crowd work under it. **Print**
+   puts it on paper.
+6. ✕ takes you back to the set. Nothing here logs a show: log one yourself when you've done it.
 
 ## 8. Log the show on the way home
 

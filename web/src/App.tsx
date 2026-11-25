@@ -24,7 +24,7 @@ const PremisePage = named(() => import('./features/premises/PremisePage'), 'Prem
 const RewritePage = named(() => import('./features/jokes/RewritePage'), 'RewritePage')
 const SetsPage = named(() => import('./features/sets/SetsPage'), 'SetsPage')
 const SetBuilder = named(() => import('./features/sets/SetBuilder'), 'SetBuilder')
-const StageView = named(() => import('./features/sets/StageView'), 'StageView')
+const BirdsEyeView = named(() => import('./features/sets/BirdsEyeView'), 'BirdsEyeView')
 const PrintView = named(() => import('./features/sets/PrintView'), 'PrintView')
 const ShowsPage = named(() => import('./features/shows/ShowsPage'), 'ShowsPage')
 const BrainstormPage = named(() => import('./features/brainstorm/BrainstormPage'), 'BrainstormPage')
@@ -100,7 +100,7 @@ export function App() {
         {/* A session can turn into a joke, so it has the New joke sheet too. */}
         <Route path="/brainstorm/:sessionId" element={full(<CaptureProvider><SessionPage /></CaptureProvider>)} />
         <Route path="/jokes/:jokeId/rewrite" element={full(<RewritePage />)} />
-        <Route path="/sets/:setId/stage" element={full(<StageView />)} />
+        <Route path="/sets/:setId/stage" element={full(<BirdsEyeView />)} />
         <Route path="/sets/:setId/print" element={full(<PrintView />)} />
         {/* Old addresses from the first version. */}
         <Route path="/bits/*" element={<OldJokesAddress />} />

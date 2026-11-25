@@ -62,7 +62,7 @@ def entry_out(entry: Any, names: Names, places: dict[str, int]) -> dict[str, Any
             "only_if_previous_premise_landed": entry.gate,
             "jokes": jokes,
         }
-    return {"kind": "jokes_without_premise", "jokes": jokes}
+    return {"kind": "jokes_without_premise", "title": entry.title or None, "jokes": jokes}
 
 
 def beats_out(
