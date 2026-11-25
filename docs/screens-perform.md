@@ -25,7 +25,7 @@ What a set is made of and why is in [sets.md](sets.md). Files:
   strips sized by beat time, each edged with its status colour (green win, blue neutral, amber
   loss, grey Not sure), and what's left of the slot as **to plan**; the checks in a word each
   (shifts with no reason, the longest stretch with no top-up, a persona side no beat drives, beats
-  with Not sure); and the length against the slot (amber in the last minute, red when over), with
+  with Not sure), with checks that don't apply yet folded into one grey pill; and the length against the slot (amber in the last minute, red when over), with
   the status and tags. A set from before beats shows its one beat and **Split into beats**. Each
   card has **On stage** and a ⋯ menu (Cue card, Delete set). Chips filter by status (All, Draft,
   Work in Progress, Stage Ready, Discarded, each with a count, kept in `?status=`); All leaves
@@ -38,8 +38,9 @@ What a set is made of and why is in [sets.md](sets.md). Files:
 - **Shape:** once there are beats, the **status track** shows your status field across the set by
   beat time. There's a row per option, a tape-yellow line through the beats, and a dotted grey
   line for a Not sure beat at the level before it. A shift with no reason is marked "why?". Next
-  to it are the four **checks**, each naming the Craft note it comes from. The top-up limit is
-  edited in place. The track scrolls sideways on a phone.
+  to it are the **checks**, each naming the Craft note it comes from. A check that can't apply
+  yet (one beat can't shift) is greyed out with **Needs more beats** or **Needs labels** and a
+  line on what it needs, never a tick. The top-up limit is edited in place. The track scrolls sideways on a phone.
 - **Spine:** the beats in their fixed order, as tape strips. Each strip shows the cue, the time,
   its labels (Not sure outlined), "Why the shift?" in amber when a reason is missing, and what's in
   it (premises, jokes, crowd work). Up and down arrows move a beat, and **Add beat** adds one at

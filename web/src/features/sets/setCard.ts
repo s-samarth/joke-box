@@ -1,32 +1,28 @@
 /**
  * What a set's card on Sets says about its shape (docs/sets.md): the checks in a word each, the
- * same rules as the builder's SetChecks, from your own labels. Pure, so it's tested on its own.
+ * same rules as the builder's SetChecks (checks.ts), from your own labels. Pure, so it's tested on its own.
  */
 import type { PremiseStatus } from '../../api/premises'
 import type { Beat, SetFields, Setlist } from '../../api/types'
-import { clock } from '../../lib/duration'
-import { analyse, labelOf, personaField, statusField } from './beats'
+import { applies, setChecks } from './checks'
 
 export type Pill = { kind: 'ok' | 'warn' | 'info'; text: string }
 
 export function cardChecks(beats: Beat[], config: SetFields): Pill[] {
   if (!beats.length) return []
-  const { fields, top_up_seconds: limit } = config
-  const a = analyse(beats, fields)
-  const status = statusField(fields)
-  const persona = personaField(fields)
-  const out: Pill[] = []
-  // Checks need labels: until a beat has a status, they'd only ever say "fine".
-  const labelled = status ? beats.some((b) => b.labels[status.id]) : false
-  if (status && labelled) {
-    const n = a.flips.length
-    out.push(n ? { kind: 'warn', text: `${n} ${n === 1 ? 'shift' : 'shifts'} with no reason` } : { kind: 'ok', text: 'Every shift has a reason' })
-    out.push(a.longest > limit ? { kind: 'warn', text: `${clock(a.longest)} with no top-up` } : { kind: 'ok', text: `Top-up within ${clock(limit)}` })
+  const { analysis: a, checks } = setChecks(beats, config)
+  const out: Pill[] = checks.filter(applies).map((c) => ({ kind: c.state === 'warn' ? 'warn' : 'ok', text: c.pill }))
+  // Checks that can't say anything yet fold into one grey pill, so the card stays short.
+  const later = checks.filter((c) => c.state === 'later').length
+  const label = checks.filter((c) => c.state === 'label').length
+  const waiting = later + label
+  if (waiting) {
+    const noun = `${waiting} ${waiting === 1 ? 'check needs' : 'checks need'}`
+    out.push({ kind: 'info', text: later && label ? `${waiting} checks not yet` : `${noun} more ${later ? 'beats' : 'labels'}` })
   }
-  if (persona && labelled && a.missing.length) out.push({ kind: 'warn', text: `No ${a.missing.join(', ')} beat` })
   // Counted by beat, not by label, so a card stays short.
-  const unsure = beats.filter((b) => fields.some((f) => !labelOf(b, f))).length
-  if (unsure) out.push({ kind: 'info', text: labelled ? `${unsure} ${unsure === 1 ? 'beat has' : 'beats have'} Not sure` : 'Label the beats to see the checks' })
+  const unsure = a.unsure.length
+  if (unsure) out.push({ kind: 'info', text: `${unsure} ${unsure === 1 ? 'beat has' : 'beats have'} Not sure` })
   return out
 }
 

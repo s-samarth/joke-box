@@ -84,38 +84,62 @@ export function needsWhy(beats: Beat[], i: number, fields: SetField[]): boolean 
 
 export const hasReason = (b: Beat) => SHIFT_REASONS.some((r) => r === b.shift_reason)
 
+/** A stretch of beat time with no humility top-up: how long, and where (start and end time). */
+export interface Run { seconds: number; span: [number, number] | null }
+
 export interface Analysis {
   total: number
-  /** The longest run of beat time with no loss (no humility top-up), and where it is. */
-  longest: number
-  worst: [number, number] | null
+  /** The longest stretch with no top-up, two ways: `known` counts a Not sure beat as a top-up, so
+   * it's only labelled wins and neutrals (certainly too long if over the limit); `possible` counts
+   * Not sure as no top-up (certainly fine if under it). Between the two, labels decide. */
+  known: Run
+  possible: Run
+  /** Beats with a status (Not sure left out). */
+  statused: number
   flips: Beat[]
-  /** Persona options no beat is labelled with. */
+  /** Persona options no beat is labelled with, and the beats whose persona is Not sure. */
   missing: string[]
-  /** "Cue: Field" for each label left Not sure. */
-  unsure: string[]
+  personaUnsure: Beat[]
+  /** Each beat with a label left Not sure, and which fields. */
+  unsure: { beat: Beat; name: string; fields: string[] }[]
 }
 
-export function analyse(beats: Beat[], fields: SetField[]): Analysis {
-  let longest = 0, run = 0, runStart = 0, t = 0
-  let worst: [number, number] | null = null
-  beats.forEach((b) => {
+/** The longest run of beat time with no loss. A Not sure beat is a loss (top-up) or not, as asked. */
+function longestRun(beats: Beat[], fields: SetField[], unsureTopsUp: boolean): Run {
+  let best: Run = { seconds: 0, span: null }
+  let run = 0, start = 0, t = 0
+  for (const b of beats) {
     const g = groupOf(b, fields)
-    // A loss is a top-up and ends the run; win and neutral add to it, and so does Not sure once a
-    // run has started (no top-up came), so the longest run is the stretch of clock it shades.
-    if (g === 'loss') run = 0
-    else if (g || run > 0) {
-      if (run === 0) runStart = t
+    if (g === 'loss' || (!g && unsureTopsUp)) run = 0
+    else {
+      if (run === 0) start = t
       run += b.seconds
-      if (run > longest) { longest = run; worst = [runStart, t + b.seconds] }
+      if (run > best.seconds) best = { seconds: run, span: [start, t + b.seconds] }
     }
     t += b.seconds
-  })
+  }
+  return best
+}
+
+export const beatName = (b: Beat, i: number) => b.cue || `Beat ${i + 1}`
+
+export function analyse(beats: Beat[], fields: SetField[]): Analysis {
+  const sf = statusField(fields)
+  const has = sf ? (b: Beat) => !!labelOf(b, sf) : () => false
   const flips = beats.filter((b, i) => needsWhy(beats, i, fields) && !hasReason(b))
   const pf = personaField(fields)
   const missing = pf ? pf.options.filter((o) => !beats.some((b) => b.labels[pf.id] === o.id)).map((o) => o.label) : []
-  const unsure = beats.flatMap((b, i) => fields.filter((f) => !labelOf(b, f)).map((f) => `${b.cue || `Beat ${i + 1}`}: ${f.name}`))
-  return { total: t, longest, worst, flips, missing, unsure }
+  const personaUnsure = pf ? beats.filter((b) => !labelOf(b, pf)) : []
+  const unsure = beats
+    .map((beat, i) => ({ beat, name: beatName(beat, i), fields: fields.filter((f) => !labelOf(beat, f)).map((f) => f.name) }))
+    .filter((u) => u.fields.length)
+  return {
+    total: beatTotal(beats),
+    known: longestRun(beats, fields, true),
+    possible: longestRun(beats, fields, false),
+    statused: beats.filter(has).length,
+    flips, missing, personaUnsure, unsure,
+  }
 }
 
 /** "3 beats, 12 jokes" for a set's card. */

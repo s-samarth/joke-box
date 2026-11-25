@@ -48,11 +48,12 @@ export function SetGuide({ open, onOpenChange }: { open: boolean; onOpenChange: 
         <Part title="The checks">
           <p>Each check is a rule from your Craft notes, counted from your own labels. None of them judges a joke.</p>
           <ul className="list-disc space-y-1 pl-5">
-            <li>A status shift needs a reason: Top-up, Planned turn or Clash.</li>
-            <li>The longest stretch with no top-up stays under your limit (4:00 to start). Neutral isn't a top-up.</li>
-            <li>Every persona side drives at least one beat.</li>
-            <li>Not sure labels are counted, never guessed.</li>
+            <li>A status shift needs a reason: Top-up, Planned turn or Clash. It applies once two beats have a status, because one beat can't shift.</li>
+            <li>A humility top-up at least every 4:00 (your limit). It applies once the set is longer than the limit, because a shorter set can't go that long without one. Neutral isn't a top-up.</li>
+            <li>Every persona side drives a beat. It applies once there's a beat for each side.</li>
           </ul>
+          <p>Until a check applies, it's greyed out and says what it needs: <b className="text-paper">Needs more beats</b> or <b className="text-paper">Needs labels</b>. It never ticks a rule it can't test yet.</p>
+          <p>Not sure is never guessed. The top-up check warns only if the stretch is too long even with every Not sure beat as a top-up, and ticks only if it's fine with none of them as one. In between, it names the beats to label.</p>
         </Part>
         <Part title="On stage and the cue card">
           <p><b className="text-paper">On stage</b> walks the set one beat at a time. Answer each gate as you reach it, and what it guards is struck out if it didn't land. Next always means the next beat.</p>

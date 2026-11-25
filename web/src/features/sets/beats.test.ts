@@ -35,7 +35,7 @@ describe('beats', () => {
     expect(beats.map((_, i) => needsWhy(beats, i, DEFAULT_FIELDS))).toEqual([false, false, true, false])
   })
 
-  it('times the longest stretch with no top-up; neutral is not a top-up, Not sure carries a run on', () => {
+  it('times the longest stretch with no top-up two ways: Not sure as a top-up, and as none', () => {
     const beats = [
       beat('a', 60, { status: 'i-lose' }),
       beat('b', 100, { status: 'i-win' }),
@@ -45,16 +45,18 @@ describe('beats', () => {
       beat('f', 30, { status: 'we-lose' }),
     ]
     const a = analyse(beats, DEFAULT_FIELDS)
-    expect(a.longest).toBe(350) // the whole shaded stretch, Not sure beat d included
-    expect(a.worst).toEqual([60, 410])
+    expect(a.known).toEqual({ seconds: 200, span: [60, 260] }) // neutral is not a top-up
+    expect(a.possible).toEqual({ seconds: 350, span: [60, 410] }) // Not sure beat d included
+    expect(a.statused).toBe(5)
     // Win to neutral is a shift too; a Not sure beat between (d) doesn't hide neutral to win (e).
     expect(a.flips.map((b) => b.id)).toEqual(['b', 'c', 'e', 'f'])
   })
 
-  it('counts persona sides that never drive a beat, and labels left Not sure', () => {
-    const a = analyse([beat('a', 60, { persona: 'bakchod', status: 'gone' })], DEFAULT_FIELDS)
+  it('counts persona sides that never drive a beat, and labels left Not sure, by beat', () => {
+    const a = analyse([beat('a', 60, { persona: 'bakchod', status: 'gone' }), beat('', 60, { persona: 'gone' })], DEFAULT_FIELDS)
     expect(a.missing).toEqual(['Riled up', 'Point prover'])
-    // A deleted option reads as Not sure.
-    expect(a.unsure).toEqual(['a: Status', 'a: Tone', 'a: Voice fit'])
+    expect(a.personaUnsure.map((b) => b.cue)).toEqual([''])
+    // A deleted option reads as Not sure, and a beat with no cue is named by its place.
+    expect(a.unsure.map((u) => [u.name, u.fields])).toEqual([['a', ['Status', 'Tone', 'Voice fit']], ['Beat 2', ['Status', 'Persona side', 'Tone', 'Voice fit']]])
   })
 })

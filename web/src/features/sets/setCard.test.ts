@@ -13,8 +13,14 @@ describe('cardChecks', () => {
   it('says nothing for a set with no beats', () => {
     expect(cardChecks([], config)).toEqual([])
   })
-  it('asks for labels before judging anything', () => {
-    expect(cardChecks([beat('a', 60)], config)).toEqual([{ kind: 'info', text: 'Label the beats to see the checks' }])
+  it('folds the checks a one-beat set is too short for into one grey pill', () => {
+    expect(cardChecks([beat('a', 60)], config)).toEqual([
+      { kind: 'info', text: '3 checks need more beats' },
+      { kind: 'info', text: '1 beat has Not sure' },
+    ])
+  })
+  it('asks for labels when there are beats enough but no labels', () => {
+    expect(cardChecks([beat('a', 120), beat('b', 120), beat('c', 120)], config)[0]).toEqual({ kind: 'info', text: '3 checks need more labels' })
   })
   it('counts shifts with no reason and a long stretch with no top-up', () => {
     const pills = cardChecks([beat('a', 200, 'i-win'), beat('b', 100, 'i-lose'), beat('c', 300, 'i-win')], config)
@@ -22,7 +28,7 @@ describe('cardChecks', () => {
     expect(pills.map((p) => p.text)).toContain('5:00 with no top-up')
   })
   it('names a persona side that never drives a beat', () => {
-    const pills = cardChecks([beat('a', 60, 'i-lose', 'riled-up'), beat('b', 60, 'i-lose', 'bakchod')], config)
+    const pills = cardChecks([beat('a', 60, 'i-lose', 'riled-up'), beat('b', 60, 'i-lose', 'bakchod'), beat('c', 60, 'i-lose', 'bakchod')], config)
     expect(pills.map((p) => p.text)).toContain('No Point prover beat')
   })
 })
