@@ -82,10 +82,28 @@ def shown(beats: list[BeatIn], jokes: Jokes) -> list[BeatIn]:
     return out
 
 
+GATE_DEPTH = 2  # a gate, and inside it a gate whose jokes can't be gates
+
+
 def clamp(pieces: list[PieceIn]) -> None:
-    """A gate can guard only the jokes after it."""
+    """Gates fit their list, as the app reads them (web/src/features/sets/gateRows.ts): a gate
+    guards only jokes after it, a gate inside a gate ends inside it (one that ran past widens the
+    outer one), and a gate deeper than GATE_DEPTH folds into the gate it's in. Every joke that
+    was guarded still is."""
+    last = len(pieces) - 1
+    end = [min(n + p.gate, last) for n, p in enumerate(pieces)]
+    for n in range(last, -1, -1):
+        j = n + 1
+        while j <= end[n]:
+            end[n] = max(end[n], end[j])
+            j += 1
+    open_ends: list[int] = []  # the ends of the gates around the joke
     for n, p in enumerate(pieces):
-        p.gate = min(p.gate, len(pieces) - 1 - n)
+        while open_ends and open_ends[-1] < n:
+            open_ends.pop()
+        p.gate = 0 if len(open_ends) >= GATE_DEPTH else end[n] - n
+        if p.gate:
+            open_ends.append(end[n])
 
 
 def tidy(db: Session, user: User, beats: list[BeatIn]) -> list[BeatIn]:

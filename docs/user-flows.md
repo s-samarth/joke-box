@@ -170,7 +170,7 @@ sets work** (the ? on Sets and in the builder).
    (for example 8:00). A set isn't tied to a venue; you name the venue when you log the show.
 3. **Add beat** for each section of the set, in order. Give each a **cue** (the one word you'll
    remember on stage), its own **time** (set by hand: joke times don't add up to it) and a line on
-   what it's for. Arrows on the spine move a beat.
+   what it's for. Drag a beat by its grip on the spine (or use its arrows) to move it.
 4. Label the beat **in this set**: Status, Dominant persona side, Tone, Voice fit (or your own fields, from
    **Edit labels**, where you add, rename or delete options). Leave any as **Not sure**. If the status changes from the beat before, say why:
    Top-up, Planned turn or Clash.
@@ -179,18 +179,23 @@ sets work** (the ? on Sets and in the builder).
    the room, with "if they say… → your line" replies and whether you have a reply yet. A joke from a
    cluster follows the cluster's lead; tap **Follows the lead** to pin that version.
 6. For each joke: **Locked** (yellow, in this place) or **Loose** (teal, keeps its number but can
-   move or go on the night). Tap **Gate** on a joke the next ones depend on, then + and − for how
-   many it guards. A premise after the first can be gated on the one before it landing.
-7. Read the shape: the **status track** across the set, and the checks under it. Each check
+   move or go on the night). Tap **Gate** on a joke the next ones depend on: the joke under it goes
+   into its box. Drag more jokes into the box (or tap **+ Joke in this gate**), and drag them out
+   again. A joke in a box can be a gate too, one level down. A premise after the first can be gated
+   on the one before it landing.
+7. Put things in order by dragging the grips (or the arrows): blocks within the beat, jokes within
+   a block or into another one. A joke dragged into a premise rests on it in your library; if it
+   rested on another, you're asked first.
+8. Read the shape: the **status track** across the set, and the checks under it. Each check
    is a rule from your Craft notes (a shift needs a reason; a humility top-up every few minutes,
    the limit yours to change; every persona side gets a beat), and the labels still Not sure.
    Until the set can break a rule (two beats for a shift, more time than the limit, a beat per
    persona side), its check is greyed out and says what to add.
-8. Watch the light bar: the beats' time against the slot.
-9. Set its **Status** as it moves along (Draft, Work in Progress, Stage Ready; Discarded hides it
-   from All), rate it with stars and tag it. There's no Save button: the set saves as you go.
-10. Back on **Sets**, the card shows the set's spine and checks at a glance, and the status chips
-   find it again (for example, everything Stage Ready before a show).
+9. Watch the light bar: the beats' time against the slot.
+10. Set its **Status** as it moves along (Draft, Work in Progress, Stage Ready; Discarded hides it
+    from All), rate it with stars and tag it. There's no Save button: the set saves as you go.
+11. Back on **Sets**, the card shows the set's spine and checks at a glance, and the status chips
+    find it again (for example, everything Stage Ready before a show).
 
 ## 7. Go on stage
 

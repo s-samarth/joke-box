@@ -37,10 +37,16 @@ export function SetGuide({ open, onOpenChange }: { open: boolean; onOpenChange: 
         </Part>
         <Part title="Locked, loose and gates">
           <p><Swatch className="text-tape">Locked</Swatch> (yellow): done in this place. <Swatch className="text-teal">Loose</Swatch> (teal): it keeps its number, but you can move it or drop it on the night.</p>
-          <p>A <Swatch className="text-sky">gate</Swatch> (blue) is a joke the next ones depend on. Tap Gate on a joke, then + and − to say how many jokes after it it guards. If it doesn't land, you skip them.</p>
+          <p>A <Swatch className="text-sky">gate</Swatch> (blue) is a box: a joke on top, and the jokes you do only if it lands inside. If it doesn't land, you skip the box. Tap Gate on a joke and the joke under it goes in; drag more in or out, or tap + Joke in this gate. Tap Gate again to open the box: its jokes stay where they are.</p>
+          <p>A gate can hold one gate of its own. Jokes inside that one can't be gates: two levels at most.</p>
           <p>A premise after the first can be gated too: do it only if the premise before it landed.</p>
         </Part>
-        <Part title="Premises and your library">A joke under a premise in a set rests on that premise in your library too, so adding it here shows on the joke and in the premise. A joke on another premise moves, and you're told first.</Part>
+        <Part title="Moving things">
+          <p>Drag by the grip (⋮⋮) on a beat, a block or a joke. Anywhere else, a finger still scrolls. On a phone or iPad, hold the grip a moment first. With a keyboard: Tab to the grip, Space, the arrow keys, Space.</p>
+          <p>Beats move in the spine. Blocks move within their beat, and fold to their headings while you drag one. Jokes move within a block, into and out of gates, and into another block in the beat. A gate's joke brings its whole box.</p>
+          <p>The arrows move a thing one place, walking into and out of gates on the way. They don't leave the block: drag for that.</p>
+        </Part>
+        <Part title="Premises and your library">A joke under a premise in a set rests on that premise in your library too, so adding or dragging it here shows on the joke and in the premise. A joke on another premise moves, and you're asked first. Dragged into No premise, only the set changes.</Part>
         <Part title="Clusters">A cluster shows once when you add jokes, and adds its lead. A version from a cluster plays the cluster's lead, so changing the lead in Jokes changes the set. Pick another version to pin that one in this set whatever the lead is.</Part>
         <Part title="Labels">
           <p>Each beat gets labels in this set, not on the jokes, because the same joke can play a different status somewhere else. The fields start as Status, Dominant persona side, Tone and Voice fit. Not sure is always there.</p>
