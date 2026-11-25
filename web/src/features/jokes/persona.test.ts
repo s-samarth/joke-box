@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { DEFAULT_FIELDS } from '../../api/setFields'
 import type { Joke } from '../../api/types'
-import { personaFieldOf, personaLabel } from './persona'
+import { genericLabel, matchesGeneric, personaFieldOf, personaLabel } from './persona'
 import { matchesPersona, PERSONA_NOT_SURE } from './useJokeFilters'
 
 const field = personaFieldOf(DEFAULT_FIELDS)!
@@ -25,5 +25,20 @@ describe("a joke's persona", () => {
     expect(matchesPersona(joke('gone'), PERSONA_NOT_SURE, known)).toBe(true)
     expect(matchesPersona(joke('bakchod'), PERSONA_NOT_SURE, known)).toBe(false)
     expect(matchesPersona(joke('gone'), null, known)).toBe(true)
+  })
+})
+
+describe('Generic', () => {
+  it('reads as Generic, Non-generic or not answered', () => {
+    expect([genericLabel(true), genericLabel(false), genericLabel(null), genericLabel(undefined)]).toEqual(['Generic', 'Non-generic', null, null])
+  })
+  it('filters by answer, and "unset" finds the ones still to answer', () => {
+    expect(matchesGeneric(true, 'yes')).toBe(true)
+    expect(matchesGeneric(false, 'yes')).toBe(false)
+    expect(matchesGeneric(false, 'no')).toBe(true)
+    expect(matchesGeneric(null, 'unset')).toBe(true)
+    expect(matchesGeneric(undefined, 'unset')).toBe(true)
+    expect(matchesGeneric(false, 'unset')).toBe(false)
+    expect(matchesGeneric(null, null)).toBe(true)
   })
 })

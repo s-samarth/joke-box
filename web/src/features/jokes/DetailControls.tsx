@@ -1,4 +1,4 @@
-/** The small editors on a joke's page: types, clean rating, persona and hashtags. Strength: components/ui/StrengthPicker. */
+/** The small editors on a joke's page: types, clean rating, vibe, generic and hashtags. Strength: components/ui/StrengthPicker. */
 import { Plus, X } from 'lucide-react'
 import { useId, useState } from 'react'
 import { useTypes } from '../../api/library'
@@ -7,7 +7,7 @@ import { useTypeColor } from '../../api/typeColors'
 import { CLEAN_LABELS, DEFAULT_TYPES } from '../../lib/jokeMeta'
 import { choice } from '../../components/ui/choice'
 import { NewTypeDialog } from './NewTypeDialog'
-import { NOT_SURE } from './persona'
+import { GENERIC_ASK, NOT_SURE, VIBE } from './persona'
 
 export function TypeToggles({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
   const { data: types = [] } = useTypes()
@@ -42,15 +42,26 @@ export function CleanPicker({ value, onChange }: { value: CleanRating | null; on
   )
 }
 
-/** The side of you the joke shows, from your persona field's options; Not sure is always there. */
+/** Its vibe: the side of you it shows, from your persona field's options. Not sure is always there. */
 export function PersonaPicker({ field, value, onChange }: { field: SetField; value: string | null; onChange: (v: string | null) => void }) {
   const current = field.options.some((o) => o.id === value) ? value : null
   return (
-    <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Persona">
+    <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={VIBE}>
       {field.options.map((o) => (
         <button key={o.id} type="button" role="radio" aria-checked={current === o.id} onClick={() => onChange(o.id)} className={choice(current === o.id)}>{o.label}</button>
       ))}
       <button type="button" role="radio" aria-checked={!current} onClick={() => onChange(null)} className={choice(!current)}>{NOT_SURE}</button>
+    </div>
+  )
+}
+
+/** Generic (anyone could do it) or not. Unanswered, it says so in amber until you pick. */
+export function GenericPicker({ value, onChange }: { value: boolean | null; onChange: (v: boolean) => void }) {
+  return (
+    <div className="flex flex-wrap items-center gap-2" role="radiogroup" aria-label="Generic">
+      <button type="button" role="radio" aria-checked={value === true} onClick={() => onChange(true)} className={choice(value === true)}>Generic</button>
+      <button type="button" role="radio" aria-checked={value === false} onClick={() => onChange(false)} className={choice(value === false)}>Non-generic</button>
+      {value == null && <span className="text-sm text-amber">{GENERIC_ASK} Pick one</span>}
     </div>
   )
 }

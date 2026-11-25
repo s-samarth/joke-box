@@ -1,5 +1,5 @@
 /**
- * Search plus menus for topic, premise, type, status, persona and sort, in one row that scrolls sideways (see
+ * Search plus menus for topic, premise, type, status, vibe, generic and sort, in one row that scrolls sideways (see
  * ChipRow). Each menu shows what's chosen. Once you pick a topic that has subtopics, a Subtopic menu
  * appears beside it, so the topic list stays topics only. The Jokes list and every joke picker
  * sheet (pickers/useJokePickFilters.ts) both use it.
@@ -20,8 +20,7 @@ import { useSubtopicActions } from './useSubtopicActions'
 import { TypeManager } from './TypeManager'
 import { useNewTopic } from './useNewTopic'
 import { PERSONA_NOT_SURE, SORTS, type FilterKey, type SortKey } from './useJokeFilters'
-import { NOT_SURE, usePersonaField } from './persona'
-import { FieldsSheet } from '../sets/FieldsSheet'
+import { GENERIC_FILTERS, NOT_SURE, VIBE, usePersonaField } from './persona'
 
 /** What the row reads and changes: the Jokes list's filters (in the URL) or a picker's own. */
 export interface Filters {
@@ -30,8 +29,10 @@ export interface Filters {
   premise: string | null
   type: string | null
   status: string | null
-  /** A persona option id, PERSONA_NOT_SURE, or null for any. Optional: older remembered filters lack it. */
+  /** A vibe (persona option id), PERSONA_NOT_SURE, or null for any. Optional: older remembered filters lack it. */
   persona?: string | null
+  /** 'yes', 'no', 'unset' (not answered) or null for any. Optional, like persona. */
+  generic?: string | null
   q: string
   sort: SortKey
   /** A filter is set, so Clear shows. */
@@ -54,7 +55,7 @@ export function JokeFilters({ f, edge = '-mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:
   const { data: types = [] } = useTypes()
   const { data: statuses = [] } = useStatuses()
   const { data: premises = [] } = usePremises()
-  const [managing, setManaging] = useState<'topics' | 'subtopics' | 'types' | 'statuses' | 'personas' | null>(null)
+  const [managing, setManaging] = useState<'topics' | 'subtopics' | 'types' | 'statuses' | null>(null)
   const persona = usePersonaField()
   const subActions = useSubtopicActions()
   const newTopic = useNewTopic()
@@ -102,14 +103,16 @@ export function JokeFilters({ f, edge = '-mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:
     'divider',
     { label: 'Manage statuses…', onSelect: () => setManaging('statuses') },
   ]
-  const personaItems: (MenuItem | 'divider')[] = [
-    { label: 'Any persona', onSelect: () => f.set({ persona: null }), checked: !f.persona },
+  const personaItems: MenuItem[] = [
+    { label: 'Any vibe', onSelect: () => f.set({ persona: null }), checked: !f.persona },
     ...(persona?.options ?? []).map((o) => ({ label: o.label, onSelect: () => f.set({ persona: o.id }), checked: f.persona === o.id })),
     { label: NOT_SURE, onSelect: () => f.set({ persona: PERSONA_NOT_SURE }), checked: f.persona === PERSONA_NOT_SURE },
-    'divider',
-    { label: 'Edit sides…', onSelect: () => setManaging('personas') },
   ]
-  const personaLabel = f.persona === PERSONA_NOT_SURE ? `Persona: ${NOT_SURE}` : (persona?.options.find((o) => o.id === f.persona)?.label ?? 'Persona')
+  const genericItems: MenuItem[] = [
+    { label: 'Generic or not', onSelect: () => f.set({ generic: null }), checked: !f.generic },
+    ...Object.entries(GENERIC_FILTERS).map(([k, label]) => ({ label, onSelect: () => f.set({ generic: k }), checked: f.generic === k })),
+  ]
+  const personaLabel = f.persona === PERSONA_NOT_SURE ? `${VIBE}: ${NOT_SURE}` : (persona?.options.find((o) => o.id === f.persona)?.label ?? VIBE)
   const sortItems: MenuItem[] = (Object.keys(SORTS) as SortKey[]).map((k) => ({ label: SORTS[k], onSelect: () => f.set({ sort: k === 'new' ? null : k }), checked: f.sort === k }))
 
   return (
@@ -127,9 +130,10 @@ export function JokeFilters({ f, edge = '-mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:
         <Dropdown align="start" items={typeItems} trigger={<span><MenuButton label={f.type === UNDEFINED_TYPE ? 'No type yet' : (f.type ?? 'Type')} on={Boolean(f.type)} /></span>} />
         <Dropdown align="start" items={statusItems} trigger={<span><MenuButton label={f.status ?? 'Status'} on={Boolean(f.status)} /></span>} />
         {persona && <Dropdown align="start" items={personaItems} trigger={<span><MenuButton label={personaLabel} on={Boolean(f.persona)} /></span>} />}
+        <Dropdown align="start" items={genericItems} trigger={<span><MenuButton label={(f.generic && GENERIC_FILTERS[f.generic as keyof typeof GENERIC_FILTERS]) || 'Generic'} on={Boolean(f.generic)} /></span>} />
         <Dropdown align="start" items={sortItems} trigger={<span><MenuButton label={SORTS[f.sort]} on={false} /></span>} />
         {f.active && (
-          <button type="button" onClick={() => f.set({ topic: null, sub: null, premise: null, type: null, status: null, persona: null, q: null })} className="inline-flex h-9 shrink-0 items-center gap-1 px-2 text-sm text-dim hover:text-paper">
+          <button type="button" onClick={() => f.set({ topic: null, sub: null, premise: null, type: null, status: null, persona: null, generic: null, q: null })} className="inline-flex h-9 shrink-0 items-center gap-1 px-2 text-sm text-dim hover:text-paper">
             <X size={14} /> Clear
           </button>
         )}
@@ -137,7 +141,6 @@ export function JokeFilters({ f, edge = '-mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:
       <TopicManager open={managing === 'topics'} onClose={() => setManaging(null)} />
       <SubtopicManager topicId={managing === 'subtopics' ? (topic?.id ?? null) : null} onClose={() => setManaging(null)} onRemoved={(id) => f.sub === id && f.set({ sub: null })} />
       <TypeManager open={managing === 'types'} onClose={() => setManaging(null)} />
-      <FieldsSheet open={managing === 'personas'} onOpenChange={(o) => setManaging(o ? 'personas' : null)} />
       {/* A filter on a status that's renamed or deleted follows it, so the list doesn't empty out. */}
       <StatusManager open={managing === 'statuses'} onClose={() => setManaging(null)} onRenamed={(from, to) => f.status === from && f.set({ status: to })} />
     </div>

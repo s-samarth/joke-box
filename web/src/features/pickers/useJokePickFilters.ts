@@ -26,7 +26,7 @@ export interface StartAt {
 }
 
 const startState = (start: StartAt): State => ({
-  topic: start.topic, sub: start.topic ? (start.sub ?? null) : null, premise: start.premise ?? null, type: null, status: null, persona: null, q: '', sort: 'edited', showDiscarded: false,
+  topic: start.topic, sub: start.topic ? (start.sub ?? null) : null, premise: start.premise ?? null, type: null, status: null, persona: null, generic: null, q: '', sort: 'edited', showDiscarded: false,
 })
 
 export function useJokePickFilters(candidates: Joke[], start: StartAt, memory?: string) {
@@ -52,7 +52,7 @@ export function useJokePickFilters(candidates: Joke[], start: StartAt, memory?: 
     const { kept, discarded } = keepDiscarded(matching, s.showDiscarded, Boolean(s.status))
     return { shown: [...kept].sort(SORTERS[s.sort] ?? SORTERS.edited), discarded }
   }, [candidates, clusters, personaField, s])
-  const active = Boolean(s.topic || s.premise || s.type || s.status || s.persona || s.q)
+  const active = Boolean(s.topic || s.premise || s.type || s.status || s.persona || s.generic || s.q)
   const f: Filters = { ...s, active, set }
   return { f, shown, discarded, showDiscarded: s.showDiscarded }
 }

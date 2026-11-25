@@ -89,6 +89,10 @@ class Premise(Trashable, OwnedMixin, Base):
     strength: Mapped[int | None] = mapped_column(SmallInteger, default=None)
     # One of PREMISE_STATUSES, its own scale: a Discarded premise leaves its jokes as they are.
     status: Mapped[str] = mapped_column(String(20), default="Draft", server_default="Draft")
+    # Its vibe: an option id from the persona label field, as on jokes. None is Not sure.
+    persona: Mapped[str | None] = mapped_column(String(64))
+    # Generic (anyone could say it) or not; None is not answered yet, which the app flags.
+    generic: Mapped[bool | None] = mapped_column(Boolean)
     # Goes up by one on every save; a save edited from an older version is a conflict.
     version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
 
@@ -171,9 +175,11 @@ class Joke(Trashable, OwnedMixin, Base):
     alt_punchlines: Mapped[list[str]] = mapped_column(JSON, default=list, server_default="[]")
     clean_rating: Mapped[str | None] = mapped_column(String(10))
     language: Mapped[str | None] = mapped_column(String(40))
-    # The persona side it shows: an option id from the persona label field (the list a beat's
-    # Dominant persona side picks from). None, or an option since deleted, is Not sure.
+    # Its vibe, the persona side it shows: an option id from the persona label field (the list a
+    # beat's Dominant persona side picks from). None, or an option since deleted, is Not sure.
     persona: Mapped[str | None] = mapped_column(String(64))
+    # Generic (anyone could say it) or not; None is not answered yet, which the app flags.
+    generic: Mapped[bool | None] = mapped_column(Boolean)
     comments: Mapped[str] = mapped_column(Text, default="")
     # The joke this one continues from. Many jokes can follow one, so chains branch into trees.
     follows_id: Mapped[uuid.UUID | None] = mapped_column(

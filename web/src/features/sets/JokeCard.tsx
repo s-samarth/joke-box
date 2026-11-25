@@ -2,14 +2,16 @@
  * One joke in a beat's list: its grip, its number, the joke (tap to read it whole) and its tools.
  * Locked is tape-yellow, loose is teal (still in order, just flexible), a gate is sky blue. The
  * arrows walk it one place at a time, into and out of gates on the way (gateEdit.ts); Move takes it
- * to another block or premise by name (moveTo.ts). A joke with
- * a persona says which side it shows, beside its tools.
+ * to another block or premise by name (moveTo.ts). Its Vibe and Generic sit beside Locked and
+ * Gate: they're the joke's own (saved on the joke, not the set).
  */
 import type { DraggableAttributes, DraggableSyntheticListeners } from '@dnd-kit/core'
 import { ArrowDown, ArrowUp, ChevronDown, X } from 'lucide-react'
 import type { Joke, SetPiece } from '../../api/types'
+import { useSaveJoke } from '../../api/library'
 import { Dropdown, type MenuItem } from '../../components/ui/Menu'
-import { personaLabel, usePersonaField } from '../jokes/persona'
+import { MaterialTags, type Tags } from '../jokes/MaterialTags'
+import { toInput } from '../jokes/useAutosaveJoke'
 import { togglePin, toggleLoose } from './beatEdit'
 import { DragGrip } from './DragGrip'
 import { canGate, canStep, stepJoke, toggleGate } from './gateEdit'
@@ -43,8 +45,8 @@ const icon = 'inline-flex size-8 pointer-coarse:size-11 items-center justify-cen
 
 export function JokeCard({ piece: p, isGate, depth, grip, pieces, onChange, jokes, leadOf, onOpen, moveItems }: Props) {
   const joke = jokes.get(p.joke_id)
-  const persona = usePersonaField()
-  const side = personaLabel(joke?.persona, persona)
+  const save = useSaveJoke()
+  const tag = (patch: Tags) => { if (joke) save.mutate({ id: joke.id, input: { ...toInput(joke), ...patch } }) }
   const t = tone(p, isGate)
   const n = pieces.findIndex((x) => x.id === p.id) + 1
   const gateable = isGate || canGate(pieces, p.id)
@@ -72,7 +74,7 @@ export function JokeCard({ piece: p, isGate, depth, grip, pieces, onChange, joke
             title={p.pinned ? 'This version, even if the lead changes. Tap to follow the lead.' : 'Plays the cluster lead. Tap to pin this version.'}
             className={`${tool} text-dim hover:bg-ink-3`}>{p.pinned ? 'Pinned version' : 'Follows the lead'}</button>
         )}
-        {side && <span className="ml-1 rounded-md px-2 py-0.5 text-xs text-dim ring-1 ring-rule" title="The persona side this joke shows">{side}</span>}
+        {joke && <MaterialTags value={joke} onChange={tag} what="this joke" />}
         <span className="ml-auto flex items-center">
           {moveItems && <Dropdown items={moveItems(p.id)} trigger={<button type="button" className={`${tool} text-dim hover:bg-ink-3 hover:text-paper`} aria-label={`Move to another block: ${name}`}
             title="Out of the premise, into another block of this beat, or under another premise">Move <ChevronDown size={13} aria-hidden /></button>} />}

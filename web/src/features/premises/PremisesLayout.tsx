@@ -19,6 +19,7 @@ import { topicName } from '../../lib/jokeMeta'
 import { MenuButton } from '../jokes/JokeFilters'
 import { TopicManager } from '../jokes/TopicManager'
 import { useNewTopic } from '../jokes/useNewTopic'
+import { GENERIC_FILTERS } from '../jokes/persona'
 import { NewPremiseDialog } from './NewPremiseDialog'
 import { PremiseGuide } from './PremiseGuide'
 import { PremiseCount, PremiseRow } from './PremiseListParts'
@@ -52,6 +53,10 @@ export function PremisesLayout() {
     'divider',
     { label: 'Manage topics…', onSelect: () => setManaging(true) },
   ]
+  const genericItems: MenuItem[] = [
+    { label: 'Generic or not', onSelect: () => f.set({ generic: null }), checked: !f.generic },
+    ...Object.entries(GENERIC_FILTERS).map(([k, label]) => ({ label, onSelect: () => f.set({ generic: k }), checked: f.generic === k })),
+  ]
   const statusItems: MenuItem[] = [
     { label: 'Any status', onSelect: () => f.set({ status: null }), checked: !f.status },
     ...PREMISE_STATUSES.map((s) => ({ label: s, onSelect: () => f.set({ status: s }), checked: Boolean(f.status) && premiseStatus(f.status) === s })),
@@ -73,8 +78,9 @@ export function PremisesLayout() {
       <ChipRow className="mt-3 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
         <Dropdown align="start" items={topicItems} trigger={<span><MenuButton label={topic ? topicName(topic) : 'Topic'} on={Boolean(topic)} /></span>} />
         <Dropdown align="start" items={statusItems} trigger={<span><MenuButton label={f.status ? premiseStatus(f.status) : 'Status'} on={Boolean(f.status)} /></span>} />
+        <Dropdown align="start" items={genericItems} trigger={<span><MenuButton label={(f.generic && GENERIC_FILTERS[f.generic as keyof typeof GENERIC_FILTERS]) || 'Generic'} on={Boolean(f.generic)} /></span>} />
         <Dropdown align="start" items={sortItems} trigger={<span><MenuButton label={PREMISE_SORTS[f.sort]} on={false} /></span>} />
-        {f.active && <button type="button" onClick={() => f.set({ q: null, topic: null, status: null })} className="inline-flex h-9 shrink-0 items-center gap-1 px-2 text-sm text-dim hover:text-paper"><X size={14} /> Clear</button>}
+        {f.active && <button type="button" onClick={() => f.set({ q: null, topic: null, status: null, generic: null })} className="inline-flex h-9 shrink-0 items-center gap-1 px-2 text-sm text-dim hover:text-paper"><X size={14} /> Clear</button>}
       </ChipRow>
       <PremiseCount f={f} />
       <div className="lg:-mx-6 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:px-3">

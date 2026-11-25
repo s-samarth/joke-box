@@ -1,5 +1,5 @@
 /**
- * Jokes list state lives in the URL (?topic=&sub=&premise=&type=&status=&persona=&q=&sort=&discarded=&versions=), so back,
+ * Jokes list state lives in the URL (?topic=&sub=&premise=&type=&status=&persona=&generic=&q=&sort=&discarded=&versions=), so back,
  * refresh and links keep your place. Discarded jokes are hidden until ?discarded=show (discarded.ts). Filtering runs in the browser, so it works offline.
  * A cluster's versions stack into one row (cluster/stacks.ts) in either display mode.
  * Arrive with no filters in the URL and the ones you used last come back (lib/useRememberedParams).
@@ -12,7 +12,7 @@ import { byStrength, UNDEFINED_TYPE } from '../../lib/jokeMeta'
 import { NO_PREMISE, ON_A_PREMISE } from '../../lib/premises'
 import { useRememberedParams } from '../../lib/useRememberedParams'
 import { stackRows } from './cluster/stacks'
-import { usePersonaField } from './persona'
+import { matchesGeneric, usePersonaField } from './persona'
 import { keepDiscarded } from './discarded'
 
 export type SortKey = 'new' | 'old' | 'edited' | 'strong' | 'weak' | 'long'
@@ -59,9 +59,9 @@ export function matchesPersona(joke: Joke, persona: string | null | undefined, k
   return persona === PERSONA_NOT_SURE ? !own : own === persona
 }
 
-export type FilterKey = 'topic' | 'sub' | 'premise' | 'type' | 'status' | 'persona' | 'q' | 'sort' | 'discarded' | 'versions'
+export type FilterKey = 'topic' | 'sub' | 'premise' | 'type' | 'status' | 'persona' | 'generic' | 'q' | 'sort' | 'discarded' | 'versions'
 
-type Narrowing = { topic: string | null; sub: string | null; premise: string | null; type: string | null; status: string | null; persona?: string | null; personas?: Set<string>; q: string }
+type Narrowing = { topic: string | null; sub: string | null; premise: string | null; type: string | null; status: string | null; persona?: string | null; personas?: Set<string>; generic?: string | null; q: string }
 
 /** Does the joke pass every filter that's set? Discarded jokes are left to keepDiscarded. */
 export const matchesFilters = (b: Joke, f: Narrowing, clusterTitle = ''): boolean =>
@@ -71,6 +71,7 @@ export const matchesFilters = (b: Joke, f: Narrowing, clusterTitle = ''): boolea
   matchesType(b, f.type) &&
   (!f.status || b.status === f.status) &&
   matchesPersona(b, f.persona, f.personas) &&
+  matchesGeneric(b.generic, f.generic) &&
   matchesSearch(b, f.q, clusterTitle)
 
 export const SORTERS: Record<SortKey, (a: Joke, b: Joke) => number> = {
@@ -94,6 +95,7 @@ export function useJokeFilters() {
     type: params.get('type'),
     status: params.get('status'),
     persona: params.get('persona'),
+    generic: params.get('generic'),
     q: params.get('q') ?? '',
     sort: (params.get('sort') as SortKey | null) ?? 'new',
     showDiscarded: params.get('discarded') === 'show',
@@ -112,13 +114,13 @@ export function useJokeFilters() {
   const { visible, discarded } = useMemo(() => {
     const titles = new Map(clusters.map((c) => [c.id, c.title]))
     const personas = new Set(personaField?.options.map((o) => o.id))
-    const matching = jokes.filter((b) => matchesFilters(b, { topic: f.topic, sub: f.sub, premise: f.premise, type: f.type, status: f.status, persona: f.persona, personas, q: f.q }, titles.get(b.cluster_id ?? '')))
+    const matching = jokes.filter((b) => matchesFilters(b, { topic: f.topic, sub: f.sub, premise: f.premise, type: f.type, status: f.status, persona: f.persona, personas, generic: f.generic, q: f.q }, titles.get(b.cluster_id ?? '')))
     const { kept, discarded } = keepDiscarded(matching, f.showDiscarded, Boolean(f.status))
     return { visible: kept.sort(SORTERS[f.sort] ?? SORTERS.new), discarded }
-  }, [jokes, clusters, personaField, f.topic, f.sub, f.premise, f.type, f.status, f.persona, f.q, f.sort, f.showDiscarded])
+  }, [jokes, clusters, personaField, f.topic, f.sub, f.premise, f.type, f.status, f.persona, f.generic, f.q, f.sort, f.showDiscarded])
   const rows = useMemo(() => stackRows(visible, jokes, { clusters, showDiscarded: f.showDiscarded || Boolean(f.status) }), [visible, jokes, clusters, f.showDiscarded, f.status])
 
-  const active = Boolean(f.topic || f.premise || f.type || f.status || f.persona || f.q)
+  const active = Boolean(f.topic || f.premise || f.type || f.status || f.persona || f.generic || f.q)
   // Hidden discarded jokes narrow the list without being a filter you set, so Clear leaves them be.
   const hidingDiscarded = discarded > 0 && !f.showDiscarded
   return { ...f, set, visible, rows, discarded, hidingDiscarded, total: jokes.length, isPending, active, query }

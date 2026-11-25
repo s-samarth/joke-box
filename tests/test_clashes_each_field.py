@@ -22,6 +22,7 @@ JOKE_CHANGES: list[tuple[str, Any]] = [
     ("duration_seconds", 45),
     ("alt_punchlines", ["Fake alternate"]),
     ("persona", "bakchod"),
+    ("generic", True),
 ]
 
 

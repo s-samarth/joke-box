@@ -52,7 +52,7 @@ export function SetGuide({ open, onOpenChange }: { open: boolean; onOpenChange: 
         <Part title="Labels">
           <p>Each beat gets labels in this set, not on the jokes, because the same joke can play a different status somewhere else. The fields start as Status, Dominant persona side, Tone and Voice fit. Not sure is always there.</p>
           <p>Tap <b className="text-paper">Edit labels</b> to add, rename or delete options and fields. Deleting one tells you how many beats have it first, and they turn to Not sure.</p>
-          <p>Each joke has its own <b className="text-paper">Persona</b> too, on the joke's page: the side of you it shows, from the same list as Dominant persona side. It shows on the joke in a set.</p>
+          <p>Each joke and premise has its own <b className="text-paper">Vibe</b> (Riled up, Bakchod or Point prover, the sides of Dominant persona side) and <b className="text-paper">Generic</b> or Non-generic. Set them right in the set, beside Locked and Gate, or on the joke's or premise's page. Generic shows in amber until you answer it.</p>
           <p>Status options count as a win, neutral (System attack: you and the room against the system together) or a loss. A loss is a humility top-up.</p>
         </Part>
         <Part title="The checks">

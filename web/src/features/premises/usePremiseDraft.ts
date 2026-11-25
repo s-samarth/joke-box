@@ -6,7 +6,9 @@ import { onHide } from '../../lib/saveOnHide'
 const DELAY = 700
 
 export function usePremiseDraft(premise: Premise) {
-  const [draft, setDraft] = useState<PremiseInput>(() => ({ topic_id: premise.topic_id, take: premise.take, notes: premise.notes, extra_notes: premise.extra_notes ?? '', strength: premise.strength ?? null, status: premise.status ?? 'Draft', version: premise.version }))
+  const [draft, setDraft] = useState<PremiseInput>(() => ({ topic_id: premise.topic_id, take: premise.take, notes: premise.notes, extra_notes: premise.extra_notes ?? '', strength: premise.strength ?? null, status: premise.status ?? 'Draft', version: premise.version,
+    // Only when known: a premise cached before these existed leaves them out, so a save keeps them.
+    ...(premise.persona !== undefined && { persona: premise.persona }), ...(premise.generic !== undefined && { generic: premise.generic }) }))
   const save = useSavePremise()
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const pending = useRef<PremiseInput | null>(null)
