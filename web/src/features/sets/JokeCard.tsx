@@ -2,14 +2,14 @@
  * One joke in a beat's list: its grip, its number, the joke (tap to read it whole) and its tools.
  * Locked is tape-yellow, loose is teal (still in order, just flexible), a gate is sky blue. The
  * arrows walk it one place at a time, into and out of gates on the way (gateEdit.ts); Move takes it
- * to another block or premise by name (moveTo.ts). Its Vibe and Generic sit beside Locked and
+ * out on its own, to another block, or under a premise, by name (moveTo.ts). Its Vibe and Generic sit beside Locked and
  * Gate: they're the joke's own (saved on the joke, not the set).
  */
 import type { DraggableAttributes, DraggableSyntheticListeners } from '@dnd-kit/core'
 import { ArrowDown, ArrowUp, ChevronDown, X } from 'lucide-react'
 import type { Joke, SetPiece } from '../../api/types'
 import { useSaveJoke } from '../../api/library'
-import { Dropdown, type MenuItem } from '../../components/ui/Menu'
+import { Dropdown, type MenuRow } from '../../components/ui/Menu'
 import { MaterialTags, type Tags } from '../jokes/MaterialTags'
 import { toInput } from '../jokes/useAutosaveJoke'
 import { togglePin, toggleLoose } from './beatEdit'
@@ -29,7 +29,7 @@ export interface ListProps {
   /** + Joke inside a gate's box. */
   onAddToGate: (gateId: string) => void
   /** What Move to… offers this joke: other blocks of the beat, or another premise. */
-  moveItems?: (pieceId: string) => (MenuItem | 'divider')[]
+  moveItems?: (pieceId: string) => MenuRow[]
 }
 
 interface Props extends ListProps {
@@ -76,8 +76,8 @@ export function JokeCard({ piece: p, isGate, depth, grip, pieces, onChange, joke
         )}
         {joke && <MaterialTags value={joke} onChange={tag} what="this joke" />}
         <span className="ml-auto flex items-center">
-          {moveItems && <Dropdown items={moveItems(p.id)} trigger={<button type="button" className={`${tool} text-dim hover:bg-ink-3 hover:text-paper`} aria-label={`Move to another block: ${name}`}
-            title="Out of the premise, into another block of this beat, or under another premise">Move <ChevronDown size={13} aria-hidden /></button>} />}
+          {moveItems && <Dropdown items={moveItems(p.id)} trigger={<button type="button" className={`${tool} text-dim hover:bg-ink-3 hover:text-paper`} aria-label={`Move: ${name}`}
+            title="On its own with no premise, into another block of this beat, or under a premise">Move <ChevronDown size={13} aria-hidden /></button>} />}
           <button type="button" className={icon} disabled={!canStep(pieces, p.id, -1)} onClick={() => onChange(stepJoke(pieces, p.id, -1))} aria-label={`Move up: ${name}`}><ArrowUp size={15} /></button>
           <button type="button" className={icon} disabled={!canStep(pieces, p.id, 1)} onClick={() => onChange(stepJoke(pieces, p.id, 1))} aria-label={`Move down: ${name}`}><ArrowDown size={15} /></button>
           <button type="button" className={`${icon} ml-2`} onClick={() => onChange(pieces.filter((x) => x.id !== p.id))} aria-label={`Take out of the beat: ${name}`}><X size={15} /></button>

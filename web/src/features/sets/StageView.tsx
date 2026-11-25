@@ -97,7 +97,7 @@ export function StageView() {
                   return (
                     <li key={r.key} className={`pt-3 ${r.key === pending?.key ? 'rounded-lg ring-2 ring-sky' : ''}`}>
                       <button type="button" disabled={!said} onClick={() => unanswer(r.key)} title={said ? 'Take this answer back' : undefined}
-                        className={`flex w-full gap-2 text-left text-[13px] font-semibold tracking-[0.1em] uppercase ${r.skipped ? 'text-faint line-through' : r.gated ? 'text-sky' : 'text-faint'}`}>
+                        className={`flex w-full gap-2 text-left text-[13px] font-semibold tracking-[0.1em] uppercase ${r.skipped ? 'text-faint line-through' : r.gated ? 'text-sky' : 'text-leaf'}`}>
                         {r.gated && 'Gate · '}{(r.entry.premise_id && premises.get(r.entry.premise_id)?.take) || 'Premise'}
                         {said && <span className="ml-auto shrink-0 font-normal tracking-normal normal-case">{answers[r.key] ? 'landed' : "didn't"}</span>}
                       </button>

@@ -22,6 +22,10 @@ export interface MenuItem {
   count?: number
 }
 
+/** A quiet title over the items under it, to split a menu into parts. */
+export interface MenuHeading { heading: string }
+export type MenuRow = MenuItem | MenuHeading | 'divider'
+
 const look = 'z-50 min-w-48 overflow-y-auto overscroll-contain rounded-xl bg-ink-3 p-1.5 shadow-lift ring-1 ring-rule-strong'
 const dropdownPanel = `${look} max-h-[min(70dvh,var(--radix-dropdown-menu-content-available-height))]`
 const contextPanel = `${look} max-h-[min(70dvh,var(--radix-context-menu-content-available-height))]`
@@ -45,12 +49,14 @@ function ContextPanel(props: ComponentProps<typeof ContextMenu.Content>) {
   return <ContextMenu.Content collisionPadding={edgeClearance()} className={contextPanel} {...props} />
 }
 
-function Items({ items, Item }: { items: (MenuItem | 'divider')[]; Item: typeof DropdownMenu.Item }) {
+function Items({ items, Item }: { items: MenuRow[]; Item: typeof DropdownMenu.Item }) {
   return (
     <>
       {items.map((i, n) =>
         i === 'divider' ? (
           <div key={`d${n}`} className="my-1 h-px bg-rule" />
+        ) : 'heading' in i ? (
+          <div key={`h${n}`} role="presentation" className="px-3 pt-2 pb-1 text-[11.5px] font-semibold tracking-[0.13em] text-faint uppercase">{i.heading}</div>
         ) : (
           <Item key={i.label} role={i.checked === undefined ? 'menuitem' : 'menuitemcheckbox'} aria-checked={i.checked} className={row(i.danger)} disabled={i.disabled} onSelect={i.onSelect}>
             {i.icon}
@@ -66,7 +72,7 @@ function Items({ items, Item }: { items: (MenuItem | 'divider')[]; Item: typeof 
 
 interface DropdownProps {
   trigger: ReactNode
-  items: (MenuItem | 'divider')[]
+  items: MenuRow[]
   align?: 'start' | 'end'
   /** True when the item picked last put focus somewhere itself (a text box it opened), so the
    * menu shouldn't hand focus back to its button on closing. */

@@ -1,7 +1,8 @@
 /**
  * One block of a beat: a premise with its jokes, jokes with no premise, or crowd work. It drags by
  * the grip on its heading, or steps with the arrows. While any block is dragged, every block folds
- * to its heading (`folded`) so a long premise is easy to move. A premise shows its Vibe and
+ * to its heading (`folded`) so a long premise is easy to move. A premise is outlined and written in
+ * leaf green (sky blue when gated), crowd work in orchid pink, jokes with no premise in plain rule. A premise shows its Vibe and
  * Generic under its take, saved on the premise itself.
  */
 import { useSortable } from '@dnd-kit/sortable'
@@ -10,7 +11,7 @@ import { ArrowDown, ArrowUp, Lightbulb, ListChecks, Plus, Trash2 } from 'lucide-
 import { useSavePremise, type Premise } from '../../api/premises'
 import type { Beat, Joke, SetEntry } from '../../api/types'
 import { Button } from '../../components/ui/Button'
-import type { MenuItem } from '../../components/ui/Menu'
+import type { MenuRow } from '../../components/ui/Menu'
 import { MaterialTags, type Tags } from '../jokes/MaterialTags'
 import { CrowdBlock } from './CrowdBlock'
 import { mapEntry, mapPieces } from './beatEdit'
@@ -40,7 +41,7 @@ interface Props extends BlockProps {
   onSelect: (on: boolean) => void
   onPick: (pieceId: string) => void
   onGroup: (pieceIds: string[]) => void
-  moveItems: (pieceId: string) => (MenuItem | 'divider')[]
+  moveItems: (pieceId: string) => MenuRow[]
 }
 
 const icon = 'inline-flex size-11 items-center justify-center rounded-md text-faint hover:bg-ink-3 hover:text-paper disabled:opacity-30'
@@ -50,7 +51,14 @@ const eyebrow = 'text-[11.5px] font-semibold tracking-[0.13em] uppercase'
 function heading(entry: SetEntry, premise?: Premise) {
   if (entry.kind === 'crowd') return <span className={`${eyebrow} text-orchid`}>Crowd work</span>
   if (entry.kind === 'jokes') return <span className={`${eyebrow} text-faint`}>No premise</span>
-  return <span className={`${eyebrow} text-faint`}>Premise{premise ? '' : ' (deleted)'}</span>
+  return <span className={`${eyebrow} text-leaf`}>Premise{premise ? '' : ' (deleted)'}</span>
+}
+
+/** The block's outline: a premise leaf green (sky blue when gated), crowd work orchid pink. */
+function ring(entry: SetEntry, gated: boolean) {
+  if (entry.kind === 'crowd') return 'ring-orchid/60'
+  if (entry.kind === 'premise') return gated ? 'bg-sky/5 ring-sky/50' : 'ring-leaf/60'
+  return 'ring-rule-strong'
 }
 
 function summary(entry: SetEntry, premise?: Premise) {
@@ -70,7 +78,7 @@ export function EntryBlock({ entry, index, beat, onChange, premises, canGatePrem
   const tag = (patch: Tags) => { if (premise) savePremise.mutate({ id: premise.id, input: { topic_id: premise.topic_id, take: premise.take, notes: premise.notes, version: premise.version, ...patch } }) }
   const name = entry.kind === 'premise' ? (premise?.take ?? 'the premise') : entry.kind === 'crowd' ? 'the crowd work' : 'the jokes with no premise'
   return (
-    <li ref={setNodeRef} style={style} data-entry={entry.id} className={`rounded-xl p-2.5 ring-1 sm:p-3 ${gated ? 'bg-sky/5 ring-sky/40' : 'ring-rule'} ${isDragging ? 'opacity-40' : ''}`}>
+    <li ref={setNodeRef} style={style} data-entry={entry.id} className={`rounded-xl p-2.5 ring-[1.5px] sm:p-3 ${ring(entry, gated)} ${isDragging ? 'opacity-40' : ''}`}>
       <div className="flex items-center gap-1">
         <DragGrip label={name} listeners={listeners} attributes={attributes} setRef={setActivatorNodeRef} />
         <span className="w-5 text-sm font-semibold text-faint tabular">{index + 1}</span>
@@ -84,7 +92,7 @@ export function EntryBlock({ entry, index, beat, onChange, premises, canGatePrem
       {folded ? <p className="mt-1 truncate pl-9 text-sm text-dim">{summary(entry, premise)}</p> : <>
         {entry.kind === 'premise' && (
           <div className="mt-1.5 mb-3">
-            <p className="leading-snug font-medium">{premise?.take ?? 'This premise was deleted. Its jokes stay.'}</p>
+            <p className="leading-snug font-medium text-leaf">{premise?.take ?? 'This premise was deleted. Its jokes stay.'}</p>
             {premise?.notes && <p className="mt-0.5 line-clamp-2 text-sm text-dim">{premise.notes}</p>}
             {premise && <div className="mt-2 flex flex-wrap gap-1"><MaterialTags value={premise} onChange={tag} what="this premise" /></div>}
             {canGatePremise && (
