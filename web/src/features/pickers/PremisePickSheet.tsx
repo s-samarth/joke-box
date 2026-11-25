@@ -2,7 +2,8 @@
  * Pick premises, with the Premises tab's own filters (search the take and notes, topic, status,
  * sort) and rows like its list. Filters start on the caller's topic; clear them to pick from any.
  * Discarded premises stay hidden until you Show them or pick a status, as in the tab. Used for
- * the premise a joke rests on (one pick) and the premises that came from an observation (many).
+ * the premise a joke rests on (one pick), the premises that came from an observation (many) and
+ * the premises in a set's beat.
  */
 import { Search, X } from 'lucide-react'
 import { useMemo, useState, type ReactNode } from 'react'
@@ -29,11 +30,13 @@ interface Props {
   topicId: string | null
   many?: [verb: string, one: string, more: string]
   current?: string | null
+  /** A detail worth knowing before picking one (already in this beat). */
+  note?: (p: Premise) => string | null
   after?: ReactNode
   onPick: (ids: string[]) => void
 }
 
-export function PremisePickSheet({ candidates = () => true, topicId, ...sheet }: Props) {
+export function PremisePickSheet({ candidates = () => true, topicId, note = () => null, ...sheet }: Props) {
   const { data: premises = [] } = usePremises()
   const { data: jokes = [] } = useJokes()
   const { data: topics = [] } = useTopics()
@@ -82,6 +85,7 @@ export function PremisePickSheet({ candidates = () => true, topicId, ...sheet }:
       <span className="flex items-start gap-3">
         <PremiseRowBody premise={p} jokes={counts.get(p.id) ?? 0} topics={topics} showTopic={!topic}>
           {p.id === sheet.current && <span className="text-tape">Current</span>}
+          {note(p) && <span className="rounded-md bg-ink-3 px-1.5 py-0.5 text-paper">{note(p)}</span>}
         </PremiseRowBody>
       </span>
     ),

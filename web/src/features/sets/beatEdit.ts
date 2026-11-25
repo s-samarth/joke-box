@@ -94,3 +94,24 @@ export function addPiecesTo(beat: Beat, entryId: string | null, pieces: SetPiece
   const entry = { kind: 'jokes' as const, id: newId(), pieces }
   return { beat: setEntries(beat, [...beat.entries, entry]), entryId: entry.id }
 }
+
+/**
+ * Put some jokes of a no-premise list under a premise (jokes first, premise later). They keep
+ * their order and settings. If the beat has that premise already they join the end of it;
+ * otherwise the premise goes in just above the list. A list left empty goes.
+ */
+export function groupUnder(beat: Beat, entryId: string, pieceIds: string[], premiseId: string): Beat {
+  const from = beat.entries.find((e) => e.id === entryId)
+  if (from?.kind !== 'jokes') return beat
+  const moving = from.pieces.filter((p) => pieceIds.includes(p.id))
+  if (!moving.length) return beat
+  const staying = from.pieces.filter((p) => !pieceIds.includes(p.id))
+  const target = beat.entries.find((e) => e.kind === 'premise' && e.premise_id === premiseId)
+  const entries = beat.entries.flatMap((e): SetEntry[] => {
+    if (e.id === target?.id && e.kind === 'premise') return [{ ...e, pieces: [...e.pieces, ...moving] }]
+    if (e.id !== entryId) return [e]
+    const left = staying.length ? [{ ...from, pieces: staying }] : []
+    return target ? left : [{ ...newPremise(premiseId), pieces: moving } as SetEntry, ...left]
+  })
+  return setEntries(beat, entries)
+}
