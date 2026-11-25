@@ -50,7 +50,7 @@ const eyebrow = 'text-[11.5px] font-semibold tracking-[0.13em] uppercase'
 
 function heading(entry: SetEntry, premise?: Premise) {
   if (entry.kind === 'crowd') return <span className={`${eyebrow} text-orchid`}>Crowd work</span>
-  if (entry.kind === 'jokes') return <span className={`${eyebrow} text-faint`}>No premise</span>
+  if (entry.kind === 'jokes') return <span className={`${eyebrow} text-faint`}>Standalone jokes</span>
   return <span className={`${eyebrow} text-leaf`}>Premise{premise ? '' : ' (deleted)'}</span>
 }
 
@@ -76,7 +76,7 @@ export function EntryBlock({ entry, index, beat, onChange, premises, canGatePrem
   const savePremise = useSavePremise()
   // Only what a save needs: fields left out (strength, status, Notes) stay as stored.
   const tag = (patch: Tags) => { if (premise) savePremise.mutate({ id: premise.id, input: { topic_id: premise.topic_id, take: premise.take, notes: premise.notes, version: premise.version, ...patch } }) }
-  const name = entry.kind === 'premise' ? (premise?.take ?? 'the premise') : entry.kind === 'crowd' ? 'the crowd work' : 'the jokes with no premise'
+  const name = entry.kind === 'premise' ? (premise?.take ?? 'the premise') : entry.kind === 'crowd' ? 'the crowd work' : 'the standalone jokes'
   return (
     <li ref={setNodeRef} style={style} data-entry={entry.id} className={`rounded-xl p-2.5 ring-[1.5px] sm:p-3 ${ring(entry, gated)} ${isDragging ? 'opacity-40' : ''}`}>
       <div className="flex items-center gap-1">

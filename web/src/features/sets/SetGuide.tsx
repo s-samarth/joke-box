@@ -31,7 +31,7 @@ export function SetGuide({ open, onOpenChange }: { open: boolean; onOpenChange: 
           <p>One ordered list of:</p>
           <ul className="list-disc space-y-1 pl-5">
             <li><Swatch className="text-leaf">Premises</Swatch> (green), the take a run of jokes rests on, with those jokes under them.</li>
-            <li><b className="text-paper">Jokes with no premise</b>, as many blocks as you like, before, between or after premises. Tap Select some for a premise to put them under one later.</li>
+            <li><b className="text-paper">Standalone jokes</b> (no premise), as many blocks as you like, before, between or after premises. Tap Select some for a premise to put them under one later.</li>
             <li><Swatch className="text-orchid">Crowd work</Swatch> (pink): questions for the room, and lines for what they might say. Mark each question Have a reply or No reply yet.</li>
           </ul>
         </Part>
@@ -44,7 +44,7 @@ export function SetGuide({ open, onOpenChange }: { open: boolean; onOpenChange: 
         <Part title="Moving things">
           <p>Drag by the grip (⋮⋮) on a beat, a block or a joke. Anywhere else, a finger still scrolls. On a phone or iPad, hold the grip a moment first. With a keyboard: Tab to the grip, Space, the arrow keys, Space.</p>
           <p>Beats move in the spine. Blocks move within their beat, and fold to their headings while you drag one. Jokes move within a block, into and out of gates, and into another block in the beat. A gate's joke brings its whole box.</p>
-          <p>Or tap Move on a joke. It has two parts. No premise: New block, just below (its own block, out of any premise), or into another No premise block. Under a premise: into another premise in the beat, or pick any premise.</p>
+          <p>Or tap Move on a joke. It has two parts. Standalone: New block, just below (its own block, out of any premise), or into another Standalone block. Under a premise: into another premise in the beat, or pick any premise.</p>
           <p>The arrows move a thing one place, walking into and out of gates on the way. They don't leave the block: drag or Move for that.</p>
         </Part>
         <Part title="Premises and your library">Sets never change your library. Adding a joke under a premise here, dragging or moving it into one, or taking it out changes only the set: in your library each joke keeps the premise it rests on, or none. Link a joke to a premise on the joke itself.</Part>

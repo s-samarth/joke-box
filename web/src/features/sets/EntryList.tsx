@@ -44,14 +44,14 @@ export function EntryList({ beat, onChange, onGroup, onMoveToPremise, ...rest }:
     const from = beat.entries.find((e) => e.id === spotOf(beat, pieceId)?.entryId)
     onChange(setEntries(next, next.entries))
     const left = from?.kind === 'premise' && !next.entries.some((e) => e.kind === 'premise' && e.premise_id === from.premise_id && e.pieces.some((p) => p.id === pieceId))
-    toast(left ? `Out of “${short(takeOf(from.premise_id) ?? 'the premise', 40)}” in this set. Your library stays as it is.` : label.startsWith('Into') ? `Moved ${label.replace(/^Into/, 'into')}` : 'Moved into a new block, no premise', { label: 'Undo', onClick: () => onChange(before) })
+    toast(left ? `Out of “${short(takeOf(from.premise_id) ?? 'the premise', 40)}” in this set. Your library stays as it is.` : label.startsWith('Into') ? `Moved ${label.replace(/^Into/, 'into')}` : 'Moved into a new standalone block', { label: 'Undo', onClick: () => onChange(before) })
   }
   // Move: two plain parts, so a joke can always go out on its own with no premise, or under any premise.
   const moveItems = (pieceId: string): MenuRow[] => {
     const { none, premise } = moveChoices(beat, pieceId, takeOf)
     const item = (c: MoveChoice) => ({ label: c.label, onSelect: () => move(pieceId, c.to, c.label) })
     return [
-      ...(none.length ? [{ heading: 'No premise' }, ...none.map(item), 'divider' as const] : []),
+      ...(none.length ? [{ heading: 'Standalone' }, ...none.map(item), 'divider' as const] : []),
       { heading: 'Under a premise' }, ...premise.map(item),
       { label: premise.length ? 'Another premise…' : 'Pick a premise…', onSelect: () => onMoveToPremise(pieceId) },
     ]
