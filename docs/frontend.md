@@ -145,7 +145,8 @@ under fixed keys (`setMutationDefaults`), each spreading the shared `QUEUED` opt
   earlier would show the server's older copy and make a waiting change seem to vanish. On
   reconnect TanStack also resumes saves before it refetches queries. A successful wording-only
   joke edit refetches nothing: the answer's version and time go into the cached joke, and the
-  text is what was sent. A set's save puts the server's answer (the set as it now shows) into the
+  text is what was sent. Any other edit, or a move to the Trash, of a joke in a cluster also
+  refreshes the clusters, since the server may have handed the lead on. A set's save puts the server's answer (the set as it now shows) into the
   list when nothing else of that set waits, and refreshes venues only for a venue the list
   lacks. Refetching all jokes or sets at every autosave pause was most of the app's data
   transfer. Structural edits and failed saves still refresh related lists.

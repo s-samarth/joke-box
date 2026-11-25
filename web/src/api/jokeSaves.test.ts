@@ -89,3 +89,13 @@ it('refetches nothing after a wording edit (the cache already has it) and relate
     expect(invalidate.mock.calls.map(([q]) => q?.queryKey)).toEqual([keys.jokes, keys.types, keys.statuses, keys.setlists])
   } finally { invalidate.mockRestore() }
 })
+
+it("refreshes the clusters after a version's status or strength changes (its lead can move)", async () => {
+  queryClient.setQueryData(keys.jokes, [{ ...joke(5), cluster_id: 'c1' }])
+  const invalidate = vi.spyOn(queryClient, 'invalidateQueries')
+  try {
+    serve(5)
+    await save({ id: 'j1', input: { ...opened(5), cluster_id: 'c1', strength: 5 } })
+    expect(invalidate.mock.calls.map(([q]) => q?.queryKey)).toContainEqual(keys.clusters)
+  } finally { invalidate.mockRestore() }
+})
