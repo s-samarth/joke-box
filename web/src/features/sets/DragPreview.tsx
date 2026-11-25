@@ -27,7 +27,7 @@ export function DragPreview(props: Props) {
     )
   }
   const e = props.entry
-  const title = e.kind === 'crowd' ? 'Crowd work' : e.kind === 'jokes' ? 'No premise' : (e.premise_id && props.premises.get(e.premise_id)?.take) || 'Premise'
+  const title = e.kind === 'crowd' ? 'Crowd work' : e.kind === 'jokes' ? 'Standalone jokes' : (e.premise_id && props.premises.get(e.premise_id)?.take) || 'Premise'
   return (
     <div className={`${card} ${e.kind === 'premise' ? 'text-leaf ring-leaf/60' : e.kind === 'crowd' ? 'text-orchid ring-orchid/60' : 'ring-rule-strong'}`}>
       <GripVertical size={17} className="shrink-0 text-faint" aria-hidden />

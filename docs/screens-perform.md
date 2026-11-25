@@ -56,7 +56,7 @@ What a set is made of and why is in [sets.md](sets.md). Files:
   [sets.md](sets.md#drag-and-arrows):
   - **Premise:** the take and its reasoning, then its jokes. From the second premise on, a
     **Gate: only if the premise before it landed** toggle (sky blue when on).
-  - **No premise:** jokes that aren't under a premise.
+  - **Standalone jokes:** jokes that aren't under a premise.
   - **Crowd work** (orchid): what it's about, then questions. Each question has **Have a reply**
     (green) or **No reply yet** (amber), and replies as "If they say… → your line". On a phone, a
     reply's two boxes stack.
@@ -82,8 +82,8 @@ What a set is made of and why is in [sets.md](sets.md). Files:
     with the lead crowned; choosing one ticks the row and pins that version. Tick as many as you
     like: **Add N jokes** puts them in in the order you ticked them. The book button reads a joke
     whole first (`JokePeek`, with **Add to set**). Jokes in the set, and clusters with a version
-    in it, sit greyed at the bottom. Under a premise, the picker starts on that premise's jokes and
-    a joke from another premise says **Moves from: …**. With no premise, it remembers its filters
+    in it, sit greyed at the bottom. Under a premise, the picker starts on that premise's topic, with no premise filter, so jokes not yet linked to it show too, and
+    a joke from another premise says **Moves from: …**. As standalone jokes, it remembers its filters
     for an hour. A joke that follows others brings the ones before it.
   - **Jokes first, premise later:** **Select some for a premise**, under a no-premise list, turns
     its jokes into ticks.

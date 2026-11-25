@@ -29,7 +29,7 @@ beat). Everything that depends on the room happens inside a beat.
 | **Cue** | The one word you remember on stage for a beat | `beat.cue` |
 | **Beat time** | Set by hand, per beat. The set's length is the beats' times added up | `beat.seconds` |
 | **Premise entry** | A premise from your library with the jokes you put under it in this set, in order. Outlined and written in leaf green (sky blue when gated) | `entry.kind = "premise"` |
-| **Jokes with no premise** | A list of jokes that aren't under a premise. A beat can have as many as you like, before, between or after premises. Select some to put them under a premise later | `entry.kind = "jokes"` |
+| **Standalone jokes** | A list of jokes that aren't under a premise. A beat can have as many as you like, before, between or after premises. Select some to put them under a premise later | `entry.kind = "jokes"` |
 | **Crowd work** | Plain-text questions for the room. Each question has replies ("if they say X → my line") and a Have a reply / No reply yet flag. Outlined and headed in orchid pink | `entry.kind = "crowd"` |
 | **Locked / Loose** | Locked (tape yellow): done in this place. Loose (teal): it keeps its number, but you can move it or drop it on the night | `piece.loose` |
 | **Gate** | A box: a joke on top, and inside it the jokes you do only if it lands. If it doesn't, you skip the box. A gate can hold one gate of its own, no deeper. Sky blue | `piece.gate` (N: how many jokes after it are inside) |
@@ -126,7 +126,7 @@ and tested: [gateRows.ts](../web/src/features/sets/gateRows.ts) reads a list as 
 | You move | Where | What you end up with |
 |---|---|---|
 | A beat | Anywhere in the spine | A new running order. Its labels, time and contents go with it; the shift flags and checks follow the new order |
-| A block (premise, No premise, crowd work) | Anywhere among the blocks of its beat | Its jokes and gates come with it. While you drag, every block folds to its heading |
+| A block (premise, Standalone, crowd work) | Anywhere among the blocks of its beat | Its jokes and gates come with it. While you drag, every block folds to its heading |
 | A premise that becomes the beat's first | | Its premise gate turns off: there's no premise before it |
 | A block into another block, or another beat | Not allowed | Blocks don't nest; take it out and add it there |
 
@@ -140,12 +140,12 @@ and tested: [gateRows.ts](../web/src/features/sets/gateRows.ts) reads a list as 
 | A gate's joke | Anywhere | The whole box moves, inner gate and all |
 | A gate | Inside another gate | It becomes that gate's inner gate, if it has none of its own; a gate with an inner gate can't go in (three levels). Never into itself |
 | A joke or gate | Into another premise in the beat | Only the set changes: in your library each joke keeps its premise, or none |
-| A joke or gate | Into No premise | Only the set changes |
+| A joke or gate | Into Standalone | Only the set changes |
 | A joke | Into an empty block | Drop it on "No jokes here yet" |
 | A joke | Into crowd work, or another beat | Not allowed |
 
 A drop that isn't allowed is never offered: the box doesn't light up, and the joke goes back.
-A No premise block that a drop leaves empty goes; an emptied premise stays, so you can add to it
+A Standalone block that a drop leaves empty goes; an emptied premise stays, so you can add to it
 or remove it.
 
 ### Move
@@ -156,17 +156,17 @@ has two parts, so a joke can always leave a premise without picking another one:
 
 | Part | Pick | What you end up with |
 |---|---|---|
-| No premise | New block, just below | A No premise block of its own, just below the block it was in. From a premise, only the set changes, and the toast says your library stays as it is. Not offered when it's already all of its No premise block |
-| No premise | Into N · No premise | At the end of that No premise block (N is its number in the beat) |
+| Standalone | New block, just below | A Standalone block of its own, just below the block it was in. From a premise, only the set changes, and the toast says your library stays as it is. Not offered when it's already all of its Standalone block |
+| Standalone | Into N · Standalone | At the end of that Standalone block (N is its number in the beat) |
 | Under a premise | Into N · a premise | At the end of that premise's block. Only the set changes |
 | Under a premise | Another premise… (Pick a premise… when the beat has none) | The premise sheet, with **New premise**. It goes into that premise's block if the beat has it, else into a new premise block just below. Only the set changes |
 
-Jokes with no premise are a normal part of a beat: as many No premise blocks as you like, before,
+Jokes with no premise are a normal part of a beat: as many Standalone blocks as you like, before,
 between or after premises, each moved with its grip or arrows like any block.
 
 A gate's joke brings its box; a joke inside a gate comes out of the gate. Every move has Undo.
 
-<img src="screenshots/phone-set-move.webp" width="230" alt="Move on a joke in a green premise block: No premise (New block, just below; Into 1 No premise), then Under a premise (Pick a premise)">
+<img src="screenshots/phone-set-move.webp" width="230" alt="Move on a joke in a green premise block: Standalone (New block, just below; Into 1 Standalone), then Under a premise (Pick a premise)">
 
 ### The arrows
 
@@ -275,7 +275,7 @@ until you hide them, and **How sets work** opens the whole guide.
 | **Drag only from the grip** | A finger on a joke still scrolls the page and opens the joke; only the grip starts a drag, after a short hold on touch | Drag from anywhere on the row (it fights scrolling on a phone) |
 | **The arrows stay, and walk through gates** | Dragging can fail (a stiff finger, a screen reader), and the arrows are exact. One place per press is predictable | Arrows removed; arrows that jump over a whole gate |
 | **Dragging and Move change only the set** | The same rule as adding under a premise: sets never write the library | Dragging into a premise linked the joke to it (until Nov 2026) |
-| **Move names where a joke goes, in two parts** | A drag needs the other block on screen and a steady hand, and in a beat with one premise there's nowhere to drag to. A menu of the beat's blocks, plus any premise, works anywhere. No premise comes first, with a new block of its own always there, because the old menu made taking a joke off a premise feel like picking another one | Drag only; a separate "Take out of the premise" button |
+| **Move names where a joke goes, in two parts** | A drag needs the other block on screen and a steady hand, and in a beat with one premise there's nowhere to drag to. A menu of the beat's blocks, plus any premise, works anywhere. Standalone comes first, with a new block of its own always there, because the old menu made taking a joke off a premise feel like picking another one | Drag only; a separate "Take out of the premise" button |
 | **Dragging stays inside a beat** | One beat is open at a time, and a joke between beats changes what you memorise. Take it out and add it to the other beat | Dragging onto a beat in the spine |
 | **Labels live on the beat in the set, not on jokes** | The same joke can play a different status in another set. The comic asked for this explicitly | Labels on jokes |
 | **Vibe is the material's own, from the same list** | A beat's labels depend on the set, but the side of you a joke or premise shows doesn't. One list (the persona field's options) means beats and material use the same three sides | A fixed list on jokes, apart from the beats' |

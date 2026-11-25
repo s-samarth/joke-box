@@ -2,7 +2,7 @@
  * One block of a beat: a premise with its jokes, jokes with no premise, or crowd work. It drags by
  * the grip on its heading, or steps with the arrows. While any block is dragged, every block folds
  * to its heading (`folded`) so a long premise is easy to move. A premise is outlined and written in
- * leaf green (sky blue when gated), crowd work in orchid pink, jokes with no premise in plain rule. A premise shows its Vibe and
+ * leaf green (sky blue when gated), crowd work in orchid pink, standalone jokes in white, each with a thick left border. A premise shows its Vibe and
  * Generic under its take, saved on the premise itself.
  */
 import { useSortable } from '@dnd-kit/sortable'
@@ -50,15 +50,16 @@ const eyebrow = 'text-[11.5px] font-semibold tracking-[0.13em] uppercase'
 
 function heading(entry: SetEntry, premise?: Premise) {
   if (entry.kind === 'crowd') return <span className={`${eyebrow} text-orchid`}>Crowd work</span>
-  if (entry.kind === 'jokes') return <span className={`${eyebrow} text-faint`}>No premise</span>
+  if (entry.kind === 'jokes') return <span className={`${eyebrow} text-faint`}>Standalone jokes</span>
   return <span className={`${eyebrow} text-leaf`}>Premise{premise ? '' : ' (deleted)'}</span>
 }
 
-/** The block's outline: a premise leaf green (sky blue when gated), crowd work orchid pink. */
+/** The block's outline, thicker on the left like a joke card: a premise leaf green (sky blue
+ *  when gated), crowd work orchid pink, standalone jokes white. */
 function ring(entry: SetEntry, gated: boolean) {
-  if (entry.kind === 'crowd') return 'ring-orchid/60'
-  if (entry.kind === 'premise') return gated ? 'bg-sky/5 ring-sky/50' : 'ring-leaf/60'
-  return 'ring-rule-strong'
+  if (entry.kind === 'crowd') return 'ring-orchid border-orchid'
+  if (entry.kind === 'premise') return gated ? 'bg-sky/5 ring-sky border-sky' : 'ring-leaf border-leaf'
+  return 'ring-paper/80 border-paper'
 }
 
 function summary(entry: SetEntry, premise?: Premise) {
@@ -76,9 +77,9 @@ export function EntryBlock({ entry, index, beat, onChange, premises, canGatePrem
   const savePremise = useSavePremise()
   // Only what a save needs: fields left out (strength, status, Notes) stay as stored.
   const tag = (patch: Tags) => { if (premise) savePremise.mutate({ id: premise.id, input: { topic_id: premise.topic_id, take: premise.take, notes: premise.notes, version: premise.version, ...patch } }) }
-  const name = entry.kind === 'premise' ? (premise?.take ?? 'the premise') : entry.kind === 'crowd' ? 'the crowd work' : 'the jokes with no premise'
+  const name = entry.kind === 'premise' ? (premise?.take ?? 'the premise') : entry.kind === 'crowd' ? 'the crowd work' : 'the standalone jokes'
   return (
-    <li ref={setNodeRef} style={style} data-entry={entry.id} className={`rounded-xl p-2.5 ring-[1.5px] sm:p-3 ${ring(entry, gated)} ${isDragging ? 'opacity-40' : ''}`}>
+    <li ref={setNodeRef} style={style} data-entry={entry.id} className={`rounded-xl border-l-[5px] p-2.5 ring-[1.5px] sm:p-3 ${ring(entry, gated)} ${isDragging ? 'opacity-40' : ''}`}>
       <div className="flex items-center gap-1">
         <DragGrip label={name} listeners={listeners} attributes={attributes} setRef={setActivatorNodeRef} />
         <span className="w-5 text-sm font-semibold text-faint tabular">{index + 1}</span>

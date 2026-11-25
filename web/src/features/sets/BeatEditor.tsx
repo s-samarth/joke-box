@@ -73,7 +73,7 @@ export function BeatEditor({ beat, previous, needsWhy, fields, onChange, onDelet
         <EntryList beat={beat} onChange={onChange} {...lists} />
         <div className="mt-3 flex flex-wrap gap-2">
           <Button small icon={<Lightbulb size={15} />} onClick={onAddPremise}>Premise</Button>
-          <Button small icon={<Plus size={15} />} onClick={() => lists.onAddJokes(null)}>Jokes, no premise</Button>
+          <Button small icon={<Plus size={15} />} onClick={() => lists.onAddJokes(null)}>Standalone jokes</Button>
           <Button small icon={<MessagesSquare size={15} />} onClick={() => onChange(setEntries(beat, [...beat.entries, newCrowd()]))}>Crowd work</Button>
         </div>
       </div>

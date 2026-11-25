@@ -70,8 +70,8 @@ describe('Move to…', () => {
     const b = beat(premise('x', 'a'), crowd, jokes('j', ''), premise('y', 'b'))
     const take = (id: string | null) => (id === 'Py' ? 'A take that is far too long to fit on one line of the menu' : undefined)
     const labels = (id: string) => { const g = moveChoices(b, id, take); return [g.none.map((c) => c.label), g.premise.map((c) => c.label)] }
-    expect(labels('a')).toEqual([['New block, just below', 'Into 3 · No premise'], ['Into 4 · A take that is far too long to fit on o…']])
-    expect(labels('b')).toEqual([['New block, just below', 'Into 3 · No premise'], ['Into 1 · Deleted premise']])
+    expect(labels('a')).toEqual([['New block, just below', 'Into 3 · Standalone'], ['Into 4 · A take that is far too long to fit on o…']])
+    expect(labels('b')).toEqual([['New block, just below', 'Into 3 · Standalone'], ['Into 1 · Deleted premise']])
     expect(moveChoices(beat(jokes('j', 'a')), 'a', take)).toEqual({ none: [], premise: [] })
   })
 })

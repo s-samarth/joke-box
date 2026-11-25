@@ -29,7 +29,7 @@
   /* A loose joke in a set's beat: it keeps its place, only marked as flexible (docs/sets.md). */
   --color-teal: #6fd6d0;
   /* A premise block in a set: leaf green, apart from teal (loose) and ok (success). */
-  --color-leaf: #a3d977;
+  --color-leaf: #6fe86a;
 
   --font-sans: "Archivo Variable", ui-sans-serif, system-ui, sans-serif;
   --font-marker: "Permanent Marker", "Archivo Variable", cursive;

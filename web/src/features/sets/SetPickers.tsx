@@ -106,8 +106,8 @@ export function SetPickers({ picking, onPicking, beats, onBeat, leadOf, reading,
     <>
       {picking?.kind === 'jokes' && (
         <SetJokePicker key={`${picking.entryId}/${picking.gateId}`} title={picking.gateId ? 'Add jokes to the gate' : 'Add jokes'} onClose={() => onPicking(null)} used={used} onAdd={addJokes} onRead={onReading}
-          description={(picking.gateId ? 'Inside the gate: only if it lands. ' : '') + (premiseId ? `Under “${short(takeOf(premiseId) ?? 'a deleted premise')}”. Starts on its jokes: clear the filters for any. Only the set changes.` : `Into ${beat?.cue || 'this beat'}, with no premise. Tick them in the order you want them.`)}
-          start={premiseId ? { topic: null, premise: premiseId } : { topic: null }} memory={premiseId ? undefined : 'set-joke-picker'} />
+          description={(picking.gateId ? 'Inside the gate: only if it lands. ' : '') + (premiseId ? `Under “${short(takeOf(premiseId) ?? 'a deleted premise')}”. Starts on its topic, so jokes not yet linked to it show too. Only the set changes.` : `Into ${beat?.cue || 'this beat'}, as standalone jokes. Tick them in the order you want them.`)}
+          start={premiseId ? { topic: premises.find((p) => p.id === premiseId)?.topic_id ?? null, premise: null } : { topic: null }} memory={premiseId ? undefined : 'set-joke-picker'} />
       )}
       {(picking?.kind === 'premise' || forJokes) && (
         <PremisePickSheet topicId={forJokes ? sameTopic : null} onClose={() => onPicking(null)} onPick={([id]) => pickPremise(id)}
