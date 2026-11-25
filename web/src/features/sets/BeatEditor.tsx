@@ -58,7 +58,7 @@ export function BeatEditor({ beat, previous, needsWhy, fields, onChange, onDelet
       </div>
       <div>
         <p className={section}>What it's for</p>
-        <GrowingText aria-label="Description" placeholder="What this beat does, and how you get into it" value={beat.description}
+        <GrowingText aria-label="Description" maxLength={4000} placeholder="What this beat does, and how you get into it" value={beat.description}
           className="mt-1.5 rounded-lg bg-ink-2 px-3 py-2.5 leading-relaxed ring-1 ring-rule-strong focus:ring-2 focus:ring-tape" onChange={(e) => onChange({ ...beat, description: e.target.value })} />
       </div>
       <div>

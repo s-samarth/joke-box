@@ -9,7 +9,7 @@ import { Link, useParams } from 'react-router'
 import { useClusters } from '../../api/clusters'
 import { useJokes } from '../../api/library'
 import { usePremises } from '../../api/premises'
-import { useSaveSetFields, useSetFields } from '../../api/setFields'
+import { useLoadedSetFields, useSaveSetFields, useSetFields } from '../../api/setFields'
 import { useSetlists } from '../../api/shows'
 import type { Beat, Joke, Setlist } from '../../api/types'
 import { EmptyState, Spinner } from '../../components/ui/pieces'
@@ -19,6 +19,7 @@ import { Modal } from '../../components/ui/Modal'
 import { chainTo } from '../../lib/chains'
 import { clock, parse } from '../../lib/duration'
 import { CraftSheet } from '../craft/CraftSheet'
+import { leadOf as leadOfCluster, versionsOf } from '../jokes/cluster/lead'
 import { JokePeek } from '../jokes/JokePeek'
 import { AddJokes } from './AddJokes'
 import { BeatEditor } from './BeatEditor'
@@ -43,6 +44,7 @@ function Builder({ setlist }: { setlist: Setlist }) {
   const { data: premiseList = [] } = usePremises()
   const { data: clusters = [] } = useClusters()
   const config = useSetFields()
+  const loaded = useLoadedSetFields()
   const saveFields = useSaveSetFields()
   const { confirm, toast } = useFeedback()
   const [selected, setSelected] = useState<string | null>(draft.beats[0]?.id ?? null)
@@ -59,7 +61,8 @@ function Builder({ setlist }: { setlist: Setlist }) {
   }
   const byId = new Map(jokes.map((j) => [j.id, j]))
   const premises = new Map(premiseList.map((p) => [p.id, p]))
-  const leadOf = (id: string) => clusters.find((c) => c.id === id)?.lead_joke_id
+  // The lead as the server keeps it, worked out here too (a discarded lead hands on), as on stage
+  const leadOf = (id: string) => leadOfCluster(clusters.find((c) => c.id === id), versionsOf(id, jokes))?.id
   const beats = draft.beats
   const index = beats.findIndex((b) => b.id === selected)
   const beat = index >= 0 ? beats[index] : null
@@ -106,10 +109,10 @@ function Builder({ setlist }: { setlist: Setlist }) {
         </div>
       </div>
       <div className="max-w-3xl">
-        <GrowingText aria-label="Set name" className="headline mt-4 text-[44px] sm:text-[56px]" value={draft.name} placeholder="Untitled set" onChange={(e) => update((d) => ({ ...d, name: e.target.value }))} />
+        <GrowingText aria-label="Set name" maxLength={200} className="headline mt-4 text-[44px] sm:text-[56px]" value={draft.name} placeholder="Untitled set" onChange={(e) => update((d) => ({ ...d, name: e.target.value }))} />
         <div className="mt-5">
           <p className={section}>The point</p>
-          <GrowingText aria-label="The point" placeholder="Your one point tonight, in one sentence" value={draft.point}
+          <GrowingText aria-label="The point" maxLength={1000} placeholder="Your one point tonight, in one sentence" value={draft.point}
             className="mt-1.5 rounded-lg bg-ink-2 px-3 py-2.5 text-lg leading-snug ring-1 ring-rule-strong focus:ring-2 focus:ring-tape" onChange={(e) => update((d) => ({ ...d, point: e.target.value }))} />
         </div>
         <div className="mt-5 grid grid-cols-2 gap-3">
@@ -124,7 +127,7 @@ function Builder({ setlist }: { setlist: Setlist }) {
       {beats.length > 0 && (
         <section className="mt-8 rounded-2xl bg-ink-2/50 p-4 ring-1 ring-rule">
           <p className={`${section} mb-3`}>{config.fields.find((f) => f.role === 'status')?.name ?? 'Status'} across the set, by beat time</p>
-          <SetChecks beats={beats} config={config} onLimit={(s) => saveFields.mutate({ ...config, top_up_seconds: s })} />
+          <SetChecks beats={beats} config={config} onLimit={(s) => loaded && saveFields.mutate({ ...loaded, top_up_seconds: s })} />
         </section>
       )}
       <div className="mt-8 grid gap-6 lg:grid-cols-[20rem_minmax(0,1fr)]">

@@ -20,7 +20,7 @@ function FieldCard({ field, onChange, onDelete, roleTaken }: { field: SetField; 
   const [adding, setAdding] = useState('')
   const add = () => {
     const label = adding.trim()
-    if (!label || label === NOT_SURE || field.options.some((o) => o.label === label)) return
+    if (!label || label === NOT_SURE || field.options.length >= 40 || field.options.some((o) => o.label === label)) return // 40: the server's limit
     onChange({ ...field, options: [...field.options, { id: newId(), label, group: field.role === 'status' ? 'neutral' : null }] })
     setAdding('')
   }
@@ -82,7 +82,7 @@ export function FieldsSheet({ open, onOpenChange }: { open: boolean; onOpenChang
             onDelete={() => set(current.fields.filter((x) => x.id !== f.id))} />
         ))}
       </ul>
-      <Button className="mt-3" icon={<Plus size={16} />} onClick={() => set([...current.fields, { id: newId(), name: 'New field', role: null, options: [] }])}>New field</Button>
+      <Button className="mt-3" icon={<Plus size={16} />} disabled={current.fields.length >= 30} onClick={() => set([...current.fields, { id: newId(), name: 'New field', role: null, options: [] }])}>New field</Button>
     </Modal>
   )
 }

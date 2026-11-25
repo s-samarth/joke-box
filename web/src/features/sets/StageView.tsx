@@ -23,6 +23,7 @@ import { lightState } from './setlistMath'
 import { type Answers, starts, walk } from './stageWalk'
 
 const icon = 'inline-flex size-11 items-center justify-center rounded-lg text-faint hover:text-paper'
+const clip = (text = 'that joke') => (text.length > 48 ? `${text.slice(0, 47)}…` : text)
 const colour = (gate: number, loose: boolean) => (gate ? 'text-sky' : loose ? 'text-teal' : 'text-tape')
 
 export function StageView() {
@@ -34,7 +35,7 @@ export function StageView() {
   const [at, setAt] = useState(0)
   const [answers, setAnswers] = useState<Answers>({})
   const timer = useTimer()
-  useWakeLock()
+  const wake = useWakeLock()
 
   const setlist = sets.find((s) => s.id === setId)
   if (!setlist) return <div className="p-8 text-dim">Set not found. <Link to="/sets" className="text-tape">Back to sets</Link></div>
@@ -57,6 +58,7 @@ export function StageView() {
         <Link to={`/sets/${setlist.id}`} aria-label="Leave" className={icon}><X size={24} /></Link>
         <span className={`headline text-4xl tabular ${clockTone}`} aria-live="off">{clock(timer.seconds)}</span>
         <span className="text-faint tabular">/ {clock(target)}</span>
+        {wake === 'refused' && <span className="ml-1 text-sm text-amber" title="This phone wouldn't keep the screen on: it may lock mid-set">Screen may lock</span>}
         {state === 'light' && <span className="ml-1 inline-flex items-center gap-1.5 text-sm text-amber"><span className="size-2.5 rounded-full bg-amber" />Light</span>}
         <div className="ml-auto flex gap-1">
           <button type="button" onClick={() => setNotes(true)} aria-label="Before you go on" title="Before you go on" className={icon}><GraduationCap size={20} /></button>
@@ -71,7 +73,7 @@ export function StageView() {
             className={`shrink-0 rounded-full px-3 py-1 text-sm ${n === i ? 'bg-tape font-semibold text-tape-ink' : n < i ? 'text-faint' : 'bg-ink-3 text-dim'}`}>{b.cue || `Beat ${n + 1}`}</button>
         ))}
       </nav>
-      <article className="min-h-0 flex-1 overflow-y-auto">
+      <article key={beat?.id} className="min-h-0 flex-1 overflow-y-auto">
         {!beat ? <p className="p-8 text-xl text-dim">This set has no beats yet.</p> : (
           <div className="mx-auto max-w-2xl px-5 py-6 sm:px-8">
             <p className="text-sm text-faint">Beat {i + 1} of {beats.length} · <span className="tabular">{clock(begin)} → {clock(begin + beat.seconds)}</span></p>
@@ -90,15 +92,22 @@ export function StageView() {
                     ))}
                   </li>
                 )
-                if (r.kind === 'premise') return (
-                  <li key={r.key} className={`pt-3 text-[13px] font-semibold tracking-[0.1em] uppercase ${r.skipped ? 'text-faint line-through' : r.gated ? 'text-sky' : 'text-faint'}`}>
-                    {r.gated && 'Gate · '}{(r.entry.premise_id && premises.get(r.entry.premise_id)?.take) || 'Premise'}
-                  </li>
-                )
+                if (r.kind === 'premise') {
+                  const said = r.gated && answers[r.key] !== undefined
+                  return (
+                    <li key={r.key} className={`pt-3 ${r.key === pending?.key ? 'rounded-lg ring-2 ring-sky' : ''}`}>
+                      <button type="button" disabled={!said} onClick={() => unanswer(r.key)} title={said ? 'Take this answer back' : undefined}
+                        className={`flex w-full gap-2 text-left text-[13px] font-semibold tracking-[0.1em] uppercase ${r.skipped ? 'text-faint line-through' : r.gated ? 'text-sky' : 'text-faint'}`}>
+                        {r.gated && 'Gate · '}{(r.entry.premise_id && premises.get(r.entry.premise_id)?.take) || 'Premise'}
+                        {said && <span className="ml-auto shrink-0 font-normal tracking-normal normal-case">{answers[r.key] ? 'landed' : "didn't"}</span>}
+                      </button>
+                    </li>
+                  )
+                }
                 const joke = byId.get(r.piece.joke_id)
                 const answered = r.piece.gate > 0 && answers[r.key] !== undefined
                 return (
-                  <li key={r.key} className={`${r.guarded ? 'ml-5 border-l-2 border-dashed border-sky/40 pl-3' : ''} ${r.skipped ? 'opacity-35' : ''}`}>
+                  <li key={r.key} className={`${r.guarded ? 'ml-5 border-l-2 border-dashed border-sky/40 pl-3' : ''} ${r.skipped ? 'opacity-35' : ''} ${r.key === pending?.key ? 'rounded-lg ring-2 ring-sky ring-offset-4 ring-offset-[#0f121a]' : ''}`}>
                     <button type="button" disabled={!answered} onClick={() => unanswer(r.key)} className="block w-full text-left" title={answered ? 'Take this answer back' : undefined}>
                       <p className="line-clamp-2 text-dim">{joke?.setup ?? 'Deleted joke'}</p>
                       <p className={`flex items-start gap-2 text-xl leading-snug font-medium ${colour(r.piece.gate, r.piece.loose)} ${r.skipped ? 'line-through' : ''}`}>
@@ -117,6 +126,7 @@ export function StageView() {
         <footer className="grid gap-2 border-t border-rule px-3 py-3 sm:flex sm:justify-center">
           {pending ? (
             <>
+              <p className="text-center text-sm text-sky sm:self-center">{pending.premise ? 'Gate: did the premise before land?' : `Gate: did “${clip(byId.get(pending.jokeId ?? '')?.punchline || byId.get(pending.jokeId ?? '')?.setup)}” land?`}</p>
               <button type="button" onClick={() => answer(pending.key, true)} className="h-12 rounded-lg bg-sky px-5 font-semibold text-ink">{pending.premise ? 'The premise before landed' : 'It landed'}</button>
               <button type="button" onClick={() => answer(pending.key, false)} className="h-12 rounded-lg bg-ink-3 px-5 text-paper">It didn't · skip what it guards</button>
             </>

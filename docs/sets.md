@@ -63,8 +63,8 @@ from ([beats.ts](../web/src/features/sets/beats.ts) `analyse`, tested in `beats.
 
 | Check | Rule | Source |
 |---|---|---|
-| Shift with no reason | When a beat's status group (win, neutral, loss) differs from the beat before, it needs a reason | "Shift, don't flip", My status: a flow |
-| Longest stretch with no humility top-up | The longest run of beat time with no loss beat stays under your limit (4:00 to start, editable). Neutral and win add to the run, a loss ends it, and Not sure leaves it as it was | "every 2–4 minutes", My status: a flow |
+| Shift with no reason | When a beat's status group (win, neutral, loss) differs from the last labelled beat before it (Not sure beats between don't hide it), it needs a reason | "Shift, don't flip", My status: a flow |
+| Longest stretch with no humility top-up | The longest run of beat time with no loss beat stays under your limit (4:00 to start, editable). Neutral and win add to the run, a loss ends it, and Not sure adds to a run already going (no top-up came) | "every 2–4 minutes", My status: a flow |
 | Persona sides | Every option of the persona field labels at least one beat | "The persona is the balance", My persona |
 | Not sure | Counted and listed, never judged | |
 
@@ -129,8 +129,14 @@ until you hide them, and **How sets work** opens the whole guide.
   optional as loose, and its time is what those jokes added up to. The first save writes real beats.
 - **Older apps** send `items` and no `beats` or `point`. The server keeps the stored beats and
   point, and works the items out from them. For a set that has no beats yet, it takes the items as before.
+  An older app can't change a set's jokes once it has beats: a save whose jokes differ is
+  refused (409, "Reload the app"), so the change isn't dropped silently. Its other details save.
 - **The connector**: `list_sets` adds `point` and `beat_count`, and its `runtime_seconds` is the
   beats' time. `get_set` adds `beats`, with label names, and keeps `running_order` with every
   field it had (`optional` is now the same as the new `loose`). See [api.md](api.md).
 - **The Trash**: a joke in the Trash is hidden from its beat and keeps its place there, as it did
-  in the old list.
+  in the old list. A gate counts only the jokes shown, and widens again over a guarded joke put
+  back. A premise in the Trash keeps its place too. A joke erased for good drops out of `items`.
+- **Clusters**: a set's `items` list what its beats play now, so a new lead shows in "In sets"
+  at once. A joke clustered after it went into a set follows its cluster from the next save
+  (pinned to itself unless it's the lead).

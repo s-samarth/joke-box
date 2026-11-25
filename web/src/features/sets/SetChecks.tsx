@@ -26,7 +26,7 @@ function Limit({ seconds, onChange }: { seconds: number; onChange: (s: number) =
   const [text, setText] = useState(clock(seconds))
   return (
     <input aria-label="Top-up limit" inputMode="numeric" value={text} onChange={(e) => setText(e.target.value)}
-      onBlur={() => { const s = parse(text); if (s) onChange(s); setText(clock(s || seconds)) }}
+      onBlur={() => { const s = parse(text); if (s && s !== seconds) onChange(s); setText(clock(s || seconds)) }}
       className="mx-1 inline-block h-7 w-14 rounded-md bg-ink-3 text-center text-paper tabular ring-1 ring-rule-strong outline-none focus:ring-2 focus:ring-tape" />
   )
 }

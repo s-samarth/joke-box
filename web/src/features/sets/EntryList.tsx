@@ -3,8 +3,10 @@
  * between premises), and crowd work. A premise after the first can be gated on the one before.
  */
 import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 import type { Premise } from '../../api/premises'
 import type { Beat, Joke, SetEntry } from '../../api/types'
+import { useFeedback } from '../../components/ui/feedbackContext'
 import { CrowdBlock } from './CrowdBlock'
 import { mapEntry, mapPieces, setEntries, swap } from './beatEdit'
 import { PieceList } from './PieceList'
@@ -19,7 +21,7 @@ interface Props {
   onAddJokes: (entryId: string | null) => void
 }
 
-const icon = 'inline-flex size-8 items-center justify-center rounded-md text-faint hover:bg-ink-3 hover:text-paper disabled:opacity-30'
+const icon = 'inline-flex size-11 items-center justify-center rounded-md text-faint hover:bg-ink-3 hover:text-paper disabled:opacity-30'
 const eyebrow = 'text-[11.5px] font-semibold tracking-[0.13em] uppercase'
 
 function Heading({ entry, premise }: { entry: SetEntry; premise?: Premise }) {
@@ -30,6 +32,16 @@ function Heading({ entry, premise }: { entry: SetEntry; premise?: Premise }) {
 
 export function EntryList({ beat, onChange, jokes, premises, leadOf, onOpen, onAddJokes }: Props) {
   const entries = beat.entries
+  const { toast } = useFeedback()
+  const latest = useRef(beat) // Undo puts it back into the beat as it is by then
+  useEffect(() => { latest.current = beat })
+  const remove = (entry: SetEntry, at: number) => {
+    onChange(setEntries(beat, entries.filter((e) => e.id !== entry.id)))
+    toast(entry.kind === 'crowd' ? 'Crowd work taken out' : entry.kind === 'premise' ? 'Premise taken out' : 'Jokes taken out', {
+      label: 'Undo',
+      onClick: () => { const now = latest.current.entries; onChange(setEntries(latest.current, [...now.slice(0, at), entry, ...now.slice(at)])) },
+    })
+  }
   if (!entries.length) return <p className="rounded-lg border border-dashed border-rule-strong p-5 text-center text-dim">Empty beat. Add a premise, jokes or crowd work below.</p>
   const firstPremise = entries.findIndex((e) => e.kind === 'premise')
   return (
@@ -45,7 +57,7 @@ export function EntryList({ beat, onChange, jokes, premises, leadOf, onOpen, onA
               <span className="ml-auto flex">
                 <button type="button" className={icon} disabled={i === 0} onClick={() => onChange(setEntries(beat, swap(entries, i, -1)))} aria-label="Move up"><ArrowUp size={15} /></button>
                 <button type="button" className={icon} disabled={i === entries.length - 1} onClick={() => onChange(setEntries(beat, swap(entries, i, 1)))} aria-label="Move down"><ArrowDown size={15} /></button>
-                <button type="button" className={icon} onClick={() => onChange(setEntries(beat, entries.filter((e) => e.id !== entry.id)))} aria-label="Remove from the beat"><Trash2 size={15} /></button>
+                <button type="button" className={`${icon} ml-3`} onClick={() => remove(entry, i)} aria-label="Remove from the beat"><Trash2 size={16} /></button>
               </span>
             </div>
             {entry.kind === 'premise' && (
