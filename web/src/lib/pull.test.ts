@@ -33,6 +33,11 @@ describe('where a pull may start', () => {
     expect(canPullFrom(el(0, el(40, el(0))), 0)).toBe(false)
   })
 
+  it("doesn't start on a slider, like the Jokes month scrubber on iPad", () => {
+    const thumb: PullTarget = { scrollTop: 0, parentElement: null, closest: (selector) => (selector.includes('[role="slider"]') ? {} : null) }
+    expect(canPullFrom(thumb, 0)).toBe(false)
+  })
+
   it("doesn't start without a target", () => {
     expect(canPullFrom(null, 0)).toBe(false)
   })

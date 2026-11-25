@@ -35,12 +35,14 @@ export interface Archive {
 /** Each list: the file it goes in, the API path, and what it's called while it downloads. */
 export const LISTS: [file: string, path: string, step: string][] = [
   ['jokes.json', '/api/jokes', 'Jokes'],
+  ['clusters.json', '/api/clusters', 'Clusters'],
   ['premises.json', '/api/premises', 'Premises'],
   ['topics.json', '/api/topics', 'Topics'],
   ['types.json', '/api/types', 'Types'],
   ['statuses.json', '/api/statuses', 'Statuses'],
   ['sets.json', '/api/setlists', 'Sets'],
   ['set-tags.json', '/api/set-tags', 'Set tags'],
+  ['set-fields.json', '/api/set-fields', 'Set label fields'],
   ['venues.json', '/api/venues', 'Venues'],
   ['shows.json', '/api/logs', 'Shows'],
   ['observations.json', '/api/observations', 'Observations'],

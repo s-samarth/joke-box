@@ -175,12 +175,13 @@ file**. On a phone or iPad, Save opens the share sheet: choose **Save to Files**
 server's own lists. It holds:
 
 - `README.txt`, with counts and how to read the rest.
-- One JSON file per list: jokes, premises, topics, types, statuses, sets, set tags,
-  venues, shows, observations and their kinds, rewrites, Craft notes, areas and kinds, the
+- One JSON file per list: jokes, clusters, premises, topics, types, statuses, sets, set tags,
+  set label fields, venues, shows, observations and their kinds, rewrites, Craft notes, areas and kinds, the
   watchlist, analyses, voice notes, and brainstorm sessions. Each is exactly as the API sends it
   ([api.md](api.md)).
 - `brainstorm-sessions/`: each session in full, handwriting included.
-- `voice-notes/`: each recording, named by date and label.
+- `voice-notes/`: each recording, named by date and label. One already kept on the device comes
+  from there, so only the others cost a Blob operation each.
 
 It leaves out the Trash and any changes still waiting on a device to sync, and there's no
 import for it. To bring the app back, use the nightly backup. If one recording can't be

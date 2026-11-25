@@ -18,6 +18,8 @@ import './api/premises'
 import './api/clusters'
 import './api/setFields'
 import './api/observationSaves'
+// Session ink kept on the device apart from the cache, read back at launch.
+import './api/sessionStore'
 import { App } from './App'
 import { FeedbackProvider } from './components/ui/feedback'
 import { startOutbox } from './features/voice/outbox'

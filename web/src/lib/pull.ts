@@ -23,7 +23,7 @@ export function pullDistance(dy: number): number {
   return dy <= 0 ? 0 : Math.min(PULL_MAX, dy / 2)
 }
 
-const OWN_DRAG = 'input, textarea, select, canvas, [contenteditable="true"], [role="dialog"], [role="menu"], [role="listbox"], [data-no-pull]'
+const OWN_DRAG = 'input, textarea, select, canvas, [contenteditable="true"], [role="dialog"], [role="menu"], [role="listbox"], [role="slider"], [data-no-pull]'
 
 /** The part of an element a pull needs: real DOM elements fit, and so do simple fakes in tests. */
 export interface PullTarget {
