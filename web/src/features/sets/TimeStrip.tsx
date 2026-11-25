@@ -64,7 +64,7 @@ export function TimeStrip({ strip, pxPerSecond, slot, total, fields, data, onPic
           const e = b.entry
           const hex = e.kind === 'crowd' ? '#e7a3e0' : e.kind === 'jokes' ? '#ece6da' : e.gate ? '#9db4ff' : '#6fe86a'
           const name = e.kind === 'crowd' ? `Crowd work${e.title ? `: ${e.title}` : ''}` : e.kind === 'jokes' ? e.title?.trim() || 'Standalone' : (e.premise_id && data.premises.get(e.premise_id)?.take) || 'Premise'
-          return <div key={e.id} title={name} className={seg} style={{ left: b.x, width: Math.max(0, b.w - 3), color: hex, backgroundColor: `${hex}1f`, boxShadow: `inset 0 0 0 1.5px ${hex}` }}>{name}</div>
+          return <div key={e.id} title={name} className={`${seg} px-1! text-[9.5px]!`} style={{ left: b.x, width: Math.max(0, b.w - 3), color: hex, backgroundColor: `${hex}1f`, boxShadow: `inset 0 0 0 1.5px ${hex}` }}>{name}</div>
         })}
       </Lane>
       <Lane name="Jokes, by Vibe" height={76} width={width}>
