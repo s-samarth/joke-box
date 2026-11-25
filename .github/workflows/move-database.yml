@@ -105,7 +105,7 @@ jobs:
             --dbname="$(< "$RUNNER_TEMP/to-url")" "$RUNNER_TEMP/move.dump"
           rm -f "$RUNNER_TEMP/move.dump"
 
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
 
       - run: uv sync --locked --no-dev
 

@@ -1,7 +1,6 @@
 """Health check, the signed-in profile, and the local-only reseed button."""
 
 from fastapi import APIRouter, HTTPException
-from sqlalchemy import text
 
 from app.auth.deps import CurrentUser, DbSession
 from app.config import get_settings
@@ -12,8 +11,9 @@ router = APIRouter(tags=["system"])
 
 
 @router.get("/health")
-def health(db: DbSession) -> dict[str, str]:
-    db.execute(text("SELECT 1"))
+def health() -> dict[str, str]:
+    """Answers without the database: anyone can call it, and the app's offline check only needs
+    to know the server is reachable. A query here would keep Neon awake for any pinger."""
     settings = get_settings()
     return {"status": "ok", "env": settings.app_env, "version": settings.app_version}
 

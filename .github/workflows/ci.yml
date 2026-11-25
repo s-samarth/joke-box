@@ -60,10 +60,18 @@ jobs:
       TEST_DATABASE_URL: postgresql://jokebox:jokebox-ci-only@localhost:5432/jokebox
     steps:
       - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
       - run: uv sync --locked
       - run: uv run ruff check . && uv run ruff format --check .
       - run: uv run mypy app
+      - name: Migrations form one line (two PRs adding a migration each would leave two heads)
+        run: |
+          heads=$(uv run alembic heads | wc -l)
+          if [ "$heads" -ne 1 ]; then
+            uv run alembic heads
+            echo "::error::More than one migration head. Add a merge migration."
+            exit 1
+          fi
       - name: Migrations apply, roll back and re-apply on Postgres
         run: uv run alembic upgrade head && uv run alembic downgrade base && uv run alembic upgrade head
       - name: Reset the database for tests

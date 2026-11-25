@@ -46,6 +46,10 @@ CLAUDE_CALLBACKS = {
     "https://claude.com/api/mcp/auth_callback",
 }
 LOOPBACK = {"localhost", "127.0.0.1", "::1"}
+# Anyone can register, so a registration is kept only if it's the size of a real one (Claude's
+# is about 600 characters). Without a cap, each one could store megabytes in the database.
+MAX_REGISTRATION = 4096
+MAX_CLIENT_NAME = 100
 
 
 def allowed_redirect(url: str) -> bool:
@@ -69,6 +73,9 @@ class Provider(OAuthAuthorizationServerProvider[AuthorizationCode, RefreshToken,
         redirects = [str(u) for u in client_info.redirect_uris or []]
         if not redirects or not all(allowed_redirect(u) for u in redirects):
             raise RegistrationError("invalid_redirect_uri", "Only Claude can connect to JokeBox.")
+        too_long_name = len(client_info.client_name or "") > MAX_CLIENT_NAME
+        if too_long_name or len(client_info.model_dump_json()) > MAX_REGISTRATION:
+            raise RegistrationError("invalid_client_metadata", "That registration is too large.")
         await run(partial(save_client, client_info))
 
     async def authorize(
