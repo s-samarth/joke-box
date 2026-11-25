@@ -9,7 +9,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.auth.routes import router as auth_router
 from app.config import get_settings
-from app.connector import http as connector
+from app.connector import lazy as connector
 from app.packed import UnpackRequests
 from app.routers import (
     analyses,

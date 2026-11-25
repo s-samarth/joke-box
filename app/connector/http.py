@@ -2,8 +2,11 @@
 
 /mcp speaks MCP's streamable HTTP transport, stateless with JSON replies: every request stands
 alone, which suits serverless functions where no two requests are sure to reach the same
-instance. The SDK's session manager runs a task group, so it's started in the app's lifespan;
-a fresh one each time the app starts.
+instance. The SDK's session manager runs a task group, so the first /mcp call starts it in the
+task group the app's lifespan holds open (lazy.py); a fresh one each time the app starts.
+
+Nothing imports this module when the app starts: lazy.py loads it on the first request to one
+of the connector's paths, since loading the MCP SDK was half the CPU of every cold start.
 
 Sign-in is OAuth, the way Claude's custom connectors expect: a request without a token gets a
 401 pointing at /.well-known/oauth-protected-resource/mcp, which names JokeBox as the
@@ -11,10 +14,9 @@ authorization server; Claude registers itself, sends you to /authorize (and on t
 page), and swaps the code for tokens at /token.
 """
 
-from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
-
-from fastapi import FastAPI
+import anyio
+from anyio.abc import TaskStatus
+from fastapi import APIRouter, FastAPI
 from mcp.server.auth.middleware.auth_context import AuthContextMiddleware
 from mcp.server.auth.middleware.bearer_auth import BearerAuthBackend, RequireAuthMiddleware
 from mcp.server.auth.provider import ProviderTokenVerifier
@@ -35,19 +37,9 @@ from app.config import get_settings
 from app.connector import server as tools  # noqa: F401  (registers every tool)
 from app.connector.base import server
 from app.connector.consent import router as consent_router
+from app.connector.lazy import MCP_PATH as PATH
+from app.connector.lazy import Background, origin
 from app.connector.oauth import SCOPE, SCOPES, Provider
-
-PATH = "/mcp"
-LOCAL_ORIGIN = "http://localhost:8000"
-
-
-def origin() -> str | None:
-    """Where JokeBox is served, which is also the OAuth issuer. None if it isn't known (a
-    preview deployment without PUBLIC_URL), and then the connector isn't served."""
-    settings = get_settings()
-    if settings.public_url:
-        return settings.public_url.rstrip("/")
-    return LOCAL_ORIGIN if settings.is_local else None
 
 
 def security() -> TransportSecuritySettings:
@@ -64,13 +56,36 @@ def security() -> TransportSecuritySettings:
     )
 
 
-@asynccontextmanager
-async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+class Manager:
+    """Whether the session manager is running in the lifespan's task group now."""
+
+    running = False
+
+
+async def serve(*, task_status: TaskStatus[None] = anyio.TASK_STATUS_IGNORED) -> None:
+    """Run a fresh session manager until the lifespan's task group is cancelled."""
     server.streamable_http_app(
         stateless_http=True, json_response=True, transport_security=security()
     )
-    async with server.session_manager.run():
-        yield
+    try:
+        async with server.session_manager.run():
+            Manager.running = True
+            task_status.started()
+            await anyio.sleep_forever()
+    finally:
+        Manager.running = False
+
+
+async def start_manager() -> None:
+    """Start the session manager on this server copy's first /mcp call."""
+    if Manager.running:
+        return
+    tasks, lock = Background.tasks, Background.lock
+    if tasks is None or lock is None:
+        raise RuntimeError("The app's lifespan isn't running, so /mcp can't be served")
+    async with lock:
+        if not Manager.running:
+            await tasks.start(serve)
 
 
 class Endpoint:
@@ -84,6 +99,7 @@ class Endpoint:
         if scope["method"] != "POST":
             await Response(status_code=405, headers={"Allow": "POST"})(scope, receive, send)
             return
+        await start_manager()
         await server.session_manager.handle_request(scope, receive, send)
 
 
@@ -95,11 +111,12 @@ def protected(resource: AnyHttpUrl, provider: Provider) -> ASGIApp:
     )
 
 
-def install(app: FastAPI) -> None:
-    """Add /mcp, the OAuth endpoints and the consent page to the app."""
+def build(app: FastAPI) -> ASGIApp:
+    """/mcp, the OAuth endpoints and the consent page, served at lazy.PATHS. The consent
+    page's dependencies follow the app's overrides (tests swap the database)."""
     base = origin()
     if base is None:
-        return
+        raise RuntimeError("The connector isn't served without PUBLIC_URL")
     provider = Provider()
     # Read through the SDK's settings, which keep a bare origin without a trailing slash: the
     # issuer is compared as an exact string, so "https://x/" wouldn't match "https://x".
@@ -110,7 +127,8 @@ def install(app: FastAPI) -> None:
     registration = ClientRegistrationOptions(
         enabled=True, valid_scopes=SCOPES, default_scopes=[SCOPE]
     )
-    app.router.routes.extend(
+    router = APIRouter(dependency_overrides_provider=app)
+    router.routes.extend(
         create_auth_routes(
             provider,
             issuer_url=issuer,
@@ -118,6 +136,7 @@ def install(app: FastAPI) -> None:
             revocation_options=RevocationOptions(enabled=True),
         )
     )
-    app.router.routes.extend(create_protected_resource_routes(resource, [issuer], SCOPES))
-    app.router.routes.append(Route(PATH, endpoint=protected(resource, provider)))
-    app.include_router(consent_router)
+    router.routes.extend(create_protected_resource_routes(resource, [issuer], SCOPES))
+    router.routes.append(Route(PATH, endpoint=protected(resource, provider)))
+    router.include_router(consent_router)
+    return router
