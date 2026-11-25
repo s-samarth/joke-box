@@ -30,3 +30,22 @@ def test_registrations_that_never_signed_in_are_cleared_after_a_week(db: Session
     assert client_ids(db) == {recent, used, newest}
     row = db.scalar(select(ConnectorClient).where(ConnectorClient.client_id == used))
     assert row is not None and row.signed_in_at is not None
+
+
+def test_a_registration_bigger_than_a_real_one_is_refused(db: Session) -> None:
+    """Anyone can register without signing in, so a huge one must not reach the database."""
+    browser = signed_in("dev@example.com")
+    body = {
+        "redirect_uris": ["https://claude.ai/api/mcp/auth_callback"],
+        "client_name": "Claude",
+        "token_endpoint_auth_method": "none",
+        "jwks": {"keys": [{"k": "x" * 100_000}]},
+    }
+    response = browser.post("/register", json=body)
+    assert response.status_code == 400
+    assert response.json()["error"] == "invalid_client_metadata"
+    long_name = {**body, "client_name": "C" * 101}
+    long_name.pop("jwks")
+    assert browser.post("/register", json=long_name).status_code == 400
+    assert client_ids(db) == set()
+    assert register(browser).status_code == 201  # a real one still registers

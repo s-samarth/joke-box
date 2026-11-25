@@ -207,14 +207,14 @@ flowchart LR
   The key is `**`, not `*`: branch names like `feat/premises` have a slash, which `*` doesn't match.
 - **Database connections:** each serverless invocation opens a connection through Neon's pooler
   (`NullPool`, `pool_pre_ping`) instead of keeping its own pool.
-- **Health:** `GET /health` runs `SELECT 1` and returns `{status, env, version}`.
+- **Health:** `GET /health` returns `{status, env, version}` without touching the database. Anyone can call it, and a query there would keep Neon from scaling to zero.
 
 ### CI ([ci.yml](../.github/workflows/ci.yml))
 
 | Job | Checks |
 |---|---|
 | `migrations` | On a PR, fails if any migration already on the base branch was modified, deleted or renamed |
-| `api` | `ruff check`, `ruff format --check`, `mypy app`; Alembic upgrade → downgrade → upgrade on Postgres 16; `pytest` |
+| `api` | `ruff check`, `ruff format --check`, `mypy app`; exactly one Alembic head (two PRs that each add a migration would leave two); Alembic upgrade → downgrade → upgrade on Postgres 16; `pytest` |
 | `web` | `tsc -b`, `oxlint --deny-warnings`, `vitest run`, `vite build` |
 
 [backup.yml](../.github/workflows/backup.yml) runs the nightly encrypted backup

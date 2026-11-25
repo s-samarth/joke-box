@@ -30,7 +30,7 @@ still accept the old `bit_id` and `bit_ids` for good. Responses use only the new
 
 | Method | Path | Does |
 |---|---|---|
-| GET | `/health` | `{status, env, version}` after `SELECT 1` against the database. No auth |
+| GET | `/health` | `{status, env, version}`. No auth, and no database query, so a pinger can't keep the database awake |
 | GET | `/api/me` | The signed-in user: `id, email, display_name, avatar_url, plan, env` |
 | POST | `/api/dev/reseed` | Wipes the account and loads the demo data. Local only (404 otherwise) |
 | GET | `/auth/google/login` | Redirects to Google (503 if `GOOGLE_CLIENT_ID` isn't set) |
@@ -260,7 +260,7 @@ endpoints with JokeBox's own storage ([oauth.py](../app/connector/oauth.py),
 |---|---|
 | `GET /.well-known/oauth-protected-resource/mcp` | Says `/mcp` is protected and that JokeBox itself issues the tokens |
 | `GET /.well-known/oauth-authorization-server` | The endpoints below, PKCE `S256`, scopes `read` (the default) and `shows` (logging shows; only set-review asks for it, and the consent page then says it can log shows) |
-| `POST /register` | Dynamic client registration. Only Claude's callbacks (`https://claude.ai/api/mcp/auth_callback`, and the same on claude.com) and loopback addresses (`http://localhost:*`, for apps on your computer) are accepted; anything else is `400 invalid_redirect_uri` |
+| `POST /register` | Dynamic client registration. Only Claude's callbacks (`https://claude.ai/api/mcp/auth_callback`, and the same on claude.com) and loopback addresses (`http://localhost:*`, for apps on your computer) are accepted; anything else is `400 invalid_redirect_uri`. A registration over 4,096 characters, or a `client_name` over 100, is `400 invalid_client_metadata`: anyone can register, so the size is capped before it's stored |
 | `GET /authorize` | Checks the request, then sends the browser to the consent page |
 | `GET/POST /oauth/consent` | Sign in (Google, or the dev sign-in locally) and Allow or Don't allow. The request travels in the address, signed and good for 10 minutes; the form is tied to you and the request |
 | `POST /token` | Code for tokens (PKCE checked), or a refresh token for new ones |
