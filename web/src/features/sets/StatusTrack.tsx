@@ -1,7 +1,7 @@
 /**
  * The status track: your status field drawn across the set by beat time. One row per option,
  * a tape-yellow line through the beats. A Not sure beat is a dotted grey line at the level
- * before it; a shift with no reason is marked "why?". Over the top-up limit is shaded amber.
+ * before it; a shift with no reason is marked "why?". A labelled stretch over the top-up limit is shaded amber.
  */
 import type { ReactNode } from 'react'
 import type { Beat, SetField } from '../../api/types'
@@ -47,7 +47,7 @@ export function StatusTrack({ beats, field, fields, analysis, limit }: { beats: 
     }
     t += b.seconds
   })
-  const worst = analysis.worst && analysis.longest > limit ? analysis.worst : null
+  const worst = analysis.known.seconds > limit ? analysis.known.span : null
   return (
     <div className="-mx-1 overflow-x-auto px-1">
       <svg viewBox={`0 0 ${W} ${H}`} className="block w-full min-w-[620px]" role="img" aria-label={`${field.name} across the set, by beat time`}>

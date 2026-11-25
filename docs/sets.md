@@ -59,22 +59,49 @@ the status track, and one at most the persona.
 
 They sit under the status track. **Each one is a rule from a Craft note, counted from your own
 labels.** None of them reads the jokes or guesses anything, and each says which note it comes
-from ([beats.ts](../web/src/features/sets/beats.ts) `analyse`, tested in `beats.test.ts`).
+from ([checks.ts](../web/src/features/sets/checks.ts) `setChecks`, over
+[beats.ts](../web/src/features/sets/beats.ts) `analyse`, tested in `checks.test.ts` and
+`beats.test.ts`). The builder and the set's card use the same results.
 
-| Check | Rule | Source |
-|---|---|---|
-| Shift with no reason | When a beat's status group (win, neutral, loss) differs from the last labelled beat before it (Not sure beats between don't hide it), it needs a reason | "Shift, don't flip", My status: a flow |
-| Longest stretch with no humility top-up | The longest run of beat time with no loss beat stays under your limit (4:00 to start, editable). Neutral and win add to the run, a loss ends it, and Not sure adds to a run already going (no top-up came) | "every 2–4 minutes", My status: a flow |
-| Persona sides | Every option of the persona field labels at least one beat | "The persona is the balance", My persona |
-| Not sure | Counted and listed, never judged | |
+| Check | Rule | Applies once | Source |
+|---|---|---|---|
+| A status shift needs a reason | When a beat's status group (win, neutral, loss) differs from the last labelled beat before it (Not sure beats between don't hide it), it needs a reason | Two beats have a status | "Shift, don't flip", My status: a flow |
+| A humility top-up at least every 4:00 | The longest run of beat time with no loss beat stays under your limit (4:00 to start, editable). Win and neutral add to the run; a loss ends it | The set is longer than the limit | "every 2–4 minutes", My status: a flow; What Indian rooms reward |
+| Every persona side drives a beat | Every option of the persona field labels at least one beat | There's a beat for each side | "The persona is the balance", My persona |
+| Not sure | Listed by beat, with which labels hold a check back. Not a check | | |
+
+### When a check doesn't apply yet
+
+A check gives one of four answers. **✓** and **!** are the rule passed or failed. The other two are
+greyed out, with a tag and a line saying what's needed, because a tick there would be one the set
+hasn't earned (a one-beat set used to show "Longest stretch with no top-up: 0:00 ✓"):
+
+- **Needs more beats**: the set is too short for the rule to bite. One beat can't shift, a 2:00 set
+  can't go 4:00 without a top-up, two beats can't hold three persona sides.
+- **Needs labels**: the answer depends on beats left Not sure. The shift check needs two beats
+  with a status. The persona check waits while a missing side could still be on a Not sure beat.
+  The top-up check is worked out twice: with every Not sure beat as a top-up (if the stretch is
+  still too long, it warns, and that stretch is shaded on the track) and with none of them as one
+  (if it's still fine, it ticks). In between, it names the Not sure beats in the long stretch.
+
+None of these thresholds is a number picked for the app: each follows from the rule it guards.
+The one number, the 4:00 limit, is the top of "every 2–4 minutes" and is yours to change.
+
+<p>
+  <img src="screenshots/desktop-set-checks.webp" width="560" alt="Five beats: two checks pass, the top-up check needs a label on one beat">
+  <img src="screenshots/phone-set-checks-not-yet.webp" width="230" alt="One beat: every check greyed out with Needs more beats">
+</p>
+
+On a set's card, only ✓ and ! show as pills. Checks that don't apply yet fold into one grey pill
+("2 checks need more beats").
 
 ## The Sets screen
 
 Each set is a card ([SetCard.tsx](../web/src/features/sets/SetCard.tsx)), so you see a set's shape
 without opening it: its point, its spine as yellow cue strips sized by beat time with the status
 colour under each, its checks in a word each, and its length against the slot. The checks are the
-builder's, from [setCard.ts](../web/src/features/sets/setCard.ts) `cardChecks`. They need labels,
-so until a beat has a status the card asks you to label them instead. A set from before beats says
+builder's, from [setCard.ts](../web/src/features/sets/setCard.ts) `cardChecks`. Checks that don't
+apply yet fold into one grey pill ("3 checks need more labels"). A set from before beats says
 so and offers **Split into beats**. Chips filter by status. The four steps of a set sit on top
 until you hide them, and **How sets work** opens the whole guide.
 
@@ -114,6 +141,7 @@ until you hide them, and **How sets work** opens the whole guide.
 | **Fields are the comic's own**, with Not sure always there | Labels are a thinking tool. A forced answer is worse than an honest Not sure | Fixed fields |
 | **Neutral status** (System attack / Neutral) | Attacking the system together is neither a win nor a top-up | v2 had only win and loss shades |
 | **"Mixed"**, not "Both" | "Both" was unclear. The comic may rename it, which is what Fields is for | |
+| **A check that can't apply yet says so**, greyed out, instead of ticking | A one-beat set showed ticks for rules it couldn't break ("0:00 with no top-up ✓") and a persona warning no single beat could fix. Each check now applies only once the set can break its rule, a threshold that follows from the rule itself, and never guesses Not sure | Ticks from the first beat (the comic found them meaningless) |
 | **Checks are deterministic and quote their note** | The comic distrusts AI-judged analysis. A rule he wrote, applied to labels he chose, can be checked by hand | v2's checks guessed from jokes and used invented thresholds |
 | **No new-room / known-room toggle** | Not something he plans a set around | v2 had it |
 | **Clusters follow the lead unless pinned** | Changing your lead in Jokes should update every set that plays it. Pin when a set needs one version | Copying the joke id at add time |

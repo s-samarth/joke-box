@@ -181,9 +181,11 @@ sets work** (the ? on Sets and in the builder).
 6. For each joke: **Locked** (yellow, in this place) or **Loose** (teal, keeps its number but can
    move or go on the night). Tap **Gate** on a joke the next ones depend on, then + and − for how
    many it guards. A premise after the first can be gated on the one before it landing.
-7. Read the shape: the **status track** across the set, and the four checks under it. Each check
+7. Read the shape: the **status track** across the set, and the checks under it. Each check
    is a rule from your Craft notes (a shift needs a reason; a humility top-up every few minutes,
-   the limit yours to change; every persona side gets a beat; how many labels are Not sure).
+   the limit yours to change; every persona side gets a beat), and the labels still Not sure.
+   Until the set can break a rule (two beats for a shift, more time than the limit, a beat per
+   persona side), its check is greyed out and says what to add.
 8. Watch the light bar: the beats' time against the slot.
 9. Set its **Status** as it moves along (Draft, Work in Progress, Stage Ready; Discarded hides it
    from All), rate it with stars and tag it. There's no Save button: the set saves as you go.
