@@ -28,7 +28,7 @@ import { TechniquePanel } from './TechniquePanel'
 import { useSessionAutosave } from './useSessionAutosave'
 
 const modeButton = (on: boolean) =>
-  `inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'text-dim hover:text-paper'}`
+  `inline-flex h-9 pointer-coarse:h-11 items-center gap-1.5 rounded-md px-3 text-sm transition ${on ? 'bg-paper text-ink font-medium' : 'text-dim hover:text-paper'}`
 
 function Workspace({ id, start, technique }: { id: string; start?: WritingSession; technique: string | null }) {
   const [title, setTitle] = useState(start?.title ?? '')
@@ -103,8 +103,8 @@ function Workspace({ id, start, technique }: { id: string; start?: WritingSessio
           </button>
           <IconButton label="Reset timer" onClick={() => { timer.reset(); autosave.saveNow() }}><RotateCcw size={16} /></IconButton>
           <div className="ml-auto flex rounded-lg bg-ink-3 p-0.5" role="group" aria-label="Page">
-            <button type="button" aria-pressed={mode === 'type'} onClick={() => switchMode('type')} className={modeButton(mode === 'type')}><Keyboard size={16} /><span className="hidden sm:inline">Type</span></button>
-            <button type="button" aria-pressed={mode === 'write'} onClick={() => switchMode('write')} className={modeButton(mode === 'write')}><PenLine size={16} /><span className="hidden sm:inline">Handwrite</span></button>
+            <button type="button" aria-label="Type" title="Type" aria-pressed={mode === 'type'} onClick={() => switchMode('type')} className={modeButton(mode === 'type')}><Keyboard size={16} /><span className="hidden sm:inline">Type</span></button>
+            <button type="button" aria-label="Handwrite" title="Handwrite" aria-pressed={mode === 'write'} onClick={() => switchMode('write')} className={modeButton(mode === 'write')}><PenLine size={16} /><span className="hidden sm:inline">Handwrite</span></button>
           </div>
         </div>}
         {mode === 'write' && (

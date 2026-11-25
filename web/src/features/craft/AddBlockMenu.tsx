@@ -27,7 +27,7 @@ interface Props {
 
 export function AddBlockMenu({ onPick, trigger, label = 'Add a block below' }: Props) {
   const button = trigger ?? (
-    <button type="button" aria-label={label} title={label} className="inline-flex size-8 items-center justify-center rounded-md text-dim hover:bg-ink-3 hover:text-paper">
+    <button type="button" aria-label={label} title={label} className="inline-flex size-8 pointer-coarse:size-11 items-center justify-center rounded-md text-dim hover:bg-ink-3 hover:text-paper">
       <Plus size={16} />
     </button>
   )

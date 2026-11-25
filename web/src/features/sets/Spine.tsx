@@ -17,7 +17,7 @@ interface Props {
   onAdd: () => void
 }
 
-const icon = 'inline-flex size-8 items-center justify-center rounded-md text-faint hover:bg-ink-3 hover:text-paper disabled:opacity-30'
+const icon = 'inline-flex size-8 pointer-coarse:size-11 items-center justify-center rounded-md text-faint hover:bg-ink-3 hover:text-paper disabled:opacity-30'
 
 function contents(b: Beat) {
   const premises = b.entries.filter((e) => e.kind === 'premise').length

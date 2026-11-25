@@ -35,7 +35,7 @@ export function TagLines({ lines, onChange }: { lines: string[]; onChange: (l: s
           <div className="group flex items-start gap-2">
             <GrowingText aria-label={`Tag line ${i + 1}`} placeholder="And another thing…" className="text-lg leading-snug text-dim" value={text}
               onChange={(e) => onChange(lines.map((l, n) => (n === i ? e.target.value : l)))} />
-            <button type="button" aria-label="Remove tag line" onClick={() => remove(i)} className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-faint hover:text-paper sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100">
+            <button type="button" aria-label="Remove tag line" onClick={() => remove(i)} className="inline-flex size-8 pointer-coarse:size-11 shrink-0 items-center justify-center rounded-md text-faint hover:text-paper sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100">
               <X size={15} />
             </button>
           </div>

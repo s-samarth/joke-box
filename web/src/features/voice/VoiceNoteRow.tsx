@@ -49,7 +49,7 @@ export function VoiceNoteRow({ note, suggestions, onEdit, onDelete, onTag }: Pro
       <div className="flex items-center gap-3">
         <PlayButton player={player} />
         <div className="min-w-0 flex-1">
-          <p className={`truncate ${note.label ? 'font-medium' : 'text-dim'}`}>{note.label || 'Untitled note'}</p>
+          <p className={`line-clamp-2 break-words ${note.label ? 'font-medium' : 'text-dim'}`} title={note.label || undefined}>{note.label || 'Untitled note'}</p>
           <p className="flex flex-wrap items-center gap-x-2 text-sm text-faint">
             <span className="tabular">{player.state === 'idle' ? clock(note.duration_seconds) : `${clock(Math.floor(player.position))} / ${clock(Math.round(player.duration))}`}</span>
             <span>{formatDateTime(note.created_at)}</span>
