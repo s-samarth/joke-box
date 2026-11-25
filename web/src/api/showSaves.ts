@@ -83,7 +83,19 @@ queryClient.setMutationDefaults(saveSetlistKey, {
     const version = input.version ?? known?.version ?? 0
     return upsert<Setlist>(keys.setlists, { ...input, items, id, version, created_at: createdAt<Setlist>(keys.setlists, id), updated_at: now() })
   },
-  onSettled: () => refreshWhenSynced(keys.setlists, keys.venues),
+  // The answer is the set as the server now shows it, so with nothing else of this set still
+  // waiting it goes straight into the list instead of refetching every set at each autosave pause.
+  // Venues refresh only when the set named one the list doesn't have.
+  onSettled: (saved, error, { id, input }: SaveSetlistVars) => {
+    // This save still counts itself as pending here, so another waiting save makes two.
+    const waiting = queryClient.getMutationCache().findAll({ mutationKey: saveSetlistKey, status: 'pending' })
+      .filter((m) => (m.state.variables as SaveSetlistVars | undefined)?.id === id).length > 1
+    if (error || !saved || waiting) return refreshWhenSynced(keys.setlists, keys.venues)
+    queryClient.setQueryData<Setlist[]>(keys.setlists, (old = []) => old.map((s) => (s.id === id ? saved : s)))
+    const venues = queryClient.getQueryData<{ name: string }[]>(keys.venues)
+    const known = !input.venue_name || venues?.some((v) => v.name.toLowerCase() === input.venue_name?.trim().toLowerCase())
+    return known ? refreshWhenSynced() : refreshWhenSynced(keys.venues)
+  },
 })
 
 queryClient.setMutationDefaults(deleteSetlistKey, {

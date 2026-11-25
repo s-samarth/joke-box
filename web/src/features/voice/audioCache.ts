@@ -35,6 +35,14 @@ export async function forgetAudio(id: string): Promise<void> {
   await del(id, store)
 }
 
+/** A note's recording from this device if it's kept here, else from the server (one Blob
+ * operation each). "Download everything" uses it so recordings already here cost nothing. */
+export async function audioBlob(id: string): Promise<Blob> {
+  const cached = await get<Cached | Blob>(id, store).catch(() => undefined)
+  if (cached && !(cached instanceof Blob) && cached.bytes.byteLength) return new Blob([cached.bytes], { type: cached.type })
+  return downloadVoiceAudio(id)
+}
+
 /** A playable address for a note's audio: from memory, then this device, then the server. */
 export async function audioUrl(id: string): Promise<string> {
   const known = urls.get(id)

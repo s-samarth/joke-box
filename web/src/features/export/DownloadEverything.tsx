@@ -7,14 +7,14 @@ import { Download } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { ApiError, api } from '../../api/client'
 import { NetworkError } from '../../api/network'
-import { downloadVoiceAudio } from '../../api/voice'
 import { Button } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
 import { useWaiting } from '../../layout/useWaiting'
+import { audioBlob } from '../voice/audioCache'
 import { collect, type Archive, type Progress, type Sources } from './collect'
 import { saveFile } from './saveFile'
 
-const live: Sources = { json: (path) => api<unknown>(path), audio: downloadVoiceAudio }
+const live: Sources = { json: (path) => api<unknown>(path), audio: audioBlob }
 
 type State =
   | { stage: 'idle' }

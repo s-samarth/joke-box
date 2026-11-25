@@ -52,7 +52,7 @@ queryClient.setMutationDefaults(saveJokeKey, {
     const saved = await api<Joke>(`/api/jokes/${id}`, 'PUT', { ...fields, base_version: base })
     own.record(id, from, base, saved.version)
     await queryClient.cancelQueries({ queryKey: keys.jokes }) // an older list mustn't land after this
-    queryClient.setQueryData<Joke[]>(keys.jokes, (old = []) => old.map((b) => (b.id === id ? { ...b, version: saved.version } : b)))
+    queryClient.setQueryData<Joke[]>(keys.jokes, (old = []) => old.map((b) => (b.id === id ? { ...b, version: saved.version, updated_at: saved.updated_at } : b)))
     return saved
   },
   onMutate: async ({ id, input, keepMine }: SaveJokeVars) => {
@@ -70,8 +70,11 @@ queryClient.setMutationDefaults(saveJokeKey, {
     })
     return { wordingOnly: !keepMine && wordingOnly(before, input) }
   },
+  // A change of wording alone needs no list back: the version and time are already in the cache
+  // (above), and the text is what was sent. Refetching every joke after every autosave pause was
+  // most of the app's data transfer. Anything else refreshes what it may have changed.
   onSettled: (_saved, error, _vars, context) => !error && context?.wordingOnly
-    ? refreshWhenSynced(keys.jokes)
+    ? refreshWhenSynced()
     : refreshWhenSynced(keys.jokes, keys.types, keys.statuses, keys.setlists),
 })
 

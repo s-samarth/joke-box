@@ -76,13 +76,14 @@ describe('a joke edited on two devices', () => {
   })
 })
 
-it('refreshes only jokes after a wording edit and related lists after a structural edit', async () => {
+it('refetches nothing after a wording edit (the cache already has it) and related lists after a structural edit', async () => {
   queryClient.setQueryData(keys.jokes, [joke(5)])
   const invalidate = vi.spyOn(queryClient, 'invalidateQueries')
   try {
     serve(5)
     await save({ id: 'j1', input: { ...opened(5), setup: 'New fake wording' } })
-    expect(invalidate.mock.calls.map(([q]) => q?.queryKey)).toEqual([keys.jokes])
+    expect(invalidate).not.toHaveBeenCalled()
+    expect(queryClient.getQueryData<Joke[]>(keys.jokes)?.[0]).toMatchObject({ setup: 'New fake wording', version: 6 })
     invalidate.mockClear()
     await save({ id: 'j1', input: { ...opened(6), types: ['Fake type'] } })
     expect(invalidate.mock.calls.map(([q]) => q?.queryKey)).toEqual([keys.jokes, keys.types, keys.statuses, keys.setlists])

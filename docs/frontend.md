@@ -60,7 +60,11 @@ under fixed keys (`setMutationDefaults`), each spreading the shared `QUEUED` opt
   sync.ts): the newest copy holds everything they did. A save already on its way is left alone.
 - **Brainstorm sessions in pieces:** the list (`session-list`) comes without ink; each session's
   ink is its own query (`['session-detail', id]`, never garbage-collected) so it stays on the
-  phone. `keepOnDevice` in [sessions.ts](../web/src/api/sessions.ts) downloads, one at a time,
+  phone. That ink is kept under its own IndexedDB key per session
+  ([sessionStore.ts](../web/src/api/sessionStore.ts)), not in the saved copy of the cache: the
+  saved copy is rewritten whole at every change, and with all the handwriting in it each write
+  was megabytes (typing lagged). A session is written alone when it changes and read back at
+  launch (`sessionsRestored`, which the session queries wait for). `keepOnDevice` in [sessions.ts](../web/src/api/sessions.ts) downloads, one at a time,
   each session whose `updated_at` moved on, but never while saves are waiting (it would fetch
   the server's older copy). An open session isn't refetched while its own save waits either, and
   once saved the copy kept is what was saved, with the server's time
@@ -126,7 +130,9 @@ under fixed keys (`setMutationDefaults`), each spreading the shared `QUEUED` opt
   [launch.ts](../web/src/api/launch.ts)): the provider counts the app as loading until its
   `onSuccess` returns, and while it loads no screen fetches and nothing is written back to the
   phone. Returning the replay there held the app that way until every waiting save got through,
-  which on a weak signal took minutes and while signed out never ended.
+  which on a weak signal took minutes and while signed out never ended. The refresh after the
+  replay skips lists fetched since launch and doesn't restart a fetch already on its way: it used
+  to, and every Home list loaded twice at each relaunch.
 - **Waiting saves show again at launch:** `showWaitingSaves()` reruns each restored save's
   `onMutate`, oldest first. A save can reach the phone before its `onMutate` has shown it (that
   waits a moment for `cancelQueries`), and TanStack doesn't rerun `onMutate` for a restored save,
@@ -138,7 +144,11 @@ under fixed keys (`setMutationDefaults`), each spreading the shared `QUEUED` opt
   collects the keys and invalidates them only when the last queued save settles. Refetching
   earlier would show the server's older copy and make a waiting change seem to vanish. On
   reconnect TanStack also resumes saves before it refetches queries. A successful wording-only
-  joke edit refreshes the jokes list. Structural edits and failed saves also refresh related lists.
+  joke edit refetches nothing: the answer's version and time go into the cached joke, and the
+  text is what was sent. A set's save puts the server's answer (the set as it now shows) into the
+  list when nothing else of that set waits, and refreshes venues only for a venue the list
+  lacks. Refetching all jokes or sets at every autosave pause was most of the app's data
+  transfer. Structural edits and failed saves still refresh related lists.
 
 Anything not queued (renaming a topic, deleting a venue) uses the default
 `networkMode: 'always'` with no retries: offline it fails at once with "You're offline" instead

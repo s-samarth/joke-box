@@ -10,6 +10,7 @@ import { forgetAllAudio } from '../features/voice/audioCache'
 import { api } from './client'
 import { keys, persister, queryClient } from './queryClient'
 import type { Me } from './types'
+import { forgetSessions } from './sessionStore'
 import { clearUnsynced } from './unsynced'
 
 /** Everything on this phone that hasn't reached the server: queued saves, recordings, the Couldn't sync list, an unsaved New joke. */
@@ -17,7 +18,7 @@ async function forgetWaiting() {
   queryClient.getMutationCache().clear()
   forgetDraft()
   clearDeviceDrafts()
-  await Promise.all([clearOutbox(), clearUnsynced(), forgetAllAudio()])
+  await Promise.all([clearOutbox(), clearUnsynced(), forgetAllAudio(), forgetSessions()])
 }
 
 /* Whose saves are waiting on this phone. Kept apart from the cache, which can drop the profile

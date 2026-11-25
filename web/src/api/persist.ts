@@ -1,5 +1,5 @@
 /** How the cache is kept on the phone: shared by the provider in main.tsx and by a tab stepping aside. */
-import { dehydrate } from '@tanstack/react-query'
+import { defaultShouldDehydrateQuery, dehydrate } from '@tanstack/react-query'
 import type { PersistQueryClientOptions } from '@tanstack/react-query-persist-client'
 import { set } from 'idb-keyval'
 import { handedOver } from '../lib/oneTab'
@@ -12,7 +12,11 @@ export const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
   buster: CACHE_BUSTER,
   // Keep every queued save that hasn't finished, not only the paused ones: a save on its way when
   // the app is closed may never have arrived, so it's sent again next time.
-  dehydrateOptions: { shouldDehydrateMutation: (m) => m.state.status === 'pending' && m.options.scope?.id === QUEUED.scope.id },
+  dehydrateOptions: {
+    shouldDehydrateMutation: (m) => m.state.status === 'pending' && m.options.scope?.id === QUEUED.scope.id,
+    // Each session's ink is kept apart, written only when it changes (sessionStore.ts).
+    shouldDehydrateQuery: (q) => defaultShouldDehydrateQuery(q) && q.queryKey[0] !== 'session-detail',
+  },
 }
 
 let restored = false

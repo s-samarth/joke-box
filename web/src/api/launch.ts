@@ -11,10 +11,17 @@ import { queryClient, resumeQueued } from './queryClient'
 import { checkAccount } from './session'
 
 export function afterRestore(): void {
+  const launched = Date.now()
   markRestored()
   showWaitingSaves()
-  // Who's signed in comes first: waiting saves only ever go to the account that made them.
-  void checkAccount().then(resumeQueued).then(() => queryClient.invalidateQueries())
+  // Who's signed in comes first: waiting saves only ever go to the account that made them. Then
+  // lists from the saved copy refresh, but not ones already fetched since launch (the screen's
+  // own stale lists fetch as it opens), and a fetch already on its way isn't restarted: doing
+  // either made every Home list load twice.
+  void checkAccount().then(resumeQueued).then(() => queryClient.invalidateQueries(
+    { predicate: (q) => q.state.dataUpdatedAt < launched && q.state.fetchStatus !== 'fetching' },
+    { cancelRefetch: false },
+  ))
 }
 
 /**

@@ -10,6 +10,7 @@ import { useEffect } from 'react'
 import { ApiError, api } from './client'
 import { deleteSessionKey, keys, saveSessionKey, sessionKey, type SaveSessionVars } from './queryClient'
 import { savesOf } from './sessionSaves'
+import { sessionsRestored } from './sessionStore'
 import { QUEUED } from './sync'
 import type { SessionSummary, WritingSession } from './types'
 
@@ -42,6 +43,7 @@ export async function keepOnDevice(client: QueryClient, list: SessionSummary[]) 
   }
   running = true
   try {
+    await sessionsRestored // or every session would look missing and be downloaded again
     for (const s of list) {
       if (savesWaiting(client)) return
       if (client.getQueryData<WritingSession | null>(sessionKey(s.id))?.updated_at === s.updated_at) continue
@@ -78,9 +80,10 @@ export function useSessionList() {
  * One session with its ink. While a save of it waits, the copy here is newer than the server's,
  * so it's kept rather than fetched: a fetch then would put the older copy back.
  */
-export function readSession(client: QueryClient, id: string): Promise<WritingSession | null> {
+export async function readSession(client: QueryClient, id: string): Promise<WritingSession | null> {
+  await sessionsRestored
   const here = client.getQueryData<WritingSession | null>(sessionKey(id))
-  return here && savesOf(id) > 0 ? Promise.resolve(here) : fetchSession(id)
+  return here && savesOf(id) > 0 ? here : fetchSession(id)
 }
 
 export const useSession = (id: string) => {
