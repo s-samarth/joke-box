@@ -239,12 +239,12 @@ From the top:
   whole screen under the header and filters, on every device. Beside an open joke the switch is
   three icons.
 - **List:** a search box ("Search words, tags, notes") and menus in one row that scrolls sideways (a wheel over the row slides it; one over an open menu scrolls only the menu): Topic, then Subtopic once a topic is picked, Premise, Type,
-  Status (with **Manage statuses…**), and Sort (Newest, Oldest, Recently edited, Strongest, Weakest, Longest). Each row shows the
+  Status (with **Manage statuses…**), Persona (each side, Not sure, and **Edit sides…**), and Sort (Newest, Oldest, Recently edited, Strongest, Weakest, Longest). Each row shows the
   setup and the punchline (two lines each), strength ticks (or a faint "Unrated"), type dots, the topic, the date it was added (or
   last edited, under Recently edited) and the runtime. Sorted by a date, the list is grouped into
   months under pinned headings, with the time scrubber down its side ([JokeList.tsx](../web/src/features/jokes/JokeList.tsx)).
   A joke brought in with an older date (an import) counts as last edited then, not on the day it
-  arrived. The ⋯ menu has **Export as CSV** (with Created At and Edited At).
+  arrived. The ⋯ menu has **Export as CSV** (with Created At, Edited At and Persona).
 - **Clusters** ([cluster/](../web/src/features/jokes/cluster/)): versions of one joke kept
   together, each still a whole joke. Like Google Photos stacking similar shots, the list shows a
   cluster as one row with a tape-yellow **3 versions** badge
@@ -281,7 +281,7 @@ From the top:
 - **Add versions** ([AddVersionsDialog.tsx](../web/src/features/jokes/cluster/AddVersionsDialog.tsx)),
   the joke picker sheet (see [Picker sheets](#picker-sheets)): the lead pinned at the top to compare against, then the Jokes
   list's own search and filter row ([JokeFilters.tsx](../web/src/features/jokes/JokeFilters.tsx):
-  Topic, Subtopic, Premise, Type, Status, Sort), starting on the lead's topic and subtopic and
+  Topic, Subtopic, Premise, Type, Status, Persona, Sort), starting on the lead's topic and subtopic and
   Recently edited ([useJokePickFilters.ts](../web/src/features/pickers/useJokePickFilters.ts);
   kept in the sheet, so the list's filters behind it don't change). A count line with discarded
   jokes hidden behind **Show** and **Clear filters**. Rows look like the list's
@@ -354,7 +354,7 @@ From the top:
   came from, and below the words, a row of details: Strength (**Unrated**, then five bars; tap the lit bar again
   to clear it), Type (with Edit types), Filed under (topic and
   subtopic, with Edit topics; with no subtopic picked, the topic's **Subtopic unknown**), Premise (the premise sheet), Follows (the joke this one comes after in a chain, from the joke sheet),
-  Followed by (**Write the next joke**, or **Pick jokes that follow** from the joke sheet; a joke already following another says "Now follows: …" and moves here), Status (with Edit statuses: the **Statuses** sheet lists every status with its joke count, Draft first as the default that can't be renamed or deleted; drag the rest into order, rename one (onto a name you have, it asks to merge) or delete it, and its jokes go back to Draft; **Add status**), Runs for (type it, or step it five
+  Followed by (**Write the next joke**, or **Pick jokes that follow** from the joke sheet; a joke already following another says "Now follows: …" and moves here), Status (with Edit statuses: the **Statuses** sheet lists every status with its joke count, Draft first as the default that can't be renamed or deleted; drag the rest into order, rename one (onto a name you have, it asks to merge) or delete it, and its jokes go back to Draft; **Add status**), Persona (the side of you the joke shows: Riled up, Bakchod, Point prover or Not sure, from the same list as a set beat's Dominant persona side; **Edit sides** opens Label fields, see [sets.md](sets.md#a-jokes-persona)), Runs for (type it, or step it five
   seconds at a time with − and +), Clean rating, Language (Hinglish, Hindi or English) and
   Hashtags, followed by a Notes box. Then **Rewrites** (earlier sessions and **Start a rewrite**),
   **In sets** (with Add to a set), the show record once the joke has been logged at a show

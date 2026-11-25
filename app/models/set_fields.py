@@ -1,4 +1,4 @@
-"""Your label fields for set beats (Status, Persona side, Tone, Voice fit, or your own)."""
+"""Your label fields for set beats (Status, Dominant persona side, Tone, Voice fit, or your own)."""
 
 import uuid
 from typing import Any

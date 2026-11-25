@@ -128,7 +128,7 @@ export function SetJokePicker({ used, start, memory, premiseId, onAdd, onRead, .
     <>
       {`${rows.length} ${rows.length === 1 ? 'joke' : 'jokes'}`}
       {discarded > 0 && <>{` · ${discarded} discarded ${showDiscarded ? 'shown' : 'hidden'} `}<button type="button" onClick={() => f.set({ discarded: showDiscarded ? null : 'show' })} className={linkStyle}>{showDiscarded ? 'Hide' : 'Show'}</button></>}
-      {f.active && <> · <button type="button" onClick={() => f.set({ topic: null, sub: null, premise: null, type: null, status: null, q: null })} className={linkStyle}>Clear filters</button></>}
+      {f.active && <> · <button type="button" onClick={() => f.set({ topic: null, sub: null, premise: null, type: null, status: null, persona: null, q: null })} className={linkStyle}>Clear filters</button></>}
     </>
   )
   return (

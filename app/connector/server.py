@@ -86,8 +86,8 @@ def list_sets() -> dict[str, Any]:
 
 @server.tool(annotations=READ)
 def get_set(set_id: str) -> dict[str, Any]:
-    """A set as the comic builds it: beats in a fixed order, each with a cue, a description, its
-    own time, labels (Status, Persona side and the comic's other fields; Not sure if unset) and
+    """A set as the comic builds it: beats in a fixed order, each with a cue, a description, its own
+    time, labels (Status, Dominant persona side and the comic's other fields; Not sure if unset) and
     the reason for a status shift. A beat is an ordered list of premises with their jokes, jokes
     with no premise, and crowd work. A loose joke keeps its place but is flexible; a joke that
     guards N jokes is a gate: if it doesn't land, those are skipped. Then every joke in running

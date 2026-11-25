@@ -2,11 +2,13 @@
  * The jokes of a premise (or of a list with no premise), in order. Each keeps its number. Locked
  * is tape-yellow, loose is teal (still in order, just flexible), and a gate is sky blue: the
  * jokes it guards sit indented under it. Tap a joke to read it whole. While you're picking jokes
- * to put under a premise (`picked`), each row is a tick and the tools step aside.
+ * to put under a premise (`picked`), each row is a tick and the tools step aside. A joke with a
+ * persona says which side it shows, beside its tools.
  */
 import { ArrowDown, ArrowUp, Check, Minus, Plus, X } from 'lucide-react'
 import type { Joke, SetPiece } from '../../api/types'
 import { guardMap, skipTarget } from './beats'
+import { personaLabel, usePersonaField } from '../jokes/persona'
 import { stepGate, swap, toggleGate, toggleLoose, togglePin } from './beatEdit'
 
 interface Props {
@@ -30,12 +32,14 @@ function tone(p: SetPiece) {
 
 export function PieceList({ pieces, onChange, jokes, leadOf, onOpen, picked, onPick }: Props) {
   const guards = guardMap(pieces)
+  const persona = usePersonaField()
   if (!pieces.length) return <p className="py-2 text-sm text-faint">No jokes here yet.</p>
   return (
     <ol className="space-y-2">
       {pieces.map((p, i) => {
         const joke = jokes.get(p.joke_id)
         const t = tone(p)
+        const side = personaLabel(joke?.persona, persona)
         const after = i + p.gate + 1
         const skip = p.gate ? skipTarget(pieces, i) : after
         if (picked) {
@@ -74,6 +78,7 @@ export function PieceList({ pieces, onChange, jokes, leadOf, onOpen, picked, onP
                     title={p.pinned ? 'This version, even if the lead changes. Tap to follow the lead.' : 'Plays the cluster lead. Tap to pin this version.'}
                     className={`${tool} text-dim hover:bg-ink-3`}>{p.pinned ? 'Pinned version' : 'Follows the lead'}</button>
                 )}
+                {side && <span className="ml-1 rounded-md px-2 py-0.5 text-xs text-dim ring-1 ring-rule" title="The persona side this joke shows">{side}</span>}
                 <span className="ml-auto flex [&>button]:size-11">
                   <button type="button" className={icon} disabled={i === 0} onClick={() => onChange(swap(pieces, i, -1))} aria-label="Move up"><ArrowUp size={15} /></button>
                   <button type="button" className={icon} disabled={i === pieces.length - 1} onClick={() => onChange(swap(pieces, i, 1))} aria-label="Move down"><ArrowDown size={15} /></button>

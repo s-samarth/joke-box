@@ -43,7 +43,9 @@ export function SetGuide({ open, onOpenChange }: { open: boolean; onOpenChange: 
         <Part title="Premises and your library">A joke under a premise in a set rests on that premise in your library too, so adding it here shows on the joke and in the premise. A joke on another premise moves, and you're told first.</Part>
         <Part title="Clusters">A cluster shows once when you add jokes, and adds its lead. A version from a cluster plays the cluster's lead, so changing the lead in Jokes changes the set. Pick another version to pin that one in this set whatever the lead is.</Part>
         <Part title="Labels">
-          <p>Each beat gets labels in this set, not on the jokes, because the same joke can play a different status somewhere else. The fields start as Status, Persona side, Tone and Voice fit. Change them in Fields. Not sure is always there.</p>
+          <p>Each beat gets labels in this set, not on the jokes, because the same joke can play a different status somewhere else. The fields start as Status, Dominant persona side, Tone and Voice fit. Not sure is always there.</p>
+          <p>Tap <b className="text-paper">Edit labels</b> to add, rename or delete options and fields. Deleting one tells you how many beats have it first, and they turn to Not sure.</p>
+          <p>Each joke has its own <b className="text-paper">Persona</b> too, on the joke's page: the side of you it shows, from the same list as Dominant persona side. It shows on the joke in a set.</p>
           <p>Status options count as a win, neutral (System attack: you and the room against the system together) or a loss. A loss is a humility top-up.</p>
         </Part>
         <Part title="The checks">

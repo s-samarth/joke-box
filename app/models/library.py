@@ -171,6 +171,9 @@ class Joke(Trashable, OwnedMixin, Base):
     alt_punchlines: Mapped[list[str]] = mapped_column(JSON, default=list, server_default="[]")
     clean_rating: Mapped[str | None] = mapped_column(String(10))
     language: Mapped[str | None] = mapped_column(String(40))
+    # The persona side it shows: an option id from the persona label field (the list a beat's
+    # Dominant persona side picks from). None, or an option since deleted, is Not sure.
+    persona: Mapped[str | None] = mapped_column(String(64))
     comments: Mapped[str] = mapped_column(Text, default="")
     # The joke this one continues from. Many jokes can follow one, so chains branch into trees.
     follows_id: Mapped[uuid.UUID | None] = mapped_column(

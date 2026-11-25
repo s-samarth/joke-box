@@ -19,7 +19,7 @@ export function readme(lists: Record<string, unknown>, now: Date, missing: strin
     '- Each .json file is one list, exactly as the JokeBox API sends it (see docs/api.md and',
     '  docs/data-model.md in the JokeBox repository for every field). Ids link them: a joke\'s',
     '  premise_id is a premise\'s id, its cluster_id a cluster (versions of one joke, with its lead), its voice_note_ids name voice notes, an observation\'s joke_ids',
-    '  and premise_ids name what came from it, a set\'s items name joke ids, and set-fields.json names the label options a set\'s beats use.',
+    '  and premise_ids name what came from it, a set\'s items name joke ids, and set-fields.json names the label options a set\'s beats and a joke\'s persona use.',
     '- brainstorm-sessions.json lists the sessions; brainstorm-sessions/ holds each one in full,',
     '  handwriting included ("ink": strokes of [x, y, pressure] points, each on a page).',
     '- voice-notes.json lists the notes; voice-notes/ holds each recording, named by date and label.',

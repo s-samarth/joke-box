@@ -115,7 +115,7 @@ function Builder({ setlist }: { setlist: Setlist }) {
             <BeatEditor key={beat.id} beat={beat} previous={beats[index - 1] ?? null} needsWhy={needsWhy(beats, index, config.fields)} fields={config.fields}
               onChange={changeBeat} onDelete={() => deleteBeat(beat)} jokes={byId} premises={premises} leadOf={leadOf} onOpen={setReading}
               onAddJokes={(entryId) => setPicking({ kind: 'jokes', beatId: beat.id, entryId })} onAddPremise={() => setPicking({ kind: 'premise', beatId: beat.id })}
-              onGroup={(entryId, pieceIds) => setPicking({ kind: 'group', beatId: beat.id, entryId, pieceIds })} />
+              onGroup={(entryId, pieceIds) => setPicking({ kind: 'group', beatId: beat.id, entryId, pieceIds })} onEditFields={() => setSheet('fields')} />
           ) : (
             <p className="py-10 text-center text-dim">{beats.length ? 'Pick a beat to open it.' : 'No beats yet. Add the first one: a cue word for what you talk about first.'}</p>
           )}
@@ -123,7 +123,7 @@ function Builder({ setlist }: { setlist: Setlist }) {
       </div>
       <SetPickers picking={picking} onPicking={setPicking} beats={beats} onBeat={changeBeat} leadOf={leadOf} reading={reading} onReading={setReading} />
       <SetGuide open={sheet === 'guide'} onOpenChange={(o) => setSheet(o ? 'guide' : null)} />
-      <FieldsSheet open={sheet === 'fields'} onOpenChange={(o) => setSheet(o ? 'fields' : null)} />
+      <FieldsSheet open={sheet === 'fields'} onOpenChange={(o) => setSheet(o ? 'fields' : null)} current={{ id: setlist.id, beats: draft.beats }} />
       <CraftSheet open={sheet === 'craft'} onOpenChange={(o) => setSheet(o ? 'craft' : null)} title="Building a set" screen="sets" empty="No notes in the areas that show on the set builder." />
     </div>
   )

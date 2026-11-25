@@ -32,7 +32,7 @@ DEFAULT_FIELDS: list[dict[str, Any]] = [
     },
     {
         "id": "persona",
-        "name": "Persona side",
+        "name": "Dominant persona side",
         "role": "persona",
         "options": options(
             ("riled-up", "Riled up", None),

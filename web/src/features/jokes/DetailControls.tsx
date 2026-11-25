@@ -1,12 +1,13 @@
-/** The small editors on a joke's page: types, clean rating and hashtags. Strength: components/ui/StrengthPicker. */
+/** The small editors on a joke's page: types, clean rating, persona and hashtags. Strength: components/ui/StrengthPicker. */
 import { Plus, X } from 'lucide-react'
 import { useId, useState } from 'react'
 import { useTypes } from '../../api/library'
-import type { CleanRating } from '../../api/types'
+import type { CleanRating, SetField } from '../../api/types'
 import { useTypeColor } from '../../api/typeColors'
 import { CLEAN_LABELS, DEFAULT_TYPES } from '../../lib/jokeMeta'
 import { choice } from '../../components/ui/choice'
 import { NewTypeDialog } from './NewTypeDialog'
+import { NOT_SURE } from './persona'
 
 export function TypeToggles({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
   const { data: types = [] } = useTypes()
@@ -37,6 +38,19 @@ export function CleanPicker({ value, onChange }: { value: CleanRating | null; on
           {CLEAN_LABELS[k]}
         </button>
       ))}
+    </div>
+  )
+}
+
+/** The side of you the joke shows, from your persona field's options; Not sure is always there. */
+export function PersonaPicker({ field, value, onChange }: { field: SetField; value: string | null; onChange: (v: string | null) => void }) {
+  const current = field.options.some((o) => o.id === value) ? value : null
+  return (
+    <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Persona">
+      {field.options.map((o) => (
+        <button key={o.id} type="button" role="radio" aria-checked={current === o.id} onClick={() => onChange(o.id)} className={choice(current === o.id)}>{o.label}</button>
+      ))}
+      <button type="button" role="radio" aria-checked={!current} onClick={() => onChange(null)} className={choice(!current)}>{NOT_SURE}</button>
     </div>
   )
 }

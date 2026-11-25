@@ -60,6 +60,8 @@ export interface JokeInput {
   alt_punchlines?: string[]
   clean_rating: CleanRating | null
   language: string | null
+  /** Persona side: an option id of your persona label field, null for Not sure. Left out, kept. */
+  persona?: string | null
   comments: string
   /** The joke this one continues from. Many jokes can follow one, so chains branch. */
   follows_id: string | null
