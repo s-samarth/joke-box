@@ -251,7 +251,7 @@ until you hide them, and **How sets work** opens the whole guide.
   sure hatched amber, and where the status shifts, the reason or "Needs a reason"), the blocks in
   order, and the jokes as numbered chips in their Vibe colour, with gates as sky brackets. Under it,
   the **beat board**: a column per beat with its labels, and its blocks, gates and every joke in
-  full (setup, punchline, Vibe, Generic, status, runtime, tags). Both scroll together, both ways,
+  full (setup, punchline, Vibe, Generic, status, runtime, and tag lines in small amber). Both scroll together, both ways,
   and zoom. Tap a chip on the strip to find the joke on the board.
 - **Only beats have time.** On the strip, a beat is as wide as its time; inside it, every joke and
   crowd work question gets an equal slot in running order, and a block is as wide as its slots. So

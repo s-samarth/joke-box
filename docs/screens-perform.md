@@ -143,7 +143,7 @@ and each device remembers its zoom.
 - **The time strip**, on top, to scale against the slot. Lanes: the time (with what's left of the
   slot hatched amber, or how far over), the beats as cue strips, one lane per label field in its
   options' colours (Not sure hatched amber, and the shift reason, or **Needs a reason**, where the
-  status changes), the blocks in order, and the jokes as numbered chips in their Vibe colour, edged
+  status changes), the blocks in order (in smaller type, so short blocks stay readable), and the jokes as numbered chips in their Vibe colour, edged
   yellow (locked) or dashed teal (loose), with gates as sky brackets ("if 6 lands"). Crowd work
   questions are orchid **?** chips. Only beats have time: blocks and jokes keep their order in equal
   slots, so their widths say nothing about how long they run. Tap a joke chip to scroll to it on
@@ -155,7 +155,7 @@ and each device remembers its zoom.
   status; Standalone jokes outlined white with their title; crowd work in orchid with its questions,
   Have a reply or No reply yet, and the replies. Each joke shows its number in the set, setup,
   punchline (yellow locked, teal loose), Vibe, Generic, status, runtime, Locked or Loose and its
-  tag lines; a gate is a sky box with what rides on it under "If 6 lands". Between columns, an arrow
+  tag lines (each in small amber under the punchline); a gate is a sky box with what rides on it under "If 6 lands". Between columns, an arrow
   and the shift reason, amber **Shift needs a reason** when one is missing.
 
 <img src="screenshots/desktop-birds-eye.webp" alt="Bird's eye view: the time strip over the beat board">
