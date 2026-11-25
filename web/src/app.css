@@ -15,7 +15,7 @@
   --color-rule-strong: rgb(236 230 218 / 0.16);
   --color-paper: #ece6da;
   --color-dim: #a3a7b3;
-  --color-faint: #6f7689;
+  --color-faint: #8b91a3; /* 4.5:1 or more on ink, ink-2 and ink-3 (WCAG AA for text) */
   --color-tape: #f0cf5a;
   --color-tape-deep: #d8b744;
   --color-tape-ink: #2b2512;

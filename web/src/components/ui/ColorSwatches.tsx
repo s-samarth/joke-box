@@ -38,13 +38,13 @@ export function ColorSwatches({ value, onChange, label = 'Colour' }: Props) {
     <fieldset className="flex flex-wrap gap-2">
       <legend className="sr-only">{label}</legend>
       {SWATCHES.map((s) => (
-        <label key={s.color} title={s.name} className={`relative inline-flex size-8 cursor-pointer items-center justify-center rounded-full transition ${ring(s.color === current)}`} style={{ backgroundColor: s.color }}>
+        <label key={s.color} title={s.name} className={`relative inline-flex size-8 pointer-coarse:size-11 cursor-pointer items-center justify-center rounded-full transition ${ring(s.color === current)}`} style={{ backgroundColor: s.color }}>
           <input type="radio" name={group} value={s.color} checked={s.color === current} onChange={() => onChange(s.color)} aria-label={s.name} className="peer sr-only" />
           {s.color === current && <Check size={15} style={{ color: onColor(s.color) }} aria-hidden />}
           <span className="pointer-events-none absolute inset-0 rounded-full peer-focus-visible:outline-2 peer-focus-visible:outline-offset-4 peer-focus-visible:outline-tape" aria-hidden />
         </label>
       ))}
-      <label title="Custom colour" className={`relative inline-flex size-8 cursor-pointer items-center justify-center rounded-full transition ${custom ? ring(true) : 'bg-ink-3 text-dim hover:text-paper'}`} style={custom ? { backgroundColor: current } : undefined}>
+      <label title="Custom colour" className={`relative inline-flex size-8 pointer-coarse:size-11 cursor-pointer items-center justify-center rounded-full transition ${custom ? ring(true) : 'bg-ink-3 text-dim hover:text-paper'}`} style={custom ? { backgroundColor: current } : undefined}>
         <input ref={picker} type="color" value={current} onChange={(e) => setPreview(e.target.value)} aria-label="Custom colour" className="peer absolute inset-0 size-full cursor-pointer opacity-0" />
         {custom ? <Check size={15} style={{ color: onColor(current) }} aria-hidden /> : <Pipette size={15} aria-hidden />}
         <span className="pointer-events-none absolute inset-0 rounded-full peer-focus-visible:outline-2 peer-focus-visible:outline-offset-4 peer-focus-visible:outline-tape" aria-hidden />

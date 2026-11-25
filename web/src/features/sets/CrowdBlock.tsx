@@ -10,7 +10,7 @@ import { GrowingText, Input } from '../../components/ui/Field'
 type Crowd = Extract<SetEntry, { kind: 'crowd' }>
 
 const small = 'inline-flex h-8 items-center gap-1 rounded-md px-2 text-[13px] text-dim hover:bg-ink-3 hover:text-paper'
-const remove = 'inline-flex size-8 shrink-0 items-center justify-center rounded-md text-faint hover:bg-ink-3 hover:text-paper'
+const remove = 'inline-flex size-8 pointer-coarse:size-11 shrink-0 items-center justify-center rounded-md text-faint hover:bg-ink-3 hover:text-paper'
 
 export function CrowdBlock({ entry, onChange }: { entry: Crowd; onChange: (e: Crowd) => void }) {
   const setQ = (id: string, change: (q: SetQuestion) => SetQuestion) =>

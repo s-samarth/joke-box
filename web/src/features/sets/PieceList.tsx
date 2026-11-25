@@ -17,7 +17,7 @@ interface Props {
 }
 
 const tool = 'inline-flex h-8 items-center gap-1 rounded-md px-2 text-[13px] font-semibold transition-colors'
-const icon = 'inline-flex size-8 items-center justify-center rounded-md text-faint hover:bg-ink-3 hover:text-paper disabled:opacity-30'
+const icon = 'inline-flex size-8 pointer-coarse:size-11 items-center justify-center rounded-md text-faint hover:bg-ink-3 hover:text-paper disabled:opacity-30'
 
 function tone(p: SetPiece) {
   if (p.gate) return { text: 'text-sky', border: 'border-sky', label: 'Gate' }

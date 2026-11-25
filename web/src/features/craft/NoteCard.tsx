@@ -100,7 +100,7 @@ export function NoteCard({ note, areas, showArea, index }: { note: CraftNote; ar
         <Icon size={14} aria-hidden />
         <span>{kindName(kinds, note.kind_id)}{showArea && area ? `, ${area.name}` : ''}</span>
         <span className="relative z-10 -my-1.5 -mr-2 ml-auto">
-          <Dropdown items={items} trigger={<button type="button" aria-label={`More for ${note.title}`} className="inline-flex size-8 items-center justify-center rounded-md text-faint hover:bg-ink-4 hover:text-paper"><MoreHorizontal size={16} /></button>} />
+          <Dropdown items={items} trigger={<button type="button" aria-label={`More for ${note.title}`} className="inline-flex size-8 pointer-coarse:size-11 items-center justify-center rounded-md text-faint hover:bg-ink-4 hover:text-paper"><MoreHorizontal size={16} /></button>} />
         </span>
       </div>
       <Link to={`/craft/${note.id}`} className="mt-1.5 block leading-snug font-medium after:absolute after:inset-0 after:content-['']">{note.title}</Link>

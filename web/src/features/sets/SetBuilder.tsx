@@ -99,13 +99,13 @@ function Builder({ setlist }: { setlist: Setlist }) {
   return (
     <div className="mx-auto max-w-6xl pb-12">
       <div className="flex h-12 items-center justify-between gap-2 lg:mt-6">
-        <Link to="/sets" className="inline-flex items-center gap-1.5 text-dim hover:text-paper"><ArrowLeft size={18} /> Sets</Link>
+        <Link to="/sets" aria-label="Sets" className="inline-flex min-w-0 items-center gap-1.5 text-dim hover:text-paper"><ArrowLeft size={18} /><span className="max-[359px]:hidden">Sets</span></Link>
         <div className="flex gap-0.5">
           <button type="button" onClick={() => setSheet('guide')} aria-label="How sets work" title="How sets work" className={iconLink}><CircleHelp size={18} /></button>
           <button type="button" onClick={() => setSheet('fields')} aria-label="Label fields" title="Label fields" className={iconLink}><SlidersHorizontal size={18} /></button>
           <button type="button" onClick={() => setSheet('craft')} aria-label="Notes on building a set" title="Notes on building a set" className={iconLink}><GraduationCap size={18} /></button>
           <Link to={`/sets/${setlist.id}/print`} aria-label="Cue card" title="Cue card" className={iconLink}><ScrollText size={18} /></Link>
-          <Link to={`/sets/${setlist.id}/stage`} className="ml-1 inline-flex h-10 items-center gap-2 rounded-lg bg-tape px-3 font-semibold text-tape-ink"><Play size={16} /> On stage</Link>
+          <Link to={`/sets/${setlist.id}/stage`} aria-label="On stage" className="ml-1 inline-flex h-10 shrink-0 items-center gap-2 rounded-lg bg-tape px-3 font-semibold text-tape-ink"><Play size={16} /><span className="max-[359px]:hidden">On stage</span></Link>
         </div>
       </div>
       <div className="max-w-3xl">

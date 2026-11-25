@@ -124,7 +124,7 @@ export function EditableBody({ body, onChange, onTick, onLost }: Props) {
             <div className="group relative -mx-2 cursor-text rounded-lg px-2 py-0.5 transition-colors hover:bg-ink-2/70" onClick={(e) => onBlockClick(e, s)}>
               <BlockView block={s.block} onTick={onTick} gap={false} />
               <div className="pointer-events-none absolute top-0 -right-1 flex rounded-lg bg-ink-2 opacity-0 shadow-lift ring-1 ring-rule transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 focus-within:pointer-events-auto focus-within:opacity-100">
-                <button type="button" aria-label="Edit this part" title="Edit this part" onClick={() => open(s)} className="inline-flex size-8 items-center justify-center rounded-md text-dim hover:bg-ink-3 hover:text-paper"><Pencil size={15} /></button>
+                <button type="button" aria-label="Edit this part" title="Edit this part" onClick={() => open(s)} className="inline-flex size-8 pointer-coarse:size-11 items-center justify-center rounded-md text-dim hover:bg-ink-3 hover:text-paper"><Pencil size={15} /></button>
                 <AddBlockMenu onPick={(kind) => startNew(body, s.to, kind)} />
               </div>
             </div>

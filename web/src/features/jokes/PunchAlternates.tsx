@@ -43,7 +43,7 @@ export function PunchAlternates({ punchline, alternates, onChange }: Props) {
                 onClick={() => { setAdded(null); onChange(swapPunch(punchline, alternates, i)) }} className={`${quiet} gap-1 px-2 text-sm hover:text-tape disabled:pointer-events-none disabled:opacity-40`}>
                 <ArrowUp size={14} /> Use
               </button>
-              <button type="button" aria-label={`Remove alternate punch ${i + 1}`} onClick={() => remove(i)} className={`${quiet} size-8`}>
+              <button type="button" aria-label={`Remove alternate punch ${i + 1}`} onClick={() => remove(i)} className={`${quiet} size-8 pointer-coarse:size-11`}>
                 <X size={15} />
               </button>
             </li>

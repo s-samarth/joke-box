@@ -43,7 +43,7 @@ export function TechniquePanel({ techniqueId, onChange }: Props) {
           <GraduationCap size={15} className="mr-1.5 inline align-[-2px] text-tape" />
           <Link to={`/craft/${note.id}`} className="font-medium text-paper hover:text-tape">{note.title}</Link>
         </p>
-        <button type="button" aria-label="Stop using this technique" onClick={() => onChange(null)} className="-mt-1 -mr-1 inline-flex size-8 items-center justify-center rounded-md text-faint hover:bg-ink-3 hover:text-paper"><X size={16} /></button>
+        <button type="button" aria-label="Stop using this technique" onClick={() => onChange(null)} className="-mt-1 -mr-1 inline-flex size-8 pointer-coarse:size-11 items-center justify-center rounded-md text-faint hover:bg-ink-3 hover:text-paper"><X size={16} /></button>
       </div>
       {prompt && (
         <div className="mt-3">

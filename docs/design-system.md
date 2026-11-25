@@ -18,7 +18,7 @@ block, so every token is also a utility class (`bg-ink-2`, `text-tape`, `ring-ru
 | `rule` / `rule-strong` | paper at 9% / 16% | Hairline borders and dividers |
 | `paper` | `#ece6da` | Body text |
 | `dim` | `#a3a7b3` | Secondary text |
-| `faint` | `#6f7689` | Hints, meta, placeholders |
+| `faint` | `#8b91a3` | Hints, meta, placeholders (4.5:1 or more on ink, ink-2 and ink-3) |
 | `tape` / `tape-deep` | `#f0cf5a` / `#d8b744` | The accent: primary buttons, punchlines, focus ring, the light bar while there's room |
 | `tape-ink` | `#2b2512` | Text on tape |
 | `amber` | `#ffb547` | The last minute of the slot; offline |
