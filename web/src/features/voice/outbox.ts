@@ -129,12 +129,14 @@ export async function flush(): Promise<void> {
   if (running || !onlineManager.isOnline()) return
   running = true
   clearTimeout(retry)
+  let tried = false
   try {
     // Another tab may be uploading the same notes: wait for it, then start from what's left.
     await oneTabAtATime('jokebox-outbox', async () => {
       await reload()
       for (const note of [...state.items].reverse()) {
         if (note.failed || discarded.has(note.id)) continue
+        tried = true
         emit({ uploading: note.id })
         try {
           await send(note)
@@ -158,7 +160,9 @@ export async function flush(): Promise<void> {
     if (again) { again = false; void flush() }
     emit({ uploading: null })
     await reload()
-    void queryClient.invalidateQueries({ queryKey: keys.voiceNotes })
+    // Only a pass that sent something changes the server's list. An empty pass (every launch and
+    // return online) refetched it anyway, alone and outside the launch batch: a server start.
+    if (tried) void queryClient.invalidateQueries({ queryKey: keys.voiceNotes })
   }
 }
 
