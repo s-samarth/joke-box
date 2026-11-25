@@ -71,6 +71,19 @@ export function keepUnsynced(key: readonly unknown[], variables: unknown, error:
   void update((current) => [...current.filter((i) => same === null || subject(i.key, i.variables) !== same), entry])
 }
 
+/**
+ * A later save of the same thing went through. Each save sends the whole thing, as the editor
+ * had it, so the newer one already carries what the failed one held: keeping the failed one
+ * would let Retry put the older text back over it (with this device's own version as its base,
+ * so with no clash). Deletes and links aren't whole copies, so they stay.
+ */
+export function forgetSuperseded(key: readonly unknown[], variables: unknown) {
+  if (key[1] !== 'save') return
+  const same = subject(key, variables)
+  if (same === null || !items.some((i) => subject(i.key, i.variables) === same)) return
+  void update((current) => current.filter((i) => subject(i.key, i.variables) !== same))
+}
+
 export const discardUnsynced = (id: string) => update((current) => current.filter((i) => i.id !== id))
 
 export const clearUnsynced = () => update(() => [])

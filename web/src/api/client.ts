@@ -12,6 +12,17 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Vercel's bot checkpoint answered instead of JokeBox (a 403 page with `x-vercel-mitigated`). It
+ * lifts once a normal browser tab passes the check, so a save waits for it, like a sign-in that
+ * ran out, instead of failing for good.
+ */
+export class CheckpointError extends ApiError {
+  constructor() {
+    super(403, "Vercel's bot check is up. Open JokeBox in a normal browser tab; saves wait until then.")
+  }
+}
+
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
 /** How long a request may take before we treat it as no signal (a weak basement signal can hang). */
@@ -50,6 +61,7 @@ export async function api<T>(path: string, method: Method = 'GET', body?: unknow
   // 511: wifi that wants you to sign in, said politely.
   if (response.status === 511) noConnection()
   if (!response.ok) {
+    if (response.headers.get('x-vercel-mitigated')) throw new CheckpointError()
     throw new ApiError(response.status, await errorMessage(response))
   }
   if (response.status === 204) return undefined as T

@@ -77,10 +77,17 @@ under fixed keys (`setMutationDefaults`), each spreading the shared `QUEUED` opt
 - **Retries:** a save that never reached the server is retried (pausing while offline, which
   costs no tries) up to 20 times while the server answers `/health`, so one stuck request can't
   hold up the queue forever. A 5xx, 408 or 429 gets three more tries. A 401 (the sign-in ran out)
-  waits, retrying each minute, until you sign in again. Any other refusal stops.
+  waits, retrying each minute, until you sign in again. Vercel's bot checkpoint (a 403 with
+  `x-vercel-mitigated`) waits the same way (`CheckpointError` in client.ts): it lifts once a normal
+  tab passes the check, so it isn't a refusal. Any other refusal stops.
 - **Nothing refused is lost:** a queued save that fails for good goes, with its variables, to the
   **Couldn't sync** list ([unsynced.ts](../web/src/api/unsynced.ts), its own IndexedDB key) via
   the `MutationCache` `onError`. A strip above every page opens it, with Retry, Copy and Discard.
+  When a later save of the same thing goes through (`onSuccess`), its entry leaves the list: each
+  save sends the whole thing, so the newer one carries it, and a Retry would otherwise put the
+  older text back over the newer with this device's own version as its base (no clash). Signing
+  out counts these, and recordings that failed to upload, in its warning, since it wipes them.
+  "Reload a fresh copy" keeps this device's own version chains and moved sessions.
 - **Written-at times:** new jokes, premises, observations, voice notes and craft notes send `created_at`, so
   something written offline keeps the time it was written; the server keeps it on create only and
   caps it at now.
@@ -348,7 +355,8 @@ flowchart LR
 - **Uploads time out:** a minute plus time to send at 20 KB/s (at most 15 minutes), so a stalled
   upload can't hold up the recordings behind it; a timeout counts as no connection.
 - **Outbox:** every recording is saved on the device first. The details and the audio upload as two
-  calls, and retry when back online. A permanent refusal (too large, say) marks the note as failed,
+  calls, and retry when back online. A recording made while another uploads goes in a second
+  pass, and a pass cut short by a server error tries again 30 seconds later. A permanent refusal (too large, say) marks the note as failed,
   so you can delete it.
 - **Playback:** notes are fetched as a Blob and played from an object URL rather than by pointing
   `<audio>` at the API. Safari only streams from servers that answer byte-range requests, and this

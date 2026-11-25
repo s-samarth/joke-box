@@ -3,6 +3,8 @@ import { AppWindow, Download, FolderInput, LogOut, Plug, RefreshCcw } from 'luci
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useMe, useReseed } from '../api/library'
+import { useUnsynced } from '../api/unsynced'
+import { useOutbox } from '../features/voice/outbox'
 import { signOut } from '../api/session'
 import { useFeedback } from '../components/ui/feedbackContext'
 import { Dropdown, type MenuItem } from '../components/ui/Menu'
@@ -16,7 +18,10 @@ export function AccountMenu({ showName = false }: { showName?: boolean }) {
   const reseed = useReseed()
   const { confirm, toast } = useFeedback()
   const navigate = useNavigate()
-  const { count: waiting } = useWaiting()
+  const { count: queued } = useWaiting()
+  // Couldn't sync and recordings that failed to upload are wiped too, so they count.
+  const stuck = useUnsynced().length + useOutbox().items.filter((n) => n.failed).length
+  const waiting = queued + stuck
   // Signing out wipes this phone, so changes that haven't synced yet would be lost: ask first.
   const leave = async () => {
     const changes = waiting === 1 ? '1 change hasn’t' : `${waiting} changes haven’t`

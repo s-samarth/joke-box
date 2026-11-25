@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ApiError } from './client'
+import { ApiError, CheckpointError } from './client'
 import { NetworkError } from './network'
 import { QUEUED, retrySync } from './sync'
 
@@ -23,6 +23,12 @@ describe('retrySync', () => {
   it('waits, a minute at a time, for you to sign in again', () => {
     expect(retrySync(500, new ApiError(401, 'Sign in'))).toBe(true)
     expect(QUEUED.retryDelay(3, new ApiError(401, 'Sign in'))).toBe(60_000)
+  })
+
+  it("waits, a minute at a time, for Vercel's bot check to lift, while a plain 403 is a refusal", () => {
+    expect(retrySync(500, new CheckpointError())).toBe(true)
+    expect(QUEUED.retryDelay(3, new CheckpointError())).toBe(60_000)
+    expect(retrySync(0, new ApiError(403, 'Missing X-Requested-With header'))).toBe(false)
   })
 
   it("doesn't retry a refusal, which won't change", () => {
