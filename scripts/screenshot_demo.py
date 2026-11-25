@@ -1,11 +1,10 @@
 """Fill the demo account with made-up material, so README screenshots show every feature.
 
-The material is in screenshot_demo.json and is all invented; never put real jokes in it. See
-"Regenerating icons and screenshots" in docs/development.md for the steps:
+The material is in screenshot_demo.json, screenshot_extras.py (premises, how the set's jokes went)
+and screenshot_sets.py (a set in beats), all invented; never put real jokes in them. Steps in
+"Regenerating icons and screenshots", docs/development.md:
 
     PYTHONPATH=. uv run python scripts/screenshot_demo.py <folder with note0-2.m4a>
-
-Premises and how the set's jokes went at the last few shows come from screenshot_extras.py.
 """
 
 import json
@@ -20,7 +19,7 @@ from typing import Any
 from fastapi.testclient import TestClient
 
 from app.main import app
-from scripts import screenshot_extras
+from scripts import screenshot_extras, screenshot_sets
 
 DATA = json.loads((Path(__file__).parent / "screenshot_demo.json").read_text())
 NOW = datetime.now(UTC)
@@ -193,6 +192,7 @@ def main() -> None:
     study()
     trash(topics, observation_ids)
     screenshot_extras.add(c, ok)
+    screenshot_sets.add(c, ok)
     print(f"Done: {len(ok(c.get('/api/jokes')))} jokes, {len(ok(c.get('/api/logs')))} shows")
 
 

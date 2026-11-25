@@ -118,7 +118,7 @@ def tidy(db: Session, user: User, beats: list[BeatIn]) -> list[BeatIn]:
     # itself unless it's the lead, so the set still plays what was picked.
     jokes = {p.joke_id for pieces in piece_lists(beats) for p in pieces}
     rows = select(Joke.id, Joke.cluster_id).where(Joke.user_id == user.id, Joke.id.in_(jokes))
-    cluster_of = dict(db.execute(rows.execution_options(**{INCLUDE_TRASHED: True})).tuples().all())
+    cluster_of = dict(db.execute(rows.execution_options(**{INCLUDE_TRASHED: True})).all())
     leads = cluster_leads(db, user)
     out = [b.model_copy(deep=True) for b in beats]
     for beat in out:

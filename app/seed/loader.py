@@ -21,6 +21,7 @@ from app.schemas.library import JokeIn, status_name
 from app.seed.convert import Json, seconds, split_tags, when, wipe
 from app.services import jokes as joke_svc
 from app.services import subtopics
+from app.services.set_tags import add_default_set_tags
 
 
 class Loader:
@@ -165,6 +166,7 @@ class Loader:
         """Replace the user's data with `data`, in one transaction (the caller commits)."""
         wipe(self.db, self.user)
         ensure_defaults(self.db, self.user)
+        add_default_set_tags(self.db, self.user)  # wiped with the rest, as for a new account
         for t in data.get("topics", []):
             topic = self.topic(t["name"])
             for name in t.get("subtopics") or []:

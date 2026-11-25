@@ -115,7 +115,7 @@ def test_performing_tools(claude: tuple[TestClient, str]) -> None:
     opened = result(claude, "get_set", set_id=sets[0]["id"])
     assert set(opened) == SET | {"topics", "beats", "running_order"}
     first = items(opened, "running_order")[0]
-    assert set(first) == BRIEF | {"place", "role", "optional", "loose", "premise", "follows_id"}
+    assert set(first) == fields.RUNNING
     beat = items(opened, "beats")[0]
     assert set(beat) == fields.BEAT
     kinds = {e["kind"]: e for b in opened["beats"] for e in b["entries"]}

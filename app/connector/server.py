@@ -91,7 +91,8 @@ def get_set(set_id: str) -> dict[str, Any]:
     the reason for a status shift. A beat is an ordered list of premises with their jokes, jokes
     with no premise, and crowd work. A loose joke keeps its place but is flexible; a joke that
     guards N jokes is a gate: if it doesn't land, those are skipped. Then every joke in running
-    order with its topic, premise, strength and time, and a count of jokes per topic."""
+    order with its topic, premise, strength, time, vibe and Generic answer (null: not answered),
+    and a count of jokes per topic."""
     with reading() as (db, user):
         return performing.get_set(db, user, set_id)
 
