@@ -39,16 +39,18 @@ SCOPE = "read"
 # Logging shows. Only the set-review engine asks for it; Claude's own connector reads only.
 SHOWS_SCOPE = "shows"
 SCOPES = [SCOPE, SHOWS_SCOPE]
-# Web apps' sign-in callbacks: Claude (claude.com is where it may move), ChatGPT and VS Code.
-# Apps on your own computer may also use a loopback address (Claude Code, Gemini CLI, Codex
-# CLI) or their own URL scheme such as cursor:// (RFC 8252). PKCE keeps those safe, and every
-# sign-in still needs your yes on the consent page.
+# Web apps' sign-in callbacks: Claude (claude.com is where it may move), ChatGPT, VS Code
+# and Cursor's desktop registration. Apps on your own computer may also use a loopback
+# address (Claude Code, Gemini CLI, Codex CLI, Cursor's localhost callback) or their own URL
+# scheme such as cursor:// (RFC 8252). PKCE keeps those safe, and every sign-in still needs
+# your yes on the consent page.
 WEB_CALLBACKS = {
     "https://claude.ai/api/mcp/auth_callback",
     "https://claude.com/api/mcp/auth_callback",
     "https://chatgpt.com/connector_platform_oauth_redirect",
     "https://platform.openai.com/apps-manage/oauth",
     "https://vscode.dev/redirect",
+    "https://www.cursor.com/agents/mcp/oauth/callback",
 }
 LOOPBACK = {"localhost", "127.0.0.1", "::1"}
 # Schemes a browser would run or read itself, never an app's own sign-in callback.
