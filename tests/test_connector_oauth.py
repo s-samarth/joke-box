@@ -19,6 +19,24 @@ from tests.conftest import signed_in
 from tests.connector_auth import allow, authorize, connect, register, rpc, swap_code
 
 
+def test_cursor_desktop_registers_both_callbacks() -> None:
+    """Cursor's desktop dynamic registration sends its web callback and localhost together."""
+    client = TestClient(app)
+    body = {
+        "redirect_uris": [
+            "https://www.cursor.com/agents/mcp/oauth/callback",
+            "http://localhost:8787/callback",
+        ],
+        "client_name": "Cursor",
+        "token_endpoint_auth_method": "none",
+    }
+    assert client.post("/register", json=body).status_code == 201
+    other = {**body, "redirect_uris": ["https://not-cursor.example/oauth/callback"]}
+    refused = client.post("/register", json=other)
+    assert refused.status_code == 400
+    assert refused.json()["error"] == "invalid_redirect_uri"
+
+
 def test_ai_apps_and_loopback_callbacks_can_register() -> None:
     client = TestClient(app)
     assert register(client).status_code == 201
