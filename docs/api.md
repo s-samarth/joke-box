@@ -254,9 +254,10 @@ watchlist routines and craft notes wait here 30 days after they're deleted. `{ki
 | DELETE | `/api/trash/{kind}/{id}` | Erases it now (and a voice note's audio). Only acts on things in the Trash |
 | DELETE | `/api/trash` | Empties the Trash |
 
-## Claude connector (MCP)
+## AI connector (MCP)
 
-`/mcp` is an [MCP](https://modelcontextprotocol.io) server, so Claude can read your JokeBox while
+`/mcp` is an [MCP](https://modelcontextprotocol.io) server, so any MCP app (Claude, ChatGPT,
+Cursor, VS Code, Gemini CLI, Codex) can read your JokeBox while
 you write with it. Its instructions tell Claude what a cluster is, and to count one as a single
 piece of material. It's in [app/connector/](../app/connector/) and uses the official `mcp` Python
 SDK over streamable HTTP, stateless, with JSON replies: each request stands alone, which suits
@@ -264,7 +265,7 @@ serverless functions. Only `POST /mcp` is answered (a `GET` gets 405), and the s
 subscriptions: both would be streams that a stateless server never writes to, held open until
 the function timed out.
 
-**Sign-in** is OAuth 2.1, the way Claude's custom connectors expect, built on the SDK's OAuth
+**Sign-in** is standard MCP OAuth 2.1 (discovery, dynamic registration, PKCE), built on the SDK's OAuth
 endpoints with JokeBox's own storage ([oauth.py](../app/connector/oauth.py),
 [tokens.py](../app/connector/tokens.py)):
 
@@ -272,9 +273,9 @@ endpoints with JokeBox's own storage ([oauth.py](../app/connector/oauth.py),
 |---|---|
 | `GET /.well-known/oauth-protected-resource/mcp` | Says `/mcp` is protected and that JokeBox itself issues the tokens |
 | `GET /.well-known/oauth-authorization-server` | The endpoints below, PKCE `S256`, scopes `read` (the default) and `shows` (logging shows; only set-review asks for it, and the consent page then says it can log shows) |
-| `POST /register` | Dynamic client registration. Only Claude's callbacks (`https://claude.ai/api/mcp/auth_callback`, and the same on claude.com) and loopback addresses (`http://localhost:*`, for apps on your computer) are accepted; anything else is `400 invalid_redirect_uri`. A registration over 4,096 characters, or a `client_name` over 100, is `400 invalid_client_metadata`: anyone can register, so the size is capped before it's stored |
+| `POST /register` | Dynamic client registration. Accepted callbacks: the web apps' own (Claude's `https://claude.ai/api/mcp/auth_callback` and the same on claude.com, ChatGPT's `https://chatgpt.com/connector_platform_oauth_redirect` and `https://platform.openai.com/apps-manage/oauth`, VS Code's `https://vscode.dev/redirect`), loopback addresses (`http://localhost:*`, `127.0.0.1`, `[::1]`, for Claude Code, Gemini CLI, Codex CLI) and an app's own URL scheme such as `cursor://` (RFC 8252). Any other `https`/`http` address, and `javascript:`, `data:`, `file:` and the like, are anything else is `400 invalid_redirect_uri`. A registration over 4,096 characters, or a `client_name` over 100, is `400 invalid_client_metadata`: anyone can register, so the size is capped before it's stored |
 | `GET /authorize` | Checks the request, then sends the browser to the consent page |
-| `GET/POST /oauth/consent` | Sign in (Google, or the dev sign-in locally) and Allow or Don't allow. The request travels in the address, signed and good for 10 minutes; the form is tied to you and the request |
+| `GET/POST /oauth/consent` | Sign in (Google, or the dev sign-in locally) and Allow or Don't allow. The page names the app and where it will send you back (its site, or its scheme like `cursor://`), since an app picks its own name. The request travels in the address, signed and good for 10 minutes; the form is tied to you and the request |
 | `POST /token` | Code for tokens (PKCE checked), or a refresh token for new ones |
 | `POST /revoke` | Ends a sign-in |
 

@@ -11,7 +11,7 @@
 | [design-system.md](design-system.md) | Colours, type, components |
 | [architecture.md](architecture.md) | How it's built, and the decisions with their trade-offs |
 | [data-model.md](data-model.md) | Tables, columns and migrations |
-| [api.md](api.md) | The REST API and the Claude connector's tools |
+| [api.md](api.md) | The REST API and the AI connector's (MCP) tools |
 | [frontend.md](frontend.md) | The web app's structure, offline queue and caching |
 | [development.md](development.md) | Running it, checks, conventions, git, deploying |
 | [backups.md](backups.md) | Backups and restores |

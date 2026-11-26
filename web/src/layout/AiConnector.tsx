@@ -1,5 +1,5 @@
 /**
- * How to connect Claude to JokeBox, and the apps connected now with a Disconnect for each.
+ * How to connect an AI app (Claude, ChatGPT, Cursor, Gemini CLI...) to JokeBox, and the apps connected now with a Disconnect for each.
  * Opened from the account menu.
  */
 import { Copy } from 'lucide-react'
@@ -33,21 +33,21 @@ function ConnectionRow({ connection }: { connection: Connection }) {
   )
 }
 
-export function ClaudeConnector({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+export function AiConnector({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const { data: connections, isError } = useConnections(open)
   const { toast } = useFeedback()
   const copy = () => navigator.clipboard.writeText(address()).then(() => toast('Copied'), () => toast('Couldn’t copy'))
   return (
-    <Modal open={open} onOpenChange={onOpenChange} title="Claude connector" description="Let Claude read your JokeBox while you write. It can’t change anything.">
+    <Modal open={open} onOpenChange={onOpenChange} title="AI connector" description="Let an AI app read your JokeBox while you write. It can’t change anything.">
       <ol className="list-decimal space-y-1.5 pl-5 text-sm text-dim">
-        <li>In Claude, open Settings, then Connectors, and add a custom connector.</li>
+        <li>In your AI app, add a custom connector or remote MCP server (in Claude: Settings, then Connectors).</li>
         <li>Paste this address and press Connect:</li>
       </ol>
       <div className="mt-2 flex items-center gap-2">
         <code className="min-w-0 flex-1 truncate rounded-lg bg-ink-3 px-3 py-2 text-sm">{address()}</code>
         <Button small icon={<Copy size={16} />} onClick={() => void copy()}>Copy</Button>
       </div>
-      <p className="mt-2 text-sm text-dim">Sign in here when Claude asks, then allow it. It works on your phone too.</p>
+      <p className="mt-2 text-sm text-dim">Sign in here when the app asks, then allow it. Works with Claude, ChatGPT, Cursor, Gemini CLI, Codex and other MCP apps.</p>
       <h3 className="mt-5 mb-2 font-medium">Connected now</h3>
       {isError && <p className="text-sm text-dim">Couldn’t load this. Check your connection.</p>}
       {connections?.length === 0 && <p className="text-sm text-dim">Nothing is connected.</p>}

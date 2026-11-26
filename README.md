@@ -46,7 +46,7 @@ Plus:
 - **Several tabs** if you want them: one tab at a time by default, so offline saves can't clash, with a switch in the account menu.
 - **Premises:** the ideas under your jokes, each with the jokes resting on it, and a web of them beside the jokes list. On a phone it shares the **Ideas** tab with Observations, one tap apart.
 - **Backups:** a nightly encrypted copy of everything, and Download everything as one ZIP from the account menu ([backups.md](docs/backups.md)).
-- **Claude can read it:** a read-only connector lets Claude search your jokes, premises, sets, shows (with how particular jokes went, and your comments on them), notes, voice notes and brainstorms while you write together.
+- **Any AI can read it:** a read-only MCP connector lets Claude, ChatGPT, Cursor, Gemini CLI or Codex search your jokes, premises, sets, shows (with how particular jokes went, and your comments on them), notes, voice notes and brainstorms while you write together.
 - Topic folders on Home, a "needs work" list, and CSV export of your shows.
 
 ## How it's built
@@ -97,7 +97,7 @@ locally it uses SQLite and a folder for voice notes.
 | [System design](docs/architecture.md) | Architecture, request lifecycle, auth, data isolation, deployment, CI, trade-offs |
 | [Frontend architecture](docs/frontend.md) | Server state, optimistic updates, the offline queue, autosave, the voice pipeline, PWA |
 | [Data model](docs/data-model.md) | Every table, what deletes do, migrations, the Bit Vault importer |
-| [API reference](docs/api.md) | Every endpoint, with its body and rules, and the Claude connector (MCP) |
+| [API reference](docs/api.md) | Every endpoint, with its body and rules, and the AI connector (MCP) |
 | [Development and operations](docs/development.md) | Setup, checks, conventions, migrations, deploying to Vercel, runbook |
 | [Backups](docs/backups.md) | The nightly encrypted backup, Download everything, and how to restore |
 | [Moving to Singapore](docs/move-region.md) | Moving the server and database to another region, step by step, with the way back |
@@ -105,7 +105,7 @@ locally it uses SQLite and a folder for voice notes.
 ## Project layout
 
 ```
-app/        FastAPI: models, schemas, routers, services, auth, seed, connector (MCP for Claude)
+app/        FastAPI: models, schemas, routers, services, auth, seed, connector (MCP for any AI app)
 alembic/    migrations (append-only; CI enforces it)
 tests/      pytest
 web/        React app: api/, components/ui/, layout/, features/<area>/, lib/

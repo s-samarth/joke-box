@@ -1,4 +1,4 @@
-/** Your avatar: import, download everything, the Claude connector, several tabs, sign out, and (on your laptop only) reset to demo data. */
+/** Your avatar: import, download everything, the AI connector, several tabs, sign out, and (on your laptop only) reset to demo data. */
 import { AppWindow, Download, FolderInput, LogOut, Plug, RefreshCcw } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
@@ -10,7 +10,7 @@ import { useFeedback } from '../components/ui/feedbackContext'
 import { Dropdown, type MenuItem } from '../components/ui/Menu'
 import { DownloadEverything } from '../features/export/DownloadEverything'
 import { manyTabs, setManyTabs } from '../lib/oneTab'
-import { ClaudeConnector } from './ClaudeConnector'
+import { AiConnector } from './AiConnector'
 import { useWaiting } from './useWaiting'
 
 export function AccountMenu({ showName = false }: { showName?: boolean }) {
@@ -47,7 +47,7 @@ export function AccountMenu({ showName = false }: { showName?: boolean }) {
   const items: MenuItem[] = [
     { label: 'Import', icon: <FolderInput size={16} />, onSelect: () => navigate('/import') },
     { label: 'Download everything', icon: <Download size={16} />, onSelect: () => setExporting(true) },
-    { label: 'Claude connector', icon: <Plug size={16} />, onSelect: () => setConnector(true) },
+    { label: 'AI connector', icon: <Plug size={16} />, onSelect: () => setConnector(true) },
     { label: 'Several tabs', icon: <AppWindow size={16} />, checked: many, onSelect: () => void toggleTabs() },
     { label: 'Sign out', icon: <LogOut size={16} />, onSelect: () => void leave() },
   ]
@@ -64,7 +64,7 @@ export function AccountMenu({ showName = false }: { showName?: boolean }) {
 
   return (
     <>
-      <ClaudeConnector open={connector} onOpenChange={setConnector} />
+      <AiConnector open={connector} onOpenChange={setConnector} />
       <DownloadEverything open={exporting} onOpenChange={setExporting} />
       <Dropdown
         align="start"

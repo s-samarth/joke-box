@@ -1,6 +1,7 @@
 """The consent page's HTML, in the app's colours. Every value put in is escaped."""
 
 from html import escape
+from urllib.parse import urlparse
 
 STYLE = """
 :root { color-scheme: dark; }
@@ -29,7 +30,23 @@ def shell(title: str, body: str) -> str:
     )
 
 
-def page(app_name: str, email: str, request_token: str, check: str, logs: bool = False) -> str:
+def callback_label(url: str) -> str:
+    """Where the app sends you back: a website's address, or an app's own scheme (cursor://).
+    The app picks its own name, so this is the part you can check it against."""
+    parsed = urlparse(url)
+    if parsed.scheme in ("http", "https"):
+        return parsed.netloc
+    return f"{parsed.scheme}://"
+
+
+def page(
+    app_name: str,
+    email: str,
+    request_token: str,
+    check: str,
+    logs: bool = False,
+    back: str = "",
+) -> str:
     name = escape(app_name)
     verb = "read your JokeBox and log shows" if logs else "read your JokeBox"
     can = (
@@ -38,10 +55,12 @@ def page(app_name: str, email: str, request_token: str, check: str, logs: bool =
         if logs
         else "It can't change or delete anything."
     )
+    sent_back = f"<p>It will send you back to <strong>{escape(back)}</strong>.</p>" if back else ""
     return shell(
         f"Connect {app_name} to JokeBox",
         f"""<h1>Let {name} {verb}?</h1>
 <p>Signed in as <strong>{escape(email)}</strong>.</p>
+{sent_back}
 <p>{name} will be able to read:</p>
 <ul><li>your jokes, premises, sets and shows</li>
 <li>your observations, Brainstorms and Rewrites</li>
@@ -61,5 +80,5 @@ def page(app_name: str, email: str, request_token: str, check: str, logs: bool =
 EXPIRED = shell(
     "Connecting to JokeBox",
     """<h1>This link has run out</h1>
-<p>Sign-in links last 10 minutes. Go back to Claude and connect JokeBox again.</p>""",
+<p>Sign-in links last 10 minutes. Go back to your AI app and connect JokeBox again.</p>""",
 )
