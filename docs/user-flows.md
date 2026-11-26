@@ -348,9 +348,9 @@ recording and you only check it.
 5. Offline, Put back and Delete now wait and sync like any save. Editing something on another
    device after it was deleted waits in "Couldn't sync" until you put it back and retry.
 
-## 14. Write with Claude
+## 14. Write with Claude (or any AI app)
 
-1. In JokeBox, open your account menu and choose **Claude connector**. It shows the address to
+1. In JokeBox, open your account menu and choose **AI connector**. It shows the address to
    add (`https://<your JokeBox>/mcp`) with a Copy button.
 2. In Claude, open Settings, then Connectors, add a custom connector and paste the address.
    Claude opens JokeBox's sign-in: sign in with Google if asked, then **Allow**. It works in
@@ -359,5 +359,17 @@ recording and you only check it.
    what it needs (your premises and their jokes, a set's running order, your shows, your voice
    notes' labels, your Craft notes) and quotes the notes it applies. It only reads: you write and edit in JokeBox.
    (The one exception is set-review, which logs shows you reviewed with it: see 8a.)
-4. **Claude connector** in the account menu lists what's connected and when it was last used.
+4. **AI connector** in the account menu lists what's connected and when it was last used.
    **Disconnect** stops it at once; connect again any time.
+
+Other AI apps connect the same way: give them the address, sign in, **Allow**. The consent page
+names the app and where it sends you back, so check both.
+
+| App | How |
+|---|---|
+| ChatGPT | Settings, Apps & Connectors, Advanced: turn on Developer mode. Then Create, paste the address, authentication OAuth |
+| Cursor | `~/.cursor/mcp.json`: `{"mcpServers": {"jokebox": {"url": "https://<your JokeBox>/mcp"}}}`, then press Connect in Settings, MCP |
+| VS Code (Copilot) | `.vscode/mcp.json`: `{"servers": {"jokebox": {"type": "http", "url": "https://<your JokeBox>/mcp"}}}` |
+| Gemini CLI | `~/.gemini/settings.json`: `{"mcpServers": {"jokebox": {"httpUrl": "https://<your JokeBox>/mcp"}}}`, then `/mcp auth jokebox` |
+| Codex CLI | `codex mcp add jokebox --url https://<your JokeBox>/mcp`, then `codex mcp login jokebox` |
+| Claude Code | `claude mcp add --transport http jokebox https://<your JokeBox>/mcp`, then `/mcp` to sign in |

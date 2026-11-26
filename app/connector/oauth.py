@@ -39,13 +39,20 @@ SCOPE = "read"
 # Logging shows. Only the set-review engine asks for it; Claude's own connector reads only.
 SHOWS_SCOPE = "shows"
 SCOPES = [SCOPE, SHOWS_SCOPE]
-# Claude's sign-in callbacks (claude.com is where it may move). Loopback addresses are allowed
-# too, for apps on your own computer such as Claude Code; PKCE keeps those safe.
-CLAUDE_CALLBACKS = {
+# Web apps' sign-in callbacks: Claude (claude.com is where it may move), ChatGPT and VS Code.
+# Apps on your own computer may also use a loopback address (Claude Code, Gemini CLI, Codex
+# CLI) or their own URL scheme such as cursor:// (RFC 8252). PKCE keeps those safe, and every
+# sign-in still needs your yes on the consent page.
+WEB_CALLBACKS = {
     "https://claude.ai/api/mcp/auth_callback",
     "https://claude.com/api/mcp/auth_callback",
+    "https://chatgpt.com/connector_platform_oauth_redirect",
+    "https://platform.openai.com/apps-manage/oauth",
+    "https://vscode.dev/redirect",
 }
 LOOPBACK = {"localhost", "127.0.0.1", "::1"}
+# Schemes a browser would run or read itself, never an app's own sign-in callback.
+UNSAFE_SCHEMES = {"https", "http", "javascript", "data", "file", "blob", "about", "vbscript"}
 # Anyone can register, so a registration is kept only if it's the size of a real one (Claude's
 # is about 600 characters). Without a cap, each one could store megabytes in the database.
 MAX_REGISTRATION = 4096
@@ -54,7 +61,12 @@ MAX_CLIENT_NAME = 100
 
 def allowed_redirect(url: str) -> bool:
     parsed = urlparse(url)
-    return url in CLAUDE_CALLBACKS or (parsed.scheme == "http" and parsed.hostname in LOOPBACK)
+    if url in WEB_CALLBACKS:
+        return True
+    if parsed.scheme == "http":
+        return parsed.hostname in LOOPBACK
+    # An app's own scheme (cursor://...) has a dot or a letter-only name and no credentials.
+    return bool(parsed.scheme) and parsed.scheme not in UNSAFE_SCHEMES and "@" not in url
 
 
 async def run[T](fn: Callable[[], T]) -> T:
@@ -72,7 +84,9 @@ class Provider(OAuthAuthorizationServerProvider[AuthorizationCode, RefreshToken,
     async def register_client(self, client_info: OAuthClientInformationFull) -> None:
         redirects = [str(u) for u in client_info.redirect_uris or []]
         if not redirects or not all(allowed_redirect(u) for u in redirects):
-            raise RegistrationError("invalid_redirect_uri", "Only Claude can connect to JokeBox.")
+            raise RegistrationError(
+                "invalid_redirect_uri", "That sign-in address isn't one JokeBox accepts."
+            )
         too_long_name = len(client_info.client_name or "") > MAX_CLIENT_NAME
         if too_long_name or len(client_info.model_dump_json()) > MAX_REGISTRATION:
             raise RegistrationError("invalid_client_metadata", "That registration is too large.")

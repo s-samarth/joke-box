@@ -1,4 +1,5 @@
-"""Signing Claude in to JokeBox: registration, consent, codes, refresh, and disconnecting.
+"""Signing an AI app (Claude, ChatGPT, Cursor...) in to JokeBox: registration, consent, codes,
+refresh, and disconnecting.
 Everything here is made up."""
 
 import secrets
@@ -18,13 +19,28 @@ from tests.conftest import signed_in
 from tests.connector_auth import allow, authorize, connect, register, rpc, swap_code
 
 
-def test_only_claude_and_loopback_callbacks_can_register() -> None:
+def test_ai_apps_and_loopback_callbacks_can_register() -> None:
     client = TestClient(app)
     assert register(client).status_code == 201
-    assert register(client, "http://localhost:33418/callback").status_code == 201
-    refused = register(client, "https://fake-attacker.example/callback")
-    assert refused.status_code == 400
-    assert refused.json()["error"] == "invalid_redirect_uri"
+    for url in (
+        "http://localhost:33418/callback",
+        "http://127.0.0.1:1455/auth/callback",
+        "https://chatgpt.com/connector_platform_oauth_redirect",
+        "https://vscode.dev/redirect",
+        "cursor://anysphere.cursor-mcp/oauth/callback",
+    ):
+        assert register(client, url).status_code == 201, url
+    for url in (
+        "https://fake-attacker.example/callback",
+        "http://fake-attacker.example/callback",
+        "https://chatgpt.com.fake-attacker.example/connector_platform_oauth_redirect",
+        "javascript:alert(1)",
+        "data:text/html,hi",
+        "file:///etc/passwd",
+    ):
+        refused = register(client, url)
+        assert refused.status_code == 400, url
+        assert refused.json()["error"] == "invalid_redirect_uri"
 
 
 def test_consent_asks_you_to_sign_in_first() -> None:
@@ -44,6 +60,7 @@ def test_the_page_says_who_and_what() -> None:
     page = browser.get(authorize(browser, client_id, secrets.token_urlsafe(48))).text
     assert "Let Claude read your JokeBox?" in page
     assert "dev@example.com" in page
+    assert "send you back to <strong>claude.ai</strong>" in page
     assert "can't change or delete anything" in page
 
 

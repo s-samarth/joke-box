@@ -1,4 +1,5 @@
-"""The consent page: where you sign in and allow Claude to read your JokeBox.
+"""The consent page: where you sign in and let an AI app (Claude, ChatGPT, Cursor, Gemini...)
+read your JokeBox.
 
 A plain server-rendered page rather than a screen in the React app: it's one form, it must work
 without the app's offline cache, and it never needs the app's JavaScript.
@@ -16,7 +17,7 @@ from mcp.server.auth.provider import construct_redirect_uri
 from app.auth.deps import DbSession
 from app.config import get_settings
 from app.connector.consent_link import CONSENT_PATH, Pending, read_pending
-from app.connector.consent_page import EXPIRED, page
+from app.connector.consent_page import EXPIRED, callback_label, page
 from app.connector.oauth import SHOWS_SCOPE
 from app.connector.tokens import load_client, store
 from app.models import User
@@ -55,7 +56,9 @@ def show_consent(
     client = load_client(pending.client_id)
     name = (client.client_name if client else None) or "An app"
     logs = SHOWS_SCOPE in pending.scopes
-    return HTMLResponse(page(name, user.email, token, form_token(str(user.id), token), logs))
+    back = callback_label(str(pending.redirect_uri))
+    check = form_token(str(user.id), token)
+    return HTMLResponse(page(name, user.email, token, check, logs, back))
 
 
 def answer(pending: Pending, **params: str | None) -> RedirectResponse:
