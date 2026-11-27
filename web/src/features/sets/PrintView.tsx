@@ -17,7 +17,7 @@ import type { Joke, SetEntry } from '../../api/types'
 import { clock } from '../../lib/duration'
 import { useVibeTone } from '../jokes/vibeTone'
 import { LabelChip } from './BeatBoard'
-import { beatName, beatTotal, beatsOf, personaField, statusField } from './beats'
+import { beatName, beatTotal, beatsOf, changeNote, personaField, statusField } from './beats'
 import { starts } from './birdsEye'
 import { spoken } from './bridges'
 import { type Row, rowsOf } from './gateRows'
@@ -35,6 +35,7 @@ export function PrintView() {
   if (!setlist) return <div className="p-8 text-dim">Set not found.</div>
   const beats = beatsOf(setlist)
   const at = starts(beats)
+  const notes = beats.map((_, i) => changeNote(beats, i, fields))
   const byId = new Map(jokes.map((j) => [j.id, j]))
   const premises = new Map(premiseList.map((p) => [p.id, p]))
   const labels = [statusField(fields), personaField(fields)].filter((f) => f !== undefined)
@@ -96,7 +97,7 @@ export function PrintView() {
               </div>
               <div className="mt-1.5 flex flex-wrap gap-1.5 pl-8">
                 {labels.map((f) => <LabelChip key={f.id} field={f} beat={b} />)}
-                {b.shift_reason && <span className="rounded-full px-2 py-px text-[11px] text-dim ring-1 ring-rule-strong">{b.shift_reason}</span>}
+                {notes[i] && <span className="rounded-full px-2 py-px text-[11px] text-dim ring-1 ring-rule-strong">{notes[i]!.text}</span>}
               </div>
               <ul className="mt-2 space-y-1.5 pl-8 text-[17px] leading-snug">{b.entries.map(entry)}</ul>
             </li>

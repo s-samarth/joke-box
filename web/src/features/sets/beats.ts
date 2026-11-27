@@ -7,7 +7,7 @@ import type { Beat, SetEntry, SetField, SetFieldOption, SetPiece, Setlist, Statu
 
 /** What you've written for a beat with no label chosen: always there, never a stored option. */
 export const NOT_SURE = 'Not sure'
-/** Why a status shift happens. Top-up: you take a loss on purpose to earn the next win. */
+/** Why a status turn happens. Top-up: you take a loss on purpose to earn the next win. */
 export const SHIFT_REASONS = ['Top-up', 'Planned turn', 'Clash'] as const
 
 /** A set's beats. A copy cached from before beats reads as one beat, as the server shows it. */
@@ -70,19 +70,57 @@ export function groupOf(beat: Beat, fields: SetField[]): StatusGroup | null {
   return o ? (o.group ?? 'neutral') : null
 }
 
-/** A beat whose status group differs from the last labelled beat before it needs a reason for
- * the shift (a Not sure beat between them doesn't hide it, as the status track draws it). */
-export function needsWhy(beats: Beat[], i: number, fields: SetField[]): boolean {
-  const b = i > 0 ? groupOf(beats[i], fields) : null
-  if (!b) return false
-  for (let k = i - 1; k >= 0; k--) {
-    const a = groupOf(beats[k], fields)
-    if (a) return a !== b
-  }
-  return false
+/** Which side of neutral a status sits on: 1 above it, 0 neutral, -1 below, in the order of the
+ * status field's options (best first, as the status track draws them). With no neutral option,
+ * a win is above and a loss below. Null when Not sure. */
+export function sideOf(beat: Beat, fields: SetField[]): number | null {
+  const f = statusField(fields)
+  const o = f && labelOf(beat, f)
+  if (!f || !o) return null
+  const g = o.group ?? 'neutral'
+  if (g === 'neutral') return 0
+  const first = f.options.findIndex((x) => (x.group ?? 'neutral') === 'neutral')
+  if (first < 0) return g === 'win' ? 1 : -1
+  return f.options.indexOf(o) < first ? 1 : -1
 }
 
+/** How the status changes into beat `i` from the last labelled beat before it (a Not sure beat
+ * between doesn't hide it). A turn crosses neutral, or moves onto or off it: losing to mixed,
+ * neutral or winning, and back. A shift stays on the same side (I lose to We lose). The same
+ * status, or a Not sure on either end, is neither. */
+export type StatusChange = 'turn' | 'shift' | null
+export function changeAt(beats: Beat[], i: number, fields: SetField[]): StatusChange {
+  const f = statusField(fields)
+  const now = i > 0 && f ? labelOf(beats[i], f) : null
+  if (!f || !now) return null
+  for (let k = i - 1; k >= 0; k--) {
+    const was = labelOf(beats[k], f)
+    if (!was) continue
+    if (was.id === now.id) return null
+    return sideOf(beats[k], fields) === sideOf(beats[i], fields) ? 'shift' : 'turn'
+  }
+  return null
+}
+
+/** Only a turn needs a reason ("Shift, don't flip"). */
+export const needsWhy = (beats: Beat[], i: number, fields: SetField[]) => changeAt(beats, i, fields) === 'turn'
+
 export const hasReason = (b: Beat) => SHIFT_REASONS.some((r) => r === b.shift_reason)
+/** The reason for the turn into beat `i`, or null. A reason saved before the statuses changed
+ * (so there's no turn now) is kept but not shown, and comes back if the turn does. */
+export const turnReason = (beats: Beat[], i: number, fields: SetField[]) =>
+  needsWhy(beats, i, fields) && hasReason(beats[i]) ? beats[i].shift_reason : null
+/** A reason as the app says it: "Planned turn" is stored, "Planned" is shown after "Turn". */
+export const reasonLabel = (r: string) => (r === 'Planned turn' ? 'Planned' : r)
+
+/** What to write where the status changes into beat `i`: "Turn · Top-up", "Turn: why?" (`open`,
+ * amber) or "Shift"; null when it doesn't change. */
+export function changeNote(beats: Beat[], i: number, fields: SetField[]): { text: string; open: boolean } | null {
+  const c = changeAt(beats, i, fields)
+  if (c !== 'turn') return c && { text: 'Shift', open: false }
+  const r = turnReason(beats, i, fields)
+  return r ? { text: `Turn · ${reasonLabel(r)}`, open: false } : { text: 'Turn: why?', open: true }
+}
 
 /** A stretch of beat time with no humility top-up: how long, and where (start and end time). */
 export interface Run { seconds: number; span: [number, number] | null }

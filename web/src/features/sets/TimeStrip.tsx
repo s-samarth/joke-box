@@ -6,11 +6,11 @@
  * Tap a joke to find it on the board.
  */
 import type { CSSProperties, ReactNode } from 'react'
-import type { Beat, SetField } from '../../api/types'
+import type { SetField } from '../../api/types'
 import { Tape } from '../../components/ui/pieces'
 import { clock } from '../../lib/duration'
 import { NOT_SURE_COLOR, optionColor, washed } from '../../lib/labelColors'
-import { beatName, hasReason, labelOf, needsWhy, statusField } from './beats'
+import { beatName, changeNote, labelOf, statusField } from './beats'
 import type { BoardData } from './BoardJoke'
 import type { Strip } from './birdsEye'
 
@@ -35,7 +35,6 @@ export function TimeStrip({ strip, pxPerSecond, slot, total, fields, data, onPic
   const { width } = strip
   const beats = strip.beats.map((s) => s.beat)
   const sf = statusField(fields)
-  const shift = (b: Beat, i: number) => i > 0 && (hasReason(b) || needsWhy(beats, i, fields))
   return (
     <div className="mb-4 w-max overflow-clip rounded-xl bg-ink ring-1 ring-rule-strong">
       <Lane name={`${clock(total)} of ${clock(slot)}`} height={40} width={width}>
@@ -43,8 +42,12 @@ export function TimeStrip({ strip, pxPerSecond, slot, total, fields, data, onPic
         {total < slot && <div className={`${seg} top-[18px]`} style={{ left: total * pxPerSecond, width: (slot - total) * pxPerSecond, ...hatch(NOT_SURE_COLOR) }}>{clock(slot - total)} of the slot not planned yet</div>}
         {total > slot && <div className={`${seg} top-[18px] bg-light/20 text-light`} style={{ left: slot * pxPerSecond, width: (total - slot) * pxPerSecond }}>{clock(total - slot)} over</div>}
       </Lane>
-      <Lane name="Beats" height={40} width={width}>
-        {strip.beats.map((s) => <div key={s.beat.id} className="absolute top-2 overflow-hidden" style={{ left: s.x, width: Math.max(0, s.w - 4) }}><Tape seed={s.index} className="max-w-full truncate text-[13px]">{beatName(s.beat, s.index)}</Tape></div>)}
+      <Lane name="Beats" height={48} width={width}>
+        {strip.beats.map((s) => (
+          <div key={s.beat.id} className="absolute top-1.5 bottom-1.5 flex items-center justify-center overflow-hidden rounded-md bg-tape/10 px-2 ring-1 ring-tape/35 ring-inset" style={{ left: s.x, width: Math.max(0, s.w - 4) }}>
+            <Tape seed={s.index} className="max-w-full truncate px-2 text-[16px] leading-7">{beatName(s.beat, s.index)}</Tape>
+          </div>
+        ))}
       </Lane>
       {fields.map((f) => (
         <Lane key={f.id} name={f.name} height={32} width={width}>
@@ -52,11 +55,14 @@ export function TimeStrip({ strip, pxPerSecond, slot, total, fields, data, onPic
             const o = labelOf(s.beat, f)
             return <div key={s.beat.id} className={seg} style={{ left: s.x, width: Math.max(0, s.w - 4), ...(o ? washed(optionColor(o)) : hatch(NOT_SURE_COLOR)) }}>{o?.label ?? 'Not sure'}</div>
           })}
-          {f.id === sf?.id && strip.beats.map((s, i) => shift(s.beat, i) && (
-            <span key={`why-${s.beat.id}`} className={`absolute -top-2 z-[5] -translate-x-1/2 rounded-full bg-ink px-1.5 text-[10px] ring-1 ${hasReason(s.beat) ? 'text-dim ring-rule-strong' : 'text-amber ring-amber/50'}`} style={{ left: s.x }}>
-              {hasReason(s.beat) ? s.beat.shift_reason : 'Needs a reason'}
-            </span>
-          ))}
+          {f.id === sf?.id && strip.beats.map((s, i) => {
+            const note = changeNote(beats, i, fields)
+            return note && (
+              <span key={`why-${s.beat.id}`} className={`absolute -top-2 z-[5] -translate-x-1/2 rounded-full bg-ink px-1.5 text-[10.5px] whitespace-nowrap ring-1 ${note.open ? 'text-amber ring-amber/50' : 'text-dim ring-rule-strong'}`} style={{ left: s.x }}>
+                {note.text}
+              </span>
+            )
+          })}
         </Lane>
       ))}
       <Lane name="Blocks, in order" height={32} width={width}>

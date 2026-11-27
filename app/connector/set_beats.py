@@ -7,8 +7,9 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from app.connector.jokes import Names
+from app.connector.status_change import changes, status_sides
 from app.models import Setlist, User
-from app.schemas.set_beats import BeatIn, CrowdEntry, PieceIn, PremiseEntry
+from app.schemas.set_beats import BeatIn, CrowdEntry, PieceIn, PremiseEntry, SetFieldIn
 from app.services.set_beats import Jokes, cluster_leads, shown, stored_beats
 from app.services.set_bridges import spoken
 from app.services.set_fields import config_of, fields_out
@@ -21,9 +22,13 @@ def live_beats(db: Session, user: User, s: Setlist, jokes: set[uuid.UUID]) -> li
     return shown(stored_beats(s), Jokes(set(), {j: 0 for j in jokes}, cluster_leads(db, user)))
 
 
-def label_names(db: Session, user: User) -> list[tuple[str, str, dict[str, str]]]:
+def label_fields(db: Session, user: User) -> list[SetFieldIn]:
+    """The comic's label fields for beats, in order."""
+    return list(fields_out(config_of(db, user)).fields)
+
+
+def label_names(fields: list[SetFieldIn]) -> list[tuple[str, str, dict[str, str]]]:
     """Each field: its id, its name and its options' labels by id."""
-    fields = fields_out(config_of(db, user)).fields
     return [(f.id, f.name, {o.id: o.label for o in f.options}) for f in fields]
 
 
@@ -75,13 +80,17 @@ def entry_fields(entry: Any, names: Names, places: dict[str, int]) -> dict[str, 
 
 def beats_out(
     beats: list[BeatIn],
-    fields: list[tuple[str, str, dict[str, str]]],
+    label_fields: list[SetFieldIn],
     names: Names,
     places: dict[str, int],
 ) -> list[dict[str, Any]]:
-    """Every beat in order, with when it starts (beat times added up, not joke times)."""
+    """Every beat in order, with when it starts (beat times added up, not joke times), and how
+    the status changes into it. A reason shows only for a turn: one saved before the statuses
+    changed is kept, unshown."""
+    fields = label_names(label_fields)
+    kinds = changes(beats, status_sides(label_fields))
     out, start = [], 0
-    for beat in beats:
+    for beat, kind in zip(beats, kinds, strict=True):
         out.append(
             {
                 "cue": beat.cue,
@@ -92,7 +101,8 @@ def beats_out(
                     name: options.get(beat.labels.get(fid, ""), NOT_SURE)
                     for fid, name, options in fields
                 },
-                "shift_reason": beat.shift_reason or None,
+                "status_change": kind,
+                "shift_reason": (beat.shift_reason or None) if kind == "turn" else None,
                 "entries": [entry_out(e, names, places) for e in beat.entries],
             }
         )

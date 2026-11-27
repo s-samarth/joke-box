@@ -1,12 +1,13 @@
 /**
  * The status track: your status field drawn across the set by beat time. One row per option,
  * a tape-yellow line through the beats. A Not sure beat is a dotted grey line at the level
- * before it; a shift with no reason is marked "why?". A labelled stretch over the top-up limit is shaded amber.
+ * before it; where it changes, "Turn · reason" ("Turn: why?" in amber with none yet) or "Shift".
+ * A labelled stretch over the top-up limit is shaded amber.
  */
 import type { ReactNode } from 'react'
 import type { Beat, SetField } from '../../api/types'
 import { clock } from '../../lib/duration'
-import { type Analysis, hasReason, needsWhy } from './beats'
+import { type Analysis, changeNote } from './beats'
 
 const COLOUR = { win: 'var(--color-ok)', neutral: 'var(--color-sky)', loss: 'var(--color-amber)' }
 
@@ -40,10 +41,8 @@ export function StatusTrack({ beats, field, fields, analysis, limit }: { beats: 
       if (prev !== null) d += `M${x0} ${y(prev)} L${x0} ${y(oi)} `
       d += `M${x0} ${y(oi)} L${x1} ${y(oi)} `
       prev = oi
-      if (needsWhy(beats, i, fields)) {
-        const ok = hasReason(b)
-        parts.push(<text key={`w${b.id}`} x={x0} y={H - 6} textAnchor="middle" fontSize="12" fontWeight="700" fill={ok ? 'var(--color-faint)' : 'var(--color-amber)'}>{ok ? b.shift_reason : 'why?'}</text>)
-      }
+      const note = changeNote(beats, i, fields)
+      if (note) parts.push(<text key={`w${b.id}`} x={x0} y={H - 6} textAnchor="middle" fontSize="12" fontWeight="700" fill={note.open ? 'var(--color-amber)' : 'var(--color-faint)'}>{note.text}</text>)
     }
     t += b.seconds
   })

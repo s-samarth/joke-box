@@ -9,7 +9,7 @@ import { ArrowDown, ArrowUp, Plus } from 'lucide-react'
 import type { Beat, SetField } from '../../api/types'
 import { Tape } from '../../components/ui/pieces'
 import { clock } from '../../lib/duration'
-import { hasReason, labelOf, needsWhy } from './beats'
+import { changeNote, labelOf } from './beats'
 import { DragGrip } from './DragGrip'
 
 interface Props {
@@ -49,7 +49,7 @@ export function Spine({ beats, fields, selected, onSelect, onMove, onReorder, on
         <SortableContext items={beats.map((b) => b.id)} strategy={verticalListSortingStrategy}>
           <ol className="space-y-2" aria-label="Beats, in running order">
             {beats.map((b, i) => (
-              <SpineBeat key={b.id} beat={b} i={i} last={i === beats.length - 1} flag={needsWhy(beats, i, fields) && !hasReason(b)} fields={fields}
+              <SpineBeat key={b.id} beat={b} i={i} last={i === beats.length - 1} note={changeNote(beats, i, fields)} fields={fields}
                 selected={selected === b.id} onSelect={() => onSelect(b.id)} onMove={(d) => onMove(i, d)} />
             ))}
           </ol>
@@ -62,9 +62,9 @@ export function Spine({ beats, fields, selected, onSelect, onMove, onReorder, on
   )
 }
 
-interface BeatProps { beat: Beat; i: number; last: boolean; flag: boolean; fields: SetField[]; selected: boolean; onSelect: () => void; onMove: (d: number) => void }
+interface BeatProps { beat: Beat; i: number; last: boolean; note: ReturnType<typeof changeNote>; fields: SetField[]; selected: boolean; onSelect: () => void; onMove: (d: number) => void }
 
-function SpineBeat({ beat: b, i, last, flag, fields, selected, onSelect, onMove }: BeatProps) {
+function SpineBeat({ beat: b, i, last, note, fields, selected, onSelect, onMove }: BeatProps) {
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id: b.id })
   const style = { transform: CSS.Transform.toString(transform && { ...transform, x: 0 }), transition }
   const name = b.cue || `beat ${i + 1}`
@@ -81,7 +81,7 @@ function SpineBeat({ beat: b, i, last, flag, fields, selected, onSelect, onMove 
             const o = labelOf(b, f)
             return <span key={f.id} className={`rounded-full px-2 py-0.5 text-[12px] ${o ? 'bg-ink-3 text-dim' : 'text-faint ring-1 ring-rule'}`}>{o?.label ?? 'Not sure'}</span>
           })}
-          {flag && <span className="rounded-full bg-amber/15 px-2 py-0.5 text-[12px] font-semibold text-amber">Why the shift?</span>}
+          {note && <span className={`rounded-full px-2 py-0.5 text-[12px] font-semibold ${note.open ? 'bg-amber/15 text-amber' : 'text-dim ring-1 ring-rule-strong'}`}>{note.text}</span>}
         </p>
         <p className="mt-1 text-[12.5px] text-faint">{contents(b)}</p>
       </button>

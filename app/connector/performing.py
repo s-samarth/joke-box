@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.connector.jokes import NOT_SURE, brief, load_names, topic_name, user_jokes
 from app.connector.library import parse_id
-from app.connector.set_beats import beats_out, label_names, live_beats
+from app.connector.set_beats import beats_out, label_fields, live_beats
 from app.connector.show_record import jokes_done
 from app.connector.text import clip, day, ist_date, matches, page
 from app.models import Joke, PerformanceLog, Setlist, User
@@ -117,7 +117,7 @@ def get_set(db: Session, user: User, set_id: str) -> dict[str, Any]:
     return {
         **summary(s, jokes, leads),
         "topics": topics,
-        "beats": beats_out(beats, label_names(db, user), names, places),
+        "beats": beats_out(beats, label_fields(db, user), names, places),
         "running_order": running,
     }
 

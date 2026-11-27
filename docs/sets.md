@@ -37,7 +37,8 @@ beat). Everything that depends on the room happens inside a beat.
 | **Premise gate** | A premise after the first in a beat that's done only if the premise before it landed | `entry.gate` |
 | **Cluster version** | A joke from a cluster follows the cluster's lead unless the set pins that version | `piece.cluster_id`, `piece.pinned` |
 | **Labels** | Per beat, per set: an option from each of your label fields, or Not sure | `beat.labels` |
-| **Shift reason** | When the status group changes from the beat before: Top-up, Planned turn or Clash | `beat.shift_reason` |
+| **Turn and shift** | How the status changes from the last labelled beat before. A **turn** crosses neutral, or moves onto or off it (I lose to Mixed, Neutral or I win, and back); a **shift** stays on the same side (I lose to We lose, Mixed to I win). The same status is neither. The side follows the order of the Status options, best first: above Neutral or below it (with no neutral option, wins above, losses below) | worked out, never stored |
+| **Turn reason** | Why a turn happens: Top-up, Planned (stored as `Planned turn`) or Clash. Asked only for a turn; a reason saved before the statuses changed is kept but not shown, and comes back if the turn does | `beat.shift_reason` |
 
 ### Label fields
 
@@ -59,7 +60,7 @@ stored one. Claude and exports read only the labels, so colours don't reach them
 
 | Field | Options | Used by |
 |---|---|---|
-| Status (the status track) | I win (win, green), Mixed (loss, lime), System attack / Neutral (neutral, blue), We lose (loss, soft red), I lose (loss, red) | The status track, the shift check, the top-up check |
+| Status (the status track) | I win (win, green), Mixed (loss, lime), System attack / Neutral (neutral, blue), We lose (loss, soft red), I lose (loss, red) | The status track, the turn check, the top-up check |
 | Dominant persona side (the persona) | Riled up (red), Bakchod (blue), Point prover (green) | The persona check, and each joke's Persona |
 | Tone | Opinionated (violet), Playful (cyan), Edgy (rose), Heartfelt (pink) | Nothing: it's for you |
 | Voice fit | Mine (green), Half (lime), Anyone's (stone) | Nothing: it's for you |
@@ -152,7 +153,7 @@ and tested: [gateRows.ts](../web/src/features/sets/gateRows.ts) reads a list as 
 
 | You move | Where | What you end up with |
 |---|---|---|
-| A beat | Anywhere in the spine | A new running order. Its labels, time and contents go with it; the shift flags and checks follow the new order |
+| A beat | Anywhere in the spine | A new running order. Its labels, time and contents go with it; the turn and shift marks and the checks follow the new order |
 | A block (premise, Standalone, crowd work) | Anywhere among the blocks of its beat | Its jokes and gates come with it. While you drag, every block folds to its heading |
 | A premise that becomes the beat's first | | Its premise gate turns off: there's no premise before it |
 | A block into another block, or another beat | Not allowed | Blocks don't nest; take it out and add it there |
@@ -225,7 +226,7 @@ from ([checks.ts](../web/src/features/sets/checks.ts) `setChecks`, over
 
 | Check | Rule | Applies once | Source |
 |---|---|---|---|
-| A status shift needs a reason | When a beat's status group (win, neutral, loss) differs from the last labelled beat before it (Not sure beats between don't hide it), it needs a reason | Two beats have a status | "Shift, don't flip", My status: a flow |
+| A status turn needs a reason | When a beat's status is a turn from the last labelled beat before it (Not sure beats between don't hide it), it needs a reason. A shift doesn't | Two beats have a status | "Shift, don't flip", My status: a flow |
 | A humility top-up at least every 4:00 | The longest run of beat time with no loss beat stays under your limit (4:00 to start, editable). Win and neutral add to the run; a loss ends it | The set is longer than the limit | "every 2–4 minutes", My status: a flow; What Indian rooms reward |
 | Every persona side drives a beat | Every option of the persona field labels at least one beat | There's a beat for each side | "The persona is the balance", My persona |
 | Not sure | Listed by beat, with which labels hold a check back. Not a check | | |
@@ -236,9 +237,9 @@ A check gives one of four answers. **✓** and **!** are the rule passed or fail
 greyed out, with a tag and a line saying what's needed, because a tick there would be one the set
 hasn't earned (a one-beat set used to show "Longest stretch with no top-up: 0:00 ✓"):
 
-- **Needs more beats**: the set is too short for the rule to bite. One beat can't shift, a 2:00 set
+- **Needs more beats**: the set is too short for the rule to bite. One beat can't turn, a 2:00 set
   can't go 4:00 without a top-up, two beats can't hold three persona sides.
-- **Needs labels**: the answer depends on beats left Not sure. The shift check needs two beats
+- **Needs labels**: the answer depends on beats left Not sure. The turn check needs two beats
   with a status. The persona check waits while a missing side could still be on a Not sure beat.
   The top-up check is worked out twice: with every Not sure beat as a top-up (if the stretch is
   still too long, it warns, and that stretch is shaded on the track) and with none of them as one
@@ -276,7 +277,7 @@ until you hide them, and **How sets work** opens the whole guide.
   [birdsEye.ts](../web/src/features/sets/birdsEye.ts)) shows the whole set from above. On top, a
   **time strip** to scale against the slot, at one scale for every set (five minutes is 960 px at
   100%, so longer sets scroll sideways): the beats, a lane per label field in its colours (Not
-  sure hatched amber, and where the status shifts, the reason or "Needs a reason"), the blocks in
+  sure hatched amber, and where the status changes, "Turn · reason", amber "Turn: why?", or "Shift"), the blocks in
   order, and the jokes as numbered chips in their Vibe colour, with gates as sky brackets. Under it,
   the **beat board**: a column per beat with its labels, and its blocks, gates and every joke in
   full (setup, punchline, Vibe, Generic, status, runtime, and tag lines in small amber). Both scroll together, both ways,

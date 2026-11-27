@@ -97,7 +97,8 @@ class BeatIn(BaseModel):
     seconds: int = Field(default=0, ge=0, le=INT_MAX)
     # Field id to option id. A field left out, or an option since deleted, reads as Not sure.
     labels: dict[Id, Id] = Field(default_factory=dict, max_length=50)
-    # Why the status changed from the beat before: Top-up, Planned turn, Clash, or "" (none yet).
+    # Why the status turned from the beat before: Top-up, Planned turn, Clash, or "" (none yet).
+    # Asked only for a turn (docs/sets.md); one saved before the statuses changed is kept, unshown.
     shift_reason: str = Field(default="", max_length=60)
     entries: list[Entry] = Field(default_factory=list, max_length=500)
 

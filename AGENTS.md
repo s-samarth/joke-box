@@ -74,6 +74,9 @@ directly, so a model change can break them, and Claude only finds out mid-conver
   The default label fields are in both `app/services/set_fields.py` and `web/src/api/setFields.ts`.
   Change them together, with `tests/test_set_beats.py` and `beats.test.ts`, and keep
   `docs/sets.md` and the in-app guide (`SetGuide.tsx`) saying the same thing.
+- **Turns and shifts between beats are worked out twice:** in the browser (`sideOf` and
+  `changeAt` in `web/src/features/sets/beats.ts`) and for `get_set` (`app/connector/status_change.py`).
+  Change the rule in both, with `beats.test.ts` and `tests/test_connector_status_change.py`.
 - **The writing pulse is worked out twice:** in the browser for the Activity screen
   (`web/src/features/daily/pulse.ts`, `pulseTrends.ts`, `pulseNotes.ts`) and in `app/connector/`
   for Claude (`pulse.py`, `pulse_rows.py`, `pulse_trends.py`, `pulse_notes.py`).
