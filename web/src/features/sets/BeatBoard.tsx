@@ -3,7 +3,8 @@
  * A column's head has the cue, its time (the bar against the longest beat, in the status colour)
  * and every label; then its blocks in order: a premise in leaf green (sky blue when it needs the
  * premise before it to land), Standalone jokes in white with their title, crowd work in orchid.
- * Between columns sits why the status shifts, amber when a shift has no reason yet. Bridges are
+ * Between columns sits how the status changes: a turn with its reason (amber when it has none
+ * yet), or a shift; nothing when it stays the same. Bridges are
  * grey boxes under the joke or block they follow; like everything inside a beat, they have no time.
  */
 import { ArrowRight } from 'lucide-react'
@@ -11,7 +12,7 @@ import type { Beat, SetEntry, SetField } from '../../api/types'
 import { Tape } from '../../components/ui/pieces'
 import { clock } from '../../lib/duration'
 import { NOT_SURE_COLOR, optionColor, washed } from '../../lib/labelColors'
-import { beatName, hasReason, labelOf, needsWhy, statusField } from './beats'
+import { beatName, changeNote, labelOf, statusField } from './beats'
 import { BridgeNotes } from './BridgeBoxes'
 import { spoken } from './bridges'
 import { COLUMN, GUTTER, boardWidth } from './birdsEye'
@@ -69,12 +70,12 @@ function Column({ beat, index, longest, fields, data }: { beat: Beat; index: num
   const bar = sf ? optionColor(labelOf(beat, sf)) : NOT_SURE_COLOR
   return (
     <article className="shrink-0 rounded-xl bg-ink-2 p-2.5 ring-1 ring-rule-strong" style={{ width: COLUMN }}>
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-faint tabular">{index + 1}</span>
-        <Tape seed={index} className="min-w-0 truncate text-lg">{beatName(beat, index)}</Tape>
+      <div className="flex flex-col items-center gap-1 pt-1 text-center">
+        <span className="text-[12px] font-semibold tracking-[0.12em] text-faint uppercase tabular">Beat {index + 1}</span>
+        <Tape seed={index} className="max-w-full truncate px-3 text-[26px] leading-10">{beatName(beat, index)}</Tape>
       </div>
       <div className="mt-2 h-2 overflow-hidden rounded bg-ink-4"><div className="h-full rounded" style={{ width: `${longest ? (beat.seconds / longest) * 100 : 0}%`, backgroundColor: bar }} /></div>
-      <p className="mt-1 text-[12px] text-faint tabular">{clock(beat.seconds)} · {clock(data.start)} → {clock(data.start + beat.seconds)}</p>
+      <p className="mt-1 text-center text-[12px] text-faint tabular">{clock(beat.seconds)} · {clock(data.start)} → {clock(data.start + beat.seconds)}</p>
       <dl className="mt-1.5 grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-1 text-[11px] text-faint">
         {fields.map((f) => <div key={f.id} className="contents"><dt className="max-w-28 truncate" title={f.name}>{f.name}</dt><dd className="min-w-0"><LabelChip field={f} beat={beat} /></dd></div>)}
       </dl>
@@ -91,19 +92,20 @@ export function BeatBoard({ beats, starts, fields, data }: { beats: Beat[]; star
   const longest = Math.max(0, ...beats.map((b) => b.seconds))
   return (
     <div className="flex items-start" style={{ width: boardWidth(beats.length) }}>
-      {beats.map((b, i) => (
-        <div key={b.id} className="flex items-start">
-          {i > 0 && (
-            <div className="flex shrink-0 flex-col items-center gap-2 pt-6 text-faint" style={{ width: GUTTER }}>
-              <ArrowRight size={16} aria-hidden />
-              {(b.shift_reason || needsWhy(beats, i, fields)) && (
-                <span className={`text-[11px] [writing-mode:vertical-rl] ${hasReason(b) ? 'text-dim' : 'text-amber'}`}>{hasReason(b) ? b.shift_reason : 'Shift needs a reason'}</span>
-              )}
-            </div>
-          )}
-          <Column beat={b} index={i} longest={longest} fields={fields} data={{ ...data, start: starts[i] ?? 0 }} />
-        </div>
-      ))}
+      {beats.map((b, i) => {
+        const note = changeNote(beats, i, fields)
+        return (
+          <div key={b.id} className="flex items-start">
+            {i > 0 && (
+              <div className="flex shrink-0 flex-col items-center gap-2 pt-6 text-faint" style={{ width: GUTTER }}>
+                <ArrowRight size={16} aria-hidden />
+                {note && <span className={`text-[12px] [writing-mode:vertical-rl] ${note.open ? 'text-amber' : 'text-dim'}`}>{note.text}</span>}
+              </div>
+            )}
+            <Column beat={b} index={i} longest={longest} fields={fields} data={{ ...data, start: starts[i] ?? 0 }} />
+          </div>
+        )
+      })}
     </div>
   )
 }

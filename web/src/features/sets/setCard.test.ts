@@ -22,9 +22,9 @@ describe('cardChecks', () => {
   it('asks for labels when there are beats enough but no labels', () => {
     expect(cardChecks([beat('a', 120), beat('b', 120), beat('c', 120)], config)[0]).toEqual({ kind: 'info', text: '3 checks need more labels' })
   })
-  it('counts shifts with no reason and a long stretch with no top-up', () => {
+  it('counts turns with no reason and a long stretch with no top-up', () => {
     const pills = cardChecks([beat('a', 200, 'i-win'), beat('b', 100, 'i-lose'), beat('c', 300, 'i-win')], config)
-    expect(pills.map((p) => p.text)).toContain('2 shifts with no reason')
+    expect(pills.map((p) => p.text)).toContain('2 turns with no reason')
     expect(pills.map((p) => p.text)).toContain('5:00 with no top-up')
   })
   it('names a persona side that never drives a beat', () => {

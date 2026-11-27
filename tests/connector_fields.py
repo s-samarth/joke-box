@@ -105,6 +105,7 @@ BEAT = {
     "seconds",
     "starts_at_seconds",
     "labels",
+    "status_change",
     "shift_reason",
     "entries",
 }

@@ -2,7 +2,7 @@
  * The set's checks (docs/sets.md "The checks"), worked out once for the builder (SetChecks) and
  * the set's card (setCard). Each is a rule from a Craft note, counted from your own labels. A
  * check also knows when it can't say anything yet, and says what it needs instead of ticking:
- * - `later`: the set is too short for the rule to bite (one beat can't shift, a 2:00 set can't go
+ * - `later`: the set is too short for the rule to bite (one beat can't turn, a 2:00 set can't go
  *   4:00 without a top-up, two beats can't hold three persona sides). Add beats.
  * - `label`: the answer depends on beats left Not sure. Not sure is never guessed either way.
  * None of these thresholds is a number picked here: each follows from the rule itself.
@@ -27,16 +27,16 @@ const names = (beats: Beat[], all: Beat[]) => beats.map((b) => beatName(b, all.i
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`
 
 function shift(beats: Beat[], a: Analysis): Check {
-  const id = 'shift', title = 'Every status shift has a reason'
+  const id = 'shift', title = 'Every status turn has a reason'
   if (a.statused < 2) {
     const more = beats.length < 2
-    return { id, title, state: more ? 'later' : 'label', pill: '', need: more ? 'Applies once there are two beats. One beat can’t shift.' : 'Applies once two beats have a status.' }
+    return { id, title, state: more ? 'later' : 'label', pill: '', need: more ? 'Applies once there are two beats. One beat can’t turn.' : 'Applies once two beats have a status.' }
   }
   if (a.flips.length) {
     const n = a.flips.length
-    return { id, state: 'warn', title: `Shift with no reason: ${names(a.flips, beats)}`, need: '', pill: `${plural(n, 'shift')} with no reason` }
+    return { id, state: 'warn', title: `Turn with no reason: ${names(a.flips, beats)}`, need: '', pill: `${plural(n, 'turn')} with no reason` }
   }
-  return { id, title, state: 'ok', need: '', pill: 'Every shift has a reason' }
+  return { id, title, state: 'ok', need: '', pill: 'Every turn has a reason' }
 }
 
 function topUp(beats: Beat[], a: Analysis, limit: number, fields: SetField[]): Check {

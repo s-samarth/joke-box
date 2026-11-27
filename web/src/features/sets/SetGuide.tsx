@@ -59,7 +59,7 @@ export function SetGuide({ open, onOpenChange }: { open: boolean; onOpenChange: 
         <Part title="The checks">
           <p>Each check is a rule from your Craft notes, counted from your own labels. None of them judges a joke.</p>
           <ul className="list-disc space-y-1 pl-5">
-            <li>A status shift needs a reason: Top-up, Planned turn or Clash. It applies once two beats have a status, because one beat can't shift.</li>
+            <li>A status turn needs a reason: Top-up, Planned or Clash. A turn crosses neutral, or moves onto or off it: from a loss to Mixed, Neutral or a win, or back. Moving on the same side, like I lose to We lose, is a shift: it's marked but needs no reason. The same status twice is neither. Which side an option is on follows your Status options' order, best first: above Neutral or below it. It applies once two beats have a status, because one beat can't turn.</li>
             <li>A humility top-up at least every 4:00 (your limit). It applies once the set is longer than the limit, because a shorter set can't go that long without one. Neutral isn't a top-up.</li>
             <li>Every persona side drives a beat. It applies once there's a beat for each side.</li>
           </ul>

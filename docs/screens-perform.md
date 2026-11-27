@@ -25,7 +25,7 @@ What a set is made of and why is in [sets.md](sets.md). Files:
   show day, venue, slot and stars; the point (or **+ Write your point**); the spine as yellow cue
   strips sized by beat time, each edged with its status colour (green win, blue neutral, amber
   loss, grey Not sure), and what's left of the slot as **to plan**; the checks in a word each
-  (shifts with no reason, the longest stretch with no top-up, a persona side no beat drives, beats
+  (turns with no reason, the longest stretch with no top-up, a persona side no beat drives, beats
   with Not sure), with checks that don't apply yet folded into one grey pill; and the length against the slot (amber in the last minute, red when over), with
   the tags. A set from before beats shows its one beat and **Split into beats**. Each
   card shows its status in the top corner (Draft white, Work in Progress yellow, Stage Ready
@@ -39,19 +39,19 @@ What a set is made of and why is in [sets.md](sets.md). Files:
   them, the beats' total against the slot, with the light bar.
 - **Shape:** once there are beats, the **status track** shows your status field across the set by
   beat time. There's a row per option, a tape-yellow line through the beats, and a dotted grey
-  line for a Not sure beat at the level before it. A shift with no reason is marked "why?". Next
+  line for a Not sure beat at the level before it. Where the status changes it says "Turn · reason", "Turn: why?" in amber, or "Shift". Next
   to it are the **checks**, each naming the Craft note it comes from. A check that can't apply
-  yet (one beat can't shift) is greyed out with **Needs more beats** or **Needs labels** and a
+  yet (one beat can't turn) is greyed out with **Needs more beats** or **Needs labels** and a
   line on what it needs, never a tick. The top-up limit is edited in place. The track scrolls sideways on a phone.
 - **Spine:** the beats in their fixed order, as tape strips. Each strip shows the cue, the time,
-  its labels (Not sure outlined), "Why the shift?" in amber when a reason is missing, and what's in
+  its labels (Not sure outlined), "Turn: why?" in amber when a turn has no reason ("Turn · Top-up" once it has, "Shift" for a shift), and what's in
   it (premises, jokes, crowd work). Drag a beat by its grip, or use the up and down arrows, and **Add beat** adds one at
   the end. From 1024px wide, the spine sits beside the open beat. Narrower (phones, iPads in
   portrait), it sits above it, and tapping a beat scrolls to it.
 - **The open beat:** the cue on a tape strip (type into it), **Time for this beat** (minutes and seconds boxes, set by
   hand), **What it's for**, and **Labels for this beat, in this set** (one row of options per field,
   plus Not sure). When the status group changes from the beat before, an amber box asks **Why the
-  shift?** (Top-up, Planned turn, Clash). Then **The beat, in order**: numbered entries, each with
+  turn: why?** (Top-up, Planned, Clash), only when the status turns. Then **The beat, in order**: numbered entries, each with
   a grip, up, down and remove. Dragging one folds every entry to its heading (and a summary line)
   until you drop it. The full rules for dragging and the arrows are in
   [sets.md](sets.md#drag-and-arrows):
@@ -118,7 +118,7 @@ What a set is made of and why is in [sets.md](sets.md). Files:
 </p>
 <img src="screenshots/desktop-set-builder.webp" alt="Set builder: the status track, the checks, the spine and an open beat">
 <img src="screenshots/desktop-set-blocks.webp" alt="A beat's blocks: No premise in plain rule, a premise outlined and written in green, crowd work outlined in pink, and Move open on a joke">
-<img src="screenshots/desktop-set-beat.webp" alt="An open beat: labels, the shift reason, a premise with a gate box holding an inner gate">
+<img src="screenshots/desktop-set-beat.webp" alt="An open beat: labels, the turn reason, a premise with a gate box holding an inner gate">
 <img src="screenshots/ipad-set-builder.webp" width="420" alt="A beat's list on an iPad: a gate box with an inner gate">
 <p>
   <img src="screenshots/phone-set-builder.webp" width="230" alt="The spine on a phone">
@@ -143,22 +143,22 @@ and each device remembers its zoom.
 - **The time strip**, on top, to one scale for every set: a minute is 192 px at 100% (five minutes
   960 px), so a longer set scrolls sideways rather than squeezing. Its lane names stay pinned on the
   left as you scroll. Lanes: the time (with what's left of the
-  slot hatched amber, or how far over), the beats as cue strips, one lane per label field in its
-  options' colours (Not sure hatched amber, and the shift reason, or **Needs a reason**, where the
+  slot hatched amber, or how far over), the beats as cue strips (a band the length of the beat, its name on tape in the middle), one lane per label field in its
+  options' colours (Not sure hatched amber, and **Turn · reason**, amber **Turn: why?**, or **Shift** where the
   status changes), the blocks in order (in smaller type, so short blocks stay readable), and the jokes as numbered chips in their Vibe colour, edged
   yellow (locked) or dashed teal (loose), with gates as sky brackets ("if 6 lands"). Crowd work
   questions are orchid **?** chips. Only beats have time: blocks and jokes keep their order in equal
   slots, so their widths say nothing about how long they run. Tap a joke chip to scroll to it on
   the board, outlined for a moment.
 - **The beat board**, under it: one 600 px column per beat (wide, so a beat needs less scrolling down), in running order. The column head has
-  the cue on tape, a bar for its time against the longest beat in its status colour, its start and
+  "Beat 2" and the cue on tape, large and centred, a bar for its time against the longest beat in its status colour, its start and
   end, every label with its colour, and what it's for. Then its blocks: a premise outlined leaf green
   (sky blue, "only if the premise before landed", when gated) with its take, Vibe, Generic and
   status; Standalone jokes outlined white with their title; crowd work in orchid with its questions,
   Have a reply or No reply yet, and the replies. Each joke shows its number in the set, setup,
   punchline (yellow locked, teal loose), Vibe, Generic, status, runtime, Locked or Loose and its
   tag lines (each in small amber under the punchline); a gate is a sky box with what rides on it under "If 6 lands". Between columns, an arrow
-  and the shift reason, amber **Shift needs a reason** when one is missing.
+  and how the status changes: **Turn · reason**, amber **Turn: why?** when a turn has no reason, or **Shift**. Nothing when it stays the same.
 
 <img src="screenshots/desktop-birds-eye.webp" alt="Bird's eye view: the time strip over the beat board">
 <img src="screenshots/phone-birds-eye.webp" width="230" alt="Bird's eye view on a phone">
@@ -170,7 +170,7 @@ and each device remembers its zoom.
 A dark page in the app's colours, to read off a phone (printing turns it black on white). It has
 the set name, the beats' time and the slot, and the point. Then each beat, numbered, with its cue
 in marker, its time and when it starts, its Status and Dominant persona side as coloured chips and
-its shift reason. Under it: each premise's take (leaf green, or sky blue after "If that landed:"
+its turn reason (or Shift). Under it: each premise's take (leaf green, or sky blue after "If that landed:"
 when gated), a Standalone block's title, then a line of jokes, each the start of its punchline with
 a dot in its Vibe colour, teal when loose, and what rides on a gate in sky after "if it lands";
 crowd work in orchid with each question and whether you have a reply. **Print** opens the

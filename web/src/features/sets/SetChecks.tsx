@@ -54,7 +54,7 @@ export function SetChecks({ beats, config, onLimit }: { beats: Beat[]; config: S
   const { analysis: a, checks } = setChecks(beats, config)
   const status = statusField(fields)
   const source: Record<Check['id'], ReactNode> = {
-    shift: <>A change in status needs a reason. From “Shift, don't flip”, My status: a flow.</>,
+    shift: <>A turn in status needs a reason. From “Shift, don't flip”, My status: a flow.</>,
     topup: <>Keep it under<Limit seconds={limit} onChange={onLimit} />(“every 2–4 minutes”, My status: a flow). Neutral doesn't count as a top-up.</>,
     persona: <>All sides show up. From “The persona is the balance”, My persona.</>,
   }
