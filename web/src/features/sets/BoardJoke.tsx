@@ -2,12 +2,15 @@
  * A joke in the Bird's eye view's board, and the gates around jokes. Everything a joke carries is
  * shown, small: its number in the set, setup, punchline (yellow locked, teal loose), Vibe, Generic,
  * status, runtime and tag lines. A gate is a sky box: its joke on top, then what rides on it.
+ * A joke's bridges sit under it in grey.
  */
 import type { Premise } from '../../api/premises'
 import type { Joke, SetPiece } from '../../api/types'
 import { clock } from '../../lib/duration'
 import { statusOf } from '../../lib/jokeMeta'
 import { genericTone, type Tone } from '../jokes/vibeTone'
+import { BridgeNotes } from './BridgeBoxes'
+import { spoken } from './bridges'
 import type { Row } from './gateRows'
 
 export interface BoardData {
@@ -67,9 +70,10 @@ function JokeCard({ piece, data }: { piece: SetPiece; data: BoardData }) {
 export function JokeRows({ rows, data }: { rows: Row[]; data: BoardData }) {
   return (
     <div className="space-y-1.5">
-      {rows.map((r) => r.guarded.length === 0 ? <JokeCard key={r.piece.id} piece={r.piece} data={data} /> : (
+      {rows.map((r) => r.guarded.length === 0 ? <div key={r.piece.id}><JokeCard piece={r.piece} data={data} /><BridgeNotes bridges={spoken(r.piece)} className="mt-1" /></div> : (
         <div key={r.piece.id} className="rounded-lg bg-sky/5 p-1 ring-[1.5px] ring-sky">
           <JokeCard piece={r.piece} data={data} />
+          <BridgeNotes bridges={spoken(r.piece)} className="mt-1" />
           <div className="mt-1 ml-2 border-l-2 border-dotted border-sky pl-1.5">
             <p className="mb-1 text-[10.5px] font-semibold text-sky">If {data.number.get(r.piece.id)} lands</p>
             <JokeRows rows={r.guarded} data={data} />

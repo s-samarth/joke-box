@@ -127,7 +127,7 @@ def test_crowd_work_is_kept_as_written(alice: TestClient) -> None:
     question = {"id": "q1", "text": "Fake question?", "has_reply": True, "replies": [reply]}
     crowd = {"kind": "crowd", "id": "c1", "title": "Fake room", "questions": [question]}
     out = put_beats(alice, str(uuid.uuid4()), beat(crowd)).json()
-    assert out["beats"][0]["entries"][0] == crowd
+    assert out["beats"][0]["entries"][0] == crowd | {"bridges": None}
 
 
 def test_label_fields_start_as_the_defaults_and_are_yours(

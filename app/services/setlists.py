@@ -22,6 +22,7 @@ from app.services.set_beats import (
     stored_beats,
     tidy,
 )
+from app.services.set_bridges import keep_bridges
 from app.services.show_logs import venue_named
 from app.services.trash import trashed_joke_ids
 
@@ -134,7 +135,9 @@ def save_set(db: Session, user: User, setlist_id: uuid.UUID, body: SetlistIn) ->
     if body.beats is not None:
         beats = tidy(db, user, body.beats)
         keep_hidden(stored_beats(setlist) if found else [], beats, hidden)
-        keep_titles(stored_beats(setlist) if found else [], beats)
+        before = stored_beats(setlist) if found else []
+        keep_titles(before, beats)
+        keep_bridges(before, beats)
         setlist.beats = [b.model_dump(mode="json") for b in beats]
     # An older app sends no beats: the beats there are stay, and the items follow them.
     items = items_from(stored_beats(setlist)) if setlist.beats is not None else None

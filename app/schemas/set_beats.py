@@ -17,6 +17,19 @@ from app.schemas.limits import INT_MAX
 Id = Annotated[str, Field(min_length=1, max_length=64)]
 
 
+class BridgeIn(BaseModel):
+    """A bridge: a line or a few paragraphs you might say to carry the momentum from a joke or a
+    block to the next one. Not a joke and not a premise, so nothing else reads it."""
+
+    id: Id
+    text: str = Field(default="", max_length=4000)
+
+
+# Bridges after a joke or a block. Left out (an app from before bridges), a save keeps the stored
+# ones; an empty list clears them.
+Bridges = Annotated[list[BridgeIn], Field(max_length=20)]
+
+
 class PieceIn(BaseModel):
     """One joke in a list. A cluster's version follows the cluster's lead unless `pinned`."""
 
@@ -26,6 +39,7 @@ class PieceIn(BaseModel):
     pinned: bool = False
     loose: bool = False
     gate: int = Field(default=0, ge=0, le=500)
+    bridges: Bridges | None = None
 
 
 class PremiseEntry(BaseModel):
@@ -35,6 +49,7 @@ class PremiseEntry(BaseModel):
     # Only if the premise before it in the beat landed.
     gate: bool = False
     pieces: list[PieceIn] = Field(default_factory=list, max_length=500)
+    bridges: Bridges | None = None
 
 
 class JokesEntry(BaseModel):
@@ -45,6 +60,7 @@ class JokesEntry(BaseModel):
     id: Id
     title: str | None = Field(default=None, max_length=200)
     pieces: list[PieceIn] = Field(default_factory=list, max_length=500)
+    bridges: Bridges | None = None
 
 
 class ReplyIn(BaseModel):
@@ -67,6 +83,7 @@ class CrowdEntry(BaseModel):
     id: Id
     title: str = Field(default="", max_length=200)
     questions: list[QuestionIn] = Field(default_factory=list, max_length=50)
+    bridges: Bridges | None = None
 
 
 Entry = Annotated[PremiseEntry | JokesEntry | CrowdEntry, Field(discriminator="kind")]

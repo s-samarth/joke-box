@@ -14,8 +14,13 @@ POINT = "Everything modern was built to make me feel stupid."
 VIBES = ["bakchod", "riled-up", "point-prover", None]
 
 
-def piece(joke: Any, gate: int = 0, loose: bool = False) -> dict[str, Any]:
-    return {"id": f"p-{joke['id']}", "joke_id": joke["id"], "gate": gate, "loose": loose}
+def piece(joke: Any, gate: int = 0, loose: bool = False, *said: str) -> dict[str, Any]:
+    out = {"id": f"p-{joke['id']}", "joke_id": joke["id"], "gate": gate, "loose": loose}
+    return out | ({"bridges": bridges(*said)} if said else {})
+
+
+def bridges(*said: str) -> list[dict[str, str]]:
+    return [{"id": f"br-{n}-{len(text)}", "text": text} for n, text in enumerate(said)]
 
 
 def beat(
@@ -44,7 +49,13 @@ def gadgets_and_dating(jokes: list[Any], premises: list[Any]) -> dict[str, Any]:
         "kind": "premise",
         "id": "e1",
         "premise_id": premises[0]["id"],
-        "pieces": [piece(j[0], gate=2), piece(j[1]), piece(j[2]), piece(j[3], loose=True)],
+        "pieces": [
+            piece(j[0], 2),
+            piece(j[1], 0, False, "And it's not just the fridge. Everything is on my case now."),
+            piece(j[2]),
+            piece(j[3], loose=True),
+        ],
+        "bridges": bridges("Anyway. I tried to get away from all of it, so I went shopping."),
     }
     shopping = {"kind": "jokes", "id": "e2", "title": "Shopping", "pieces": [piece(j[4])]}
     grown = {
@@ -52,6 +63,10 @@ def gadgets_and_dating(jokes: list[Any], premises: list[Any]) -> dict[str, Any]:
         "id": "e3",
         "premise_id": premises[1]["id"],
         "pieces": [piece(j[5], gate=1), piece(j[6]), piece(j[7])],
+        "bridges": bridges(
+            "So that's me. But I can't be the only one.",
+            "Let me check. Hands up, honestly.",
+        ),
     }
     crowd = {
         "kind": "crowd",

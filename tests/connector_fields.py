@@ -108,12 +108,19 @@ BEAT = {
     "shift_reason",
     "entries",
 }
-SET_JOKE = {"place", "joke_id", "loose", "guards", "cluster_id", "pinned_version"}
+SET_JOKE = {"place", "joke_id", "loose", "guards", "cluster_id", "pinned_version", "bridges_after"}
 # The kinds of entry in a beat, and the fields each has.
 ENTRIES = {
-    "premise": {"kind", "premise_id", "premise", "jokes", "only_if_previous_premise_landed"},
-    "jokes_without_premise": {"kind", "title", "jokes"},
-    "crowd_work": {"kind", "title", "questions"},
+    "premise": {
+        "kind",
+        "premise_id",
+        "premise",
+        "jokes",
+        "only_if_previous_premise_landed",
+        "bridges_after",
+    },
+    "jokes_without_premise": {"kind", "title", "jokes", "bridges_after"},
+    "crowd_work": {"kind", "title", "questions", "bridges_after"},
 }
 QUESTION = {"question", "has_reply", "replies"}
 
@@ -122,10 +129,12 @@ def beats_set(jokes: list[dict[str, str]], premise: str) -> dict[str, object]:
     """A set with one of every kind of entry: a premise, jokes with no premise, crowd work."""
     piece = lambda n: {"id": f"p{n}", "joke_id": jokes[n]["id"], "gate": 1}  # noqa: E731
     question = {"id": "q", "text": "Fake question", "replies": [{"id": "r", "line": "Fake"}]}
+    bridge = [{"id": "br", "text": "Fake bridge"}]
+    first = piece(0) | {"bridges": bridge}
     entries = [
-        {"kind": "premise", "id": "e1", "premise_id": premise, "pieces": [piece(0), piece(1)]},
+        {"kind": "premise", "id": "e1", "premise_id": premise, "pieces": [first, piece(1)]},
         {"kind": "jokes", "id": "e2", "title": "Fake bits", "pieces": [piece(2)]},
-        {"kind": "crowd", "id": "e3", "title": "Fake", "questions": [question]},
+        {"kind": "crowd", "id": "e3", "title": "Fake", "questions": [question], "bridges": bridge},
     ]
     beat = {"id": "b", "cue": "Fake", "seconds": 90, "labels": {"status": "i-lose"}}
     return {"name": "Fake beats", "point": "Fake point", "beats": [beat | {"entries": entries}]}

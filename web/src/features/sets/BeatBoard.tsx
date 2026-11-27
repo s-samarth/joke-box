@@ -3,7 +3,8 @@
  * A column's head has the cue, its time (the bar against the longest beat, in the status colour)
  * and every label; then its blocks in order: a premise in leaf green (sky blue when it needs the
  * premise before it to land), Standalone jokes in white with their title, crowd work in orchid.
- * Between columns sits why the status shifts, amber when a shift has no reason yet.
+ * Between columns sits why the status shifts, amber when a shift has no reason yet. Bridges are
+ * grey boxes under the joke or block they follow; like everything inside a beat, they have no time.
  */
 import { ArrowRight } from 'lucide-react'
 import type { Beat, SetEntry, SetField } from '../../api/types'
@@ -11,6 +12,8 @@ import { Tape } from '../../components/ui/pieces'
 import { clock } from '../../lib/duration'
 import { NOT_SURE_COLOR, optionColor, washed } from '../../lib/labelColors'
 import { beatName, hasReason, labelOf, needsWhy, statusField } from './beats'
+import { BridgeNotes } from './BridgeBoxes'
+import { spoken } from './bridges'
 import { COLUMN, GUTTER, boardWidth } from './birdsEye'
 import { type BoardData, GenericChip, JokeRows, StatusTag, VibeChip } from './BoardJoke'
 import { rowsOf } from './gateRows'
@@ -78,7 +81,7 @@ function Column({ beat, index, longest, fields, data }: { beat: Beat; index: num
       {beat.description && <p className="mt-2 text-[12px] leading-snug whitespace-pre-line text-dim">{beat.description}</p>}
       <div className="mt-2.5 space-y-2">
         {beat.entries.length === 0 && <p className="text-[12px] text-faint">Nothing in this beat yet.</p>}
-        {beat.entries.map((e) => <Block key={e.id} entry={e} data={data} />)}
+        {beat.entries.map((e) => <div key={e.id}><Block entry={e} data={data} /><BridgeNotes bridges={spoken(e)} className="mt-1.5" /></div>)}
       </div>
     </article>
   )

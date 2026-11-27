@@ -28,6 +28,7 @@ block, so every token is also a utility class (`bg-ink-2`, `text-tape`, `ring-ru
 | `orchid` | `#e7a3e0` | Observations on the Activity calendar; crowd work in a set (its heading and outline) |
 | `teal` | `#6fd6d0` | A loose joke in a set: it keeps its number, only marked as flexible. Locked jokes are `tape` |
 | `leaf` | `#6fe86a` | A premise block in a set: its outline (thick on the left), heading and take. Bright, as vivid as the joke yellow. Greener than `teal` and `ok`, so it never reads as a loose joke |
+| `bridge` | `#4f5461` | A bridge in a set (lines between jokes or blocks): a grey box with white text. Grey, so it never reads as a joke, a premise or crowd work |
 
 Joke types get a small coloured dot, never a filled chip: One-Liner sky, Story violet,
 Crowd Work amber, Roast rose, Observation emerald, Premise pink, Act Out orange. Every other type

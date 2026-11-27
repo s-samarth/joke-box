@@ -10,6 +10,11 @@ export interface SetlistItem {
   optional: boolean
 }
 
+/** A bridge: a line or a few paragraphs you might say to carry the momentum into what's next. */
+export interface SetBridge { id: string; text: string }
+/** Bridges said after a joke or a block. Missing or null: none (a save keeps what's stored); [] clears them. */
+type Bridges = SetBridge[] | null
+
 /** One joke in a beat's list (docs/sets.md). */
 export interface SetPiece {
   id: string
@@ -21,16 +26,17 @@ export interface SetPiece {
   loose: boolean
   /** A gate: if this joke doesn't land, the next `gate` jokes in the list are skipped. */
   gate: number
+  bridges?: Bridges
 }
 
 export interface SetReply { id: string; when: string; line: string }
 export interface SetQuestion { id: string; text: string; has_reply: boolean; replies: SetReply[] }
 
 export type SetEntry =
-  | { kind: 'premise'; id: string; premise_id: string | null; gate: boolean; pieces: SetPiece[] }
+  | { kind: 'premise'; id: string; premise_id: string | null; gate: boolean; pieces: SetPiece[]; bridges?: Bridges }
   /** `title`: a short name you give the block, like a premise's take. Missing or null: none yet. */
-  | { kind: 'jokes'; id: string; title?: string | null; pieces: SetPiece[] }
-  | { kind: 'crowd'; id: string; title: string; questions: SetQuestion[] }
+  | { kind: 'jokes'; id: string; title?: string | null; pieces: SetPiece[]; bridges?: Bridges }
+  | { kind: 'crowd'; id: string; title: string; questions: SetQuestion[]; bridges?: Bridges }
 
 export interface Beat {
   id: string

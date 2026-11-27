@@ -10,6 +10,7 @@ from app.connector.jokes import Names
 from app.models import Setlist, User
 from app.schemas.set_beats import BeatIn, CrowdEntry, PieceIn, PremiseEntry
 from app.services.set_beats import Jokes, cluster_leads, shown, stored_beats
+from app.services.set_bridges import spoken
 from app.services.set_fields import config_of, fields_out
 
 NOT_SURE = "Not sure"
@@ -35,10 +36,17 @@ def piece_out(p: PieceIn, places: dict[str, int]) -> dict[str, Any]:
         "guards": p.gate,
         "cluster_id": str(p.cluster_id) if p.cluster_id else None,
         "pinned_version": p.pinned,
+        # Lines the comic might say after this joke, to carry it into the next one.
+        "bridges_after": spoken(p.bridges),
     }
 
 
 def entry_out(entry: Any, names: Names, places: dict[str, int]) -> dict[str, Any]:
+    """An entry, with the bridges said after it, into the next one."""
+    return entry_fields(entry, names, places) | {"bridges_after": spoken(entry.bridges)}
+
+
+def entry_fields(entry: Any, names: Names, places: dict[str, int]) -> dict[str, Any]:
     if isinstance(entry, CrowdEntry):
         return {
             "kind": "crowd_work",
