@@ -34,6 +34,7 @@ export function SetGuide({ open, onOpenChange }: { open: boolean; onOpenChange: 
             <li><b className="text-paper">Standalone jokes</b> (no premise), as many blocks as you like, before, between or after premises. Give a block a short title to call it by, as a premise has its take. Tap Select some for a premise to put them under one later.</li>
             <li><Swatch className="text-orchid">Crowd work</Swatch> (pink): questions for the room, and lines for what they might say. Mark each question Have a reply or No reply yet.</li>
           </ul>
+          <p><Swatch className="rounded bg-bridge px-1 text-white">Bridges</Swatch> (grey) are what you might say to carry one thing into the next, when it isn't a setup or a premise. Tap + Bridge on a joke for one after it, or + Bridge to next block at the foot of a block. A line or a few paragraphs, and as many in one spot as you need. A bridge stays with the joke or block above it when that moves.</p>
         </Part>
         <Part title="Locked, loose and gates">
           <p><Swatch className="text-tape">Locked</Swatch> (yellow): done in this place. <Swatch className="text-teal">Loose</Swatch> (teal): it keeps its number, but you can move it or drop it on the night.</p>
@@ -66,8 +67,8 @@ export function SetGuide({ open, onOpenChange }: { open: boolean; onOpenChange: 
           <p>Not sure is never guessed. The top-up check warns only if the stretch is too long even with every Not sure beat as a top-up, and ticks only if it's fine with none of them as one. In between, it names the beats to label.</p>
         </Part>
         <Part title="Bird's eye view and the cue card">
-          <p><b className="text-paper">Bird's eye view</b> (the eye icon) shows the whole set from above: a time strip to scale against the slot, with a lane per label and every joke as a chip in its Vibe colour, and under it a column per beat with everything in it. Only beats have time: blocks and jokes keep their order. Scroll both ways and zoom; tap a chip to find the joke.</p>
-          <p>The <b className="text-paper">cue card</b> (the scroll icon) is what you memorise: the beat cues and times with their Status and persona, and each beat's premises, Standalone jokes and crowd work under them, dotted by Vibe. Print it or keep it on your phone.</p>
+          <p><b className="text-paper">Bird's eye view</b> (the eye icon) shows the whole set from above: a time strip to scale against the slot, with a lane per label and every joke as a chip in its Vibe colour, and under it a column per beat with everything in it. Only beats have time: blocks, jokes and bridges keep their order. Scroll both ways and zoom; tap a chip to find the joke.</p>
+          <p>The <b className="text-paper">cue card</b> (the scroll icon) is what you memorise: the beat cues and times with their Status and persona, and each beat's premises, Standalone jokes and crowd work under them, dotted by Vibe, with the start of each bridge in grey. Print it or keep it on your phone.</p>
         </Part>
       </div>
     </Modal>

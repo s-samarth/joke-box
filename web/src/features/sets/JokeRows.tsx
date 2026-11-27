@@ -2,12 +2,15 @@
  * A beat's jokes as rows you drag: a joke on its own, or a gate as a sky-blue box with its joke
  * on top and the jokes it unlocks inside (which can hold one gate of their own). Dragging a gate's
  * joke moves the whole box; jokes drag into and out of a box. The drag itself is in useBeatDrag.
+ * A joke's bridges sit right under it, and move with it.
  */
 import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Plus } from 'lucide-react'
 import { skipTarget } from './beats'
+import { BridgeEditor } from './BridgeBoxes'
+import { bridgesOf, dropBridge, writeBridge } from './bridges'
 import { height, type Row } from './gateRows'
 import { JokeCard, type ListProps } from './JokeCard'
 import { gateKey, jokeKey, type DragData } from './useBeatDrag'
@@ -35,9 +38,13 @@ function RowItem({ row, ...place }: Place & { row: Row }) {
   const style = { transform: CSS.Transform.toString(transform && { ...transform, x: 0 }), transition }
   const grip = { listeners, attributes, setRef: setActivatorNodeRef }
   const gate = row.guarded.length > 0
+  const { pieces, onChange, jokes } = place
+  const edit = (change: (p: typeof row.piece) => typeof row.piece) => onChange(pieces.map((x) => (x.id === row.piece.id ? change(x) : x)))
+  const after = `after ${jokes.get(row.piece.joke_id)?.setup ?? 'a deleted joke'}`
   return (
     <li ref={setNodeRef} style={style} className={`${isDragging ? 'opacity-40' : ''} ${gate ? 'rounded-xl bg-sky/5 p-1 ring-1 ring-sky/40 sm:p-1.5' : ''}`}>
       <JokeCard {...place} piece={row.piece} isGate={gate} grip={grip} />
+      <BridgeEditor bridges={bridgesOf(row.piece)} after={after} onWrite={(id, text) => edit((x) => writeBridge(x, id, text))} onDrop={(id) => edit((x) => dropBridge(x, id))} />
       {gate && <GateInside row={row} {...place} />}
     </li>
   )

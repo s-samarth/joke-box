@@ -3,16 +3,17 @@
  * Locked is tape-yellow, loose is teal (still in order, just flexible), a gate is sky blue. The
  * arrows walk it one place at a time, into and out of gates on the way (gateEdit.ts); Move takes it
  * out on its own, to another block, or under a premise, by name (moveTo.ts). Its Vibe and Generic sit beside Locked and
- * Gate: they're the joke's own (saved on the joke, not the set).
+ * Gate: they're the joke's own (saved on the joke, not the set). + Bridge adds a bridge after it (BridgeBoxes.tsx).
  */
 import type { DraggableAttributes, DraggableSyntheticListeners } from '@dnd-kit/core'
-import { ArrowDown, ArrowUp, ChevronDown, X } from 'lucide-react'
+import { ArrowDown, ArrowUp, ChevronDown, Plus, X } from 'lucide-react'
 import type { Joke, SetPiece } from '../../api/types'
 import { useSaveJoke } from '../../api/library'
 import { Dropdown, type MenuRow } from '../../components/ui/Menu'
 import { MaterialTags, type Tags } from '../jokes/MaterialTags'
 import { toInput } from '../jokes/useAutosaveJoke'
 import { togglePin, toggleLoose } from './beatEdit'
+import { addBridge } from './bridges'
 import { DragGrip } from './DragGrip'
 import { canGate, canStep, stepJoke, toggleGate } from './gateEdit'
 import { GATE_DEPTH } from './gateRows'
@@ -75,6 +76,8 @@ export function JokeCard({ piece: p, isGate, depth, grip, pieces, onChange, joke
             className={`${tool} text-dim hover:bg-ink-3`}>{p.pinned ? 'Pinned version' : 'Follows the lead'}</button>
         )}
         {joke && <MaterialTags value={joke} onChange={tag} what="this joke" />}
+        <button type="button" onClick={() => onChange(pieces.map((x) => (x.id === p.id ? addBridge(x) : x)))} aria-label={`Add a bridge after: ${name}`}
+          title="A bridge: a line or a few paragraphs you might say to carry this joke into the next one" className={`${tool} text-dim hover:bg-ink-3 hover:text-paper`}><Plus size={13} aria-hidden /> Bridge</button>
         <span className="ml-auto flex items-center">
           {moveItems && <Dropdown items={moveItems(p.id)} trigger={<button type="button" className={`${tool} text-dim hover:bg-ink-3 hover:text-paper`} aria-label={`Move: ${name}`}
             title="On its own with no premise, into another block of this beat, or under a premise">Move <ChevronDown size={13} aria-hidden /></button>} />}

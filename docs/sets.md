@@ -31,6 +31,7 @@ beat). Everything that depends on the room happens inside a beat.
 | **Premise entry** | A premise from your library with the jokes you put under it in this set, in order. Outlined and written in leaf green (sky blue when gated) | `entry.kind = "premise"` |
 | **Standalone jokes** | A list of jokes that aren't under a premise. A beat can have as many as you like, before, between or after premises. Give it a short title ("Gym reels") to call it by, as a premise has its take: Move, the Bird's eye view and the cue card use it. Select some to put them under a premise later | `entry.kind = "jokes"`, `entry.title` |
 | **Crowd work** | Plain-text questions for the room. Each question has replies ("if they say X → my line") and a Have a reply / No reply yet flag. Outlined and headed in orchid pink | `entry.kind = "crowd"` |
+| **Bridge** | What you might say to carry one thing into the next, when it isn't a setup or a premise: a line, a paragraph or several. Any number in one spot. A grey box with white text, after the joke or block it follows | `piece.bridges`, `entry.bridges` |
 | **Locked / Loose** | Locked (tape yellow): done in this place. Loose (teal): it keeps its number, but you can move it or drop it on the night | `piece.loose` |
 | **Gate** | A box: a joke on top, and inside it the jokes you do only if it lands. If it doesn't, you skip the box. A gate can hold one gate of its own, no deeper. Sky blue | `piece.gate` (N: how many jokes after it are inside) |
 | **Premise gate** | A premise after the first in a beat that's done only if the premise before it landed | `entry.gate` |
@@ -103,6 +104,32 @@ what's stored.
   <img src="screenshots/ipad-joke-vibe.webp" width="300" alt="A joke's Vibe and Generic rows on an iPad">
   <img src="screenshots/phone-set-vibe.webp" width="200" alt="A joke in a beat on a phone, with a red Riled up Vibe and a green Non-generic">
 </p>
+
+### Bridges
+
+Some jokes need a line between them to keep the momentum: not a setup, not a premise, just what
+you say to get from one to the next. You might say it, you might not. A **bridge** holds it.
+
+- **+ Bridge** on a joke adds one right under it, before the next joke (inside a gate's box too).
+  **+ Bridge to next block** at the foot of a premise, Standalone or crowd work block adds one
+  under the block, before the next block (or the next beat, after the last block).
+- Each bridge is its own grey box: type a line or a few paragraphs. Add more boxes for more, and
+  × takes one out ([BridgeBoxes.tsx](../web/src/features/sets/BridgeBoxes.tsx),
+  [bridges.ts](../web/src/features/sets/bridges.ts)).
+- **A bridge belongs to what it follows**, and is stored on it (`bridges`: a list of `id` and
+  `text`). Drag, the arrows or Move take a joke's bridges with it; moving a block takes its
+  bridges along. Taking out a joke or a block takes out its bridges.
+- **Bridges have no time and aren't checked.** On the Bird's eye strip they get no slot. On the
+  board they're grey boxes under their joke or block, and on the cue card the start of each is a
+  grey pill after what it follows (↳). Blank ones aren't shown there.
+- **Claude reads them**: `get_set` gives each joke and each entry `bridges_after`, the text of
+  its bridges (see [api.md](api.md)).
+
+<p>
+  <img src="screenshots/desktop-set-bridges.webp" width="560" alt="A bridge in a grey box under a joke inside a gate">
+  <img src="screenshots/phone-set-bridges.webp" width="230" alt="A bridge under a joke on a phone">
+</p>
+<img src="screenshots/ipad-set-bridges.webp" width="400" alt="Bridges after jokes on an iPad, with + Bridge on each joke and + Bridge to next block at the foot">
 
 ## Drag and arrows
 
@@ -268,7 +295,9 @@ until you hide them, and **How sets work** opens the whole guide.
   <img src="screenshots/phone-set-guide.webp" width="230" alt="How sets work, in the app">
 </p>
 <img src="screenshots/desktop-birds-eye.webp" alt="Bird's eye view: the time strip over the beat board">
+<img src="screenshots/desktop-birds-eye-bridges.webp" alt="The beat board with bridges in grey under a joke and between blocks">
 <img src="screenshots/desktop-cue-card.webp" alt="The cue card">
+<img src="screenshots/desktop-cue-card-bridges.webp" alt="The cue card with the start of each bridge in a grey pill">
 
 ## Decisions, and why
 
@@ -306,6 +335,8 @@ until you hide them, and **How sets work** opens the whole guide.
 | **Bird's eye view shows the set from above**, instead of walking it one beat at a time | A set is a spine of beats with blocks, gates and labels; one beat at a time with a clock hid that shape. The comic asked for a view of the whole object, to read and plan from | On stage: one beat at a time, gates asked as you reach them, a clock (until Nov 2026) |
 | **On the strip, blocks and jokes have no time** | Only beats have a time you set. Sizing a block by its jokes' runtimes would draw a time the set doesn't have | Blocks sized by joke runtimes |
 | **Standalone blocks can have a title** | A premise block has its take to call it by; a list of loose jokes had only "Standalone". A short name (stored on the block, in the set) makes Move, the strip and the cue card readable | Numbers only ("Into 3 · Standalone") |
+| **A bridge is stored on what it follows** | It says "after this joke", so it moves with the joke and stays inside its gate. A bridge as its own item in the list would count as a joke to gates, the arrows, Move and the strip, and every rule there would need an exception | A bridge as a separate entry or piece |
+| **Bridges have no time on the strip** | Only beats have time. A bridge is said or skipped on the night | A slot like a joke's |
 | **The set's shape is on its card** | The spine and checks are the point of a set. Hiding them behind a tap made the list look empty | Cards with counts and a time bar only |
 | **An older app's save keeps the beats** | A save queued offline by an app from before beats sends only `items`. Taking those over would wipe the beats | |
 
@@ -331,6 +362,10 @@ until you hide them, and **How sets work** opens the whole guide.
 - **Standalone titles**: `title` on a jokes entry. A save that leaves it out (an app from before
   titles) keeps the stored one (`keep_titles` in `app/services/setlists.py`); an empty title clears
   it. Tested in `tests/test_set_standalone_titles.py`.
+- **Bridges**: `bridges` on a joke or an entry. A save that leaves it out (an app from before
+  bridges) keeps the stored ones, matched by the joke's or block's id
+  (`keep_bridges` in `app/services/set_bridges.py`); an empty list clears them. Tested in
+  `tests/test_set_bridges.py`.
 - **Clusters**: a set's `items` list what its beats play now, so a new lead shows in "In sets"
   at once. A joke clustered after it went into a set follows its cluster from the next save
   (pinned to itself unless it's the lead).

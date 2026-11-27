@@ -3,6 +3,7 @@
  * beat's cue, time and start, its Status and persona, and under it its premises, Standalone jokes
  * (by title, when they have one) and crowd work. Each joke is the start of its punchline with a dot
  * in its Vibe colour: teal when it's loose, and what rides on a gate in sky after "if it lands".
+ * A bridge is the start of its line in a grey pill after what it follows (↳).
  * Printing turns it black on white, so it doesn't use a page of ink.
  */
 import { ArrowLeft, Printer } from 'lucide-react'
@@ -18,6 +19,7 @@ import { useVibeTone } from '../jokes/vibeTone'
 import { LabelChip } from './BeatBoard'
 import { beatName, beatTotal, beatsOf, personaField, statusField } from './beats'
 import { starts } from './birdsEye'
+import { spoken } from './bridges'
 import { type Row, rowsOf } from './gateRows'
 
 const clip = (text: string, n: number) => (text.length > n ? `${text.slice(0, n - 1).trimEnd()}…` : text)
@@ -43,10 +45,14 @@ export function PrintView() {
       {clip(j?.punchline || j?.setup || 'A joke that is gone', 40)}
     </span>
   )
+  const bridges = (x: Parameters<typeof spoken>[0]) => spoken(x).map((b) => (
+    <span key={b.id} className="mx-0.5 rounded bg-bridge px-1.5 text-[15px] text-white italic print:bg-transparent print:text-black">↳ {clip(b.text.replace(/\s+/g, ' '), 60)}</span>
+  ))
   const line = (rows: Row[]): ReactNode => rows.map((r, n) => (
     <Fragment key={r.piece.id}>
       {n > 0 && <span className="text-faint"> · </span>}
       {token(byId.get(r.piece.joke_id), r.piece.loose)}
+      {bridges(r.piece)}
       {r.guarded.length > 0 && <span className="text-sky print:text-black"> (if it lands: {line(r.guarded)})</span>}
     </Fragment>
   ))
@@ -55,6 +61,7 @@ export function PrintView() {
       <li key={e.id} className="text-orchid print:text-black">
         <span className="italic">Crowd work{e.title ? `: ${e.title}` : ''}</span>
         {e.questions.map((q) => <span key={q.id} className="block pl-3">? {clip(q.text || 'A question', 60)} <span className={`text-sm ${q.has_reply ? 'text-ok' : 'text-amber'} print:text-black`}>{q.has_reply ? 'reply ready' : 'no reply yet'}</span></span>)}
+        {spoken(e).length > 0 && <span className="mt-1 block not-italic">{bridges(e)}</span>}
       </li>
     )
     const take = e.kind === 'premise' ? clip((e.premise_id && premises.get(e.premise_id)?.take) || 'Premise', 70) : e.title?.trim()
@@ -63,6 +70,7 @@ export function PrintView() {
       <li key={e.id}>
         {take && <span className={`block font-semibold ${tint} print:text-black`}>{e.kind === 'premise' && e.gate && 'If that landed: '}{take}</span>}
         <span className="text-dim">+ </span>{e.pieces.length ? line(rowsOf(e.pieces)) : <span className="text-faint">no jokes yet</span>}
+        {spoken(e).length > 0 && <span className="mt-1 block">{bridges(e)}</span>}
       </li>
     )
   }
