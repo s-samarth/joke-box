@@ -23,7 +23,7 @@ const seg = 'absolute top-1 bottom-1 overflow-hidden rounded-md px-1.5 text-[11p
 function Lane({ name, height, width, children }: { name: string; height: number; width: number; children: ReactNode }) {
   return (
     <div className="flex border-b border-rule" style={{ height }}>
-      <div className="sticky left-0 z-10 flex shrink-0 items-center border-r border-rule-strong bg-ink pr-2 text-[11.5px] leading-tight text-dim" style={{ width: LABEL }}>{name}</div>
+      <div className="sticky left-0 z-10 flex shrink-0 items-center border-r border-rule-strong bg-ink px-2 text-[11.5px] leading-tight text-dim" style={{ width: LABEL }}>{name}</div>
       <div className="relative shrink-0" style={{ width }}>{children}</div>
     </div>
   )
@@ -37,7 +37,7 @@ export function TimeStrip({ strip, pxPerSecond, slot, total, fields, data, onPic
   const sf = statusField(fields)
   const shift = (b: Beat, i: number) => i > 0 && (hasReason(b) || needsWhy(beats, i, fields))
   return (
-    <div className="mb-4 w-max overflow-hidden rounded-xl bg-ink ring-1 ring-rule-strong">
+    <div className="mb-4 w-max overflow-clip rounded-xl bg-ink ring-1 ring-rule-strong">
       <Lane name={`${clock(total)} of ${clock(slot)}`} height={40} width={width}>
         {strip.ticks.map((t) => <span key={t} className="absolute top-0 bottom-0 border-l border-rule pl-1 text-[10.5px] text-faint tabular" style={{ left: t * pxPerSecond }}>{clock(t)}</span>)}
         {total < slot && <div className={`${seg} top-[18px]`} style={{ left: total * pxPerSecond, width: (slot - total) * pxPerSecond, ...hatch(NOT_SURE_COLOR) }}>{clock(slot - total)} of the slot not planned yet</div>}

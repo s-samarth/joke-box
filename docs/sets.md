@@ -274,7 +274,8 @@ until you hide them, and **How sets work** opens the whole guide.
 
 - **Bird's eye view** ([BirdsEyeView.tsx](../web/src/features/sets/BirdsEyeView.tsx), laid out by
   [birdsEye.ts](../web/src/features/sets/birdsEye.ts)) shows the whole set from above. On top, a
-  **time strip** to scale against the slot: the beats, a lane per label field in its colours (Not
+  **time strip** to scale against the slot, at one scale for every set (five minutes is 960 px at
+  100%, so longer sets scroll sideways): the beats, a lane per label field in its colours (Not
   sure hatched amber, and where the status shifts, the reason or "Needs a reason"), the blocks in
   order, and the jokes as numbered chips in their Vibe colour, with gates as sky brackets. Under it,
   the **beat board**: a column per beat with its labels, and its blocks, gates and every joke in

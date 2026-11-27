@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Beat, SetEntry, SetPiece } from '../../api/types'
-import { clampZoom, depths, numbers, scaleFor, starts, stripLayout, ticks } from './birdsEye'
+import { clampZoom, depths, numbers, PX_PER_SECOND, starts, stripLayout, ticks } from './birdsEye'
 
 const piece = (id: string, gate = 0, loose = false): SetPiece => ({ id, joke_id: `j-${id}`, gate, loose })
 const jokes = (id: string, ...pieces: SetPiece[]): SetEntry => ({ kind: 'jokes', id, pieces })
@@ -62,10 +62,9 @@ describe('scale and zoom', () => {
     expect(ticks(900, 0.5)).toEqual([0, 300, 600, 900])
   })
 
-  it('matches the board width, never narrower than the minimum', () => {
-    expect(scaleFor(1200, 600)).toBe(2)
-    expect(scaleFor(300, 360)).toBe(2)
-    expect(scaleFor(300, 0)).toBe(1)
+  it('draws five minutes 960 px wide, whatever the set', () => {
+    expect(300 * PX_PER_SECOND).toBe(960)
+    expect(ticks(1200, PX_PER_SECOND)).toHaveLength(21)
   })
 
   it('keeps zoom between a quarter and three times', () => {

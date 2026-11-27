@@ -140,7 +140,9 @@ on screen), the cue card and **Before you go on**. Under it, one frame scrolls b
 zoom: ctrl and the scroll wheel (or a trackpad pinch) zoom too, a pinch on a phone zooms the page,
 and each device remembers its zoom.
 
-- **The time strip**, on top, to scale against the slot. Lanes: the time (with what's left of the
+- **The time strip**, on top, to one scale for every set: a minute is 192 px at 100% (five minutes
+  960 px), so a longer set scrolls sideways rather than squeezing. Its lane names stay pinned on the
+  left as you scroll. Lanes: the time (with what's left of the
   slot hatched amber, or how far over), the beats as cue strips, one lane per label field in its
   options' colours (Not sure hatched amber, and the shift reason, or **Needs a reason**, where the
   status changes), the blocks in order (in smaller type, so short blocks stay readable), and the jokes as numbered chips in their Vibe colour, edged
@@ -148,7 +150,7 @@ and each device remembers its zoom.
   questions are orchid **?** chips. Only beats have time: blocks and jokes keep their order in equal
   slots, so their widths say nothing about how long they run. Tap a joke chip to scroll to it on
   the board, outlined for a moment.
-- **The beat board**, under it: one 300 px column per beat, in running order. The column head has
+- **The beat board**, under it: one 600 px column per beat (wide, so a beat needs less scrolling down), in running order. The column head has
   the cue on tape, a bar for its time against the longest beat in its status colour, its start and
   end, every label with its colour, and what it's for. Then its blocks: a premise outlined leaf green
   (sky blue, "only if the premise before landed", when gated) with its take, Vibe, Generic and
