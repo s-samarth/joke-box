@@ -88,14 +88,17 @@ export function stripLayout(beats: Beat[], slotSeconds: number, pxPerSecond: num
   return out
 }
 
-/** The board's columns and the gaps between them, in pixels at 100%. */
-export const COLUMN = 300
+/**
+ * The strip's one scale, the same for every set: 3.2 px a second at 100%, so five minutes is
+ * 960 px. A fixed scale keeps a minute the same width from set to set; longer sets scroll sideways.
+ */
+export const PX_PER_SECOND = 3.2
+
+/** The board's columns and the gaps between them, in pixels at 100%. Wide, so less scrolls down. */
+export const COLUMN = 600
 export const GUTTER = 44
 export const boardWidth = (beats: number) => Math.max(0, beats * COLUMN + (beats - 1) * GUTTER)
 
-/** Pixels per second so the strip is about as wide as the board under it, and never too narrow. */
-export const scaleFor = (boardWidth: number, seconds: number, minWidth = 720) =>
-  seconds > 0 ? Math.max(boardWidth, minWidth) / seconds : 1
 
 /** A zoom step, kept between a quarter size and three times. */
 export const clampZoom = (z: number) => Math.min(3, Math.max(0.25, Math.round(z * 100) / 100))

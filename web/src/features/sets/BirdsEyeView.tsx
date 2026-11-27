@@ -1,8 +1,8 @@
 /**
  * Bird's eye view (docs/sets.md): the whole set from above, to read and plan. The time strip runs
- * across the top, to scale against the slot, and the beat board sits under it: one column per beat
- * with its labels, blocks, gates and every joke in full. Both scroll together, both ways, and zoom
- * (useZoom.ts). Tap a joke on the strip to find it on the board. Colours come from your Label
+ * across the top, to one scale for every set (birdsEye.ts), and the beat board sits under it: one
+ * column per beat with its labels, blocks, gates and every joke in full. Both scroll together,
+ * both ways, and zoom (useZoom.ts). Tap a joke on the strip to find it on the board. Colours come from your Label
  * fields and each joke's Vibe, as in the builder.
  */
 import { GraduationCap, Minus, Plus, ScrollText, X } from 'lucide-react'
@@ -19,7 +19,7 @@ import { personaLabel, usePersonaField } from '../jokes/persona'
 import { useVibeTone } from '../jokes/vibeTone'
 import { BeatBoard } from './BeatBoard'
 import { beatTotal, beatsOf } from './beats'
-import { boardWidth, numbers, scaleFor, starts, stripLayout } from './birdsEye'
+import { PX_PER_SECOND as px, numbers, starts, stripLayout } from './birdsEye'
 import { TimeStrip } from './TimeStrip'
 import { useZoom } from './useZoom'
 
@@ -43,7 +43,6 @@ export function BirdsEyeView() {
   if (!setlist) return <div className="p-8 text-dim">Set not found. <Link to="/sets" className="text-tape">Back to sets</Link></div>
   const total = beatTotal(beats)
   const slot = setlist.target_seconds || total
-  const px = scaleFor(boardWidth(beats.length), Math.max(slot, total))
   const strip = stripLayout(beats, slot, px, number)
   const data = {
     jokes: new Map(jokes.map((j) => [j.id, j])),
